@@ -17,6 +17,7 @@ package com.landawn.abacus.pool;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,13 +40,14 @@ import com.landawn.abacus.util.Objectory;
  */
 public class GenericObjectPool<E extends Poolable> extends AbstractPool implements ObjectPool<E> {
 
+    @Serial
     private static final long serialVersionUID = -5055744987721643286L;
 
     private final long maxMemorySize;
 
     private final ObjectPool.MemoryMeasure<E> memoryMeasure;
 
-    private volatile long usedMemorySize = 0;
+    private long usedMemorySize = 0;
 
     final Deque<E> pool;
 
@@ -73,28 +75,28 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
         this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
-        pool = new ArrayDeque<>((capacity > 1000) ? 1000 : capacity);
+        pool = new ArrayDeque<>(Math.min(capacity, 1000));
 
         switch (this.evictionPolicy) {
             // =============================================== For Priority Queue
             case LAST_ACCESS_TIME:
 
-                cmp = (o1, o2) -> Long.compare(o1.activityPrint().getLastAccessTime(), o2.activityPrint().getLastAccessTime());
+                cmp = Comparator.comparingLong(o -> o.activityPrint().getLastAccessTime());
 
                 break;
 
             case ACCESS_COUNT:
-                cmp = (o1, o2) -> Long.compare(o1.activityPrint().getAccessCount(), o2.activityPrint().getAccessCount());
+                cmp = Comparator.comparingLong(o -> o.activityPrint().getAccessCount());
 
                 break;
 
             case EXPIRATION_TIME:
-                cmp = (o1, o2) -> Long.compare(o1.activityPrint().getExpirationTime(), o2.activityPrint().getExpirationTime());
+                cmp = Comparator.comparingLong(o -> o.activityPrint().getExpirationTime());
 
                 break;
 
             default:
-                throw new RuntimeException("Unsupproted eviction policy: " + evictionPolicy.name());
+                throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
         }
 
         if (evictDelay > 0) {
@@ -173,17 +175,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {
-        boolean sucess = false;
+        boolean success = false;
 
         try {
-            sucess = add(e);
+            success = add(e);
         } finally {
-            if (autoDestroyOnFailedToAdd && !sucess && e != null) {
+            if (autoDestroyOnFailedToAdd && !success && e != null) {
                 e.destroy();
             }
         }
 
-        return sucess;
+        return success;
     }
 
     /**
@@ -258,17 +260,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E e, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd) throws InterruptedException {
-        boolean sucess = false;
+        boolean success = false;
 
         try {
-            sucess = add(e, timeout, unit);
+            success = add(e, timeout, unit);
         } finally {
-            if (autoDestroyOnFailedToAdd && !sucess && e != null) {
+            if (autoDestroyOnFailedToAdd && !success && e != null) {
                 e.destroy();
             }
         }
 
-        return sucess;
+        return success;
     }
 
     /**
@@ -492,8 +494,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * scan the object pool to find the idle object which inactive time greater than permitted the inactive time for it
-     * or it's time out.
+     * scan the object pool to find the idle object which inactive time greater than permitted the inactive time and remove it
      *
      */
     @SuppressWarnings("deprecation")
@@ -587,6 +588,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Serial
     private void writeObject(final ObjectOutputStream os) throws IOException {
         lock.lock();
 
@@ -603,6 +605,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
+    @Serial
     private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 

@@ -41,7 +41,7 @@ public class MillisTimestampType extends TimestampType {
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
         final long lng = rs.getLong(columnIndex);
 
-        return (lng == 0) ? null : DateUtil.createTimestamp(lng);
+        return (lng == 0) ? null : DateUtil.createdTimestamp(lng);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MillisTimestampType extends TimestampType {
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
         final long lng = rs.getLong(columnLabel);
 
-        return (lng == 0) ? null : DateUtil.createTimestamp(lng);
+        return (lng == 0) ? null : DateUtil.createdTimestamp(lng);
     }
 
     /**

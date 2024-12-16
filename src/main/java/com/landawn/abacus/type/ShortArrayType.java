@@ -80,7 +80,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     public Short[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_SHORT_OBJ_ARRAY;
         }
 

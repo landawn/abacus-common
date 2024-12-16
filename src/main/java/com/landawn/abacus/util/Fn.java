@@ -72,6 +72,7 @@ import java.util.regex.Pattern;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -165,7 +166,7 @@ import com.landawn.abacus.util.function.UnaryOperator;
  * Factory utility class for functional interfaces.
  *
  * <br>
- * Note: Usually you shouldn't cache or reuse any Function/Predicat/Consumer/... created by calling the methods in this class.
+ * Note: Usually you shouldn't cache or reuse any Function/Predicate/Consumer/... created by calling the methods in this class.
  * These methods should be called every time.
  * </br>
  *
@@ -389,7 +390,7 @@ public final class Fn {
 
     public static final Predicate<java.util.OptionalDouble> IS_PRESENT_DOUBLE_JDK = java.util.OptionalDouble::isPresent;
 
-    protected Fn() {
+    Fn() {
         // for extension.
     }
 
@@ -415,6 +416,7 @@ public final class Fn {
     }
 
     // Copied from Google Guava under Apache License v2.
+
     /**
      * Copied from Google Guava under Apache License v2.
      * <br />
@@ -431,7 +433,7 @@ public final class Fn {
      * instance. The actual memoization does not happen when the underlying delegate throws an
      * exception.
      *
-     * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
+     * <p>When the underlying delegate throws an exception then this memorizing supplier will keep
      * delegating calls until it returns valid data.
      *
      * @param <T>
@@ -456,7 +458,7 @@ public final class Fn {
 
             @Override
             public T get() {
-                // Another variant of Double Checked Locking.
+                // Another variant of Double-Checked Locking.
                 //
                 // We use two volatile reads. We could reduce this to one by
                 // putting our fields into a holder class, but (at least on x86)
@@ -530,6 +532,7 @@ public final class Fn {
             private final Map<T, R> resultMap = new ConcurrentHashMap<>();
             private volatile R resultForNull = none; //NOSONAR
 
+            @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
             @Override
             public R apply(final T t) {
                 R result = null;
@@ -540,7 +543,7 @@ public final class Fn {
                     if (result == none) {
                         synchronized (this) {
                             if (resultForNull == none) {
-                                resultForNull = func.apply(t);
+                                resultForNull = func.apply(null);
                             }
 
                             result = resultForNull;
@@ -801,6 +804,7 @@ public final class Fn {
                 isClosed = true;
                 try {
                     service.shutdown();
+                    //noinspection ResultOfMethodCallIgnored
                     service.awaitTermination(terminationTimeout, timeUnit);
                 } catch (final InterruptedException e) {
                     // ignore.
@@ -833,12 +837,12 @@ public final class Fn {
     /**
      *
      * @param <T>
-     * @param excpetionSupplier
+     * @param exceptionSupplier
      * @return
      */
-    public static <T> Consumer<T> throwException(final java.util.function.Supplier<? extends RuntimeException> excpetionSupplier) {
+    public static <T> Consumer<T> throwException(final java.util.function.Supplier<? extends RuntimeException> exceptionSupplier) {
         return t -> {
-            throw excpetionSupplier.get();
+            throw exceptionSupplier.get();
         };
     }
 
@@ -1598,7 +1602,7 @@ public final class Fn {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.size() == 0;
+    private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.isEmpty();
 
     /**
      *
@@ -1698,7 +1702,7 @@ public final class Fn {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && value.size() > 0;
+    private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && !value.isEmpty();
 
     /**
      *
@@ -1914,7 +1918,7 @@ public final class Fn {
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
 
-        return value -> value != null && clazz.isInstance(value);
+        return clazz::isInstance;
     }
 
     /**
@@ -2654,7 +2658,7 @@ public final class Fn {
      */
     @Beta
     public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, Collection<R>> mapper) {
-        return t -> t == null ? N.<R> emptyList() : mapper.apply(t);
+        return t -> t == null ? N.emptyList() : mapper.apply(t);
     }
 
     /**
@@ -2959,7 +2963,7 @@ public final class Fn {
         };
     }
 
-    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = Maps::flatToMap;
+    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::flatToMap;
 
     /**
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
@@ -2969,9 +2973,10 @@ public final class Fn {
      * @return
      * @see Maps#flatToMap(Map)
      */
+    @Beta
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<? super Map<K, ? extends Collection<? extends V>>, List<Map<K, V>>> flatToMap() {
-        return (Function) FLAT_TO_MAP_FUNC;
+    public static <K, V> Function<? super Map<K, ? extends Collection<? extends V>>, List<Map<K, V>>> flatmapValue() {
+        return (Function) FLAT_MAP_VALUE_FUNC;
     }
 
     private static final ToByteFunction<String> PARSE_BYTE_FUNC = Numbers::toByte;
@@ -3375,7 +3380,7 @@ public final class Fn {
 
         @Override
         public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
-            return cmp.compare(a.getKey(), a.getKey()) <= 0 ? a : b;
+            return cmp.compare(a.getKey(), b.getKey()) <= 0 ? a : b;
         }
     };
 
@@ -3397,7 +3402,7 @@ public final class Fn {
 
         @Override
         public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
-            return cmp.compare(a.getValue(), a.getValue()) <= 0 ? a : b;
+            return cmp.compare(a.getValue(), b.getValue()) <= 0 ? a : b;
         }
     };
 
@@ -3461,7 +3466,7 @@ public final class Fn {
 
         @Override
         public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
-            return cmp.compare(a.getKey(), a.getKey()) >= 0 ? a : b;
+            return cmp.compare(a.getKey(), b.getKey()) >= 0 ? a : b;
         }
     };
 
@@ -3483,7 +3488,7 @@ public final class Fn {
 
         @Override
         public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
-            return cmp.compare(a.getValue(), a.getValue()) >= 0 ? a : b;
+            return cmp.compare(a.getValue(), b.getValue()) >= 0 ? a : b;
         }
     };
 
@@ -4847,13 +4852,13 @@ public final class Fn {
 
     /**
      *
-     * @param runnbale
+     * @param runnable
      * @return
      */
-    public static Runnable rr(final Throwables.Runnable<? extends Exception> runnbale) {
+    public static Runnable rr(final Throwables.Runnable<? extends Exception> runnable) {
         return () -> {
             try {
-                runnbale.run();
+                runnable.run();
             } catch (final Exception e) {
                 throw N.toRuntimeException(e);
             }
@@ -5240,10 +5245,6 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE = LinkedBlockingQueue::new;
 
-        /** The Constant ARRAY_BLOCKING_QUEUE. */
-        @SuppressWarnings("rawtypes")
-        private static final Supplier<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE = () -> new ArrayBlockingQueue(0);
-
         /** The Constant LINKED_BLOCKING_DEQUE. */
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE = LinkedBlockingDeque::new;
@@ -5615,16 +5616,6 @@ public final class Fn {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T> Supplier<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
-            return (Supplier) ARRAY_BLOCKING_QUEUE;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
             return (Supplier) LINKED_BLOCKING_DEQUE;
         }
@@ -5951,8 +5942,6 @@ public final class Fn {
                     return ofDeque();
                 } else if (BlockingQueue.class.equals(targetType) || LinkedBlockingQueue.class.equals(targetType)) {
                     return ofLinkedBlockingQueue();
-                } else if (ArrayBlockingQueue.class.equals(targetType)) {
-                    return ofArrayBlockingQueue();
                 } else if (BlockingDeque.class.equals(targetType) || LinkedBlockingDeque.class.equals(targetType)) {
                     return ofLinkedBlockingDeque();
                 } else if (ConcurrentLinkedQueue.class.equals(targetType)) {
@@ -6179,7 +6168,7 @@ public final class Fn {
         private static final Supplier<RuntimeException> RUNTIME_EXCEPTION = RuntimeException::new;
 
         @Beta
-        public static Supplier<RuntimeException> newRuntimException() {
+        public static Supplier<RuntimeException> newRuntimeException() {
             return RUNTIME_EXCEPTION;
         }
 
@@ -6198,34 +6187,34 @@ public final class Fn {
     public abstract static class Factory {
 
         /** The Constant BOOLEAN_ARRAY. */
-        private static final IntFunction<boolean[]> BOOLEAN_ARRAY = len -> new boolean[len];
+        private static final IntFunction<boolean[]> BOOLEAN_ARRAY = boolean[]::new;
 
         /** The Constant CHAR_ARRAY. */
-        private static final IntFunction<char[]> CHAR_ARRAY = len -> new char[len];
+        private static final IntFunction<char[]> CHAR_ARRAY = char[]::new;
 
         /** The Constant BYTE_ARRAY. */
-        private static final IntFunction<byte[]> BYTE_ARRAY = len -> new byte[len];
+        private static final IntFunction<byte[]> BYTE_ARRAY = byte[]::new;
 
         /** The Constant SHORT_ARRAY. */
-        private static final IntFunction<short[]> SHORT_ARRAY = len -> new short[len];
+        private static final IntFunction<short[]> SHORT_ARRAY = short[]::new;
 
         /** The Constant INT_ARRAY. */
-        private static final IntFunction<int[]> INT_ARRAY = len -> new int[len];
+        private static final IntFunction<int[]> INT_ARRAY = int[]::new;
 
         /** The Constant LONG_ARRAY. */
-        private static final IntFunction<long[]> LONG_ARRAY = len -> new long[len];
+        private static final IntFunction<long[]> LONG_ARRAY = long[]::new;
 
         /** The Constant FLOAT_ARRAY. */
-        private static final IntFunction<float[]> FLOAT_ARRAY = len -> new float[len];
+        private static final IntFunction<float[]> FLOAT_ARRAY = float[]::new;
 
         /** The Constant DOUBLE_ARRAY. */
-        private static final IntFunction<double[]> DOUBLE_ARRAY = len -> new double[len];
+        private static final IntFunction<double[]> DOUBLE_ARRAY = double[]::new;
 
         /** The Constant STRING_ARRAY. */
-        private static final IntFunction<String[]> STRING_ARRAY = len -> new String[len];
+        private static final IntFunction<String[]> STRING_ARRAY = String[]::new;
 
         /** The Constant OBJECT_ARRAY. */
-        private static final IntFunction<Object[]> OBJECT_ARRAY = len -> new Object[len];
+        private static final IntFunction<Object[]> OBJECT_ARRAY = Object[]::new;
 
         /** The Constant BOOLEAN_LIST. */
         private static final IntFunction<BooleanList> BOOLEAN_LIST = BooleanList::new;
@@ -6340,7 +6329,7 @@ public final class Fn {
         private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = N::newSetMultimap;
 
         protected Factory() {
-            // for extention
+            // for extension
         }
 
         /**
@@ -6899,6 +6888,7 @@ public final class Fn {
                     try {
                         final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
+                        //noinspection ConstantValue
                         if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
                             ret = size -> {
                                 try {
@@ -6986,6 +6976,7 @@ public final class Fn {
                     try {
                         final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
+                        //noinspection ConstantValue
                         if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
                             ret = size -> {
                                 try {
@@ -7387,7 +7378,7 @@ public final class Fn {
         private static final TriPredicate ALWAYS_TRUE = (a, b, c) -> true;
 
         /** The Constant ALWAYS_FALSE. */
-        @SuppressWarnings({ "rawtypes", "hiding" })
+        @SuppressWarnings({ "rawtypes" })
         private static final TriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
         private TriPredicates() {
@@ -8021,13 +8012,13 @@ public final class Fn {
         private static final BinaryOperator<String> CONCAT = (t, u) -> t + u;
 
         /** The Constant ADD_INTEGER. */
-        private static final BinaryOperator<Integer> ADD_INTEGER = (t, u) -> t.intValue() + u.intValue();
+        private static final BinaryOperator<Integer> ADD_INTEGER = Integer::sum;
 
         /** The Constant ADD_LONG. */
-        private static final BinaryOperator<Long> ADD_LONG = (t, u) -> t.longValue() + u.longValue();
+        private static final BinaryOperator<Long> ADD_LONG = Long::sum;
 
         /** The Constant ADD_DOUBLE. */
-        private static final BinaryOperator<Double> ADD_DOUBLE = (t, u) -> t.doubleValue() + u.doubleValue();
+        private static final BinaryOperator<Double> ADD_DOUBLE = Double::sum;
 
         /** The Constant ADD_BIG_INTEGER. */
         private static final BinaryOperator<BigInteger> ADD_BIG_INTEGER = BigInteger::add;
@@ -8522,7 +8513,7 @@ public final class Fn {
 
         /** The Constant CLONE. */
         @SuppressWarnings("rawtypes")
-        private static final Function<DisposableArray, Object[]> CLONE = DisposableArray::clone;
+        private static final Function<DisposableArray, Object[]> CLONE = DisposableArray::copy;
 
         /** The Constant TO_STRING. */
         @SuppressWarnings("rawtypes")
@@ -8633,6 +8624,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToCharFunction<Character> unbox() {
             return ToCharFunction.UNBOX;
         }
@@ -8747,7 +8739,7 @@ public final class Fn {
         private FB() {
         }
 
-        public static BytePredicate positve() {
+        public static BytePredicate positive() {
             return POSITIVE;
         }
 
@@ -8779,6 +8771,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToByteFunction<Byte> unbox() {
             return ToByteFunction.UNBOX;
         }
@@ -8907,7 +8900,7 @@ public final class Fn {
         private FS() {
         }
 
-        public static ShortPredicate positve() {
+        public static ShortPredicate positive() {
             return POSITIVE;
         }
 
@@ -8939,6 +8932,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToShortFunction<Short> unbox() {
             return ToShortFunction.UNBOX;
         }
@@ -9067,7 +9061,7 @@ public final class Fn {
         private FI() {
         }
 
-        public static IntPredicate positve() {
+        public static IntPredicate positive() {
             return POSITIVE;
         }
 
@@ -9099,6 +9093,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToIntFunction<Integer> unbox() {
             return ToIntFunction.UNBOX;
         }
@@ -9184,9 +9179,9 @@ public final class Fn {
                 // Singleton for utility class.
             }
 
-            public static final IntBinaryOperator MIN = (left, right) -> left <= right ? left : right;
+            public static final IntBinaryOperator MIN = Math::min;
 
-            public static final IntBinaryOperator MAX = (left, right) -> left >= right ? left : right;
+            public static final IntBinaryOperator MAX = Math::max;
         }
     }
 
@@ -9227,7 +9222,7 @@ public final class Fn {
         private FL() {
         }
 
-        public static LongPredicate positve() {
+        public static LongPredicate positive() {
             return POSITIVE;
         }
 
@@ -9259,6 +9254,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToLongFunction<Long> unbox() {
             return ToLongFunction.UNBOX;
         }
@@ -9344,9 +9340,9 @@ public final class Fn {
                 // Singleton for utility class.
             }
 
-            public static final LongBinaryOperator MIN = (left, right) -> left <= right ? left : right;
+            public static final LongBinaryOperator MIN = Math::min;
 
-            public static final LongBinaryOperator MAX = (left, right) -> left >= right ? left : right;
+            public static final LongBinaryOperator MAX = Math::max;
         }
     }
 
@@ -9387,7 +9383,7 @@ public final class Fn {
         private FF() {
         }
 
-        public static FloatPredicate positve() {
+        public static FloatPredicate positive() {
             return POSITIVE;
         }
 
@@ -9419,6 +9415,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToFloatFunction<Float> unbox() {
             return ToFloatFunction.UNBOX;
         }
@@ -9504,9 +9501,9 @@ public final class Fn {
                 // Singleton for utility class.
             }
 
-            public static final FloatBinaryOperator MIN = (left, right) -> left <= right ? left : right;
+            public static final FloatBinaryOperator MIN = Math::min;
 
-            public static final FloatBinaryOperator MAX = (left, right) -> left >= right ? left : right;
+            public static final FloatBinaryOperator MAX = Math::max;
         }
     }
 
@@ -9547,7 +9544,7 @@ public final class Fn {
         private FD() {
         }
 
-        public static DoublePredicate positve() {
+        public static DoublePredicate positive() {
             return POSITIVE;
         }
 
@@ -9579,6 +9576,7 @@ public final class Fn {
             return LESS_EQUAL;
         }
 
+        @SuppressWarnings("SameReturnValue")
         public static ToDoubleFunction<Double> unbox() {
             return ToDoubleFunction.UNBOX;
         }
@@ -9664,9 +9662,9 @@ public final class Fn {
                 // Singleton for utility class.
             }
 
-            public static final DoubleBinaryOperator MIN = (left, right) -> left <= right ? left : right;
+            public static final DoubleBinaryOperator MIN = Math::min;
 
-            public static final DoubleBinaryOperator MAX = (left, right) -> left >= right ? left : right;
+            public static final DoubleBinaryOperator MAX = Math::max;
         }
     }
 
@@ -9693,6 +9691,7 @@ public final class Fn {
         }
 
         // Copied from Google Guava under Apache License v2.
+
         /**
          * Copied from Google Guava under Apache License v2.
          * <br />
@@ -9709,7 +9708,7 @@ public final class Fn {
          * instance. The actual memoization does not happen when the underlying delegate throws an
          * exception.
          *
-         * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
+         * <p>When the underlying delegate throws an exception then this memorizing supplier will keep
          * delegating calls until it returns valid data.
          *
          * @param <T>
@@ -9735,7 +9734,7 @@ public final class Fn {
 
                 @Override
                 public T get() throws E {
-                    // Another variant of Double Checked Locking.
+                    // Another variant of Double-Checked Locking.
                     //
                     // We use two volatile reads. We could reduce this to one by
                     // putting our fields into a holder class, but (at least on x86)
@@ -9777,6 +9776,7 @@ public final class Fn {
                 private final Map<T, R> resultMap = new ConcurrentHashMap<>();
                 private volatile R resultForNull = none; //NOSONAR
 
+                @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
                 @Override
                 public R apply(final T t) throws E {
                     R result = null;
@@ -9787,7 +9787,7 @@ public final class Fn {
                         if (result == none) {
                             synchronized (this) {
                                 if (resultForNull == none) {
-                                    resultForNull = func.apply(t);
+                                    resultForNull = func.apply(null);
                                 }
 
                                 result = resultForNull;
@@ -10015,12 +10015,12 @@ public final class Fn {
          *
          * @param <T>
          * @param <E>
-         * @param excpetionSupplier
+         * @param exceptionSupplier
          * @return
          */
-        public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final java.util.function.Supplier<? extends E> excpetionSupplier) {
+        public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final java.util.function.Supplier<? extends E> exceptionSupplier) {
             return t -> {
-                throw excpetionSupplier.get();
+                throw exceptionSupplier.get();
             };
         }
 
@@ -10151,7 +10151,7 @@ public final class Fn {
          * @return
          */
         public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
-            return cc(Fn.<T, U> println(separator));
+            return cc(Fn.println(separator));
         }
 
         /**

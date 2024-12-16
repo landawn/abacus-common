@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -50,12 +51,7 @@ public class Array {
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
         if (length == 0) {
-            Object result = N.CLASS_EMPTY_ARRAY.get(componentType);
-
-            if (result == null) {
-                result = java.lang.reflect.Array.newInstance(componentType, length);
-                N.CLASS_EMPTY_ARRAY.put(componentType, result);
-            }
+            Object result = N.CLASS_EMPTY_ARRAY.computeIfAbsent(componentType, k -> java.lang.reflect.Array.newInstance(componentType, length));
 
             return (T) result;
         }
@@ -569,7 +565,7 @@ public class Array {
     @SafeVarargs
     @NullSafe
     public static <T> List<T> asList(@NullSafe final T... a) {
-        return N.isEmpty(a) ? N.<T> emptyList() : Arrays.asList(a);
+        return N.isEmpty(a) ? N.emptyList() : Arrays.asList(a);
     }
 
     /**
@@ -940,7 +936,7 @@ public class Array {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        final char[] a = new char[endExclusive * 1 - startInclusive];
+        final char[] a = new char[endExclusive - startInclusive];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -964,7 +960,7 @@ public class Array {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        final byte[] a = new byte[endExclusive * 1 - startInclusive];
+        final byte[] a = new byte[endExclusive - startInclusive];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -988,7 +984,7 @@ public class Array {
             return N.EMPTY_SHORT_ARRAY;
         }
 
-        final short[] a = new short[endExclusive * 1 - startInclusive];
+        final short[] a = new short[endExclusive - startInclusive];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1012,7 +1008,7 @@ public class Array {
             return N.EMPTY_INT_ARRAY;
         }
 
-        if (endExclusive * 1L - startInclusive > Integer.MAX_VALUE) {
+        if ((long) endExclusive - startInclusive > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("overflow"); //NOSONAR
         }
 
@@ -1096,7 +1092,7 @@ public class Array {
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
@@ -1113,10 +1109,11 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endExclusive * 1 - startInclusive) / by + ((endExclusive * 1 - startInclusive) % by == 0 ? 0 : 1);
+        final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final char[] a = new char[len];
+        final char byChar = (char) by;
 
-        for (int i = 0; i < len; i++, startInclusive += by) {
+        for (int i = 0; i < len; i++, startInclusive += byChar) {
             a[i] = startInclusive;
         }
 
@@ -1132,7 +1129,7 @@ public class Array {
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
@@ -1149,7 +1146,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endExclusive * 1 - startInclusive) / by + ((endExclusive * 1 - startInclusive) % by == 0 ? 0 : 1);
+        final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final byte[] a = new byte[len];
 
         for (int i = 0; i < len; i++, startInclusive += by) {
@@ -1168,7 +1165,7 @@ public class Array {
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
@@ -1185,7 +1182,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endExclusive * 1 - startInclusive) / by + ((endExclusive * 1 - startInclusive) % by == 0 ? 0 : 1);
+        final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final short[] a = new short[len];
 
         for (int i = 0; i < len; i++, startInclusive += by) {
@@ -1204,7 +1201,7 @@ public class Array {
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
@@ -1221,7 +1218,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final long len = (endExclusive * 1L - startInclusive) / by + ((endExclusive * 1L - startInclusive) % by == 0 ? 0 : 1);
+        final long len = ((long) endExclusive - startInclusive) / by + (((long) endExclusive - startInclusive) % by == 0 ? 0 : 1);
 
         if (len > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("overflow");
@@ -1245,7 +1242,7 @@ public class Array {
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
@@ -1361,7 +1358,7 @@ public class Array {
             return Array.of(startInclusive);
         }
 
-        final char[] a = new char[endInclusive * 1 - startInclusive + 1];
+        final char[] a = new char[endInclusive - startInclusive + 1];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1387,7 +1384,7 @@ public class Array {
             return Array.of(startInclusive);
         }
 
-        final byte[] a = new byte[endInclusive * 1 - startInclusive + 1];
+        final byte[] a = new byte[endInclusive - startInclusive + 1];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1413,7 +1410,7 @@ public class Array {
             return Array.of(startInclusive);
         }
 
-        final short[] a = new short[endInclusive * 1 - startInclusive + 1];
+        final short[] a = new short[endInclusive - startInclusive + 1];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1439,7 +1436,7 @@ public class Array {
             return Array.of(startInclusive);
         }
 
-        if (endInclusive * 1L - startInclusive + 1 > Integer.MAX_VALUE) {
+        if ((long) endInclusive - startInclusive + 1 > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("overflow");
         }
 
@@ -1515,7 +1512,7 @@ public class Array {
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
@@ -1534,10 +1531,11 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endInclusive * 1 - startInclusive) / by + 1;
+        final int len = (endInclusive - startInclusive) / by + 1;
         final char[] a = new char[len];
+        final char byChar = (char) by;
 
-        for (int i = 0; i < len; i++, startInclusive += by) {
+        for (int i = 0; i < len; i++, startInclusive += byChar) {
             a[i] = startInclusive;
         }
 
@@ -1553,7 +1551,7 @@ public class Array {
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
@@ -1572,7 +1570,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endInclusive * 1 - startInclusive) / by + 1;
+        final int len = (endInclusive - startInclusive) / by + 1;
         final byte[] a = new byte[len];
 
         for (int i = 0; i < len; i++, startInclusive += by) {
@@ -1591,7 +1589,7 @@ public class Array {
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
@@ -1610,7 +1608,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final int len = (endInclusive * 1 - startInclusive) / by + 1;
+        final int len = (endInclusive - startInclusive) / by + 1;
         final short[] a = new short[len];
 
         for (int i = 0; i < len; i++, startInclusive += by) {
@@ -1629,7 +1627,7 @@ public class Array {
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
@@ -1648,7 +1646,7 @@ public class Array {
         //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
         //        }
 
-        final long len = (endInclusive * 1L - startInclusive) / by + 1;
+        final long len = ((long) endInclusive - startInclusive) / by + 1;
 
         if (len > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("overflow");
@@ -1672,7 +1670,7 @@ public class Array {
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
@@ -3239,9 +3237,8 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Boolean[], boolean)
-     * @see #unbox(Boolean)
      */
     @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) throws IndexOutOfBoundsException {
@@ -3303,7 +3300,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive chars, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Character[], char)
      * @see #unbox(Character[])
      */
@@ -3367,7 +3364,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[])
      */
@@ -3431,7 +3428,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Short[], short)
      * @see #unbox(Short[])
      */
@@ -3496,7 +3493,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive integers, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer...)
      */
@@ -3561,7 +3558,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive longs, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Long[], long)
      * @see #unbox(Long...)
      */
@@ -3626,7 +3623,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive floats, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Float[], float)
      * @see #unbox(Float...)
      */
@@ -3691,7 +3688,7 @@ public class Array {
      * @param toIndex The ending index (exclusive) in the array to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Double[], double)
      * @see #unbox(Double...)
      */
@@ -4314,7 +4311,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4357,7 +4354,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4400,7 +4397,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4443,7 +4440,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4486,7 +4483,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4529,7 +4526,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4572,7 +4569,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4615,7 +4612,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }
@@ -4658,7 +4655,7 @@ public class Array {
         checkIfMatrixArray(a);
 
         if (a == null) {
-            return a;
+            return null;
         } else if (a.length == 0) {
             return a.clone();
         }

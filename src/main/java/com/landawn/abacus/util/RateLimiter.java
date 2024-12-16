@@ -1,16 +1,16 @@
 /*
-* Copyright (C) 2012 The Guava Authors
-*
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
+ * Copyright (C) 2012 The Guava Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.landawn.abacus.util;
 
 import static java.lang.Math.max;
@@ -219,6 +219,7 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
      */
     public final void setRate(final double permitsPerSecond) throws IllegalArgumentException {
+        //noinspection ConstantValue
         N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
         synchronized (mutex()) {
             doSetRate(permitsPerSecond, stopwatch.readMicros());
@@ -297,7 +298,7 @@ public abstract class RateLimiter {
     /**
      * Acquires a permit from this {@code RateLimiter} if it can be obtained without exceeding the
      * specified {@code timeout}, or returns {@code false} immediately (without waiting) if the permit
-     * would not have been granted before the timeout expired.
+     * had not been granted before the timeout expired.
      *
      * <p>This method is equivalent to {@code tryAcquire(1, timeout, unit)}.
      *
@@ -338,7 +339,7 @@ public abstract class RateLimiter {
     /**
      * Acquires the given number of permits from this {@code RateLimiter} if it can be obtained
      * without exceeding the specified {@code timeout}, or returns {@code false} immediately (without
-     * waiting) if the permits would not have been granted before the timeout expired.
+     * waiting) if the permits had not been granted before the timeout expired.
      *
      * @param permits the number of permits to acquire
      * @param timeout the maximum time to wait for the permits. Negative values are treated as zero.
@@ -432,11 +433,11 @@ public abstract class RateLimiter {
         protected abstract void sleepMicrosUninterruptibly(long micros);
 
         /**
-         * Creates the from system timer.
+         * Creates from system timer.
          *
          * @return
          */
-        public static final SleepingStopwatch createFromSystemTimer() {
+        public static SleepingStopwatch createFromSystemTimer() {
             return new SleepingStopwatch() {
                 final Stopwatch stopwatch = Stopwatch.createStarted();
 

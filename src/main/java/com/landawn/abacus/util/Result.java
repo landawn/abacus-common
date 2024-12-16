@@ -320,6 +320,7 @@ public class Result<T, E extends Throwable> implements Immutable {
             return true;
         }
 
+        //noinspection rawtypes
         if (obj instanceof final Result other) { // NOSONAR
             return N.equals(other.value, value) && N.equals(other.exception, exception);
         }

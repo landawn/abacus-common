@@ -14,13 +14,9 @@
 
 package com.landawn.abacus.util;
 
+import java.io.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -51,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -67,6 +64,7 @@ import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -85,6 +83,7 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -432,6 +431,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
+        //noinspection resource
         return Seq.<Throwables.Supplier<? extends Seq<? extends T, ? extends E>, ? extends E>, E> just(supplier).flatMap(Throwables.Supplier::get);
     }
 
@@ -501,6 +501,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the array of elements to be included in the sequence
      * @return a sequence containing the provided elements
      */
+    @SafeVarargs
     public static <T, E extends Exception> Seq<T, E> of(final T... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -508,7 +509,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -535,7 +536,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -555,7 +556,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Boolean, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -578,7 +579,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -598,7 +599,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Character, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -621,7 +622,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -641,7 +642,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Byte, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -664,7 +665,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -684,7 +685,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Short, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -707,7 +708,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -727,7 +728,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Integer, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -750,7 +751,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -770,7 +771,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Long, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -793,7 +794,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -813,7 +814,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Float, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -836,7 +837,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -856,7 +857,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int len = N.len(a);
 
-        return create(new Throwables.Iterator<Double, E>() {
+        return create(new Throwables.Iterator<>() {
             private int position = 0;
 
             @Override
@@ -879,7 +880,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n > len - position) {
                     position = len;
                 } else {
-                    position += n;
+                    position += (int) n;
                 }
             }
         });
@@ -896,7 +897,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         otherwise an empty sequence
      */
     public static <T, E extends Exception> Seq<T, E> of(final Optional<T> op) {
-        return op == null || !op.isPresent() ? Seq.<T, E> empty() : Seq.<T, E> of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
     }
 
     /**
@@ -910,7 +911,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         otherwise an empty sequence
      */
     public static <T, E extends Exception> Seq<T, E> of(final java.util.Optional<T> op) {
-        return op == null || !op.isPresent() ? Seq.<T, E> empty() : Seq.<T, E> of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
     }
 
     /**
@@ -1078,7 +1079,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return Seq.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
+        //noinspection resource
+        return Seq.<K, V, E> of(map).filter(Fnn.testByValue(valueFilter)).map(Fnn.key());
     }
 
     /**
@@ -1096,13 +1098,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return Seq.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> key());
+        //noinspection resource
+        return Seq.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.key());
     }
 
     /**
      * Creates a sequence from the values of the provided Map.
      *
-     * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param <E> the type of exception that might be thrown
      * @param map the Map whose values are to be included in the sequence
@@ -1131,7 +1133,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return Seq.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
+        //noinspection resource
+        return Seq.<K, V, E> of(map).filter(Fnn.testByKey(keyFilter)).map(Fnn.value());
     }
 
     /**
@@ -1149,7 +1152,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return Seq.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
+        //noinspection resource
+        return Seq.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.value());
     }
 
     /**
@@ -1163,6 +1167,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public static <T, E extends Exception> Seq<T, E> ofReversed(final T[] array) {
         final int len = N.len(array);
 
+        //noinspection resource
         return Seq.<E> range(0, len).map(idx -> array[len - idx - 1]);
     }
 
@@ -1177,6 +1182,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public static <T, E extends Exception> Seq<T, E> ofReversed(final List<? extends T> list) {
         final int size = N.size(list);
 
+        //noinspection resource
         return Seq.<E> range(0, size).map(idx -> list.get(size - idx - 1));
     }
 
@@ -1381,7 +1387,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private long cnt = n;
 
             @Override
@@ -1410,6 +1416,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive) {
+        //noinspection resource
         return of(IntStream.range(startInclusive, endExclusive).boxed().iterator());
     }
 
@@ -1425,6 +1432,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
+        //noinspection resource
         return of(IntStream.range(startInclusive, endExclusive, by).boxed().iterator());
     }
 
@@ -1437,8 +1445,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a sequence containing the range of integers
      */
     @SuppressWarnings("deprecation")
-    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endExclusive) {
-        return of(IntStream.rangeClosed(startInclusive, endExclusive).boxed().iterator());
+    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive) {
+        //noinspection resource
+        return of(IntStream.rangeClosed(startInclusive, endInclusive).boxed().iterator());
     }
 
     /**
@@ -1447,13 +1456,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <E> the type of the exception that might be thrown
      * @param startInclusive the starting value (inclusive)
-     * @param endExclusive the ending value (exclusive)
+     * @param endInclusive the ending value (exclusive)
      * @param by the step value for incrementing, it can be negative but not zero
      * @return a sequence containing the range of integers
      */
     @SuppressWarnings("deprecation")
-    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-        return of(IntStream.rangeClosed(startInclusive, endExclusive, by).boxed().iterator());
+    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive, final int by) {
+        //noinspection resource
+        return of(IntStream.rangeClosed(startInclusive, endInclusive, by).boxed().iterator());
     }
 
     /**
@@ -1575,7 +1585,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a function to map the chunk from and to index to an element in the resulting stream
      * @return a sequence of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
-     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
+     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction) 
      */
     public static <T, E extends Exception> Seq<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
             final Throwables.IntBiFunction<? extends T, ? extends E> mapper) {
@@ -1583,10 +1593,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
 
         if (totalSize == 0) {
-            return Seq.<T, E> empty();
+            return Seq.empty();
         }
 
-        final int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
+        final int count = Math.min(totalSize, maxChunkCount);
         final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
         final int biggerCount = totalSize % maxChunkCount;
         final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
@@ -1828,14 +1838,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     private static Throwables.Iterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
             final boolean closeReader) {
-        return Throwables.Iterator.defer(new Supplier<Throwables.Iterator<String, IOException>>() {
+        return Throwables.Iterator.defer(new Supplier<>() {
             private Throwables.Iterator<String, IOException> lazyIter = null;
 
             @Override
             public synchronized Throwables.Iterator<String, IOException> get() {
                 if (lazyIter == null) {
                     lazyIter = new Throwables.Iterator<>() {
-                        private BufferedReader bufferedReader;
+                        private final BufferedReader bufferedReader;
 
                         { //NOSONAR
                             if (reader != null) {
@@ -1971,7 +1981,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Iterator<? extends Seq<? extends T, E>> iterators = c.iterator();
             private Seq<? extends T, E> cur;
             private Throwables.Iterator<? extends T, E> iter;
@@ -2007,7 +2017,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first array to zip
      * @param b the second array to zip
      * @param zipFunction a function that combines elements from the two arrays. An empty sequence is returned if the one of input arrays is {@code null} or empty.
@@ -2016,7 +2026,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final int len = N.min(N.len(a), N.len(b));
             private int cursor = 0;
 
@@ -2043,17 +2053,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
      * @param <C> the type of elements in the third array
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first array to zip
      * @param b the second array to zip
      * @param c the third array to zip
      * @param zipFunction a function that combines elements from the three arrays. An empty sequence is returned if the one of input arrays is {@code null} or empty.
      * @return a sequence of combined elements
-     * @see N#zip(Object[], Object[], Object[], java.util.function.TriFunction)
+     * @see N#zip(Object[], Object[], Object[], TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final C[] c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final int len = N.min(N.len(a), N.len(b), N.len(c));
             private int cursor = 0;
 
@@ -2079,7 +2089,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param zipFunction a function that combines elements from the two iterables. An empty sequence is returned if the one of input iterables is {@code null} or empty.
@@ -2098,13 +2108,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
      * @param <C> the type of elements in the third iterable
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param c the third iterable to zip
      * @param zipFunction a function that combines elements from the three iterables. An empty sequence is returned if the one of input iterables is {@code null} or empty.
      * @return a sequence of combined elements
-     * @see N#zip(Iterable, Iterable, Iterable, java.util.function.TriFunction)
+     * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -2117,16 +2127,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first iterator to zip
      * @param b the second iterator to zip
      * @param zipFunction a function that combines elements from the two iterators. An empty sequence is returned if the one of input iterators is {@code null} or empty.
      * @return a sequence of combined elements
-     * @see N#zip(Iterator, Iterator, java.util.function.BiFunction)
+     * @see N#zip(Iterable, Iterable, BiFunction)
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -2149,17 +2159,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
      * @param <C> the type of elements in the third iterator
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first iterator to zip
      * @param b the second iterator to zip
      * @param c the third iterator to zip
      * @param zipFunction a function that combines elements from the three iterators. An empty sequence is returned if the one of input iterators is {@code null} or empty.
      * @return a sequence of combined elements
-     * @see N#zip(Iterator, Iterator, Iterator, java.util.function.TriFunction)
+     * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -2182,7 +2192,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first stream
      * @param <B> the type of elements in the second stream
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first sequence to zip
      * @param b the second sequence to zip
      * @param zipFunction a function that combines elements from the two streams. An empty sequence is returned if the one of input streams is {@code null} or empty.
@@ -2191,7 +2201,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
             private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
@@ -2214,17 +2224,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first stream
      * @param <B> the type of elements in the second stream
      * @param <C> the type of elements in the third stream
-     * @param <R> the type of elements in the resulting sequence
+     * @param <T> the type of elements in the resulting sequence
      * @param a the first sequence to zip
      * @param b the second sequence to zip
      * @param c the third sequence to zip
      * @param zipFunction a function that combines elements from the three streams. An empty sequence is returned if the one of input streams is {@code null} or empty.
      * @return a sequence of combined elements
-     * @see N#zip(Iterable, Iterable, Iterable, java.util.function.TriFunction)
+     * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final Seq<? extends C, E> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
             private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
             private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
@@ -2248,7 +2258,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first array to zip
      * @param b the second array to zip
      * @param valueForNoneA the default value to use if the first array is shorter
@@ -2259,7 +2269,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final int lenA = N.len(a);
             private final int lenB = N.len(b);
             private final int len = N.max(lenA, lenB);
@@ -2293,7 +2303,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
      * @param <C> the type of elements in the third array
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first array to zip
      * @param b the second array to zip
      * @param c the third array to zip
@@ -2302,11 +2312,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param valueForNoneC the default value to use if the third array is shorter
      * @param zipFunction a function that combines elements from the three arrays
      * @return a sequence containing the zipped elements
-     * @see N#zip(Object[], Object[], Object[], Object, Object, Object, java.util.function.TriFunction)
+     * @see N#zip(Object[], Object[], Object[], Object, Object, Object,TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final int lenA = N.len(a);
             private final int lenB = N.len(b);
             private final int lenC = N.len(c);
@@ -2341,7 +2351,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param valueForNoneA the default value to use if the first iterable is shorter
@@ -2363,7 +2373,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
      * @param <C> the type of elements in the third iterable
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param c the third iterable to zip
@@ -2372,7 +2382,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param valueForNoneC the default value to use if the third iterable is shorter
      * @param zipFunction a function that combines elements from the three iterables
      * @return a sequence containing the zipped elements
-     * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, java.util.function.TriFunction)
+     * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
@@ -2387,18 +2397,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first iterator to zip
      * @param b the second iterator to zip
      * @param valueForNoneA the default value to use if the first iterator is shorter
      * @param valueForNoneB the default value to use if the second iterator is shorter
      * @param zipFunction a function that combines elements from the two iterators
      * @return a sequence containing the zipped elements
-     * @see N#zip(Iterator, Iterator, Object, Object, java.util.function.BiFunction)
+     * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -2426,7 +2436,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
      * @param <C> the type of elements in the third iterator
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first iterator to zip
      * @param b the second iterator to zip
      * @param c the third iterator to zip
@@ -2435,12 +2445,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param valueForNoneC the default value to use if the third iterator is shorter
      * @param zipFunction a function that combines elements from the three iterators
      * @return a sequence containing the zipped elements
-     * @see N#zip(Iterator, Iterator, Iterator, Object, Object, Object, java.util.function.TriFunction)
+     * @seeN#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -2469,7 +2479,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <A> the type of elements in the first stream
      * @param <B> the type of elements in the second stream
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first sequence to zip
      * @param b the second sequence to zip
      * @param valueForNoneA the default value to use if the first sequence is shorter
@@ -2480,7 +2490,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
             private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
@@ -2508,7 +2518,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <A> the type of elements in the first stream
      * @param <B> the type of elements in the second stream
      * @param <C> the type of elements in the third stream
-     * @param <R> the type of elements in the resulting stream
+     * @param <T> the type of elements in the resulting stream
      * @param a the first sequence to zip
      * @param b the second sequence to zip
      * @param c the third sequence to zip
@@ -2517,12 +2527,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param valueForNoneC the default value to use if the third sequence is shorter
      * @param zipFunction a function that combines elements from the three streams
      * @return a sequence containing the zipped elements
-     * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, java.util.function.TriFunction)
+     * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final Seq<? extends C, E> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
             private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
             private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
@@ -2565,7 +2575,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return of(a);
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final int lenA = N.len(a);
             private final int lenB = N.len(b);
             private int cursorA = 0;
@@ -2609,7 +2619,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return mergeIterators(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(N.iterate(c)), nextSelector);
+        //noinspection resource
+        return mergeIterators(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.of(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -2683,6 +2694,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final Iterator<? extends T> c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        //noinspection resource
         return mergeIterators(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(c), nextSelector);
     }
 
@@ -2725,7 +2737,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     static <T, E extends Exception> Seq<T, E> mergeIterators(final Throwables.Iterator<? extends T, E> a, final Throwables.Iterator<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iterA = a == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) a;
             private final Throwables.Iterator<T, E> iterB = b == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) b;
 
@@ -2799,7 +2811,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -2867,7 +2879,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean hasMore = true;
             private boolean hasNext = false;
             private T next = null;
@@ -2911,7 +2923,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean hasNext = false;
             private T next = null;
             private boolean dropped = false;
@@ -3077,9 +3089,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalStateException {
         assertNotClosed();
 
-        final Supplier<? extends Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
+        final Supplier<? extends Map<Object, T>> supplier = Suppliers.ofLinkedHashMap();
 
-        return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<Object, T, E> value());
+        //noinspection resource
+        return groupBy(keyMapper, Fnn.identity(), mergeFunction, supplier).map(Fnn.value());
     }
 
     //    /**
@@ -3142,7 +3155,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <R> Seq<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -3169,6 +3182,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @IntermediateOp
     public <R> Seq<R, E> mapIfNotNull(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) throws IllegalStateException {
+        //noinspection resource
         return skipNulls().map(mapper);
     }
 
@@ -3184,7 +3198,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean isFirst = true;
 
             @Override
@@ -3219,7 +3233,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean isFirst = true;
 
             @Override
@@ -3251,7 +3265,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -3288,7 +3302,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             private T next = null;
 
             @Override
@@ -3385,7 +3399,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <R> Seq<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             private Collection<? extends R> c = null;
             private Iterator<? extends R> cur = null;
 
@@ -3665,6 +3679,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public <R> Seq<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper)
             throws IllegalStateException {
+        //noinspection resource
         return skipNulls().flatmap(mapper);
     }
 
@@ -3687,6 +3702,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public <U, R> Seq<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
             final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) throws IllegalStateException {
+        //noinspection resource
         return skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2);
     }
 
@@ -4108,7 +4124,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * <p>
-     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     * Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a>
      * </p>
      *
      * Transforms the elements of this sequence using the provided mapper function,
@@ -4124,12 +4140,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @IntermediateOp
     public <R> Seq<R, E> mapPartial(final Throwables.Function<? super T, Optional<? extends R>, E> mapper) throws IllegalStateException {
+        //noinspection resource
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT).map(GET_AS_IT);
     }
 
     /**
      * <p>
-     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     * Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a>
      * </p>
      *
      * Transforms the elements of this sequence using the provided mapper function,
@@ -4144,12 +4161,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @IntermediateOp
     public Seq<Integer, E> mapPartialToInt(final Throwables.Function<? super T, OptionalInt, E> mapper) throws IllegalStateException {
+        //noinspection resource
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_INT).map(GET_AS_INT);
     }
 
     /**
      * <p>
-     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     * Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a>
      * </p>
      *
      * Transforms the elements of this sequence using the provided mapper function,
@@ -4164,12 +4182,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @IntermediateOp
     public Seq<Long, E> mapPartialToLong(final Throwables.Function<? super T, OptionalLong, E> mapper) throws IllegalStateException {
+        //noinspection resource
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_LONG).map(GET_AS_LONG);
     }
 
     /**
      * <p>
-     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     * Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a>
      * </p>
      *
      * Transforms the elements of this sequence using the provided mapper function,
@@ -4184,6 +4203,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @IntermediateOp
     public Seq<Double, E> mapPartialToDouble(final Throwables.Function<? super T, OptionalDouble, E> mapper) throws IllegalStateException {
+        //noinspection resource
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE).map(GET_AS_DOUBLE);
     }
 
@@ -4262,9 +4282,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Consumer<R> consumer = queue::offer;
 
+        @SuppressWarnings("resource")
         final Throwables.Iterator<T, E> iter = iteratorEx();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() throws E {
                 if (queue.size() == 0) {
@@ -4342,7 +4363,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int windowSize = 2;
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -4439,7 +4460,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final int windowSize = 3;
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -4513,7 +4534,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     @TerminalOpTriggered
     public <K> Seq<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) throws IllegalStateException {
-        return groupBy(keyMapper, Suppliers.<K, List<T>> ofMap());
+        return groupBy(keyMapper, Suppliers.ofMap());
     }
 
     /**
@@ -4530,7 +4551,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOpTriggered
     public <K> Seq<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory) throws IllegalStateException {
-        return groupBy(keyMapper, Fnn.<T, E> identity(), mapFactory);
+        return groupBy(keyMapper, Fnn.identity(), mapFactory);
     }
 
     /**
@@ -4550,7 +4571,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOpTriggered
     public <K, V> Seq<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) throws IllegalStateException {
-        return groupBy(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
+        return groupBy(keyMapper, valueMapper, Suppliers.ofMap());
     }
 
     /**
@@ -4574,7 +4595,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<Map.Entry<K, List<V>>, E>() {
+        return create(new Throwables.Iterator<>() {
             private Iterator<Map.Entry<K, List<V>>> iter = null;
 
             @Override
@@ -4617,7 +4638,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <K, V> Seq<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction)
             throws IllegalStateException {
-        return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
+        return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.ofMap());
     }
 
     /**
@@ -4645,7 +4666,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final Supplier<? extends Map<K, V>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<Map.Entry<K, V>, E>() {
+        return create(new Throwables.Iterator<>() {
             private Iterator<Map.Entry<K, V>> iter = null;
 
             @Override
@@ -4684,7 +4705,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOpTriggered
     public <K, D> Seq<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, ?, D> downstream) throws IllegalStateException {
-        return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupBy(keyMapper, downstream, Suppliers.ofMap());
     }
 
     /**
@@ -4704,7 +4725,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOpTriggered
     public <K, D> Seq<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) throws IllegalStateException {
-        return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
+        return groupBy(keyMapper, Fnn.identity(), downstream, mapFactory);
     }
 
     /**
@@ -4726,7 +4747,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <K, V, D> Seq<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream)
             throws IllegalStateException {
-        return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupBy(keyMapper, valueMapper, downstream, Suppliers.ofMap());
     }
 
     /**
@@ -4751,7 +4772,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final Supplier<? extends Map<K, D>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<Map.Entry<K, D>, E>() {
+        return create(new Throwables.Iterator<>() {
             private Iterator<Map.Entry<K, D>> iter = null;
 
             @Override
@@ -4790,7 +4811,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException {
         assertNotClosed();
 
-        return partitionBy(predicate, Collectors.<T> toList());
+        return partitionBy(predicate, Collectors.toList());
     }
 
     /**
@@ -4813,7 +4834,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<Entry<Boolean, D>, E>() {
+        return create(new Throwables.Iterator<>() {
             private Iterator<Entry<Boolean, D>> iter = null;
 
             @Override
@@ -5522,7 +5543,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //     *
     //     * @param accumulator a {@code BiFunction} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
     //     * @return a new {@code Seq} consisting of the results of the scan operation on the elements of the original stream.
-    //     * @seee Stream#scan(java.util.function.BiFunction)
+    //     * @see Stream#scan(java.util.function.BiFunction)
     //     */
     //    @IntermediateOp
     //    public Seq<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) throws IllegalStateException {
@@ -5664,7 +5685,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
-     * @see #commonSet(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      */
     @IntermediateOp
@@ -5688,7 +5709,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
-     * @see #commonSet(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      */
     @IntermediateOp
@@ -5775,6 +5796,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Multiset<?> multiset = Multiset.create(c);
 
+        //noinspection resource
         return filter(value -> !multiset.remove(value)).append(Seq.<T, E> of(c).filter(multiset::remove));
     }
 
@@ -5916,7 +5938,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return create(elements, closeHandlers);
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Throwables.Iterator<T, E> iter;
 
             @Override
@@ -6046,13 +6068,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        assertNotClosed();
     //
     //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //
     //                //            public boolean hasNext() throws E {
     //                try {
-    //                    return fallbackValueAvaiable && elements.hasNext();
+    //                    return fallbackValueAvailable && elements.hasNext();
     //                } catch (Exception e) {
-    //                    return fallbackValueAvaiable;
+    //                    return fallbackValueAvailable;
     //                }
     //            }
     //
@@ -6064,7 +6086,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return elements.next();
     //                } catch (Exception e) {
-    //                    fallbackValueAvaiable = false;
+    //                    fallbackValueAvailable = false;
     //                    return fallbackValue;
     //                }
     //            }
@@ -6078,14 +6100,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        this.checkArgNotNull(type, "type");
     //
     //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //
     //                //            public boolean hasNext() throws E {
     //                try {
-    //                    return fallbackValueAvaiable && elements.hasNext();
+    //                    return fallbackValueAvailable && elements.hasNext();
     //                } catch (Exception e) {
     //                    if (ExceptionUtil.hasCause(e, type)) {
-    //                        return fallbackValueAvaiable;
+    //                        return fallbackValueAvailable;
     //                    } else {
     //                        throw (E) e;
     //                    }
@@ -6101,7 +6123,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                    return elements.next();
     //                } catch (Exception e) {
     //                    if (ExceptionUtil.hasCause(e, type)) {
-    //                        fallbackValueAvaiable = false;
+    //                        fallbackValueAvailable = false;
     //                        return fallbackValue;
     //                    } else {
     //                        throw (E) e;
@@ -6118,14 +6140,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        this.checkArgNotNull(predicate, s.Predicate);
     //
     //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //
     //                //            public boolean hasNext() throws E {
     //                try {
-    //                    return fallbackValueAvaiable && elements.hasNext();
+    //                    return fallbackValueAvailable && elements.hasNext();
     //                } catch (Exception e) {
     //                    if (predicate.test(e)) {
-    //                        return fallbackValueAvaiable;
+    //                        return fallbackValueAvailable;
     //                    } else {
     //                        throw (E) e;
     //                    }
@@ -6141,7 +6163,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                    return elements.next();
     //                } catch (Exception e) {
     //                    if (predicate.test(e)) {
-    //                        fallbackValueAvaiable = false;
+    //                        fallbackValueAvailable = false;
     //                        return fallbackValue;
     //                    } else {
     //                        throw (E) e;
@@ -6158,7 +6180,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
     //            private Seq<T, E> s = null;
     //
@@ -6166,7 +6188,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable) {
+    //                    if (fallbackValueAvailable) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        return iter.hasNext();
@@ -6184,7 +6206,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.next();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable) {
+    //                    if (fallbackValueAvailable) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        if (iter.hasNext()) {
@@ -6211,7 +6233,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //            }
     //
     //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvaiable = false;
+    //                fallbackValueAvailable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
     //            }
@@ -6228,7 +6250,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
     //            private Seq<T, E> s = null;
     //
@@ -6236,7 +6258,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable && ExceptionUtil.hasCause(e, type)) {
+    //                    if (fallbackValueAvailable && ExceptionUtil.hasCause(e, type)) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        return iter.hasNext();
@@ -6254,7 +6276,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.next();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable && ExceptionUtil.hasCause(e, type)) {
+    //                    if (fallbackValueAvailable && ExceptionUtil.hasCause(e, type)) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        if (iter.hasNext()) {
@@ -6281,7 +6303,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //            }
     //
     //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvaiable = false;
+    //                fallbackValueAvailable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
     //            }
@@ -6298,7 +6320,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvaiable = true;
+    //            private boolean fallbackValueAvailable = true;
     //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
     //            private Seq<T, E> s = null;
     //
@@ -6306,7 +6328,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable && predicate.test(e)) {
+    //                    if (fallbackValueAvailable && predicate.test(e)) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        return iter.hasNext();
@@ -6324,7 +6346,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                try {
     //                    return iter.next();
     //                } catch (Exception e) {
-    //                    if (fallbackValueAvaiable && predicate.test(e)) {
+    //                    if (fallbackValueAvailable && predicate.test(e)) {
     //                        useFallbackStream(fallbackStreamSupplier);
     //
     //                        if (iter.hasNext()) {
@@ -6351,7 +6373,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //            }
     //
     //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvaiable = false;
+    //                fallbackValueAvailable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
     //            }
@@ -6449,7 +6471,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(action, cs.action);
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Throwables.Iterator<T, E> iter;
 
             @Override
@@ -6511,7 +6533,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -6537,7 +6559,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> onFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean isFirst = true;
 
             @Override
@@ -6570,7 +6592,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> onLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -6699,14 +6721,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public Seq<List<T>, E> split(final int chunkSize) throws IllegalStateException {
-        return split(chunkSize, Factory.<T> ofList());
+        return split(chunkSize, Factory.ofList());
     }
 
     //    /**
-    //     * Returns sequence of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+    //     * Returns sequence of {@code Set<T>} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
     //     *
     //     *
-    //     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+    //     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
     //     * @return
     //     */
     //    @IntermediateOp
@@ -6729,7 +6751,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
-        return create(new Throwables.Iterator<C, E>() {
+        return create(new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -6789,7 +6811,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -6854,7 +6876,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<List<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
-        return split(predicate, Suppliers.<T> ofList());
+        return split(predicate, Suppliers.ofList());
     }
 
     //    /**
@@ -6890,7 +6912,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(predicate, cs.Predicate);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
-        return create(new Throwables.Iterator<C, E>() {
+        return create(new Throwables.Iterator<>() {
             private T next = (T) NONE;
             private boolean preCondition = false;
 
@@ -6956,7 +6978,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             private T next = (T) NONE;
             private boolean preCondition = false;
 
@@ -7019,7 +7041,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Throwables.Iterator<T, E> iter = elements;
 
-        return create(new Throwables.Iterator<Seq<T, E>, E>() {
+        return create(new Throwables.Iterator<>() {
             private int cursor = 0;
 
             @Override
@@ -7093,7 +7115,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Throwables.Iterator<T, E> iter = elements;
 
-        return create(new Throwables.Iterator<Seq<T, E>, E>() {
+        return create(new Throwables.Iterator<>() {
             private int cursor = 0;
             private T next = null;
             private boolean hasNext = false;
@@ -7286,7 +7308,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public Seq<List<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
-        return sliding(windowSize, increment, Factory.<T> ofList());
+        return sliding(windowSize, increment, Factory.ofList());
     }
 
     //    /**
@@ -7323,7 +7345,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
-        return create(new Throwables.Iterator<C, E>() {
+        return create(new Throwables.Iterator<>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -7409,21 +7431,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (increment >= windowSize) {
+                    //noinspection DuplicateExpressions
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
                     if (N.isEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
                         elements.advance(m);
                     } else {
+                        @SuppressWarnings("DuplicateExpressions")
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size()); //NOSONAR
+                        final int prevSize = queue.size(); //NOSONAR
 
                         if (m < prevSize) {
                             for (int i = 0; i < m; i++) {
                                 queue.removeFirst();
                             }
                         } else {
-                            if (queue != null) {
+                            if (!queue.isEmpty()) {
                                 queue.clear();
                             }
 
@@ -7471,7 +7495,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return create(new Throwables.Iterator<R, E>() {
+        return create(new Throwables.Iterator<>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -7559,21 +7583,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (increment >= windowSize) {
+                    //noinspection DuplicateExpressions
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
                     if (N.isEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
                         elements.advance(m);
                     } else {
+                        @SuppressWarnings("DuplicateExpressions")
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size()); //NOSONAR
+                        final int prevSize = queue.size(); //NOSONAR
 
                         if (m < prevSize) {
                             for (int i = 0; i < m; i++) {
                                 queue.removeFirst();
                             }
                         } else {
-                            if (queue != null) {
+                            if (!queue.isEmpty()) {
                                 queue.clear();
                             }
 
@@ -7616,7 +7642,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return this;
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean skipped = false;
 
             @Override
@@ -7698,7 +7724,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return create(elements, sorted, cmp, closeHandlers);
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Deque<T> deque = null;
 
             @Override
@@ -7753,7 +7779,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNegative(maxSize, cs.maxSize);
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private long cnt = 0;
 
             @Override
@@ -7814,7 +7840,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return limit(0);
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Iterator<T> iter;
             private boolean initialized = false;
 
@@ -7892,7 +7918,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgPositive(n, cs.n);
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean initialized = false;
             private T[] aar = null;
             private int cursor = 0;
@@ -8003,7 +8029,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> reversed() throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor;
@@ -8075,7 +8101,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return create(elements, closeHandlers);
         }
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean initialized = false;
             private T[] aar;
             private int len;
@@ -8374,7 +8400,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     private Seq<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor = 0;
@@ -8442,7 +8468,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> cycled() throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Throwables.Iterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
@@ -8513,7 +8539,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNegative(rounds, cs.rounds);
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private Throwables.Iterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
@@ -8653,7 +8679,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> intersperse(final T delimiter) throws IllegalStateException {
         assertNotClosed();
 
-        return create(new Throwables.Iterator<T, E>() {
+        return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
             private boolean toInsert = false;
 
@@ -8727,7 +8753,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<Indexed<T>, E> indexed() throws IllegalStateException {
         assertNotClosed();
 
-        return map(new Throwables.Function<T, Indexed<T>, E>() {
+        return map(new Throwables.Function<>() {
             private final MutableLong idx = MutableLong.of(0);
 
             @Override
@@ -8778,6 +8804,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Supplier<Throwables.Iterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer);
 
+        //noinspection resource
         return Seq.<Supplier<Throwables.Iterator<T, E>>, E> just(supplier) //
                 .map(Supplier::get)
                 .flatMap(iter -> create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)));
@@ -8828,7 +8855,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a BiFunction that takes two parameters: an element from this sequence and an element from the given collection. It returns a combined element of type R.
      * @return a new {@code Seq} resulting from zipping this sequence with the given collection
      * @throws IllegalStateException if the sequence is already closed
-     * @see #zip(Collection, object, Object, Throwables.BiFunction)
+     * @see #zip(Iterable, Iterable, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      */
     @IntermediateOp
@@ -8973,7 +9000,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a TriFunction that takes three parameters: an element from this sequence, an element from the first sequence, and an element from the second sequence. It returns a combined element of type R.
      * @return a new {@code Seq} resulting from zipping this sequence with the two given sequences
      * @throws IllegalStateException if the sequence is already closed
-     * @see #zip(Seq, Seq, Object, Object, Object, Throwables.TriFunction)
+     * @see #zip(Seq, Seq, Seq, Object, Object, Object, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     @IntermediateOp
@@ -9634,6 +9661,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final MutableBoolean flagToBreak = MutableBoolean.of(false);
         final Throwables.Consumer<? super T, E2> tmp = t -> action.accept(t, flagToBreak);
 
+        //noinspection resource
         takeWhile(value -> flagToBreak.isFalse()).forEach(tmp);
     }
 
@@ -9663,6 +9691,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
+        //noinspection resource
         takeWhile(value -> flagToBreak.isFalse()).forEach(action);
     }
 
@@ -10054,13 +10083,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an {@code Optional} containing the minimum value of this sequence according to the key extracted by the {@code keyMapper} function. Null values are considered to be maximum.
-     * If this sequence is empty, it returns an empty {@code Optional}
+     * Returns an {@code Optional} containing the minimum value of this sequence according to the key extracted by the {@code keyMapper} function.
+     * Null values are considered to be maximum.
+     * If this sequence is empty, it returns an empty {@code Optional}.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
      *
-     * @param comparator the comparator to determine the order of the elements
+     * @param keyMapper the function to extract the key for comparison
      * @return an {@code Optional} containing the minimum value or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified keyMapper is null
@@ -10141,7 +10171,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * This is a terminal operation and will close the sequence.
      *
-     * @param comparator the comparator to determine the order of the elements
+     * @param keyMapper the function to extract the key for comparison
      * @return an {@code Optional} containing the maximum value or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified keyMapper is null
@@ -10329,7 +10359,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
             }
 
-            return Optional.<T> empty();
+            return Optional.empty();
         } finally {
             close();
         }
@@ -10390,7 +10420,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
             }
 
-            return result == NONE ? Optional.<T> empty() : Optional.of(result);
+            return result == NONE ? Optional.empty() : Optional.of(result);
         } finally {
             close();
         }
@@ -10517,7 +10547,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return {@code true} if this sequence contains all the specified elements, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
-     * @see N#containsAll(Iterable, Object...)
+     * @see N#containsAll(Collection, Object...)
      */
     @TerminalOp
     @SafeVarargs
@@ -10528,9 +10558,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             if (N.isEmpty(a)) {
                 return true;
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
-                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
+                return anyMatch(Fnn.<T, E> pp(Fn.equal(a[0])));
             } else if (a.length == 2) {
-                return filter(new Throwables.Predicate<T, E>() {
+                //noinspection resource
+                return filter(new Throwables.Predicate<>() {
                     private final T val1 = a[0];
                     private final T val2 = a[1];
 
@@ -10557,7 +10588,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return {@code true} if this sequence contains all the elements in the specified collection, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
-     * @see N#containsAll(Iterable, Iterable)
+     * @see N#containsAll(Collection, Collection) 
      */
     @TerminalOp
     public boolean containsAll(final Collection<? extends T> c) throws IllegalStateException, E {
@@ -10568,11 +10599,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return true;
             } else if (c.size() == 1) {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
-                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(val)));
+                return anyMatch(Fnn.<T, E> pp(Fn.equal(val)));
             } else {
                 final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
                 final int distinctCount = set.size();
 
+                //noinspection resource
                 return filter(set::contains).distinct().limit(distinctCount).count() == distinctCount;
             }
         } finally {
@@ -10601,7 +10633,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             if (N.isEmpty(a)) {
                 return false;
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
-                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
+                return anyMatch(Fnn.<T, E> pp(Fn.equal(a[0])));
             } else if (a.length == 2) {
                 return anyMatch(new Throwables.Predicate<T, E>() {
                     private final T val1 = a[0];
@@ -10643,7 +10675,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return false;
             } else if (c.size() == 1) {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
-                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(val)));
+                return anyMatch(Fnn.<T, E> pp(Fn.equal(val)));
             } else {
                 final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
 
@@ -10805,6 +10837,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
 
         try {
+            @SuppressWarnings("resource")
             final Object[] a = sorted().toArray();
 
             if (N.isEmpty(a)) {
@@ -10838,6 +10871,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(comparator, cs.comparator);
 
         try {
+            @SuppressWarnings("resource")
             final Object[] a = sorted(comparator).toArray();
 
             if (N.isEmpty(a)) {
@@ -10927,6 +10961,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         if (position == 0) {
             return first();
         } else {
+            //noinspection resource
             return skip(position).first();
         }
     }
@@ -10986,7 +11021,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an array containing all of the elements in this sequence.
+     * Returns an array containing all the elements in this sequence.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -11019,7 +11054,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an array containing all of the elements in this sequence,
+     * Returns an array containing all the elements in this sequence,
      * using the provided {@code generator} function to allocate the returned array.
      *
      * <br />
@@ -11049,7 +11084,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a list containing all of the elements in this sequence.
+     * Returns a list containing all the elements in this sequence.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -11076,7 +11111,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a set containing all of the elements in this sequence.
+     * Returns a set containing all the elements in this sequence.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -11103,7 +11138,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a collection containing all of the elements in this sequence,
+     * Returns a collection containing all the elements in this sequence,
      * using the provided {@code supplier} to create the returned collection.
      *
      * <br />
@@ -11135,7 +11170,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an immutable list containing all of the elements in this sequence.
+     * Returns an immutable list containing all the elements in this sequence.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -11150,7 +11185,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an immutable set containing all of the elements in this sequence.
+     * Returns an immutable set containing all the elements in this sequence.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -11328,7 +11363,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3 {
-        return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
+        return toMap(keyMapper, valueMapper, Suppliers.ofMap());
     }
 
     /**
@@ -11382,7 +11417,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> Map<K, V> toMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
             final Throwables.BinaryOperator<V, E4> mergeFunction) throws IllegalStateException, E, E2, E3, E4 {
-        return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
+        return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.ofMap());
     }
 
     /**
@@ -11566,7 +11601,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, E2 extends Exception> Map<K, List<T>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper)
             throws IllegalStateException, E, E2 {
-        return groupTo(keyMapper, Suppliers.<K, List<T>> ofMap());
+        return groupTo(keyMapper, Suppliers.ofMap());
     }
 
     /**
@@ -11610,7 +11645,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
+        return groupTo(keyMapper, valueMapper, Suppliers.ofMap());
     }
 
     /**
@@ -11681,7 +11716,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Collector<? super T, ?, D> downstream) throws IllegalStateException, E, E2 {
-        return groupTo(keyMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
 
     /**
@@ -11728,7 +11763,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream)
             throws IllegalStateException, E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupTo(keyMapper, valueMapper, downstream, Suppliers.ofMap());
     }
 
     /**
@@ -11811,7 +11846,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
-        return partitionTo(predicate, Collectors.<T> toList());
+        return partitionTo(predicate, Collectors.toList());
     }
 
     /**
@@ -11834,7 +11869,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
         final Throwables.Function<T, Boolean, E2> keyMapper = predicate::test;
-        final Supplier<Map<Boolean, D>> mapFactory = () -> N.<Boolean, D> newHashMap(2);
+        final Supplier<Map<Boolean, D>> mapFactory = () -> N.newHashMap(2);
         final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
 
         if (!map.containsKey(Boolean.TRUE)) {
@@ -11863,7 +11898,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper)
             throws IllegalStateException, E, E2 {
-        return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
+        return toMultimap(keyMapper, Suppliers.ofListMultimap());
     }
 
     /**
@@ -11908,7 +11943,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3 {
-        return toMultimap(keyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+        return toMultimap(keyMapper, valueMapper, Suppliers.ofListMultimap());
     }
 
     /**
@@ -11966,7 +12001,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @TerminalOp
     public Multiset<T> toMultiset() throws IllegalStateException, E {
-        return toMultiset(Suppliers.<T> ofMultiset());
+        return toMultiset(Suppliers.ofMultiset());
     }
 
     /**
@@ -12218,7 +12253,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the accumulator function is null
      * @throws E if an exception occurs during the reduction
      * @throws E2 if the accumulator function throws an exception
-     * @see Stream#reduce(Throwables.BinaryOperator)
+     * @see Stream#reduce(BinaryOperator) 
      */
     @TerminalOp
     public <E2 extends Exception> Optional<T> reduce(final Throwables.BinaryOperator<T, E2> accumulator)
@@ -12256,7 +12291,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the accumulator function is null
      * @throws E if an exception occurs during the reduction
      * @throws E2 if the accumulator function throws an exception
-     * @see Stream#reduce(Object, Throwables.BinaryOperator)
+     * @see Stream#reduce(Object, BinaryOperator) 
      */
     @TerminalOp
     public <U, E2 extends Exception> U reduce(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator)
@@ -12532,6 +12567,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
 
         try {
+            @SuppressWarnings("resource")
             final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
 
             while (elements.hasNext()) {
@@ -12582,7 +12618,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed.
      * @see #persist(File)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12603,7 +12639,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @see #persist(Throwables.Function, File)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12625,7 +12661,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -12686,7 +12722,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @see #persist(Throwables.Function, OutputStream)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12707,7 +12743,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -12761,7 +12797,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already
      * @see #persist(Throwables.Function, Writer)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12783,7 +12819,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -12838,7 +12874,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @see #persist(Throwables.BiConsumer, File)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12860,7 +12896,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -12921,7 +12957,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @see #persist(Throwables.BiConsumer, Writer)
-     * @see String#stringOf(Object)
+     * @see N#stringOf(Object)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -12943,7 +12979,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -13150,7 +13186,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -13220,7 +13256,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified DataSource or insert script is null
-     * @see #persist(DataSource, String, int, long, Throwables.BiConsumer)
+     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -13245,7 +13281,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified DataSource or insert script is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
-     * @see #persist(DataSource, String, int, long, Throwables.BiConsumer)
+     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Throwables.Consumer)
      */
     @Beta
@@ -13273,7 +13309,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 final T next = iter.next();
 
-                if (initialized == false) {
+                if (!initialized) {
                     init();
                 }
 
@@ -13537,6 +13573,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             long cnt = 0;
 
             try {
+                @SuppressWarnings("resource")
                 final Throwables.Iterator<T, E> iter = iteratorEx();
 
                 if (header != null) {
@@ -13580,7 +13617,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * This is a terminal operation and will close the sequence.
      *
-     * @param toLine the function to convert each element to a string
+     * @param writeLine the consumer to write each element to the writer
      * @param output the file to persist the sequence to
      * @return the number of elements persisted
      * @throws IllegalStateException if the sequence is already closed
@@ -13670,6 +13707,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             long cnt = 0;
 
             try {
+                @SuppressWarnings("resource")
                 final Throwables.Iterator<T, E> iter = iteratorEx();
 
                 if (header != null) {
@@ -13732,6 +13770,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
 
         try {
+            @SuppressWarnings("resource")
             final Throwables.Iterator<T, E> iter = iteratorEx();
             final boolean isBatchUsed = batchSize > 1;
             long cnt = 0;
@@ -14045,6 +14084,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             Class<?> cls = null;
 
             try {
+                @SuppressWarnings("resource")
                 final Throwables.Iterator<T, E> iter = iteratorEx();
 
                 if (iter.hasNext()) {
@@ -14306,6 +14346,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             long cnt = 0;
 
             try {
+                @SuppressWarnings("resource")
                 final Throwables.Iterator<T, E> iter = iteratorEx();
 
                 bw.write("[");
@@ -14542,7 +14583,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <R> Seq<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
 
-        return create((Stream<R>) ops.apply(this.stream().parallel()), true);
+        return create(ops.apply(this.stream().parallel()), true);
     }
 
     /**
@@ -14566,7 +14607,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
 
-        return create((Stream<R>) ops.apply(this.stream().parallel(maxThreadNum)), true);
+        return create(ops.apply(this.stream().parallel(maxThreadNum)), true);
     }
 
     //    /**
@@ -16366,7 +16407,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    private int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+    private void checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            try {
+                N.checkArgPositive(arg, argNameOrErrorMsg);
+            } finally {
+                close();
+            }
+        }
+    }
+
+    private void checkArgPositive(final long arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            try {
+                N.checkArgPositive(arg, argNameOrErrorMsg);
+            } finally {
+                close();
+            }
+        }
+    }
+
+    private void checkArgPositive(final double arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
@@ -16375,34 +16436,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
         }
 
-        return arg;
     }
 
-    private long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
-        if (arg <= 0) {
-            try {
-                N.checkArgPositive(arg, argNameOrErrorMsg);
-            } finally {
-                close();
-            }
-        }
-
-        return arg;
-    }
-
-    private double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
-        if (arg <= 0) {
-            try {
-                N.checkArgPositive(arg, argNameOrErrorMsg);
-            } finally {
-                close();
-            }
-        }
-
-        return arg;
-    }
-
-    private int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
+    private void checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
@@ -16410,11 +16446,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 close();
             }
         }
-
-        return arg;
     }
 
-    private long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
+    private void checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
@@ -16422,38 +16456,34 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 close();
             }
         }
-
-        return arg;
     }
 
-    private <ARG> ARG checkArgNotNull(final ARG obj, final String errorMessage) {
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
+    private void checkArgNotNull(final Object obj, final String errorMessage) {
         if (obj == null) {
             try {
+                //noinspection ConstantValue
                 N.checkArgNotNull(obj, errorMessage);
             } finally {
                 close();
             }
         }
-
-        return obj;
     }
 
-    @SuppressWarnings("rawtypes")
-    private <ARG extends Collection> ARG checkArgNotEmpty(final ARG obj, final String errorMessage) {
-        if (obj == null || obj.size() == 0) {
+    private void checkArgNotEmpty(final Collection<?> c, final String errorMessage) {
+        if (c == null || c.size() == 0) {
             try {
-                N.checkArgNotEmpty(obj, errorMessage);
+                N.checkArgNotEmpty(c, errorMessage);
             } finally {
                 close();
             }
         }
-
-        return obj;
     }
 
     private void checkArgument(final boolean b, final String errorMessage) {
         if (!b) {
             try {
+                //noinspection ConstantValue,DataFlowIssue
                 N.checkArgument(b, errorMessage);
             } finally {
                 close();
@@ -16464,6 +16494,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     private void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
         if (!b) {
             try {
+                //noinspection ConstantValue,DataFlowIssue
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
             } finally {
                 close();
@@ -16704,6 +16735,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     private static void setError(final Holder<Throwable> errorHolder, final Throwable e) {
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() == null) {
                 errorHolder.setValue(e);
@@ -16724,6 +16756,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     private static void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) {
         onGoing.setFalse();
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() != null) {
                 throw toRuntimeException(errorHolder.getAndSet(null), true);
@@ -16799,6 +16832,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     @Internal
     private static final class LocalArrayDeque<T> extends ArrayDeque<T> {
+
+        @Serial
         private static final long serialVersionUID = -97425473105100734L;
 
         public LocalArrayDeque() {

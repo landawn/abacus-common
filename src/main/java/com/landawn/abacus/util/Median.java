@@ -52,7 +52,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty"); //NOSONAR
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty"); //NOSONAR
 
         return of(a, 0, a.length);
     }
@@ -92,6 +92,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -99,6 +100,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalChar.of(queue.poll())) : Pair.of(queue.peek(), OptionalChar.empty());
         }
     }
@@ -114,7 +116,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -154,6 +156,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -161,6 +164,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalByte.of(queue.poll())) : Pair.of(queue.peek(), OptionalByte.empty());
         }
     }
@@ -176,7 +180,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -216,6 +220,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -223,6 +228,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalShort.of(queue.poll())) : Pair.of(queue.peek(), OptionalShort.empty());
         }
     }
@@ -255,7 +261,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -295,6 +301,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -302,6 +309,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalInt.of(queue.poll())) : Pair.of(queue.peek(), OptionalInt.empty());
         }
     }
@@ -317,7 +325,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -357,6 +365,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -364,6 +373,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalLong.of(queue.poll())) : Pair.of(queue.peek(), OptionalLong.empty());
         }
     }
@@ -379,7 +389,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -419,6 +429,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -426,6 +437,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalFloat.of(queue.poll())) : Pair.of(queue.peek(), OptionalFloat.empty());
         }
     }
@@ -441,7 +453,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -481,6 +493,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
+                    //noinspection DataFlowIssue
                     if (a[i] > queue.peek()) {
                         queue.remove();
                         queue.add(a[i]);
@@ -488,6 +501,7 @@ public final class Median {
                 }
             }
 
+            //noinspection DataFlowIssue
             return len % 2 == 0 ? Pair.of(queue.poll(), OptionalDouble.of(queue.poll())) : Pair.of(queue.peek(), OptionalDouble.empty());
         }
     }
@@ -503,7 +517,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -536,7 +550,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static <T> Pair<T, Nullable<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length, cmp);
     }
@@ -568,12 +582,12 @@ public final class Median {
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], Nullable.<T> empty());
+            return Pair.of(a[fromIndex], Nullable.empty());
         } else if (len == 2) {
             return cmp.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? Pair.of(a[fromIndex], Nullable.of(a[fromIndex + 1]))
                     : Pair.of(a[fromIndex + 1], Nullable.of(a[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex, cmp), Nullable.<T> empty());
+            return Pair.of(N.median(a, fromIndex, toIndex, cmp), Nullable.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
@@ -589,7 +603,7 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.<T> empty());
+            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.empty());
         }
     }
 
@@ -629,14 +643,14 @@ public final class Median {
         final int len = c.size();
 
         if (len == 1) {
-            return Pair.of(c.iterator().next(), Nullable.<T> empty());
+            return Pair.of(c.iterator().next(), Nullable.empty());
         } else if (len == 2) {
             final Iterator<? extends T> iter = c.iterator();
             final T first = iter.next();
             final T second = iter.next();
             return cmp.compare(first, second) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
         } else if (len == 3) {
-            return Pair.of(N.median(c, cmp), Nullable.<T> empty());
+            return Pair.of(N.median(c, cmp), Nullable.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
@@ -652,7 +666,7 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.<T> empty());
+            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.empty());
         }
     }
 

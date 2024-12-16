@@ -135,7 +135,7 @@ public final class Try<T extends AutoCloseable> {
     /**
      * Executes the provided {@code cmd} and if an exception occurs, applies the {@code actionOnError} consumer on the exception.
      *
-     * <p>This method is useful when you want to run a piece of code that might throw an exception and you want to handle that exception in a specific way.</p>
+     * <p>This method is useful when you want to run a piece of code that might throw an exception, and you want to handle that exception in a specific way.</p>
      *
      * @param cmd The runnable task that might throw an exception, must not be {@code null}.
      * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
@@ -171,14 +171,14 @@ public final class Try<T extends AutoCloseable> {
     /**
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
      *
      * @param <R> The type of the result.
      * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @return The result of the {@code cmd}.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
-     * @see Throwables#call(java.util.concurrent.Callable)
+     * @see Throwables#call(Throwables.Callable)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -194,14 +194,14 @@ public final class Try<T extends AutoCloseable> {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the {@code actionOnError} function is applied to the exception to provide a return value.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a function that can transform an exception into a return value.
      *
      * @param <R> The type of the result.
      * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @param actionOnError The function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
      * @return The result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
-     * @see Throwables#call(java.util.concurrent.Callable, Function)
+     * @see Throwables#call(Throwables.Callable, Function)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -218,14 +218,14 @@ public final class Try<T extends AutoCloseable> {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the {@code supplier} is used to provide a return value.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a supplier that can provide a return value when an exception occurs.
      *
      * @param <R> The type of the result.
      * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @param supplier The supplier to provide a return value when an exception occurs. Must not be {@code null}.
      * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
-     * @see Throwables#call(java.util.concurrent.Callable, Supplier)
+     * @see Throwables#call(Throwables.Callable, Supplier)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Supplier<R> supplier) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -242,14 +242,14 @@ public final class Try<T extends AutoCloseable> {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs.
      *
      * @param <R> The type of the result.
      * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
      * @return The result of the {@code cmd} or the default value if an exception occurs.
-     * @see Throwables#call(java.util.concurrent.Callable, Object)
+     * @see Throwables#call(Throwables.Callable, Object)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -272,7 +272,7 @@ public final class Try<T extends AutoCloseable> {
      * @param supplier The supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
      * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
-     * @see Throwables#call(java.util.concurrent.Callable, Predicate, Supplier)
+     * @see Throwables#call(Throwables.Callable, Predicate, Supplier)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -295,7 +295,7 @@ public final class Try<T extends AutoCloseable> {
      * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned if the {@code predicate} returns {@code true}.
      * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs and the {@code predicate} returns {@code true}.
      *
      * @param <R> The type of the result.
@@ -304,7 +304,7 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
      * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
-     * @see Throwables#call(java.util.concurrent.Callable, Predicate, Object)
+     * @see Throwables#call(Throwables.Callable, Predicate, Object)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final R defaultValue) {
         N.checkArgNotNull(cmd, cs.cmd);

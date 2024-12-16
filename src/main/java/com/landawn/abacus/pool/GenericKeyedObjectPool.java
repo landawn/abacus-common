@@ -15,6 +15,7 @@
 package com.landawn.abacus.pool;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -38,13 +39,14 @@ import com.landawn.abacus.util.Objectory;
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
 
+    @Serial
     private static final long serialVersionUID = 4137548490922758243L;
 
     private final long maxMemorySize;
 
     private final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure;
 
-    private volatile long usedMemorySize = 0;
+    private long usedMemorySize = 0;
 
     final Map<K, E> pool;
 
@@ -72,27 +74,27 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
-        pool = new HashMap<>((capacity > 1000) ? 1000 : capacity);
+        pool = new HashMap<>(Math.min(capacity, 1000));
 
         switch (this.evictionPolicy) {
             case LAST_ACCESS_TIME:
 
-                cmp = (o1, o2) -> Long.compare(o1.getValue().activityPrint().getLastAccessTime(), o2.getValue().activityPrint().getLastAccessTime());
+                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getLastAccessTime());
 
                 break;
 
             case ACCESS_COUNT:
-                cmp = (o1, o2) -> Long.compare(o1.getValue().activityPrint().getAccessCount(), o2.getValue().activityPrint().getAccessCount());
+                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getAccessCount());
 
                 break;
 
             case EXPIRATION_TIME:
-                cmp = (o1, o2) -> Long.compare(o1.getValue().activityPrint().getExpirationTime(), o2.getValue().activityPrint().getExpirationTime());
+                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getExpirationTime());
 
                 break;
 
             default:
-                throw new RuntimeException("Unsupproted eviction policy: " + evictionPolicy.name());
+                throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
         }
 
         if (evictDelay > 0) {
@@ -179,17 +181,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public boolean put(final K key, final E e, final boolean autoDestroyOnFailedToPut) {
-        boolean sucess = false;
+        boolean success = false;
 
         try {
-            sucess = put(key, e);
+            success = put(key, e);
         } finally {
-            if (autoDestroyOnFailedToPut && !sucess && e != null) {
+            if (autoDestroyOnFailedToPut && !success && e != null) {
                 e.destroy();
             }
         }
 
-        return sucess;
+        return success;
     }
 
     /**
@@ -471,8 +473,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * scan the object pool to find the idle object which inactive time greater than permitted the inactive time for it
-     * or it's time out.
+     * scan the object pool to find the idle object which inactive time greater than permitted the inactive time and remove it.
      *
      */
     @SuppressWarnings({ "null", "deprecation" })
@@ -569,6 +570,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Serial
     private void writeObject(final java.io.ObjectOutputStream os) throws IOException {
         lock.lock();
 
@@ -585,6 +587,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
+    @Serial
     private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 

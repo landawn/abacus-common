@@ -15,9 +15,11 @@
 package com.landawn.abacus.exception;
 
 import java.io.IOException;
+import java.io.Serial;
 
 public class UncheckedIOException extends UncheckedException {
 
+    @Serial
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**

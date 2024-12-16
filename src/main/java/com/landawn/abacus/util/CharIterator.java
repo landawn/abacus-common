@@ -47,6 +47,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static CharIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -72,7 +73,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (a == null || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -107,7 +108,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      * Returns an CharIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the CharIterator instance when the CharIterator's methods are first called.
+     * The Supplier is responsible for producing the CharIterator instance when the first method in the returned {@code CharIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the CharIterator when needed.
      * @return A CharIterator that is initialized on the first call to hasNext() or nextByte().

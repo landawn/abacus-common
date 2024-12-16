@@ -48,6 +48,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static LongIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Returns an LongIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the LongIterator instance when the LongIterator's methods are first called.
+     * The Supplier is responsible for producing the LongIterator instance when the first method in the returned {@code LongIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the LongIterator when needed.
      * @return A LongIterator that is initialized on the first call to hasNext() or nextByte().

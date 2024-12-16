@@ -76,8 +76,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType the class of the type to which the value should be converted
      * @return the value associated with the specified property name, converted to the specified target type, or default value of {@code targetType} if the property is not found or its value is {@code null}
      */
-    @SuppressWarnings("unchecked")
     public <T> T get(final Object propName, final Class<? extends T> targetType) {
+        //noinspection SuspiciousMethodCalls
         return N.convert(values.get(propName), targetType);
     }
 
@@ -89,8 +89,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, or {@code defaultValue} if the property is not found or its value is {@code null}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public V getOrDefault(final Object propName, final V defaultValue) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V result = values.get(propName);
 
         if (result == null) {
@@ -111,6 +111,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, converted to the specified target type, or {@code defaultValue} if the property is not found or its value is {@code null}
      */
     public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final Object result = values.get(propName);
 
         if (result == null) {
@@ -146,7 +147,7 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Copies all of the mappings from the specified map to this map.
+     * Copies all the mappings from the specified map to this map.
      * These mappings will replace any mappings that this map had for any of the keys currently in the specified map.
      *
      * @param m the mappings to be stored in this map

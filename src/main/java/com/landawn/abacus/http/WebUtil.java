@@ -49,7 +49,7 @@ public final class WebUtil {
 
         String url = null;
         HttpMethod httpMethod = null;
-        String headers = "";
+        StringBuilder headers = new StringBuilder();
         String token = "";
         String body = "";
         for (int i = 0, size = tokens.size(); i < size; i++) {
@@ -62,7 +62,12 @@ public final class WebUtil {
             } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
-                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
+                headers.append(indent)
+                        .append(".header(\"")
+                        .append(header.substring(0, idx).trim())
+                        .append("\", \"")
+                        .append(escapeJava(header.substring(idx + 1).trim()))
+                        .append("\")"); //NOSONAR
             } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
                 body = tokens.get(++i);
             }
@@ -80,9 +85,9 @@ public final class WebUtil {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
         }
 
-        sb.append("  HttpRequest.url(\"" + url + "\")");
+        sb.append("  HttpRequest.url(\"").append(url).append("\")");
 
-        if (Strings.isNotEmpty(headers)) {
+        if (Strings.isNotEmpty(headers.toString())) {
             sb.append(headers);
         }
 
@@ -104,6 +109,7 @@ public final class WebUtil {
                     sb.append("requestBody");
                 }
             } else {
+                //noinspection DataFlowIssue
                 sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
 
                 if (Strings.isNotEmpty(body)) {
@@ -127,7 +133,7 @@ public final class WebUtil {
 
         String url = null;
         HttpMethod httpMethod = null;
-        String headers = "";
+        StringBuilder headers = new StringBuilder();
         String token = "";
         String body = "";
         String mediaType = null;
@@ -141,7 +147,12 @@ public final class WebUtil {
             } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
-                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
+                headers.append(indent)
+                        .append(".header(\"")
+                        .append(header.substring(0, idx).trim())
+                        .append("\", \"")
+                        .append(escapeJava(header.substring(idx + 1).trim()))
+                        .append("\")"); //NOSONAR
 
                 if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
                     mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
@@ -163,9 +174,9 @@ public final class WebUtil {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
         }
 
-        sb.append("  OkHttpRequest.url(\"" + url + "\")");
+        sb.append("  OkHttpRequest.url(\"").append(url).append("\")");
 
-        if (Strings.isNotEmpty(headers)) {
+        if (Strings.isNotEmpty(headers.toString())) {
             sb.append(headers);
         }
 
@@ -182,6 +193,7 @@ public final class WebUtil {
         } else if (httpMethod == HttpMethod.PUT) {
             sb.append(indent).append(".put();");
         } else {
+            //noinspection DataFlowIssue
             sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name()).append(");");
         }
 
@@ -270,7 +282,7 @@ public final class WebUtil {
      * @param url
      * @param logHandler
      * @return
-     * @see https://github.com/mrmike/Ok2Curl
+     * @see <a href="https://github.com/mrmike/Ok2Curl">https://github.com/mrmike/Ok2Curl</a>
      */
     public static OkHttpRequest createOkHttpRequestForCurl(final String url, final Consumer<? super String> logHandler) {
         return createOkHttpRequestForCurl(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);

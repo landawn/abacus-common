@@ -92,6 +92,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
      *
      * @return
      */
+    @SuppressWarnings("SameReturnValue")
     char getCharQuotation() {
         return WD.CHAR_ZERO;
     }
@@ -102,7 +103,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
      * @param ch
      * @return
      */
-    protected static String getHexString(final int ch) {
+    static String getHexString(final int ch) {
         return "&#x" + Integer.toHexString(ch) + ";";
     }
 }

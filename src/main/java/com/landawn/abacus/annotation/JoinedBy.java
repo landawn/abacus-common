@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  *   private long id;
  *
  *   @JoinedBy("id=accountId")
- *   private List&ltDevice&gt devices;
+ *   private List&lt;Device&gt; devices;
  *
  *   //...
  * }
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  *   private long id;
  *
  *   @JoinedBy({ "id=EmployeeProject.employeeId", "EmployeeProject.projectId = id" })
- *   private List&ltProject&gt projects;
+ *   private List&lt;Project&gt; projects;
  *
  *   //...
  * }

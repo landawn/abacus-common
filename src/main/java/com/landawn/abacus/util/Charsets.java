@@ -38,6 +38,7 @@ public final class Charsets {
     public static final Charset DEFAULT = Charset.defaultCharset();
 
     private static final Map<String, Charset> charsetPool = new ObjectPool<>(128);
+
     static {
         charsetPool.put(US_ASCII.name(), US_ASCII);
         charsetPool.put(ISO_8859_1.name(), ISO_8859_1);

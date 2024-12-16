@@ -82,6 +82,6 @@ public class DataSetType extends AbstractType<DataSet> {
      */
     @Override
     public DataSet valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : (DataSet) Utils.jsonParser.deserialize(str, typeClass);
+        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 }

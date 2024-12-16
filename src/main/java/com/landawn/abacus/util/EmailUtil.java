@@ -103,16 +103,6 @@ public final class EmailUtil {
         send(recipients, from, subject, content, attachedFiles, true, userName, password, props);
     }
 
-    /**
-     *
-     * @param recipients
-     * @param from
-     * @param subject
-     * @param content
-     * @param attachedFiles
-     * @param mailServer
-     * @param isHTML
-     */
     private static void send(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
             final boolean isHTML, final String userName, final String password, final Properties props) {
 

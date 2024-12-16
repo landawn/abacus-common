@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.Fnn;
@@ -119,7 +120,7 @@ public final class Iterators {
 
         while (iter.hasNext()) {
             if (index-- == 0) {
-                return Nullable.<T> of(iter.next());
+                return Nullable.of(iter.next());
             } else {
                 iter.next();
             }
@@ -248,7 +249,7 @@ public final class Iterators {
         }
 
         while (iter.hasNext()) {
-            if (N.equals(iter.hasNext(), valueToFind)) {
+            if (N.equals(iter.next(), valueToFind)) {
                 return index;
             }
 
@@ -560,8 +561,9 @@ public final class Iterators {
                 return true;
             }
 
+            @SuppressFBWarnings("IT_NO_SUCH_ELEMENT")
             @Override
-            public T next() throws NoSuchElementException { // NOSONAR
+            public T next() { // NOSONAR
                 if (cursor >= len) {
                     cursor = 0;
                 }
@@ -661,7 +663,7 @@ public final class Iterators {
 
             @Override
             public T next() {
-                if (hasNext() == false) {
+                if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
@@ -1725,9 +1727,9 @@ public final class Iterators {
         N.checkArgNotNull(nextSelector);
 
         if (N.isEmpty(c)) {
-            return ObjIterator.<T> empty();
+            return ObjIterator.empty();
         } else if (c.size() == 1) {
-            return ObjIterator.<T> of(c.iterator().next());
+            return ObjIterator.of(c.iterator().next());
         } else if (c.size() == 2) {
             final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
@@ -1791,9 +1793,9 @@ public final class Iterators {
         N.checkArgNotNull(nextSelector);
 
         if (N.isEmpty(iterables)) {
-            return ObjIterator.<T> empty();
+            return ObjIterator.empty();
         } else if (iterables.size() == 1) {
-            return ObjIterator.<T> of(iterables.iterator().next());
+            return ObjIterator.of(iterables.iterator().next());
         } else if (iterables.size() == 2) {
             final Iterator<? extends Iterable<? extends T>> iter = iterables.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
@@ -1841,7 +1843,7 @@ public final class Iterators {
     }
 
     /**
-     * Merges two sorted Iterable objects into a single ObjIterato, which will iterate over the elements of each Iterable in a sorted order.
+     * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in a sorted order.
      * The elements in the Iterable objects should implement Comparable interface.
      *
      * @param <T> The type of elements in the Iterable objects, which should implement Comparable interface.
@@ -2377,7 +2379,7 @@ public final class Iterators {
     public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iter, final long offset, final long count) {
         checkOffsetCount(offset, count);
 
-        return iter == null ? ObjIterator.<T> empty() : skipAndLimit(iter.iterator(), offset, count);
+        return iter == null ? ObjIterator.empty() : skipAndLimit(iter.iterator(), offset, count);
     }
 
     //    /**
@@ -2402,7 +2404,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
-        return filter(c, Fn.<T> notNull());
+        return filter(c, Fn.notNull());
     }
 
     /**
@@ -2413,7 +2415,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
-        return filter(iter, Fn.<T> notNull());
+        return filter(iter, Fn.notNull());
     }
 
     /**
@@ -3354,6 +3356,7 @@ public final class Iterators {
                 }
             } else {
                 final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
+                @SuppressWarnings("resource")
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
                 final Holder<Exception> errorHolder = new Holder<>();
 
@@ -3389,7 +3392,7 @@ public final class Iterators {
                 try {
                     countDownLatch.await();
                 } catch (final InterruptedException e) {
-                    N.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
 
                 if (errorHolder.value() == null && onComplete != null) {

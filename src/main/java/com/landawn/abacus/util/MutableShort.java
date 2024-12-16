@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code short} wrapper.
- * <p>
- * Note that as MutableShort does not extend Short, it is not treated by String.format as a Short parameter.
  *
  * <p>
  * {@code MutableShort} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableShort extends Number implements Comparable<MutableShort>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = -2135791679L;
 
     private short value;
@@ -72,6 +68,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Short instance.
      *
@@ -93,7 +90,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -173,6 +171,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -251,6 +250,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     //-----------------------------------------------------------------------
     // byteValue relies on Number implementation
+
     /**
      * Returns the value of this MutableShort as a short.
      *
@@ -302,6 +302,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -310,10 +311,11 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      */
     @Override
     public int compareTo(final MutableShort other) {
-        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
+        return Short.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument
      * is not {@code null} and is a {@code MutableShort} object that contains the same {@code short}
@@ -341,6 +343,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

@@ -30,6 +30,7 @@ import java.util.function.Function;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -184,8 +185,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         creator = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._2;
         valueExtractor = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._3;
 
-        isSerializable = jsonValueType != null ? jsonValueType.isSerializable()
-                : (valueType != null && valueExtractor != null ? valueType.isSerializable() : false);
+        isSerializable = jsonValueType != null ? jsonValueType.isSerializable() : (valueType != null && valueExtractor != null && valueType.isSerializable());
 
         isObjectType = jsonValueType == null && valueType == null && valueExtractor == null && !typeClass.isEnum();
     }
@@ -460,6 +460,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass) {
         final Field[] fields = typeClass.getDeclaredFields();
         final Constructor<?>[] constructors = typeClass.getDeclaredConstructors();

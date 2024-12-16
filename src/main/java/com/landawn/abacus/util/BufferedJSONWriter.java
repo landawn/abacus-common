@@ -121,7 +121,7 @@ public final class BufferedJSONWriter extends CharacterWriter {
      * @param ch
      * @return
      */
-    protected static String getCharNum(final char ch) {
+    static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);
     }
 }

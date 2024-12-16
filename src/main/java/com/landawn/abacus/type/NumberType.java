@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -43,6 +44,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
     }
 
+    @SuppressFBWarnings({ "REC_CATCH_EXCEPTION", "DE_MIGHT_IGNORE" })
     protected NumberType(final String typeName, final Class<?> typeClass) {
         super(typeName);
         this.typeClass = (Class<T>) typeClass;

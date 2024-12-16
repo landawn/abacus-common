@@ -14,8 +14,11 @@
 
 package com.landawn.abacus.exception;
 
+import java.io.Serial;
+
 public class ParseException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 7678894353902496315L;
 
     private int token = -2; //NOSONAR

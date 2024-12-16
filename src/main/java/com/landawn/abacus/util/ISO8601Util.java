@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,  Jackson Authors/Contributers.
+ * Copyright (c) 2017,  Jackson Authors/Contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
+
 /**
  *
- * Copyright (c) 2017,  Jackson Authors/Contributers.
+ * Copyright (c) 2017,  Jackson Authors/Contributors.
  *
- * Utilities methods for manipulating dates in iso8601 format. This is much much faster and GC friendly than using SimpleDateFormat so
+ * Utilities methods for manipulating dates in iso8601 format. This is much, much faster and GC friendly than using SimpleDateFormat so
  * highly suitable if you (un)serialize lots of date objects.
  *
  * Supported parse format: [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh[:]mm]]
@@ -138,6 +140,7 @@ final class ISO8601Util {
      * @param pos The position to start parsing from, updated to where parsing stopped.
      * @return
      */
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static Date parse(final String date, final ParsePosition pos) {
         Exception fail = null;
         try {
@@ -167,6 +170,7 @@ final class ISO8601Util {
             final boolean hasT = checkOffset(date, offset, 'T');
 
             if (!hasT && (date.length() <= offset)) {
+                //noinspection MagicConstant
                 final Calendar calendar = new GregorianCalendar(year, month - 1, day);
 
                 pos.setIndex(offset);
@@ -283,6 +287,7 @@ final class ISO8601Util {
             msg = "(" + fail.getClass().getName() + ")";
         }
         final RuntimeException ex = new RuntimeException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
+        //noinspection UnnecessaryInitCause
         ex.initCause(fail);
         throw ex;
     }

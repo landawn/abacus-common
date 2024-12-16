@@ -43,6 +43,7 @@ import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -76,7 +77,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <br />
  * The input parameters of most methods in this class should be {@code Iterable/Array}, instead of {@code Collection/Array}.
  * The returned type of most methods in this class should be a type of {@code Optional}, instead of element type of the input {@code Collection/Array}.
- * This class is an utility class, which is designed to extend the methods in {@code CommonUtil/N} class for handling empty input {@code Collection/Array/Iterator/Iterable} parameters or result.
+ * This class is a utility class, which is designed to extend the methods in {@code CommonUtil/N} class for handling empty input {@code Collection/Array/Iterator/Iterable} parameters or result.
  * </p>
  *
  * @see com.landawn.abacus.util.Comparators
@@ -120,7 +121,7 @@ public final class Iterables {
      * If the array is {@code null} or empty, it returns an empty {@code OptionalByte}.
      *
      * @param a the array of bytes to evaluate
-     * @return an @code OptionalByte} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
+     * @return an {@code OptionalByte} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
      * @see N#min(byte...)
      */
     @SafeVarargs
@@ -203,7 +204,7 @@ public final class Iterables {
      * @see N#min(Comparable...)
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.min(a));
     }
 
     /**
@@ -216,7 +217,7 @@ public final class Iterables {
      * @see N#min(Object[], Comparator)
      */
     public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.min(a, cmp));
     }
 
     /**
@@ -242,7 +243,7 @@ public final class Iterables {
      * @see N#min(Iterable, Comparator)
      */
     public static <T> Nullable<T> min(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
-        return c == null ? Nullable.<T> empty() : min(c.iterator(), cmp);
+        return c == null ? Nullable.empty() : min(c.iterator(), cmp);
     }
 
     /**
@@ -267,11 +268,12 @@ public final class Iterables {
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterator, Comparator)
      */
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? (Comparator<T>) N.NULL_MAX_COMPARATOR : cmp;
 
         if (iter == null || !iter.hasNext()) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         T candidate = null;
@@ -281,6 +283,7 @@ public final class Iterables {
             next = iter.next();
 
             if (next == null && cmp == N.NULL_MIN_COMPARATOR) { // NOSONAR
+                //noinspection ConstantValue
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) < 0) {
                 candidate = next;
@@ -310,7 +313,7 @@ public final class Iterables {
      * Null values are considered to be maximum.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterable, Comparator)
@@ -325,7 +328,7 @@ public final class Iterables {
      * Null values are considered to be maximum.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterator, Comparator)
@@ -351,18 +354,18 @@ public final class Iterables {
             return OptionalInt.empty();
         }
 
-        int candicate = valueExtractor.applyAsInt(a[0]);
+        int candidate = valueExtractor.applyAsInt(a[0]);
         int next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsInt(a[i]);
 
-            if (next < candicate) {
-                candicate = next;
+            if (next < candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalInt.of(candicate);
+        return OptionalInt.of(candidate);
     }
 
     /**
@@ -370,7 +373,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
      * @return an {@code OptionalInt} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#minIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
@@ -389,7 +392,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
      * @return an {@code OptionalInt} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#minIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
@@ -400,18 +403,18 @@ public final class Iterables {
             return OptionalInt.empty();
         }
 
-        int candicate = valueExtractor.applyAsInt(iter.next());
+        int candidate = valueExtractor.applyAsInt(iter.next());
         int next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsInt(iter.next());
 
-            if (next < candicate) {
-                candicate = next;
+            if (next < candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalInt.of(candicate);
+        return OptionalInt.of(candidate);
     }
 
     /**
@@ -430,18 +433,18 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        long candicate = valueExtractor.applyAsLong(a[0]);
+        long candidate = valueExtractor.applyAsLong(a[0]);
         long next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsLong(a[i]);
 
-            if (next < candicate) {
-                candicate = next;
+            if (next < candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalLong.of(candicate);
+        return OptionalLong.of(candidate);
     }
 
     /**
@@ -449,7 +452,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
      * @return an {@code OptionalLong} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#minLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
@@ -468,7 +471,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
      * @return an {@code OptionalLong} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#minLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
@@ -479,18 +482,18 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        long candicate = valueExtractor.applyAsLong(iter.next());
+        long candidate = valueExtractor.applyAsLong(iter.next());
         long next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsLong(iter.next());
 
-            if (next < candicate) {
-                candicate = next;
+            if (next < candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalLong.of(candicate);
+        return OptionalLong.of(candidate);
     }
 
     /**
@@ -509,18 +512,18 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double candidate = valueExtractor.applyAsDouble(a[0]);
         double next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
 
-            if (N.compare(next, candicate) < 0) {
-                candicate = next;
+            if (N.compare(next, candidate) < 0) {
+                candidate = next;
             }
         }
 
-        return OptionalDouble.of(candicate);
+        return OptionalDouble.of(candidate);
     }
 
     /**
@@ -528,7 +531,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
      * @return an {@code OptionalDouble} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#minDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
@@ -547,7 +550,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
      * @return an {@code OptionalDouble} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#minDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
@@ -558,18 +561,18 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double candidate = valueExtractor.applyAsDouble(iter.next());
         double next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsDouble(iter.next());
 
-            if (N.compare(next, candicate) < 0) {
-                candicate = next;
+            if (N.compare(next, candidate) < 0) {
+                candidate = next;
             }
         }
 
-        return OptionalDouble.of(candicate);
+        return OptionalDouble.of(candidate);
     }
 
     /**
@@ -590,7 +593,7 @@ public final class Iterables {
      * If the array is {@code null} or empty, it returns an empty {@code OptionalByte}.
      *
      * @param a the array of bytes to evaluate
-     * @return an @code OptionalByte} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
+     * @return an {@code OptionalByte} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
      * @see N#max(byte...)
      */
     @SafeVarargs
@@ -673,7 +676,7 @@ public final class Iterables {
      * @see N#max(Comparable...)
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.max(a));
     }
 
     /**
@@ -686,7 +689,7 @@ public final class Iterables {
      * @see N#max(Object[], Comparator)
      */
     public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.max(a, cmp));
     }
 
     /**
@@ -712,7 +715,7 @@ public final class Iterables {
      * @see N#max(Iterable, Comparator)
      */
     public static <T> Nullable<T> max(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
-        return c == null ? Nullable.<T> empty() : max(c.iterator(), cmp);
+        return c == null ? Nullable.empty() : max(c.iterator(), cmp);
     }
 
     /**
@@ -737,11 +740,12 @@ public final class Iterables {
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterator, Comparator)
      */
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? (Comparator<T>) N.NULL_MIN_COMPARATOR : cmp;
 
         if (iter == null || !iter.hasNext()) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         T candidate = null;
@@ -751,6 +755,7 @@ public final class Iterables {
             next = iter.next();
 
             if (next == null && cmp == N.NULL_MAX_COMPARATOR) { // NOSONAR
+                //noinspection ConstantValue
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) > 0) {
                 candidate = next;
@@ -780,7 +785,7 @@ public final class Iterables {
      * Null values are considered to be minimum
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterable, Comparator)
@@ -795,7 +800,7 @@ public final class Iterables {
      * Null values are considered to be minimum
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterator, Comparator)
@@ -821,18 +826,18 @@ public final class Iterables {
             return OptionalInt.empty();
         }
 
-        int candicate = valueExtractor.applyAsInt(a[0]);
+        int candidate = valueExtractor.applyAsInt(a[0]);
         int next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsInt(a[i]);
 
-            if (next > candicate) {
-                candicate = next;
+            if (next > candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalInt.of(candicate);
+        return OptionalInt.of(candidate);
     }
 
     /**
@@ -840,7 +845,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
      * @return an {@code OptionalInt} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#maxIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
@@ -859,7 +864,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
      * @return an {@code OptionalInt} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#maxIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
@@ -870,18 +875,18 @@ public final class Iterables {
             return OptionalInt.empty();
         }
 
-        int candicate = valueExtractor.applyAsInt(iter.next());
+        int candidate = valueExtractor.applyAsInt(iter.next());
         int next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsInt(iter.next());
 
-            if (next > candicate) {
-                candicate = next;
+            if (next > candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalInt.of(candicate);
+        return OptionalInt.of(candidate);
     }
 
     /**
@@ -900,18 +905,18 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        long candicate = valueExtractor.applyAsLong(a[0]);
+        long candidate = valueExtractor.applyAsLong(a[0]);
         long next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsLong(a[i]);
 
-            if (next > candicate) {
-                candicate = next;
+            if (next > candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalLong.of(candicate);
+        return OptionalLong.of(candidate);
     }
 
     /**
@@ -919,7 +924,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
      * @return an {@code OptionalLong} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#maxLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
@@ -938,7 +943,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
      * @return an {@code OptionalLong} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#maxLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
@@ -949,18 +954,18 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        long candicate = valueExtractor.applyAsLong(iter.next());
+        long candidate = valueExtractor.applyAsLong(iter.next());
         long next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsLong(iter.next());
 
-            if (next > candicate) {
-                candicate = next;
+            if (next > candidate) {
+                candidate = next;
             }
         }
 
-        return OptionalLong.of(candicate);
+        return OptionalLong.of(candidate);
     }
 
     /**
@@ -979,18 +984,18 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double candidate = valueExtractor.applyAsDouble(a[0]);
         double next = 0;
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
 
-            if (N.compare(next, candicate) > 0) {
-                candicate = next;
+            if (N.compare(next, candidate) > 0) {
+                candidate = next;
             }
         }
 
-        return OptionalDouble.of(candicate);
+        return OptionalDouble.of(candidate);
     }
 
     /**
@@ -998,7 +1003,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
      * @return an {@code OptionalDouble} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#maxDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
@@ -1017,7 +1022,7 @@ public final class Iterables {
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
      * @return an {@code OptionalDouble} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#maxDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
@@ -1028,18 +1033,18 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double candidate = valueExtractor.applyAsDouble(iter.next());
         double next = 0;
 
         while (iter.hasNext()) {
             next = valueExtractor.applyAsDouble(iter.next());
 
-            if (N.compare(next, candicate) > 0) {
-                candicate = next;
+            if (N.compare(next, candidate) > 0) {
+                candidate = next;
             }
         }
 
-        return OptionalDouble.of(candicate);
+        return OptionalDouble.of(candidate);
     }
 
     /**
@@ -1052,7 +1057,7 @@ public final class Iterables {
      * @see N#minMax(Comparable...)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final T[] a) {
-        return N.isEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a));
+        return N.isEmpty(a) ? Optional.empty() : Optional.of(N.minMax(a));
     }
 
     /**
@@ -1067,7 +1072,7 @@ public final class Iterables {
      * @see N#minMax(Object[], Comparator)
      */
     public static <T> Optional<Pair<T, T>> minMax(final T[] a, final Comparator<? super T> cmp) {
-        return N.isEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a, cmp));
+        return N.isEmpty(a) ? Optional.empty() : Optional.of(N.minMax(a, cmp));
     }
 
     /**
@@ -1075,14 +1080,14 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c) {
         final Iterator<? extends T> iter = c == null ? null : c.iterator();
 
-        return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter));
+        return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter));
     }
 
     /**
@@ -1090,7 +1095,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return an Optional Pair containing the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterable, Comparator)
@@ -1098,7 +1103,7 @@ public final class Iterables {
     public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         final Iterator<? extends T> iter = c == null ? null : c.iterator();
 
-        return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter, cmp));
+        return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter, cmp));
     }
 
     /**
@@ -1106,12 +1111,12 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterator)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter) {
-        return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter));
+        return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter));
     }
 
     /**
@@ -1119,13 +1124,13 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
-     * @param a the iterator of elements to evaluate
+     * @param iter the iterator of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return an Optional Pair containing the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterator, Comparator)
      */
     public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, final Comparator<? super T> cmp) {
-        return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter, cmp));
+        return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter, cmp));
     }
 
     /**
@@ -1140,7 +1145,7 @@ public final class Iterables {
      * @see Median#of(Object[], Comparator)
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.median(a));
     }
 
     /**
@@ -1156,7 +1161,7 @@ public final class Iterables {
      * @see Median#of(Object[], Comparator)
      */
     public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
-        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.median(a, cmp));
     }
 
     /**
@@ -1164,14 +1169,14 @@ public final class Iterables {
      * The result is wrapped in a {@code Nullable}. If the collection is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
-     * @param a the collection of elements to evaluate
+     * @param c the collection of elements to evaluate
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Collection)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
-        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
+        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c));
     }
 
     /**
@@ -1179,7 +1184,7 @@ public final class Iterables {
      * The result is wrapped in a {@code Nullable}. If the collection is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
-     * @param a the collection of elements to evaluate
+     * @param c the collection of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Collection, Comparator)
@@ -1187,7 +1192,7 @@ public final class Iterables {
      * @see Median#of(Collection, Comparator)
      */
     public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
-        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
+        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c, cmp));
     }
 
     //    /**
@@ -1235,7 +1240,7 @@ public final class Iterables {
      * @see N#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
-        return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
+        return N.isEmpty(a) || a.length < k ? Nullable.empty() : Nullable.of(N.kthLargest(a, k));
     }
 
     /**
@@ -1250,7 +1255,7 @@ public final class Iterables {
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
-        return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
+        return N.isEmpty(a) || a.length < k ? Nullable.empty() : Nullable.of(N.kthLargest(a, k, cmp));
     }
 
     /**
@@ -1264,7 +1269,7 @@ public final class Iterables {
      * @see N#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
-        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
+        return N.isEmpty(c) || c.size() < k ? Nullable.empty() : Nullable.of(N.kthLargest(c, k));
     }
 
     /**
@@ -1279,7 +1284,7 @@ public final class Iterables {
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
-        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
+        return N.isEmpty(c) || c.size() < k ? Nullable.empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
     /**
@@ -1306,9 +1311,9 @@ public final class Iterables {
      * @see N#sumInt(Iterable, ToIntFunction)
      */
     public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalInt.empty();
         }
 
@@ -1339,9 +1344,9 @@ public final class Iterables {
      * @see N#sumIntToLong(Iterable, ToIntFunction)
      */
     public static <T> OptionalLong sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalLong.empty();
         }
 
@@ -1372,9 +1377,9 @@ public final class Iterables {
      * @see N#sumLong(Iterable, ToLongFunction)
      */
     public static <T> OptionalLong sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalLong.empty();
         }
 
@@ -1405,9 +1410,9 @@ public final class Iterables {
      * @see N#sumDouble(Iterable, ToDoubleFunction)
      */
     public static <T> OptionalDouble sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalDouble.empty();
         }
 
@@ -1437,9 +1442,9 @@ public final class Iterables {
      * @see N#sumBigInteger(Iterable, Function)
      */
     public static <T> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return Optional.empty();
         }
 
@@ -1469,9 +1474,9 @@ public final class Iterables {
      * @see N#sumBigDecimal(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return Optional.empty();
         }
 
@@ -1485,7 +1490,7 @@ public final class Iterables {
      * @param <T> the type of the elements in the array, which must be a subtype of Number
      * @param a the array of elements to evaluate
      * @return the average of the integer values if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
-     * @see N#averageInt(Object[])
+     * @see N#averageInt(Number[])
      */
     public static <T extends Number> OptionalDouble averageInt(final T[] a) {
         return averageInt(a, Fn.numToInt());
@@ -1501,7 +1506,7 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
-     * @see N#averageInt(Object[], int, int)
+     * @see N#averageInt(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageInt(a, fromIndex, toIndex, Fn.numToInt());
@@ -1595,7 +1600,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return the average of the integer values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageInt(Iterable)
      */
@@ -1608,15 +1613,15 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param func the function to extract an integer value from each element
      * @return the average of the integer values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageInt(Iterable, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalDouble.empty();
         }
 
@@ -1630,7 +1635,7 @@ public final class Iterables {
      * @param <T> the type of the elements in the array, which must be a subtype of Number
      * @param a the array of elements to evaluate
      * @return the average of the long values if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
-     * @see N#averageLong(Object[])
+     * @see N#averageLong(Number[])
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a) {
         return averageLong(a, Fn.numToLong());
@@ -1646,7 +1651,7 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
-     * @see N#averageLong(Object[], int, int)
+     * @see N#averageLong(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageLong(a, fromIndex, toIndex, Fn.numToLong());
@@ -1716,7 +1721,7 @@ public final class Iterables {
      * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array of elements to evaluate
+     * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract an integer value from each element
@@ -1740,7 +1745,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return the average of the long values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageLong(Iterable)
      */
@@ -1753,15 +1758,15 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param func the function to extract a long value from each element
      * @return the average of the long values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageLong(Iterable, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return OptionalDouble.empty();
         }
 
@@ -1775,7 +1780,7 @@ public final class Iterables {
      * @param <T> the type of the elements in the array, which must be a subtype of Number
      * @param a the array of elements to evaluate
      * @return the average of the double values if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
-     * @see N#averageDouble(Object[])
+     * @see N#averageDouble(Number[])
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a) {
         return averageDouble(a, Fn.numToDouble());
@@ -1791,7 +1796,7 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
-     * @see N#averageDouble(Object[], int, int)
+     * @see N#averageDouble(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageDouble(a, fromIndex, toIndex, Fn.numToDouble());
@@ -1866,8 +1871,8 @@ public final class Iterables {
      * Returns the average of the double values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the array of elements to evaluate
+     * @param <T> the type of the elements in the collection
+     * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a double value from each element
@@ -1915,7 +1920,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return the average of the double values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageDouble(Iterable)
      */
@@ -1928,7 +1933,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param func the function to extract a double value from each element
      * @return the average of the double values if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#averageDouble(Iterable, ToDoubleFunction)
@@ -1951,7 +1956,7 @@ public final class Iterables {
      * Returns the average of the BigInteger values of the provided numbers as an {@code Optional<BigDecimal>}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return the average of the BigInteger values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigDecimal>}
      * @see N#averageBigInteger(Iterable)
      */
@@ -1964,15 +1969,15 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param func the function to extract a BigInteger value from each element
      * @return the average of the BigInteger values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigDecimal>}
      * @see N#averageBigInteger(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return Optional.empty();
         }
 
@@ -1983,7 +1988,7 @@ public final class Iterables {
      * Returns the average of the BigDecimal values of the provided numbers as an {@code Optional<BigDecimal>}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @return the average of the BigDecimal values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigDecimal>}
      * @see N#averageBigDecimal(Iterable)
      */
@@ -1996,15 +2001,15 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * @param <T> the type of the elements in the iterable
-     * @param a the iterable of elements to evaluate
+     * @param c the iterable of elements to evaluate
      * @param func the function to extract a BigDecimal value from each element
      * @return the average of the BigDecimal values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigDecimal>}
      * @see N#averageBigDecimal(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+        final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
-        if (iter.hasNext() == false) {
+        if (!iter.hasNext()) {
             return Optional.empty();
         }
 
@@ -2083,7 +2088,7 @@ public final class Iterables {
      */
     public static <T> Nullable<T> findFirstOrLast(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast) {
         if (N.isEmpty(a)) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         final Nullable<T> res = N.findFirst(a, predicateForFirst);
@@ -2102,13 +2107,13 @@ public final class Iterables {
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Nullable} containing the first element satisfying {@code predicateForFirst} if found,
      *         otherwise the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code Nullable}
-     * @see N#findFirst(Collection, Predicate)
-     * @see N#findLast(Collection, Predicate)
+     * @see N#findFirst(Iterable, Predicate)
+     * @see N#findLast(Iterable, Predicate)
      */
     public static <T> Nullable<T> findFirstOrLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
             final Predicate<? super T> predicateForLast) {
         if (N.isEmpty(c)) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         final Nullable<T> res = N.findFirst(c, predicateForFirst);
@@ -2194,14 +2199,14 @@ public final class Iterables {
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicateForFirst} if found and a {@code Nullable} for the last element satisfying {@code predicateForLast} if found,
      *         otherwise a {@code Pair} of empty {@code Nullable} objects
      * @see #findFirstAndLast(Object[], Predicate)
-     * @see #findFirstOrLast(Object[], Predicate)
+     * @see #findFirstOrLast(Object[], Predicate, Predicate)
      * @see N#findFirst(Object[], Predicate)
      * @see N#findLast(Object[], Predicate)
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicateForFirst,
             final Predicate<? super T> predicateForLast) {
         if (N.isEmpty(a)) {
-            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+            return Pair.of(Nullable.empty(), Nullable.empty());
         }
 
         return Pair.of(N.findFirst(a, predicateForFirst), N.findLast(a, predicateForLast));
@@ -2218,8 +2223,8 @@ public final class Iterables {
      *         otherwise a {@code Pair} of empty {@code Nullable} objects
      * @see #findFirstAndLast(Collection, Predicate, Predicate)
      * @see #findFirstOrLast(Collection, Predicate, Predicate)
-     * @see N#findFirst(Collection, Predicate)
-     * @see N#findLast(Collection, Predicate)
+     * @see N#findFirst(Iterable, Predicate)
+     * @see N#findLast(Iterable, Predicate)
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         return findFirstAndLast(c, predicate, predicate);
@@ -2236,14 +2241,14 @@ public final class Iterables {
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicateForFirst} if found and a {@code Nullable} for the last element satisfying {@code predicateForLast} if found,
      *         otherwise a {@code Pair} of empty {@code Nullable} objects
      * @see #findFirstAndLast(Collection, Predicate)
-     * @see #findFirstOrLast(Collection, Predicate)
-     * @see N#findFirst(Collection, Predicate)
-     * @see N#findLast(Collection, Predicate)
+     * @see #findFirstOrLast(Collection, Predicate, Predicate)
+     * @see N#findFirst(Iterable, Predicate)
+     * @see N#findLast(Iterable, Predicate)
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
             final Predicate<? super T> predicateForLast) {
         if (N.isEmpty(c)) {
-            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+            return Pair.of(Nullable.empty(), Nullable.empty());
         }
 
         return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
@@ -2278,7 +2283,7 @@ public final class Iterables {
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicateForFirst} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicateForLast} if found,
      *         otherwise a {@code Pair} of empty {@code OptionalInt} objects
      * @see #findFirstAndLastIndex(Object[], Predicate)
-     * @see #findFirstOrLastIndex(Object[], Predicate)
+     * @see #findFirstOrLastIndex(Object[], Predicate, Predicate)
      * @see N#findFirstIndex(Object[], Predicate)
      * @see N#findLastIndex(Object[], Predicate)
      */
@@ -2320,7 +2325,7 @@ public final class Iterables {
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicateForFirst} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicateForLast} if found,
      *         otherwise a {@code Pair} of empty {@code OptionalInt} objects
      * @see #findFirstAndLastIndex(Collection, Predicate)
-     * @see #findFirstOrLastIndex(Collection, Predicate)
+     * @see #findFirstOrLastIndex(Collection, Predicate, Predicate)
      * @see N#findFirstIndex(Collection, Predicate)
      * @see N#findLastIndex(Collection, Predicate)
      */
@@ -2339,7 +2344,7 @@ public final class Iterables {
      * Returns a reversed view of the specified list. For example, {@code
      * reverse(Arrays.asList(1, 2, 3))} returns a list containing {@code 3, 2, 1}. The returned
      * list is backed by this list, so changes in the returned list are reflected in this list, and
-     * vice-versa. The returned list supports all of the optional list operations supported by this
+     * vice versa. The returned list supports all the optional list operations supported by this
      * list.
      *
      * <p>The returned list is random-access if the specified list is random access.</p>
@@ -2351,7 +2356,7 @@ public final class Iterables {
      * @see N#reverse(Collection)
      * @see N#reverseToList(Collection)
      */
-    public static <T extends Object> List<T> reverse(final List<T> list) {
+    public static <T> List<T> reverse(final List<T> list) {
         if (list instanceof ImmutableList) {
             // Avoid nullness warnings.
             final List<?> reversed = ((ImmutableList<?>) list).reverse();
@@ -2366,7 +2371,7 @@ public final class Iterables {
     }
 
     // Copied from Google Guava under Apache License v2.0 and may be modified.
-    private static sealed class ReverseList<T extends Object> extends AbstractList<T> permits RandomAccessReverseList {
+    private static sealed class ReverseList<T> extends AbstractList<T> permits RandomAccessReverseList {
         private final List<T> forwardList;
 
         ReverseList(final List<T> forwardList) {
@@ -2508,7 +2513,7 @@ public final class Iterables {
     }
 
     // Copied from Google Guava under Apache License v2.0 and may be modified.
-    private static final class RandomAccessReverseList<T extends Object> extends ReverseList<T> implements RandomAccess {
+    private static final class RandomAccessReverseList<T> extends ReverseList<T> implements RandomAccess {
         RandomAccessReverseList(final List<T> forwardList) {
             super(forwardList);
         }
@@ -2558,7 +2563,7 @@ public final class Iterables {
         Set<? extends E> tmp = null;
 
         if (N.isEmpty(set1)) {
-            tmp = N.isEmpty(set2) ? N.<E> emptySet() : set2;
+            tmp = N.isEmpty(set2) ? N.emptySet() : set2;
         } else if (N.isEmpty(set2)) {
             tmp = set1;
         } else {
@@ -2687,7 +2692,7 @@ public final class Iterables {
         Set<E> tmp = null;
 
         if (N.isEmpty(set1) || N.isEmpty(set2)) {
-            tmp = N.<E> emptySet();
+            tmp = N.emptySet();
         } else {
             tmp = new AbstractSet<>() {
                 @Override
@@ -2795,7 +2800,7 @@ public final class Iterables {
         Set<E> tmp = null;
 
         if (N.isEmpty(set1)) {
-            tmp = N.<E> emptySet();
+            tmp = N.emptySet();
         } else if (N.isEmpty(set2)) {
             tmp = set1;
         } else {
@@ -2860,6 +2865,7 @@ public final class Iterables {
 
                 @Override
                 public boolean isEmpty() {
+                    //noinspection SuspiciousMethodCalls
                     return set2.containsAll(set1);
                 }
             };
@@ -2891,7 +2897,7 @@ public final class Iterables {
         Set<? extends E> tmp = null;
 
         if (N.isEmpty(set1)) {
-            tmp = N.isEmpty(set2) ? N.<E> emptySet() : set2;
+            tmp = N.isEmpty(set2) ? N.emptySet() : set2;
         } else if (N.isEmpty(set2)) {
             tmp = set1;
         } else {
@@ -2983,7 +2989,7 @@ public final class Iterables {
     /**
      * Returns a subset of the provided NavigableSet that falls within the specified range.
      * The subset includes all elements in the NavigableSet that are within the range defined by the lower and upper endpoints of the Range object.
-     * The returned NavigableSet is a view of the original set, meaning changes in the returned set are reflected in the original set and vice-versa.
+     * The returned NavigableSet is a view of the original set, meaning changes in the returned set are reflected in the original set and vice versa.
      * The iteration order of the returned set matches that of the original set.
      *
      * @param <K> the type of elements in the set, which must extend Comparable
@@ -3394,8 +3400,8 @@ public final class Iterables {
          */
         @Override
         public boolean contains(final Object obj) {
-            if (obj instanceof Set) {
-                final Set<?> set = (Set<?>) obj;
+            if (obj instanceof Set<?> set) {
+                //noinspection SuspiciousMethodCalls
                 return inputSet.keySet().containsAll(set);
             }
             return false;
@@ -3408,8 +3414,7 @@ public final class Iterables {
          */
         @Override
         public boolean equals(final Object obj) {
-            if (obj instanceof PowerSet) {
-                final PowerSet<?> that = (PowerSet<?>) obj;
+            if (obj instanceof PowerSet<?> that) {
                 return inputSet.equals(that.inputSet);
             }
             return super.equals(obj);
@@ -3429,22 +3434,11 @@ public final class Iterables {
             return inputSet.keySet().hashCode() << (inputSet.size() - 1);
         }
 
-        /**
-         *
-         * @return the string
-         */
         @Override
         public String toString() {
             return "powerSet(" + inputSet + ")";
         }
 
-        /**
-         * Returns a map from the ith element of list to i.
-         *
-         * @param <E>
-         * @param c
-         * @return the immutable map
-         */
         private static <E> ImmutableMap<E, Integer> indexMap(final Collection<E> c) {
             final Map<E, Integer> map = new LinkedHashMap<>();
 
@@ -3533,6 +3527,7 @@ public final class Iterables {
          */
         @Override
         public boolean contains(final Object o) {
+            @SuppressWarnings("SuspiciousMethodCalls")
             final Integer index = inputSet.get(o);
             return index != null && (mask & (1 << index)) != 0;
         }
@@ -3814,11 +3809,9 @@ public final class Iterables {
          */
         @Override
         public boolean contains(final Object obj) {
-            if (!(obj instanceof Collection)) {
+            if (!(obj instanceof Collection<?> c)) {
                 return false;
             }
-
-            final Collection<?> c = (Collection<?>) obj;
 
             if (c.size() != axes.length) {
                 return false;
@@ -3860,9 +3853,10 @@ public final class Iterables {
      *
      * @param <T>
      */
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static final class Slice<T> extends ImmutableCollection<T> { //NOSONAR
 
-        /** The from index. */
+        /** The start index. */
         private final int fromIndex;
 
         /** The to index. */
@@ -3963,7 +3957,7 @@ public final class Iterables {
         @Override
         public ObjIterator<T> iterator() {
             if (coll == null || fromIndex == toIndex) {
-                return ObjIterator.<T> empty();
+                return ObjIterator.empty();
             }
 
             final Iterator<T> iter = coll.iterator();
@@ -4027,7 +4021,7 @@ public final class Iterables {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     static <T> Iterator<T> iterateNonEmpty(final Iterable<T> arg, final String argNameOrErrorMsg) {
-        final Iterator<T> iter = arg == null ? ObjIterator.<T> empty() : arg.iterator();
+        final Iterator<T> iter = arg == null ? ObjIterator.empty() : arg.iterator();
         final boolean isNullOrEmpty = arg == null || (arg instanceof Collection ? ((Collection<T>) arg).size() == 0 : !iter.hasNext());
 
         if (isNullOrEmpty) {

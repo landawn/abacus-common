@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code byte} wrapper.
- * <p>
- * Note that as MutableByte does not extend Byte, it is not treated by String.format as a Byte parameter.
  *
  * <p>
  * {@code MutableByte} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableByte extends Number implements Comparable<MutableByte>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = -1585823265L;
 
     private byte value;
@@ -72,6 +68,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Byte instance.
      *
@@ -93,7 +90,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -173,6 +171,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -251,6 +250,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     //-----------------------------------------------------------------------
     // shortValue relies on Number implementation
+
     /**
      * Returns the value of this MutableByte as a byte.
      *
@@ -312,6 +312,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -320,10 +321,11 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      */
     @Override
     public int compareTo(final MutableByte other) {
-        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
+        return Byte.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument is
      * not {@code null} and is a {@code MutableByte} object that contains the same {@code byte} value
@@ -351,6 +353,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

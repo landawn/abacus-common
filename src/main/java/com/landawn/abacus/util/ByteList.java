@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  */
 public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
+    @Serial
     private static final long serialVersionUID = 6361439693114081075L;
 
     static final Random RAND = new SecureRandom();
@@ -488,7 +490,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1259,7 +1261,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ByteConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1295,7 +1297,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntByteConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1506,17 +1508,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public ByteList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new ByteList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code ByteList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code ByteList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

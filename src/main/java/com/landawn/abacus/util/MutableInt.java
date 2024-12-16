@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code int} wrapper.
- * <p>
- * Note that as MutableInt does not extend Integer, it is not treated by String.format as an Integer parameter.
  *
  * <p>
  * {@code MutableInt} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableInt extends Number implements Comparable<MutableInt>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = 512176391864L;
 
     private int value;
@@ -72,8 +68,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     //-----------------------------------------------------------------------
+
     /**
-     * Gets the value as a Integer instance.
+     * Gets the value as an Integer instance.
      *
      * @return
      * @deprecated replace by {@link #value()}.
@@ -93,7 +90,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -173,6 +171,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -251,6 +250,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     //-----------------------------------------------------------------------
     // shortValue and byteValue rely on Number implementation
+
     /**
      * Returns the value of this MutableInt as an int.
      *
@@ -292,6 +292,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -300,10 +301,11 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      */
     @Override
     public int compareTo(final MutableInt other) {
-        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
+        return Integer.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument is
      * not {@code null} and is a {@code MutableInt} object that contains the same {@code int} value
@@ -331,6 +333,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

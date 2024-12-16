@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code float} wrapper.
- * <p>
- * Note that as MutableFloat does not extend Float, it is not treated by String.format as a Float parameter.
  *
  * <p>
  * {@code MutableFloat} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableFloat extends Number implements Comparable<MutableFloat>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = 5787169186L;
 
     private float value;
@@ -72,6 +68,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Float instance.
      *
@@ -93,7 +90,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks whether the float value is the special NaN value.
      *
@@ -175,6 +173,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -192,6 +191,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -270,6 +270,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     //-----------------------------------------------------------------------
     // shortValue and byteValue rely on Number implementation
+
     /**
      * Returns the value of this MutableFloat as an int.
      *
@@ -311,6 +312,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -323,6 +325,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object against some other object. The result is {@code true} if and only if the argument is
      * not {@code null} and is a {@code Float} object that represents a {@code float} that has the
@@ -370,6 +373,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

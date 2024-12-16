@@ -107,7 +107,7 @@ public class u { // NOSONAR
         public static Optional<String> of(final String value) throws NullPointerException {
             Objects.requireNonNull(value);
 
-            if (value.length() == 0) {
+            if (value.isEmpty()) {
                 return EMPTY_STRING;
             }
 
@@ -133,7 +133,7 @@ public class u { // NOSONAR
         public static Optional<String> ofNullable(final String value) {
             if (value == null) {
                 return empty();
-            } else if (value.length() == 0) {
+            } else if (value.isEmpty()) {
                 return EMPTY_STRING;
             }
 
@@ -161,10 +161,10 @@ public class u { // NOSONAR
          * @return
          */
         public static <T> Optional<T> from(final java.util.Optional<T> op) {
-            if (op.isPresent()) {
-                return of(op.get());
-            } else {
+            if (op == null || op.isEmpty()) {
                 return empty();
+            } else {
+                return of(op.get());
             }
         }
 
@@ -270,9 +270,9 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Nullable.<U> of(mapper.apply(value));
+                return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<U> empty();
+                return Nullable.empty();
             }
         }
 
@@ -290,9 +290,9 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Optional.<U> of(mapper.apply(value));
+                return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<U> empty();
+                return Optional.empty();
             }
         }
 
@@ -655,7 +655,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return Stream.of(value);
             } else {
-                return Stream.<T> empty();
+                return Stream.empty();
             }
         }
 
@@ -684,7 +684,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<T> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -697,7 +697,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<T> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -739,9 +739,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof Optional) {
-                final Optional<?> other = (Optional<?>) obj;
-
+            if (obj instanceof Optional<?> other) {
                 return N.equals(value, other.value);
             }
 
@@ -1017,7 +1015,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -1036,7 +1034,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -1298,7 +1296,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Boolean> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -1311,7 +1309,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Boolean> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -1319,7 +1317,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Boolean> empty();
+                return Optional.empty();
             }
         }
 
@@ -1433,6 +1431,7 @@ public class u { // NOSONAR
          * @return
          */
         public static OptionalChar of(final char value) {
+            //noinspection ConstantValue
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalChar(value);
         }
 
@@ -1555,7 +1554,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1600,7 +1599,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -1619,7 +1618,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -1867,7 +1866,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Character> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -1880,7 +1879,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Character> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -1888,7 +1887,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return Optional.of(value);
             } else {
-                return Optional.<Character> empty();
+                return Optional.empty();
             }
         }
 
@@ -2150,7 +2149,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -2169,7 +2168,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -2417,7 +2416,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Byte> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -2430,7 +2429,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Byte> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -2438,7 +2437,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Byte> empty();
+                return Optional.empty();
             }
         }
 
@@ -2700,7 +2699,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -2719,7 +2718,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -2967,7 +2966,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Short> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -2980,7 +2979,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Short> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -2988,7 +2987,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Short> empty();
+                return Optional.empty();
             }
         }
 
@@ -3237,7 +3236,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3339,7 +3338,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -3358,7 +3357,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -3606,7 +3605,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Integer> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -3619,7 +3618,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Integer> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -3627,7 +3626,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Integer> empty();
+                return Optional.empty();
             }
         }
 
@@ -3939,7 +3938,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -3958,7 +3957,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -4206,7 +4205,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Long> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -4219,7 +4218,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Long> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -4227,7 +4226,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Long> empty();
+                return Optional.empty();
             }
         }
 
@@ -4513,7 +4512,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -4532,7 +4531,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -4780,7 +4779,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Float> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -4793,7 +4792,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Float> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -4801,7 +4800,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Float> empty();
+                return Optional.empty();
             }
         }
 
@@ -5082,7 +5081,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -5101,7 +5100,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<T> empty();
+                return Optional.empty();
             }
         }
 
@@ -5349,7 +5348,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableList.of(value);
             } else {
-                return ImmutableList.<Double> empty();
+                return ImmutableList.empty();
             }
         }
 
@@ -5362,7 +5361,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return ImmutableSet.of(value);
             } else {
-                return ImmutableSet.<Double> empty();
+                return ImmutableSet.empty();
             }
         }
 
@@ -5370,7 +5369,7 @@ public class u { // NOSONAR
             if (isPresent) {
                 return Optional.of(value);
             } else {
-                return Optional.<Double> empty();
+                return Optional.empty();
             }
         }
 
@@ -5508,7 +5507,7 @@ public class u { // NOSONAR
         public static Nullable<String> of(final String value) {
             if (value == null) {
                 return NULL_STRING;
-            } else if (value.length() == 0) {
+            } else if (value.isEmpty()) {
                 return EMPTY_STRING;
             }
 
@@ -5535,7 +5534,7 @@ public class u { // NOSONAR
             if (optional.isPresent()) {
                 return new Nullable<>(optional.get());
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -5546,11 +5545,7 @@ public class u { // NOSONAR
          * @return
          */
         public static <T> Nullable<T> from(final java.util.Optional<T> optional) {
-            if (optional.isPresent()) {
-                return new Nullable<>(optional.get());
-            } else {
-                return Nullable.<T> empty();
-            }
+            return optional.map(Nullable::new).orElseGet(Nullable::empty);
         }
 
         /**
@@ -5592,7 +5587,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns {@code true} if the value is not present, or it is present but it's {@code null}, otherwise returns {@code false}.
+         * Returns {@code true} if the value is not present, or it is present, but it's {@code null}, otherwise returns {@code false}.
          *
          * @return {@code true}, if is null
          */
@@ -5601,7 +5596,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns {@code true} if the value is present and it's not {@code null}, otherwise returns {@code false}.
+         * Returns {@code true} if the value is present, and it's not {@code null}, otherwise returns {@code false}.
          *
          * @return {@code true}, if is not null
          */
@@ -5748,7 +5743,7 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Nullable.of((U) mapper.apply(value));
+                return Nullable.of(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -5768,9 +5763,9 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Optional.of((U) mapper.apply(value));
+                return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<U> empty();
+                return Optional.empty();
             }
         }
 
@@ -5941,7 +5936,7 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
-                return Nullable.of((U) mapper.apply(value));
+                return Nullable.of(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -5962,9 +5957,9 @@ public class u { // NOSONAR
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
-                return Optional.of((U) mapper.apply(value));
+                return Optional.of(mapper.apply(value));
             } else {
-                return Optional.<U> empty();
+                return Optional.empty();
             }
         }
 
@@ -6518,7 +6513,7 @@ public class u { // NOSONAR
             if (isPresent()) {
                 return Stream.of(value);
             } else {
-                return Stream.<T> empty();
+                return Stream.empty();
             }
         }
 
@@ -6531,7 +6526,7 @@ public class u { // NOSONAR
             if (isNotNull()) {
                 return Stream.of(value);
             } else {
-                return Stream.<T> empty();
+                return Stream.empty();
             }
         }
 
@@ -6636,7 +6631,7 @@ public class u { // NOSONAR
          */
         public Optional<T> toOptional() {
             if (value == null) {
-                return Optional.<T> empty();
+                return Optional.empty();
             } else {
                 return Optional.of(value);
             }
@@ -6649,7 +6644,7 @@ public class u { // NOSONAR
          */
         public java.util.Optional<T> toJdkOptional() {
             if (value == null) {
-                return java.util.Optional.<T> empty();
+                return java.util.Optional.empty();
             } else {
                 return java.util.Optional.of(value);
             }
@@ -6666,9 +6661,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof Nullable) {
-                final Nullable<?> other = (Nullable<?>) obj;
-
+            if (obj instanceof Nullable<?> other) {
                 return N.equals(isPresent, other.isPresent) && N.equals(value, other.value);
             }
 

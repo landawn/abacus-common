@@ -109,7 +109,6 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @return
      */
     @MayReturnNull
-    @SuppressWarnings("unchecked")
     @Override
     public Map.Entry<K, V> valueOf(final String str) {
         if (Strings.isEmpty(str) || "{}".equals(str)) {

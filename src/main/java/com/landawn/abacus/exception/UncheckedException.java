@@ -17,8 +17,11 @@ package com.landawn.abacus.exception;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
+import java.io.Serial;
+
 public class UncheckedException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -1973552812345999717L;
 
     // private final Throwable checkedException;

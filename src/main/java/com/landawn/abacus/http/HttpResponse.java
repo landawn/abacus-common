@@ -160,9 +160,9 @@ public class HttpResponse {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultType.clazz());
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
                 return URLEncodedUtil.decode(new String(body, respCharset), resultType.clazz());
-            } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
+            } else if (bodyFormat.name().contains("JSON")) {
                 return N.fromJson(new String(body, respCharset), resultType);
-            } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
+            } else if (bodyFormat.name().contains("XML")) {
                 return N.fromXml(new String(body, respCharset), resultType);
             } else {
                 return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultType.clazz());
@@ -178,7 +178,7 @@ public class HttpResponse {
         result = prime * result + statusCode;
         result = prime * result + ((message == null) ? 0 : message.hashCode());
         result = prime * result + ((headers == null) ? 0 : headers.hashCode());
-        result = prime * result + ((bodyFormat == null) ? 0 : bodyFormat.hashCode());
+        result = prime * result + bodyFormat.hashCode();
         return prime * result + ((body == null) ? 0 : N.hashCode(body));
     }
 

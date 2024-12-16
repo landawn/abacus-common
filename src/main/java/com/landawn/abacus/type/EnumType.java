@@ -23,8 +23,10 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BiMap;
@@ -53,6 +55,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         this(enumClassName, false);
     }
 
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     EnumType(final String clsName, final boolean ordinal) {
         super(ordinal ? clsName + "(true)" : clsName, (Class<T>) getEnumClass(ClassUtil.forClass(clsName)));
 
@@ -69,6 +72,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
 
         try {
+            //noinspection ConstantValue
             hasNull = Enum.valueOf(typeClass, NULL) != null;
         } catch (final Exception e) {
             // ignore;
@@ -113,16 +117,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return null; // NOSONAR
             }
 
-            if (Strings.isAsciiDigtalInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
+            if (Strings.isAsciiDigitalInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
                 final T val = jsonXmlNameEnumMap.get(str);
 
-                if (val != null) {
-                    return val;
-                } else {
-                    return Enum.valueOf(typeClass, str);
-                }
+                return Objects.requireNonNullElseGet(val, () -> Enum.valueOf(typeClass, str));
             }
         } else {
             return super.valueOf(str);

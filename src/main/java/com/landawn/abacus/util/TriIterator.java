@@ -71,7 +71,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         @Override
-        public void foreachRemaining(final Throwables.TriConsumer action) throws IllegalArgumentException, Exception {
+        public void foreachRemaining(final Throwables.TriConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action);
         }
 
@@ -495,9 +495,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
-        final Iterator<A> iter1 = iterA == null ? ObjIterator.<A> empty() : iterA;
-        final Iterator<B> iter2 = iterB == null ? ObjIterator.<B> empty() : iterB;
-        final Iterator<C> iter3 = iterC == null ? ObjIterator.<C> empty() : iterC;
+        final Iterator<A> iter1 = iterA == null ? ObjIterator.empty() : iterA;
+        final Iterator<B> iter2 = iterB == null ? ObjIterator.empty() : iterB;
+        final Iterator<C> iter3 = iterC == null ? ObjIterator.empty() : iterC;
 
         return new TriIterator<>() {
             @Override
@@ -744,10 +744,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             private void skip() {
                 long idx = 0;
 
-                final Throwables.TriConsumer<A, B, C, RuntimeException> action = DO_NOTHING;
-
                 while (idx++ < n && iter.hasNext()) {
-                    iter.next(action);
+                    iter.next(DO_NOTHING);
                 }
 
                 skipped = true;
@@ -767,7 +765,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
-            return TriIterator.<A, B, C> empty();
+            return TriIterator.empty();
         }
 
         final TriIterator<A, B, C> iter = this;
@@ -824,7 +822,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 if (cnt > 0) {
                     return iter.<R> map(mapper).limit(cnt);
                 } else {
-                    return ObjIterator.<R> empty();
+                    return ObjIterator.empty();
                 }
             }
         };
@@ -959,7 +957,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         if (hasNext()) {
             return Optional.of(next());
         } else {
-            return Optional.<Triple<A, B, C>> empty();
+            return Optional.empty();
         }
     }
 
@@ -978,7 +976,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             return Optional.of(next);
         } else {
-            return Optional.<Triple<A, B, C>> empty();
+            return Optional.empty();
         }
     }
 

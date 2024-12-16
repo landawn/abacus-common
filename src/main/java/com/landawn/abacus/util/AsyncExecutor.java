@@ -50,9 +50,9 @@ public class AsyncExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncExecutor.class);
 
-    private static final int DEFAULT_CORE_POOL_SIZE = Math.max(8, IOUtil.CPU_CORES);
+    private static final int DEFAULT_CORE_POOL_SIZE = Math.max(8, InternalUtil.CPU_CORES);
 
-    private static final int DEFAULT_MAX_THREAD_POOL_SIZE = Math.max(16, IOUtil.CPU_CORES * 2);
+    private static final int DEFAULT_MAX_THREAD_POOL_SIZE = Math.max(16, InternalUtil.CPU_CORES * 2);
 
     private final int coreThreadPoolSize;
 
@@ -220,12 +220,12 @@ public class AsyncExecutor {
      * @param actionInFinal the Runnable to be executed after the command
      * @return a ContinuableFuture representing the result of the computation
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actioInFinal) {
+    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actionInFinal) {
         return execute(new FutureTask<>(() -> {
             try {
                 return command.call();
             } finally {
-                actioInFinal.run();
+                actionInFinal.run();
             }
         }));
     }
@@ -281,14 +281,14 @@ public class AsyncExecutor {
      *
      * @param action the Runnable to be executed asynchronously
      * @param retryTimes the number of times to retry the execution if it fails
-     * @param retryIntervallInMillis the interval in milliseconds between retries
+     * @param retryIntervalInMillis the interval in milliseconds between retries
      * @param retryCondition the condition to determine whether to retry the execution based on the exception thrown
      * @return a ContinuableFuture representing the result of the computation
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervallInMillis,
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
-        return execute((Callable<Void>) () -> {
-            Retry.of(retryTimes, retryIntervallInMillis, retryCondition).run(action);
+        return execute(() -> {
+            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(action);
             return null;
         });
     }
@@ -301,14 +301,14 @@ public class AsyncExecutor {
      * @param <R> the type of the result returned by the Callable
      * @param action the Callable to be executed asynchronously
      * @param retryTimes the number of times to retry the execution if it fails
-     * @param retryIntervallInMillis the interval in milliseconds between retries
+     * @param retryIntervalInMillis the interval in milliseconds between retries
      * @param retryCondition the condition to determine whether to retry the execution based on the result and the exception thrown
      * @return a ContinuableFuture representing the result of the computation
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervallInMillis,
+    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
-        return execute((Callable<R>) () -> {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillis, retryCondition);
+        return execute(() -> {
+            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(action);
         });
     }
@@ -339,6 +339,7 @@ public class AsyncExecutor {
         if (executor == null) {
             synchronized (this) {
                 if (executor == null) {
+                    @SuppressWarnings("UnnecessaryLocalVariable")
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(coreThreadPoolSize, maxThreadPoolSize, keepAliveTime, unit,
                             new LinkedBlockingQueue<>());
                     //    if (keepAliveTime > 0 && coreThreadPoolSize == maxThreadPoolSize) {
@@ -347,12 +348,7 @@ public class AsyncExecutor {
 
                     executor = threadPoolExecutor;
 
-                    Runtime.getRuntime().addShutdownHook(new Thread() {
-                        @Override
-                        public void run() {
-                            shutdown(120, TimeUnit.SECONDS);
-                        }
-                    });
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(120, TimeUnit.SECONDS)));
                 }
             }
         }
@@ -391,6 +387,7 @@ public class AsyncExecutor {
             executorService.shutdown();
 
             if (terminationTimeout > 0 && !executorService.isTerminated()) {
+                //noinspection ResultOfMethodCallIgnored
                 executorService.awaitTermination(terminationTimeout, timeUnit);
             }
         } catch (final InterruptedException e) {

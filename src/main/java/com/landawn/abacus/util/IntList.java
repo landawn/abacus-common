@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.IntStream;
  */
 public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
+    @Serial
     private static final long serialVersionUID = 8661773953226671696L;
 
     static final Random RAND = new SecureRandom();
@@ -198,7 +200,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param len the number of random elements to generate
      * @return a new IntList containing the random elements
      * @see Random#nextInt()
-     * @see Array#randomInts(int)
+     * @see Array#random(int)
      */
     public static IntList random(final int len) {
         final int[] a = new int[len];
@@ -521,7 +523,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1128,7 +1130,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * </pre>
      *
      * @param b
-     * @return this.difference(b).addAll(b.difference(this))
+     * @return this.difference(b).addAll(b.difference ( this))
      * @see #difference(IntList)
      */
     @Override
@@ -1320,7 +1322,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.IntConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1356,7 +1358,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntIntConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1567,17 +1569,17 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new IntList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code IntList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code IntList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

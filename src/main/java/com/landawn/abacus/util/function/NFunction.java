@@ -23,6 +23,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * @param args
      * @return
      */
+    @SuppressWarnings("unchecked")
     @Override
     R apply(T... args);
 

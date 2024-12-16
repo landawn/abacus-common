@@ -23,9 +23,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Note: copied from Apache commons-codec: https://commons.apache.org/proper/commons-codec.
+ * Note: copied from <a href="https://commons.apache.org/proper/commons-codec">Apache commons-codec</a>.
  *
- * Operations to simplify common {@link java.security.MessageDigest} tasks.
+ * Operations to simplify common {@link MessageDigest} tasks.
  * This class is immutable and thread-safe.
  *
  * @version $Id: DigestUtils.java 1634433 2014-10-27 01:10:47Z ggregory $

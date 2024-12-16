@@ -123,7 +123,7 @@ public final class Splitter {
 
                             start = (cursor = sourceLen + 1);
 
-                            if (omitEmptyStrings && next.length() == 0) {
+                            if (omitEmptyStrings && next.isEmpty()) {
                                 next = null;
                             }
                         } else {
@@ -137,7 +137,7 @@ public final class Splitter {
 
                                     start = ++cursor;
 
-                                    if (omitEmptyStrings && next.length() == 0) {
+                                    if (omitEmptyStrings && next.isEmpty()) {
                                         next = null;
                                     }
 
@@ -195,7 +195,7 @@ public final class Splitter {
                             next = subStringFunc.subString(source, start, sourceLen);
                             start = (cursor = sourceLen + 1);
 
-                            if (omitEmptyStrings && next.length() == 0) {
+                            if (omitEmptyStrings && next.isEmpty()) {
                                 next = null;
                             }
                         } else {
@@ -204,7 +204,7 @@ public final class Splitter {
                                     next = subStringFunc.subString(source, start, cursor);
                                     start = ++cursor;
 
-                                    if (omitEmptyStrings && next.length() == 0) {
+                                    if (omitEmptyStrings && next.isEmpty()) {
                                         next = null;
                                     }
 
@@ -273,7 +273,7 @@ public final class Splitter {
                                 next = subStringFunc.subString(source, start, sourceLen);
                                 start = (cursor = sourceLen + 1);
 
-                                if (omitEmptyStrings && next.length() == 0) {
+                                if (omitEmptyStrings && next.isEmpty()) {
                                     next = null;
                                 }
                             } else {
@@ -287,7 +287,7 @@ public final class Splitter {
                                             start = (cursor += delimiter.length());
                                         }
 
-                                        if (omitEmptyStrings && next.length() == 0) {
+                                        if (omitEmptyStrings && next.isEmpty()) {
                                             next = null;
                                         }
 
@@ -362,7 +362,7 @@ public final class Splitter {
                             next = subStringFunc.subString(source, start, sourceLen);
                             start = (cursor = sourceLen + 1);
 
-                            if (omitEmptyStrings && next.length() == 0) {
+                            if (omitEmptyStrings && next.isEmpty()) {
                                 next = null;
                             }
                         } else {
@@ -377,7 +377,7 @@ public final class Splitter {
                                         start = (cursor = sourceLen + 1);
                                     }
 
-                                    if (omitEmptyStrings && next.length() == 0) {
+                                    if (omitEmptyStrings && next.isEmpty()) {
                                         next = null;
                                     }
 
@@ -703,7 +703,7 @@ public final class Splitter {
     public String[] splitToArray(final CharSequence source) {
         final List<String> substrs = split(source);
 
-        return substrs.toArray(new String[substrs.size()]);
+        return substrs.toArray(new String[0]);
     }
 
     /**
@@ -716,7 +716,7 @@ public final class Splitter {
     public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) {
         final List<String> substrs = split(source, mapper);
 
-        return substrs.toArray(new String[substrs.size()]);
+        return substrs.toArray(new String[0]);
     }
 
     /**
@@ -1229,7 +1229,7 @@ public final class Splitter {
             entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);
 
-            return Stream.of(new ObjIteratorEx<Map.Entry<String, String>>() {
+            return Stream.of(new ObjIteratorEx<>() {
                 private final ObjIterator<String> iter = entrySplitter.iterate(source);
                 private ObjIterator<String> keyValueIter = null;
                 private String entryString = null;
@@ -1286,7 +1286,8 @@ public final class Splitter {
          * @return
          */
         public EntryStream<String, String> splitToEntryStream(final CharSequence source) {
-            return splitToStream(source).mapToEntry(Fn.<Map.Entry<String, String>> identity());
+            //noinspection resource
+            return splitToStream(source).mapToEntry(Fn.identity());
         }
 
         /**

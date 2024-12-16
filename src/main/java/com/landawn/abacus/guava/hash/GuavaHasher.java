@@ -23,6 +23,7 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 import com.landawn.abacus.util.N;
 
+@SuppressWarnings("ClassCanBeRecord")
 final class GuavaHasher implements Hasher {
     final com.google.common.hash.Hasher gHasher;
 

@@ -20,5 +20,5 @@ package com.landawn.abacus.parser;
  */
 enum XMLParserType {
 
-    SAX, DOM, StAX;
+    SAX, DOM, StAX
 }

@@ -48,6 +48,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static ShortIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Returns an ShortIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the ShortIterator instance when the ShortIterator's methods are first called.
+     * The Supplier is responsible for producing the ShortIterator instance when the first method in the returned {@code ShortIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the ShortIterator when needed.
      * @return A ShortIterator that is initialized on the first call to hasNext() or nextByte().

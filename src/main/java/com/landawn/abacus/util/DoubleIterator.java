@@ -48,6 +48,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static DoubleIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (a == null || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Returns an DoubleIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the DoubleIterator instance when the DoubleIterator's methods are first called.
+     * The Supplier is responsible for producing the DoubleIterator instance when the first method in the returned {@code DoubleIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the DoubleIterator when needed.
      * @return A DoubleIterator that is initialized on the first call to hasNext() or nextByte().

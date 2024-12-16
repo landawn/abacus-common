@@ -24,11 +24,13 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  *
  * @param <E>
  */
+@SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
 @SuppressWarnings("java:S2160")
 public sealed class ImmutableList<E> extends ImmutableCollection<E> implements List<E> permits ImmutableList.ReverseImmutableList {
 
@@ -54,6 +56,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @param list the list of elements to be included in this ImmutableList
      * @param isUnmodifiable a boolean indicating if the provided list is unmodifiable
      */
+    @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION")
     ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) {
         super(isUnmodifiable ? list : Collections.unmodifiableList(list));
         this.list = (List<E>) coll;
@@ -481,6 +484,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return (size() <= 1) ? this : new ReverseImmutableList<>(this);
     }
 
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static final class ReverseImmutableList<E> extends ImmutableList<E> {
         private final ImmutableList<E> forwardList;
         private final int size;
@@ -503,6 +507,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
         @Override
         public int indexOf(final Object object) {
+            @SuppressWarnings("SuspiciousMethodCalls")
             final int index = forwardList.lastIndexOf(object);
 
             return (index >= 0) ? reverseIndex(index) : -1;
@@ -510,6 +515,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
         @Override
         public int lastIndexOf(final Object object) {
+            @SuppressWarnings("SuspiciousMethodCalls")
             final int index = forwardList.indexOf(object);
 
             return (index >= 0) ? reverseIndex(index) : -1;
@@ -585,7 +591,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @param elements
          * @return
          */
-        public Builder<E> add(final E... elements) {
+        @SafeVarargs
+        public final Builder<E> add(final E... elements) {
             if (N.notEmpty(elements)) {
                 list.addAll(Arrays.asList(elements));
             }

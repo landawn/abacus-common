@@ -16,11 +16,12 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.math.BigInteger;
 
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
@@ -42,11 +43,7 @@ import java.math.BigInteger;
 @com.landawn.abacus.annotation.Immutable
 public final class Fraction extends Number implements Comparable<Fraction>, Immutable {
 
-    /**
-     * Required for serialization support. Lang version 2.0.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = 65382027393090L;
 
     /**
@@ -191,7 +188,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 return ZERO; // normalize zero.
             }
             // simplify fraction.
-            final int gcd = greatestCommonDivisor(numerator, denominator);
+            final int gcd = greatestCommandDivisor(numerator, denominator);
             numerator /= gcd;
             denominator /= gcd;
         }
@@ -261,7 +258,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param value the double value to convert
      * @return a new fraction instance that is close to the value
-     * @throws ArithmeticException             if the the algorithm does not converge
+     * @throws ArithmeticException             if the algorithm does not converge
      */
     public static Fraction of(double value) {
         final int sign = value < 0 ? -1 : 1;
@@ -542,7 +539,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (numerator == 0) {
             return equals(ZERO) ? this : ZERO;
         }
-        final int gcd = greatestCommonDivisor(Math.abs(numerator), denominator);
+        final int gcd = greatestCommandDivisor(Math.abs(numerator), denominator);
         if (gcd == 1) {
             return this;
         }
@@ -665,7 +662,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *            a non-zero number
      * @return
      */
-    private static int greatestCommonDivisor(int u, int v) {
+    private static int greatestCommandDivisor(int u, int v) {
         // From Commons Math:
         if (u == 0 || v == 0) {
             if (u == Integer.MIN_VALUE || v == Integer.MIN_VALUE) {
@@ -705,7 +702,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         do {
             /* assert u<0 && v<0; */
             // B4/B3: cast out twos from t.
-            while ((t & 1) == 0) { // while t is even..
+            while ((t & 1) == 0) { // while t is even.
                 t /= 2; // cast out twos
             }
             // B5 [reset max(u,v)]
@@ -863,7 +860,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
         // if denominators are randomly distributed, d1 will be 1 about 61%
         // of the time.
-        final int d1 = greatestCommonDivisor(denominator, fraction.denominator);
+        final int d1 = greatestCommandDivisor(denominator, fraction.denominator);
         if (d1 == 1) {
             // result is ( (u*v' +/- u'v) / u'v')
             final int uvp = mulAndCheck(numerator, fraction.denominator);
@@ -879,7 +876,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         // but d2 doesn't need extra precision because
         // d2 = gcd(t,d1) = gcd(t mod d1, d1)
         final int tmodd1 = t.mod(BigInteger.valueOf(d1)).intValue();
-        final int d2 = tmodd1 == 0 ? d1 : greatestCommonDivisor(tmodd1, d1);
+        final int d2 = tmodd1 == 0 ? d1 : greatestCommandDivisor(tmodd1, d1);
 
         // result is (t/d2) / (u'/d1)(v'/d2)
         final BigInteger w = t.divide(BigInteger.valueOf(d2));
@@ -911,8 +908,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
         // knuth 4.5.1
         // make sure we don't overflow unless the result *must* overflow.
-        final int d1 = greatestCommonDivisor(numerator, fraction.denominator);
-        final int d2 = greatestCommonDivisor(fraction.numerator, denominator);
+        final int d1 = greatestCommandDivisor(numerator, fraction.denominator);
+        final int d2 = greatestCommandDivisor(fraction.numerator, denominator);
         return of(mulAndCheck(numerator / d1, fraction.numerator / d2), mulPosAndCheck(denominator / d2, fraction.denominator / d1), true);
     }
 
@@ -954,20 +951,14 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      */
     @Override
     public int compareTo(final Fraction other) {
-        if ((this == other) || (numerator == other.numerator && denominator == other.denominator)) {
+        if (this.equals(other)) {
             return 0;
         }
 
         // otherwise see which is less
         final long first = (long) numerator * (long) other.denominator;
         final long second = (long) other.numerator * (long) denominator;
-        if (first == second) {
-            return 0;
-        } else if (first < second) {
-            return -1;
-        } else {
-            return 1;
-        }
+        return Long.compare(first, second);
     }
 
     /**
@@ -999,15 +990,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 if (properNumerator == 0) {
                     toProperString = Integer.toString(getProperWhole());
                 } else {
-                    toProperString = new StringBuilder(32).append(getProperWhole())
-                            .append(' ')
-                            .append(properNumerator)
-                            .append('/')
-                            .append(getDenominator())
-                            .toString();
+                    toProperString = String.valueOf(getProperWhole()) + ' ' + properNumerator + '/' + getDenominator();
                 }
             } else {
-                toProperString = new StringBuilder(32).append(getNumerator()).append('/').append(getDenominator()).toString();
+                toProperString = String.valueOf(getNumerator()) + '/' + getDenominator();
             }
         }
         return toProperString;
@@ -1020,7 +1006,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * .
      *
      * <p>
-     * To be equal, both values must be equal. Thus 2/4 is not equal to 1/2.
+     * To be equal, both values must be equal. Thus, 2/4 is not equal to 1/2.
      * </p>
      *
      * @param obj
@@ -1067,7 +1053,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     @Override
     public String toString() {
         if (toString == null) {
-            toString = new StringBuilder(32).append(getNumerator()).append('/').append(getDenominator()).toString();
+            toString = String.valueOf(getNumerator()) + '/' + getDenominator();
         }
         return toString;
     }

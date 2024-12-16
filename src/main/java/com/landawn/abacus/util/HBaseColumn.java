@@ -331,7 +331,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      */
     @Override
     public int compareTo(final HBaseColumn<T> o) {
-        return version > o.version ? 1 : version == o.version ? 0 : -1;
+        return Long.compare(version, o.version);
     }
 
     @Override
@@ -355,10 +355,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         if (obj instanceof HBaseColumn) {
             final HBaseColumn<T> other = (HBaseColumn<T>) obj;
 
-            if (N.equals(version, other.version) && N.equals(value, other.value)) {
-
-                return true;
-            }
+            return N.equals(version, other.version) && N.equals(value, other.value);
         }
 
         return false;

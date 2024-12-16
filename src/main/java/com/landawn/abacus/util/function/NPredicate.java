@@ -21,6 +21,7 @@ public interface NPredicate<T> {
      * @param args
      * @return
      */
+    @SuppressWarnings("unchecked")
     boolean test(T... args);
 
     default NPredicate<T> negate() {

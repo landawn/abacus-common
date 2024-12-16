@@ -24,7 +24,7 @@ import java.security.SecureRandom;
 
 /**
  * <p>
- * Note: it's copied from Apache WSS4J developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache WSS4J developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
@@ -44,6 +44,7 @@ public final class WSSecurityUtil {
      * overcome punitive overhead.
      */
     private static final SecureRandom random;
+
     static {
         try {
             random = SecureRandom.getInstance(RNG_ALGORITHM);
@@ -54,6 +55,7 @@ public final class WSSecurityUtil {
 
     /** A cached MessageDigest object. */
     private static final MessageDigest digest;
+
     static {
         try {
             digest = MessageDigest.getInstance(HASH_ALGORITHM);

@@ -105,7 +105,6 @@ public interface Type<T> {
      * @param classes
      * @return
      */
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     static <T> List<Type<T>> ofAll(final Class<? extends T>... classes) {
         return ofAll(Array.asList(classes));
@@ -117,7 +116,6 @@ public interface Type<T> {
      * @param classes
      * @return
      */
-    @SuppressWarnings("unchecked")
     static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
 
@@ -486,151 +484,149 @@ public interface Type<T> {
     boolean isCharSequence();
 
     /**
-     * Checks if is date.
+     * Checks if this is type of {@code Date}.
      *
-     * @return {@code true}, if is date
+     * @return {@code true}, if it is {@code Date} type
      */
     boolean isDate();
 
     /**
-     * Checks if is calendar.
+     * Checks if this is type of {@code Calendar}.
      *
-     * @return {@code true}, if is calendar
+     * @return {@code true}, if it is {@code Calendar} type
      */
     boolean isCalendar();
 
     /**
-     * Checks if is joda date time.
+     * Checks if this is type of Joda {@code DateTime}.
      *
-     * @return {@code true}, if is joda date time
+     * @return {@code true}, if it is Joda {@code DateTime} type
      */
     boolean isJodaDateTime();
 
     /**
-     * Checks if is primitive array.
+     * Checks if this is type of primitive {@code array}.
      *
-     * @return {@code true}, if is primitive array
+     * @return {@code true}, if it is primitive {@code array} type
      */
     boolean isPrimitiveArray();
 
     /**
-     * Checks if is primitive byte array.
+     * Checks if this is type of {@code byte[]}.
      *
-     * @return {@code true}, if is primitive byte array
+     * @return {@code true}, if it is {@code byte[]} type
      */
     boolean isPrimitiveByteArray();
 
     /**
-     * Checks if is object array.
+     * Checks if this is type of object {@code array}.
      *
-     * @return {@code true}, if is object array
+     * @return {@code true}, if it is object {@code array} type
      */
     boolean isObjectArray();
 
     /**
-     * Checks if is array.
+     * Checks if this is type of {@code array}.
      *
-     * @return {@code true}, if is array
+     * @return {@code true}, if it is {@code array} type
      */
     boolean isArray();
 
     /**
-     * Checks if is list.
+     * Checks if this is type of {@code List}.
      *
-     * @return {@code true}, if is list
+     * @return {@code true}, if it is {@code List} type
      */
     boolean isList();
 
     /**
-     * Checks if is sets the.
+     * Checks if this is type of {@code Set}.
      *
-     * @return {@code true}, if is sets the
+     * @return {@code true}, if it is {@code Set} type
      */
     boolean isSet();
 
     /**
-     * Checks if is collection.
+     * Checks if this is type of {@code Collection}.
      *
-     * @return {@code true}, if is collection
+     * @return {@code true}, if it is {@code Collection} type
      */
     boolean isCollection();
 
     /**
-     * Checks if is map.
+     * Checks if this is type of {@code Map}.
      *
-     * @return {@code true}, if is map
+     * @return {@code true}, if it is {@code Map} type
      */
     boolean isMap();
 
     /**
-     * Checks if is bean.
+     * Checks if this is type of {@code Bean}.
      *
-     * @return {@code true}, if is bean
+     * @return {@code true}, if it is {@code Bean} type
      */
     boolean isBean();
 
     /**
-     * Checks if is map bean.
+     * Checks if this is type of {@code MapEntity}.
      *
-     * @return {@code true}, if is map bean
+     * @return {@code true}, if it is {@code MapEntity} type
      */
     boolean isMapEntity();
 
     /**
-     * Checks if is bean id.
+     * Checks if this is type of {@code EntityId}.
      *
-     * @return {@code true}, if is bean id
+     * @return {@code true}, if it is {@code EntityId} type
      */
     boolean isEntityId();
 
     /**
-     * Checks if is data set.
+     * Checks if this is type of {@code DataSet}.
      *
-     * @return {@code true}, if is data set
+     * @return {@code true}, if it is {@code DataSet} type
      */
     boolean isDataSet();
 
     /**
-     * Checks if is input stream.
+     * Checks if this is type of {@code InputStream}.
      *
-     * @return {@code true}, if is input stream
+     * @return {@code true}, if it is {@code InputStream} type
      */
     boolean isInputStream();
 
     /**
-     * Checks if is reader.
+     * Checks if this is type of {@code Reader}.
      *
-     * @return {@code true}, if is reader
+     * @return {@code true}, if it is {@code Reader} type
      */
     boolean isReader();
 
     /**
-     * Checks if is byte buffer.
+     * Checks if this is type of {@code ByteBuffer}.
      *
-     * @return {@code true}, if is byte buffer
+     * @return {@code true}, if it is {@code ByteBuffer} type
      */
     boolean isByteBuffer();
 
     /**
-     * Checks if is generic type.
+     * Checks if this is generic type.
      *
-     * @return {@code true}, if is generic type
+     * @return {@code true}, if it is generic type
      */
     boolean isGenericType();
 
-    boolean isObjectType();
-
     /**
-     * Checks if is immutable.
+     * Checks if this is immutable type.
      *
-     * @return {@code true}, if is immutable
+     * @return {@code true}, if it is immutable
      */
     boolean isImmutable();
 
     /**
-     * Checks if is comparable.
+     * Checks if this is comparable type.
      *
-     * @return {@code true}, if is comparable
+     * @return {@code true}, if it is comparable
      */
     boolean isComparable();
 
@@ -641,6 +637,8 @@ public interface Type<T> {
      * @return {@code true}, if is serializable
      */
     boolean isSerializable();
+
+    boolean isObjectType();
 
     /**
      * Checks if is optional or {@code nullable}.
@@ -864,6 +862,6 @@ public interface Type<T> {
     String deepToString(T x);
 
     enum SerializationType {
-        SERIALIZABLE, ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, ENTITY_ID, DATA_SET, SHEET, UNKNOWN;
+        SERIALIZABLE, ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, ENTITY_ID, DATA_SET, SHEET, UNKNOWN
     }
 }

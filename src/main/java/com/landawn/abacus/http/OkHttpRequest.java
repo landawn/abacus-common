@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
@@ -55,7 +56,7 @@ import okhttp3.Response;
 import okhttp3.internal.Util;
 
 /**
- * Note: This class contains the codes and docs copied from OkHttp: https://square.github.io/okhttp/ under Apache License v2.
+ * Note: This class contains the codes and docs copied from : <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2.
  *
  * @see URLEncodedUtil
  * @see HttpHeaders
@@ -78,6 +79,7 @@ public final class OkHttpRequest {
     private final Request.Builder requestBuilder;
     private RequestBody body;
 
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
     private boolean closeHttpClientAfterExecution = false;
 
     OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
@@ -727,6 +729,8 @@ public final class OkHttpRequest {
         try (Response resp = execute(request)) {
             if (Response.class.equals(resultClass)) {
                 return (T) resp;
+            } else if (resultClass == null || resultClass.equals(Void.class)) {
+                return null;
             } else if (resp.isSuccessful()) {
                 final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
                 final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
@@ -735,12 +739,9 @@ public final class OkHttpRequest {
                 final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
                 final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
                 final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
-
                 final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
-                if (resultClass == null || resultClass.equals(Void.class)) {
-                    return null;
-                } else if (resultClass.equals(String.class)) {
+                if (resultClass.equals(String.class)) {
                     return (T) IOUtil.readAllToString(is, respCharset);
                 } else if (byte[].class.equals(resultClass)) {
                     return (T) IOUtil.readAllBytes(is);

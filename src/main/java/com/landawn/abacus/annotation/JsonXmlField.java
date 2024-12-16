@@ -67,7 +67,7 @@ public @interface JsonXmlField {
 
     Expose expose() default Expose.DEFAULT;
 
-    public enum Expose {
+    enum Expose {
         /**
          * @deprecated don't need to set it. It's {@code DEFAULT} by default.
          */
@@ -76,6 +76,6 @@ public @interface JsonXmlField {
 
         SERIALIZE_ONLY,
 
-        DESERIALIZE_ONLY;
+        DESERIALIZE_ONLY
     }
 }

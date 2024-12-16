@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 @Internal
 public final class MapEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -6595007303962724540L;
 
     private final String entityName;
@@ -109,7 +111,6 @@ public final class MapEntity implements Serializable {
      * @param targetType
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T get(final String propName, final Class<? extends T> targetType) {
         Object propValue = get(propName);
 
@@ -151,9 +152,10 @@ public final class MapEntity implements Serializable {
      * @param propName
      * @return
      */
+    @SuppressWarnings("UnusedReturnValue")
     @MayReturnNull
     public Object remove(String propName) {
-        if (values.size() == 0) {
+        if (values.isEmpty()) {
             return null;
         }
 
@@ -181,7 +183,7 @@ public final class MapEntity implements Serializable {
      * @return {@code true}, if successful
      */
     public boolean containsKey(final String propName) {
-        if (values.size() == 0) {
+        if (values.isEmpty()) {
             return false;
         }
 

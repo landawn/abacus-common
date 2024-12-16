@@ -32,9 +32,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is array.
+     * Checks if this is array type.
      *
-     * @return {@code true}, if is array
+     * @return {@code true}, if this is array type
      */
     @Override
     public boolean isArray() {

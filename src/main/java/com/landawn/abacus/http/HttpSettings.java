@@ -326,6 +326,7 @@ public final class HttpSettings {
      * @param password
      * @return
      */
+    @SuppressWarnings("UnusedReturnValue")
     public HttpSettings basicAuth(final String user, final Object password) {
         return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
     }

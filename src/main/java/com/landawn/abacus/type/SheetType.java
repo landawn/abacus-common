@@ -20,6 +20,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 // TODO: Auto-generated Javadoc
+
 /**
  *
  * @param <R>
@@ -119,7 +120,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     @SuppressWarnings("rawtypes")
     @Override
     public Sheet valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : (Sheet) Utils.jsonParser.deserialize(str, typeClass);
+        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 
     /**

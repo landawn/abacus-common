@@ -58,7 +58,7 @@ public final class JsonMappers {
         {
             SerializationFeature tmp = null;
             for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
-                if (defaultSerializationConfig.isEnabled(serializationFeature) == false) {
+                if (!defaultSerializationConfig.isEnabled(serializationFeature)) {
                     tmp = serializationFeature;
                     break;
                 }
@@ -71,7 +71,7 @@ public final class JsonMappers {
         {
             DeserializationFeature tmp = null;
             for (final DeserializationFeature deserializationFeature : DeserializationFeature.values()) {
-                if (defaultDeserializationConfig.isEnabled(deserializationFeature) == false) {
+                if (!defaultDeserializationConfig.isEnabled(deserializationFeature)) {
                     tmp = deserializationFeature;
                     break;
                 }

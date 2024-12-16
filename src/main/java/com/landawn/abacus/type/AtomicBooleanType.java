@@ -91,7 +91,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws SQLException {
-        stmt.setBoolean(columnIndex, (x == null) ? false : x.get());
+        stmt.setBoolean(columnIndex, x != null && x.get());
     }
 
     /**
@@ -103,7 +103,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws SQLException {
-        stmt.setBoolean(parameterName, (x == null) ? false : x.get());
+        stmt.setBoolean(parameterName, x != null && x.get());
     }
 
     /**

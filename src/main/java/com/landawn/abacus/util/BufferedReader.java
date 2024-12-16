@@ -29,23 +29,23 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     static final Reader DUMMY_READER = new DummyReader();
 
-    protected char[] _cbuf; //NOSONAR
+    char[] _cbuf; //NOSONAR
 
-    protected int nChars = 0;
+    int nChars = 0;
 
-    protected int nextChar = 0;
+    int nextChar = 0;
 
-    protected boolean skipLF = false;
+    boolean skipLF = false;
 
-    protected String str;
+    String str;
 
-    protected char[] strValue;
+    char[] strValue;
 
-    protected int strLength;
+    int strLength;
 
-    protected Reader in;
+    Reader in;
 
-    protected boolean isClosed;
+    boolean isClosed;
 
     BufferedReader(final String st) {
         super(DUMMY_READER, 1);
@@ -211,7 +211,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             if (nextChar >= nChars) { /* EOF */
                 String str = null; //NOSONAR
 
-                if ((sb != null) && (sb.length() > 0)) {
+                if ((sb != null) && (!sb.isEmpty())) {
                     str = sb.toString();
                 }
 
@@ -330,7 +330,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
                 final long d = nChars - nextChar; //NOSONAR
 
                 if (r <= d) {
-                    nextChar += r;
+                    nextChar += (int) r;
                     r = 0;
 
                     break;
@@ -348,7 +348,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
             // Bound skip by beginning and end of the source
             final long ns = Math.min(strLength - nextChar, n); //NOSONAR
-            nextChar += ns;
+            nextChar += (int) ns;
 
             return ns;
         }
@@ -400,7 +400,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         }
 
         try {
-            IOUtil.close(in);
+            if (in != null) {
+                in.close();
+            }
         } finally {
             _reset();
             isClosed = true;
@@ -442,6 +444,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * Reset.
      */
     void _reset() { //NOSONAR
+        //noinspection SynchronizeOnNonFinalField
         synchronized (lock) {
             Objectory.recycle(_cbuf);
             _cbuf = null;

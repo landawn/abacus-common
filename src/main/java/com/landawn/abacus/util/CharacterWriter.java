@@ -66,9 +66,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
         int i = 0;
         int from = 0;
 
-        for (final int end = len; i < end; i++) {
+        for (@SuppressWarnings("UnnecessaryLocalVariable")
+        final int end = len; i < end; i++) {
             ch = cbuf[i];
 
+            //noinspection StatementWithEmptyBody
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
                 // continue
             } else {
@@ -105,6 +107,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
         for (final int end = off + len; i < end; i++) {
             ch = cbuf[i];
 
+            //noinspection StatementWithEmptyBody
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
                 // continue
             } else {

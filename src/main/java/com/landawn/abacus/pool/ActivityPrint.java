@@ -14,15 +14,17 @@
 
 package com.landawn.abacus.pool;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 public final class ActivityPrint implements Cloneable, Serializable {
 
+    @Serial
     private static final long serialVersionUID = -45207875951748322L;
 
-    private long createTime;
+    private long createdTime;
 
     private long liveTime;
 
@@ -47,12 +49,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
             throw new IllegalArgumentException("Illegal maxIdleTime[" + maxIdleTime + "]. ");
         }
 
-        createTime = System.currentTimeMillis();
+        createdTime = System.currentTimeMillis();
 
         this.liveTime = liveTime;
         this.maxIdleTime = maxIdleTime;
 
-        lastAccessTime = createTime;
+        lastAccessTime = createdTime;
         accessCount = 0;
     }
 
@@ -119,22 +121,22 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the creates the time.
+     * Gets the creation time.
      *
      * @return
      */
-    public long getCreateTime() {
-        return createTime;
+    public long getCreatedTime() {
+        return createdTime;
     }
 
     /**
-     * Sets the create time.
+     * Sets the creation time.
      *
-     * @param createTime
+     * @param createdTime
      * @return
      */
-    ActivityPrint setCreateTime(final long createTime) {
-        this.createTime = createTime;
+    ActivityPrint setCreatedTime(final long createdTime) {
+        this.createdTime = createdTime;
 
         return this;
     }
@@ -177,7 +179,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return
      */
     public long getExpirationTime() {
-        return ((Long.MAX_VALUE - createTime) < liveTime) ? Long.MAX_VALUE : (createTime + liveTime);
+        return ((Long.MAX_VALUE - createdTime) < liveTime) ? Long.MAX_VALUE : (createdTime + liveTime);
     }
 
     /**
@@ -188,7 +190,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     public boolean isExpired() {
         final long now = System.currentTimeMillis();
 
-        return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
+        return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createdTime));
     }
 
     @Override
@@ -207,7 +209,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         long h = 7;
-        h = (h * 31) + createTime;
+        h = (h * 31) + createdTime;
         h = (h * 31) + liveTime;
         h = (h * 31) + maxIdleTime;
         h = (h * 31) + lastAccessTime;
@@ -229,7 +231,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
         }
 
         if (obj instanceof final ActivityPrint other) {
-            return (createTime == other.createTime) && (liveTime == other.liveTime) && (maxIdleTime == other.maxIdleTime)
+            return (createdTime == other.createdTime) && (liveTime == other.liveTime) && (maxIdleTime == other.maxIdleTime)
                     && (lastAccessTime == other.lastAccessTime) && (accessCount == other.accessCount);
         }
 
@@ -238,7 +240,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "{createTime=" + createTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime
+        return "{createdTime=" + createdTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime
                 + ", accessCount=" + accessCount + "}";
     }
 }

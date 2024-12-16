@@ -80,7 +80,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     public Integer[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_INT_OBJ_ARRAY;
         }
 

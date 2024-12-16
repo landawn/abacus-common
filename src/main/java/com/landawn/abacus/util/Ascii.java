@@ -156,7 +156,7 @@ public final class Ascii {
 
     /**
      * Shift Out: A control character indicating that the code combinations which follow shall be
-     * interpreted as outside of the character set of the standard code table until a Shift In
+     * interpreted as outside the character set of the standard code table until a Shift In
      * character is reached.
      *
      */

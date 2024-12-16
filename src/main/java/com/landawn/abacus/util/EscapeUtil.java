@@ -19,12 +19,7 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Note: it's copied from StringEscaperUtils in Apache Commons Lang under Apache License 2.0
@@ -34,7 +29,7 @@ import java.util.Set;
  *
  * <p>#ThreadSafe#</p>
  */
-@SuppressWarnings({ "java:S100", "java:S3878" })
+@SuppressWarnings({ "java:S100", "java:S3878", "UnnecessaryUnicodeEscape", "SpellCheckingInspection" })
 public final class EscapeUtil {
     /**
      * {@code \u000a} linefeed LF ('\n').
@@ -251,11 +246,12 @@ public final class EscapeUtil {
      * instance to operate.</p>
      */
     private EscapeUtil() {
-        // singlton.
+        // singleton.
     }
 
     // Java and JavaScript
     //--------------------------------------------------------------------------
+
     /**
      * <p>Escapes the characters in a {@code String} using Java String rules.</p>
      *
@@ -379,6 +375,7 @@ public final class EscapeUtil {
 
     // HTML and XML
     //--------------------------------------------------------------------------
+
     /**
      * <p>Escapes the characters in a {@code String} using HTML entities.</p>
      *
@@ -422,6 +419,7 @@ public final class EscapeUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * <p>Unescapes a string containing bean escapes to a string
      * containing the actual Unicode characters corresponding to the
@@ -516,6 +514,7 @@ public final class EscapeUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * <p>Unescapes a string containing XML bean escapes to a string
      * containing the actual Unicode characters corresponding to the
@@ -663,8 +662,7 @@ public final class EscapeUtil {
                     }
                     continue;
                 }
-                // contract with translators is that they have to understand codepoints
-                // and they just took care of a surrogate pair
+                // contract with translators is that they have to understand codepoints, and they just took care of a surrogate pair
                 for (int pt = 0; pt < consumed; pt++) {
                     pos += Character.charCount(Character.codePointAt(input, pos));
                 }
@@ -939,7 +937,7 @@ public final class EscapeUtil {
          * {@inheritDoc}
          */
         @Override
-        public boolean translate(final int codepoint, final Writer out) throws IOException {
+        public boolean translate(final int codepoint, final Writer out) {
             // It's a surrogate. Write nothing and say we've translated.
             return codepoint >= Character.MIN_SURROGATE && codepoint <= Character.MAX_SURROGATE;
         }
@@ -1169,7 +1167,7 @@ public final class EscapeUtil {
      * Translate XML numeric entities of the form &amp;#[xX]?\d+;? to
      * the specific codepoint.
      *
-     * Note that the semi-colon is optional.
+     * Note that the semicolon is optional.
      *
      */
     static class NumericBeanUnescaper extends CharSequenceTranslator {
@@ -1179,11 +1177,11 @@ public final class EscapeUtil {
          */
         public enum OPTION {
 
-            /** The semi colon required. */
+            /** The semicolon required. */
             semiColonRequired,
-            /** The semi colon optional. */
+            /** The semicolon optional. */
             semiColonOptional,
-            /** The error if no semi colon. */
+            /** The error if no semicolon. */
             errorIfNoSemiColon
         }
 
@@ -1195,7 +1193,7 @@ public final class EscapeUtil {
          * Create a UnicodeUnescaper.
          *
          * The constructor takes a list of options, only one type of which is currently
-         * available (whether to allow, error or ignore the semi-colon on the end of a
+         * available (whether to allow, error or ignore the semicolon on the end of a
          * numeric bean to being missing).
          *
          * For example, to support numeric entities without a ';':
@@ -1212,7 +1210,7 @@ public final class EscapeUtil {
             if (options.length > 0) {
                 this.options = EnumSet.copyOf(Arrays.asList(options));
             } else {
-                this.options = EnumSet.copyOf(Arrays.asList(OPTION.semiColonRequired));
+                this.options = EnumSet.copyOf(List.of(OPTION.semiColonRequired));
             }
         }
 
@@ -1223,7 +1221,7 @@ public final class EscapeUtil {
          * @return whether the option is set
          */
         public boolean isSet(final OPTION option) {
-            return options == null ? false : options.contains(option);
+            return options != null && options.contains(option);
         }
 
         /**
@@ -1249,7 +1247,7 @@ public final class EscapeUtil {
                 }
 
                 int end = start;
-                // Note that this supports character codes without a ; on the end
+                // Note that this supports character codes without a ';' on the end
                 while (end < seqEnd && (input.charAt(end) >= '0' && input.charAt(end) <= '9' || input.charAt(end) >= 'a' && input.charAt(end) <= 'f'
                         || input.charAt(end) >= 'A' && input.charAt(end) <= 'F')) {
                     end++;
@@ -1261,7 +1259,7 @@ public final class EscapeUtil {
                     if (isSet(OPTION.semiColonRequired)) {
                         return 0;
                     } else if (isSet(OPTION.errorIfNoSemiColon)) {
-                        throw new IllegalArgumentException("Semi-colon required at end of numeric bean");
+                        throw new IllegalArgumentException("Semicolon required at end of numeric bean");
                     }
                 }
 
@@ -1389,7 +1387,7 @@ public final class EscapeUtil {
          *
          * @param codepoint int character input to translate
          * @param out Writer to optionally push the translated output to
-         * @return boolean as to whether translation occurred or not
+         * @return boolean whether translation occurred or not
          * @throws IOException if and only if the Writer produces an IOException
          */
         public abstract boolean translate(int codepoint, Writer out) throws IOException;
@@ -1398,6 +1396,7 @@ public final class EscapeUtil {
 
     // TODO: Create a parent class - 'SinglePassTranslator' ?
     //       It would handle the index checking + length returning,
+
     /**
      * The Class CsvEscaper.
      */
@@ -1483,7 +1482,7 @@ public final class EscapeUtil {
             final String quoteless = input.subSequence(1, input.length() - 1).toString();
 
             if (Strings.containsAny(quoteless, CSV_SEARCH_CHARS)) {
-                // deal with escaped quotes; ie) ""
+                // deal with escaped quotes; ie ""
                 out.write(Strings.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
             } else {
                 out.write(input.toString());

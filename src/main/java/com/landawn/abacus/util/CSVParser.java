@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.landawn.abacus.exception.ParseException;
@@ -41,7 +40,7 @@ public class CSVParser {
     public static final int INITIAL_READ_SIZE = 1024;
     /**
      * In most cases we know the size of the line we want to read.  In that case we will set the initial read
-     * to that plus an buffer size.
+     * to that plus a buffer size.
      */
     public static final int READ_BUFFER_SIZE = 128;
     /**
@@ -80,7 +79,7 @@ public class CSVParser {
     /**
      * This is the character that the CSVParser will treat as the quotation character.
      */
-    private final char quotechar;
+    private final char quoteChar;
     /**
      * This is the character that the CSVParser will treat as the escape character.
      */
@@ -120,21 +119,21 @@ public class CSVParser {
      * Constructs CSVParser with supplied separator and quote char.
      *
      * @param separator The delimiter to use for separating entries
-     * @param quotechar The character to use for quoted elements
+     * @param quoteChar The character to use for quoted elements
      */
-    public CSVParser(final char separator, final char quotechar) {
-        this(separator, quotechar, DEFAULT_ESCAPE_CHARACTER);
+    public CSVParser(final char separator, final char quoteChar) {
+        this(separator, quoteChar, DEFAULT_ESCAPE_CHARACTER);
     }
 
     /**
      * Constructs CSVParser with supplied separator and quote char.
      *
      * @param separator The delimiter to use for separating entries
-     * @param quotechar The character to use for quoted elements
+     * @param quoteChar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
      */
-    public CSVParser(final char separator, final char quotechar, final char escape) {
-        this(separator, quotechar, escape, DEFAULT_STRICT_QUOTES);
+    public CSVParser(final char separator, final char quoteChar, final char escape) {
+        this(separator, quoteChar, escape, DEFAULT_STRICT_QUOTES);
     }
 
     /**
@@ -142,12 +141,12 @@ public class CSVParser {
      * Allows setting the "strict quotes" flag.
      *
      * @param separator The delimiter to use for separating entries
-     * @param quotechar The character to use for quoted elements
+     * @param quoteChar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
      * @param strictQuotes If {@code true}, characters outside the quotes are ignored
      */
-    public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes) {
-        this(separator, quotechar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
+    public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) {
+        this(separator, quoteChar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
     }
 
     /**
@@ -155,13 +154,13 @@ public class CSVParser {
      * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
      *
      * @param separator The delimiter to use for separating entries
-     * @param quotechar The character to use for quoted elements
+     * @param quoteChar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
      * @param strictQuotes If {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
      */
-    public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
-        this(separator, quotechar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
+    public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
+        this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
     }
 
     /**
@@ -169,15 +168,15 @@ public class CSVParser {
      * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
      *
      * @param separator The delimiter to use for separating entries
-     * @param quotechar The character to use for quoted elements
+     * @param quoteChar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
      * @param strictQuotes If {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
      * @param ignoreQuotations If {@code true}, treat quotations like any other character.
      */
-    public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
+    public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
             final boolean ignoreQuotations) {
-        if (anyCharactersAreTheSame(separator, quotechar, escape)) {
+        if (anyCharactersAreTheSame(separator, quoteChar, escape)) {
             throw new UnsupportedOperationException("The separator, quote, and escape characters must be different!");
         }
 
@@ -186,7 +185,7 @@ public class CSVParser {
         }
 
         this.separator = separator;
-        this.quotechar = quotechar;
+        this.quoteChar = quoteChar;
         this.escape = escape;
         this.strictQuotes = strictQuotes;
         this.ignoreLeadingWhiteSpace = ignoreLeadingWhiteSpace;
@@ -203,8 +202,8 @@ public class CSVParser {
     /**
      * @return The default quotation character for this parser.
      */
-    public char getQuotechar() {
-        return quotechar;
+    public char getQuoteChar() {
+        return quoteChar;
     }
 
     /**
@@ -241,12 +240,12 @@ public class CSVParser {
      * must the different.
      *
      * @param separator The defined separator character
-     * @param quotechar The defined quotation cahracter
+     * @param quoteChar The defined quotation cahracter
      * @param escape The defined escape character
      * @return True if any two of the three are the same.
      */
-    private boolean anyCharactersAreTheSame(final char separator, final char quotechar, final char escape) {
-        return isSameCharacter(separator, quotechar) || isSameCharacter(separator, escape) || isSameCharacter(quotechar, escape);
+    private boolean anyCharactersAreTheSame(final char separator, final char quoteChar, final char escape) {
+        return isSameCharacter(separator, quoteChar) || isSameCharacter(separator, escape) || isSameCharacter(quoteChar, escape);
     }
 
     /**
@@ -299,7 +298,7 @@ public class CSVParser {
     public String[] parseLineToArray(final String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine);
 
-        return ret.toArray(new String[ret.size()]);
+        return ret.toArray(new String[0]);
     }
 
     /**
@@ -311,20 +310,18 @@ public class CSVParser {
     public String[] parseLineMultiToArray(final String nextLine) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);
 
-        return ret.toArray(new String[ret.size()]);
+        return ret.toArray(new String[0]);
     }
 
     /**
-     *
      * @param nextLine
      * @param output
-     * @return the specified output parameter: {@code output}.
      * @throws ParseException
      */
-    public String[] parseLineToArray(final String nextLine, final String[] output) throws ParseException {
+    public void parseLineToArray(final String nextLine, final String[] output) throws ParseException {
         final List<String> ret = parseLine(nextLine);
 
-        return ret.toArray(output);
+        ret.toArray(output);
     }
 
     /**
@@ -357,10 +354,10 @@ public class CSVParser {
             if (pending != null) {
                 final String s = pending;
                 pending = null;
-                return Arrays.asList(s);
+                return List.of(s);
             }
 
-            return N.<String> emptyList();
+            return N.emptyList();
         }
 
         final List<String> tokensOnThisLine = new ArrayList<>();
@@ -378,7 +375,7 @@ public class CSVParser {
                 if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
                     i = appendNextCharacterAndAdvanceLoop(nextLine, sb, i);
                 }
-            } else if (c == quotechar) {
+            } else if (c == quoteChar) {
                 if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
                     i = appendNextCharacterAndAdvanceLoop(nextLine, sb, i);
                 } else {
@@ -395,7 +392,7 @@ public class CSVParser {
                                 && nextLine.length() > (i + 1) && nextLine.charAt(i + 1) != separator //not at the   end of an escape sequence
                         ) {
 
-                            if (ignoreLeadingWhiteSpace && sb.length() > 0 && Strings.isWhitespace(sb)) {
+                            if (ignoreLeadingWhiteSpace && !sb.isEmpty() && Strings.isWhitespace(sb)) {
                                 sb.setLength(0);
                             } else {
                                 sb.append(c);
@@ -442,7 +439,7 @@ public class CSVParser {
     }
 
     private boolean atStartOfField(final StringBuilder sb) {
-        return sb.length() == 0;
+        return sb.isEmpty();
     }
 
     /**
@@ -462,7 +459,7 @@ public class CSVParser {
     /**
      * Determines if we can process as if we were in quotes.
      *
-     * @param inQuotes Are we currently in quotes.
+     * @param inQuotes
      * @return True if we should process as if we are inside quotes.
      */
     private boolean inQuotes(final boolean inQuotes) {
@@ -492,7 +489,7 @@ public class CSVParser {
      * @return True if c is the defined quotation character
      */
     private boolean isCharacterQuoteCharacter(final char c) {
-        return c == quotechar;
+        return c == quoteChar;
     }
 
     /**
@@ -521,7 +518,7 @@ public class CSVParser {
      * Checks to see if the character after the current index in a String is an
      * escapable character.
      * Meaning the next character is either a quotation character or the escape
-     * char and you are inside quotes.
+     * char if it's inside quotes.
      *
      * Precondition: the current character is an escape.
      *

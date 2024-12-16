@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see ObjListIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @see Throwables.Iterator.
+ * @see Throwables.Iterator
  * @param <T>
  */
 @SuppressWarnings({ "java:S6548" })
@@ -125,7 +125,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -199,7 +199,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @return An ObjIterator for the given Collection.
      */
     public static <T> ObjIterator<T> of(final Collection<? extends T> iterable) {
-        return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
+        return iterable == null ? ObjIterator.empty() : of(iterable.iterator());
     }
 
     /**
@@ -210,12 +210,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @return An ObjIterator for the given Iterable.
      */
     public static <T> ObjIterator<T> of(final Iterable<? extends T> iterable) {
-        return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
+        return iterable == null ? ObjIterator.empty() : of(iterable.iterator());
     }
 
     /**
      * Returns an ObjIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the Iterator instance when the ObjIterator's methods are first called.
+     * The Supplier is responsible for producing the ObjIterator instance when the first method in the returned {@code ObjIterator} is called.
      *
      * @param <T> the type of elements returned by this iterator
      * @param iteratorSupplier A Supplier that produces an Iterator instance when called.
@@ -465,7 +465,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public T next() {
-                if (hasNext() == false) {
+                if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
 
@@ -502,7 +502,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public T next() {
-                if (hasNext() == false) {
+                if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
 
@@ -571,7 +571,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
-            return ObjIterator.<T> empty();
+            return ObjIterator.empty();
         }
 
         final ObjIterator<T> iter = this;
@@ -639,7 +639,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         if (hasNext()) {
             return Nullable.of(next());
         } else {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
     }
 
@@ -677,7 +677,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             return Nullable.of(next);
         } else {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
     }
 
@@ -726,7 +726,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns an Stream of the elements in this ObjIterator.
+     * Returns a Stream of the elements in this ObjIterator.
      *
      * @return A Stream containing the remaining elements in the ObjIterator.
      */

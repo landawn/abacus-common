@@ -71,7 +71,7 @@ public final class TestUtil {
             if (String.class.equals(parameterClass)) {
                 propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
-                propValue = (N.RAND.nextInt() % 2 == 0) == false;
+                propValue = N.RAND.nextInt() % 2 != 0;
             } else if (char.class.equals(parameterClass) || Character.class.equals(parameterClass)) {
                 propValue = (char) ('a' + N.RAND.nextInt() % 26);
             } else if (int.class.equals(parameterClass) || Integer.class.equals(parameterClass)) {
@@ -149,7 +149,7 @@ public final class TestUtil {
 
         fill(beanInfo, result, propNamesToFill);
 
-        return (T) beanInfo.finishBeanResult(result);
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
@@ -177,7 +177,7 @@ public final class TestUtil {
 
             fill(beanInfo, result, propNamesToFill);
 
-            resultList.add((T) beanInfo.finishBeanResult(result));
+            resultList.add(beanInfo.finishBeanResult(result));
         }
 
         return resultList;

@@ -17,6 +17,8 @@ package com.landawn.abacus.logging;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
+
 /**
  * A factory for creating Logger objects.
  *
@@ -57,6 +59,7 @@ public final class LoggerFactory {
      * @param name
      * @return
      */
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static synchronized Logger getLogger(final String name) {
         Logger logger = namedLoggers.get(name);

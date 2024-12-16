@@ -110,6 +110,7 @@ public final class KahanSummation { // NOSONAR
     }
 
     // https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+
     /**
      *
      * @param value

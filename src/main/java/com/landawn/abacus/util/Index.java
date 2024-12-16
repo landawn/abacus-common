@@ -435,7 +435,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -454,7 +454,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -517,7 +517,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -536,7 +536,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -599,7 +599,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -618,7 +618,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -681,7 +681,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -700,7 +700,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -763,7 +763,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -782,7 +782,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -845,7 +845,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -864,7 +864,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -927,7 +927,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -946,7 +946,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1009,7 +1009,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1028,7 +1028,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1090,7 +1090,7 @@ public final class Index {
      * @param fromIndex The index to start the search from.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see #ofSubArray(Object[], Object[], int)
+     * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1109,7 +1109,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1191,7 +1191,7 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-list.
      * @return An OptionalInt containing the index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubList</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subListToFind</i>.
-     * @see #ofSubArray(Object[], Object[], int, int, int)
+     * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1521,8 +1521,6 @@ public final class Index {
      * @param charValueToFind The character value to find in the string.
      * @return An OptionalInt containing the last index of the character in the string, or an empty {@code OptionalInt} if the character is not found.
      * @see Strings#lastIndexOf(String, int)
-     * @see String#lastIndexOf(int)
-     * @see String#lastIndexOf(int, int)
      */
     public static OptionalInt last(final String str, final int charValueToFind) {
         return toOptionalInt(Strings.lastIndexOf(str, charValueToFind));
@@ -1536,8 +1534,6 @@ public final class Index {
      * @param startIndexFromBack The index to start the search from the end of the string.
      * @return An OptionalInt containing the last index of the character in the string, or an empty {@code OptionalInt} if the character is not found.
      * @see Strings#lastIndexOf(String, int, int)
-     * @see String#lastIndexOf(int)
-     * @see String#lastIndexOf(int, int)
      */
     public static OptionalInt last(final String str, final int charValueToFind, final int startIndexFromBack) {
         return toOptionalInt(Strings.lastIndexOf(str, charValueToFind, startIndexFromBack));
@@ -1550,8 +1546,8 @@ public final class Index {
      * @param valueToFind The string value to find in the string.
      * @return An OptionalInt containing the last index of the string in the string, or an empty {@code OptionalInt} if the string is not found.
      * @see Strings#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt last(final String str, final String valueToFind) {
         return toOptionalInt(Strings.lastIndexOf(str, valueToFind));
@@ -1565,8 +1561,8 @@ public final class Index {
      * @param startIndexFromBack The index to start the search from the end of the string.
      * @return An OptionalInt containing the last index of the string in the string, or an empty {@code OptionalInt} if the string is not found.
      * @see Strings#lastIndexOf(String, String, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt last(final String str, final String valueToFind, final int startIndexFromBack) {
         return toOptionalInt(Strings.lastIndexOf(str, valueToFind, startIndexFromBack));
@@ -1579,8 +1575,8 @@ public final class Index {
      * @param valueToFind The string value to find in the string.
      * @return An OptionalInt containing the last index of the string in the string, or an empty {@code OptionalInt} if the string is not found.
      * @see Strings#lastIndexOfIgnoreCase(String, String)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfIgnoreCase(final String str, final String valueToFind) {
         return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, valueToFind));
@@ -1594,8 +1590,8 @@ public final class Index {
      * @param startIndexFromBack The index to start the search from the end of the string.
      * @return An OptionalInt containing the last index of the string in the string, or an empty {@code OptionalInt} if the string is not found.
      * @see Strings#lastIndexOfIgnoreCase(String, String, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfIgnoreCase(final String str, final String valueToFind, final int startIndexFromBack) {
         return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, valueToFind, startIndexFromBack));
@@ -1608,8 +1604,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -1623,8 +1619,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int startIndexFromBack, final boolean[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -1642,8 +1638,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int startIndexFromBack, final boolean[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -1657,7 +1653,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -1687,8 +1683,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final char[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -1702,8 +1698,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int startIndexFromBack, final char[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -1721,8 +1717,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int startIndexFromBack, final char[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -1734,7 +1730,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -1764,8 +1760,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final byte[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -1779,8 +1775,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int startIndexFromBack, final byte[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -1798,8 +1794,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int startIndexFromBack, final byte[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -1811,7 +1807,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -1841,8 +1837,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final short[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -1856,8 +1852,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int startIndexFromBack, final short[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -1875,8 +1871,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int startIndexFromBack, final short[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -1888,7 +1884,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -1918,8 +1914,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -1933,8 +1929,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -1952,8 +1948,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind, final int startIndexOfSubArray,
             final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -1965,7 +1961,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -1995,8 +1991,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final long[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -2010,8 +2006,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int startIndexFromBack, final long[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -2029,8 +2025,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int startIndexFromBack, final long[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -2042,7 +2038,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -2072,8 +2068,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final float[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -2087,8 +2083,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int startIndexFromBack, final float[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -2106,8 +2102,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int startIndexFromBack, final float[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -2119,7 +2115,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -2149,8 +2145,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final double[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -2164,8 +2160,8 @@ public final class Index {
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int startIndexFromBack, final double[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -2183,8 +2179,8 @@ public final class Index {
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int startIndexFromBack, final double[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -2196,7 +2192,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -2225,8 +2221,8 @@ public final class Index {
      * @param sourceArray The array to be searched.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final Object[] subArrayToFind) {
         return lastOfSubArray(sourceArray, N.len(sourceArray), subArrayToFind, 0, N.len(subArrayToFind));
@@ -2239,8 +2235,8 @@ public final class Index {
      * @param startIndexFromBack The index to start the search from the end of the array.
      * @param subArrayToFind The sub-array to find in the source array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int startIndexFromBack, final Object[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
@@ -2257,8 +2253,8 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-array.
      * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int startIndexFromBack, final Object[] subArrayToFind,
             final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -2270,7 +2266,7 @@ public final class Index {
             if (sourceArray == null || subArrayToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -2299,8 +2295,8 @@ public final class Index {
      * @param sourceList The list to be searched.
      * @param subListToFind The sub-list to find in the source list.
      * @return An OptionalInt containing the last index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final List<?> subListToFind) {
         return lastOfSubList(sourceList, N.size(sourceList), subListToFind, 0, N.size(subListToFind));
@@ -2313,8 +2309,8 @@ public final class Index {
      * @param startIndexFromBack The index to start the search from the end of the list.
      * @param subListToFind The sub-list to find in the source list.
      * @return An OptionalInt containing the last index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subListToFind) {
         return lastOfSubList(sourceList, startIndexFromBack, subListToFind, 0, N.size(subListToFind));
@@ -2331,8 +2327,8 @@ public final class Index {
      * @param sizeToMatch The number of elements to match from the sub-list.
      * @return An OptionalInt containing the last index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubList</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
-     * @see String#lastIndexOf(String, String)
-     * @see String#lastIndexOf(String, String, int)
+     * @see Strings#lastIndexOf(String, String)
+     * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subListToFind, final int startIndexOfSubList,
             final int sizeToMatch) throws IndexOutOfBoundsException {
@@ -2344,7 +2340,7 @@ public final class Index {
             if (sourceList == null || subListToFind == null || startIndexFromBack < 0) {
                 return toOptionalInt(N.INDEX_NOT_FOUND);
             } else {
-                return toOptionalInt(startIndexFromBack <= len ? startIndexFromBack : len);
+                return toOptionalInt(Math.min(startIndexFromBack, len));
             }
         }
 
@@ -2780,8 +2776,7 @@ public final class Index {
             return bitSet;
         }
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<?> list = (List<?>) c;
+        if (c instanceof List<?> list && c instanceof RandomAccess) {
 
             for (int idx = N.max(fromIndex, 0); idx < size; idx++) {
                 if (N.equals(list.get(idx), valueToFind)) {
@@ -2876,8 +2871,7 @@ public final class Index {
             return bitSet;
         }
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends T> list = (List<? extends T>) c;
+        if (c instanceof List<? extends T> list && c instanceof RandomAccess) {
 
             for (int idx = N.max(fromIndex, 0); idx < size; idx++) {
                 if (predicate.test(list.get(idx))) {

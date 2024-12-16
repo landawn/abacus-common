@@ -36,7 +36,7 @@ package com.landawn.abacus.util;
  *       }
  * </pre>
  *
- * @version  $Id: ThreadMonitor.java 1563227 2014-01-31 19:45:30Z ggregory $
+ * @version $Id: ThreadMonitor.java 1563227 2014-01-31 19:45:30Z ggregory $
  */
 final class ThreadMonitor implements Runnable {
 
@@ -59,7 +59,7 @@ final class ThreadMonitor implements Runnable {
     /**
      * Start monitoring the specified thread.
      *
-     * @param thread The thread The thread to monitor
+     * @param thread The thread to monitor
      * @param timeout The timeout amount in milliseconds
      * or no timeout if the value is zero or less
      * @return The monitor thread or {@code null}
@@ -68,8 +68,8 @@ final class ThreadMonitor implements Runnable {
     public static Thread start(final Thread thread, final long timeout) {
         Thread monitor = null;
         if (timeout > 0) {
-            final ThreadMonitor timout = new ThreadMonitor(thread, timeout);
-            monitor = new Thread(timout, ThreadMonitor.class.getSimpleName());
+            final ThreadMonitor threadMonitor = new ThreadMonitor(thread, timeout);
+            monitor = new Thread(threadMonitor, ThreadMonitor.class.getSimpleName());
             monitor.setDaemon(true);
             monitor.start();
         }

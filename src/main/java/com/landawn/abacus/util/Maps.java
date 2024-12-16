@@ -771,7 +771,6 @@ public final class Maps {
      *
      * @param <K> The type of keys in the resulting Map.
      * @param <V> The type of values in the resulting Map.
-     * @param <M> The type of the resulting Map.
      * @param keys An Iterable of keys for the resulting Map.
      * @param values An Iterable of values for the resulting Map.
      * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
@@ -1019,7 +1018,7 @@ public final class Maps {
      */
     public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
-            return N.<E> emptyList();
+            return N.emptyList();
         }
 
         final V val = map.get(key);
@@ -1065,7 +1064,7 @@ public final class Maps {
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
-            return N.<E> emptySet();
+            return N.emptySet();
         }
 
         final V val = map.get(key);
@@ -1113,13 +1112,13 @@ public final class Maps {
      */
     public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
-            return N.<KK, VV> emptyMap();
+            return N.emptyMap();
         }
 
         final V val = map.get(key);
 
         if (val == null) {
-            return N.<KK, VV> emptyMap();
+            return N.emptyMap();
         }
 
         return val;
@@ -1706,7 +1705,7 @@ public final class Maps {
     //     * @param map
     //     * @param key
     //     * @return
-    //     * @deprecated inconsistent with {@link #getNonNull(Map, Object, Object)
+    //     * @deprecated inconsistent with {@link #getNonNull(Map, Object, Object)}
     //     */
     //    @Deprecated
     //    public static <K, V> u.Optional<V> getNonNull(final Map<K, ? extends V> map, final K key) {
@@ -1993,6 +1992,7 @@ public final class Maps {
         V val = null;
 
         for (final Object key : keys) {
+            //noinspection SuspiciousMethodCalls
             val = map.get(key);
 
             if (val != null) {
@@ -2042,7 +2042,7 @@ public final class Maps {
     //    }
 
     /**
-     * Gets the or default for each.
+     * Returns a list of values mapped by the keys which exist in the specified {@code Map}, or default value if the key doesn't exist in the {@code Map} or associated value is {@code null}.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
@@ -2069,6 +2069,7 @@ public final class Maps {
         V val = null;
 
         for (final Object key : keys) {
+            //noinspection SuspiciousMethodCalls
             val = map.get(key);
 
             if (val == null) {
@@ -2085,29 +2086,29 @@ public final class Maps {
      * Retrieves a value from a nested map structure using a dot-separated path. For example:
      * <pre>
      * <code>
-        Map map = N.asMap("key1", "val1");
-        assertEquals("val1", Maps.getByPath(map, "key1"));
-
-        map = N.asMap("key1", N.asList("val1"));
-        assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
-        map = N.asMap("key1", N.asSet("val1"));
-        assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
-        assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
-        map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
-        assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
-        assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
-        assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
-        assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
+     Map map = N.asMap("key1", "val1");
+     assertEquals("val1", Maps.getByPath(map, "key1"));
+    
+     map = N.asMap("key1", N.asList("val1"));
+     assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+    
+     map = N.asMap("key1", N.asSet("val1"));
+     assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+    
+     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
+     assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
+    
+     map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
+     assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
+    
+     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
+     assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
+    
+     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+     assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
+    
+     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+     assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
      * </pre>
      *
@@ -2188,7 +2189,7 @@ public final class Maps {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         return Nullable.of((T) val);
@@ -2208,7 +2209,7 @@ public final class Maps {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
 
         if (val == null || targetType.isAssignableFrom(val.getClass())) {
@@ -2323,7 +2324,7 @@ public final class Maps {
      * @return A new map which is the intersection of the input maps
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
-     * @see #commonSet(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<?, ?> map2) {
@@ -2374,7 +2375,7 @@ public final class Maps {
 
         if (N.isEmpty(map2)) {
             for (final Map.Entry<K, V> entry : map.entrySet()) {
-                result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.<V> empty()));
+                result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.empty()));
             }
         } else {
             V val = null;
@@ -2383,7 +2384,7 @@ public final class Maps {
                 val = map2.get(entry.getKey());
 
                 if (val == null && !map2.containsKey(entry.getKey())) {
-                    result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.<V> empty()));
+                    result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.empty()));
                 } else if (!N.equals(val, entry.getValue())) {
                     result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.of(val)));
                 }
@@ -2405,10 +2406,10 @@ public final class Maps {
      * @param map The first map to compare.
      * @param map2 The second map to compare.
      * @return A map representing the symmetric difference between the two input maps.
-     * @see #symmetricDifference(int[], int[])
-     * @see #excludeAll(Collection, Collection)
-     * @see #excludeAllToSet(Collection, Collection)
-     * @see #difference(Collection, Collection)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
      * @see Difference.MapDifference#of(Map, Map)
      * @see Difference#of(Collection, Collection)
      * @see Iterables#symmetricDifference(Set, Set)
@@ -2421,7 +2422,7 @@ public final class Maps {
         if (N.notEmpty(map)) {
             if (N.isEmpty(map2)) {
                 for (final Map.Entry<K, V> entry : map.entrySet()) {
-                    result.put(entry.getKey(), Pair.of(Nullable.of(entry.getValue()), Nullable.<V> empty()));
+                    result.put(entry.getKey(), Pair.of(Nullable.of(entry.getValue()), Nullable.empty()));
                 }
             } else {
                 K key = null;
@@ -2432,7 +2433,7 @@ public final class Maps {
                     val2 = map2.get(key);
 
                     if (val2 == null && !map2.containsKey(key)) {
-                        result.put(key, Pair.of(Nullable.of(entry.getValue()), Nullable.<V> empty()));
+                        result.put(key, Pair.of(Nullable.of(entry.getValue()), Nullable.empty()));
                     } else if (!N.equals(val2, entry.getValue())) {
                         result.put(key, Pair.of(Nullable.of(entry.getValue()), Nullable.of(val2)));
                     }
@@ -2443,12 +2444,12 @@ public final class Maps {
         if (N.notEmpty(map2)) {
             if (N.isEmpty(map)) {
                 for (final Map.Entry<K, V> entry : map2.entrySet()) {
-                    result.put(entry.getKey(), Pair.of(Nullable.<V> empty(), Nullable.of(entry.getValue())));
+                    result.put(entry.getKey(), Pair.of(Nullable.empty(), Nullable.of(entry.getValue())));
                 }
             } else {
                 for (final Map.Entry<K, V> entry : map2.entrySet()) {
                     if (!map.containsKey(entry.getKey())) {
-                        result.put(entry.getKey(), Pair.of(Nullable.<V> empty(), Nullable.of(entry.getValue())));
+                        result.put(entry.getKey(), Pair.of(Nullable.empty(), Nullable.of(entry.getValue())));
                     }
                 }
             }
@@ -2569,12 +2570,15 @@ public final class Maps {
             return false;
         }
 
+        @SuppressWarnings("SuspiciousMethodCalls")
         final Object curValue = map.get(key);
 
+        //noinspection SuspiciousMethodCalls
         if (!N.equals(curValue, value) || (curValue == null && !map.containsKey(key))) {
             return false;
         }
 
+        //noinspection SuspiciousMethodCalls
         map.remove(key);
         return true;
     }
@@ -3087,12 +3091,7 @@ public final class Maps {
 
             if (N.notEmpty(c)) {
                 for (final V v : c) {
-                    List<K> list = result.get(v);
-
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        result.put(v, list);
-                    }
+                    List<K> list = result.computeIfAbsent(v, k -> new ArrayList<>());
 
                     list.add(entry.getKey());
                 }
@@ -3163,7 +3162,7 @@ public final class Maps {
      * @return A new map which is the flattened version of the input map.
      */
     public static Map<String, Object> flatten(final Map<String, Object> map) {
-        return flatten(map, Suppliers.<String, Object> ofMap());
+        return flatten(map, Suppliers.ofMap());
     }
 
     /**
@@ -3241,7 +3240,7 @@ public final class Maps {
      * @return A new map which is the unflattened version of the input map.
      */
     public static Map<String, Object> unflatten(final Map<String, Object> map) {
-        return unflatten(map, Suppliers.<String, Object> ofMap());
+        return unflatten(map, Suppliers.ofMap());
     }
 
     /**
@@ -3277,7 +3276,7 @@ public final class Maps {
 
         if (N.notEmpty(map)) {
             for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getKey().indexOf(delimiter) >= 0) {
+                if (entry.getKey().contains(delimiter)) {
                     final String[] keys = keySplitter.splitToArray(entry.getKey());
                     Map<String, Object> lastMap = result;
 
@@ -3493,24 +3492,24 @@ public final class Maps {
      * Converts a collection of maps into a list of bean objects of the specified type.
      * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
      * The resulting list contains bean objects of the specified type with their properties set to the values from the corresponding map.
-     * The igoreNullProperty parameter allows the user to specify whether {@code null} properties should be ignored.
+     * The ignoreNullProperty parameter allows the user to specify whether {@code null} properties should be ignored.
      * The ignoreUnmatchedProperty parameter allows the user to specify whether unmatched properties should be ignored.
      *
      * @param <T> The type of the bean objects to be returned.
      * @param mList The collection of maps to be converted into bean objects.
-     * @param igoreNullProperty A boolean that determines whether {@code null} properties should be ignored.
+     * @param ignoreNullProperty A boolean that determines whether {@code null} properties should be ignored.
      * @param ignoreUnmatchedProperty A boolean that determines whether unmatched properties should be ignored.
      * @param targetType The type of the bean objects to be returned.
      * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
+    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
         for (final Map<String, Object> m : mList) {
-            beanList.add(map2Bean(m, igoreNullProperty, ignoreUnmatchedProperty, targetType));
+            beanList.add(map2Bean(m, ignoreNullProperty, ignoreUnmatchedProperty, targetType));
         }
 
         return beanList;
@@ -4242,7 +4241,7 @@ public final class Maps {
      *  <br />
      *  public static class User {
      *     private String name;
-     *     private Address address
+     *     private Address address;
      *  }
      *  <br/>
      *  public static class Address {
@@ -5126,15 +5125,14 @@ public final class Maps {
             return;
         }
 
-        final Map<K, V> mapToUse = map;
-        final List<K> keys = new ArrayList<>(mapToUse.keySet());
+        final List<K> keys = new ArrayList<>(map.keySet());
         K newKey = null;
 
         for (final K key : keys) {
             newKey = keyConverter.apply(key);
 
             if (!N.equals(key, newKey)) {
-                mapToUse.merge(newKey, mapToUse.remove(key), merger);
+                map.merge(newKey, map.remove(key), merger);
             }
         }
     }

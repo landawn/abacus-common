@@ -288,7 +288,7 @@ public abstract class Files { //NOSONAR
      *     href="https://developer.android.com/training/data-storage" target="_blank">Data and File
      *     Storage overview</a> to select an appropriate temporary directory (perhaps {@code
      *     context.getCacheDir()}), and create your own directory under that. (For example, you might
-     *     use {@code new File(context.getCacheDir(), "directoryname").mkdir()}, or, if you need an
+     *     use {@code new File(context.getCacheDir(), "directoryName").mkdir()}, or, if you need an
      *     arbitrary number of temporary directories, you might have to generate multiple directory
      *     names in a loop until {@code mkdir()} returns {@code true}.) For JRE users, prefer {@link
      *     java.nio.file.Files#createTempDirectory}, transforming it to a {@link File} using {@link
@@ -381,7 +381,7 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Reads all of the lines from a file. The lines do not include line-termination characters, but
+     * Reads all the lines from a file. The lines do not include line-termination characters, but
      * do include other leading and trailing whitespace.
      *
      * <p>This method returns a mutable {@code List}. For an {@code ImmutableList}, use {@code
@@ -445,7 +445,7 @@ public abstract class Files { //NOSONAR
      * <p>Files are mapped from offset 0 to {@code size}.
      *
      * <p>If the mode is {@link MapMode#READ_WRITE} and the file does not exist, it will be created
-     * with the requested {@code size}. Thus this method is useful for creating memory mapped files
+     * with the requested {@code size}. Thus, this method is useful for creating memory mapped files
      * which do not yet exist.
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
@@ -555,7 +555,7 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>Warning:</b> {@code File} provides no support for symbolic links, and as such there is no
      * way to ensure that a symbolic link to a directory is not followed when traversing the tree. In
-     * this case, iterables created by this traverser could contain files that are outside of the
+     * this case, iterables created by this traverser could contain files that are outside the
      * given directory or even be infinite if there is a symbolic link loop.
      *
      * <p>If available, consider using {@link MoreFiles#fileTraverser()} instead. It behaves the same

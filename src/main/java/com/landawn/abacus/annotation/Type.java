@@ -29,6 +29,7 @@ import java.lang.annotation.Target;
 public @interface Type {
 
     /**
+     * Use {@code name} to specify attribute explicitly
      *
      * @return
      * @deprecated use {@code name} to specify attribute explicitly.
@@ -48,7 +49,7 @@ public @interface Type {
     /**
      * The Enum EnumType.
      */
-    public enum EnumBy {
+    enum EnumBy {
         /** Persist enumerated type property or field as an integer. */
         ORDINAL,
 
@@ -59,7 +60,7 @@ public @interface Type {
     /**
      * The Enum Scope.
      */
-    public enum Scope {
+    enum Scope {
         /**
          * Used for json/xml/... serialization/deserialization.
          */

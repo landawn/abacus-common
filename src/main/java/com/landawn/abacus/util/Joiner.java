@@ -70,7 +70,7 @@ public final class Joiner implements Closeable {
 
     private String emptyValue;
 
-    private String lastestToStringValue;
+    private String latestToStringValue;
 
     private boolean isClosed;
 
@@ -439,7 +439,7 @@ public final class Joiner implements Closeable {
      * @param element
      * @return
      */
-    public Joiner append(final Object element) { // Note: DO NOT remove/update this method because it also protect append(boolean/char/byte/.../double) from NullPointerException.
+    public Joiner append(final Object element) { // Note: DO NOT remove/update this method because it also protects append(boolean/char/byte/.../double) from NullPointerException.
         if (element != null || !skipNulls) {
             prepareBuilder().append(toString(element));
         }
@@ -469,6 +469,7 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendIf(final boolean b, final Supplier<?> supplier) {
         if (b) {
+            //noinspection resource
             append(supplier.get());
         }
 
@@ -1228,7 +1229,7 @@ public final class Joiner implements Closeable {
             StringBuilder sb = null;
 
             for (final T e : c) {
-                if (filter.test(e) == false) {
+                if (!filter.test(e)) {
                     continue;
                 }
 
@@ -1295,7 +1296,7 @@ public final class Joiner implements Closeable {
             while (iter.hasNext()) {
                 e = iter.next();
 
-                if (filter.test(e) == false) {
+                if (!filter.test(e)) {
                     continue;
                 }
 
@@ -1513,8 +1514,10 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final Map.Entry<?, ?> entry) {
         if (entry == null) {
+            //noinspection resource
             append(nullText);
         } else {
+            //noinspection resource
             appendEntry(toString(entry.getKey()), toString(entry.getValue()));
         }
 
@@ -1614,7 +1617,7 @@ public final class Joiner implements Closeable {
         StringBuilder sb = null;
 
         for (final Map.Entry<K, V> entry : m.entrySet()) {
-            if (filter.test(entry) == false) {
+            if (!filter.test(entry)) {
                 continue;
             }
 
@@ -1653,7 +1656,7 @@ public final class Joiner implements Closeable {
         StringBuilder sb = null;
 
         for (final Map.Entry<K, V> entry : m.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue()) == false) {
+            if (!filter.test(entry.getKey(), entry.getValue())) {
                 continue;
             }
 
@@ -1850,7 +1853,7 @@ public final class Joiner implements Closeable {
         for (final String propName : ClassUtil.getPropNameList(cls)) {
             propValue = beanInfo.getPropValue(bean, propName);
 
-            if (filterToUse.test(propName, propValue) == false) {
+            if (!filterToUse.test(propName, propValue)) {
                 continue;
             }
 
@@ -1888,9 +1891,11 @@ public final class Joiner implements Closeable {
 
         if (n < 10) {
             for (int i = 0; i < n; i++) {
+                //noinspection resource
                 append(newString);
             }
         } else {
+            //noinspection resource
             append(Strings.repeat(newString, n, separator));
         }
 
@@ -1943,7 +1948,7 @@ public final class Joiner implements Closeable {
      * {@code prefix + suffix} or the {@code emptyValue} characters are returned
      *
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
@@ -1957,7 +1962,7 @@ public final class Joiner implements Closeable {
             try {
                 String result = null;
 
-                if (suffix.equals("")) {
+                if (suffix.isEmpty()) {
                     result = buffer.toString();
                 } else {
                     final int initialLength = buffer.length();
@@ -1968,7 +1973,7 @@ public final class Joiner implements Closeable {
                     buffer.setLength(initialLength);
                 }
 
-                lastestToStringValue = result;
+                latestToStringValue = result;
 
                 return result;
             } finally {
@@ -1996,7 +2001,7 @@ public final class Joiner implements Closeable {
 
     /**
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
@@ -2012,7 +2017,7 @@ public final class Joiner implements Closeable {
      * Call {@code mapper} only if at least one element/object/entry is appended.
      *
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
@@ -2024,14 +2029,14 @@ public final class Joiner implements Closeable {
     public <T> Nullable<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
-        return buffer == null ? Nullable.<T> empty() : Nullable.of(mapper.apply(toString()));
+        return buffer == null ? Nullable.empty() : Nullable.of(mapper.apply(toString()));
     }
 
     /**
      * Call {@code mapper} only if at least one element/object/entry is appended.
      *
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
@@ -2043,12 +2048,12 @@ public final class Joiner implements Closeable {
     public <T> u.Optional<T> mapToNonNullIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
-        return buffer == null ? u.Optional.<T> empty() : u.Optional.of(mapper.apply(toString()));
+        return buffer == null ? u.Optional.empty() : u.Optional.of(mapper.apply(toString()));
     }
 
     /**
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
@@ -2062,14 +2067,14 @@ public final class Joiner implements Closeable {
      * Returns a stream with the String value generated by {@code toString()} if at least one element/object/entry is appended, otherwise an empty {@code Stream} is returned.
      *
      * <pre>
-     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code reuseStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
      * @return
      */
     public Stream<String> streamIfNotEmpty() {
-        return buffer == null ? Stream.<String> empty() : Stream.of(toString());
+        return buffer == null ? Stream.empty() : Stream.of(toString());
     }
 
     /**
@@ -2104,7 +2109,7 @@ public final class Joiner implements Closeable {
             }
         } else {
             buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder())
-                    .append(lastestToStringValue == null ? prefix : lastestToStringValue);
+                    .append(latestToStringValue == null ? prefix : latestToStringValue);
         }
 
         return buffer;

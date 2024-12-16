@@ -138,7 +138,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return empty();
         } else if (fromIndex == 0 && toIndex == a.length) {
             return of(Arrays.asList(a));
@@ -154,7 +154,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @return
      */
     public static <T> ObjListIterator<T> of(final List<? extends T> list) {
-        return list == null ? ObjListIterator.<T> empty() : of(list.listIterator());
+        return list == null ? ObjListIterator.empty() : of(list.listIterator());
     }
 
     /**
@@ -325,7 +325,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
-            return ObjListIterator.<T> empty();
+            return ObjListIterator.empty();
         }
 
         final ObjListIterator<T> iter = this;
@@ -396,7 +396,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         if (hasNext()) {
             return Nullable.of(next());
         } else {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
     }
 
@@ -424,7 +424,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             return Nullable.of(next);
         } else {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
     }
 

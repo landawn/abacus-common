@@ -128,7 +128,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalDouble x) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
             appendable.append(N.stringOf(x.getAsDouble()));
@@ -144,7 +144,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalDouble x, final JSONXMLSerializationConfig<?> config) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             writer.write(x.getAsDouble());

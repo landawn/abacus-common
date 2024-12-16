@@ -334,7 +334,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         }
 
         if (obj instanceof final JSONSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
                     && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(writeLongAsString(), other.writeLongAsString())
@@ -345,10 +345,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                     && N.equals(writeNullToEmpty, other.writeNullToEmpty) && N.equals(writeDataSetByRow, other.writeDataSetByRow)
                     && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType) && N.equals(writeColumnType, other.writeColumnType)
                     && N.equals(quotePropName, other.quotePropName) && N.equals(quoteMapKey, other.quoteMapKey)
-                    && N.equals(bracketRootValue, other.bracketRootValue) && N.equals(wrapRootValue, other.wrapRootValue)) {
-
-                return true;
-            }
+                    && N.equals(bracketRootValue, other.bracketRootValue) && N.equals(wrapRootValue, other.wrapRootValue);
         }
 
         return false;

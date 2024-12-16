@@ -16,17 +16,18 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code char} wrapper.
  * <p>
- * Note that as MutableChar does not extend Char, it is not treated by String.format as a Char parameter.
+ * Note that as MutableChar does not extend Char, it is not treated by {@code String.format} as a Char parameter.
  *
  * <p>
  * {@code MutableChar} is NOT thread-safe.
@@ -35,6 +36,7 @@ import java.io.Serializable;
  * @see Character
  */
 public final class MutableChar implements Mutable, Serializable, Comparable<MutableChar> {
+    @Serial
     private static final long serialVersionUID = 6807507696378901820L;
 
     private char value;
@@ -68,6 +70,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Char instance.
      *
@@ -89,7 +92,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -101,7 +104,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -152,6 +155,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -169,6 +173,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -246,6 +251,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -254,10 +260,11 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      */
     @Override
     public int compareTo(final MutableChar other) {
-        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
+        return Character.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument is
      * not {@code null} and is a {@code MutableChar} object that contains the same {@code char} value
@@ -286,6 +293,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

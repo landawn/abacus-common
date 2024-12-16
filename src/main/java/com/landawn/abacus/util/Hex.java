@@ -18,7 +18,7 @@
 package com.landawn.abacus.util;
 
 /**
- * Note: copied from Apache commons-codec: https://commons.apache.org/proper/commons-codec.
+ * Note: copied from <a href="https://commons.apache.org/proper/commons-codec">Apache commons-codec</a>.
  *
  * Converts hexadecimal Strings. The charset used for certain operation can be set, the default is set in
  * {@link #DEFAULT_CHARSET_NAME}
@@ -104,7 +104,7 @@ public final class Hex {
      *            the output alphabet
      * @return A char[] containing hexadecimal characters
      */
-    protected static char[] encode(final byte[] data, final char[] toDigits) {
+    static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;
         final char[] out = new char[l << 1];
         // two characters form the hex value.
@@ -168,7 +168,7 @@ public final class Hex {
      * @return An integer
      * @throws IllegalArgumentException the illegal argument exception
      */
-    protected static int toDigit(final char ch, final int index) throws IllegalArgumentException {
+    static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);
         if (digit == -1) {
             throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);

@@ -28,8 +28,6 @@ import com.landawn.abacus.util.u.Optional;
 @SuppressWarnings({ "java:S116", "java:S117" })
 public abstract class Tuple<TP> implements Immutable {
 
-    private static final Tuple0 EMPTY = new Tuple0();
-
     Tuple() {
     }
 
@@ -95,7 +93,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
-        return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
+        return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.empty();
     }
 
     //    /**
@@ -331,7 +329,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         switch (len) {
             case 0:
-                result = EMPTY;
+                result = Tuple0.EMPTY;
                 break;
 
             case 1:
@@ -392,7 +390,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         switch (len) {
             case 0:
-                result = EMPTY;
+                result = Tuple0.EMPTY;
                 break;
 
             case 1:
@@ -573,10 +571,15 @@ public abstract class Tuple<TP> implements Immutable {
     /**
      * The Class Tuple1.
      *
-     * @param <T1>
      */
     @Beta
     static final class Tuple0 extends Tuple<Tuple0> {
+
+        private static final Tuple0 EMPTY = new Tuple0();
+
+        Tuple0() {
+        }
+
         @Override
         public int arity() {
             return 0;
@@ -885,7 +888,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
-            return predicate.test(_1, _2) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
+            return predicate.test(_1, _2) ? Optional.of(this) : Optional.empty();
         }
 
         @Override
@@ -1064,7 +1067,7 @@ public abstract class Tuple<TP> implements Immutable {
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
                 throws E {
-            return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
+            return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.empty();
         }
 
         @Override

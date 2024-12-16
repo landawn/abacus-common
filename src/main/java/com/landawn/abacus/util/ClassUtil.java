@@ -105,6 +105,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.Record;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -143,7 +144,6 @@ public final class ClassUtil {
     static final class ClassMask {//NOSONAR
 
         /** The Constant FIELD_MASK. */
-        @SuppressWarnings("hiding")
         static final String FIELD_MASK = "FIELD_MASK";
 
         /**
@@ -163,13 +163,13 @@ public final class ClassUtil {
     private static final String PROP_NAME_SEPARATOR = ".";
 
     // ...
-    private static final String GET = "get".intern();
+    private static final String GET = "get";
 
-    private static final String SET = "set".intern();
+    private static final String SET = "set";
 
-    private static final String IS = "is".intern();
+    private static final String IS = "is";
 
-    private static final String HAS = "has".intern();
+    private static final String HAS = "has";
 
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
@@ -585,12 +585,7 @@ public final class ClassUtil {
     @SuppressWarnings("deprecation")
     public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
         synchronized (registeredNonPropGetSetMethodPool) {
-            Set<String> set = registeredNonPropGetSetMethodPool.get(cls);
-
-            if (set == null) {
-                set = N.newHashSet();
-                registeredNonPropGetSetMethodPool.put(cls, set);
-            }
+            Set<String> set = registeredNonPropGetSetMethodPool.computeIfAbsent(cls, k -> N.newHashSet());
 
             set.add(propName);
 
@@ -620,7 +615,7 @@ public final class ClassUtil {
                 if (propMethodMap.containsKey(propName)) {
                     if (!method.equals(propMethodMap.get(propName))) {
                         throw new IllegalArgumentException(
-                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
+                                propName + " has already been registered with different method: " + propMethodMap.get(propName).getName());
                     }
                 } else {
                     propMethodMap.put(propName, method);
@@ -636,7 +631,7 @@ public final class ClassUtil {
                 if (propMethodMap.containsKey(propName)) {
                     if (!method.equals(propMethodMap.get(propName))) {
                         throw new IllegalArgumentException(
-                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
+                                propName + " has already been registered with different method: " + propMethodMap.get(propName).getName());
                     }
                 } else {
                     propMethodMap.put(propName, method);
@@ -651,7 +646,7 @@ public final class ClassUtil {
 
     /**
      * The property maybe only have get method if its type is collection or map by xml binding specification
-     * Otherwise, it will be ignored if not registered as a XML binding class.
+     * Otherwise, it will be ignored if not registered as an XML binding class.
      *
      * @param cls the class to be registered for XML binding
      */
@@ -692,6 +687,7 @@ public final class ClassUtil {
      * @param method the method for which the MethodHandle is to be created
      * @return the MethodHandle for the specified method
      */
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
 
@@ -767,9 +763,8 @@ public final class ClassUtil {
      * @return
      * @throws IllegalArgumentException if class not found.
      */
-    @SuppressWarnings("unchecked")
     public static <T> Class<T> forClass(final String clsName) throws IllegalArgumentException {
-        return (Class<T>) forClass(clsName, true);
+        return forClass(clsName, true);
     }
 
     /**
@@ -824,14 +819,15 @@ public final class ClassUtil {
                                 String prefixOfArray = "";
 
                                 while (dimensions-- > 0) {
+                                    //noinspection StringConcatenationInLoop
                                     prefixOfArray += "["; //NOSONAR
                                 }
 
-                                final String symbolOfPrimitiveArraryClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
+                                final String symbolOfPrimitiveArrayClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
 
-                                if (symbolOfPrimitiveArraryClassName != null) {
+                                if (symbolOfPrimitiveArrayClassName != null) {
                                     try {
-                                        cls = Class.forName(prefixOfArray + symbolOfPrimitiveArraryClassName); // NOSONAR
+                                        cls = Class.forName(prefixOfArray + symbolOfPrimitiveArrayClassName); // NOSONAR
 
                                         BUILT_IN_TYPE.put(clsName, cls);
                                     } catch (final ClassNotFoundException e2) {
@@ -897,9 +893,9 @@ public final class ClassUtil {
         if (newPropName == null) {
             newPropName = toCamelCase(propName);
 
-            for (final String keyWord : keyWordMapper.keySet()) { //NOSONAR
-                if (keyWord.equalsIgnoreCase(newPropName)) {
-                    newPropName = keyWordMapper.get(keyWord);
+            for (final Map.Entry<String, String> entry : keyWordMapper.entrySet()) { //NOSONAR
+                if (entry.getKey().equalsIgnoreCase(newPropName)) {
+                    newPropName = entry.getValue();
 
                     break;
                 }
@@ -949,6 +945,7 @@ public final class ClassUtil {
                 if (ch == '$') {
                     final int j = i;
                     char x = 0;
+                    //noinspection StatementWithEmptyBody
                     while (--i >= 0 && (Character.isLetterOrDigit(x = res.charAt(i)) || x == '_' || x == '.')) {
                         // continue
                     }
@@ -989,9 +986,7 @@ public final class ClassUtil {
                 clsName = cls.getName();
             }
 
-            if (clsName != null) {
-                canonicalClassNamePool.put(cls, clsName);
-            }
+            canonicalClassNamePool.put(cls, clsName);
         }
 
         return clsName;
@@ -1005,14 +1000,8 @@ public final class ClassUtil {
      */
 
     public static String getClassName(final Class<?> cls) {
-        String clsName = nameClassPool.get(cls);
 
-        if (clsName == null) {
-            clsName = cls.getName();
-            nameClassPool.put(cls, clsName);
-        }
-
-        return clsName;
+        return nameClassPool.computeIfAbsent(cls, k -> cls.getName());
     }
 
     //    private static Class[] getTypeArguments(Class cls) {
@@ -1036,13 +1025,13 @@ public final class ClassUtil {
     //        }
     //
     //        if (notEmpty(typeArgs)) {
-    //            Class[] clses = new Class[typeArgs.length];
+    //            Class[] classes = new Class[typeArgs.length];
     //
     //            for (int i = 0; i < typeArgs.length; i++) {
-    //                clses[i] = (Class) typeArgs[i];
+    //                classes[i] = (Class) typeArgs[i];
     //            }
     //
-    //            return clses;
+    //            return classes;
     //        } else {
     //            return null;
     //        }
@@ -1052,7 +1041,7 @@ public final class ClassUtil {
     //     * Returns the method declared in the specified {@code cls} with the specified method name.
     //     *
     //     * @param cls
-    //     * @param methodName is case insensitive
+    //     * @param methodName is case-insensitive
     //     * @return {@code null} if no method is found by specified name
     //     */
     //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
@@ -1090,14 +1079,8 @@ public final class ClassUtil {
      * @return the simple name of the class
      */
     public static String getSimpleClassName(final Class<?> cls) {
-        String clsName = simpleClassNamePool.get(cls);
 
-        if (clsName == null) {
-            clsName = cls.getSimpleName();
-            simpleClassNamePool.put(cls, clsName);
-        }
-
-        return clsName;
+        return simpleClassNamePool.computeIfAbsent(cls, k -> cls.getSimpleName());
     }
 
     /**
@@ -1196,13 +1179,13 @@ public final class ClassUtil {
      *
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
-     * @param skipClassLoaddingException if {@code true}, skips classes that cannot be loaded
+     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
      * @return a list of classes in the specified package
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException)
+    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
             throws UncheckedIOException {
-        return getClassesByPackage(pkgName, isRecursive, skipClassLoaddingException, Fn.alwaysTrue());
+        return getClassesByPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
     }
 
     /**
@@ -1210,12 +1193,12 @@ public final class ClassUtil {
      *
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
-     * @param skipClassLoaddingException if {@code true}, skips classes that cannot be loaded
+     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
      * @param predicate a predicate to filter the classes
      * @return a list of classes in the specified package
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException,
+    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws UncheckedIOException {
         if (logger.isInfoEnabled()) {
             logger.info("Looking for classes in package: " + pkgName);
@@ -1269,13 +1252,14 @@ public final class ClassUtil {
                                 logger.warn(e, "Failed to load class: " + className);
                             }
 
-                            if (!skipClassLoaddingException) {
+                            if (!skipClassLoadingException) {
                                 throw new RuntimeException("ClassNotFoundException loading " + className); //NOSONAR
                             }
                         }
                     } else if (file2.isDirectory() && isRecursive) {
                         final String subPkgName = pkgName + WD._PERIOD + file2.getName();
-                        classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoaddingException, predicate));
+                        //noinspection ConstantValue
+                        classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                     }
                 }
             } else if (file.exists() && file.getName().endsWith(JAR_POSTFIX)) {
@@ -1308,7 +1292,7 @@ public final class ClassUtil {
                                         logger.warn("ClassNotFoundException loading " + className);
                                     }
 
-                                    if (!skipClassLoaddingException) {
+                                    if (!skipClassLoadingException) {
                                         IOUtil.close(jarFile);
                                         jarFile = null;
                                         throw new RuntimeException("ClassNotFoundException loading " + className);
@@ -1316,7 +1300,8 @@ public final class ClassUtil {
                                 }
                             } else if (entry.isDirectory() && (entryName.length() > (pkgPath.length() + 1)) && isRecursive) {
                                 final String subPkgName = filePath2PackageName(entryName);
-                                classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoaddingException, predicate));
+                                //noinspection ConstantValue
+                                classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                             }
                         }
                     }
@@ -1353,13 +1338,13 @@ public final class ClassUtil {
     //        }
     //
     //        if (notEmpty(typeArgs)) {
-    //            Class[] clses = new Class[typeArgs.length];
+    //            Class[] classes = new Class[typeArgs.length];
     //
     //            for (int i = 0; i < typeArgs.length; i++) {
-    //                clses[i] = (Class) typeArgs[i];
+    //                classes[i] = (Class) typeArgs[i];
     //            }
     //
-    //            return clses;
+    //            return classes;
     //        } else {
     //            return null;
     //        }
@@ -1369,7 +1354,7 @@ public final class ClassUtil {
     //     * Returns the method declared in the specified {@code cls} with the specified method name.
     //     *
     //     * @param cls
-    //     * @param methodName is case insensitive
+    //     * @param methodName is case-insensitive
     //     * @return {@code null} if no method is found by specified name
     //     */
     //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
@@ -1949,7 +1934,7 @@ public final class ClassUtil {
      * Returns the property get method declared in the specified {@code cls}
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
-     *
+     * <p>
      * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB
      * specification
@@ -1972,9 +1957,9 @@ public final class ClassUtil {
             synchronized (beanDeclaredPropGetMethodPool) {
                 final Map<String, Method> getterMethodList = getPropGetMethods(cls);
 
-                for (final String key : getterMethodList.keySet()) { //NOSONAR
-                    if (isPropName(cls, propName, key)) {
-                        method = getterMethodList.get(key);
+                for (final Map.Entry<String, Method> entry : getterMethodList.entrySet()) { //NOSONAR
+                    if (isPropName(cls, propName, entry.getKey())) {
+                        method = entry.getValue();
 
                         break;
                     }
@@ -2112,7 +2097,6 @@ public final class ClassUtil {
      * @return the value of the specified property
      * @see #getPropValue(Object, Method)
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object bean, final String propName) {
         return getPropValue(bean, propName, false);
     }
@@ -2178,10 +2162,11 @@ public final class ClassUtil {
             throw new IllegalArgumentException(
                     "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
         }
+        final int len = inlinePropGetMethodQueue.size();
         Object propBean = bean;
 
-        for (int i = 0, len = inlinePropGetMethodQueue.size(); i < len; i++) {
-            propBean = ClassUtil.getPropValue(propBean, inlinePropGetMethodQueue.get(i));
+        for (Method method : inlinePropGetMethodQueue) {
+            propBean = ClassUtil.getPropValue(propBean, method);
 
             if (propBean == null) {
                 return (T) N.defaultValueOf(inlinePropGetMethodQueue.get(len - 1).getReturnType());
@@ -2386,12 +2371,10 @@ public final class ClassUtil {
 
         final Object rt = invokeMethod(bean, propGetMethod);
 
-        if (rt instanceof Collection) {
-            final Collection<?> c = (Collection<?>) rt;
+        if (rt instanceof Collection<?> c) {
             c.clear();
             c.addAll((Collection) propValue);
-        } else if (rt instanceof Map) {
-            final Map<?, ?> m = (Map<?, ?>) rt;
+        } else if (rt instanceof Map<?, ?> m) {
             m.clear();
             m.putAll((Map) propValue);
         } else {
@@ -2407,7 +2390,7 @@ public final class ClassUtil {
      * @return
      */
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
-        final Map<String, String> statisFinalFields = new HashMap<>();
+        final Map<String, String> staticFinalFields = new HashMap<>();
 
         for (final Field field : cls.getFields()) {
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())
@@ -2416,14 +2399,14 @@ public final class ClassUtil {
 
                 try {
                     value = (String) field.get(null);
-                    statisFinalFields.put(value, value);
+                    staticFinalFields.put(value, value);
                 } catch (final Exception e) {
                     // ignore. should never happen
                 }
             }
         }
 
-        return statisFinalFields;
+        return staticFinalFields;
     }
 
     /**
@@ -2483,7 +2466,6 @@ public final class ClassUtil {
     /**
      * Gets the sets the method.
      *
-     * @param declaringClass
      * @param getMethod
      * @return
      */
@@ -2528,6 +2510,7 @@ public final class ClassUtil {
             Method builderMethod = getBuilderMethod(cls);
 
             if (builderMethod == null) {
+                //noinspection resource
                 builderClass = Stream.of(cls.getDeclaredClasses())
                         .filter(it -> getBuilderMethod(it) != null && getBuildMethod(it, cls) != null)
                         .first()
@@ -2664,7 +2647,7 @@ public final class ClassUtil {
 
             @Override
             public Class<?> next() {
-                if (hasNext() == false) {
+                if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
 
@@ -2711,12 +2694,12 @@ public final class ClassUtil {
             //    }
 
             private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
-                for (final Class<?> iface : c.getInterfaces()) {
-                    if (!seenInterfaces.contains(iface)) {
-                        addTo.add(iface);
+                for (final Class<?> cls : c.getInterfaces()) {
+                    if (!seenInterfaces.contains(cls)) {
+                        addTo.add(cls);
                     }
 
-                    walkInterfaces(addTo, iface);
+                    walkInterfaces(addTo, cls);
                 }
             }
         };
@@ -2781,7 +2764,6 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
      */
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> T invokeMethod(final Method method, final Object... args) {
         return invokeMethod(null, method, args);
@@ -2797,7 +2779,6 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments, or the underlying method throws an exception
      */
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
         try {
@@ -2819,7 +2800,7 @@ public final class ClassUtil {
         if (N.notEmpty(annotations)) {
             for (final Annotation annotation : annotations) {
                 try {
-                    if (annotation.getClass().equals(javax.persistence.Entity.class)) {
+                    if (annotation.annotationType().equals(javax.persistence.Entity.class)) {
                         return true;
                     }
                 } catch (final Throwable e) {
@@ -2827,7 +2808,7 @@ public final class ClassUtil {
                 }
 
                 try {
-                    if (annotation.getClass().equals(jakarta.persistence.Entity.class)) {
+                    if (annotation.annotationType().equals(jakarta.persistence.Entity.class)) {
                         return true;
                     }
                 } catch (final Throwable e) {
@@ -2923,7 +2904,7 @@ public final class ClassUtil {
      */
     static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
         if (inputPropName.length() > 128) {
-            throw new IllegalArgumentException("The property name execeed 128: " + inputPropName);
+            throw new IllegalArgumentException("The property name exceed 128: " + inputPropName);
         }
 
         inputPropName = inputPropName.trim();
@@ -2949,6 +2930,7 @@ public final class ClassUtil {
      *
      * @param cls
      */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private static void loadPropGetSetMethodList(final Class<?> cls) {
         synchronized (beanDeclaredPropGetMethodPool) {
             if (beanDeclaredPropGetMethodPool.containsKey(cls)) {
@@ -2962,6 +2944,7 @@ public final class ClassUtil {
                     instance = cls.getDeclaredConstructor().newInstance();
                 } catch (final Exception e) {
                     if (logger.isWarnEnabled()) {
+                        //noinspection StatementWithEmptyBody
                         if (Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java.")) {
                             // ignore
                         } else {
@@ -3011,6 +2994,7 @@ public final class ClassUtil {
 
                 // sort the methods by the order of declared fields
                 for (final Field field : clazz.getDeclaredFields()) {
+                    //noinspection resource
                     Stream.of(clazz.getMethods())
                             .filter(method -> isFieldGetMethod(method, field))
                             .sortedBy(method -> method.getName().length())
@@ -3080,7 +3064,7 @@ public final class ClassUtil {
                                 propFieldMap.put(propName, field);
                                 propGetMethodMap.put(propName, method);
 
-                                continue;//NOSONAR
+                                //NOSONAR
                             }
                         } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
                                 && !Modifier.isFinal(field.getModifiers())) {
@@ -3123,15 +3107,15 @@ public final class ClassUtil {
 
                             propGetMethodMap.put(propName, method);
 
-                            continue;//NOSONAR
+                            //NOSONAR
                         }
                     }
                 }
             }
 
-            for (final Class<?> key : registeredNonPropGetSetMethodPool.keySet()) { //NOSONAR
-                if (key.isAssignableFrom(cls)) {
-                    final Set<String> set = registeredNonPropGetSetMethodPool.get(key);
+            for (final Map.Entry<Class<?>, Set<String>> entry : registeredNonPropGetSetMethodPool.entrySet()) { //NOSONAR
+                if (entry.getKey().isAssignableFrom(cls)) {
+                    final Set<String> set = entry.getValue();
                     final List<String> methodNames = new ArrayList<>(propGetMethodMap.keySet());
 
                     for (final String nonPropName : set) {
@@ -3150,6 +3134,7 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
+            //noinspection ResultOfMethodCallIgnored
             unmodifiableFieldMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
@@ -3159,6 +3144,7 @@ public final class ClassUtil {
             beanPropFieldPool.put(cls, tempFieldMap);
 
             final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.wrap(propGetMethodMap);
+            //noinspection ResultOfMethodCallIgnored
             unmodifiableGetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
@@ -3173,6 +3159,7 @@ public final class ClassUtil {
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
+            //noinspection ResultOfMethodCallIgnored
             unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
@@ -3207,6 +3194,7 @@ public final class ClassUtil {
                     }
 
                     final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
+                    //noinspection ResultOfMethodCallIgnored
                     unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
                     beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
@@ -3232,7 +3220,9 @@ public final class ClassUtil {
         final File classFileFolder = new File(classFilePath);
 
         if (!classFileFolder.exists()) {
-            classFileFolder.mkdirs();
+            if (classFileFolder.mkdirs()) {
+                throw new RuntimeException("Failed to create folder: " + classFileFolder);
+            }
         }
 
         return classFilePath;
@@ -3269,7 +3259,7 @@ public final class ClassUtil {
      * @param flag the new accessibility flag
      * @return {@code true} if no error happens, otherwise {@code false} is returned
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "UnusedReturnValue" })
     public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
         if (accessibleObject == null) {
             return false;
@@ -3310,13 +3300,13 @@ public final class ClassUtil {
     //        }
     //
     //        if (notEmpty(typeArgs)) {
-    //            Class[] clses = new Class[typeArgs.length];
+    //            Class[] classes = new Class[typeArgs.length];
     //
     //            for (int i = 0; i < typeArgs.length; i++) {
-    //                clses[i] = (Class) typeArgs[i];
+    //                classes[i] = (Class) typeArgs[i];
     //            }
     //
-    //            return clses;
+    //            return classes;
     //        } else {
     //            return null;
     //        }
@@ -3326,7 +3316,7 @@ public final class ClassUtil {
     //     * Returns the method declared in the specified {@code cls} with the specified method name.
     //     *
     //     * @param cls
-    //     * @param methodName is case insensitive
+    //     * @param methodName is case-insensitive
     //     * @return {@code null} if no method is found by specified name
     //     */
     //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
@@ -3522,14 +3512,7 @@ public final class ClassUtil {
             return false;
         }
 
-        Boolean ret = recordClassPool.get(cls);
-
-        if (ret == null) {
-            ret = (recordClass != null && recordClass.isAssignableFrom(cls)) || cls.getAnnotation(Record.class) != null;
-            recordClassPool.put(cls, ret);
-        }
-
-        return ret;
+        return recordClassPool.computeIfAbsent(cls, k -> (recordClass != null && recordClass.isAssignableFrom(cls)) || cls.getAnnotation(Record.class) != null);
     }
 
     private static final Map<Class<?>, Boolean> anonymousClassMap = new ConcurrentHashMap<>();
@@ -3541,14 +3524,8 @@ public final class ClassUtil {
      * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
      */
     public static boolean isAnonymousClass(final Class<?> cls) {
-        Boolean v = anonymousClassMap.get(cls);
 
-        if (v == null) {
-            v = cls.isAnonymousClass();
-            anonymousClassMap.put(cls, v);
-        }
-
-        return v;
+        return anonymousClassMap.computeIfAbsent(cls, k -> cls.isAnonymousClass());
     }
 
     private static final Map<Class<?>, Boolean> memberClassMap = new ConcurrentHashMap<>();
@@ -3560,14 +3537,8 @@ public final class ClassUtil {
      * @return {@code true} if the specified class is a member class, {@code false} otherwise
      */
     public static boolean isMemberClass(final Class<?> cls) {
-        Boolean v = memberClassMap.get(cls);
 
-        if (v == null) {
-            v = cls.isMemberClass();
-            memberClassMap.put(cls, v);
-        }
-
-        return v;
+        return memberClassMap.computeIfAbsent(cls, k -> cls.isMemberClass());
     }
 
     /**
@@ -3576,21 +3547,12 @@ public final class ClassUtil {
      * @param cls the class to be checked
      * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
      */
-    public static boolean isAnonymousOrMemeberClass(final Class<?> cls) {
-        Boolean v = anonymousClassMap.get(cls);
+    public static boolean isAnonymousOrMemberClass(final Class<?> cls) {
+        Boolean v = anonymousClassMap.computeIfAbsent(cls, k -> cls.isAnonymousClass());
 
-        if (v == null) {
-            v = cls.isAnonymousClass();
-            anonymousClassMap.put(cls, v);
-        }
+        if (!v) {
+            v = memberClassMap.computeIfAbsent(cls, k -> cls.isMemberClass());
 
-        if (v.booleanValue() == false) {
-            v = memberClassMap.get(cls);
-
-            if (v == null) {
-                v = cls.isMemberClass();
-                memberClassMap.put(cls, v);
-            }
         }
 
         return v;
@@ -3732,6 +3694,7 @@ public final class ClassUtil {
             return System.identityHashCode(this);
         }
 
+        @SuppressWarnings("RedundantMethodOverride")
         @Override
         public boolean equals(final Object obj) {
             return obj == this;

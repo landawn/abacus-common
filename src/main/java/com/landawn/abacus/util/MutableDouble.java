@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code double} wrapper.
- * <p>
- * Note that as MutableDouble does not extend Double, it is not treated by String.format as a Double parameter.
  *
  * <p>
  * {@code MutableDouble} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableDouble extends Number implements Comparable<MutableDouble>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = 1587163916L;
 
     private double value;
@@ -72,6 +68,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Double instance.
      *
@@ -93,7 +90,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks whether the double value is the special NaN value.
      *
@@ -175,6 +173,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -192,6 +191,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -270,6 +270,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     //-----------------------------------------------------------------------
     // shortValue and byteValue rely on Number implementation
+
     /**
      * Returns the value of this MutableDouble as an int.
      *
@@ -311,6 +312,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -323,6 +325,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object against the specified object. The result is {@code true} if and only if the argument
      * is not {@code null} and is a {@code Double} object that represents a double that has the identical
@@ -364,11 +367,11 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      */
     @Override
     public int hashCode() {
-        final long bits = Double.doubleToLongBits(value);
-        return (int) (bits ^ bits >>> 32);
+        return Double.hashCode(value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

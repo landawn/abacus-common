@@ -60,7 +60,7 @@ public final class Throwables {
     /**
      * Executes the provided {@code cmd} and if an exception occurs, applies the {@code actionOnError} consumer on the exception.
      *
-     * <p>This method is useful when you want to run a piece of code that might throw an exception and you want to handle that exception in a specific way.</p>
+     * <p>This method is useful when you want to run a piece of code that might throw an exception, and you want to handle that exception in a specific way.</p>
      *
      * @param cmd The runnable task that might throw an exception, must not be {@code null}.
      * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
@@ -78,7 +78,7 @@ public final class Throwables {
     /**
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
      *
      * @param <R> The type of the result.
@@ -100,7 +100,7 @@ public final class Throwables {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the {@code actionOnError} function is applied to the exception to provide a return value.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a function that can transform an exception into a return value.
      *
      * @param <R> The type of the result.
@@ -123,7 +123,7 @@ public final class Throwables {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the {@code supplier} is used to provide a return value.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a supplier that can provide a return value when an exception occurs.
      *
      * @param <R> The type of the result.
@@ -147,7 +147,7 @@ public final class Throwables {
      * Executes the provided {@code cmd} that may throw an exception and returns the result.
      * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs.
      *
      * @param <R> The type of the result.
@@ -199,7 +199,7 @@ public final class Throwables {
      * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned if the {@code predicate} returns {@code true}.
      * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
      * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs and the {@code predicate} returns {@code true}.
      *
      * @param <R> The type of the result.
@@ -310,7 +310,7 @@ public final class Throwables {
                 throws IndexOutOfBoundsException {
             N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-            if (fromIndex == toIndex) {
+            if (N.isEmpty(a) || fromIndex == toIndex) {
                 return EMPTY;
             }
 
@@ -336,7 +336,7 @@ public final class Throwables {
                     if (n > toIndex - cursor) {
                         cursor = toIndex;
                     } else {
-                        cursor += n;
+                        cursor += (int) n;
                     }
                 }
 
@@ -481,6 +481,7 @@ public final class Throwables {
          * @param a
          * @return
          */
+        @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
             return concat(N.asList(a));
         }
@@ -703,7 +704,7 @@ public final class Throwables {
             if (hasNext()) {
                 return Nullable.of(next());
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -741,7 +742,7 @@ public final class Throwables {
 
                 return Nullable.of(next);
             } else {
-                return Nullable.<T> empty();
+                return Nullable.empty();
             }
         }
 
@@ -3912,23 +3913,23 @@ public final class Throwables {
 
     public interface LongObjFunction<T, R, E extends Throwable> {
         /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
+         *
+         * @param i
+         * @param t
+         * @return
+         * @throws E
+         */
         R apply(long i, T t) throws E;
     }
 
     public interface LongObjPredicate<T, E extends Throwable> {
         /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
+         *
+         * @param i
+         * @param t
+         * @return
+         * @throws E
+         */
         boolean test(long i, T t) throws E;
     }
 
@@ -3944,23 +3945,23 @@ public final class Throwables {
 
     public interface DoubleObjFunction<T, R, E extends Throwable> {
         /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
+         *
+         * @param i
+         * @param t
+         * @return
+         * @throws E
+         */
         R apply(double i, T t) throws E;
     }
 
     public interface DoubleObjPredicate<T, E extends Throwable> {
         /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
+         *
+         * @param i
+         * @param t
+         * @return
+         * @throws E
+         */
         boolean test(double i, T t) throws E;
     }
 
@@ -4139,6 +4140,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
+        @SuppressWarnings("unchecked")
         R apply(T... args) throws E;
 
         /**

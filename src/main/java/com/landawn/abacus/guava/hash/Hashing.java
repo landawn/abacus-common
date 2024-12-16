@@ -358,7 +358,7 @@ public final class Hashing {
      * @return
      */
     public static HashFunction farmHashFingerprint64() {
-        return Hash_Holder.FARMHASH_FINGERPRINT_64;
+        return Hash_Holder.FARM_HASH_FINGERPRINT_64;
     }
 
     /**
@@ -580,7 +580,7 @@ public final class Hashing {
 
         static final HashFunction ADLER_32 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.adler32());
 
-        static final HashFunction FARMHASH_FINGERPRINT_64 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.farmHashFingerprint64());
+        static final HashFunction FARM_HASH_FINGERPRINT_64 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.farmHashFingerprint64());
 
         private Hash_Holder() {
             // singleton for utility class.

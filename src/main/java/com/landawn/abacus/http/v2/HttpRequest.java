@@ -202,7 +202,7 @@ public final class HttpRequest {
             clientBuilder = HttpClient.newBuilder();
         }
 
-        if (httpClient != null && requireNewClient == false) {
+        if (httpClient != null && !requireNewClient) {
             httpClient.cookieHandler().ifPresent(it -> clientBuilder.cookieHandler(it));
             httpClient.connectTimeout().ifPresent(it -> clientBuilder.connectTimeout(it));
             httpClient.proxy().ifPresent(it -> clientBuilder.proxy(it));
@@ -695,7 +695,7 @@ public final class HttpRequest {
     }
 
     private HttpClient checkUrlAndHttpClient() {
-        if (query == null || (query instanceof String && Strings.isEmpty((String) query))) {
+        if (query == null || (query instanceof String strQuery && Strings.isEmpty(strQuery))) {
             if (uri == null) {
                 requestBuilder.uri(URI.create(url));
             } else {
@@ -789,13 +789,13 @@ public final class HttpRequest {
     /**
      *
      * @param <T>
-     * @param responseBodyHandlerr
+     * @param responseBodyHandler
      * @param pushPromiseHandler
      * @return
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandlerr,
+    public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
-        return asyncExecute(HttpMethod.POST, responseBodyHandlerr, pushPromiseHandler);
+        return asyncExecute(HttpMethod.POST, responseBodyHandler, pushPromiseHandler);
     }
 
     public CompletableFuture<HttpResponse<String>> asyncPut() {
@@ -825,13 +825,13 @@ public final class HttpRequest {
     /**
      *
      * @param <T>
-     * @param responseBodyHandlerr
+     * @param responseBodyHandler
      * @param pushPromiseHandler
      * @return
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandlerr,
+    public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
-        return asyncExecute(HttpMethod.PUT, responseBodyHandlerr, pushPromiseHandler);
+        return asyncExecute(HttpMethod.PUT, responseBodyHandler, pushPromiseHandler);
     }
 
     public CompletableFuture<HttpResponse<String>> asyncPatch() {
@@ -861,13 +861,13 @@ public final class HttpRequest {
     /**
      *
      * @param <T>
-     * @param responseBodyHandlerr
+     * @param responseBodyHandler
      * @param pushPromiseHandler
      * @return
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandlerr,
+    public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
-        return asyncExecute(HttpMethod.PATCH, responseBodyHandlerr, pushPromiseHandler);
+        return asyncExecute(HttpMethod.PATCH, responseBodyHandler, pushPromiseHandler);
     }
 
     public CompletableFuture<HttpResponse<String>> asyncDelete() {
@@ -897,13 +897,13 @@ public final class HttpRequest {
     /**
      *
      * @param <T>
-     * @param responseBodyHandlerr
+     * @param responseBodyHandler
      * @param pushPromiseHandler
      * @return
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandlerr,
+    public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
-        return asyncExecute(HttpMethod.DELETE, responseBodyHandlerr, pushPromiseHandler);
+        return asyncExecute(HttpMethod.DELETE, responseBodyHandler, pushPromiseHandler);
     }
 
     public CompletableFuture<HttpResponse<Void>> asyncHead() {
@@ -943,14 +943,17 @@ public final class HttpRequest {
             throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
+        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
-        try {
-            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
-        } finally {
-            // This is asynchronous call
-            // doAfterExecution(httpClientToUse);
-        }
+        //    try {
+        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+        //    } finally {
+        //        // This is asynchronous call
+        //        // doAfterExecution(httpClientToUse);
+        //    }
+
+        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
     }
 
     /**
@@ -965,16 +968,20 @@ public final class HttpRequest {
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
+        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
-        try {
-            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-                    .thenApply(it -> getBody(it, resultClass));
-        } finally {
-            // This is asynchronous call
-            // doAfterExecution(httpClientToUse);
-        }
+        //    try {
+        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
+        //                .thenApply(it -> getBody(it, resultClass));
+        //    } finally {
+        //        // This is asynchronous call
+        //        // doAfterExecution(httpClientToUse);
+        //    }
+
+        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
+                .thenApply(it -> getBody(it, resultClass));
     }
 
     /**
@@ -991,14 +998,17 @@ public final class HttpRequest {
             final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
+        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
-        try {
-            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
-        } finally {
-            // This is asynchronous call
-            // doAfterExecution(httpClientToUse);
-        }
+        //    try {
+        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
+        //    } finally {
+        //        // This is asynchronous call
+        //        // doAfterExecution(httpClientToUse);
+        //    }
+
+        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
     }
 
     private BodyPublisher checkBodyPublisher() {

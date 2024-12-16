@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -152,34 +153,29 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
-    private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<>(ContentFormat.class);
-
-    static {
-        contentFormat2Encoding.put(ContentFormat.XML_GZIP, GZIP);
-        contentFormat2Encoding.put(ContentFormat.XML_BR, BR);
-        contentFormat2Encoding.put(ContentFormat.XML_SNAPPY, SNAPPY);
-        contentFormat2Encoding.put(ContentFormat.XML_LZ4, LZ4);
-        contentFormat2Encoding.put(ContentFormat.JSON_GZIP, GZIP);
-        contentFormat2Encoding.put(ContentFormat.JSON_BR, BR);
-        contentFormat2Encoding.put(ContentFormat.JSON_SNAPPY, SNAPPY);
-        contentFormat2Encoding.put(ContentFormat.JSON_LZ4, LZ4);
-        contentFormat2Encoding.put(ContentFormat.GZIP, GZIP);
-        contentFormat2Encoding.put(ContentFormat.BR, BR);
-        contentFormat2Encoding.put(ContentFormat.SNAPPY, SNAPPY);
-        contentFormat2Encoding.put(ContentFormat.LZ4, LZ4);
-        contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
-    }
+    //    private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<>(ContentFormat.class);
+    //
+    //    static {
+    //        contentFormat2Encoding.put(ContentFormat.XML_GZIP, GZIP);
+    //        contentFormat2Encoding.put(ContentFormat.XML_BR, BR);
+    //        contentFormat2Encoding.put(ContentFormat.XML_SNAPPY, SNAPPY);
+    //        contentFormat2Encoding.put(ContentFormat.XML_LZ4, LZ4);
+    //        contentFormat2Encoding.put(ContentFormat.JSON_GZIP, GZIP);
+    //        contentFormat2Encoding.put(ContentFormat.JSON_BR, BR);
+    //        contentFormat2Encoding.put(ContentFormat.JSON_SNAPPY, SNAPPY);
+    //        contentFormat2Encoding.put(ContentFormat.JSON_LZ4, LZ4);
+    //        contentFormat2Encoding.put(ContentFormat.GZIP, GZIP);
+    //        contentFormat2Encoding.put(ContentFormat.BR, BR);
+    //        contentFormat2Encoding.put(ContentFormat.SNAPPY, SNAPPY);
+    //        contentFormat2Encoding.put(ContentFormat.LZ4, LZ4);
+    //        contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
+    //    }
 
     private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
 
     static {
         for (final Map.Entry<ContentFormat, String> entry : contentFormat2Type.entrySet()) {
-            Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(entry.getValue());
-
-            if (contentEncoding2Format == null) {
-                contentEncoding2Format = new HashMap<>();
-                contentTypeEncoding2Format.put(entry.getValue(), contentEncoding2Format);
-            }
+            final Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.computeIfAbsent(entry.getValue(), k -> new HashMap<>());
 
             if (Strings.containsIgnoreCase(entry.getKey().name(), GZIP)) {
                 contentEncoding2Format.put(GZIP, entry.getKey());
@@ -197,12 +193,7 @@ public final class HttpUtil {
             }
         }
 
-        Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(Strings.EMPTY_STRING);
-
-        if (contentEncoding2Format == null) {
-            contentEncoding2Format = new HashMap<>();
-            contentTypeEncoding2Format.put(Strings.EMPTY_STRING, contentEncoding2Format);
-        }
+        final Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.computeIfAbsent(Strings.EMPTY_STRING, k -> new HashMap<>());
 
         contentEncoding2Format.put(GZIP, ContentFormat.GZIP);
         contentEncoding2Format.put(BR, ContentFormat.BR);
@@ -757,7 +748,11 @@ public final class HttpUtil {
      * @return
      */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
-        if (contentFormat == null || contentFormat == ContentFormat.NONE || is == null) {
+        if (is == null) {
+            return new ByteArrayInputStream(N.EMPTY_BYTE_ARRAY);
+        }
+
+        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return is;
         }
 
@@ -841,9 +836,8 @@ public final class HttpUtil {
      * @param connection
      * @param contentFormat
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {
+    public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
         } catch (final IOException e) {
@@ -1018,7 +1012,7 @@ public final class HttpUtil {
          * @return
          */
         public static Date parse(final String value) {
-            if (value.length() == 0) {
+            if (value.isEmpty()) {
                 return null;
             }
 
@@ -1042,7 +1036,7 @@ public final class HttpUtil {
                     position.setIndex(0);
                     result = format.parse(value, position);
                     if (position.getIndex() != 0) {
-                        // Something was parsed. It's possible the entire string was not consumed but we ignore
+                        // Something was parsed. It's possible the entire string was not consumed, but we ignore
                         // that. If any of the BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS ended in "'GMT'" we'd have
                         // to also check that position.getIndex() == value.length() otherwise parsing might have
                         // terminated early, ignoring things like "+01:00". Leaving this as != 0 means that any

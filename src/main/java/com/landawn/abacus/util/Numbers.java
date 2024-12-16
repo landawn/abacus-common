@@ -39,10 +39,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.type.Type;
 
 /**
- *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under under the Apache License, Version 2.0.
+ *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under the Apache License, Version 2.0.
  *  The purpose of copying the code is to re-organize the APIs.
  * <br />
  * <br />
@@ -159,12 +160,12 @@ public final class Numbers {
 
     static final int[] int_powersOf10 = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
 
-    private static final int[] int_factorials = { 1, 1, 1 * 2, 1 * 2 * 3, 1 * 2 * 3 * 4, 1 * 2 * 3 * 4 * 5, 1 * 2 * 3 * 4 * 5 * 6, 1 * 2 * 3 * 4 * 5 * 6 * 7,
-            1 * 2 * 3 * 4 * 5 * 6 * 7 * 8, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10,
-            1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 };
+    private static final int[] int_factorials = { 1, 1, 2, 2 * 3, 2 * 3 * 4, 2 * 3 * 4 * 5, 2 * 3 * 4 * 5 * 6, 2 * 3 * 4 * 5 * 6 * 7, 2 * 3 * 4 * 5 * 6 * 7 * 8,
+            2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10, 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11,
+            2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 };
 
     // binomial(biggestBinomials[k], k) fits in an int, but not binomial(biggestBinomials[k]+1,k).
-    static int[] int_biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, 65536, 2345, 477, 193, 110, 75, 58, 49, 43, 39, 37, 35, 34, 34, 33 }; //NOSONAR
+    static final int[] int_biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, 65536, 2345, 477, 193, 110, 75, 58, 49, 43, 39, 37, 35, 34, 34, 33 }; //NOSONAR
 
     // halfPowersOf10[i] = largest int less than 10^(i + 0.5)
     static final int[] int_halfPowersOf10 = { 3, 31, 316, 3162, 31622, 316227, 3162277, 31622776, 316227766, Integer.MAX_VALUE };
@@ -180,15 +181,15 @@ public final class Numbers {
     static final long[] halfPowersOf10 = { 3L, 31L, 316L, 3162L, 31622L, 316227L, 3162277L, 31622776L, 316227766L, 3162277660L, 31622776601L, 316227766016L,
             3162277660168L, 31622776601683L, 316227766016837L, 3162277660168379L, 31622776601683793L, 316227766016837933L, 3162277660168379331L };
 
-    static final long[] long_factorials = { 1L, 1L, 1L * 2, 1L * 2 * 3, 1L * 2 * 3 * 4, 1L * 2 * 3 * 4 * 5, 1L * 2 * 3 * 4 * 5 * 6, 1L * 2 * 3 * 4 * 5 * 6 * 7,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19,
-            1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19 * 20 };
+    static final long[] long_factorials = { 1L, 1L, 2L, (long) 2 * 3, (long) 2 * 3 * 4, (long) 2 * 3 * 4 * 5, (long) 2 * 3 * 4 * 5 * 6,
+            (long) 2 * 3 * 4 * 5 * 6 * 7, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15, (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19,
+            (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19 * 20 };
 
     /*
      * binomial(biggestBinomials[k], k) fits in a long, but not binomial(biggestBinomials[k] + 1, k).
@@ -299,6 +300,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -309,6 +311,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -319,6 +322,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -327,6 +331,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -335,6 +340,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -345,6 +351,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -355,6 +362,7 @@ public final class Numbers {
                 throw new ArithmeticException("byte overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Byte.valueOf(it.byteValue());
         });
 
@@ -373,6 +381,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -383,6 +392,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -391,6 +401,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -399,6 +410,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -409,6 +421,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -419,6 +432,7 @@ public final class Numbers {
                 throw new ArithmeticException("short overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Short.valueOf(it.shortValue());
         });
 
@@ -438,6 +452,7 @@ public final class Numbers {
                 throw new ArithmeticException("integer overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Integer.valueOf(it.intValue());
         });
 
@@ -446,6 +461,7 @@ public final class Numbers {
                 throw new ArithmeticException("integer overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Integer.valueOf(it.intValue());
         });
 
@@ -454,6 +470,7 @@ public final class Numbers {
                 throw new ArithmeticException("integer overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Integer.valueOf(it.intValue());
         });
 
@@ -464,6 +481,7 @@ public final class Numbers {
                 throw new ArithmeticException("integer overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Integer.valueOf(it.intValue());
         });
 
@@ -474,6 +492,7 @@ public final class Numbers {
                 throw new ArithmeticException("integer overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Integer.valueOf(it.intValue());
         });
 
@@ -492,6 +511,7 @@ public final class Numbers {
                 throw new ArithmeticException("long overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Long.valueOf(it.longValue());
         });
 
@@ -500,6 +520,7 @@ public final class Numbers {
                 throw new ArithmeticException("long overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Long.valueOf(it.longValue());
         });
 
@@ -510,6 +531,7 @@ public final class Numbers {
                 throw new ArithmeticException("long overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Long.valueOf(it.longValue());
         });
 
@@ -520,6 +542,7 @@ public final class Numbers {
                 throw new ArithmeticException("long overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Long.valueOf(it.longValue());
         });
 
@@ -558,6 +581,7 @@ public final class Numbers {
                 throw new ArithmeticException("float overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Float.valueOf(it.floatValue());
         });
 
@@ -568,6 +592,7 @@ public final class Numbers {
                 throw new ArithmeticException("float overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Float.valueOf(it.floatValue());
         });
 
@@ -590,6 +615,7 @@ public final class Numbers {
                 throw new ArithmeticException("double overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Double.valueOf(it.doubleValue());
         });
 
@@ -600,6 +626,7 @@ public final class Numbers {
                 throw new ArithmeticException("double overflow");
             }
 
+            //noinspection UnnecessaryBoxing
             return Double.valueOf(it.doubleValue());
         });
 
@@ -668,13 +695,13 @@ public final class Numbers {
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      *
-     * <p>If the conversion would result in an overflow, an ArithmeticException is thrown.
+     * <p>If the conversion resulted in an overflow, an ArithmeticException is thrown.
      *
      * @param <T> The target type of the conversion. This must be a subclass of Number.
      * @param value The number to convert. This can be any instance of Number.
      * @param targetType The Class object representing the target type of the conversion.
      * @return The converted number. This will be an instance of the target type.
-     * @throws ArithmeticException if the conversion would result in an overflow.
+     * @throws ArithmeticException if the conversion resulted in an overflow.
      */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
@@ -697,13 +724,13 @@ public final class Numbers {
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      *
-     * <p>If the conversion would result in an overflow, an ArithmeticException is thrown.
+     * <p>If the conversion resulted in an overflow, an ArithmeticException is thrown.
      *
      * @param <T> The target type of the conversion. This must be a subclass of Number.
      * @param value The number to convert. This can be any instance of Number.
      * @param targetType The Type object representing the target type of the conversion.
      * @return The converted number. This will be an instance of the target type.
-     * @throws ArithmeticException if the conversion would result in an overflow.
+     * @throws ArithmeticException if the conversion resulted in an overflow.
      */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
@@ -922,7 +949,7 @@ public final class Numbers {
             final Integer result = N.stringIntCache.get(str);
 
             if (result != null) {
-                if (result.intValue() < Byte.MIN_VALUE || result.intValue() > Byte.MAX_VALUE) {
+                if (result < Byte.MIN_VALUE || result > Byte.MAX_VALUE) {
                     throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
                 }
 
@@ -977,7 +1004,6 @@ public final class Numbers {
      * @param str The string to convert. This can be any instance of String.
      * @return The short representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException If the string cannot be parsed as a short.
-     * @see #toShort(String, byte)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -996,7 +1022,6 @@ public final class Numbers {
      * @param obj The object to convert. This can be any instance of Object.
      * @return The short representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a short.
-     * @see #toShort(Object, byte)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1231,7 +1256,7 @@ public final class Numbers {
         if (str.length() < 5) {
             final Integer result = N.stringIntCache.get(str);
             if (result != null) {
-                return result.intValue();
+                return result;
             }
         }
 
@@ -1474,7 +1499,7 @@ public final class Numbers {
      *
      * <pre>
      *   NumberUtils.toDouble(null)                     = 0.0d
-     *   NumberUtils.toDouble(BigDecimal.valudOf(8.5d)) = 8.5d
+     *   NumberUtils.toDouble(BigDecimal.valueOf(8.5d)) = 8.5d
      * </pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -1493,7 +1518,7 @@ public final class Numbers {
      *
      * <pre>
      *   NumberUtils.toDouble(null, 1.1d)                     = 1.1d
-     *   NumberUtils.toDouble(BigDecimal.valudOf(8.5d), 1.1d) = 8.5d
+     *   NumberUtils.toDouble(BigDecimal.valueOf(8.5d), 1.1d) = 8.5d
      * </pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -1709,6 +1734,7 @@ public final class Numbers {
     }
 
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Convert a {@code String} to a {@code Float}.
@@ -1781,7 +1807,7 @@ public final class Numbers {
             return null;
         }
 
-        if (quickCheckForIsCreatable(str) == false) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigInteger.");
         }
 
@@ -1834,7 +1860,7 @@ public final class Numbers {
         }
 
         // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
-        if (quickCheckForIsCreatable(str) == false) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigDecimal.");
         }
 
@@ -1881,14 +1907,14 @@ public final class Numbers {
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @SuppressFBWarnings({ "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT" })
     @MayReturnNull
-    @SuppressWarnings({ "unchecked" })
     public static Number createNumber(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
         }
 
-        if (quickCheckForIsCreatable(str) == false) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid number.");
         }
 
@@ -1971,7 +1997,7 @@ public final class Numbers {
                 exp = null;
             }
 
-            //Requesting a specific type..
+            //Requesting a specific type.
             final String numeric = str.substring(0, len - 1);
             isAllZeros(mant);
             isAllZeros(exp);
@@ -2072,7 +2098,7 @@ public final class Numbers {
 
             final Double d = Double.valueOf(str);
 
-            if (d.isInfinite() && str.indexOf("Infinity") < 0) {
+            if (d.isInfinite() && !str.contains("Infinity")) {
                 return createBigDecimal(str);
             }
 
@@ -2091,7 +2117,7 @@ public final class Numbers {
      *
      * @param str the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric
-     * @see Strings#isNumeric(String)
+     * @see Strings#isNumeric(CharSequence) 
      */
     public static boolean isDigits(final String str) {
         return Strings.isNumeric(str);
@@ -2181,7 +2207,7 @@ public final class Numbers {
         return isCreatable(str);
     }
 
-    private static boolean[] alphanumerics = new boolean[128];
+    private static final boolean[] alphanumerics = new boolean[128];
 
     static {
         alphanumerics['0'] = true;
@@ -2203,20 +2229,26 @@ public final class Numbers {
         alphanumerics['x'] = true;
         alphanumerics['X'] = true;
 
+        //noinspection OverwrittenKey
         alphanumerics['e'] = true;
         alphanumerics['E'] = true;
 
         alphanumerics['a'] = true;
         alphanumerics['b'] = true;
         alphanumerics['c'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['d'] = true;
+        //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['e'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['f'] = true;
 
         alphanumerics['l'] = true;
         alphanumerics['L'] = true;
+        //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['f'] = true;
         alphanumerics['F'] = true;
+        //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['d'] = true;
         alphanumerics['D'] = true;
     }
@@ -2255,7 +2287,7 @@ public final class Numbers {
      * @see #isParsable(String)
      */
     public static boolean isCreatable(final String str) {
-        if (quickCheckForIsCreatable(str) == false) {
+        if (!quickCheckForIsCreatable(str)) {
             return false;
         }
 
@@ -2295,7 +2327,7 @@ public final class Numbers {
         }
 
         len--; // don't want to loop to the last char, check it afterwords
-               // for type qualifiers
+        // for type qualifiers
         int i = start;
         // loop to the next to last char or to the last char if we need another digit to
         // make a valid number (e.g. chars[0..5] = "1234E")
@@ -2475,11 +2507,13 @@ public final class Numbers {
      * @return {@code true}, if is prime
      * @throws IllegalArgumentException if {@code n} is negative
      */
+    @SuppressWarnings("ConditionCoveredByFurtherCondition")
     public static boolean isPrime(final long n) {
         if (n < 2) {
             checkNonNegative("n", n);
             return false;
         }
+        //noinspection ConditionCoveredByFurtherCondition
         if (n < 14 && (n == 2 || n == 3 || n == 5 || n == 7 || n == 11 || n == 13)) {
             return true;
         }
@@ -2622,14 +2656,14 @@ public final class Numbers {
      * @throws IllegalArgumentException if x is not positive
      * @see RoundingMode
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final int x, final RoundingMode mode) {
         checkPositive("x", x);
 
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x));
-                // fall through
+                //$FALL-THROUGH$
             case DOWN:
             case FLOOR:
                 return (Integer.SIZE - 1) - Integer.numberOfLeadingZeros(x);
@@ -2663,14 +2697,14 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     // TODO(kevinb): remove after this warning is disabled globally
     public static int log2(final long x, final RoundingMode mode) {
         checkPositive("x", x);
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x));
-                // fall through
+                //$FALL-THROUGH$
             case DOWN:
             case FLOOR:
                 return (Long.SIZE - 1) - Long.numberOfLeadingZeros(x);
@@ -2728,7 +2762,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
      *     infinite
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final double x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgument(x > 0.0 && isFinite(x), "x must be positive and finite");
         final int exponent = getExponent(x);
@@ -2741,7 +2775,7 @@ public final class Numbers {
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x));
-                // fall through
+                //$FALL-THROUGH$
             case FLOOR:
                 increment = false;
                 break;
@@ -2778,6 +2812,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      */
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     // TODO(kevinb): remove after this warning is disabled globally
     public static int log2(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
@@ -2823,7 +2858,7 @@ public final class Numbers {
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if x is not positive
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final int x, final RoundingMode mode) {
         checkPositive("x", x);
 
@@ -2832,7 +2867,7 @@ public final class Numbers {
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(x == floorPow);
-                // fall through
+                //$FALL-THROUGH$
             case FLOOR:
             case DOWN:
                 return logFloor;
@@ -2875,7 +2910,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     // TODO(kevinb): remove after this warning is disabled globally
     public static int log10(final long x, final RoundingMode mode) {
         checkPositive("x", x);
@@ -2885,7 +2920,7 @@ public final class Numbers {
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(x == floorPow);
-                // fall through
+                //$FALL-THROUGH$
             case FLOOR:
             case DOWN:
                 return logFloor;
@@ -2930,7 +2965,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final BigInteger x, final RoundingMode mode) {
         checkPositive("x", x);
         if (fitsInLong(x)) {
@@ -2976,7 +3011,7 @@ public final class Numbers {
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(floorCmp == 0);
-                // fall through
+                //$FALL-THROUGH$
             case FLOOR:
             case DOWN:
                 return floorLog;
@@ -3162,6 +3197,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code sqrt(x)} is not an integer
      */
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static int sqrt(final int x, final RoundingMode mode) {
         checkNonNegative("x", x);
@@ -3180,8 +3216,8 @@ public final class Numbers {
             case HALF_EVEN:
                 final int halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
-                 * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
-                 * x and halfSquare are integers, this is equivalent to testing whether or not x <=
+                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
+                 * x and halfSquare are integers, this is equivalent to testing whether x <=
                  * halfSquare. (We have to deal with overflow, though.)
                  *
                  * If we treat halfSquare as an unsigned int, we know that
@@ -3265,8 +3301,8 @@ public final class Numbers {
                 final long sqrtFloor = guess - ((x < guessSquared) ? 1 : 0);
                 final long halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
-                 * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
-                 * and halfSquare are integers, this is equivalent to testing whether or not x <=
+                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
+                 * and halfSquare are integers, this is equivalent to testing whether x <=
                  * halfSquare. (We have to deal with overflow, though.)
                  *
                  * If we treat halfSquare as an unsigned long, we know that
@@ -3290,6 +3326,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x} is negative
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and the square root is not an integer
      */
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
         checkNonNegative("x", x);
@@ -3314,8 +3351,8 @@ public final class Numbers {
             case HALF_EVEN:
                 final BigInteger halfSquare = sqrtFloor.pow(2).add(sqrtFloor);
                 /*
-                 * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
-                 * and halfSquare are integers, this is equivalent to testing whether or not x <=
+                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
+                 * and halfSquare are integers, this is equivalent to testing whether x <=
                  * halfSquare.
                  */
                 return (halfSquare.compareTo(x) >= 0) ? sqrtFloor : sqrtFloor.add(BigInteger.ONE);
@@ -3394,7 +3431,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *         is not an integer multiple of {@code b}
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int divide(final int p, final int q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         if (q == 0) {
@@ -3418,8 +3455,9 @@ public final class Numbers {
         boolean increment;
         switch (mode) {
             case UNNECESSARY:
+                //noinspection ConstantValue,DataFlowIssue
                 checkRoundingUnnecessary(rem == 0);
-                // fall through
+                //$FALL-THROUGH$
             case DOWN:
                 increment = false;
                 break;
@@ -3463,7 +3501,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *     is not an integer multiple of {@code b}
      */
-    @SuppressWarnings("fallthrough")
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static long divide(final long p, final long q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         final long div = p / q; // throws if q == 0
@@ -3484,8 +3522,9 @@ public final class Numbers {
         boolean increment;
         switch (mode) {
             case UNNECESSARY:
+                //noinspection ConstantValue,DataFlowIssue
                 checkRoundingUnnecessary(rem == 0);
-                // fall through
+                //$FALL-THROUGH$
             case DOWN:
                 increment = false;
                 break;
@@ -3783,6 +3822,7 @@ public final class Numbers {
             return 0;
         }
         final long lcm = Math.abs(addExact(a / gcd(a, b), b));
+        //noinspection ConstantValue
         if (lcm == Integer.MIN_VALUE) {
             throw new ArithmeticException();
         }
@@ -3874,7 +3914,7 @@ public final class Numbers {
          * If leadingZeros > Long.SIZE + 1 it's definitely fine, if it's < Long.SIZE it's definitely
          * bad. We do the leadingZeros check to avoid the division below if at all possible.
          *
-         * Otherwise, if b == Long.MIN_VALUE, then the only allowed values of a are 0 and 1. We take
+         * Otherwise, if b == Long.MIN_VALUE, then the only allowed values are 0 and 1. We take
          * care of all a < 0 with their own check, because in particular, the case a == -1 will
          * incorrectly pass the division check below.
          *
@@ -4339,7 +4379,7 @@ public final class Numbers {
             shift += tz;
             // Adjust floor(log2(num)) + 1.
             final int normalizedBits = bits - tz;
-            // If it won't fit in a long, then we store off the intermediate product.
+            // If it doesn't fit in a long, then we store off the intermediate product.
             if (normalizedBits + productBits >= Long.SIZE) {
                 bignums.add(BigInteger.valueOf(product));
                 product = 1;
@@ -4600,7 +4640,7 @@ public final class Numbers {
     @SafeVarargs
     public static double mean(final int... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
-        // The upper bound on the the length of an array and the bounds on the int values mean that, in
+        // The upper bound on the length of an array and the bounds on the int values mean that, in
         // this case only, we can compute the sum as a long without risking overflow or loss of
         // precision. So we do that, as it's slightly quicker than the Knuth algorithm.
         long sum = 0;
@@ -5066,9 +5106,9 @@ public final class Numbers {
         if (x == 1) {
             return numerator / denominator;
         }
-        final long commonDivisor = gcd(x, denominator);
-        x /= commonDivisor;
-        denominator /= commonDivisor; //NOSONAR
+        final long commandivisor = gcd(x, denominator);
+        x /= commandivisor;
+        denominator /= commandivisor; //NOSONAR
         // We know gcd(x, denominator) = 1, and x * numerator / denominator is exact,
         // so denominator must be a divisor of numerator.
         return x * (numerator / denominator); //NOSONAR
@@ -5149,7 +5189,7 @@ public final class Numbers {
         signifFloor &= SIGNIFICAND_MASK; // remove the implied bit
 
         /*
-         * We round up if either the fractional part of signif is strictly greater than 0.5 (which is
+         * We round up if either the fractional part of signify is strictly greater than 0.5 (which is
          * {@code true} if the 0.5 bit is set and any lower bit is set), or if the fractional part of signif is
          * >= 0.5 and signifFloor is odd (which is {@code true} if both the 0.5 bit and the 1 bit are set).
          */
@@ -5158,7 +5198,7 @@ public final class Numbers {
         long bits = (long) (exponent + EXPONENT_BIAS) << SIGNIFICAND_BITS;
         bits += signifRounded;
         /*
-         * If signifRounded == 2^53, we'd need to set all of the significand bits to zero and add 1 to
+         * If signifRounded == 2^53, we'd need to set all the significand bits to zero and add 1 to
          * the exponent. This is exactly the behavior we get from just adding signifRounded to bits
          * directly. If the exponent is MAX_DOUBLE_EXPONENT, we round up (correctly) to
          * Double.POSITIVE_INFINITY.
@@ -5175,11 +5215,7 @@ public final class Numbers {
      */
     static double ensureNonNegative(final double value) {
         N.checkArgument(!isNaN(value));
-        if (value > 0.0) {
-            return value;
-        } else {
-            return 0.0;
-        }
+        return Math.max(value, 0.0);
     }
 
     static int lessThanBranchFree(final int x, final int y) {

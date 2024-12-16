@@ -15,5 +15,5 @@
 package com.landawn.abacus.http;
 
 public enum HttpMethod {
-    GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, CONNECT, PATCH;
+    GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, CONNECT, PATCH
 }

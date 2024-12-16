@@ -19,10 +19,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
+@SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
 @Internal
 public final class DataSourceUtil {
 
@@ -32,6 +34,7 @@ public final class DataSourceUtil {
 
     static {
         try {
+            //noinspection ConstantValue
             isInSpring = ClassUtil.forClass("org.springframework.datasource.DataSourceUtils") != null;
         } catch (final Throwable e) {
             isInSpring = false;
@@ -388,6 +391,7 @@ public final class DataSourceUtil {
      * @return
      * @throws SQLException
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static int[] executeBatch(final Statement stmt) throws SQLException {
         try {
             return stmt.executeBatch();

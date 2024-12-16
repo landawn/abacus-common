@@ -35,6 +35,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -77,7 +78,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final char[] COMMA_SPACE_CHAR_ARRAY = COMMA_SPACE.toCharArray();
 
-    static final String NULL_STRING = "null".intern();
+    static final String NULL_STRING = "null";
 
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
@@ -194,33 +195,27 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     static final Map<Class<?>, Tuple2<Function<Class<?>, Object>, Function<Object, Object>>> mapOfCreatorAndConvertorForTargetType = new HashMap<>();
 
     static {
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), t -> ImmutableList.wrap((List<?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class, Tuple.of(t -> new ArrayList<>(), t -> ImmutableList.wrap((List<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), t -> ImmutableSet.wrap((Set<?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class, Tuple.of(t -> new HashSet<>(), t -> ImmutableSet.wrap((Set<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), t -> ImmutableSortedSet.wrap((SortedSet<?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class, Tuple.of(t -> new TreeSet<>(), t -> ImmutableSortedSet.wrap((SortedSet<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), t -> ImmutableNavigableSet.wrap((NavigableSet<?>) t)));
+                Tuple.of(t -> new TreeSet<>(), t -> ImmutableNavigableSet.wrap((NavigableSet<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConvertorForTargetType.get(ImmutableList.class));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), t -> ImmutableMap.wrap((Map<?, ?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class, Tuple.of(t -> new HashMap<>(), t -> ImmutableMap.wrap((Map<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), t -> ImmutableBiMap.wrap((BiMap<?, ?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class, Tuple.of(t -> new BiMap<>(), t -> ImmutableBiMap.wrap((BiMap<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), t -> ImmutableSortedMap.wrap((SortedMap<?, ?>) t)));
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class, Tuple.of(t -> new TreeMap<>(), t -> ImmutableSortedMap.wrap((SortedMap<?, ?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), t -> ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t)));
+                Tuple.of(t -> new TreeMap<>(), t -> ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(N::newInstance, t -> t));
+        mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.of(N::newInstance, t -> t));
     }
 
     protected static Class<?> choosePropClass(final Class<?> propClass, final Class<?> attribeTypeClass) {
@@ -249,17 +244,18 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *
      * @param <T>
      * @param propClass
-     * @param attribeTypeClass
+     * @param attrTypeClass
      * @return
      */
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attribeTypeClass) {
-        if ((attribeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attribeTypeClass))) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attrTypeClass) {
+        if ((attrTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attrTypeClass))) {
             try {
-                return (T) N.newInstance(attribeTypeClass);
+                return (T) N.newInstance(attrTypeClass);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by type attribute: " + attribeTypeClass.getCanonicalName());
+                    logger.warn("Failed to new instance by type attribute: " + attrTypeClass.getCanonicalName());
                 }
             }
         }
@@ -268,7 +264,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return (T) N.newInstance(propClass);
         }
 
-        throw new ParseException("Failed to create property instance with property class: " + propClass + " and attribute " + attribeTypeClass);
+        throw new ParseException("Failed to create property instance with property class by attribute " + attrTypeClass);
     }
 
     /**
@@ -303,6 +299,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         final Type<?> targetType = N.typeOf(targetClass);
 
+        //noinspection StatementWithEmptyBody
         if (targetType.isPrimitiveArray()) {
             // continue
         } else {

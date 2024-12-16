@@ -52,7 +52,7 @@ final class ReflectASM<T> {
      * @return
      */
     public static <T> ReflectASM<T> on(final String clsName) {
-        return on((Class<T>) ClassUtil.forClass(clsName));
+        return on(ClassUtil.forClass(clsName));
     }
 
     /**

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.pool;
 
+import java.io.Serial;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import com.landawn.abacus.util.MoreExecutors;
 
 public abstract class AbstractPool implements Pool {
 
+    @Serial
     private static final long serialVersionUID = -7780250223658416202L;
 
     static final Logger logger = LoggerFactory.getLogger(AbstractPool.class);
@@ -37,6 +39,7 @@ public abstract class AbstractPool implements Pool {
     static final float DEFAULT_BALANCE_FACTOR = 0.2f;
 
     static final ScheduledExecutorService scheduledExecutor;
+
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(64);
         executor.setKeepAliveTime(180, TimeUnit.SECONDS);
@@ -73,7 +76,7 @@ public abstract class AbstractPool implements Pool {
             final float balanceFactor) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
             throw new IllegalArgumentException(
-                    "Capacity(" + capacity + "), evict delay(" + evictDelay + "), balanc factor(" + balanceFactor + ") can not be negative");
+                    "Capacity(" + capacity + "), evict delay(" + evictDelay + "), balance factor(" + balanceFactor + ") can not be negative");
         }
 
         this.capacity = capacity;
@@ -83,18 +86,15 @@ public abstract class AbstractPool implements Pool {
 
         final Class<?> cls = this.getClass();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                logger.warn("Starting to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.warn("Starting to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
 
-                try {
-                    close();
-                } finally {
-                    logger.warn("Completed to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
-                }
+            try {
+                close();
+            } finally {
+                logger.warn("Completed to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
             }
-        });
+        }));
     }
 
     /**

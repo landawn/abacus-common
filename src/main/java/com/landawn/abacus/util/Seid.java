@@ -233,7 +233,6 @@ public class Seid implements EntityId {
      * @return
      */
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T get(final String propName, final Class<? extends T> targetType) {
         Object propValue = get(propName);
 
@@ -259,9 +258,9 @@ public class Seid implements EntityId {
         if (values.isEmpty() || (values.size() == 1 && values.containsKey(simplePropName))) {
             values = Collections.singletonMap(simplePropName, propValue);
         } else {
-            final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
-            newVlaues.putAll(values);
-            values = newVlaues;
+            final Map<String, Object> newValues = new TreeMap<>(keyComparator);
+            newValues.putAll(values);
+            values = newValues;
 
             values.put(simplePropName, propValue);
         }
@@ -287,9 +286,9 @@ public class Seid implements EntityId {
             set(entry.getKey(), entry.getValue());
         } else {
             if (!(values instanceof TreeMap)) {
-                final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
-                newVlaues.putAll(values);
-                values = newVlaues;
+                final Map<String, Object> newValues = new TreeMap<>(keyComparator);
+                newValues.putAll(values);
+                values = newValues;
             }
 
             for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
@@ -357,7 +356,7 @@ public class Seid implements EntityId {
      */
     @Override
     public boolean containsKey(final String propName) {
-        if (values.size() == 0) {
+        if (values.isEmpty()) {
             return false;
         }
 
@@ -390,7 +389,7 @@ public class Seid implements EntityId {
      */
     @Override
     public boolean isEmpty() {
-        return values.size() == 0;
+        return values.isEmpty();
     }
 
     /**
@@ -432,7 +431,7 @@ public class Seid implements EntityId {
             return true;
         }
 
-        return (obj instanceof EntityId) ? toString().equals(obj.toString()) : false;
+        return obj instanceof EntityId && toString().equals(obj.toString());
     }
 
     @Override

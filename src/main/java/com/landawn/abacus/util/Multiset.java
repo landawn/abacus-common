@@ -47,6 +47,7 @@ import com.landawn.abacus.util.function.ObjIntPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 // Copied from Google Guava under Apache License 2.0 and modified.
+
 /**
  * <pre>
  * Copied from Google Guava under Apache License 2.0 and modified.
@@ -152,7 +153,7 @@ public final class Multiset<E> implements Collection<E> {
             return new Multiset<>();
         }
 
-        final Multiset<T> multiset = new Multiset<>(N.<T, MutableInt> newHashMap(a.length));
+        final Multiset<T> multiset = new Multiset<>(N.newHashMap(a.length));
 
         multiset.addAll(Array.asList(a));
 
@@ -165,7 +166,7 @@ public final class Multiset<E> implements Collection<E> {
      * This method initializes a new instance of Multiset and adds all elements from the given collection.
      * The count of each element in the Multiset will be its frequency in the given collection.
      *
-     * @param coll The collection whose elements are to be placed into this Multiset..
+     * @param coll The collection whose elements are to be placed into this Multiset.
      * @return a new Multiset containing the elements of the specified collection.
      */
     public static <T> Multiset<T> create(final Collection<? extends T> coll) {
@@ -391,7 +392,7 @@ public final class Multiset<E> implements Collection<E> {
      * element). Note that for an {@link Object#equals}-based multiset, this gives the same result as
      * {@link Collections#frequency} (which would presumably perform more poorly).
      *
-     * <p><b>Note:</b> the utility method {@link Iterables#frequency} generalizes this operation; it
+     * <p><b>Note:</b> the utility method {@link Collections#frequency} generalizes this operation; it
      * correctly delegates to this method when dealing with a multiset, but it can also accept any
      * other iterable type.
      *
@@ -410,7 +411,7 @@ public final class Multiset<E> implements Collection<E> {
      * element). Note that for an {@link Object#equals}-based multiset, this gives the same result as
      * {@link Collections#frequency} (which would presumably perform more poorly).
      *
-     * <p><b>Note:</b> the utility method {@link Iterables#frequency} generalizes this operation; it
+     * <p><b>Note:</b> the utility method {@link Collections#frequency} generalizes this operation; it
      * correctly delegates to this method when dealing with a multiset, but it can also accept any
      * other iterable type.
      *
@@ -419,6 +420,7 @@ public final class Multiset<E> implements Collection<E> {
      *     negative
      */
     public int getCount(final Object element) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.get(element);
 
         return count == null ? 0 : count.value();
@@ -677,6 +679,7 @@ public final class Multiset<E> implements Collection<E> {
     public int remove(final Object element, final int occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
 
+        @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.get(element);
 
         if (count == null) {
@@ -688,6 +691,7 @@ public final class Multiset<E> implements Collection<E> {
         count.subtract(occurrencesToRemove);
 
         if (count.value() <= 0) {
+            //noinspection SuspiciousMethodCalls
             backingMap.remove(element);
         }
 
@@ -711,6 +715,7 @@ public final class Multiset<E> implements Collection<E> {
     public int removeAndGetCount(final Object element, final int occurrences) {
         checkOccurrences(occurrences);
 
+        @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.get(element);
 
         if (count == null) {
@@ -720,6 +725,7 @@ public final class Multiset<E> implements Collection<E> {
         count.subtract(occurrences);
 
         if (count.value() <= 0) {
+            //noinspection SuspiciousMethodCalls
             backingMap.remove(element);
         }
 
@@ -729,8 +735,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * {@inheritDoc}
      *
-     * <p><b>Note:</b> This method ignores how often any element might appear in {@code c}, and only
-     * cares whether or not an element appears at all.
+     * <p><b>Note:</b> This method ignores how often any element might appear in {@code c}, and only cares whether an element appears at all.
      *
      * <p>This method refines {@link Collection#removeAll} to further specify that it <b>may not</b>
      * throw an exception in response to any of {@code elements} being {@code null} or of the wrong type.
@@ -798,6 +803,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return The count of the element before the operation. If the element does not exist in the multiset, it will return 0.
      */
     public int removeAllOccurrences(final Object e) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.remove(e);
 
         return count == null ? 0 : count.value();
@@ -809,7 +815,7 @@ public final class Multiset<E> implements Collection<E> {
      * This method iterates over the given collection and removes all occurrences of each element from this multiset.
      * If an element from the collection is not present in the multiset, the multiset remains unchanged for that particular element.
      *
-     * @param c The collection whose elements are to be removed from this multiset..
+     * @param c The collection whose elements are to be removed from this multiset.
      * @return {@code true} if this multiset changed as a result of the call.
      */
     public boolean removeAllOccurrences(final Collection<?> c) {
@@ -846,6 +852,7 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         for (final Object e : removingKeys) {
+            //noinspection SuspiciousMethodCalls
             backingMap.remove(e);
         }
 
@@ -882,6 +889,7 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         for (final Object e : removingKeys) {
+            //noinspection SuspiciousMethodCalls
             backingMap.remove(e);
         }
 
@@ -909,7 +917,7 @@ public final class Multiset<E> implements Collection<E> {
         for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             newVal = function.apply(entry.getKey(), entry.getValue().value());
 
-            if (newVal == null || newVal.intValue() <= 0) {
+            if (newVal == null || newVal <= 0) {
                 if (keyToRemove == null) {
                     keyToRemove = new ArrayList<>();
                 }
@@ -1110,7 +1118,6 @@ public final class Multiset<E> implements Collection<E> {
      */
     public int merge(final E key, final int value, final IntBiFunction<Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
-        N.checkArgNotNull(value);
 
         final int oldValue = getCount(key);
         final int newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
@@ -1134,7 +1141,7 @@ public final class Multiset<E> implements Collection<E> {
      * {@inheritDoc}
      *
      * <p><b>Note:</b> This method ignores how often any element might appear in {@code c}, and only
-     * cares whether or not an element appears at all.
+     * cares whether an element appears at all.
      *
      * <p>This method refines {@link Collection#retainAll} to further specify that it <b>may not</b>
      * throw an exception in response to any of {@code elements} being {@code null} or of the wrong type.
@@ -1143,7 +1150,7 @@ public final class Multiset<E> implements Collection<E> {
     @Override
     public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
-            final boolean result = backingMap.size() > 0;
+            final boolean result = !backingMap.isEmpty();
             clear();
             return result;
         }
@@ -1160,7 +1167,7 @@ public final class Multiset<E> implements Collection<E> {
             }
         }
 
-        return N.isEmpty(others) ? false : removeAllOccurrences(others);
+        return !N.isEmpty(others) && removeAllOccurrences(others);
     }
 
     /**
@@ -1174,6 +1181,7 @@ public final class Multiset<E> implements Collection<E> {
      */
     @Override
     public boolean contains(final Object valueToFind) {
+        //noinspection SuspiciousMethodCalls
         return backingMap.containsKey(valueToFind);
     }
 
@@ -1186,7 +1194,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * <p><b>Note:</b> this method does not take into account the occurrence count of an element in
      * the two collections; it may still return {@code true} even if {@code elements} contains several
-     * occurrences of an element and this multiset contains only one. This is no different than any
+     * occurrences of an element and this multiset contains only one. This is no different from any
      * other collection type like {@link List}, but it may be unexpected to the user of a multiset.
      *
      * @param elements the collection of elements to be checked for containment in this multiset
@@ -1203,7 +1211,7 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     // It won't work.
-    //    public Multiset<T> synchronizedd() {
+    //    public Multiset<T> synchronized() {
     //        return new Multiset<>(Collections.synchronizedMap(valueMap));
     //    }
 
@@ -1251,8 +1259,8 @@ public final class Multiset<E> implements Collection<E> {
 
         @Override
         public boolean contains(final Object obj) {
-            if (obj instanceof Multiset.Entry) {
-                final Multiset.Entry<?> entry = (Multiset.Entry<?>) obj;
+            if (obj instanceof Multiset.Entry<?> entry) {
+                @SuppressWarnings("SuspiciousMethodCalls")
                 final MutableInt count = backingMap.get(entry.element());
 
                 return count == null ? entry.count() == 0 : count.value() == entry.count();
@@ -1345,7 +1353,7 @@ public final class Multiset<E> implements Collection<E> {
      * </p>
      * @return
      * @throws ArithmeticException if the total number of all occurrences of all elements overflows an int
-     * @see countOfDistinctElements()
+     * @see #countOfDistinctElements()
      * @see #sumOfOccurrences()
      */
     @Override
@@ -1517,7 +1525,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return A map with the elements of this multiset as keys and their counts as values, sorted by the keys using the provided comparator.
      */
     public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) {
-        return toMapSortedBy(Comparators.<E, MutableInt> comparingByKey(cmp));
+        return toMapSortedBy(Comparators.comparingByKey(cmp));
     }
 
     /**
@@ -1572,7 +1580,7 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     // It won't work.
-    //    public Multiset<T> synchronizedd() {
+    //    public Multiset<T> synchronized() {
     //        return new Multiset<>(Collections.synchronizedMap(valueMap));
     //    }
 
@@ -1588,10 +1596,8 @@ public final class Multiset<E> implements Collection<E> {
     public void forEach(final Consumer<? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        final Iterator<E> iter = iterator();
-
-        while (iter.hasNext()) {
-            action.accept(iter.next());
+        for (E e : this) {
+            action.accept(e);
         }
     }
 
@@ -1695,7 +1701,7 @@ public final class Multiset<E> implements Collection<E> {
      * @throws X if the provided function throws an exception of type X.
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
-        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
+        return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
     }
 
     /**
@@ -1718,7 +1724,7 @@ public final class Multiset<E> implements Collection<E> {
      * @throws X if the provided consumer function throws an exception of type X.
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
-        return If.is(backingMap.size() > 0).then(this, action);
+        return If.is(!backingMap.isEmpty()).then(this, action);
     }
 
     /**
@@ -1838,6 +1844,7 @@ public final class Multiset<E> implements Collection<E> {
         String toString();
     }
 
+    @SuppressWarnings("ClassCanBeRecord")
     static final class ImmutableEntry<E> implements Entry<E> { // NOSONAR
         private final E element;
         private final int count;
@@ -1859,8 +1866,7 @@ public final class Multiset<E> implements Collection<E> {
 
         @Override
         public boolean equals(final Object object) {
-            if (object instanceof Multiset.Entry) {
-                final Multiset.Entry<?> that = (Multiset.Entry<?>) object;
+            if (object instanceof Multiset.Entry<?> that) {
                 return count == that.count() && N.equals(element, that.element());
             }
 

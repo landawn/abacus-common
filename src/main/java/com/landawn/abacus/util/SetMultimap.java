@@ -51,7 +51,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param initialCapacity the initial capacity of the SetMultimap.
      */
     SetMultimap(final int initialCapacity) {
-        this(N.<K, Set<E>> newHashMap(initialCapacity), HashSet.class);
+        this(N.newHashMap(initialCapacity), HashSet.class);
     }
 
     /**
@@ -294,6 +294,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      */
     public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
+        //noinspection rawtypes
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
         if (N.notEmpty(map)) {
@@ -457,7 +458,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
-            return b == null ? N.<K, E> newSetMultimap() : create(b);
+            return b == null ? N.newSetMultimap() : create(b);
         } else {
             final SetMultimap<K, E> res = create(a);
             res.put(b);
@@ -479,7 +480,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             final Map<? extends K, ? extends E> c) {
         if (a == null) {
             if (b == null) {
-                return c == null ? N.<K, E> newSetMultimap() : create(c);
+                return c == null ? N.newSetMultimap() : create(c);
             } else {
                 final SetMultimap<K, E> res = create(b);
                 res.put(c);
@@ -555,14 +556,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return a new instance of SetMultimap backed by the provided map.
      * @throws IllegalArgumentException if the provided map or valueSupplier is null
      */
-    @SuppressWarnings("rawtypes")
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
         N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
-        return new SetMultimap<>((Map) map, valueSupplier);
+        return new SetMultimap<>((Map<K, Set<E>>) map, valueSupplier);
     }
 
     /**
@@ -570,10 +570,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @return a new instance of SetMultimap where the original keys are now values and the original values are now keys
      */
-    @SuppressWarnings("rawtypes")
     public SetMultimap<E, K> inverse() {
         final SetMultimap<K, E> multimap = this;
-        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(backingMap), (Supplier) valueSupplier);
+        //noinspection rawtypes
+        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
@@ -717,7 +717,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //     * @see Collections#synchronizedMap(Map)
     //     */
     //    @Override
-    //    public SetMultimap<K, E> synchronizedd() {
+    //    public SetMultimap<K, E> synchronized() {
     //        return new SetMultimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
     //    }
 

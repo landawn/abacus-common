@@ -53,7 +53,7 @@ public final class Synchronized<T> {
     /**
      * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex}.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception and you need to ensure that the execution is synchronized.
+     * This method is useful when you want to run a piece of code that might throw an exception, and you need to ensure that the execution is synchronized.
      * It allows you to handle exceptions in a specific way by providing a runnable task that can throw an exception.
      *
      * @param <T> The type of the mutex.
@@ -67,6 +67,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(cmd);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             cmd.run();
         }
@@ -91,6 +92,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(cmd);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             return cmd.call();
         }
@@ -99,7 +101,7 @@ public final class Synchronized<T> {
     /**
      * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
      *
-     * This method is useful when you want to test a condition that might throw an exception and you need to ensure that the execution is synchronized.
+     * This method is useful when you want to test a condition that might throw an exception, and you need to ensure that the execution is synchronized.
      * It allows you to handle exceptions in a specific way by providing a predicate that can throw an exception and returns a boolean result.
      *
      * @param <T> The type of the mutex.
@@ -114,6 +116,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(predicate);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             return predicate.test(mutex);
         }
@@ -122,7 +125,7 @@ public final class Synchronized<T> {
     /**
      * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
      *
-     * This method is useful when you want to test a condition that might throw an exception and you need to ensure that the execution is synchronized.
+     * This method is useful when you want to test a condition that might throw an exception, and you need to ensure that the execution is synchronized.
      * It allows you to handle exceptions in a specific way by providing a bi-predicate that can throw an exception and returns a boolean result.
      *
      * @param <T> The type of the mutex.
@@ -140,6 +143,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(predicate);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             return predicate.test(mutex, u);
         }
@@ -148,7 +152,7 @@ public final class Synchronized<T> {
     /**
      * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex}.
      *
-     * This method is useful when you want to perform an operation that might throw an exception and you need to ensure that the execution is synchronized.
+     * This method is useful when you want to perform an operation that might throw an exception, and you need to ensure that the execution is synchronized.
      * It allows you to handle exceptions in a specific way by providing a consumer that can throw an exception.
      *
      * @param <T> The type of the mutex.
@@ -162,6 +166,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(consumer);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             consumer.accept(mutex);
         }
@@ -170,7 +175,7 @@ public final class Synchronized<T> {
     /**
      * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex} and {@code u}.
      *
-     * This method is useful when you want to perform an operation that might throw an exception and you need to ensure that the execution is synchronized.
+     * This method is useful when you want to perform an operation that might throw an exception, and you need to ensure that the execution is synchronized.
      * It allows you to handle exceptions in a specific way by providing a bi-consumer that can throw an exception.
      *
      * @param <T> The type of the mutex.
@@ -187,6 +192,7 @@ public final class Synchronized<T> {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(consumer);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
             consumer.accept(mutex, u);
         }
@@ -207,13 +213,14 @@ public final class Synchronized<T> {
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code function}.
      */
-    public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> funciton)
+    public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
-        N.checkArgNotNull(funciton);
+        N.checkArgNotNull(function);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
-            return funciton.apply(mutex);
+            return function.apply(mutex);
         }
     }
 
@@ -234,13 +241,14 @@ public final class Synchronized<T> {
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code function}.
      */
-    public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> funciton)
+    public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> function)
             throws E {
         N.checkArgNotNull(mutex);
-        N.checkArgNotNull(funciton);
+        N.checkArgNotNull(function);
 
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
-            return funciton.apply(mutex, u);
+            return function.apply(mutex, u);
         }
     }
 

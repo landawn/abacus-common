@@ -50,11 +50,10 @@ import com.landawn.abacus.util.stream.Stream;
  * It provides a variety of methods for manipulating and accessing the data, such as sorting, filtering, joining, and grouping.
  * It also supports operations like union, intersection, and difference between two DataSets.
  * The data in a DataSet is organized into rows and columns, similar to a table in a relational database.
- * Each column in a DataSet has a name(case sensitive), and the data within a column is of a specific type.
+ * Each column in a DataSet has a name(case-sensitive), and the data within a column is of a specific type.
  * <br />
  * @see com.landawn.abacus.util.Builder.DataSetBuilder
  * @see com.landawn.abacus.util.Sheet
- * @see com.landawn.abacus.jdbc.JdbcUtil
  * @see com.landawn.abacus.util.CSVUtil
  * @see com.landawn.abacus.util.Fn.Factory
  * @see com.landawn.abacus.util.Clazz
@@ -159,7 +158,6 @@ public interface DataSet {
      * @param columns A collection of collections representing the data in the DataSet. Each sub-collection is a column.
      * @return A new DataSet with the specified column names and columns.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
-     * @see #singleColumn(String, Collection)
      */
     static DataSet columns(final Collection<String> columnNames, final Collection<? extends Collection<?>> columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.size(columns)) {
@@ -242,7 +240,7 @@ public interface DataSet {
     /**
      * Returns the index of the specified column in the DataSet.
      *
-     * @param columnName the name(case sensitive) of the column for which the index is required.
+     * @param columnName the name(case-sensitive) of the column for which the index is required.
      * @return the index of the specified column.
      * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
@@ -251,7 +249,7 @@ public interface DataSet {
     /**
      * Returns an array of column indexes corresponding to the provided column names.
      *
-     * @param columnNames the collection of column names(case sensitive) for which indexes are required.
+     * @param columnNames the collection of column names(case-sensitive) for which indexes are required.
      * @return an array of integers representing the indexes of the specified columns.
      * @throws IllegalArgumentException if any of the provided column names does not exist in the DataSet.
      */
@@ -260,7 +258,7 @@ public interface DataSet {
     /**
      * Checks if the specified column name exists in this DataSet.
      *
-     * @param columnName the name(case sensitive) of the column to check.
+     * @param columnName the name(case-sensitive) of the column to check.
      * @return {@code true} if the column exists, {@code false} otherwise.
      */
     boolean containsColumn(String columnName);
@@ -268,7 +266,7 @@ public interface DataSet {
     /**
      * Check if this {@code DataSet} contains all the specified columns.
      *
-     * @param columnNames the collection of column names(case sensitive) to check.
+     * @param columnNames the collection of column names(case-sensitive) to check.
      * @return {@code true} if all the specified columns are included in the this {@code DataSet}
      */
     boolean containsAllColumns(Collection<String> columnNames);
@@ -1357,6 +1355,7 @@ public interface DataSet {
     void updateRows(int[] indices, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
+
     /**
      * Updates all the values in the DataSet.
      * <br />
@@ -1978,7 +1977,6 @@ public interface DataSet {
      * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
      * @param columnNameFilter The predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
      * @param columnNameConverter The function to convert the column names into property names in the instance.
-     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
      * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
@@ -4327,7 +4325,7 @@ public interface DataSet {
      * <br />
      * This method returns a Sheet, where each cell represents an aggregation result.
      * The keyColumnName is used as the row identifier in the resulting Sheet.
-     * The aggregateOnColumnNames is the column on whichDifference between groupby and pivot_table for pandas dataframes the aggregate operation is to be performed.
+     * The aggregateOnColumnNames is the column on whichDifference between groupBy and pivot_table for pandas dataframes the aggregate operation is to be performed.
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The collector defines the aggregate operation.
      *

@@ -30,18 +30,13 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     private static final String Y = "Y";
     private static final String N = "N";
 
-    protected BooleanCharType() {
+    BooleanCharType() {
         super(typeName);
     }
 
     @Override
     public Class<Boolean> clazz() {
         return Boolean.class;
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return false;
     }
 
     @Override
@@ -56,7 +51,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      */
     @Override
     public String stringOf(final Boolean b) {
-        return (b == null || !b.booleanValue()) ? N : Y;
+        return (b == null || !b) ? N : Y;
     }
 
     /**
@@ -82,36 +77,36 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-    *
-    * @param rs
-    * @param columnIndex
-    * @return
-    * @throws SQLException the SQL exception
-    */
+     *
+     * @param rs
+     * @param columnIndex
+     * @return
+     * @throws SQLException the SQL exception
+     */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
     }
 
     /**
-    *
-    * @param rs
-    * @param columnLabel
-    * @return
-    * @throws SQLException the SQL exception
-    */
+     *
+     * @param rs
+     * @param columnLabel
+     * @return
+     * @throws SQLException the SQL exception
+     */
     @Override
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
 
     /**
-    *
-    * @param stmt
-    * @param columnIndex
-    * @param x
-    * @throws SQLException the SQL exception
-    */
+     *
+     * @param stmt
+     * @param columnIndex
+     * @param x
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
         if (x == null) {
@@ -122,12 +117,12 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-    *
-    * @param stmt
-    * @param parameterName
-    * @param x
-    * @throws SQLException the SQL exception
-    */
+     *
+     * @param stmt
+     * @param parameterName
+     * @param x
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
         if (x == null) {

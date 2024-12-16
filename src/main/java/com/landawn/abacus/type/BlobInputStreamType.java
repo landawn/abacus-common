@@ -23,10 +23,10 @@ import java.sql.SQLException;
 
 public class BlobInputStreamType extends InputStreamType {
 
-    public static final String BLOB_INPUTSTREAM = "BlobInputStream";
+    public static final String BLOB_INPUT_STREAM = "BlobInputStream";
 
     BlobInputStreamType() {
-        super(BLOB_INPUTSTREAM);
+        super(BLOB_INPUT_STREAM);
     }
 
     /**

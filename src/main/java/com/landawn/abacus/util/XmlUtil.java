@@ -77,7 +77,7 @@ public final class XmlUtil {
 
     protected static final Logger logger = LoggerFactory.getLogger(XmlUtil.class);
 
-    // ... it has to be big enougth to make it's safety to add element to
+    // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
     static final String NAME = "name";
 
@@ -173,15 +173,15 @@ public final class XmlUtil {
     }
 
     /**
-     * Unmarshals the given XML string into an object of the specified class.
-     * {@link Unmarshaller#unmarshal(Object, java.io.Writer)} is called.
+     * Unmarshal the given XML string into an object of the specified class.
+     * {@link  Unmarshaller#unmarshal(Reader)} is called.
      *
      * @param <T> The type of the object to be returned.
      * @param cls The class of the object to be returned.
-     * @param xml The XML string to be unmarshaled.
-     * @return The unmarshaled object of the specified class.
+     * @param xml The XML string to be unmarshalled.
+     * @return The unmarshalled object of the specified class.
      * @see JAXBContext#newInstance(Class...)
-     * @see Unmarshaller#unmarshal(Object, java.io.Reader)
+     * @see Unmarshaller#unmarshal(Reader)
      */
     @SuppressWarnings("unchecked")
     public static <T> T unmarshal(final Class<? extends T> cls, final String xml) {
@@ -193,10 +193,10 @@ public final class XmlUtil {
                 classJaxbContextPool.put(cls, jc);
             }
 
-            final Unmarshaller nnmarshaller = jc.createUnmarshaller();
+            final Unmarshaller unmarshaller = jc.createUnmarshaller();
             final StringReader reader = new StringReader(xml);
 
-            return (T) nnmarshaller.unmarshal(reader);
+            return (T) unmarshaller.unmarshal(reader);
         } catch (final JAXBException e) {
             throw N.toRuntimeException(e);
         }
@@ -297,8 +297,6 @@ public final class XmlUtil {
     /**
      * Creates a new instance of {@code DocumentBuilder}.
      *
-     * @param source The source XMLStreamReader to be filtered.
-     * @param filter The StreamFilter to apply to the source.
      * @return The filtered XMLStreamReader.
      * @see DocumentBuilderFactory#newDocumentBuilder()
      */
@@ -903,7 +901,7 @@ public final class XmlUtil {
                     case '\r':
                     case '\f':
 
-                        if ((sb.length() > 0) && (sb.charAt(sb.length() - 1) != ' ')) {
+                        if ((!sb.isEmpty()) && (sb.charAt(sb.length() - 1) != ' ')) {
                             sb.append(' ');
                         }
 
@@ -1167,9 +1165,9 @@ public final class XmlUtil {
      * @return
      */
     /*
-     * static Class<?> getAttributeTypeClass(Attributes atts) { if (atts == null) { return null; }
+     * static Class<?> getAttributeTypeClass(Attributes attrs) { if (attrs == null) { return null; }
      *
-     * String typeAttr = atts.getValue(TYPE);
+     * String typeAttr = attrs.getValue(TYPE);
      *
      * if (typeAttr == null) { return null; }
      *
@@ -1212,10 +1210,10 @@ public final class XmlUtil {
      * @return
      */
     /*
-     * static Class<?> getConcreteClass(Class<?> targetClass, Attributes atts) { if (atts == null) { return targetClass;
+     * static Class<?> getConcreteClass(Class<?> targetClass, Attributes attrs) { if (attrs == null) { return targetClass;
      * }
      *
-     * Class<?> typeClass = getAttributeTypeClass(atts);
+     * Class<?> typeClass = getAttributeTypeClass(attrs);
      *
      * return getConcreteClass(targetClass, typeClass); }
      */
@@ -1255,6 +1253,6 @@ public final class XmlUtil {
         /** The key. */
         KEY,
         /** The value. */
-        VALUE;
+        VALUE
     }
 }

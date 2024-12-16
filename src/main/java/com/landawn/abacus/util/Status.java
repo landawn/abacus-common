@@ -71,5 +71,5 @@ public enum Status {
     AVAILABLE,
     UNAVAILABLE,
     DISABLED,
-    DESTROYED;
+    DESTROYED
 }

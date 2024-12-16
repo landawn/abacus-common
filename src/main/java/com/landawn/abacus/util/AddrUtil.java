@@ -31,9 +31,9 @@ import java.util.List;
 
 public final class AddrUtil {
 
-    private static final String URL_SEPERATOR = "(?:\\s|,)+"; //NOSONAR
+    private static final String URL_SEPARATOR = "(?:\\s|,)+"; //NOSONAR
 
-    private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPERATOR).omitEmptyStrings().trimResults();
+    private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPARATOR).omitEmptyStrings().trimResults();
 
     private AddrUtil() {
         // singleton
@@ -50,7 +50,7 @@ public final class AddrUtil {
         final List<String> serverList = URL_SPLITTER.split(servers);
 
         if (N.isEmpty(serverList)) {
-            throw new IllegalArgumentException("Invlid serverUrl: " + servers);
+            throw new IllegalArgumentException("Invalid serverUrl: " + servers);
         }
 
         return serverList;
@@ -71,16 +71,16 @@ public final class AddrUtil {
             throw new IllegalArgumentException("Null or empty host list");
         }
 
-        final String[] hoststuffs = servers.split(URL_SEPERATOR); // NOSONAR
+        final String[] hoststuffs = servers.split(URL_SEPARATOR); // NOSONAR
 
         if (N.isEmpty(hoststuffs)) {
-            throw new IllegalArgumentException("Invlid addresses: " + servers);
+            throw new IllegalArgumentException("Invalid addresses: " + servers);
         }
 
         final List<InetSocketAddress> addrs = new ArrayList<>();
 
         for (final String hoststuff : hoststuffs) {
-            if (hoststuff.equals("")) {
+            if (hoststuff.isEmpty()) {
                 continue;
             }
 
@@ -125,7 +125,6 @@ public final class AddrUtil {
         }
 
         if (addrs.isEmpty()) {
-            // servers was passed in empty, and shouldn't have been
             throw new IllegalArgumentException("servers cannot be empty");
         }
 

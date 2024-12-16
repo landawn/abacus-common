@@ -40,16 +40,6 @@ public abstract class Wrapper<T> implements Immutable {
 
     static final Function<Object, String> defaultToStringFunction = N::toString;
 
-    @SuppressWarnings("rawtypes")
-    static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
-
-    @SuppressWarnings("rawtypes")
-    static final Map<Object, Wrapper> arrayWapperPool = new ConcurrentHashMap<>();
-
-    static {
-        arrayWapperPool.put(boolean.class, new ArrayWrapper<>(new boolean[0]));
-    }
-
     final T value;
 
     Wrapper(final T value) {
@@ -65,17 +55,17 @@ public abstract class Wrapper<T> implements Immutable {
      */
     public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
-            return WRAPPER_FOR_NULL_ARRAY;
+            return ArrayWrapper.WRAPPER_FOR_NULL_ARRAY;
         }
 
         Wrapper<T> result = null;
 
         if (array.getClass().isArray() && java.lang.reflect.Array.getLength(array) == 0) {
-            result = arrayWapperPool.get(array.getClass().getComponentType());
+            result = ArrayWrapper.WRAPPER_POOL.get(array.getClass().getComponentType());
 
             if (result == null) {
                 result = new ArrayWrapper<>(array);
-                arrayWapperPool.put(array.getClass().getComponentType(), result);
+                ArrayWrapper.WRAPPER_POOL.put(array.getClass().getComponentType(), result);
             }
 
             return result;
@@ -179,6 +169,17 @@ public abstract class Wrapper<T> implements Immutable {
     }
 
     static final class ArrayWrapper<T> extends Wrapper<T> {
+
+        @SuppressWarnings("rawtypes")
+        static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
+
+        @SuppressWarnings("rawtypes")
+        static final Map<Object, Wrapper> WRAPPER_POOL = new ConcurrentHashMap<>();
+
+        static {
+            WRAPPER_POOL.put(boolean.class, new ArrayWrapper<>(new boolean[0]));
+        }
+
         ArrayWrapper(final T value) {
             super(value);
         }

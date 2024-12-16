@@ -55,7 +55,7 @@ import com.landawn.abacus.util.Strings;
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
  * So content must be encoded with Base64 if the specified input is String or Reader, otherwise the content must NOT be encoded with Base64 if the specified input is File or InputStream.
- * The reason not to encoded the content with Base64 for File/OutputStream is to provide higher performance solution.
+ * The reason not to encode the content with Base64 for File/OutputStream is to provide higher performance solution.
  *
  */
 public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {
@@ -111,7 +111,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @param output
      */
     @SuppressFBWarnings
-    @SuppressWarnings("resource")
     @Override
     public void serialize(final Object obj, final AvroSerializationConfig config, final OutputStream output) {
         final Type<Object> type = N.typeOf(obj.getClass());
@@ -174,8 +173,8 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             try {
                 dataFileWriter.create(schema, output);
 
-                if (obj instanceof GenericRecord) {
-                    dataFileWriter.append((GenericRecord) obj);
+                if (obj instanceof GenericRecord genericRecord) {
+                    dataFileWriter.append(genericRecord);
                 } else if (type.isBean() || type.isMap()) {
                     dataFileWriter.append(toGenericRecord(obj, schema));
                 } else if (type.isCollection()) {
@@ -217,7 +216,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else if (type.isPrimitiveArray()) {
                     dataFileWriter.append(toGenericRecord(obj, schema));
                 } else {
-                    throw new IllegalArgumentException("Unsupprted type: " + type.name()); //NOSONAR
+                    throw new IllegalArgumentException("Unsupported type: " + type.name()); //NOSONAR
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -247,8 +246,8 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     private GenericRecord toGenericRecord(final Object obj, final Schema schema) {
-        if (obj instanceof GenericRecord) {
-            return (GenericRecord) obj;
+        if (obj instanceof GenericRecord genericrecord) {
+            return genericrecord;
         }
 
         final Class<?> cls = obj.getClass();
@@ -288,7 +287,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         } else if (type.isPrimitiveArray()) {
             return toGenericRecord(type.array2Collection(obj, List.class), schema);
         } else {
-            throw new IllegalArgumentException("Unsupprted type: " + type.name());
+            throw new IllegalArgumentException("Unsupported type: " + type.name());
         }
     }
 
@@ -358,8 +357,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Class<Object> eleClass = eleType != null && SpecificRecord.class.isAssignableFrom(eleType.clazz()) ? eleType.clazz()
                     : (Class<Object>) targetClass.getComponentType();
             @SuppressWarnings("rawtypes")
-            final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection((Class<Collection>) targetClass))
-                    : new ArrayList<>();
+            final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
             final DatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
 
             try (DataFileStream<Object> dataFileReader = new DataFileStream<>(source, datumReader)) {
@@ -388,8 +386,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else if (targetType.isCollection() || targetType.isObjectArray()) {
                     if (eleType != null && (eleType.isBean() || eleType.isMap() || GenericRecord.class.isAssignableFrom(eleType.clazz()))) {
                         @SuppressWarnings("rawtypes")
-                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection((Class<Collection>) targetClass))
-                                : new ArrayList<>();
+                        final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
 
                         while (dataFileReader.hasNext()) {
                             c.add(fromGenericRecord(dataFileReader.next(), eleType.clazz()));
@@ -399,8 +396,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     } else if (targetType.isObjectArray() && (targetType.getElementType().isBean() || targetType.getElementType().isMap()
                             || GenericRecord.class.isAssignableFrom(targetClass.getComponentType()))) {
                         @SuppressWarnings("rawtypes")
-                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection((Class<Collection>) targetClass))
-                                : new ArrayList<>();
+                        final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
 
                         while (dataFileReader.hasNext()) {
                             c.add(fromGenericRecord(dataFileReader.next(), targetClass.getComponentType()));
@@ -413,7 +409,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else if (targetType.isPrimitiveArray()) {
                     return dataFileReader.hasNext() ? fromGenericRecord(dataFileReader.next(), targetClass) : null;
                 } else {
-                    throw new IllegalArgumentException("Unsupprted type: " + targetType.name());
+                    throw new IllegalArgumentException("Unsupported type: " + targetType.name());
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -452,18 +448,18 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         final Type<Object> type = N.typeOf(targetClass);
 
         if (type.isBean()) {
-            final BeanInfo entitInfo = ParserUtil.getBeanInfo(targetClass);
-            final Object result = entitInfo.createBeanResult();
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+            final Object result = beanInfo.createBeanResult();
             Object propValue = null;
 
             for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.name());
 
                 if (propValue != null) {
-                    entitInfo.setPropValue(result, field.name(), propValue);
+                    beanInfo.setPropValue(result, field.name(), propValue);
                 }
             }
-            return entitInfo.finishBeanResult(result);
+            return beanInfo.finishBeanResult(result);
         } else if (type.isMap()) {
             @SuppressWarnings("rawtypes")
             final Map<String, Object> m = N.newMap((Class<Map>) targetClass);
@@ -480,7 +476,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             return (T) m;
         } else if (type.isCollection() || type.isObjectArray()) {
             @SuppressWarnings("rawtypes")
-            final Collection<Object> c = type.isCollection() ? (Collection<Object>) N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
+            final Collection<Object> c = type.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
             Object propValue = null;
 
             for (final Field field : source.getSchema().getFields()) {
@@ -506,7 +502,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
             return (T) type.collection2Array(c);
         } else {
-            throw new IllegalArgumentException("Unsupprted type: " + type.name());
+            throw new IllegalArgumentException("Unsupported type: " + type.name());
         }
     }
 }

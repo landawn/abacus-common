@@ -47,6 +47,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static BooleanIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -72,7 +73,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (a == null || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -107,7 +108,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns an BooleanIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the BooleanIterator instance when the BooleanIterator's methods are first called.
+     * The Supplier is responsible for producing the BooleanIterator instance when the first method in the returned {@code BooleanIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the BooleanIterator when needed.
      * @return A BooleanIterator that is initialized on the first call to hasNext() or nextByte().

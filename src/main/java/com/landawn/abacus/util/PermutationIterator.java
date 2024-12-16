@@ -113,7 +113,7 @@ public final class PermutationIterator {
                     break;
                 }
 
-                hasNext = j <= 0 ? -1 : 1;
+                hasNext = j == 0 ? -1 : 1;
             }
 
             private void switchDirection() {
@@ -200,6 +200,7 @@ public final class PermutationIterator {
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
         return new ObjIteratorEx<>() {
             T[] next = (T[]) elements.toArray();
+
             { //NOSONAR
                 N.sort(next, comparator);
             }

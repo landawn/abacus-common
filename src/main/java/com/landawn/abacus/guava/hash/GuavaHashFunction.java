@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 
+@SuppressWarnings("ClassCanBeRecord")
 final class GuavaHashFunction implements HashFunction {
 
     final com.google.common.hash.HashFunction gHashFunction;

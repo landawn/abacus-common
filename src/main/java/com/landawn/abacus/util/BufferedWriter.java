@@ -142,27 +142,27 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      *
      * @param date
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
-    public void write(final Date date) throws IOException {
+    public void write(final Date date) throws UncheckedIOException {
         DateUtil.formatTo(this, date, null, null);
     }
 
     /**
      *
      * @param c
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
-    public void write(final Calendar c) throws IOException {
+    public void write(final Calendar c) throws UncheckedIOException {
         DateUtil.formatTo(this, c, null, null);
     }
 
     /**
      *
      * @param c
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
-    public void write(final XMLGregorianCalendar c) throws IOException {
+    public void write(final XMLGregorianCalendar c) throws UncheckedIOException {
         DateUtil.formatTo(this, c, null, null);
     }
 

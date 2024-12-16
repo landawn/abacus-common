@@ -25,7 +25,9 @@ import java.lang.annotation.Target;
 @Target(value = { TYPE })
 @Retention(RUNTIME)
 public @interface Table {
+
     /**
+     * Use {@code name} to specify attribute explicitly
      *
      * @return
      * @deprecated use {@code name} to specify attribute explicitly.

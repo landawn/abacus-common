@@ -22,9 +22,9 @@ import java.util.Arrays;
 
 public final class ByteArrayOutputStream extends OutputStream {
 
-    protected byte[] buf;
+    byte[] buf;
 
-    protected int count;
+    int count;
 
     public ByteArrayOutputStream() {
         this(32);
@@ -145,6 +145,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @SuppressWarnings("RedundantThrows")
     @Override
     public void close() throws IOException {
         // Do nothing.

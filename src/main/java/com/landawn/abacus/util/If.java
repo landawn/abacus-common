@@ -504,6 +504,7 @@ public final class If {
             throw exceptionSupplier.get();
         }
 
+        //noinspection ConstantValue
         return OrElse.of(b);
     }
 
@@ -522,13 +523,11 @@ public final class If {
         /**
          * For internal only
          */
-        @SuppressWarnings("hiding")
         public static final OrElse TRUE = new OrElse(true);
 
         /**
          * For internal only
          */
-        @SuppressWarnings("hiding")
         public static final OrElse FALSE = new OrElse(false);
 
         /** The b. */

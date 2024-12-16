@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  */
 public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
+    @Serial
     private static final long serialVersionUID = 6459013170687883950L;
 
     static final Random RAND = new SecureRandom();
@@ -439,7 +441,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1211,7 +1213,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.FloatConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1247,7 +1249,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntFloatConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1458,17 +1460,17 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new FloatList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code FloatList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code FloatList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

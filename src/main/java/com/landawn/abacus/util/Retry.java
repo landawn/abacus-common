@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
@@ -38,18 +39,18 @@ public final class Retry<T> {
 
     private final int retryTimes;
 
-    private final long retryIntervallInMillis;
+    private final long retryIntervalInMillis;
 
     private final Predicate<? super Exception> retryCondition;
 
     /** The retry condition 2. */
     private final BiPredicate<? super T, ? super Exception> retryCondition2;
 
-    Retry(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition,
+    Retry(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super T, ? super Exception> retryCondition2) {
 
         this.retryTimes = retryTimes;
-        this.retryIntervallInMillis = retryIntervallInMillis;
+        this.retryIntervalInMillis = retryIntervalInMillis;
         this.retryCondition = retryCondition;
         this.retryCondition2 = retryCondition2;
     }
@@ -58,18 +59,18 @@ public final class Retry<T> {
      * Creates a new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
      *
      * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
-     * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
+     * @param retryIntervalInMillis The interval in milliseconds between retries. Must be non-negative.
      * @param retryCondition The condition to test the exceptions thrown. If the condition returns {@code true}, the operation is retried.
      * @return A new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
-     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
-    public static Retry<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition)
+    public static Retry<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, cs.retryTimes);
-        N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
+        N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<>(retryTimes, retryIntervallInMillis, retryCondition, null);
+        return new Retry<>(retryTimes, retryIntervalInMillis, retryCondition, null);
     }
 
     /**
@@ -77,18 +78,18 @@ public final class Retry<T> {
      *
      * @param <T> The type of the result of the operation to be retried.
      * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
-     * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
+     * @param retryIntervalInMillis The interval in milliseconds between retries. Must be non-negative.
      * @param retryCondition The condition to test the result and the exceptions thrown. If the condition returns {@code true}, the operation is retried.
      * @return A new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
-     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
-    public static <T> Retry<T> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
+    public static <T> Retry<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
             throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, cs.retryTimes);
-        N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
+        N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<>(retryTimes, retryIntervallInMillis, null, retryCondition);
+        return new Retry<>(retryTimes, retryIntervalInMillis, null, retryCondition);
     }
 
     /**
@@ -113,8 +114,8 @@ public final class Retry<T> {
                     retriedTimes++;
 
                     try {
-                        if (retryIntervallInMillis > 0) {
-                            N.sleepUninterruptibly(retryIntervallInMillis);
+                        if (retryIntervalInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervalInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
@@ -142,6 +143,7 @@ public final class Retry<T> {
      * @return
      * @throws Exception the exception
      */
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public T call(final java.util.concurrent.Callable<T> callable) throws Exception {
         if (retryTimes > 0) {
             T result = null;
@@ -157,14 +159,15 @@ public final class Retry<T> {
                 while (retriedTimes < retryTimes) {
                     retriedTimes++;
 
-                    if (retryIntervallInMillis > 0) {
-                        N.sleepUninterruptibly(retryIntervallInMillis);
+                    if (retryIntervalInMillis > 0) {
+                        N.sleepUninterruptibly(retryIntervalInMillis);
                     }
 
                     logger.info("Start " + retriedTimes + " retry");
 
                     result = callable.call();
 
+                    //noinspection ConstantValue
                     if (retryCondition2 == null || !retryCondition2.test(result, null)) {
                         return result;
                     }
@@ -182,8 +185,8 @@ public final class Retry<T> {
                     retriedTimes++;
 
                     try {
-                        if (retryIntervallInMillis > 0) {
-                            N.sleepUninterruptibly(retryIntervallInMillis);
+                        if (retryIntervalInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervalInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
@@ -207,6 +210,7 @@ public final class Retry<T> {
                 throw ex;
             }
 
+            //noinspection ConstantValue
             if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
                 throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
             }
@@ -217,25 +221,25 @@ public final class Retry<T> {
         }
     }
 
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public static final class R<T> {
 
-        @SuppressWarnings("hiding")
         private static final Logger logger = LoggerFactory.getLogger(R.class);
 
         private final int retryTimes;
 
-        private final long retryIntervallInMillis;
+        private final long retryIntervalInMillis;
 
         private final Predicate<? super RuntimeException> retryCondition;
 
         /** The retry condition 2. */
         private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
 
-        R(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition,
+        R(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super RuntimeException> retryCondition,
                 final BiPredicate<? super T, ? super RuntimeException> retryCondition2) {
 
             this.retryTimes = retryTimes;
-            this.retryIntervallInMillis = retryIntervallInMillis;
+            this.retryIntervalInMillis = retryIntervalInMillis;
             this.retryCondition = retryCondition;
             this.retryCondition2 = retryCondition2;
         }
@@ -243,36 +247,36 @@ public final class Retry<T> {
         /**
          *
          * @param retryTimes
-         * @param retryIntervallInMillis
+         * @param retryIntervalInMillis
          * @param retryCondition
          * @return
          * @throws IllegalArgumentException
          */
-        public static R<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition)
+        public static R<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super RuntimeException> retryCondition)
                 throws IllegalArgumentException {
             N.checkArgNotNegative(retryTimes, cs.retryTimes);
-            N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
+            N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
             N.checkArgNotNull(retryCondition);
 
-            return new R<>(retryTimes, retryIntervallInMillis, retryCondition, null);
+            return new R<>(retryTimes, retryIntervalInMillis, retryCondition, null);
         }
 
         /**
          *
          * @param <T>
          * @param retryTimes
-         * @param retryIntervallInMillis
+         * @param retryIntervalInMillis
          * @param retryCondition
          * @return
          * @throws IllegalArgumentException
          */
-        public static <T> R<T> of(final int retryTimes, final long retryIntervallInMillis,
-                final BiPredicate<? super T, ? super RuntimeException> retryCondition) throws IllegalArgumentException {
+        public static <T> R<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super RuntimeException> retryCondition)
+                throws IllegalArgumentException {
             N.checkArgNotNegative(retryTimes, cs.retryTimes);
-            N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
+            N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
             N.checkArgNotNull(retryCondition);
 
-            return new R<>(retryTimes, retryIntervallInMillis, null, retryCondition);
+            return new R<>(retryTimes, retryIntervalInMillis, null, retryCondition);
         }
 
         /**
@@ -297,8 +301,8 @@ public final class Retry<T> {
                         retriedTimes++;
 
                         try {
-                            if (retryIntervallInMillis > 0) {
-                                N.sleepUninterruptibly(retryIntervallInMillis);
+                            if (retryIntervalInMillis > 0) {
+                                N.sleepUninterruptibly(retryIntervalInMillis);
                             }
 
                             logger.info("Start " + retriedTimes + " retry");
@@ -341,14 +345,15 @@ public final class Retry<T> {
                     while (retriedTimes < retryTimes) {
                         retriedTimes++;
 
-                        if (retryIntervallInMillis > 0) {
-                            N.sleepUninterruptibly(retryIntervallInMillis);
+                        if (retryIntervalInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervalInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
 
                         result = callable.call();
 
+                        //noinspection ConstantValue
                         if (retryCondition2 == null || !retryCondition2.test(result, null)) {
                             return result;
                         }
@@ -366,8 +371,8 @@ public final class Retry<T> {
                         retriedTimes++;
 
                         try {
-                            if (retryIntervallInMillis > 0) {
-                                N.sleepUninterruptibly(retryIntervallInMillis);
+                            if (retryIntervalInMillis > 0) {
+                                N.sleepUninterruptibly(retryIntervalInMillis);
                             }
 
                             logger.info("Start " + retriedTimes + " retry");
@@ -391,6 +396,7 @@ public final class Retry<T> {
                     throw ex;
                 }
 
+                //noinspection ConstantValue
                 if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
                     throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
                 }
@@ -433,8 +439,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryIntervallInMillis > 0) {
-                                    N.sleepUninterruptibly(retryIntervallInMillis);
+                                if (retryIntervalInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervalInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in hasNext()");
@@ -468,8 +474,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryIntervallInMillis > 0) {
-                                    N.sleepUninterruptibly(retryIntervallInMillis);
+                                if (retryIntervalInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervalInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in next()");
@@ -503,8 +509,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryIntervallInMillis > 0) {
-                                    N.sleepUninterruptibly(retryIntervallInMillis);
+                                if (retryIntervalInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervalInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in remove()");

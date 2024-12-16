@@ -31,7 +31,7 @@ public final class Traverser<T> {
 
     public static final Traverser<File> FILES = forTree(t -> {
         final File[] subFiles = t.listFiles();
-        return N.isEmpty(subFiles) ? N.<File> emptyList() : Arrays.asList(subFiles);
+        return N.isEmpty(subFiles) ? N.emptyList() : Arrays.asList(subFiles);
     });
 
     private final com.google.common.graph.Traverser<T> gTraverser;

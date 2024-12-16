@@ -70,7 +70,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final BooleanListBuilder of(final BooleanList val) throws IllegalArgumentException {
+    public static BooleanListBuilder of(final BooleanList val) throws IllegalArgumentException {
         return new BooleanListBuilder(val);
     }
 
@@ -80,7 +80,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final CharListBuilder of(final CharList val) throws IllegalArgumentException {
+    public static CharListBuilder of(final CharList val) throws IllegalArgumentException {
         return new CharListBuilder(val);
     }
 
@@ -90,7 +90,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final ByteListBuilder of(final ByteList val) throws IllegalArgumentException {
+    public static ByteListBuilder of(final ByteList val) throws IllegalArgumentException {
         return new ByteListBuilder(val);
     }
 
@@ -100,7 +100,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final ShortListBuilder of(final ShortList val) throws IllegalArgumentException {
+    public static ShortListBuilder of(final ShortList val) throws IllegalArgumentException {
         return new ShortListBuilder(val);
     }
 
@@ -110,7 +110,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final IntListBuilder of(final IntList val) throws IllegalArgumentException {
+    public static IntListBuilder of(final IntList val) throws IllegalArgumentException {
         return new IntListBuilder(val);
     }
 
@@ -120,7 +120,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final LongListBuilder of(final LongList val) throws IllegalArgumentException {
+    public static LongListBuilder of(final LongList val) throws IllegalArgumentException {
         return new LongListBuilder(val);
     }
 
@@ -130,7 +130,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final FloatListBuilder of(final FloatList val) throws IllegalArgumentException {
+    public static FloatListBuilder of(final FloatList val) throws IllegalArgumentException {
         return new FloatListBuilder(val);
     }
 
@@ -140,7 +140,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final DoubleListBuilder of(final DoubleList val) throws IllegalArgumentException {
+    public static DoubleListBuilder of(final DoubleList val) throws IllegalArgumentException {
         return new DoubleListBuilder(val);
     }
 
@@ -152,7 +152,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, L extends List<T>> ListBuilder<T, L> of(final L val) throws IllegalArgumentException {
+    public static <T, L extends List<T>> ListBuilder<T, L> of(final L val) throws IllegalArgumentException {
         return new ListBuilder<>(val);
     }
 
@@ -164,7 +164,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(final C val) throws IllegalArgumentException {
+    public static <T, C extends Collection<T>> CollectionBuilder<T, C> of(final C val) throws IllegalArgumentException {
         return new CollectionBuilder<>(val);
     }
 
@@ -177,7 +177,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(final M val) throws IllegalArgumentException {
+    public static <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(final M val) throws IllegalArgumentException {
         return new MapBuilder<>(val);
     }
 
@@ -188,7 +188,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> MultisetBuilder<T> of(final Multiset<T> val) throws IllegalArgumentException {
+    public static <T> MultisetBuilder<T> of(final Multiset<T> val) throws IllegalArgumentException {
         return new MultisetBuilder<>(val);
     }
 
@@ -202,8 +202,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(final M val)
-            throws IllegalArgumentException {
+    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(final M val) throws IllegalArgumentException {
         return new MultimapBuilder<>(val);
     }
 
@@ -213,7 +212,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
+    public static DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
         return new DataSetBuilder(val);
     }
 
@@ -266,7 +265,7 @@ public class Builder<T> {
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    public static final <T> Builder<T> of(final T val) throws IllegalArgumentException {
+    public static <T> Builder<T> of(final T val) throws IllegalArgumentException {
         N.checkArgNotNull(val);
 
         final Function<Object, Builder> func = creatorMap.get(val.getClass());
@@ -279,6 +278,8 @@ public class Builder<T> {
 
         if (val instanceof List) {
             result = of((List) val);
+        } else if (val instanceof Multiset) {
+            result = of((Multiset) val);
         } else if (val instanceof Collection) {
             result = of((Collection) val);
         } else if (val instanceof Map) {
@@ -287,8 +288,6 @@ public class Builder<T> {
             result = of((Multimap) val);
         } else if (val instanceof DataSet) {
             result = of((DataSet) val);
-        } else if (val instanceof Multiset) {
-            result = of((Multiset) val);
         } else {
             result = new Builder<>(val);
         }
@@ -325,7 +324,7 @@ public class Builder<T> {
      */
     @Deprecated
     public Optional<T> filter(final Predicate<? super T> predicate) {
-        return predicate.test(val) ? Optional.of(val) : Optional.<T> empty();
+        return predicate.test(val) ? Optional.of(val) : Optional.empty();
     }
 
     /**
@@ -1395,7 +1394,8 @@ public class Builder<T> {
          * @param a
          * @return
          */
-        public CollectionBuilder<T, C> addAll(final T... a) {
+        @SafeVarargs
+        public final CollectionBuilder<T, C> addAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.addAll(Arrays.asList(a));
             }
@@ -1409,6 +1409,7 @@ public class Builder<T> {
          * @return
          */
         public CollectionBuilder<T, C> remove(final Object e) {
+            //noinspection SuspiciousMethodCalls
             val.remove(e);
 
             return this;
@@ -1422,6 +1423,7 @@ public class Builder<T> {
          */
         public CollectionBuilder<T, C> removeAll(final Collection<?> c) {
             if (N.notEmpty(c)) {
+                //noinspection SuspiciousMethodCalls
                 val.removeAll(c);
             }
 
@@ -1434,7 +1436,8 @@ public class Builder<T> {
          * @param a
          * @return
          */
-        public CollectionBuilder<T, C> removeAll(final T... a) {
+        @SafeVarargs
+        public final CollectionBuilder<T, C> removeAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.removeAll(Arrays.asList(a));
             }
@@ -1500,6 +1503,7 @@ public class Builder<T> {
          * @return
          */
         public MultisetBuilder<T> remove(final Object e) {
+            //noinspection SuspiciousMethodCalls
             val.remove(e);
 
             return this;
@@ -1608,12 +1612,9 @@ public class Builder<T> {
          * @see Map#putIfAbsent(Object, Object)
          */
         public MapBuilder<K, V, M> putIfAbsent(final K key, final V value) {
-            final V v = val.get(key);
 
             // if (v == null && val.containsKey(key) == false) {
-            if (v == null) {
-                val.put(key, value);
-            }
+            val.putIfAbsent(key, value);
 
             return this;
         }
@@ -1646,6 +1647,7 @@ public class Builder<T> {
          * @return
          */
         public MapBuilder<K, V, M> remove(final Object k) {
+            //noinspection SuspiciousMethodCalls
             val.remove(k);
 
             return this;
@@ -1660,6 +1662,7 @@ public class Builder<T> {
         public MapBuilder<K, V, M> removeAll(final Collection<?> keysToRemove) {
             if (N.notEmpty(keysToRemove)) {
                 for (final Object k : keysToRemove) {
+                    //noinspection SuspiciousMethodCalls
                     val.remove(k);
                 }
             }

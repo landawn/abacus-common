@@ -106,6 +106,7 @@ public final class MoreExecutors {
                 // This is because the logging code installs a shutdown hook of its
                 // own. See Cleaner class inside {@link LogManager}.
                 service.shutdown();
+                //noinspection ResultOfMethodCallIgnored
                 service.awaitTermination(terminationTimeout, timeUnit);
             } catch (final InterruptedException ignored) {
                 // We're shutting down anyway, so just ignore.

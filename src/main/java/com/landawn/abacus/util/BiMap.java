@@ -450,6 +450,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return A new BiMap containing the same entries as the provided map.
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
+        //noinspection rawtypes
         final BiMap<K, V> biMap = new BiMap<>(Maps.newTargetMap(map), Maps.newOrderingMap(map));
 
         biMap.putAll(map);
@@ -475,6 +476,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return The key to which the specified value is mapped, or {@code null} if this map contains no mapping for the value.
      */
     public K getByValue(final Object value) {
+        //noinspection SuspiciousMethodCalls
         return valueMap.get(value);
     }
 
@@ -486,6 +488,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return The key to which the specified value is mapped, or the default key if this map contains no mapping for the value.
      */
     public K getByValueOrDefault(final Object value, final K defaultValue) {
+        //noinspection SuspiciousMethodCalls
         return valueMap.getOrDefault(value, defaultValue);
     }
 
@@ -562,7 +565,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param m The map whose entries are to be added to this BiMap.
      * @throws IllegalArgumentException if an attempt to {@code put} any entry fails. Note that some map entries may have been added to the BiMap before the exception was thrown.
      * @see #put(Object, Object)
-     * @see #forcePutAll(Map)
      */
     @Override
     public void putAll(final Map<? extends K, ? extends V> m) {
@@ -595,6 +597,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return The key associated with the value, or {@code null} if there was no mapping for the value.
      */
     public K removeByValue(final Object value) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final K key = valueMap.remove(value);
 
         if (key != null) {
@@ -623,6 +626,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsValue(final Object value) {
+        //noinspection SuspiciousMethodCalls
         return valueMap.containsKey(value);
     }
 
@@ -706,7 +710,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Removes all of the mappings from this BiMap.
+     * Removes all the mappings from this BiMap.
      * The BiMap will be empty after this call returns.
      */
     @Override

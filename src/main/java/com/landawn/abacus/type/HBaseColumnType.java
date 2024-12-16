@@ -27,9 +27,9 @@ import com.landawn.abacus.util.WD;
 @SuppressWarnings("java:S2160")
 public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
-    private static final String SEPERATOR = ":";
+    private static final String SEPARATOR = ":";
 
-    private static final char _SEPERATOR = ':';
+    private static final char _SEPARATOR = ':';
 
     public static final String HBASE_COLUMN = "HBaseColumn";
 
@@ -98,7 +98,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      */
     @Override
     public String stringOf(final HBaseColumn<T> x) {
-        return x == null ? null : x.version() + SEPERATOR + elementType.stringOf(x.value());
+        return x == null ? null : x.version() + SEPARATOR + elementType.stringOf(x.value());
     }
 
     /**
@@ -113,7 +113,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
             return null; // NOSONAR
         }
 
-        final int index = str.indexOf(_SEPERATOR);
+        final int index = str.indexOf(_SEPARATOR);
 
         final long version = Long.parseLong(str.substring(0, index));
         final T value = elementType.valueOf(str.substring(index + 1));

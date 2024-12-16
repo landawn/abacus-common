@@ -20,5 +20,5 @@ package com.landawn.abacus.util;
  */
 public enum ThreadMode {
 
-    DEFAULT, THREAD_POOL_EXECUTOR;
+    DEFAULT, THREAD_POOL_EXECUTOR
 }

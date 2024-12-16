@@ -53,7 +53,7 @@ public final class WD {
     public static final char _SPACE = ' ';
 
     /**
-     * Field SPACE. (value is "" "")
+     * Field SPACE (value is {@code " "})
      */
     public static final String SPACE = " ";
 
@@ -63,7 +63,7 @@ public final class WD {
     public static final char _PERIOD = '.';
 
     /**
-     * Field PERIOD. (value is ""."")
+     * Field PERIOD (value is {@code "."})
      */
     public static final String PERIOD = ".";
 
@@ -73,12 +73,12 @@ public final class WD {
     public static final char _COMMA = ',';
 
     /**
-     * Field COMMA. (value is "","")
+     * Field COMMA (value is {@code ","})
      */
     public static final String COMMA = ",";
 
     /**
-     * Field COMMA_SPACE. (value is "", "")
+     * Field COMMA_SPACE (value is {@code ", "})
      */
     public static final String COMMA_SPACE = ", ";
 
@@ -88,7 +88,7 @@ public final class WD {
     public static final char _COLON = ':';
 
     /**
-     * Field COLON. (value is "":"")
+     * Field COLON (value is {@code ":"})
      */
     public static final String COLON = ":";
 
@@ -101,12 +101,12 @@ public final class WD {
     public static final char _SEMICOLON = ';';
 
     /**
-     * Field SEMICOLON. (value is "";"")
+     * Field SEMICOLON (value is {@code ";"})
      */
     public static final String SEMICOLON = ";";
 
     /**
-     * Field SEMICOLON_SPACE. (value is ""; "")
+     * Field SEMICOLON_SPACE (value is {@code "; "})
      */
     public static final String SEMICOLON_SPACE = "; ";
 
@@ -116,7 +116,7 @@ public final class WD {
     public static final char _BACKSLASH = '\\';
 
     /**
-     * Field BACKSLASH. (value is ""\\"")
+     * Field BACKSLASH (value is {@code "\\"})
      */
     public static final String BACKSLASH = "\\";
 
@@ -126,17 +126,17 @@ public final class WD {
     public static final char _QUOTATION_S = '\'';
 
     /**
-     * Field QUOTATION_S. (value is ""'"")
+     * Field QUOTATION_S (value is {@code "'"})
      */
     public static final String QUOTATION_S = "'";
 
     /**
-     * Field SPACE_QUOTATION_S. (value is "" '"")
+     * Field SPACE_QUOTATION_S (value is {@code " '"})
      */
     public static final String SPACE_QUOTATION_S = " '";
 
     /**
-     * Field QUOTATION_S_SPACE. (value is ""' "")
+     * Field QUOTATION_S_SPACE (value is {@code "' "})
      */
     public static final String QUOTATION_S_SPACE = "' ";
 
@@ -146,17 +146,17 @@ public final class WD {
     public static final char _QUOTATION_D = '"';
 
     /**
-     * Field QUOTATION_D. (value is ""\""")
+     * Field QUOTATION_D (value is {@code "\""})
      */
     public static final String QUOTATION_D = "\"";
 
     /**
-     * Field SPACE_QUOTATION_D. (value is "" \""")
+     * Field SPACE_QUOTATION_D (value is {@code " \""})
      */
     public static final String SPACE_QUOTATION_D = " \"";
 
     /**
-     * Field QUOTATION_D_SPACE. (value is ""\" "")
+     * Field QUOTATION_D_SPACE (value is {@code "\" "})
      */
     public static final String QUOTATION_D_SPACE = "\" ";
 
@@ -166,7 +166,7 @@ public final class WD {
     public static final char _AMPERSAND = '&';
 
     /**
-     * Field AMPERSAND. (value is {@code "&"})
+     * Field AMPERSAND (value is {@code {@code "&"}})
      */
     public static final String AMPERSAND = "&";
 
@@ -176,12 +176,12 @@ public final class WD {
     public static final char _VERTICALBAR = '|';
 
     /**
-     * Field VERTICALBAR. (value is ""|"")
+     * Field VERTICALBAR (value is {@code "|"})
      */
     public static final String VERTICALBAR = "|";
 
     /**
-     * Field PARALLEL. (value is ""||"")
+     * Field PARALLEL (value is {@code "||"})
      */
     public static final String PARALLEL = "||";
 
@@ -191,7 +191,7 @@ public final class WD {
     public static final char _UNDERSCORE = '_';
 
     /**
-     * Field UNDERSCORE. (value is ""_"")
+     * Field UNDERSCORE (value is {@code "_"})
      */
     public static final String UNDERSCORE = "_";
 
@@ -201,7 +201,7 @@ public final class WD {
     public static final char _LESS_THAN = '<';
 
     /**
-     * Field LESS_THAN. (value is {@code "<"})
+     * Field LESS_THAN (value is {@code {@code "<"}})
      */
     public static final String LESS_THAN = "<";
 
@@ -211,7 +211,7 @@ public final class WD {
     public static final char _GREATER_THAN = '>';
 
     /**
-     * Field GREATER_THAN. (value is ""."")
+     * Field GREATER_THAN (value is {@code "."})
      */
     public static final String GREATER_THAN = ">";
 
@@ -221,7 +221,7 @@ public final class WD {
     public static final char _EQUAL = '=';
 
     /**
-     * Field EQUAL. (value is ""="")
+     * Field EQUAL (value is {@code "="})
      */
     public static final String EQUAL = "=";
 
@@ -231,7 +231,7 @@ public final class WD {
     public static final char _PLUS = '+';
 
     /**
-     * Field PLUS. (value is ""+"")
+     * Field PLUS (value is {@code "+"})
      */
     public static final String PLUS = "+";
 
@@ -241,7 +241,7 @@ public final class WD {
     public static final char _MINUS = '-';
 
     /**
-     * Field MINUS. (value is ""-"")
+     * Field MINUS (value is {@code "-"})
      */
     public static final String MINUS = "-";
 
@@ -251,7 +251,7 @@ public final class WD {
     public static final char _PERCENT = '%';
 
     /**
-     * Field PERCENT. (value is ""%"")
+     * Field PERCENT (value is {@code "%"})
      */
     public static final String PERCENT = "%";
 
@@ -261,7 +261,7 @@ public final class WD {
     public static final char _SLASH = '/';
 
     /**
-     * Field SLASH. (value is ""/"")
+     * Field SLASH (value is {@code "/"})
      */
     public static final String SLASH = "/";
 
@@ -271,7 +271,7 @@ public final class WD {
     public static final char _ASTERISK = '*';
 
     /**
-     * Field ASTERISK. (value is ""*"")
+     * Field ASTERISK (value is {@code "*"})
      */
     public static final String ASTERISK = "*";
 
@@ -281,7 +281,7 @@ public final class WD {
     public static final char _QUESTION_MARK = '?';
 
     /**
-     * Field QUESTION_MARK. (value is ""?"")
+     * Field QUESTION_MARK (value is {@code "?"})
      */
     public static final String QUESTION_MARK = "?";
 
@@ -291,12 +291,12 @@ public final class WD {
     public static final char _PARENTHESES_L = '(';
 
     /**
-     * Field PARENTHESES_L. (value is ""("")
+     * Field PARENTHESES_L (value is {@code "("})
      */
     public static final String PARENTHESES_L = "(";
 
     /**
-     * Field SPACE_PARENTHESES_L. (value is "" ("")
+     * Field SPACE_PARENTHESES_L (value is {@code " ("})
      */
     public static final String SPACE_PARENTHESES_L = " (";
 
@@ -306,12 +306,12 @@ public final class WD {
     public static final char _PARENTHESES_R = ')';
 
     /**
-     * Field PARENTHESES_R. (value is "")"")
+     * Field PARENTHESES_R (value is {@code ")"})
      */
     public static final String PARENTHESES_R = ")";
 
     /**
-     * Field PARENTHESES_R_SPACE. (value is "") "")
+     * Field PARENTHESES_R_SPACE (value is {@code ") "})
      */
     public static final String PARENTHESES_R_SPACE = ") ";
 
@@ -321,7 +321,7 @@ public final class WD {
     public static final char _BRACKET_L = '[';
 
     /**
-     * Field BRACKET_L. (value is ""["")
+     * Field BRACKET_L (value is {@code "["})
      */
     public static final String BRACKET_L = "[";
 
@@ -331,7 +331,7 @@ public final class WD {
     public static final char _BRACKET_R = ']';
 
     /**
-     * Field BRACKET_R. (value is ""]"")
+     * Field BRACKET_R (value is {@code "]"})
      */
     public static final String BRACKET_R = "]";
 
@@ -341,7 +341,7 @@ public final class WD {
     public static final char _BRACE_L = '{';
 
     /**
-     * Field BRACE_L. (value is ""{"")
+     * Field BRACE_L (value is {@code "{"})
      */
     public static final String BRACE_L = "{";
 
@@ -351,7 +351,7 @@ public final class WD {
     public static final char _BRACE_R = '}';
 
     /**
-     * Field BRACE_R. (value is ""}"")
+     * Field BRACE_R (value is {@code "}"})
      */
     public static final String BRACE_R = "}";
 
@@ -361,7 +361,7 @@ public final class WD {
     public static final char _CIRCUMFLEX = '^';
 
     /**
-     * Field CIRCUMFLEX. (value is ""^"")
+     * Field CIRCUMFLEX (value is {@code "^"})
      */
     public static final String CIRCUMFLEX = "^";
 
@@ -371,7 +371,7 @@ public final class WD {
     public static final char _UNARYBIT = '~';
 
     /**
-     * Field UNARYBIT. (value is ""~"")
+     * Field UNARYBIT (value is {@code "~"})
      */
     public static final String UNARYBIT = "~";
 
@@ -381,7 +381,7 @@ public final class WD {
     public static final char _DOLLAR = '$';
 
     /**
-     * Field DOLLAR. (value is ""$"")
+     * Field DOLLAR (value is {@code "$"})
      */
     public static final String DOLLAR = "$";
 
@@ -391,7 +391,7 @@ public final class WD {
     public static final char _SHARP = '#';
 
     /**
-     * Field SHARP. (value is ""#"")
+     * Field SHARP (value is {@code "#"})
      */
     public static final String SHARP = "#";
 
@@ -642,27 +642,27 @@ public final class WD {
     public static final String FOR_UPDATE = "FOR UPDATE";
 
     /**
-     * Field FETCH_FIRST. (value is ""FETCH FIRST"")
+     * Field FETCH_FIRST (value is {@code "FETCH FIRST"})
      */
     public static final String FETCH_FIRST = "FETCH FIRST";
 
     /**
-     * Field FETCH_NEXT. (value is ""FETCH NEXT"")
+     * Field FETCH_NEXT (value is {@code "FETCH NEXT"})
      */
     public static final String FETCH_NEXT = "FETCH NEXT";
 
     /**
-     * Field ROWS. (value is ""ROWS"")
+     * Field ROWS (value is {@code "ROWS"})
      */
     public static final String ROWS = "ROWS";
 
     /**
-     * Field ROWS_ONLY. (value is ""ROWS ONLY"")
+     * Field ROWS_ONLY (value is {@code "ROWS ONLY"})
      */
     public static final String ROWS_ONLY = "ROWS ONLY";
 
     /**
-     * Field ROW_NEXT. (value is ""ROW_NEXT"")
+     * Field ROW_NEXT (value is {@code "ROW_NEXT"})
      */
     public static final String ROW_NEXT = "ROW_NEXT";
 
@@ -867,187 +867,187 @@ public final class WD {
     public static final String EXCEPT2 = "MINUS";
 
     /**
-     * Field AVG. (value is ""AVG"")
+     * Field AVG (value is {@code "AVG"})
      */
     public static final String AVG = "AVG";
 
     /**
-     * Field COUNT. (value is ""COUNT"")
+     * Field COUNT (value is {@code "COUNT"})
      */
     public static final String COUNT = "COUNT";
 
     /**
-     * Field SUM. (value is ""SUM"")
+     * Field SUM (value is {@code "SUM"})
      */
     public static final String SUM = "SUM";
 
     /**
-     * Field MIN. (value is ""MIN"")
+     * Field MIN (value is {@code "MIN"})
      */
     public static final String MIN = "MIN";
 
     /**
-     * Field MAX. (value is ""MAX"")
+     * Field MAX (value is {@code "MAX"})
      */
     public static final String MAX = "MAX";
 
     /**
-     * Field ABS. (value is ""ABS"")
+     * Field ABS (value is {@code "ABS"})
      */
     public static final String ABS = "ABS";
 
     /**
-     * Field ACOS. (value is ""ACOS"")
+     * Field ACOS (value is {@code "ACOS"})
      */
     public static final String ACOS = "ACOS";
 
     /**
-     * Field ASIN. (value is ""ASIN"")
+     * Field ASIN (value is {@code "ASIN"})
      */
     public static final String ASIN = "ASIN";
 
     /**
-     * Field ATAN. (value is ""ATAN"")
+     * Field ATAN (value is {@code "ATAN"})
      */
     public static final String ATAN = "ATAN";
 
     /**
-     * Field ATAN2. (value is ""ATAN2"")
+     * Field ATAN2 (value is {@code "ATAN2"})
      */
     public static final String ATAN2 = "ATAN2";
 
     /**
-     * Field CEIL. (value is ""CEIL"")
+     * Field CEIL (value is {@code "CEIL"})
      */
     public static final String CEIL = "CEIL";
 
     /**
-     * Field COS. (value is ""COS"")
+     * Field COS (value is {@code "COS"})
      */
     public static final String COS = "COS";
 
     /**
-     * Field EXP. (value is ""EXP"")
+     * Field EXP (value is {@code "EXP"})
      */
     public static final String EXP = "EXP";
 
     /**
-     * Field FLOOR. (value is ""FLOOR"")
+     * Field FLOOR (value is {@code "FLOOR"})
      */
     public static final String FLOOR = "FLOOR";
 
     /**
-     * Field LOG. (value is ""LOG"")
+     * Field LOG (value is {@code "LOG"})
      */
     public static final String LOG = "LOG";
 
     /**
-     * Field LN. (value is ""LN"")
+     * Field LN (value is {@code "LN"})
      */
     public static final String LN = "LN";
 
     /**
-     * Field MOD. (value is ""MOD"")
+     * Field MOD (value is {@code "MOD"})
      */
     public static final String MOD = "MOD";
 
     /**
-     * Field POWER. (value is ""POWER"")
+     * Field POWER (value is {@code "POWER"})
      */
     public static final String POWER = "POWER";
 
     /**
-     * Field SIGN. (value is ""SIGN"")
+     * Field SIGN (value is {@code "SIGN"})
      */
     public static final String SIGN = "SIGN";
 
     /**
-     * Field SIN. (value is ""SIN"")
+     * Field SIN (value is {@code "SIN"})
      */
     public static final String SIN = "SIN";
 
     /**
-     * Field SQRT. (value is ""SQRT"")
+     * Field SQRT (value is {@code "SQRT"})
      */
     public static final String SQRT = "SQRT";
 
     /**
-     * Field TAN. (value is ""TAN"")
+     * Field TAN (value is {@code "TAN"})
      */
     public static final String TAN = "TAN";
 
     /**
-     * Field LENGTH. (value is ""LENGTH"")
+     * Field LENGTH (value is {@code "LENGTH"})
      */
     public static final String LENGTH = "LENGTH";
 
     /**
-     * Field CONCAT. (value is ""CONCAT"")
+     * Field CONCAT (value is {@code "CONCAT"})
      */
     public static final String CONCAT = "CONCAT";
 
     /**
-     * Field TRIM. (value is ""TRIM"")
+     * Field TRIM (value is {@code "TRIM"})
      */
     public static final String TRIM = "TRIM";
 
     /**
-     * Field LTRIM. (value is ""TRIM"")
+     * Field LTRIM (value is {@code "TRIM"})
      */
     public static final String LTRIM = "LTRIM";
 
     /**
-     * Field RTRIM. (value is ""RTRIM"")
+     * Field RTRIM (value is {@code "RTRIM"})
      */
     public static final String RTRIM = "RTRIM";
 
     /**
-     * Field LPAD. (value is ""LPAD"")
+     * Field LPAD (value is {@code "LPAD"})
      */
     public static final String LPAD = "LPAD";
 
     /**
-     * Field RPAD. (value is ""RPAD"")
+     * Field RPAD (value is {@code "RPAD"})
      */
     public static final String RPAD = "RPAD";
 
     /**
-     * Field REPLACE. (value is ""REPLACE"")
+     * Field REPLACE (value is {@code "REPLACE"})
      */
     public static final String REPLACE = "REPLACE";
 
     /**
-     * Field SUBSTR. (value is ""SUBSTR"")
+     * Field SUBSTR (value is {@code "SUBSTR"})
      */
     public static final String SUBSTR = "SUBSTR";
 
     /**
-     * Field UPPER. (value is ""upper"")
+     * Field UPPER (value is {@code "upper"})
      */
     public static final String UPPER = "UPPER";
 
     /**
-     * Field LOWER. (value is ""lower"")
+     * Field LOWER (value is {@code "lower"})
      */
     public static final String LOWER = "LOWER";
 
     /**
-     * Field CAST. (value is ""CAST"")
+     * Field CAST (value is {@code "CAST"})
      */
     public static final String CAST = "CAST";
 
     /**
-     * Field CURRENT_TIME. (value is ""CURRENT_TIME"")
+     * Field CURRENT_TIME (value is {@code "CURRENT_TIME"})
      */
     public static final String CURRENT_TIME = "CURRENT_TIME";
 
     /**
-     * Field CURRENT_DATE. (value is ""CURRENT_DATE"")
+     * Field CURRENT_DATE (value is {@code "CURRENT_DATE"})
      */
     public static final String CURRENT_DATE = "CURRENT_DATE";
 
     /**
-     * Field CURRENT_TIMESTAMP. (value is ""CURRENT_TIMESTAMP"")
+     * Field CURRENT_TIMESTAMP (value is {@code "CURRENT_TIMESTAMP"})
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 

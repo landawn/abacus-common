@@ -28,7 +28,6 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,7 +84,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.AppendableWriter
  * @see com.landawn.abacus.util.StringWriter
  */
-@SuppressWarnings({ "java:S1694" })
+@SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
 public abstract sealed class Strings permits Strings.StringUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Strings.class);
@@ -94,7 +93,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String with value {@code "null"}.
      */
     @Beta
-    public static final String NULL_STRING = "null".intern();
+    public static final String NULL_STRING = "null";
 
     /**
      *
@@ -105,7 +104,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * The empty String {@code ""}.
      */
-    public static final String EMPTY_STRING = "".intern();
+    public static final String EMPTY_STRING = "";
 
     //    /**
     //     * The empty String {@code ""}.
@@ -151,9 +150,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static final char CHAR_CR = CR.charAt(0);
 
     /**
-     * Field COMMA_SPACE. (value is "", "")
+     * Field COMMA_SPACE (value is {@code ", "})
      */
-    public static final String COMMA_SPACE = WD.COMMA_SPACE.intern();
+    public static final String COMMA_SPACE = WD.COMMA_SPACE;
 
     /**
      * Value is {@code ", "}
@@ -188,34 +187,34 @@ public abstract sealed class Strings permits Strings.StringUtil {
     private static final Splitter omitEmptyLinesLineSplitter = Splitter.forLines().omitEmptyStrings();
     private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().trimResults().omitEmptyStrings();
 
-    private static final Map<Object, Splitter> splitterPool = new HashMap<>();
-
-    private static final Map<Object, Splitter> trimSplitterPool = new HashMap<>();
-
-    private static final Map<Object, Splitter> preserveSplitterPool = new HashMap<>();
-
-    private static final Map<Object, Splitter> trimPreserveSplitterPool = new HashMap<>();
-
-    static {
-        final List<String> delimiters = Array.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#",
-                "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
-
-        for (final String delimiter : delimiters) {
-            splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings());
-            trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings().trimResults());
-            preserveSplitterPool.put(delimiter, Splitter.with(delimiter));
-            trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trimResults());
-
-            if (delimiter.length() == 1) {
-                final char delimiterChar = delimiter.charAt(0);
-
-                splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings());
-                trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings().trimResults());
-                preserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar));
-                trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trimResults());
-            }
-        }
-    }
+    //    private static final Map<Object, Splitter> splitterPool = new HashMap<>();
+    //
+    //    private static final Map<Object, Splitter> trimSplitterPool = new HashMap<>();
+    //
+    //    private static final Map<Object, Splitter> preserveSplitterPool = new HashMap<>();
+    //
+    //    private static final Map<Object, Splitter> trimPreserveSplitterPool = new HashMap<>();
+    //
+    //    static {
+    //        final List<String> delimiters = Array.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#",
+    //                "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
+    //
+    //        for (final String delimiter : delimiters) {
+    //            splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings());
+    //            trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings().trimResults());
+    //            preserveSplitterPool.put(delimiter, Splitter.with(delimiter));
+    //            trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trimResults());
+    //
+    //            if (delimiter.length() == 1) {
+    //                final char delimiterChar = delimiter.charAt(0);
+    //
+    //                splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings());
+    //                trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings().trimResults());
+    //                preserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar));
+    //                trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trimResults());
+    //            }
+    //        }
+    //    }
 
     private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$", Pattern.UNICODE_CHARACTER_CLASS);
 
@@ -223,14 +222,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
     // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
     // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
     private static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])", //NOSONAR
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+            //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
     // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", //NOSONAR
+    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+            //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
-    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", //NOSONAR
+    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+            //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
@@ -317,8 +319,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
      * @return {@code true} if the CharSequence is a valid email address, {@code false} otherwise.
-     * @see #findFirstEmailAddress(String)
-     * @see #findAllEmailAddresses(String)
+     * @see #findFirstEmailAddress(CharSequence)
+     * @see #findAllEmailAddresses(CharSequence)
      */
     public static boolean isValidEmailAddress(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -370,7 +372,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static boolean isEmpty(final CharSequence cs) {
-        return (cs == null) || (cs.length() == 0);
+        return (cs == null) || (cs.isEmpty());
     }
 
     /**
@@ -404,7 +406,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code true} if the CharSequence is not {@code null} and not empty, {@code false} otherwise.
      */
     public static boolean isNotEmpty(final CharSequence cs) {
-        return (cs != null) && (cs.length() > 0);
+        return (cs != null) && (!cs.isEmpty());
     }
 
     /**
@@ -449,7 +451,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the provided CharSequences are empty or {@code null}.
+     * Checks if all the provided CharSequences are empty or {@code null}.
      *
      * @param a The first CharSequence to be checked. It can be {@code null}.
      * @param b The second CharSequence to be checked. It can be {@code null}.
@@ -461,7 +463,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty ("") or {@code null}.</p>
+     * <p>Checks if all the CharSequences are empty ("") or {@code null}.</p>
      *
      * <pre>
      * Strings.isAllEmpty(null)             = true
@@ -476,7 +478,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all of the CharSequences are empty or null
+     * @return {@code true} if all the CharSequences are empty or null
      * @see Strings#isAllEmpty(CharSequence...)
      */
     public static boolean isAllEmpty(final CharSequence... css) {
@@ -494,7 +496,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the provided CharSequences in the Iterable are empty or {@code null}.
+     * Checks if all the provided CharSequences in the Iterable are empty or {@code null}.
      *
      * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or empty, {@code false} otherwise.
@@ -525,7 +527,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the provided CharSequences are blank or {@code null}.
+     * Checks if all the provided CharSequences are blank or {@code null}.
      *
      * @param a The first CharSequence to be checked. It can be {@code null}.
      * @param b The second CharSequence to be checked. It can be {@code null}.
@@ -537,7 +539,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty (""), {@code null} or whitespace only.</p>
+     * <p>Checks if all the CharSequences are empty (""), {@code null} or whitespace only.</p>
      *
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
@@ -554,7 +556,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all of the CharSequences are empty or {@code null} or whitespace only
+     * @return {@code true} if all the CharSequences are empty or {@code null} or whitespace only
      * @see Strings#isAllBlank(CharSequence...)
      */
     public static boolean isAllBlank(final CharSequence... css) {
@@ -572,7 +574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the provided CharSequences in the Iterable are blank or {@code null}.
+     * Checks if all the provided CharSequences in the Iterable are blank or {@code null}.
      *
      * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or blank, {@code false} otherwise.
@@ -1041,7 +1043,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if the input string is empty, otherwise the original string.
      */
     public static String emptyToNull(final String str) {
-        return str == null || str.length() == 0 ? null : str;
+        return str == null || str.isEmpty() ? null : str;
     }
 
     /**
@@ -1056,7 +1058,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = strs[i] == null || strs[i].length() == 0 ? null : strs[i];
+            strs[i] = strs[i] == null || strs[i].isEmpty() ? null : strs[i];
         }
     }
 
@@ -1154,6 +1156,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Abbreviating
     //-----------------------------------------------------------------------
+
     /**
      * <p>Abbreviates a String using ellipses. This will turn
      * "Now is the time for all good men" into "Now is the time for..."</p>
@@ -1351,6 +1354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Centering
     //-----------------------------------------------------------------------
+
     /**
      * <p>Centers a String in a larger String of size {@code size}
      * using the space character (' ').</p>
@@ -1515,6 +1519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
+        @SuppressWarnings("DuplicateExpressions")
         final int delta = ((minLength - str.length()) % padStr.length() == 0) ? ((minLength - str.length()) / padStr.length())
                 : ((minLength - str.length()) / padStr.length() + 1);
         switch (delta) {
@@ -1531,6 +1536,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 final StringBuilder sb = Objectory.createStringBuilder(str.length() + (padStr.length() * delta));
 
                 try {
+                    //noinspection StringRepeatCanBeUsed
                     for (int i = 0; i < delta; i++) {
                         sb.append(padStr);
                     }
@@ -1601,6 +1607,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
+        @SuppressWarnings("DuplicateExpressions")
         final int delta = ((minLength - str.length()) % padStr.length() == 0) ? ((minLength - str.length()) / padStr.length())
                 : ((minLength - str.length()) / padStr.length() + 1);
 
@@ -1620,6 +1627,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 try {
                     sb.append(str);
 
+                    //noinspection StringRepeatCanBeUsed
                     for (int i = 0; i < delta; i++) {
                         sb.append(padStr);
                     }
@@ -1801,7 +1809,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static char[] toCharArray(final CharSequence source) {
         if (source == null) {
             return null; // NOSONAR
-        } else if (source.length() == 0) {
+        } else if (source.isEmpty()) {
             return N.EMPTY_CHAR_ARRAY;
         } else if (source instanceof String) {
             return ((String) source).toCharArray();
@@ -1837,7 +1845,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static int[] toCodePoints(final CharSequence str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return N.EMPTY_INT_ARRAY;
         }
 
@@ -1897,7 +1905,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -1928,7 +1936,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str, final Locale locale) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -1943,7 +1951,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the converted string in lower case with underscores
      */
     public static String toLowerCaseWithUnderscore(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -1956,7 +1964,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
                             sb.append(WD._UNDERSCORE);
                         }
                     }
@@ -2017,7 +2025,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2048,7 +2056,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str, final Locale locale) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2063,7 +2071,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the converted string in upper case with underscores
      */
     public static String toUpperCaseWithUnderscore(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2076,7 +2084,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
                             sb.append(WD._UNDERSCORE);
                         }
                     }
@@ -2106,7 +2114,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2220,6 +2228,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // Copied from Apache commons Lang under Apache License v2.
+
     /**
      * Converts the first character of the given string to lower case.
      * If the string is {@code null} or empty, the original string is returned.
@@ -2229,7 +2238,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         If the original string is already starting with a lower case character, the original string is returned.
      */
     public static String uncapitalize(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2257,6 +2266,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // Copied from Apache commons Lang under Apache License v2.
+
     /**
      * Converts the first character of the given string to upper case.
      * If the string is {@code null} or empty, the original string is returned.
@@ -2266,7 +2276,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         If the original string is already starting with an upper case character, the original string is returned.
      */
     public static String capitalize(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2314,7 +2324,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2340,7 +2350,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2359,12 +2369,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param excludedWords A collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
      * @return The processed string with all non-excluded words capitalized.
      * @throws IllegalArgumentException if the provided delimiter is empty.
-     * @see #convertWords(String, String, Collection)
+     * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2408,7 +2418,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2436,7 +2446,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             final Function<? super String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2464,7 +2474,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String quoteEscaped(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2500,7 +2510,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the processed string with the specified quotation character escaped, or the original string if it is {@code null} or empty
      */
     public static String quoteEscaped(final String str, final char quoteChar) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2529,6 +2539,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // --------------------------------------------------------------------------
+
     /**
      * <p>
      * Converts the char to the unicode format '\u0020'.
@@ -2605,7 +2616,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *      href="http://www.w3.org/TR/xpath/#function-normalize-space">http://www.w3.org/TR/xpath/#function-normalize-space</a>
      */
     public static String normalizeSpace(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -2656,19 +2667,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Replaces a String with another String inside a larger String, once.</p>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
+     * Replaces the first occurrence of a target string in the input string with a replacement string.
      *
      * <pre>
-     * Strings.replaceOnce(null, *, *)        = null
-     * Strings.replaceOnce("", *, *)          = ""
-     * Strings.replaceOnce("any", {@code null}, *)    = "any"
-     * Strings.replaceOnce("any", *, null)    = "any"
-     * Strings.replaceOnce("any", "", *)      = "any"
-     * Strings.replaceOnce("aba", "a", null)  = "ba"
-     * Strings.replaceOnce("aba", "a", "")    = "ba"
-     * Strings.replaceOnce("aba", "a", "z")   = "zba"
+     * Strings.replaceFirst(null, *, *)        = null
+     * Strings.replaceFirst("", *, *)          = ""
+     * Strings.replaceFirst("any", {@code null}, *)    = "any"
+     * Strings.replaceFirst("any", *, null)    = "any"
+     * Strings.replaceFirst("any", "", *)      = "any"
+     * Strings.replaceFirst("aba", "a", null)  = "ba"
+     * Strings.replaceFirst("aba", "a", "")    = "ba"
+     * Strings.replaceFirst("aba", "a", "z")   = "zba"
      * </pre>
      *
      * @param str
@@ -2698,8 +2707,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Replaces the first occurrence of a target string in the input string with a replacement string.
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
      * <pre>
      * Strings.replaceOnce(null, *, *)        = null
      * Strings.replaceOnce("", *, *)          = ""
@@ -2716,7 +2723,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement The string to replace the target string. It can be {@code null}.
      * @return A new string with the first occurrence of the target string replaced with the replacement string.
      *         If the input string, target string, or replacement string is {@code null}, the method returns the original string.
-     * @deprecated Use {@link #replaceFirst(String,String,String)} instead
+     * @deprecated Use {@link #replaceFirst(String, String, String)} instead
      */
     @Deprecated
     public static String replaceOnce(final String str, final String target, final String replacement) {
@@ -2731,11 +2738,59 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param target
      * @param replacement
      * @return
-     * @deprecated Use {@link #replaceFirst(String,int,String,String)} instead
+     * @deprecated Use {@link #replaceFirst(String, int, String, String)} instead
      */
     @Deprecated
     public static String replaceOnce(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceFirst(str, fromIndex, target, replacement);
+    }
+
+    /**
+     * Replaces the last occurrence of a target string in the input string with a replacement string.
+     *
+     * <pre>
+     * Strings.replaceLast(null, *, *)        = null
+     * Strings.replaceLast("", *, *)          = ""
+     * Strings.replaceLast("any", {@code null}, *)    = "any"
+     * Strings.replaceLast("any", *, null)    = "any"
+     * Strings.replaceLast("any", "", *)      = "any"
+     * Strings.replaceLast("aba", "a", null)  = "ab"
+     * Strings.replaceLast("aba", "a", "")    = "ab"
+     * Strings.replaceLast("aba", "a", "z")   = "abz"
+     * </pre>
+     *
+     * @param str
+     * @param target
+     * @param replacement the String to replace with, may be null
+     * @return A new string with the last occurrence of the target string replaced with the replacement string.
+     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
+     */
+    public static String replaceLast(final String str, final String target, final String replacement) {
+        return replaceLast(str, N.len(str), target, replacement);
+    }
+
+    /**
+     * Replaces the last occurrence of a target string in the input string with a replacement string, starting from a specified index backward.
+     *
+     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
+     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param target The string to be replaced. It can be {@code null} or empty.
+     * @param replacement The string to replace the target string. It can be {@code null}.
+     * @return A new string with the last occurrence of the target string replaced with the replacement string, starting from the specified index backward.
+     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
+     */
+    public static String replaceLast(final String str, final int startIndexFromBack, final String target, final String replacement) {
+        if (isEmpty(str) || isEmpty(target) || startIndexFromBack < 0) {
+            return str;
+        }
+
+        final int lastIndex = lastIndexOf(str, target, startIndexFromBack);
+
+        if (lastIndex < 0) {
+            return str;
+        }
+
+        return Strings.replaceRange(str, lastIndex, lastIndex + N.len(target), replacement);
     }
 
     /**
@@ -2833,7 +2888,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement The string to replace the target string. It can be {@code null}.
      * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
-     * @deprecated Use {@link #replaceFirstIgnoreCase(String,String,String)} instead
+     * @deprecated Use {@link #replaceFirstIgnoreCase(String, String, String)} instead
      */
     @Deprecated
     public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
@@ -2849,7 +2904,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement The string to replace the target string. It can be {@code null}.
      * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
-     * @deprecated Use {@link #replaceFirstIgnoreCase(String,int,String,String)} instead
+     * @deprecated Use {@link #replaceFirstIgnoreCase(String, int, String, String)} instead
      */
     @Deprecated
     public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
@@ -3049,6 +3104,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Remove
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Removes a substring only if it is at the beginning of a source string,
@@ -3092,7 +3148,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * <p>
-     * Case insensitive removal of a substring if it is at the beginning of a
+     * Case-insensitive removal of a substring if it is at the beginning of a
      * source string, otherwise returns the source string.
      * </p>
      *
@@ -3174,7 +3230,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * <p>
-     * Case insensitive removal of a substring if it is at the end of a source
+     * Case-insensitive removal of a substring if it is at the end of a source
      * string, otherwise returns the source string.
      * </p>
      *
@@ -3254,7 +3310,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String removeAll(final String str, final int fromIndex, final char removeChar) {
         // N.checkIndex(fromIndex, N.len(str));
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -3532,7 +3588,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String[] splitPreserveAllTokens(final String str, final char delimiter) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3564,7 +3620,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String[] splitPreserveAllTokens(final String str, final char delimiter, final boolean trim) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3593,18 +3649,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
      * <pre>
-     * StringUtils.splitPreserveAllTokens(null, *)           = []
-     * StringUtils.splitPreserveAllTokens("", *)             = [""]
-     * StringUtils.splitPreserveAllTokens("abc def", null)   = ["abc", "def"]
-     * StringUtils.splitPreserveAllTokens("abc def", " ")    = ["abc", "def"]
-     * StringUtils.splitPreserveAllTokens("abc  def", " ")   = ["abc", "", "def"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef", ":")   = ["ab", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef:", ":")  = ["ab", "cd", "ef", ""]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef::", ":") = ["ab", "cd", "ef", "", ""]
-     * StringUtils.splitPreserveAllTokens("ab::cd:ef", ":")  = ["ab", "", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens(":cd:ef", ":")     = ["", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("::cd:ef", ":")    = ["", "", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens(":cd:ef:", ":")    = ["", "cd", "ef", ""]
+     * Strings.splitPreserveAllTokens(null, *)           = []
+     * Strings.splitPreserveAllTokens("", *)             = [""]
+     * Strings.splitPreserveAllTokens("abc def", null)   = ["abc", "def"]
+     * Strings.splitPreserveAllTokens("abc def", " ")    = ["abc", "def"]
+     * Strings.splitPreserveAllTokens("abc  def", " ")   = ["abc", "", "def"]
+     * Strings.splitPreserveAllTokens("ab:cd:ef", ":")   = ["ab", "cd", "ef"]
+     * Strings.splitPreserveAllTokens("ab:cd:ef:", ":")  = ["ab", "cd", "ef", ""]
+     * Strings.splitPreserveAllTokens("ab:cd:ef::", ":") = ["ab", "cd", "ef", "", ""]
+     * Strings.splitPreserveAllTokens("ab::cd:ef", ":")  = ["ab", "", "cd", "ef"]
+     * Strings.splitPreserveAllTokens(":cd:ef", ":")     = ["", "cd", "ef"]
+     * Strings.splitPreserveAllTokens("::cd:ef", ":")    = ["", "", "cd", "ef"]
+     * Strings.splitPreserveAllTokens(":cd:ef:", ":")    = ["", "cd", "ef", ""]
      * </pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -3615,7 +3671,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String[] splitPreserveAllTokens(final String str, final String delimiter) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3650,7 +3706,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final boolean trim) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3696,7 +3752,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3742,7 +3798,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { EMPTY_STRING };
         }
 
@@ -3762,7 +3818,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
         }
 
@@ -3814,7 +3870,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
         }
 
@@ -3897,7 +3953,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String[] splitToLines(final String str) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { Strings.EMPTY_STRING };
         }
 
@@ -3917,9 +3973,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         If the input string is {@code null} or {@code str.length() == 0 && omitEmptyLines}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
-        if (str == null || (str.length() == 0 && omitEmptyLines)) {
+        if (str == null || (str.isEmpty() && omitEmptyLines)) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return new String[] { Strings.EMPTY_STRING };
         }
 
@@ -3937,6 +3993,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Removes space characters (char &lt;= 32) from both ends of this String,
@@ -4082,6 +4139,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Stripping
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Strips whitespace from the start and end of a String.
@@ -4265,7 +4323,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String strip(final String str, final String stripChars) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -4348,7 +4406,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the input array is {@code null} or empty, or the stripChars is {@code null}, the method does nothing.
      *
      * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
-     * @param stripChars The set of characters to be stripped from the start of the strings. If {@code null}, the method behaves as {@link #stripStart(String)}.
+     * @param stripChars The set of characters to be stripped from the start of the strings. If {@code null}, the method behaves as {@link #stripStart(String, String)}.
+     * @see #stripStart(String, String)
      */
     public static void stripStart(final String[] strs, final String stripChars) {
         if (N.isEmpty(strs)) {
@@ -4419,7 +4478,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the input array is {@code null} or empty, or the stripChars is {@code null}, the method does nothing.
      *
      * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
-     * @param stripChars The set of characters to be stripped from the end of the strings. If {@code null}, the method behaves as {@link #stripEnd(String)}.
+     * @param stripChars The set of characters to be stripped from the end of the strings. If {@code null}, the method behaves as {@link #stripEnd(String, String)}.
+     * @see #stripEnd(String, String)
      */
     public static void stripEnd(final String[] strs, final String stripChars) {
         if (N.isEmpty(strs)) {
@@ -4505,6 +4565,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Chomping
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Removes one newline from end of a String if it's there, otherwise leave
@@ -4535,7 +4596,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return String without newline, {@code null} if {@code null} String input
      */
     public static String chomp(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -4582,6 +4643,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Chopping
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Remove the last character from a String.
@@ -4610,7 +4672,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return String without last character, {@code null} if {@code null} String input
      */
     public static String chop(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -4804,6 +4866,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Delete
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Deletes all white spaces from a String as defined by
@@ -4822,7 +4885,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String deleteWhitespace(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -4871,7 +4934,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String appendIfMissing(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return suffix;
         } else if (str.endsWith(suffix)) {
             return str;
@@ -4893,7 +4956,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String appendIfMissingIgnoreCase(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return suffix;
         } else if (Strings.endsWithIgnoreCase(str, suffix)) {
             return str;
@@ -4914,7 +4977,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String prependIfMissing(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return prefix;
         } else if (str.startsWith(prefix)) {
             return str;
@@ -4936,7 +4999,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return prefix;
         } else if (Strings.startsWithIgnoreCase(str, prefix)) {
             return str;
@@ -5097,7 +5160,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotEmpty(prefix, cs.prefix);
         N.checkArgNotEmpty(prefix, cs.suffix);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         } else if (str.length() - prefix.length() >= suffix.length() && str.startsWith(prefix) && str.endsWith(suffix)) {
             return str.substring(prefix.length(), str.length() - suffix.length());
@@ -5262,6 +5325,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // --------------------------------------------------------------------------
+
     /**
      * <p>
      * Checks whether the character is ASCII 7 bit.
@@ -5595,6 +5659,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Character Tests
     // -----------------------------------------------------------------------
+
     /**
      * <p>
      * Checks if the CharSequence contains only Unicode letters.
@@ -5941,10 +6006,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *  "2E-10" => true
      *
      * @param str
-     * @return {@code true} if is ascii digtal number
+     * @return {@code true} if is ascii digital number
      */
-    public static boolean isAsciiDigtalNumber(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isAsciiDigitalNumber(final String str) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -6019,11 +6084,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
         }
 
-        if ((count == 0) || (i != len)) { //NOSONAR
-            return false;
-        } else {
-            return true;
-        }
+        //NOSONAR
+        return (count != 0) && (i == len);
     }
 
     /**
@@ -6043,10 +6105,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *  "2e10" => false
      *
      * @param str
-     * @return {@code true} if is ascii digtal integer
+     * @return {@code true} if is ascii digital integer
      */
-    public static boolean isAsciiDigtalInteger(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isAsciiDigitalInteger(final String str) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -6088,7 +6150,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the character does not occur.
      */
     public static int indexOf(final String str, final int charValueToFind) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -6107,7 +6169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the character does not occur.
      */
     public static int indexOf(final String str, final int charValueToFind, final int fromIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -6135,7 +6197,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the index within the input string of the first occurrence of the specified substring, starting the search at the specified index.
      * If a substring with value {@code valueToFind} occurs in the character sequence represented by the input {@code String} object,
-     * then the indexof the first such occurrence is returned.
+     * then the index of the first such occurrence is returned.
      *
      * @param str The string to be checked. May be {@code null} or empty.
      * @param valueToFind The substring to be found.
@@ -6186,14 +6248,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         final int strLen = str.length();
-        final int chsLen = valuesToFind.length;
         char ch = 0;
 
-        for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {
+        for (int i = Math.max(fromIndex, 0); i < strLen; i++) {
             ch = str.charAt(i);
 
-            for (int j = 0; j < chsLen; j++) {
-                if (valuesToFind[j] == ch) {
+            for (final char c : valuesToFind) {
+                if (c == ch) {
                     // checked by checkInputChars
 
                     //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
@@ -6265,58 +6326,57 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the index within the input string of the first occurrence of any character
      * that is not in the specified array of characters to exclude.
-     * If a character not within the array {@code valuesToExeclude} occurs in the character
+     * If a character not within the array {@code valuesToExclude} occurs in the character
      * sequence represented by the input {@code String} object, then the index of the first
      * such occurrence is returned.
      *
      * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToExeclude The array of characters to exclude from the search.
+     * @param valuesToExclude The array of characters to exclude from the search.
      * @return The index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
      */
     @SafeVarargs
-    public static int indexOfAnyBut(final String str, final char... valuesToExeclude) {
-        return indexOfAnyBut(str, 0, valuesToExeclude);
+    public static int indexOfAnyBut(final String str, final char... valuesToExclude) {
+        return indexOfAnyBut(str, 0, valuesToExclude);
     }
 
     /**
      * Returns the index within the input string of the first occurrence of any character
      * that is not in the specified array of characters to exclude, starting the search at the specified index.
-     * If a character not within the array {@code valuesToExeclude} occurs in the character
+     * If a character not within the array {@code valuesToExclude} occurs in the character
      * sequence represented by the input {@code String} object, then the index of the first
      * such occurrence is returned.
      *
      * @param str The string to be checked. May be {@code null} or empty.
      * @param fromIndex The index to start the search from.
-     * @param valuesToExeclude The array of characters to exclude from the search.
+     * @param valuesToExclude The array of characters to exclude from the search.
      * @return The index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
      */
     @SafeVarargs
-    public static int indexOfAnyBut(final String str, final int fromIndex, final char... valuesToExeclude) {
-        checkInputChars(valuesToExeclude, cs.valuesToExeclude, true);
+    public static int indexOfAnyBut(final String str, final int fromIndex, final char... valuesToExclude) {
+        checkInputChars(valuesToExclude, cs.valuesToExclude, true);
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isEmpty(valuesToExeclude)) {
+        if (N.isEmpty(valuesToExclude)) {
             return 0;
         }
 
         final int strLen = str.length();
-        final int chsLen = valuesToExeclude.length;
         char ch = 0;
 
-        outer: for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {//NOSONAR
+        outer: for (int i = Math.max(fromIndex, 0); i < strLen; i++) {//NOSONAR
             ch = str.charAt(i);
 
-            for (int j = 0; j < chsLen; j++) {
-                if (valuesToExeclude[j] == ch) {
+            for (final char c : valuesToExclude) {
+                if (c == ch) {
                     // checked by checkInputChars
 
                     //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                    //        if (valuesToExeclude[j + 1] == str.charAt(i + 1)) {
+                    //        if (valuesToExclude[j + 1] == str.charAt(i + 1)) {
                     //            continue outer;
                     //        }
                     //    } else {
@@ -6527,7 +6587,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the last occurrence of the character in the character sequence represented by this object, or -1 if the character does not occur.
      */
     public static int lastIndexOf(final String str, final int charValueToFind) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -6573,7 +6633,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         character does not occur before that point.
      */
     public static int lastIndexOf(final String str, final int charValueToFind, final int startIndexFromBack) {
-        if (str == null || str.length() == 0 || startIndexFromBack < 0) {
+        if (str == null || str.isEmpty() || startIndexFromBack < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -6612,7 +6672,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param valueToFind
-     * @param startIndexFromBack
+     * @param startIndexFromBack The index to start the search from, searching backward.
      * @return
      */
     public static int lastIndexOf(final String str, final String valueToFind, final int startIndexFromBack) {
@@ -6685,6 +6745,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.INDEX_NOT_FOUND;
         }
 
+        //noinspection DuplicateExpressions
         if (index == 0 && (index + valueToFind.length() == len || (len >= index + valueToFind.length() + delimiter.length()
                 && delimiter.equals(str.substring(index + valueToFind.length(), index + valueToFind.length() + delimiter.length()))))) {
             return index;
@@ -6828,6 +6889,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     // Shared code between ordinalIndexOf(String,String,int) and
+
     /**
      * Ordinal index of.
      *
@@ -6946,6 +7008,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         final int len = str.length();
+        @SuppressWarnings("resource")
         final List<String> sortedSubstrs = Stream.of(valuesToFind) //
                 .filter(it -> !(it == null || (fromIndex + it.length() > len)))
                 .sortedByInt(N::len)
@@ -6975,8 +7038,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestLastindicesOfAll(final String str, final String... valuesToFind) {
-        return smallestLastindicesOfAll(str, N.len(str), valuesToFind);
+    public static int smallestLastIndicesOfAll(final String str, final String... valuesToFind) {
+        return smallestLastIndicesOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -6989,7 +7052,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestLastindicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int smallestLastIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -7023,8 +7086,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestLastindicesOfAll(final String str, final String... valuesToFind) {
-        return largestLastindicesOfAll(str, N.len(str), valuesToFind);
+    public static int largestLastIndicesOfAll(final String str, final String... valuesToFind) {
+        return largestLastIndicesOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -7038,7 +7101,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String[])
      */
     @SafeVarargs
-    public static int largestLastindicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int largestLastIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -7097,7 +7160,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SuppressWarnings("deprecation")
     public static int countMatches(final String str, final char charValueToFind) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return 0;
         }
 
@@ -7149,7 +7212,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code true} if the character is found in the string, {@code false} otherwise
      */
     public static boolean contains(final String str, final char charValueToFind) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -7219,12 +7282,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the specified characters are present in the given string.
+     * Checks if all the specified characters are present in the given string.
      * The method returns {@code true} if the specified character array is empty.
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be found
-     * @return {@code true} if all of the characters are found in the given string or the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise.
+     * @return {@code true} if all the characters are found in the given string or the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise.
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final char... valuesToFind) {
@@ -7234,7 +7297,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return true;
         }
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -7248,12 +7311,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the specified substrings are present in the given string.
+     * Checks if all the specified substrings are present in the given string.
      * The method returns {@code true} if the specified substring array is empty.
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if all of the substrings are found in the given string or the specified substring array is {@code null} or empty, {@code false} otherwise
+     * @return {@code true} if all the substrings are found in the given string or the specified substring array is {@code null} or empty, {@code false} otherwise
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final String... valuesToFind) {
@@ -7261,7 +7324,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return true;
         }
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -7275,12 +7338,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the specified substrings are present in the given string, ignoring case considerations.
+     * Checks if all the specified substrings are present in the given string, ignoring case considerations.
      * The method returns {@code true} if the specified substring array is empty.
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if all of the substrings are found in the given string or the specified substring array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
+     * @return {@code true} if all the substrings are found in the given string or the specified substring array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
      */
     @SafeVarargs
     public static boolean containsAllIgnoreCase(final String str, final String... valuesToFind) {
@@ -7288,7 +7351,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return true;
         }
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -7388,14 +7451,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         final int strLen = str.length();
-        final int chsLen = valuesToFind.length;
         char ch = 0;
 
         for (int i = 0; i < strLen; i++) {
             ch = str.charAt(i);
 
-            for (int j = 0; j < chsLen; j++) {
-                if (valuesToFind[j] == ch) {
+            for (final char c : valuesToFind) {
+                if (c == ch) {
                     // checked by checkInputChars
 
                     //    if (Character.isHighSurrogate(ch)) {
@@ -7456,7 +7518,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The method returns {@code true} if the string is {@code null} or empty.
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param charValueToFind the character to be checked
+     * @param valuesToFind the character to be checked
      * @return {@code true} if the given string contains only the specified character or the given string is {@code null} or empty, {@code false} otherwise
      */
     @SafeVarargs
@@ -7478,7 +7540,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     // From org.springframework.util.StringUtils, under Apache License 2.0
     public static boolean containsWhitespace(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
 
@@ -7666,7 +7728,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
-        return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
+        return (a == null) ? b == null : (b != null && a.length() == b.length() && a.equals(b));
     }
 
     /**
@@ -7677,7 +7739,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code true} if the strings are equal, ignoring case considerations, {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
-        return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
+        return (a == null) ? b == null : (a.equalsIgnoreCase(b));
     }
 
     /**
@@ -7706,7 +7768,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if the given string is equal to any of the specified search strings, ignoring case considerations.
      *
      * @param str the string to be checked, may be null
-     * @param searchStrings the array of strings to compare against, may be {@code null} or empty
+     * @param searchStrs the array of strings to compare against, may be {@code null} or empty
      * @return {@code true} if the string is equal to any of the specified search strings, ignoring case considerations, {@code false} otherwise
      */
     @SafeVarargs
@@ -7747,7 +7809,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * <p>
-     * Compares two Strings, and returns the index at which the Stringss begin
+     * Compares two Strings, and returns the index at which the Strings begin
      * to differ.
      * </p>
      *
@@ -7845,12 +7907,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         // find the min and max string lengths; this avoids checking to make
         // sure we are not exceeding the length of the string each time through
         // the bottom loop.
-        for (int i = 0; i < arrayLen; i++) {
-            if (strs[i] == null) {
+        for (final String str : strs) {
+            if (str == null) {
                 shortestStrLen = 0;
             } else {
-                shortestStrLen = Math.min(strs[i].length(), shortestStrLen);
-                longestStrLen = Math.max(strs[i].length(), longestStrLen);
+                shortestStrLen = Math.min(str.length(), shortestStrLen);
+                longestStrLen = Math.max(str.length(), longestStrLen);
             }
         }
 
@@ -7883,7 +7945,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (firstDiff == -1 && shortestStrLen != longestStrLen) {
-            // we compared all of the characters up to the length of the
+            // we compared all the characters up to the length of the
             // shortest string and didn't find a match, but the string lengths
             // vary, so return the length of the shortest string.
             return shortestStrLen;
@@ -8176,7 +8238,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see StrUtil#substring(String, int)
      * @see #substring(String, int, int)
-     * @see #substringAfter(String, int)
+     * @see #substringAfter(String, char)
      */
     @MayReturnNull
     public static String substring(final String str, final int inclusiveBeginIndex) {
@@ -8312,13 +8374,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
      * @return
-     * @see #substringAfter(String, int)
+     * @see #substringAfter(String, char)
      * @deprecated
      */
     @MayReturnNull
     @Deprecated
     public static String substring(final String str, final char delimiterOfInclusiveBeginIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return null;
         }
 
@@ -8332,7 +8394,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
      * @return
-     * @see #substringAfter(String, int)
+     * @see #substringAfter(String, String)
      * @deprecated
      */
     @MayReturnNull
@@ -8342,7 +8404,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfInclusiveBeginIndex.length() == 0) {
+        if (delimiterOfInclusiveBeginIndex.isEmpty()) {
             return str;
         }
 
@@ -8362,7 +8424,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     @Deprecated
     public static String substring(final String str, final int inclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
+        if (str == null || str.isEmpty() || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
@@ -8393,7 +8455,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
             return EMPTY_STRING;
         }
 
@@ -8413,7 +8475,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     @Deprecated
     public static String substring(final String str, final char delimiterOfInclusiveBeginIndex, final int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
+        if (str == null || str.isEmpty() || exclusiveEndIndex < 0) {
             return null;
         }
 
@@ -8438,7 +8500,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfInclusiveBeginIndex.length() == 0) {
+        if (delimiterOfInclusiveBeginIndex.isEmpty()) {
             return EMPTY_STRING;
         }
 
@@ -8455,7 +8517,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringAfter(final String str, final char delimiterOfExclusiveBeginIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return null;
         }
 
@@ -8481,7 +8543,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
             return str;
         }
 
@@ -8509,7 +8571,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
             return substring(str, 0, exclusiveEndIndex);
         } else if (exclusiveEndIndex == 0) {
             return null;
@@ -8533,7 +8595,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringAfterLast(final String str, final char delimiterOfExclusiveBeginIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return null;
         }
 
@@ -8559,7 +8621,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
             return EMPTY_STRING;
         }
 
@@ -8586,7 +8648,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
             return EMPTY_STRING;
         } else if (exclusiveEndIndex == 0) {
             return null;
@@ -8692,7 +8754,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
             return EMPTY_STRING;
         }
 
@@ -8719,7 +8781,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
             return EMPTY_STRING;
         } else if (inclusiveBeginIndex == str.length()) {
             return null;
@@ -8743,7 +8805,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBeforeLast(final String str, final char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return null;
         }
 
@@ -8769,7 +8831,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
             return str;
         }
 
@@ -8796,7 +8858,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
             return str.substring(inclusiveBeginIndex);
         } else if (inclusiveBeginIndex == str.length()) {
             return null;
@@ -9266,7 +9328,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static List<int[]> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return new ArrayList<>();
         }
 
@@ -9288,7 +9350,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             final char delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return new ArrayList<>();
         }
 
@@ -9372,7 +9434,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         queue.add(idx + delimiterOfExclusiveBeginIndex.length());
         int next = -1;
 
-        for (int i = idx + delimiterOfExclusiveBeginIndex.length(), len = toIndex; i < len;) {
+        for (int i = idx + delimiterOfExclusiveBeginIndex.length(); i < toIndex;) {
             if (queue.size() == 0) {
                 idx = next >= i ? next : str.indexOf(delimiterOfExclusiveBeginIndex, i);
 
@@ -9390,6 +9452,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 break;
             } else {
                 final int endIndex = idx;
+                //noinspection DataFlowIssue
                 idx = res.size() > 0 ? Math.max(res.get(res.size() - 1)[1] + delimiterOfExclusiveEndIndex.length(), queue.peekLast()) : queue.peekLast();
 
                 while ((idx = str.indexOf(delimiterOfExclusiveBeginIndex, idx)) >= 0 && idx < endIndex) {
@@ -9507,7 +9570,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (fromIndex == toIndex || fromIndex >= len) {
-            return str == null ? Strings.EMPTY_STRING : str;
+            return str;
         } else if (toIndex - fromIndex >= len) {
             return Strings.EMPTY_STRING;
         }
@@ -9523,7 +9586,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return an OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty
      */
     public static OptionalChar firstChar(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return OptionalChar.empty();
         }
 
@@ -9538,7 +9601,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return an OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty
      */
     public static OptionalChar lastChar(final String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return OptionalChar.empty();
         }
 
@@ -9558,7 +9621,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String firstChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (str == null || str.length() == 0 || n == 0) {
+        if (str == null || str.isEmpty() || n == 0) {
             return EMPTY_STRING;
         } else if (str.length() <= n) {
             return str;
@@ -9580,7 +9643,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String lastChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (str == null || str.length() == 0 || n == 0) {
+        if (str == null || str.isEmpty() || n == 0) {
             return EMPTY_STRING;
         } else if (str.length() <= n) {
             return str;
@@ -11359,7 +11422,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        if (c instanceof final Collection coll) { // NOSONAR
+        if (c instanceof final Collection<?> coll) { // NOSONAR
             return join(coll, 0, coll.size(), delimiter, prefix, suffix, trim);
         } else {
             return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
@@ -11549,8 +11612,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = toIndex - fromIndex;
         final String[] elements = new String[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<?> list = (List<?>) c;
+        if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
             for (int i = fromIndex, j = 0; i < toIndex; i++, j++) {
                 elements[j] = toString(list.get(i), trim);
@@ -11745,7 +11807,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Joins the entries of the provided Map into a single String.
      *
      * @param m
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param entryDelimiter The delimiter that separates each entry
      * @return
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
@@ -11931,7 +11993,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param m
      * @param fromIndex
      * @param toIndex
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param entryDelimiter The delimiter that separates each entry
      * @return
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
@@ -11945,7 +12007,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param m
      * @param fromIndex
      * @param toIndex
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param entryDelimiter The delimiter that separates each entry
      * @param trim
      * @return
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
@@ -12679,6 +12741,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Rotating (circular shift)
     //-----------------------------------------------------------------------
+
     /**
      * <p>Rotate (circular shift) a String of {@code shift} characters.</p>
      * <ul>
@@ -12757,6 +12820,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Overlay
     //-----------------------------------------------------------------------
+
     /**
      * <p>Overlays part of a String with another String.</p>
      *
@@ -12792,7 +12856,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see Boolean#parseBoolean(String)
      */
     public static boolean parseBoolean(final String str) {
-        return Strings.isEmpty(str) ? false : Boolean.parseBoolean(str);
+        return !Strings.isEmpty(str) && Boolean.parseBoolean(str);
     }
 
     /**
@@ -12909,7 +12973,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param binaryData The byte array to be encoded.
      * @return The Base64 encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
-     * @see Base64.Encoder#encodeToString(byte[])
      */
     public static String base64Encode(final byte[] binaryData) {
         if (N.isEmpty(binaryData)) {
@@ -13186,11 +13249,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     protected static final byte PAD_DEFAULT = '='; // Allow static access to default
 
     /**
-     * Returns whether or not the {@code octet} is in the base 64 alphabet.
+     * Returns whether the {@code octet} is in the base 64 alphabet.
      *
      * @param octet
      *            The value to test
-     * @return {@code true} if the value is defined in the the base 64 alphabet, {@code false} otherwise.
+     * @return {@code true} if the value is defined in the base 64 alphabet, {@code false} otherwise.
      */
     public static boolean isBase64(final byte octet) {
         return octet == PAD_DEFAULT || (octet >= 0 && octet < DECODE_TABLE.length && DECODE_TABLE[octet] != -1);
@@ -13235,8 +13298,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs The CharSequence to be searched. It can be {@code null} or empty.
      * @return The first email address found in the CharSequence, or {@code null} if no email address is found.
-     * @see #isValidEmailAddress(String)
-     * @see #findAllEmailAddresses(String)
+     * @see #isValidEmailAddress(CharSequence)
+     * @see #findAllEmailAddresses(CharSequence)
      */
     public static String findFirstEmailAddress(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -13263,8 +13326,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs The CharSequence to be searched. It can be {@code null} or empty.
      * @return A list of all found email addresses, or an empty list if no email address is found.
-     * @see #isValidEmailAddress(String)
-     * @see #findFirstEmailAddress(String)
+     * @see #isValidEmailAddress(CharSequence)
+     * @see #findFirstEmailAddress(CharSequence)
      */
     public static List<String> findAllEmailAddresses(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -13379,7 +13442,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
-        if (canBeNullOrEmpty == false && N.isEmpty(chs)) {
+        if (!canBeNullOrEmpty && N.isEmpty(chs)) {
             throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' can't be null or empty");
         }
 
@@ -13401,7 +13464,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * @deprecated repalced by {@code Strings}
+     * @deprecated replaced by {@code Strings}
      */
     @Deprecated
     @Beta
@@ -13592,7 +13655,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param inclusiveBeginIndex
          * @param defaultStr
          * @return
-         * @see Strings#substringAfter(String, int)
+         * @see Strings#substringAfter(String, char)
          */
         @Beta
         public static String substringOrElse(final String str, final int inclusiveBeginIndex, final String defaultStr) {
@@ -13771,7 +13834,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param inclusiveBeginIndex
          * @return
-         * @see Strings#substringAfter(String, int)
+         * @see Strings#substringAfter(String, char)
          */
         @Beta
         public static String substringOrElseItself(final String str, final int inclusiveBeginIndex) {
@@ -14607,7 +14670,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both are empty
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
-            return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
+            return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.empty());
         }
 
         /**
@@ -14622,7 +14685,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
             return Strings.isNotEmpty(a) ? Optional.of(a)
-                    : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.<T> empty()));
+                    : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.empty()));
         }
 
         /**
@@ -14633,6 +14696,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param a the array of CharSequences to check, may be {@code null} or empty
          * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the array is empty
          */
+        @SafeVarargs
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
             if (N.isEmpty(a)) {
                 return Optional.empty();
@@ -14657,32 +14721,33 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both are blank
          */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
-            return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
+            return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.empty());
         }
 
         /**
-          * Returns an Optional containing the first non-blank CharSequence from the given three CharSequences.
-          * If all CharSequences are blank, returns an empty Optional.
-          *
-          * @param <T> the type of the CharSequence
-          * @param a the first CharSequence to check
-          * @param b the second CharSequence to check
-          * @param c the third CharSequence to check
-          * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank
-          */
+         * Returns an Optional containing the first non-blank CharSequence from the given three CharSequences.
+         * If all CharSequences are blank, returns an empty Optional.
+         *
+         * @param <T> the type of the CharSequence
+         * @param a the first CharSequence to check
+         * @param b the second CharSequence to check
+         * @param c the third CharSequence to check
+         * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank
+         */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
             return Strings.isNotBlank(a) ? Optional.of(a)
-                    : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.<T> empty()));
+                    : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.empty()));
         }
 
         /**
-          * Returns an Optional containing the first non-blank CharSequence from the given array of CharSequences.
-          * If all CharSequences are blank or the array is empty, returns an empty Optional.
-          *
-          * @param <T> the type of the CharSequence
-          * @param a the array of CharSequences to check, may be {@code null} or empty
-          * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the array is empty
-          */
+         * Returns an Optional containing the first non-blank CharSequence from the given array of CharSequences.
+         * If all CharSequences are blank or the array is empty, returns an empty Optional.
+         *
+         * @param <T> the type of the CharSequence
+         * @param a the array of CharSequences to check, may be {@code null} or empty
+         * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the array is empty
+         */
+        @SafeVarargs
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
             if (N.isEmpty(a)) {
                 return Optional.empty();
@@ -14706,7 +14771,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.OptionalInt createInteger(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.OptionalInt.empty();
             }
 
@@ -14726,7 +14791,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.OptionalLong createLong(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.OptionalLong.empty();
             }
 
@@ -14746,7 +14811,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.OptionalFloat createFloat(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.OptionalFloat.empty();
             }
 
@@ -14766,7 +14831,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.OptionalDouble createDouble(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.OptionalDouble.empty();
             }
 
@@ -14786,7 +14851,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.Optional<BigInteger> createBigInteger(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.Optional.empty();
             }
 
@@ -14806,7 +14871,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.Optional<BigDecimal> createBigDecimal(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.Optional.empty();
             }
 
@@ -14826,7 +14891,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          */
         @Beta
         public static u.Optional<Number> createNumber(final String str) {
-            if (Numbers.quickCheckForIsCreatable(str) == false) {
+            if (!Numbers.quickCheckForIsCreatable(str)) {
                 return u.Optional.empty();
             }
 

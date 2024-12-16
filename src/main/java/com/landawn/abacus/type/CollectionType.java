@@ -128,31 +128,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         return parameterTypes;
     }
 
-    /**
-     * Checks if is list.
-     *
-     * @return {@code true}, if is list
-     */
     @Override
     public boolean isList() {
         return isList;
     }
 
-    /**
-     * Checks if is sets the.
-     *
-     * @return {@code true}, if is sets the
-     */
     @Override
     public boolean isSet() {
         return isSet;
     }
 
-    /**
-     * Checks if is collection.
-     *
-     * @return {@code true}, if is collection
-     */
     @Override
     public boolean isCollection() {
         return true;
@@ -244,7 +229,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     public T valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return (T) N.newCollection(typeClass);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);

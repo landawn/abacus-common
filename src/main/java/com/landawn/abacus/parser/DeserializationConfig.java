@@ -42,9 +42,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     BeanInfo beanInfoForValueTypes;
 
     /**
-     * Checks if is ignore unknown property.
+     * Checks if unknown property can be ignored.
      *
-     * @return {@code true}, if is ignore unknown property
+     * @return {@code true}, if unknown property can be ignored
      */
     public boolean ignoreUnmatchedProperty() {
         return ignoreUnmatchedProperty;
@@ -196,7 +196,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type by key name.
      *
      * @param <T>
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @return
      */
     public <T> Type<T> getValueType(final String keyName) {
@@ -207,7 +207,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type by key name.
      *
      * @param <T>
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param defaultType
      * @return
      */
@@ -233,7 +233,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type class by key name.
      *
      * @param <T>
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @return
      */
     public <T> Class<T> getValueTypeClass(final String keyName) {
@@ -244,7 +244,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type class by key name.
      *
      * @param <T>
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param defaultTypeClass
      * @return
      */
@@ -257,7 +257,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets value type with key name.
      *
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param typeClass
      * @return
      */
@@ -268,7 +268,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets value type with key name.
      *
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param type
      * @return
      */
@@ -285,7 +285,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets value type with key name.
      *
-     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param typeName
      * @return
      */
@@ -350,12 +350,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         if (obj instanceof DeserializationConfig) {
             final DeserializationConfig<C> other = (DeserializationConfig<C>) obj;
 
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
                     && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
-                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)) {
-
-                return true;
-            }
+                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes);
         }
 
         return false;

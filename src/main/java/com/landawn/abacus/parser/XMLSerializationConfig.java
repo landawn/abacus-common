@@ -131,9 +131,9 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Checks if is ignore type info.
+     * Checks if type info should be ignored.
      *
-     * @return {@code true}, if is ignore type info
+     * @return {@code true}, if type info should be ignored
      */
     public boolean ignoreTypeInfo() {
         return ignoreTypeInfo;
@@ -213,7 +213,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         }
 
         if (obj instanceof final XMLSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
                     && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(writeLongAsString(), other.writeLongAsString())
@@ -221,10 +221,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
                     && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
                     && N.equals(failOnEmptyBean(), other.failOnEmptyBean()) && N.equals(supportCircularReference(), other.supportCircularReference())
                     && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
-                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
-
-                return true;
-            }
+                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo);
         }
 
         return false;

@@ -117,6 +117,7 @@ public class InputStreamType extends AbstractType<InputStream> {
         }
 
         if (bytesConstructor != null) {
+            //noinspection PrimitiveArrayArgumentToVarargsMethod
             return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, Strings.base64Decode(str)); //NOSONAR
         } else if (streamConstructor != null) {
             return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(Strings.base64Decode(str)));

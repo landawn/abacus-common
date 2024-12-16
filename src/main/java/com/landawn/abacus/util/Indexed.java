@@ -80,8 +80,7 @@ public final class Indexed<T> extends AbstractIndexed {
             return true;
         }
 
-        if (obj instanceof Indexed) {
-            final Indexed<?> other = (Indexed<?>) obj;
+        if (obj instanceof Indexed<?> other) {
 
             return index == other.index && N.equals(value, other.value);
         }

@@ -80,7 +80,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     public Character[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
@@ -89,11 +89,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         final Character[] a = new Character[len];
 
         if (len > 0) {
-            boolean isQuoted = false;
-
-            if ((strs[0].length() > 1) && ((strs[0].charAt(0) == WD._QUOTATION_S) || (strs[0].charAt(0) == WD._QUOTATION_D))) {
-                isQuoted = true;
-            }
+            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == WD._QUOTATION_S) || (strs[0].charAt(0) == WD._QUOTATION_D));
 
             if (isQuoted) {
                 for (int i = 0; i < len; i++) {

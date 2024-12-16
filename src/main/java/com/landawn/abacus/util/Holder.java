@@ -85,7 +85,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Gets the and set.
+     * Returns the current and then set the new value.
      *
      * @param value
      * @return
@@ -97,7 +97,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Sets the and get.
+     * Sets the value and returns the new value.
      *
      * @param value
      * @return
@@ -108,7 +108,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Gets the and update.
+     * Returns the current value and then update the value with the specified new value.
      *
      * @param <E>
      * @param updateFunction
@@ -136,7 +136,7 @@ public final class Holder<T> implements Mutable {
 
     /**
      * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
-     * Otherwise just return {@code false} without setting the value to new value.
+     * Otherwise, just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -287,9 +287,9 @@ public final class Holder<T> implements Mutable {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (isNotNull()) {
-            return Nullable.of((U) mapper.apply(value));
+            return Nullable.of(mapper.apply(value));
         } else {
-            return Nullable.<U> empty();
+            return Nullable.empty();
         }
     }
 
@@ -307,9 +307,9 @@ public final class Holder<T> implements Mutable {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (isNotNull()) {
-            return Optional.of((U) mapper.apply(value));
+            return Optional.of(mapper.apply(value));
         } else {
-            return Optional.<U> empty();
+            return Optional.empty();
         }
     }
 
@@ -324,7 +324,7 @@ public final class Holder<T> implements Mutable {
         if (predicate.test(value)) {
             return Nullable.of(value);
         } else {
-            return Nullable.<T> empty();
+            return Nullable.empty();
         }
     }
 
@@ -343,7 +343,7 @@ public final class Holder<T> implements Mutable {
         if (isNotNull() && predicate.test(value)) {
             return Optional.of(value);
         } else {
-            return Optional.<T> empty();
+            return Optional.empty();
         }
     }
 

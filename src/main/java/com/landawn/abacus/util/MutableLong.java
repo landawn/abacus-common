@@ -16,15 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
+
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code long} wrapper.
- * <p>
- * Note that as MutableLong does not extend Long, it is not treated by String.format as a Long parameter.
  *
  * <p>
  * {@code MutableLong} is NOT thread-safe.
@@ -34,11 +34,7 @@ package com.landawn.abacus.util;
  */
 public final class MutableLong extends Number implements Comparable<MutableLong>, Mutable {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = 62986528375L;
 
     private long value;
@@ -72,6 +68,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Long instance.
      *
@@ -93,7 +90,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -105,7 +102,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -156,6 +153,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Increments the value.
      *
@@ -173,6 +171,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a value to the value of this instance.
      *
@@ -251,6 +250,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     //-----------------------------------------------------------------------
     // shortValue and byteValue rely on Number implementation
+
     /**
      * Returns the value of this MutableLong as an int.
      *
@@ -292,6 +292,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -300,10 +301,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      */
     @Override
     public int compareTo(final MutableLong other) {
-        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
+        return Long.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument
      * is not {@code null} and is a {@code MutableLong} object that contains the same {@code long}
@@ -327,10 +329,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      */
     @Override
     public int hashCode() {
-        return (int) (value ^ (value >>> 32));
+        return Long.hashCode(value);
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

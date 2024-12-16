@@ -29,5 +29,5 @@ public enum DateTimeFormat {
     /**
      * The format is: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
      */
-    ISO_8601_TIMESTAMP;
+    ISO_8601_TIMESTAMP
 }

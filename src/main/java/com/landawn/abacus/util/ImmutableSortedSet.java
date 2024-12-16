@@ -14,19 +14,16 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  *
  * @param <E>
  */
+@SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
 @SuppressWarnings("java:S2160")
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
 
@@ -56,7 +53,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(final E e) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e)));
+        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e)));
     }
 
     /**
@@ -66,7 +63,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1)));
+        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)));
     }
 
     /**

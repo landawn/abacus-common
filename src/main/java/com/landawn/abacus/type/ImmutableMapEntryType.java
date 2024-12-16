@@ -110,7 +110,6 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @return
      */
     @MayReturnNull
-    @SuppressWarnings("unchecked")
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) {
         if (Strings.isEmpty(str) || "{}".equals(str)) {

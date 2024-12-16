@@ -41,7 +41,7 @@ public final class NameUtil {
     // private static final Map<String, Map<String, String>> parentCanonicalNamePool = new ConcurrentHashMap<>();
 
     private NameUtil() {
-        // singlton
+        // singleton
     }
 
     /**
@@ -177,12 +177,12 @@ public final class NameUtil {
         String parentName = parentNamePool.get(name);
 
         if (parentName == null) {
-            final int indx = name.lastIndexOf(WD._PERIOD);
+            final int index = name.lastIndexOf(WD._PERIOD);
 
-            if (indx < 1) {
+            if (index < 1) {
                 parentName = Strings.EMPTY_STRING;
             } else {
-                parentName = NameUtil.getCachedName(name.substring(0, indx));
+                parentName = NameUtil.getCachedName(name.substring(0, index));
             }
 
             if (parentNamePool.size() < POOL_SIZE) {

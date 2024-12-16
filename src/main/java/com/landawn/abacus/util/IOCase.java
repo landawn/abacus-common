@@ -17,7 +17,7 @@
 package com.landawn.abacus.util;
 
 /**
- * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
  *
  * Enumeration of IO case sensitivity.
  * <p>
@@ -33,15 +33,15 @@ package com.landawn.abacus.util;
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
  */
-enum IOCase {
+public enum IOCase {
 
     /**
-     * The constant for case sensitive regardless of operating system.
+     * The constant for case-sensitive regardless of operating system.
      */
     SENSITIVE("Sensitive", true),
 
     /**
-     * The constant for case insensitive regardless of operating system.
+     * The constant for case-insensitive regardless of operating system.
      */
     INSENSITIVE("Insensitive", false),
 
@@ -50,11 +50,11 @@ enum IOCase {
      * Windows is case-insensitive when comparing filenames, Unix is case-sensitive.
      * <p>
      * <strong>Note:</strong> This only caters for Windows and Unix. Other operating
-     * systems (e.g. OSX and OpenVMS) are treated as case sensitive if they use the
+     * systems (e.g. OSX and OpenVMS) are treated as case-sensitive if they use the
      * Unix file separator and case-insensitive if they use the Windows file separator
      * (see {@link java.io.File#separatorChar}).
      * <p>
-     * If you derialize this constant of Windows, and deserialize on Unix, or vice
+     * If you serialize this constant of Windows, and deserialize on Unix, or vice
      * versa, then the value of the case-sensitivity flag will change.
      */
     SYSTEM("System", !IOUtil.IS_OS_WINDOWS);
@@ -69,6 +69,7 @@ enum IOCase {
     private final transient boolean sensitive;
 
     //-----------------------------------------------------------------------
+
     /**
      * Factory method to create an IOCase from a name.
      *
@@ -86,6 +87,7 @@ enum IOCase {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      *
      * @param name
@@ -107,6 +109,7 @@ enum IOCase {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the name of the constant.
      *
@@ -117,15 +120,16 @@ enum IOCase {
     }
 
     /**
-     * Does the object represent case sensitive comparison.
+     * Does the object represent case-sensitive comparison.
      *
-     * @return {@code true} if case sensitive
+     * @return {@code true} if case-sensitive
      */
     public boolean isCaseSensitive() {
         return sensitive;
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares two strings using the case-sensitivity rule.
      * <p>
@@ -252,6 +256,7 @@ enum IOCase {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets a string describing the sensitivity.
      *

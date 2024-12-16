@@ -93,6 +93,7 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
 import com.landawn.abacus.annotation.NullSafe;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.ParserUtil;
@@ -150,14 +151,14 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 sealed class CommonUtil permits N {
-    static final int BINARYSEARCH_THRESHOLD = 64;
+    static final int BINARY_SEARCH_THRESHOLD = 64;
 
     // ...
     static final int REVERSE_THRESHOLD = 18;
 
     static final int FILL_THRESHOLD = 25;
 
-    static final int REPLACEALL_THRESHOLD = 11;
+    static final int REPLACE_ALL_THRESHOLD = 11;
 
     static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
@@ -278,24 +279,21 @@ sealed class CommonUtil permits N {
     public static final java.sql.Timestamp[] EMPTY_TIMESTAMP_ARRAY = {};
 
     /**
-    /**
      * An empty immutable/unmodifiable {@code Calendar} array.
      */
+    @SuppressFBWarnings("STCAL_STATIC_CALENDAR_INSTANCE")
     public static final Calendar[] EMPTY_CALENDAR_ARRAY = {};
 
-    /**
     /**
      * An empty immutable/unmodifiable {@code LocalDate} array.
      */
     public static final LocalDate[] EMPTY_LOCAL_DATE_ARRAY = {};
 
     /**
-    /**
      * An empty immutable/unmodifiable {@code LocalTime} array.
      */
     public static final LocalTime[] EMPTY_LOCAL_TIME_ARRAY = {};
 
-    /**
     /**
      * An empty immutable/unmodifiable {@code LocalDateTime} array.
      */
@@ -525,7 +523,7 @@ sealed class CommonUtil permits N {
     /**
      * Gets a Type by the given {@code Class}.
      *
-     * @param typeName the name of the type to be retrieved.
+     * @param cls the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      */
@@ -945,7 +943,10 @@ sealed class CommonUtil permits N {
      * @param val the value to be converted.
      * @return the String representation of the given value.
      */
+    @SuppressFBWarnings({ "INT_BAD_COMPARISON_WITH_SIGNED_BYTE", "INT_BAD_COMPARISON_WITH_SIGNED_BYTE" })
     public static String stringOf(final byte val) {
+
+        //noinspection ConstantValue
         if (val > intStringCacheLow && val < intStringCacheHigh) {
             return intStringCache[val - intStringCacheLow];
         }
@@ -1018,9 +1019,9 @@ sealed class CommonUtil permits N {
     /**
      * Converts the given value to its corresponding String representation by {@code Type.stringOf(Object)}.
      *
-     * @param val the value to be converted.
+     * @param obj the value to be converted.
      * @return the String representation of the given value. {@code null} if the specified object is null
-     * @see valueOf(String, Class)
+     * @see #valueOf(String, Class)
      * @see Type#stringOf(Object)
      */
     public static String stringOf(final Object obj) {
@@ -1035,7 +1036,7 @@ sealed class CommonUtil permits N {
      * @param targetType The class of the target type to which the string is to be converted.
      * @return The converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
      * @throws IllegalArgumentException if the specified target type is {@code null}.
-     * @see stringOf(Object)
+     * @see #stringOf(Object)
      * @see Type#valueOf(String)
      */
     @SuppressWarnings("unchecked")
@@ -1049,8 +1050,6 @@ sealed class CommonUtil permits N {
      * Registers a converter for a specific source class. The converter is a function that takes an object of the source class
      * and a target class, and converts the source object into an instance of the target class.
      *
-     * @param <T> The type of the source object to be converted.
-     * @param <R> The type of the target object after conversion.
      * @param srcClass The source class that the converter can convert from. This must not be a built-in class.
      * @param converter The converter function that takes a source object and a target class, and returns an instance of the target class.
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
@@ -1172,11 +1171,11 @@ sealed class CommonUtil permits N {
             return (T) srcType.stringOf(srcObj);
         } else if (targetType.isNumber()) {
             if (srcType.isString()) {
-                // fall through
+                // fall through.
             } else if (srcType.isNumber()) {
                 return (T) Numbers.convert((Number) srcObj, (Type) targetType);
             } else if (srcType.clazz().equals(Character.class) && (targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class))) {
-                return (T) (Integer.valueOf(((Character) srcObj).charValue())); //NOSONAR
+                return (T) (Integer.valueOf((Character) srcObj)); //NOSONAR
             } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class))
                     && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
                 return (T) (Long) ((java.util.Date) srcObj).getTime();
@@ -1219,7 +1218,7 @@ sealed class CommonUtil permits N {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    final Map<String, Object> result = N.<String, Object> newMap((Class<Map>) targetType.clazz());
+                    final Map<String, Object> result = N.newMap((Class<Map>) targetType.clazz());
                     Maps.bean2Map(srcObj, result);
                     return (T) result;
                 } catch (final Exception e) {
@@ -1416,10 +1415,10 @@ sealed class CommonUtil permits N {
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
         if (ClassUtil.isPrimitiveType(targetType)) {
-            return val != null && ClassUtil.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+            return val != null && ClassUtil.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.empty();
         }
 
-        return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+        return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.empty();
     }
 
     /**
@@ -1432,7 +1431,6 @@ sealed class CommonUtil permits N {
      * @param targetType The Type instance of the target type to which the object is to be casted.
      * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
-    @SuppressWarnings("unchecked")
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Type<? extends T> targetType) {
         return castIfAssignable(val, targetType.clazz());
@@ -1485,7 +1483,7 @@ sealed class CommonUtil permits N {
      * @param bean The bean object whose property names are to be retrieved.
      * @return A list of strings representing the property names of the given bean object.
      * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#getPropNames(Object)
+     * @see ClassUtil#getPropNameList(Class)
      * @see ClassUtil#getPropNames(Object, Predicate)
      * @see ClassUtil#getPropNames(Object, BiPredicate)
      */
@@ -1504,7 +1502,7 @@ sealed class CommonUtil permits N {
      * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
      * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
      * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#getPropNames(Object)
+     * @see ClassUtil#getPropNameList(Class)
      * @see ClassUtil#getPropNames(Object, Predicate)
      * @see ClassUtil#getPropNames(Object, BiPredicate)
      */
@@ -1553,7 +1551,7 @@ sealed class CommonUtil permits N {
      * Refer to setPropValue(Method, Object, Object).
      *
      * @param bean The bean object in which the property value is to be set.
-     * @param propName The name of the property whose value is to be set. The property name is case insensitive.
+     * @param propName The name of the property whose value is to be set. The property name is case-insensitive.
      * @param propValue The new value to be set for the specified property in the given bean object.
      * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#setPropValue(Object, String, Object)
@@ -1587,7 +1585,7 @@ sealed class CommonUtil permits N {
      * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
      *
      * @param <T>
-     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
+     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      * @param targetType
      * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
@@ -1598,7 +1596,7 @@ sealed class CommonUtil permits N {
 
         if (obj == null) {
             if (ClassUtil.isBeanClass(targetType)) {
-                return copy(obj, targetType);
+                return copy(null, targetType);
             } else {
                 return newInstance(targetType);
             }
@@ -1666,9 +1664,9 @@ sealed class CommonUtil permits N {
      * @param sourceBean the source bean to copy
      * @param propFilter the predicate to filter properties to be copied
      * @return a new instance of the same class with the filtered properties copied from the source bean, or {@code null} if the source bean is {@code null}
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final BiPredicate<? super String, ?> propFilter) {
@@ -1702,7 +1700,6 @@ sealed class CommonUtil permits N {
      * @return a new instance of the target type, even if the source bean is {@code null}
      * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
      */
-    @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
         return copy(sourceBean, selectPropNames, Fn.identity(), targetType);
@@ -1718,9 +1715,9 @@ sealed class CommonUtil permits N {
      * @param targetType the class of the target type
      * @return a new instance of the target type, even if the source bean is {@code null}
      * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
@@ -1766,9 +1763,9 @@ sealed class CommonUtil permits N {
      * @param targetType the class of the target type
      * @return a new instance of the target type, even if the source bean is {@code null}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
             throws IllegalArgumentException {
@@ -1785,9 +1782,9 @@ sealed class CommonUtil permits N {
      * @param targetType the class of the target type
      * @return a new instance of the target type, even if the source bean is {@code null}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
             final Class<? extends T> targetType) throws IllegalArgumentException {
@@ -1916,9 +1913,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         return merge(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
@@ -1935,9 +1932,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
@@ -1970,9 +1967,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
@@ -1990,9 +1987,9 @@ sealed class CommonUtil permits N {
      * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
@@ -2013,9 +2010,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -2084,6 +2081,7 @@ sealed class CommonUtil permits N {
                 }
 
                 if (targetPropInfo == null) {
+                    //noinspection ConstantValue
                     if (!ignoreUnmatchedProperty) { //NOSONAR
                         throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
                     }
@@ -2107,9 +2105,9 @@ sealed class CommonUtil permits N {
      * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
         return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
@@ -2126,13 +2124,13 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, Fn.<String> identity(), mergeFunc);
+        return merge(sourceBean, targetBean, propFilter, Fn.identity(), mergeFunc);
     }
 
     /**
@@ -2146,9 +2144,9 @@ sealed class CommonUtil permits N {
      * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
@@ -2167,9 +2165,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates.alwaysTrue()
-     * @see Fn.identity()
-     * @see Fn.selectFirst()
+     * @see BiPredicates#alwaysTrue()
+     * @see Fn#identity()
+     * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -2447,7 +2445,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException If the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
      * @throws InvocationTargetException If the underlying constructor throws an exception.
      */
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     static <T> T invoke(final Constructor<T> c, final Object... args)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (!c.isAccessible()) {
@@ -2517,7 +2515,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        if (!Modifier.isStatic(cls.getModifiers()) && ClassUtil.isAnonymousOrMemeberClass(cls)) {
+        if (!Modifier.isStatic(cls.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(cls)) {
             try {
                 // http://stackoverflow.com/questions/2097982/is-it-possible-to-create-an-instance-of-nested-class-using-java-reflection
 
@@ -2527,7 +2525,7 @@ sealed class CommonUtil permits N {
                 do {
                     toInstantiate.add(parent);
                     parent = parent.getEnclosingClass();
-                } while (parent != null && !Modifier.isStatic(parent.getModifiers()) && ClassUtil.isAnonymousOrMemeberClass(parent));
+                } while (parent != null && !Modifier.isStatic(parent.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(parent));
 
                 if (parent != null) {
                     toInstantiate.add(parent);
@@ -2541,6 +2539,7 @@ sealed class CommonUtil permits N {
                             : invoke(ClassUtil.getDeclaredConstructor(current, instance.getClass()), instance);
                 }
 
+                //noinspection DataFlowIssue
                 return invoke(ClassUtil.getDeclaredConstructor(cls, instance.getClass()), instance);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw N.toRuntimeException(e);
@@ -2568,7 +2567,6 @@ sealed class CommonUtil permits N {
      * @return a new instance of the specified class
      * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
      */
-    @SuppressWarnings("unchecked")
     public static <T> T newBean(final Class<T> targetType) {
         return newInstance(targetType);
     }
@@ -2643,9 +2641,8 @@ sealed class CommonUtil permits N {
      * @throws NegativeArraySizeException if the specified length is negative
      * @see java.lang.reflect.Array#newInstance(Class, int)
      */
-    @SuppressWarnings("unchecked")
     public static <T> T newArray(final Class<?> componentType, final int length) {
-        return (T) Array.newInstance(componentType, length);
+        return Array.newInstance(componentType, length);
     }
 
     /**
@@ -2661,15 +2658,14 @@ sealed class CommonUtil permits N {
      */
     @SafeVarargs
     public static <T> T newArray(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
-        return (T) Array.newInstance(componentType, dimensions);
+        return Array.newInstance(componentType, dimensions);
     }
 
     /**
-     * Inits the hash capacity.
      *
      * @param size
      * @return
-     * @deprecated warning...
+     * @deprecated for internal use only
      */
     @Deprecated
     @Internal
@@ -2683,7 +2679,7 @@ sealed class CommonUtil permits N {
 
         final int res = size < MAX_HASH_LENGTH ? (int) (size * 1.25) + 1 : MAX_ARRAY_SIZE;
 
-        return res >= 1024 ? res : (res >= 256 ? 256 : res);
+        return res >= 1024 ? res : (Math.min(res, 256));
     }
 
     /**
@@ -2848,12 +2844,15 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a TreeSet with the elements from the specified sorted set.
      *
      * @param <T> the type of elements in the set
-     * @param c the sorted set whose elements are to be placed into this set
+     * @param sortedSet the sorted set whose elements are to be placed into this set
      * @return a new instance of a TreeSet containing the elements from the specified sorted set
+     * @throws IllegalArgumentException if the specified {@code SortedSet} is {@code null}.
      * @see java.util.TreeSet#TreeSet(SortedSet)
      */
-    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> c) { //NOSONAR
-        return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
+    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> sortedSet) { //NOSONAR
+        N.checkArgNotNull(sortedSet, cs.sortedSet);
+
+        return new TreeSet<>(sortedSet);
     }
 
     /**
@@ -3195,11 +3194,14 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
-     * @param m the sorted map whose elements are to be placed into this map
+     * @param sortedMap the sorted map whose elements are to be placed into this map
      * @return a new instance of a TreeMap containing the entries from the specified sorted map
+     * @throws IllegalArgumentException if the specified {@code SortedMap} is {@code null}.
      */
-    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> m) { //NOSONAR
-        return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
+    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> sortedMap) { //NOSONAR
+        N.checkArgNotNull(sortedMap, cs.sortedMap);
+
+        return new TreeMap<>(sortedMap);
     }
 
     /**
@@ -3479,7 +3481,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a ListMultimap backed by a LinkedHashMap with the specified initial capacity
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final int initialCapacity) {
-        return new ListMultimap<>(N.<K, List<E>> newLinkedHashMap(initialCapacity), ArrayList.class);
+        return new ListMultimap<>(N.newLinkedHashMap(initialCapacity), ArrayList.class);
     }
 
     /**
@@ -3491,7 +3493,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a ListMultimap containing the entries from the specified map
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = new ListMultimap<>(N.<K, List<E>> newLinkedHashMap(N.size(m)), ArrayList.class);
+        final ListMultimap<K, E> multiMap = new ListMultimap<>(N.newLinkedHashMap(N.size(m)), ArrayList.class);
 
         multiMap.put(m);
 
@@ -3648,15 +3650,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-      * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity.
-      *
-      * @param <K> the type of keys maintained by this map
-      * @param <E> the type of elements in the collection
-      * @param initialCapacity the initial capacity of the SetMultimap
-      * @return a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity
-      */
+     * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity.
+     *
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param initialCapacity the initial capacity of the SetMultimap
+     * @return a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity
+     */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final int initialCapacity) {
-        return new SetMultimap<>(N.<K, Set<E>> newLinkedHashMap(initialCapacity), HashSet.class);
+        return new SetMultimap<>(N.newLinkedHashMap(initialCapacity), HashSet.class);
     }
 
     /**
@@ -3668,7 +3670,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = new SetMultimap<>(N.<K, Set<E>> newLinkedHashMap(N.size(m)), HashSet.class);
+        final SetMultimap<K, E> multiMap = new SetMultimap<>(N.newLinkedHashMap(N.size(m)), HashSet.class);
 
         multiMap.put(m);
 
@@ -3787,7 +3789,6 @@ sealed class CommonUtil permits N {
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
-     * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<?> rows) throws IllegalArgumentException {
         return newDataSet(rows, null);
@@ -3808,7 +3809,6 @@ sealed class CommonUtil permits N {
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
-     * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<?> rows, final Map<String, Object> properties) throws IllegalArgumentException {
         if (isEmpty(rows)) {
@@ -3850,7 +3850,6 @@ sealed class CommonUtil permits N {
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
-     * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows) throws IllegalArgumentException {
         return newDataSet(columnNames, rows, null);
@@ -3874,7 +3873,6 @@ sealed class CommonUtil permits N {
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
-     * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
             throws IllegalArgumentException {
@@ -4026,7 +4024,6 @@ sealed class CommonUtil permits N {
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
-     * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rowList) throws IllegalArgumentException {
         N.checkArgNotEmpty(columnNames, cs.columnNames);
@@ -4227,7 +4224,7 @@ sealed class CommonUtil permits N {
             }
 
             for (final DataSet ds : dss) {
-                if (ds.size() == 0) {
+                if (ds.isEmpty()) {
                     continue;
                 }
 
@@ -4262,13 +4259,12 @@ sealed class CommonUtil permits N {
      * @param c the collection to be converted to an array
      * @return an array containing all the elements in the specified collection
      */
-    @SuppressWarnings("unchecked")
     public static Object[] toArray(final Collection<?> c) {
         if (isEmpty(c)) {
             return EMPTY_OBJECT_ARRAY;
         }
 
-        return c.toArray(new Object[c.size()]);
+        return c.toArray(new Object[0]);
     }
 
     /**
@@ -4287,7 +4283,7 @@ sealed class CommonUtil permits N {
         if (isEmpty(c)) {
             return EMPTY_OBJECT_ARRAY;
         } else if (fromIndex == 0 || toIndex == c.size()) {
-            return c.toArray(new Object[c.size()]);
+            return c.toArray(new Object[0]);
         } else if (c instanceof List) {
             return ((List) c).subList(fromIndex, toIndex).toArray(new Object[toIndex - fromIndex]);
         } else {
@@ -4552,8 +4548,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final boolean[] result = new boolean[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<Boolean> list = (List<Boolean>) c;
+        if (c instanceof final List<Boolean> list && c instanceof RandomAccess) {
             Boolean val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4687,8 +4682,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final char[] result = new char[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<Character> list = (List<Character>) c;
+        if (c instanceof final List<Character> list && c instanceof RandomAccess) {
             Character val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4778,8 +4772,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final byte[] result = new byte[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4891,8 +4884,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final short[] result = new short[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4982,8 +4974,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final int[] result = new int[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5117,8 +5108,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final long[] result = new long[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5208,8 +5198,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final float[] result = new float[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5299,8 +5288,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final double[] result = new double[len];
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends Number> list = (List<? extends Number>) c;
+        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5651,6 +5639,7 @@ sealed class CommonUtil permits N {
 
         final List<T> result = new ArrayList<>(toIndex - fromIndex);
 
+        //noinspection ManualArrayToCollectionCopy
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]); //NOSONAR
         }
@@ -5993,6 +5982,7 @@ sealed class CommonUtil permits N {
 
         final Set<T> result = newHashSet(toIndex - fromIndex);
 
+        //noinspection ManualArrayToCollectionCopy
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]); //NOSONAR
         }
@@ -6419,6 +6409,7 @@ sealed class CommonUtil permits N {
         } else {
             final C result = supplier.apply(toIndex - fromIndex);
 
+            //noinspection ManualArrayToCollectionCopy
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(a[i]); //NOSONAR
             }
@@ -6965,7 +6956,7 @@ sealed class CommonUtil permits N {
             return new HashMap<>();
         }
 
-        return newMap(N.<K, V> newHashMap(a.length / 2), a);
+        return newMap(N.newHashMap(a.length / 2), a);
     }
 
     /**
@@ -7156,7 +7147,7 @@ sealed class CommonUtil permits N {
             return N.newLinkedHashMap();
         }
 
-        return newMap(N.<K, V> newLinkedHashMap(a.length / 2), a);
+        return newMap(N.newLinkedHashMap(a.length / 2), a);
     }
 
     /**
@@ -7277,7 +7268,7 @@ sealed class CommonUtil permits N {
             return N.newLinkedHashMap();
         }
 
-        return newMap(N.<String, Object> newLinkedHashMap(a.length / 2), a);
+        return newMap(N.newLinkedHashMap(a.length / 2), a);
     }
 
     /**
@@ -8024,7 +8015,7 @@ sealed class CommonUtil permits N {
      */
     @SafeVarargs
     @NullSafe
-    public static <T> SortedSet<T> asSortedSet(final T... a) {
+    public static <T extends Comparable<T>> SortedSet<T> asSortedSet(final T... a) {
         if (isEmpty(a)) {
             return new TreeSet<>();
         }
@@ -8041,7 +8032,7 @@ sealed class CommonUtil permits N {
      * @return a Set containing the specified elements
      */
     @SafeVarargs
-    public static <T> NavigableSet<T> asNavigableSet(final T... a) {
+    public static <T extends Comparable<T>> NavigableSet<T> asNavigableSet(final T... a) {
         if (isEmpty(a)) {
             return new TreeSet<>();
         }
@@ -8073,7 +8064,7 @@ sealed class CommonUtil permits N {
     @SafeVarargs
     public static <T> ArrayBlockingQueue<T> asArrayBlockingQueue(final T... a) {
         if (isEmpty(a)) {
-            return new ArrayBlockingQueue<>(0);
+            return new ArrayBlockingQueue<>(1);
         }
 
         final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(a.length);
@@ -8540,7 +8531,7 @@ sealed class CommonUtil permits N {
      * @return a {@code Nullable} containing the first element in the Iterator if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> firstElement(final Iterator<? extends T> iter) {
-        return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.<T> empty();
+        return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.empty();
     }
 
     /**
@@ -8611,11 +8602,11 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection coll) { // NOSONAR
+        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List list) { // NOSONAR
-                return new ArrayList<>(list.subList(0, n));
+            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
+                return new ArrayList<>((list).subList(0, n));
             }
         }
 
@@ -8683,10 +8674,10 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection coll) { // NOSONAR
+        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List list) { // NOSONAR
+            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
                 return new ArrayList<>(list.subList(list.size() - n, list.size()));
             }
         }
@@ -8745,7 +8736,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b) {
-        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.<T> empty());
+        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -8759,7 +8750,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
-        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.<T> empty()));
+        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -8841,7 +8832,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b) {
-        return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty());
+        return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty());
     }
 
     /**
@@ -8855,7 +8846,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
-        return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty()));
+        return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty()));
     }
 
     /**
@@ -8958,7 +8949,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty array, or an empty Optional if both arrays are empty or null
      */
     public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b) {
-        return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.<T[]> empty());
+        return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -8973,7 +8964,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b, final T[] c) {
         return a != null && a.length > 0 ? Optional.of(a)
-                : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.<T[]> empty()));
+                : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -8986,7 +8977,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty collection, or an empty Optional if both collections are empty or null
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
-        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.<T> empty());
+        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -9001,7 +8992,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
         return a != null && a.size() > 0 ? Optional.of(a)
-                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.<T> empty()));
+                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -9014,7 +9005,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both CharSequences are empty or null
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
-        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
+        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -9028,8 +9019,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return Strings.isNotEmpty(a) ? Optional.of(a)
-                : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.<T> empty()));
+        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -9040,6 +9030,7 @@ sealed class CommonUtil permits N {
      * @param a the array of CharSequences to check
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
      */
+    @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
         if (N.isEmpty(a)) {
             return Optional.empty();
@@ -9064,7 +9055,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both CharSequences are blank or null
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
-        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
+        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -9078,8 +9069,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
-        return Strings.isNotBlank(a) ? Optional.of(a)
-                : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.<T> empty()));
+        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -9090,6 +9080,7 @@ sealed class CommonUtil permits N {
      * @param a the array of CharSequences to check
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
      */
+    @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
         if (N.isEmpty(a)) {
             return Optional.empty();
@@ -9422,7 +9413,7 @@ sealed class CommonUtil permits N {
      * Returns the last element in the given iterator that matches the specified predicate.
      *
      * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to search
+     * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterator
      * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
      */
@@ -9467,10 +9458,9 @@ sealed class CommonUtil permits N {
             a = (T[]) ((Collection<T>) c).toArray();
         } else {
             final List<T> tmp = new ArrayList<>();
-            final Iterator<? extends T> iter = c.iterator();
 
-            while (iter.hasNext()) {
-                tmp.add(iter.next());
+            for (final T t : c) {
+                tmp.add(t);
             }
 
             a = (T[]) tmp.toArray();
@@ -9692,7 +9682,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the collection to check
+     * @param c the collection to check
      * @return the size of the specified collection, or 0 if the collection is null
      */
     public static int size(final Collection<?> c) {
@@ -9702,7 +9692,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the map to check
+     * @param m the map to check
      * @return the size of the specified map, or 0 if the map is null
      */
     public static int size(final Map<?, ?> m) {
@@ -9712,7 +9702,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the PrimitiveList to check
+     * @param c the PrimitiveList to check
      * @return the size of the specified PrimitiveList, or 0 if the PrimitiveList is null
      */
     @Beta
@@ -9785,7 +9775,7 @@ sealed class CommonUtil permits N {
      * Returns an immutable/unmodifiable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
      *
      * @param <T> the type of elements in the list
-     * @param list the list to check
+     * @param c the collection to check
      * @return an empty {@code List} if the specified list is {@code null}, otherwise the original list
      * @see #emptyList()
      */
@@ -10103,7 +10093,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableCollection if the specified collection is {@code null}, otherwise the original collection
      */
     public static <T> ImmutableCollection<T> nullToEmpty(final ImmutableCollection<T> c) {
-        return c == null ? ImmutableList.<T> empty() : c;
+        return c == null ? ImmutableList.empty() : c;
     }
 
     /**
@@ -10114,7 +10104,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableList if the specified list is {@code null}, otherwise the original list
      */
     public static <T> ImmutableList<T> nullToEmpty(final ImmutableList<T> list) {
-        return list == null ? ImmutableList.<T> empty() : list;
+        return list == null ? ImmutableList.empty() : list;
     }
 
     /**
@@ -10125,7 +10115,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableSet<T> nullToEmpty(final ImmutableSet<T> set) {
-        return set == null ? ImmutableSet.<T> empty() : set;
+        return set == null ? ImmutableSet.empty() : set;
     }
 
     /**
@@ -10136,7 +10126,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableSortedSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableSortedSet<T> nullToEmpty(final ImmutableSortedSet<T> set) {
-        return set == null ? ImmutableSortedSet.<T> empty() : set;
+        return set == null ? ImmutableSortedSet.empty() : set;
     }
 
     /**
@@ -10147,7 +10137,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableNavigableSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableNavigableSet<T> nullToEmpty(final ImmutableNavigableSet<T> set) {
-        return set == null ? ImmutableNavigableSet.<T> empty() : set;
+        return set == null ? ImmutableNavigableSet.empty() : set;
     }
 
     /**
@@ -10159,7 +10149,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableMap<K, V> nullToEmpty(final ImmutableMap<K, V> map) {
-        return map == null ? ImmutableMap.<K, V> empty() : map;
+        return map == null ? ImmutableMap.empty() : map;
     }
 
     /**
@@ -10171,7 +10161,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableSortedMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableSortedMap<K, V> nullToEmpty(final ImmutableSortedMap<K, V> map) {
-        return map == null ? ImmutableSortedMap.<K, V> empty() : map;
+        return map == null ? ImmutableSortedMap.empty() : map;
     }
 
     /**
@@ -10183,7 +10173,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableNavigableMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableNavigableMap<K, V> nullToEmpty(final ImmutableNavigableMap<K, V> map) {
-        return map == null ? ImmutableNavigableMap.<K, V> empty() : map;
+        return map == null ? ImmutableNavigableMap.empty() : map;
     }
 
     /**
@@ -10195,7 +10185,7 @@ sealed class CommonUtil permits N {
      * @return an empty ImmutableBiMap if the specified bi-map is {@code null}, otherwise the original bi-map
      */
     public static <K, V> ImmutableBiMap<K, V> nullToEmpty(final ImmutableBiMap<K, V> map) {
-        return map == null ? ImmutableBiMap.<K, V> empty() : map;
+        return map == null ? ImmutableBiMap.empty() : map;
     }
 
     //    /**
@@ -10219,7 +10209,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the CharSequence is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final CharSequence cs) {
-        return (cs == null) || (cs.length() == 0);
+        return (cs == null) || (cs.isEmpty());
     }
 
     /**
@@ -10367,7 +10357,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static boolean isEmpty(final Iterator<?> iter) {
-        return iter == null || (iter.hasNext() == false);
+        return iter == null || (!iter.hasNext());
     }
 
     /**
@@ -10450,7 +10440,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isNotEmpty(CharSequence)
      */
     public static boolean notEmpty(final CharSequence cs) {
-        return (cs != null) && (cs.length() > 0);
+        return (cs != null) && (!cs.isEmpty());
     }
 
     /**
@@ -10590,7 +10580,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the Map is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Map<?, ?> m) {
-        return (m != null) && (m.size() > 0);
+        return (m != null) && (!m.isEmpty());
     }
 
     /**
@@ -10601,7 +10591,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static boolean notEmpty(final PrimitiveList list) {
-        return (list != null) && (list.size() > 0);
+        return (list != null) && (!list.isEmpty());
     }
 
     /**
@@ -10621,17 +10611,17 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the Multimap is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Multimap<?, ?, ?> m) {
-        return (m != null) && (m.size() > 0);
+        return (m != null) && (!m.isEmpty());
     }
 
     /**
      * Checks if the specified {@code DataSet} is not {@code null} and not empty.
      *
-     * @param ds the DataSet to check
+     * @param dataSet the DataSet to check
      * @return {@code true} if the DataSet is not {@code null} and not empty, otherwise {@code false}
      */
-    public static boolean notEmpty(final DataSet rs) {
-        return (rs != null) && (rs.size() > 0);
+    public static boolean notEmpty(final DataSet dataSet) {
+        return (dataSet != null) && (!dataSet.isEmpty());
     }
 
     /**
@@ -10649,7 +10639,7 @@ sealed class CommonUtil permits N {
      * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
      *
      *
-     * @param cs
+     * @param value
      * @return {@code true}, if it's not {@code null} or default
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
@@ -10708,7 +10698,7 @@ sealed class CommonUtil permits N {
      * @param c the collection of objects to check
      * @return {@code true} if any element in the specified collection is {@code null}, otherwise {@code false}
      */
-    public static boolean anyNull(final Collection<?> c) {
+    public static boolean anyNull(final Iterable<?> c) {
         if (isEmpty(c)) {
             return false;
         }
@@ -10741,7 +10731,7 @@ sealed class CommonUtil permits N {
      * @param b the second CharSequence to check
      * @param c the third CharSequence to check
      * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
-     * @see Strings#isAnyEmpty(CharSequences, CharSequences, CharSequences)
+     * @see Strings#isAnyEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) || isEmpty(b) || isEmpty(c);
@@ -10778,7 +10768,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if any of the CharSequence objects is empty, otherwise {@code false}
      * @see Strings#isAnyEmpty(Iterable)
      */
-    public static boolean anyEmpty(final Collection<? extends CharSequence> css) {
+    public static boolean anyEmpty(final Iterable<? extends CharSequence> css) {
         return Strings.isAnyEmpty(css);
     }
 
@@ -10895,9 +10885,9 @@ sealed class CommonUtil permits N {
      *
      * @param css the collection of CharSequences to check
      * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
-     * @see Strings#isAnyBlank(Collection)
+     * @see Strings#isAnyBlank(Iterable)
      */
-    public static boolean anyBlank(final Collection<? extends CharSequence> css) {
+    public static boolean anyBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return false;
         }
@@ -10961,7 +10951,7 @@ sealed class CommonUtil permits N {
      * @param c the collection of objects to check
      * @return {@code true} if all elements in the specified collection are {@code null}, otherwise {@code false}
      */
-    public static boolean allNull(final Collection<?> c) {
+    public static boolean allNull(final Iterable<?> c) {
         if (isEmpty(c)) {
             return true;
         }
@@ -10988,12 +10978,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if all of the specified CharSequences are empty ("") or {@code null}.
+     * Checks if all the specified CharSequences are empty ("") or {@code null}.
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @param c the third CharSequence to check
-     * @return {@code true} if all of the CharSequences are empty, otherwise {@code false}
+     * @return {@code true} if all the CharSequences are empty, otherwise {@code false}
      * @see Strings#isAllEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -11001,7 +10991,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty ("") or {@code null}.</p>
+     * <p>Checks if all the CharSequences are empty ("") or {@code null}.</p>
      *
      * <pre>
      * Strings.allEmpty(null)             = true
@@ -11016,7 +11006,7 @@ sealed class CommonUtil permits N {
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all of the CharSequences are empty or null
+     * @return {@code true} if all the CharSequences are empty or null
      * @see Strings#isAllEmpty(CharSequence...)
      */
     public static boolean allEmpty(final CharSequence... css) {
@@ -11039,7 +11029,7 @@ sealed class CommonUtil permits N {
      * @param css the collection of CharSequences to check, may be {@code null} or empty
      * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
      */
-    public static boolean allEmpty(final Collection<? extends CharSequence> css) {
+    public static boolean allEmpty(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return true;
         }
@@ -11112,12 +11102,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if all of the specified CharSequences are blank.
+     * Checks if all the specified CharSequences are blank.
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @param c the third CharSequence to check
-     * @return {@code true} if all of the CharSequences are blank, otherwise {@code false}
+     * @return {@code true} if all the CharSequences are blank, otherwise {@code false}
      * @see Strings#isAllBlank(CharSequence, CharSequence, CharSequence)
      */
     public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -11125,26 +11115,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
-    * <p>Checks if all of the CharSequences are empty (""), {@code null} or whitespace only.</p>
-    *
-    * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-    *
-    * <pre>
-    * Strings.allBlank(null)             = true
-    * Strings.allBlank(null, "foo")      = false
-    * Strings.allBlank(null, null)       = true
-    * Strings.allBlank("", "bar")        = false
-    * Strings.allBlank("bob", "")        = false
-    * Strings.allBlank("  bob  ", null)  = false
-    * Strings.allBlank(" ", "bar")       = false
-    * Strings.allBlank("foo", "bar")     = false
-    * Strings.allBlank(new String[] {})  = true
-    * </pre>
-    *
-    * @param css the CharSequences to check, may be {@code null} or empty
-    * @return {@code true} if all of the CharSequences are empty or {@code null} or whitespace only
-    * @see Strings#isAllBlank(CharSequence...)
-    */
+     * <p>Checks if all the CharSequences are empty (""), {@code null} or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * Strings.allBlank(null)             = true
+     * Strings.allBlank(null, "foo")      = false
+     * Strings.allBlank(null, null)       = true
+     * Strings.allBlank("", "bar")        = false
+     * Strings.allBlank("bob", "")        = false
+     * Strings.allBlank("  bob  ", null)  = false
+     * Strings.allBlank(" ", "bar")       = false
+     * Strings.allBlank("foo", "bar")     = false
+     * Strings.allBlank(new String[] {})  = true
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all the CharSequences are empty or {@code null} or whitespace only
+     * @see Strings#isAllBlank(CharSequence...)
+     */
     public static boolean allBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
             return true;
@@ -11164,9 +11154,9 @@ sealed class CommonUtil permits N {
      *
      * @param css the collection of CharSequences to check
      * @return {@code true} if all CharSequences in the collection are blank, otherwise {@code false}
-     * @see Strings#isAllBlank(Collection)
+     * @see Strings#isAllBlank(Iterable)
      */
-    public static boolean allBlank(final Collection<? extends CharSequence> css) {
+    public static boolean allBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return true;
         }
@@ -11217,7 +11207,7 @@ sealed class CommonUtil permits N {
      * @return the value of {@code index}
      * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @throws IllegalArgumentException if {@code size} is negative
-     * @deprecated Use {@link #checkElementIndex(int,int)} instead
+     * @deprecated Use {@link #checkElementIndex(int, int)} instead
      */
     @Deprecated
     public static int checkIndex(final int index, final int size) {
@@ -11284,6 +11274,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code size} is negative
      * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static int checkPositionIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         return checkPositionIndex(index, size, "index");
     }
@@ -11681,12 +11672,12 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the argument is {@code null} or empty or blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) throws IllegalArgumentException {
+    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isBlank(arg)) {
-            if (isArgNameOnly(msg)) {
-                throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty or blank");
             } else {
-                throw new IllegalArgumentException(msg);
+                throw new IllegalArgumentException(argNameOrErrorMsg);
             }
         }
 
@@ -11741,6 +11732,7 @@ sealed class CommonUtil permits N {
      * @return the non-negative int argument
      * @throws IllegalArgumentException if the specified arg is negative
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -11761,6 +11753,7 @@ sealed class CommonUtil permits N {
      * @return the non-negative long argument
      * @throws IllegalArgumentException if the specified arg is negative
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -11861,6 +11854,7 @@ sealed class CommonUtil permits N {
      * @return the positive int argument
      * @throws IllegalArgumentException if the specified arg is not positive
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -11881,6 +11875,7 @@ sealed class CommonUtil permits N {
      * @return the positive long argument
      * @throws IllegalArgumentException if the specified arg is not positive
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -11921,6 +11916,7 @@ sealed class CommonUtil permits N {
      * @return the positive double argument
      * @throws IllegalArgumentException if the specified arg is not positive
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -12101,11 +12097,11 @@ sealed class CommonUtil permits N {
      *
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean expression) throws IllegalArgumentException {
-        if (!expression) {
+    public static void checkArgument(final boolean b) throws IllegalArgumentException {
+        if (!b) {
             throw new IllegalArgumentException();
         }
     }
@@ -12113,27 +12109,26 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean expression, final Object errorMessage) throws IllegalArgumentException {
-        if (!expression) {
-            throw new IllegalArgumentException(String.valueOf(errorMessage));
+    public static void checkArgument(final boolean b, final Object argNameOrErrorMsg) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(String.valueOf(argNameOrErrorMsg));
         }
     }
 
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs)
-            throws IllegalArgumentException {
-        if (!expression) {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalArgumentException {
+        if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
         }
     }
@@ -12141,7 +12136,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
@@ -12155,7 +12150,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
@@ -12169,7 +12164,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
@@ -12183,7 +12178,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
@@ -12197,7 +12192,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
@@ -12211,9 +12206,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12226,9 +12221,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12241,7 +12236,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12256,7 +12251,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12271,7 +12266,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12286,9 +12281,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12301,9 +12296,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12316,7 +12311,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12331,7 +12326,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12346,7 +12341,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12361,9 +12356,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12376,9 +12371,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12391,7 +12386,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12406,7 +12401,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12421,7 +12416,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12436,9 +12431,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12451,9 +12446,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12466,7 +12461,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12481,7 +12476,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12496,7 +12491,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12511,9 +12506,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12526,9 +12521,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12541,7 +12536,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12556,7 +12551,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12571,7 +12566,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12586,7 +12581,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12603,7 +12598,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -12621,7 +12616,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -12868,11 +12863,11 @@ sealed class CommonUtil permits N {
      *
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean expression) throws IllegalStateException {
-        if (!expression) {
+    public static void checkState(final boolean b) throws IllegalStateException {
+        if (!b) {
             throw new IllegalStateException();
         }
     }
@@ -12880,12 +12875,12 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @param b a boolean expression
+     * @param errorMessage the name of the argument or an error message to be used in the exception
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean expression, final Object errorMessage) throws IllegalStateException {
-        if (!expression) {
+    public static void checkState(final boolean b, final Object errorMessage) throws IllegalStateException {
+        if (!b) {
             throw new IllegalStateException(String.valueOf(errorMessage));
         }
     }
@@ -12893,13 +12888,13 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
-        if (!expression) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
+        if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
         }
     }
@@ -12907,7 +12902,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
@@ -12921,7 +12916,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
@@ -12935,7 +12930,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
@@ -12949,7 +12944,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
@@ -12963,7 +12958,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
@@ -12977,9 +12972,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -12992,9 +12987,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13007,7 +13002,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13022,7 +13017,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13037,7 +13032,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13052,9 +13047,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13067,9 +13062,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13082,7 +13077,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13097,7 +13092,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13112,7 +13107,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13127,9 +13122,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13142,9 +13137,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13157,7 +13152,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13172,7 +13167,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13187,7 +13182,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13202,9 +13197,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13217,9 +13212,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13232,7 +13227,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13247,7 +13242,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13262,7 +13257,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13277,9 +13272,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13292,9 +13287,9 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
+     * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13307,7 +13302,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13322,7 +13317,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13337,7 +13332,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13352,7 +13347,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13369,7 +13364,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
      * @param p2 the second parameter to be used in the exception message
@@ -13387,7 +13382,7 @@ sealed class CommonUtil permits N {
     /**
      * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param expression a boolean expression
+     * @param b a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -13491,7 +13486,7 @@ sealed class CommonUtil permits N {
      * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final char a, final char b) {
-        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+        return Character.compare(a, b);
     }
 
     /**
@@ -13502,7 +13497,7 @@ sealed class CommonUtil permits N {
      * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final byte a, final byte b) {
-        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+        return Byte.compare(a, b);
     }
 
     /**
@@ -13525,7 +13520,7 @@ sealed class CommonUtil permits N {
      * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final short a, final short b) {
-        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+        return Short.compare(a, b);
     }
 
     /**
@@ -13548,7 +13543,7 @@ sealed class CommonUtil permits N {
      * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final int a, final int b) {
-        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+        return Integer.compare(a, b);
     }
 
     /**
@@ -13571,7 +13566,7 @@ sealed class CommonUtil permits N {
      * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final long a, final long b) {
-        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+        return Long.compare(a, b);
     }
 
     /**
@@ -14593,9 +14588,8 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return compare(a, fromIndexA, b, fromIndexB, len, cmp);
+        return compare(a, fromIndexA, b, fromIndexB, len, NATURAL_COMPARATOR);
     }
 
     /**
@@ -14676,9 +14670,8 @@ sealed class CommonUtil permits N {
      */
     public static <T> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return compare(a, fromIndexA, b, fromIndexB, len, cmp);
+        return compare(a, fromIndexA, b, fromIndexB, len, NATURAL_COMPARATOR);
     }
 
     /**
@@ -14876,7 +14869,7 @@ sealed class CommonUtil permits N {
                 }
             }
 
-            if ((ret = compare((Comparable) propInfo1.getPropValue(bean1), (Comparable) propInfo2.getPropValue(bean2))) != 0) {
+            if ((ret = compare(propInfo1.getPropValue(bean1), (Comparable) propInfo2.getPropValue(bean2))) != 0) {
                 return ret;
             }
         }
@@ -15471,9 +15464,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T extends Comparable<? super T>> int mismatch(final T[] a, final T[] b) {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return mismatch(a, b, cmp);
+        return mismatch(a, b, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15492,9 +15484,8 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> int mismatch(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return mismatch(a, fromIndexA, b, fromIndexB, len, cmp);
+        return mismatch(a, fromIndexA, b, fromIndexB, len, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15584,9 +15575,8 @@ sealed class CommonUtil permits N {
      */
     public static <T> int mismatch(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return mismatch(a, fromIndexA, b, fromIndexB, len, cmp);
+        return mismatch(a, fromIndexA, b, fromIndexB, len, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15600,9 +15590,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T extends Comparable<? super T>> int mismatch(final Iterable<T> a, final Iterable<T> b) {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return mismatch(a, b, cmp);
+        return mismatch(a, b, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15616,9 +15605,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T extends Comparable<? super T>> int mismatch(final Iterator<T> a, final Iterator<T> b) {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        return mismatch(a, b, cmp);
+        return mismatch(a, b, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15717,19 +15705,19 @@ sealed class CommonUtil permits N {
 
         cmp = checkComparator(cmp);
 
-        final Iterator<T> iterA = a; // a == null ? ObjIterator.empty() : a;
-        final Iterator<T> iterB = b; // b == null ? ObjIterator.empty() : b;
+        // a == null ? ObjIterator.empty() : a;
+        // b == null ? ObjIterator.empty() : b;
         int idx = 0;
 
-        while (iterA.hasNext() && iterB.hasNext()) {
-            if (cmp.compare(iterA.next(), iterB.next()) != 0) {
+        while (a.hasNext() && b.hasNext()) {
+            if (cmp.compare(a.next(), b.next()) != 0) {
                 return idx;
             }
 
             idx++;
         }
 
-        return iterA.hasNext() || iterB.hasNext() ? idx : -1;
+        return a.hasNext() || b.hasNext() ? idx : -1;
     }
 
     /**
@@ -16025,7 +16013,7 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
      * @deprecated replaced by {@code gtAndLt(Comparable, Comparable, Comparable, Comparator)}
-     * @see #gtAndLt(Comparable, Comparable, Comparable, Comparator)
+     * @see #gtAndLt(Object, Object, Object, Comparator)
      */
     @Deprecated
     public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
@@ -16128,7 +16116,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
-        return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
+        return (a == null) ? b == null : (b != null && a.length() == b.length() && a.equals(b));
     }
 
     /**
@@ -16139,7 +16127,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
-        return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
+        return (a == null) ? b == null : (a.equalsIgnoreCase(b));
     }
 
     /**
@@ -16150,7 +16138,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     public static boolean equals(final Object a, final Object b) {
-        if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
+        if (Objects.equals(a, b)) {
             return true;
         }
 
@@ -16578,7 +16566,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object a, final Object b) {
-        if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
+        if (Objects.equals(a, b)) {
             return true;
         }
 
@@ -16705,8 +16693,6 @@ sealed class CommonUtil permits N {
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return true;
-        } else if (!a.getClass().equals(b.getClass())) {
-            return false;
         }
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -16736,7 +16722,6 @@ sealed class CommonUtil permits N {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the array of property names to compare, must not be null
      * @return {@code true} if all the properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if any of the arguments are null
      */
@@ -16813,7 +16798,7 @@ sealed class CommonUtil permits N {
      * @return the hash code
      */
     public static int hashCode(final long value) {
-        return (int) (value ^ (value >>> 32));
+        return Long.hashCode(value);
     }
 
     /**
@@ -16833,9 +16818,8 @@ sealed class CommonUtil permits N {
      * @return the hash code
      */
     public static int hashCode(final double value) {
-        final long bits = Double.doubleToLongBits(value);
 
-        return (int) (bits ^ (bits >>> 32));
+        return Double.hashCode(value);
     }
 
     /**
@@ -17066,7 +17050,7 @@ sealed class CommonUtil permits N {
         int result = 1;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + (int) (a[i] ^ (a[i] >>> 32));
+            result = 31 * result + Long.hashCode(a[i]);
         }
 
         return result;
@@ -17138,8 +17122,7 @@ sealed class CommonUtil permits N {
         int result = 1;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            final long bits = Double.doubleToLongBits(a[i]);
-            result = 31 * result + (int) (bits ^ (bits >>> 32));
+            result = 31 * result + Double.hashCode(a[i]);
         }
 
         return result;
@@ -17371,10 +17354,10 @@ sealed class CommonUtil permits N {
         if (obj.getClass().isArray()) {
             return typeOf(obj.getClass()).toString(obj);
         }
-        if (obj instanceof final Iterator iter) { // NOSONAR
+        if (obj instanceof final Iterator<?> iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
-        if (obj instanceof final Iterable iter) { // NOSONAR
+        if (obj instanceof final Iterable<?> iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
 
@@ -17421,8 +17404,8 @@ sealed class CommonUtil permits N {
      * @param defaultIfNull the default value to be returned if the object is null
      * @return the String representation of the object, or the default value if the object is null
      */
-    public static String toString(final Object a, final String defaultIfNull) {
-        return a == null ? defaultIfNull : toString(a);
+    public static String toString(final Object obj, final String defaultIfNull) {
+        return obj == null ? defaultIfNull : toString(obj);
     }
 
     /**
@@ -18242,8 +18225,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
      *
-     * @param obj the object to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is null
+     * @param a the object array to be represented as a string
      * @return the String representation of the object, or the default value if the object is null
      * @see Arrays#deepToString(Object[])
      */
@@ -18272,7 +18254,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
-        final Set<Object[]> set = N.newSetFromMap(N.newIdentityHashMap(len(a)));
+        final Set<Object> set = N.newSetFromMap(N.newIdentityHashMap(len(a)));
 
         try {
             deepToString(sb, a, fromIndex, toIndex, set);
@@ -18290,7 +18272,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param processedElements
      */
-    static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object[]> processedElements) {
+    static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object> processedElements) {
         deepToString(sb, a, 0, a.length, processedElements);
     }
 
@@ -18303,7 +18285,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param processedElements
      */
-    static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object[]> processedElements) {
+    static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object> processedElements) {
         processedElements.add(a);
 
         sb.append(WD._BRACKET_L);
@@ -18375,6 +18357,7 @@ sealed class CommonUtil permits N {
                         }
                 }
             } else { // element is non-null and not an array
+                //noinspection UnnecessaryToStringCall
                 sb.append(element.toString());
             }
         }
@@ -18802,6 +18785,7 @@ sealed class CommonUtil permits N {
     }
 
     // replaced by SequencedCollection in JDK 21?
+
     /**
      * Reverses the order of the elements in the specified collection that has a well-defined encounter order.
      * The reversing is performed in-place, meaning the original collection is modified.
@@ -18829,6 +18813,7 @@ sealed class CommonUtil permits N {
     }
 
     // replaced by SequencedCollection in JDK 21?
+
     /**
      * Returns a new list with the elements from the specified collection in reverse order.
      * The specified collection doesn't need to have a well-defined encounter order and won't be modified.
@@ -20183,7 +20168,7 @@ sealed class CommonUtil permits N {
      * @param objToAdd the object to be added to the collection
      * @return {@code true} if the collection was modified, {@code false} otherwise
      * @throws IllegalArgumentException if the collection is {@code null} or the minimum size is negative
-     * @see padLeft(List, int, Object)
+     * @see #padLeft(List, int, Object)
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
      */
@@ -20380,7 +20365,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copies all of the elements from the source list into the destination list.
+     * Copies all the elements from the source list into the destination list.
      * After the operation, the index of each copied element in the destination list
      * will be identical to its index in the source list. The destination list must
      * be at least as long as the source list. If it is longer, the remaining elements
@@ -20477,10 +20462,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20512,10 +20499,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20547,10 +20536,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20582,10 +20573,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20617,10 +20610,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20652,10 +20647,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20687,10 +20684,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20722,10 +20721,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20757,10 +20758,12 @@ sealed class CommonUtil permits N {
         if (length < MIN_SIZE_FOR_COPY_ALL) {
             // for same array copy.
             if (destPos > srcPos) {
+                //noinspection ManualArrayCopy
                 for (int i = length - 1; i >= 0; i--) {
                     dest[destPos + i] = src[srcPos + i];
                 }
             } else {
+                //noinspection ManualArrayCopy
                 for (int i = 0; i < length; i++) {
                     dest[destPos + i] = src[srcPos + i];
                 }
@@ -20785,6 +20788,7 @@ sealed class CommonUtil permits N {
         N.checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
         N.checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
 
+        //noinspection SuspiciousSystemArraycopy
         System.arraycopy(src, srcPos, dest, destPos, length);
     }
 
@@ -21081,7 +21085,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21145,7 +21149,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21209,7 +21213,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21273,7 +21277,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21349,7 +21353,7 @@ sealed class CommonUtil permits N {
      * @throws NullPointerException if original is null
      */
     public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21413,7 +21417,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21477,7 +21481,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21541,7 +21545,7 @@ sealed class CommonUtil permits N {
      * @see #copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21633,7 +21637,6 @@ sealed class CommonUtil permits N {
      * If step negative, the elements will be copied in reverse order.
      *
      * @param <T> the type of the elements in the new array
-     * @param <U> the type of the elements in the original array
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -21647,7 +21650,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21708,7 +21711,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("deprecation")
     public static <T> List<T> copyOfRange(final List<T> c, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, c.size());
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), c.size());
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -21778,7 +21781,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("deprecation")
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, str.length());
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), str.length());
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can not be zero");
@@ -23583,7 +23586,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the list
      * @param <U> the type of the key values, which must be comparable
-     * @param a the array to be sorted
+     * @param list the List to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
@@ -24353,7 +24356,7 @@ sealed class CommonUtil permits N {
     public static void reverseSort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (toIndex - fromIndex <= 1) {
+        if (a == null || toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -25136,7 +25139,7 @@ sealed class CommonUtil permits N {
         if (a[0] == valueToFind) {
             return 0;
         } else if (a[a.length - 1] != valueToFind) {
-            return valueToFind == false ? -1 : -(a.length + 1);
+            return !valueToFind ? -1 : -(a.length + 1);
         }
 
         int left = 0, right = a.length - 1;
@@ -26061,7 +26064,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the specified collection.
      *
-     * @param a the collection to be searched
+     * @param c the collection to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the collection,
      *         or -1 if the collection is {@code null} or empty or does not contain the value
@@ -26073,7 +26076,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the specified collection, starting the search at the specified index.
      *
-     * @param a the collection to be searched
+     * @param c the collection to be searched
      * @param valueToFind the value to be searched for
      * @param fromIndex the index to start the search from
      * @return the index of the first occurrence of the specified value in the collection,
@@ -26086,8 +26089,7 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<?> list = (List<?>) c;
+        if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
             for (int i = N.max(fromIndex, 0); i < len; i++) {
                 if (equals(list.get(i), valueToFind)) {
@@ -26096,6 +26098,7 @@ sealed class CommonUtil permits N {
             }
         } else {
             final Iterator<?> iter = c.iterator();
+
             int index = 0;
 
             if (fromIndex > 0) {
@@ -26103,22 +26106,14 @@ sealed class CommonUtil permits N {
                     iter.next();
                     index++;
                 }
+            }
 
-                while (iter.hasNext()) {
-                    if (N.equals(iter.hasNext(), valueToFind)) {
-                        return index;
-                    }
-
-                    index++;
+            while (iter.hasNext()) {
+                if (N.equals(iter.next(), valueToFind)) {
+                    return index;
                 }
-            } else {
-                while (iter.hasNext()) {
-                    if (N.equals(iter.next(), valueToFind)) {
-                        return index;
-                    }
 
-                    index++;
-                }
+                index++;
             }
         }
 
@@ -26146,7 +26141,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex The index to start the search from.
      * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
      * @throws ArithmeticException If the found {@code index} overflows an int.
-     * @see Iterators#indexOf(Iterator, Object, int)
+     * @see Iterators#indexOf(Iterator, Object, long)
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) throws ArithmeticException {
         if (iter == null) {
@@ -27239,8 +27234,7 @@ sealed class CommonUtil permits N {
 
         final IntList result = new IntList();
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<?> list = (List<?>) c;
+        if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
             for (int idx = N.max(startIndex, 0); idx < size; idx++) {
                 if (N.equals(list.get(idx), valueToFind)) {
@@ -27326,7 +27320,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
      * @param predicate the predicate to apply to elements of the collection
-     * @param startIndex the index to start the search from
+     * @param fromIndex the index to start the search from
      * @return an array of indices of all elements that match the predicate. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
@@ -27338,8 +27332,7 @@ sealed class CommonUtil permits N {
 
         final IntList result = new IntList();
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<? extends T> list = (List<? extends T>) c;
+        if (c instanceof final List<? extends T> list && c instanceof RandomAccess) {
 
             for (int i = N.max(fromIndex, 0); i < size; i++) {
                 if (predicate.test(list.get(i))) {
@@ -27440,7 +27433,7 @@ sealed class CommonUtil permits N {
      *
      * <p>If {@code null} is passed in, {@code null} will be returned.</p>
      *
-     * <p>NOTE: This returns {@code null} and will throw a NullPointerException if autoboxed to a boolean. </p>
+     * <p>NOTE: This returns {@code null} and will throw a NullPointerException if outboxed to a boolean. </p>
      *
      * <pre>
      *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
@@ -27451,6 +27444,7 @@ sealed class CommonUtil permits N {
      * @param bool the Boolean to negate, may be null
      * @return the negated Boolean, or {@code null} if {@code null} input
      */
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     @MayReturnNull
     @Beta
     public static Boolean negate(final Boolean bool) {
@@ -27692,7 +27686,7 @@ sealed class CommonUtil permits N {
                 if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
                         && Iterator.class.isAssignableFrom(m.getReturnType())) {
 
-                    return (Iterator<T>) ClassUtil.invokeMethod(c, m);
+                    return ClassUtil.invokeMethod(c, m);
                 }
             } catch (final Exception e) {
                 // continue

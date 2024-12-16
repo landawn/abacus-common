@@ -26,7 +26,6 @@ import com.landawn.abacus.util.WD;
 /**
  *
  * @param <E>
- * @param <T>
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
@@ -82,31 +81,11 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
         return parameterTypes;
     }
 
-    /**
-     * Checks if is list.
-     *
-     * @return {@code true}, if is list
-     */
-    @Override
-    public boolean isList() {
-        return false;
-    }
-
-    /**
-     * Checks if is sets the.
-     *
-     * @return {@code true}, if is sets the
-     */
     @Override
     public boolean isSet() {
         return true;
     }
 
-    /**
-     * Checks if is collection.
-     *
-     * @return {@code true}, if is collection
-     */
     @Override
     public boolean isCollection() {
         return true;

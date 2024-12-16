@@ -94,7 +94,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param <E>
      */
-    public interface MemoryMeasure<E> {
+    interface MemoryMeasure<E> {
 
         /**
          *

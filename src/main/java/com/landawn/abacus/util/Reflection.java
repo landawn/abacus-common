@@ -72,7 +72,7 @@ public final class Reflection<T> {
      * @return
      */
     public static <T> Reflection<T> on(final String clsName) {
-        return on((Class<T>) ClassUtil.forClass(clsName));
+        return on(ClassUtil.forClass(clsName));
     }
 
     /**
@@ -212,12 +212,7 @@ public final class Reflection<T> {
      * @throws NoSuchFieldException the no such field exception
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
-        Map<String, Field> fieldPool = clsFieldPool.get(cls);
-
-        if (fieldPool == null) {
-            fieldPool = new ConcurrentHashMap<>();
-            clsFieldPool.put(cls, fieldPool);
-        }
+        Map<String, Field> fieldPool = clsFieldPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
         Field field = fieldPool.get(fieldName);
 
@@ -238,12 +233,7 @@ public final class Reflection<T> {
      * @throws SecurityException the security exception
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
-        Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.get(cls);
-
-        if (constructorPool == null) {
-            constructorPool = new ConcurrentHashMap<>();
-            clsConstructorPool.put(cls, constructorPool);
-        }
+        Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
         final Wrapper<Class<?>[]> key = Wrapper.of(argTypes);
         Constructor<?> result = constructorPool.get(key);
@@ -255,6 +245,7 @@ public final class Reflection<T> {
                 for (final Constructor<?> constructor : cls.getDeclaredConstructors()) {
                     final Class<?>[] paramTypes = constructor.getParameterTypes();
 
+                    //noinspection ConstantValue
                     if (paramTypes != null && paramTypes.length == argTypes.length) {
                         for (int i = 0, len = paramTypes.length; i < len; i++) {
                             if ((argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i]) || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))
@@ -290,19 +281,9 @@ public final class Reflection<T> {
      * @throws SecurityException the security exception
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
-        Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.get(cls);
+        Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
-        if (methodPool == null) {
-            methodPool = new ConcurrentHashMap<>();
-            clsMethodPool.put(cls, methodPool);
-        }
-
-        Map<Wrapper<Class<?>[]>, Method> argsMethodPool = methodPool.get(methodName);
-
-        if (argsMethodPool == null) {
-            argsMethodPool = new ConcurrentHashMap<>();
-            methodPool.put(methodName, argsMethodPool);
-        }
+        Map<Wrapper<Class<?>[]>, Method> argsMethodPool = methodPool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
 
         final Wrapper<Class<?>[]> key = Wrapper.of(argTypes);
         Method result = argsMethodPool.get(key);
@@ -314,6 +295,7 @@ public final class Reflection<T> {
                 for (final Method method : cls.getDeclaredMethods()) {
                     final Class<?>[] paramTypes = method.getParameterTypes();
 
+                    //noinspection ConstantValue
                     if (method.getName().equals(methodName) && (paramTypes != null && paramTypes.length == argTypes.length)) {
                         for (int i = 0, len = paramTypes.length; i < len; i++) {
                             if ((argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i]) || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))

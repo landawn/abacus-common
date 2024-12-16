@@ -90,11 +90,11 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      *
-     * @param readlimit
+     * @param readLimit
      */
     @Override
-    public synchronized void mark(final int readlimit) {
-        in.mark(readlimit);
+    public synchronized void mark(final int readLimit) {
+        in.mark(readLimit);
     }
 
     /**

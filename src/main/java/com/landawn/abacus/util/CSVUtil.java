@@ -30,6 +30,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -50,7 +51,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class CSVUtil {
     private CSVUtil() {
-        // Utillity class
+        // Utility class
     }
 
     public static final JSONParser jsonParser = ParserFactory.createJSONParser();
@@ -80,15 +81,15 @@ public final class CSVUtil {
         return strs;
     };
 
-    public static final BiConsumer<String, String[]> CSV_LINE_PARSER_BY_SPLITTER = (it, ouput) -> {
-        lineSplitter.splitToArray(it, ouput);
+    public static final BiConsumer<String, String[]> CSV_LINE_PARSER_BY_SPLITTER = (it, output) -> {
+        lineSplitter.splitToArray(it, output);
         int subStrLen = 0;
 
-        for (int i = 0, len = ouput.length; i < len; i++) {
-            subStrLen = N.len(ouput[i]);
+        for (int i = 0, len = output.length; i < len; i++) {
+            subStrLen = N.len(output[i]);
 
-            if (subStrLen > 1 && ouput[i].charAt(0) == '"' && ouput[i].charAt(subStrLen - 1) == '"') {
-                ouput[i] = ouput[i].substring(0, subStrLen - 1);
+            if (subStrLen > 1 && output[i].charAt(0) == '"' && output[i].charAt(subStrLen - 1) == '"') {
+                output[i] = output[i].substring(0, subStrLen - 1);
             }
         }
     };
@@ -97,11 +98,11 @@ public final class CSVUtil {
 
     static final BiConsumer<String, String[]> CSV_LINE_PARSER_IN_JSON = (line, output) -> jsonParser.readString(line, jdc, output);
 
-    static final Function<String, String[]> defaultCsvHeadereParser = CSV_HEADER_PARSER_IN_JSON;
+    static final Function<String, String[]> defaultCsvHeaderParser = CSV_HEADER_PARSER_IN_JSON;
 
     static final BiConsumer<String, String[]> defaultCsvLineParser = CSV_LINE_PARSER_IN_JSON;
 
-    static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = ThreadLocal.withInitial(() -> defaultCsvHeadereParser);
+    static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = ThreadLocal.withInitial(() -> defaultCsvHeaderParser);
     static final ThreadLocal<BiConsumer<String, String[]>> csvLineParser_TL = ThreadLocal.withInitial(() -> defaultCsvLineParser);
 
     /**
@@ -133,7 +134,7 @@ public final class CSVUtil {
      * Resets the CSV header parser to the default parser for the current thread.
      */
     public static void resetCSVHeaderParser() {
-        csvHeaderParser_TL.set(defaultCsvHeadereParser);
+        csvHeaderParser_TL.set(defaultCsvHeaderParser);
     }
 
     /**
@@ -198,7 +199,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue());
     }
 
     /**
@@ -265,7 +266,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final InputStream source, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue());
     }
 
     /**
@@ -326,7 +327,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue());
     }
 
     /**
@@ -341,6 +342,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count); //NOSONAR
@@ -454,7 +456,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue(), beanClassForColumnType);
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue(), beanClassForColumnType);
     }
 
     /**
@@ -528,7 +530,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final InputStream source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue(), beanClassForColumnType);
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue(), beanClassForColumnType);
     }
 
     /**
@@ -596,7 +598,7 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
-        return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue(), beanClassForColumnType);
+        return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue(), beanClassForColumnType);
     }
 
     /**
@@ -612,6 +614,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if offset or count are negative, or if beanClassForColumnType is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
@@ -724,7 +727,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeMap);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeMap);
     }
 
     /**
@@ -783,7 +786,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeMap);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeMap);
     }
 
     /**
@@ -836,7 +839,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeMap);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeMap);
     }
 
     /**
@@ -851,6 +854,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if offset or count are negative, or if columnTypeMap is {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader source, long offset, long count, final Predicate<? super String[]> rowFilter,
             final Map<String, ? extends Type> columnTypeMap) throws IllegalArgumentException, UncheckedIOException {
@@ -963,7 +967,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File source, final long offset, final long count, final List<? extends Type> columnTypeList)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeList);
     }
 
     /**
@@ -1031,7 +1035,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream source, final long offset, final long count, final List<? extends Type> columnTypeList)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeList);
     }
 
     /**
@@ -1093,7 +1097,7 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader source, final long offset, final long count, final List<? extends Type> columnTypeList)
             throws UncheckedIOException {
-        return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
+        return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeList);
     }
 
     /**
@@ -1109,6 +1113,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader source, long offset, long count, final Predicate<? super String[]> rowFilter,
             final List<? extends Type> columnTypeList) throws IllegalArgumentException, UncheckedIOException {
@@ -1122,7 +1127,7 @@ public final class CSVUtil {
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
         final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
-        final Type<?>[] columnTypes = columnTypeList.toArray(new Type[columnTypeList.size()]);
+        final Type<?>[] columnTypes = columnTypeList.toArray(new Type[0]);
 
         try {
             String line = br.readLine();
@@ -1189,7 +1194,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
      */
     public static <T> Stream<T> stream(final File source, final Class<? extends T> targetType) {
-        return stream(source, (Collection<String>) null, targetType);
+        return stream(source, null, targetType);
     }
 
     /**
@@ -1247,7 +1252,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
      */
     public static <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType) {
-        return stream(source, (Collection<String>) null, closeReaderWhenStreamIsClosed, targetType);
+        return stream(source, null, closeReaderWhenStreamIsClosed, targetType);
     }
 
     /**
@@ -1286,6 +1291,7 @@ public final class CSVUtil {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgNotNull(targetType, cs.targetType);
 
+        //noinspection resource
         return Stream.defer(() -> {
 
             final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -1398,10 +1404,12 @@ public final class CSVUtil {
 
                 } else if (type.isBean()) {
                     mapper = values -> {
+                        @SuppressWarnings("DataFlowIssue")
                         final Object result = beanInfo.createBeanResult();
 
                         for (int i = 0; i < columnCount; i++) {
                             if (resultColumnNames[i] != null) {
+                                //noinspection DataFlowIssue
                                 propInfos[i].setPropValue(result, propInfos[i].readPropValue(values[i]));
                             }
                         }

@@ -71,6 +71,7 @@ public final class PropertiesUtil {
             .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
 
     private static final ScheduledExecutorService scheduledExecutor;
+
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
         executor.setRemoveOnCancelPolicy(true);
@@ -478,6 +479,7 @@ public final class PropertiesUtil {
         final T properties = (T) (output == null ? N.newInstance(targetClass) : output);
 
         final NodeList propNodes = source.getChildNodes();
+        @SuppressWarnings("ConstantValue")
         final int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
         final Set<String> newKeySet = N.newHashSet();
         Node propNode = null;
@@ -671,13 +673,11 @@ public final class PropertiesUtil {
      * @param rootElementName The name of the root element in the XML.
      * @param ignoreTypeInfo If {@code true}, type information will be ignored.
      * @param output The OutputStream to which the properties will be stored.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
-    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final OutputStream output) {
-        try {
-            storeToXml(properties, rootElementName, ignoreTypeInfo, true, IOUtil.newOutputStreamWriter(output));
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final OutputStream output)
+            throws UncheckedIOException {
+        storeToXml(properties, rootElementName, ignoreTypeInfo, true, IOUtil.newOutputStreamWriter(output));
     }
 
     /**
@@ -687,13 +687,11 @@ public final class PropertiesUtil {
      * @param rootElementName The name of the root element in the XML.
      * @param ignoreTypeInfo If {@code true}, type information will be ignored.
      * @param output The Writer to which the properties will be stored.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
-    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final Writer output) {
-        try {
-            storeToXml(properties, rootElementName, ignoreTypeInfo, true, output);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final Writer output)
+            throws UncheckedIOException {
+        storeToXml(properties, rootElementName, ignoreTypeInfo, true, output);
     }
 
     /**
@@ -704,10 +702,10 @@ public final class PropertiesUtil {
      * @param ignoreTypeInfo If {@code true}, type information will be ignored.
      * @param isFirstCall If {@code true}, this is the first call to the method.
      * @param output The OutputStream to which the properties will be stored.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final boolean isFirstCall,
-            final Writer output) throws IOException {
+            final Writer output) throws UncheckedIOException {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
 
         try {
@@ -721,23 +719,27 @@ public final class PropertiesUtil {
                 bw.write("<" + rootElementName + " type=\"Properties\">");
             }
 
+            String propName = null;
             String listPropName = null;
             String elementPropName = null;
             Object propValue = null;
-            Object listPropvalue;
+            Object listPropValue;
             Type<Object> type = null;
-            for (final Object propName : properties.keySet()) { //NOSONAR
-                listPropName = propName + "List";
-                elementPropName = propName.toString();
+            for (final Map.Entry<?, ?> entry : properties.entrySet()) { //NOSONAR
+                propName = entry.getKey().toString();
+                propValue = entry.getValue();
+
+                elementPropName = propName;
 
                 if (elementPropName.endsWith("List")) {
                     elementPropName = elementPropName.substring(0, elementPropName.length() - 4);
                 }
 
-                propValue = properties.get(propName);
-                listPropvalue = properties.get(listPropName);
+                listPropName = elementPropName + "List";
 
-                if ((propValue == null) || (listPropvalue instanceof List && ((List<?>) listPropvalue).size() > 0)) {
+                listPropValue = properties.get(listPropName);
+
+                if ((propValue == null) || (listPropValue instanceof List && ((List<?>) listPropValue).size() > 0)) {
                     continue;
                 }
 
@@ -771,7 +773,7 @@ public final class PropertiesUtil {
                 } else if (propValue instanceof Properties) {
                     bw.flush();
 
-                    storeToXml((Properties<?, ?>) propValue, propName.toString(), ignoreTypeInfo, false, output);
+                    storeToXml((Properties<?, ?>) propValue, propName, ignoreTypeInfo, false, output);
                 } else {
                     type = N.typeOf(propValue.getClass());
 
@@ -857,6 +859,7 @@ public final class PropertiesUtil {
      * @param className The name of the generated Java class.
      * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
      */
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static void xml2Java(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
         Writer writer = null;
@@ -935,6 +938,7 @@ public final class PropertiesUtil {
 
         final NodeList childNodes = xmlNode.getChildNodes();
 
+        //noinspection ConstantValue
         if ((childNodes != null) && (childNodes.getLength() > 0)) {
             final Set<String> duplicatedPropNameSet = getDuplicatedPropNameSet(xmlNode);
             final Set<String> propNameSet = N.newHashSet();
@@ -1065,6 +1069,7 @@ public final class PropertiesUtil {
         final Set<String> result = N.newLinkedHashSet();
         final NodeList childNodes = node.getChildNodes();
 
+        //noinspection ConstantValue
         if ((childNodes == null) || (childNodes.getLength() == 0)) {
             return result;
         }
@@ -1179,6 +1184,7 @@ public final class PropertiesUtil {
     private static boolean hasDuplicatedPropName(final Node node) {
         final NodeList childNodes = node.getChildNodes();
 
+        //noinspection ConstantValue
         if ((childNodes == null) || (childNodes.getLength() == 0)) {
             return false;
         }
@@ -1209,6 +1215,7 @@ public final class PropertiesUtil {
 
     private static Set<String> getDuplicatedPropNameSet(final Node node) {
         final NodeList childNodes = node.getChildNodes();
+        //noinspection ConstantValue
         if (childNodes == null || childNodes.getLength() == 0) {
             return N.newHashSet();
         }
@@ -1267,8 +1274,8 @@ public final class PropertiesUtil {
         /** The last update time. */
         private Timestamp lastUpdateTime;
 
-        /** The create time. */
-        private Timestamp createTime;
+        /** The created time. */
+        private Timestamp createdTime;
 
         /**
          * Gets the id.
@@ -1419,22 +1426,22 @@ public final class PropertiesUtil {
          *
          * @return
          */
-        public Timestamp getCreateTime() {
-            return createTime;
+        public Timestamp getCreatedTime() {
+            return createdTime;
         }
 
         /**
          * Sets the creates the time.
          *
-         * @param createTime the new creates the time
+         * @param createdTime the new creates the time
          */
-        public void setCreateTime(final Timestamp createTime) {
-            this.createTime = createTime;
+        public void setCreatedTime(final Timestamp createdTime) {
+            this.createdTime = createdTime;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, name, content, includedServers, excludedServers, status, description, lastUpdateTime, createTime);
+            return Objects.hash(id, name, content, includedServers, excludedServers, status, description, lastUpdateTime, createdTime);
         }
 
         /**
@@ -1453,7 +1460,7 @@ public final class PropertiesUtil {
                 return N.equals(other.id, id) && N.equals(other.name, name) && N.equals(other.content, content)
                         && N.equals(other.includedServers, includedServers) && N.equals(other.excludedServers, excludedServers)
                         && N.equals(other.status, status) && N.equals(other.description, description) && N.equals(other.lastUpdateTime, lastUpdateTime)
-                        && N.equals(other.createTime, createTime);
+                        && N.equals(other.createdTime, createdTime);
 
             }
 
@@ -1463,7 +1470,7 @@ public final class PropertiesUtil {
         @Override
         public String toString() {
             return "{id=" + id + ", name=" + name + ", content=" + content + ", includedServers=" + includedServers + ", excludedServers=" + excludedServers
-                    + ", status=" + status + ", description=" + description + ", lastUpdateTime=" + lastUpdateTime + ", createTime=" + createTime + "}";
+                    + ", status=" + status + ", description=" + description + ", lastUpdateTime=" + lastUpdateTime + ", createdTime=" + createdTime + "}";
         }
 
     }

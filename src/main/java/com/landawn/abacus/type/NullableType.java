@@ -109,10 +109,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = getColumnValue(rs, columnIndex, elementType.clazz());
+        final T obj = getColumnValue(rs, columnIndex, elementType.clazz());
 
         return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
     }
 
     /**
@@ -124,10 +124,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = getColumnValue(rs, columnLabel, elementType.clazz());
+        final T obj = getColumnValue(rs, columnLabel, elementType.clazz());
 
         return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
     }
 
     /**

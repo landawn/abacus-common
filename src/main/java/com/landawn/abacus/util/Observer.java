@@ -129,7 +129,7 @@ public abstract class Observer<T> implements Immutable {
      * @return
      */
     public static <T> Observer<T> of(final Collection<? extends T> c) {
-        return of(N.isEmpty(c) ? ObjIterator.<T> empty() : c.iterator());
+        return of(N.isEmpty(c) ? ObjIterator.empty() : c.iterator());
     }
 
     /**
@@ -856,39 +856,39 @@ public abstract class Observer<T> implements Immutable {
         }
     }
 
-    /**
-     * The Class Node.
-     *
-     * @param <T>
-     */
-    protected static class Node<T> {
-
-        /** The value. */
-        protected final T value;
-
-        /** The next. */
-        protected Node<T> next;
-
-        /**
-         * Instantiates a new node.
-         *
-         * @param value
-         */
-        public Node(final T value) {
-            this(value, null);
-        }
-
-        /**
-         * Instantiates a new node.
-         *
-         * @param value
-         * @param next
-         */
-        public Node(final T value, final Node<T> next) {
-            this.value = value;
-            this.next = next;
-        }
-    }
+    //    /**
+    //     * The Class Node.
+    //     *
+    //     * @param <T>
+    //     */
+    //    protected static class Node<T> {
+    //
+    //        /** The value. */
+    //        protected final T value;
+    //
+    //        /** The next. */
+    //        protected Node<T> next;
+    //
+    //        /**
+    //         * Instantiates a new node.
+    //         *
+    //         * @param value
+    //         */
+    //        public Node(final T value) {
+    //            this(value, null);
+    //        }
+    //
+    //        /**
+    //         * Instantiates a new node.
+    //         *
+    //         * @param value
+    //         * @param next
+    //         */
+    //        public Node(final T value, final Node<T> next) {
+    //            this.value = value;
+    //            this.next = next;
+    //        }
+    //    }
 
     /**
      * The Class Dispatcher.
@@ -914,7 +914,7 @@ public abstract class Observer<T> implements Immutable {
         }
 
         /**
-         * Signal a Exception exception.
+         * Signal an exception.
          * @param error the Exception to signal, not null
          */
         public void onError(final Exception error) {
@@ -1163,7 +1163,7 @@ public abstract class Observer<T> implements Immutable {
         private final TimeUnit unit;
 
         /**
-         * This method is called when information about an Timer
+         * This method is called when information about a Timer
          * which was previously requested using an asynchronous
          * interface becomes available.
          *
@@ -1176,7 +1176,7 @@ public abstract class Observer<T> implements Immutable {
         }
 
         /**
-         * This method is called when information about an Timer
+         * This method is called when information about a Timer
          * which was previously requested using an asynchronous
          * interface becomes available.
          *

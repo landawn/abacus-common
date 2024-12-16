@@ -14,18 +14,16 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.NavigableSet;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  *
  * @param <E>
  */
+@SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
 public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> { //NOSONAR
 
     @SuppressWarnings("rawtypes")
@@ -54,7 +52,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> just(final E e) {
-        return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e)));
+        return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e)));
     }
 
     /**
@@ -64,7 +62,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1) {
-        return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1)));
+        return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e1)));
     }
 
     /**

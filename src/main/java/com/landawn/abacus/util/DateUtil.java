@@ -47,6 +47,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -191,8 +192,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     private static final int[][] fields = { { Calendar.MILLISECOND }, { Calendar.SECOND }, { Calendar.MINUTE }, { Calendar.HOUR_OF_DAY, Calendar.HOUR },
             { Calendar.DATE, Calendar.DAY_OF_MONTH, Calendar.AM_PM
-            /* Calendar.DAY_OF_YEAR, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH */
-            }, { Calendar.MONTH, SEMI_MONTH }, { Calendar.YEAR }, { Calendar.ERA } };
+            /* Calendar.DAY_OF_YEAR, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH */ }, { Calendar.MONTH, SEMI_MONTH }, { Calendar.YEAR },
+            { Calendar.ERA } };
 
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
@@ -514,10 +515,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new Time object representing the same point in time as the provided {@code Calendar} object.
      * @throws IllegalArgumentException if the provided {@code Calendar} object is {@code null}.
      */
-    public static Time createTime(final Calendar calendar) throws IllegalArgumentException {
+    public static Time createdTime(final Calendar calendar) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
 
-        return createTime(calendar.getTimeInMillis());
+        return createdTime(calendar.getTimeInMillis());
     }
 
     /**
@@ -527,10 +528,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new java.sql.Time object representing the same point in time as the provided {@code java.util.Date} object.
      * @throws IllegalArgumentException if the provided {@code java.util.Date} object is {@code null}.
      */
-    public static Time createTime(final java.util.Date date) throws IllegalArgumentException {
+    public static Time createdTime(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return createTime(date.getTime());
+        return createdTime(date.getTime());
     }
 
     /**
@@ -539,7 +540,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param timeInMillis The time in milliseconds since the epoch (01-01-1970).
      * @return A new Time object representing the same point in time as the provided time in milliseconds.
      */
-    public static Time createTime(final long timeInMillis) {
+    public static Time createdTime(final long timeInMillis) {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -556,10 +557,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new Timestamp object representing the same point in time as the provided {@code Calendar} object.
      * @throws IllegalArgumentException if the provided {@code Calendar} object is {@code null}.
      */
-    public static Timestamp createTimestamp(final Calendar calendar) throws IllegalArgumentException {
+    public static Timestamp createdTimestamp(final Calendar calendar) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
 
-        return createTimestamp(calendar.getTimeInMillis());
+        return createdTimestamp(calendar.getTimeInMillis());
     }
 
     /**
@@ -569,10 +570,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new java.sql.Timestamp object representing the same point in time as the provided {@code java.util.Date} object.
      * @throws IllegalArgumentException if the provided {@code java.util.Date} object is {@code null}.
      */
-    public static Timestamp createTimestamp(final java.util.Date date) throws IllegalArgumentException {
+    public static Timestamp createdTimestamp(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return createTimestamp(date.getTime());
+        return createdTimestamp(date.getTime());
     }
 
     /**
@@ -581,7 +582,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param timeInMillis The time in milliseconds since the epoch (01-01-1970).
      * @return A new Timestamp object representing the same point in time as the provided time in milliseconds.
      */
-    public static Timestamp createTimestamp(final long timeInMillis) {
+    public static Timestamp createdTimestamp(final long timeInMillis) {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -920,7 +921,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      *
      * @param date The string representation of the time to be parsed.
      * @param format The format of the time string. If {@code null}, the method will try to parse the time using common time formats.
-     * @return The parsed java.sql.Time object or or {@code null} if the provided date string is {@code null} or empty or "null".
+     * @return The parsed java.sql.Time object or {@code null} if the provided date string is {@code null} or empty or "null".
      * @throws IllegalArgumentException if the provided time string cannot be parsed.
      */
     public static Time parseTime(final String date, final String format) {
@@ -942,7 +943,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createTime(parse(date, format, timeZone));
+        return createdTime(parse(date, format, timeZone));
     }
 
     /**
@@ -983,7 +984,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createTimestamp(parse(date, format, timeZone));
+        return createdTimestamp(parse(date, format, timeZone));
     }
 
     /**
@@ -1120,9 +1121,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (ch >= '0' && ch <= '9') {
                 ch = dateTime.charAt(4);
 
-                if (ch >= '0' && ch <= '9') {
-                    return true;
-                }
+                return ch >= '0' && ch <= '9';
             }
         }
 
@@ -1207,7 +1206,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     //        }
     //
     //        if ((format == null) && dateTime.length() > 4 && (dateTime.charAt(2) >= '0' && dateTime.charAt(2) <= '9' && dateTime.charAt(4) >= '0' && dateTime.charAt(4) <= '9')
-    //                && Strings.isAsciiDigtalInteger(dateTime)) {
+    //                && Strings.isAsciiDigitalInteger(dateTime)) {
     //
     //            if (timeZone == null) {
     //                timeZone = LOCAL_TIME_ZONE;
@@ -1585,19 +1584,21 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         final DateFormat sdf = getSDF(format, timeZone);
 
-        final String str = sdf.format(date);
+        try {
+            final String str = sdf.format(date);
 
-        if (appendable != null) {
-            try {
-                appendable.append(str);
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+            if (appendable != null) {
+                try {
+                    appendable.append(str);
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             }
+
+            return str;
+        } finally {
+            recycleSDF(format, timeZone, sdf);
         }
-
-        recycleSDF(format, timeZone, sdf);
-
-        return str;
     }
 
     private static void fastDateFormat(final StringBuilder sb, final Appendable appendable, final long timeInMillis, final boolean isTimestamp) {
@@ -1826,6 +1827,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1844,6 +1846,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1862,6 +1865,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1880,6 +1884,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1899,6 +1904,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1917,6 +1923,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1935,6 +1942,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1953,6 +1961,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -1975,6 +1984,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         final Calendar c = Calendar.getInstance();
         c.setLenient(false);
         c.setTime(date);
+        //noinspection MagicConstant
         c.set(calendarField, amount);
 
         return createDate(c.getTimeInMillis(), date.getClass());
@@ -2026,6 +2036,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         if (unit == CalendarField.MONTH || unit == CalendarField.YEAR) {
             final Calendar c = createCalendar(date);
+            //noinspection MagicConstant
             c.add(unit.value(), amount);
 
             return createDate(c.getTimeInMillis(), date.getClass());
@@ -2081,6 +2092,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         final T result = createCalendar(calendar, calendar.getTimeInMillis());
 
+        //noinspection MagicConstant
         result.add(unit.value(), amount);
 
         return result;
@@ -2114,6 +2126,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of years to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2129,6 +2142,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of months to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2144,6 +2158,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of weeks to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2159,6 +2174,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of days to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2174,6 +2190,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of hours to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2189,6 +2206,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of minutes to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2204,6 +2222,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of seconds to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2219,6 +2238,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of milliseconds to a date returning a new object.
      * The original {@code Date} is unchanged.
@@ -2234,6 +2254,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of years to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2249,6 +2270,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of months to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2264,6 +2286,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of weeks to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2279,6 +2302,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of days to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2294,6 +2318,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of hours to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2309,6 +2334,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of minutes to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2324,6 +2350,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of seconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2339,6 +2366,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Adds a number of milliseconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
@@ -2473,6 +2501,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -2569,6 +2598,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -2667,6 +2697,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -2698,9 +2729,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         boolean done = false;
 
         // truncate milliseconds
-        final int millisecs = val.get(Calendar.MILLISECOND);
-        if (ModifyType.TRUNCATE == modType || millisecs < 500) {
-            time = time - millisecs;
+        final int millis = val.get(Calendar.MILLISECOND);
+        if (ModifyType.TRUNCATE == modType || millis < 500) {
+            time = time - millis;
         }
         if (field == Calendar.SECOND) {
             done = true;
@@ -2759,6 +2790,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                         } else {
                             //We need at add one to this field since the
                             //  last number causes us to round up
+                            //noinspection MagicConstant
                             val.add(aField[0], 1);
                         }
                     }
@@ -2802,15 +2834,19 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                     break;
             }
             if (!offsetSet) {
+                @SuppressWarnings("MagicConstant")
                 final int min = val.getActualMinimum(aField[0]);
+                @SuppressWarnings("MagicConstant")
                 final int max = val.getActualMaximum(aField[0]);
                 //Calculate the offset from the minimum allowed value
+                //noinspection MagicConstant
                 offset = val.get(aField[0]) - min;
-                //Set roundUp if this is more than half way between the minimum and maximum
+                //Set roundUp if this is more than halfway between the minimum and maximum
                 roundUp = offset > ((max - min) / 2);
             }
             //We need to remove this field
             if (offset != 0) {
+                //noinspection MagicConstant
                 val.set(aField[0], val.get(aField[0]) - offset);
             }
         }
@@ -2843,7 +2879,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return {@code true} if equal; otherwise {@code false}
      * @throws IllegalArgumentException if any argument is {@code null}
      * @see #truncate(Calendar, int)
-     * @see #truncatedEquals(Date, Date, int)
+     * @see #truncatedEquals(java.util.Date, java.util.Date, int)
      */
     public static boolean truncatedEquals(final Calendar cal1, final Calendar cal2, final int field) {
         return truncatedCompareTo(cal1, cal2, field) == 0;
@@ -2909,7 +2945,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * calendar is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}
      * @see #truncate(Calendar, int)
-     * @see #truncatedCompareTo(Date, Date, int)
+     * @see #truncatedCompareTo(java.util.Date, java.util.Date, int)
      */
     public static int truncatedCompareTo(final Calendar cal1, final Calendar cal2, final int field) {
         return truncate(cal1, field).compareTo(truncate(cal2, field));
@@ -2944,7 +2980,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}
      * @see #truncate(Calendar, int)
-     * @see #truncatedCompareTo(Date, Date, int)
+     * @see #truncatedCompareTo(java.util.Date, java.util.Date, int)
      */
     public static int truncatedCompareTo(final java.util.Date date1, final java.util.Date date2, final int field) {
         return truncate(date1, field).compareTo(truncate(date2, field));
@@ -2955,7 +2991,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of milliseconds within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the milliseconds of any date will only return the number of milliseconds
      * of the current second (resulting in a number between 0 and 999). This
@@ -2992,7 +3028,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of seconds within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the seconds of any date will only return the number of seconds
      * of the current minute (resulting in a number between 0 and 59). This
@@ -3032,7 +3068,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of minutes within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the minutes of any date will only return the number of minutes
      * of the current hour (resulting in a number between 0 and 59). This
@@ -3072,7 +3108,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of hours within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the hours of any date will only return the number of hours
      * of the current day (resulting in a number between 0 and 23). This
@@ -3084,7 +3120,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
      * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
      * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
-     * A fragment less than or equal to a HOUR field will return 0.</p>
+     * A fragment less than or equal to an HOUR field will return 0.</p>
      *
      * <ul>
      *  <li>January 1, 2008 7:15:10.538 with Calendar.DAY_OF_YEAR as fragment will return 7
@@ -3112,7 +3148,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of days within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the days of any date will only return the number of days
      * of the current month (resulting in a number between 1 and 31). This
@@ -3172,7 +3208,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of milliseconds within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the milliseconds of any date will only return the number of milliseconds
      * of the current second (resulting in a number between 0 and 999). This
@@ -3212,7 +3248,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of seconds within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the seconds of any date will only return the number of seconds
      * of the current minute (resulting in a number between 0 and 59). This
@@ -3252,7 +3288,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of minutes within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the minutes of any date will only return the number of minutes
      * of the current hour (resulting in a number between 0 and 59). This
@@ -3292,7 +3328,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of hours within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the hours of any date will only return the number of hours
      * of the current day (resulting in a number between 0 and 23). This
@@ -3304,7 +3340,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
      * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
      * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
-     * A fragment less than or equal to a HOUR field will return 0.</p>
+     * A fragment less than or equal to an HOUR field will return 0.</p>
      *
      * <ul>
      *  <li>January 1, 2008 7:15:10.538 with Calendar.DAY_OF_YEAR as fragment will return 7
@@ -3332,7 +3368,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <br />
      *
      * <p>Returns the number of days within the
-     * fragment. All datefields greater than the fragment will be ignored.</p>
+     * fragment. All date fields greater than the fragment will be ignored.</p>
      *
      * <p>Asking the days of any date will only return the number of days
      * of the current month (resulting in a number between 1 and 31). This
@@ -3382,6 +3418,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if the date is {@code null} or
      * fragment is not supported
      */
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     private static long getFragment(final Calendar calendar, final int fragment, final TimeUnit unit) {
         N.checkArgNotNull(calendar, cs.calendar);
 
@@ -3429,6 +3466,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -3554,6 +3592,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -3594,6 +3633,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
@@ -3622,6 +3662,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         DateFormat sdf = null;
 
         if (timeZone == UTC_TIME_ZONE) {
+            //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 sdf = utcTimestampDFPool.poll();
 
@@ -3631,7 +3672,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 }
 
                 return sdf;
-            } else if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
+            } else //noinspection ConditionCoveredByFurtherCondition
+            if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
                 sdf = utcDateTimeDFPool.poll();
 
                 if (sdf == null) {
@@ -3663,9 +3705,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
         if (timeZone == UTC_TIME_ZONE) {
+            //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 utcTimestampDFPool.add(sdf);
-            } else if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
+            } else //noinspection ConditionCoveredByFurtherCondition
+            if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
                 utcDateTimeDFPool.add(sdf);
             } else {
                 dfPool.get(format).add(sdf);
@@ -3795,6 +3839,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             c = Calendar.getInstance(timeZone);
         }
 
+        //noinspection MagicConstant
         c.set(year, month, date, hourOfDay, minute, second);
         c.set(Calendar.MILLISECOND, milliSecond);
 
@@ -3842,6 +3887,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         Calendar result = null;
 
+        //noinspection ConstantValue
         if (cls.equals(Calendar.class)) {
             result = Calendar.getInstance();
         } else if (cls.equals(GregorianCalendar.class)) {

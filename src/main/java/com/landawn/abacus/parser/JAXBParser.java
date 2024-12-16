@@ -146,7 +146,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @param config
      * @param output
      */
-    protected void write(final Object obj, final XMLSerializationConfig config, final Writer output) {
+    void write(final Object obj, final XMLSerializationConfig config, final Writer output) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }
@@ -328,7 +328,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    <T> T read(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }

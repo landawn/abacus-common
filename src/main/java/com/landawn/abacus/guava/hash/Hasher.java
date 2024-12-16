@@ -23,7 +23,7 @@ import com.google.common.hash.HashCode;
 /**
  * Note: It's copied from Google Guava under Apache License 2.0 and modified.
  *
- * Each hasher should translate all multibyte values ({@link #put(int)}, {@link #put(long)}, etc) to bytes in
+ * Each hasher should translate all multibyte values ({@link #put(int)}, {@link #put(long)}, etc.) to bytes in
  * little-endian order.
  *
  * <p><b>Warning:</b> The result of calling any methods after calling {@link #hash} is undefined.

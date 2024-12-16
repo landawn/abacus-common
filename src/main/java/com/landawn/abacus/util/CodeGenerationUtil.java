@@ -81,12 +81,13 @@ public final class CodeGenerationUtil {
 
     private static final String BUILDER = "Builder";
 
-    private static final String LINE_SEPERATOR = IOUtil.LINE_SEPARATOR;
+    private static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
     private static final BiFunction<Class<?>, String, String> identityPropNameConverter = (cls, propName) -> propName;
+    public static final String NOSONAR_COMMENTS = " // NOSONAR";
 
     private CodeGenerationUtil() {
-        // singleton for uitility class.
+        // singleton for utility class.
     }
 
     /**
@@ -123,35 +124,41 @@ public final class CodeGenerationUtil {
 
         final String interfaceName = "public interface " + propNameTableClassName;
 
-        sb.append(LINE_SEPERATOR)
+        sb.append(LINE_SEPARATOR)
                 .append("    /**")
-                .append(LINE_SEPERATOR)
+                .append(LINE_SEPARATOR)
                 .append("     * Auto-generated class for property(field) name table.")
-                .append(LINE_SEPERATOR)
+                .append(LINE_SEPARATOR)
                 .append("     */");
 
         //    if (Character.isLowerCase(propNameTableClassName.charAt(0))) {
-        //        sb.append(LINE_SEPERATOR).append("    @SuppressWarnings(\"java:S1192\")");
+        //        sb.append(LINE_SEPARATOR).append("    @SuppressWarnings(\"java:S1192\")");
         //    }
 
-        sb.append(LINE_SEPERATOR)
+        sb.append(LINE_SEPARATOR)
                 .append("    ")
                 .append(interfaceName)
                 .append(" {")
-                .append(Character.isLowerCase(interfaceName.charAt(0)) ? " // NOSONAR" : "")
-                .append(LINE_SEPERATOR)
-                .append(LINE_SEPERATOR); //
+                .append(Character.isLowerCase(interfaceName.charAt(0)) ? NOSONAR_COMMENTS : "")
+                .append(LINE_SEPARATOR)
+                .append(LINE_SEPARATOR); //
 
         for (final String propName : ClassUtil.getPropNameList(entityClass)) {
 
-            sb.append("        /** Property(field) name {@code \"" + propName + "\"} */")
-                    .append(LINE_SEPERATOR)
-                    .append("        String " + propName + " = \"" + propName + "\";")
-                    .append(LINE_SEPERATOR)
-                    .append(LINE_SEPERATOR);
+            sb.append("        /** Property(field) name {@code \"")
+                    .append(propName)
+                    .append("\"} */")
+                    .append(LINE_SEPARATOR)
+                    .append("        String ")
+                    .append(propName)
+                    .append(" = \"")
+                    .append(propName)
+                    .append("\";")
+                    .append(LINE_SEPARATOR)
+                    .append(LINE_SEPARATOR);
         }
 
-        sb.append("    }").append(LINE_SEPERATOR);
+        sb.append("    }").append(LINE_SEPARATOR);
 
         final String ret = sb.toString();
 
@@ -261,6 +268,7 @@ public final class CodeGenerationUtil {
 
         final String interfaceName = "public interface " + propNameTableClassName;
 
+        @SuppressWarnings("resource")
         final List<Class<?>> entityClassesToUse = StreamEx.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
                 return false;
@@ -268,12 +276,9 @@ public final class CodeGenerationUtil {
 
             final String simpleClassName = ClassUtil.getSimpleClassName(cls);
 
-            if (cls.isMemberClass() && simpleClassName.endsWith(BUILDER) && cls.getDeclaringClass() != null // NOSONAR
-                    && simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER)) { // NOSONAR
-                return false;
-            }
-
-            return true;
+            // NOSONAR
+            return !cls.isMemberClass() || !simpleClassName.endsWith(BUILDER) || cls.getDeclaringClass() == null // NOSONAR
+                    || !simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER);
         }).toList();
 
         final StringBuilder sb = new StringBuilder();
@@ -284,15 +289,17 @@ public final class CodeGenerationUtil {
         final boolean generateClassPropNameList = codeConfig.isGenerateClassPropNameList();
 
         if (Strings.isNotEmpty(packageName)) {
-            sb.append("package " + packageName + ";").append(LINE_SEPERATOR);
+            sb.append("package ").append(packageName).append(";").append(LINE_SEPARATOR);
         }
 
         if (generateClassPropNameList) {
-            sb.append(LINE_SEPERATOR).append("import java.util.List;").append(LINE_SEPERATOR);
+            sb.append(LINE_SEPARATOR).append("import java.util.List;").append(LINE_SEPARATOR);
         }
 
+        @SuppressWarnings("resource")
         final String allClassName = StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
 
+        //noinspection resource
         if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).hasDuplicates()) {
             throw new IllegalArgumentException(
                     "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
@@ -325,49 +332,67 @@ public final class CodeGenerationUtil {
                 }
             }
 
-            sb.append(LINE_SEPERATOR)
+            sb.append(LINE_SEPARATOR)
                     .append("/**")
-                    .append(LINE_SEPERATOR)
-                    .append(" * Auto-generated class for property(field) name table for classes: {@code " + allClassName + "}")
-                    .append(LINE_SEPERATOR)
+                    .append(LINE_SEPARATOR)
+                    .append(" * Auto-generated class for property(field) name table for classes: {@code ")
+                    .append(allClassName)
+                    .append("}")
+                    .append(LINE_SEPARATOR)
                     .append(" */");
 
             //    if (Character.isLowerCase(propNameTableClassName.charAt(0))) {
-            //        sb.append(LINE_SEPERATOR).append("@SuppressWarnings(\"java:S1192\")");
+            //        sb.append(LINE_SEPARATOR).append("@SuppressWarnings(\"java:S1192\")");
             //    }
 
-            sb.append(LINE_SEPERATOR)
+            //noinspection DuplicateExpressions
+            sb.append(LINE_SEPARATOR)
                     .append(interfaceName)
                     .append(" {")
                     .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
-                    .append(LINE_SEPERATOR); //
+                    .append(LINE_SEPARATOR); //
 
             final List<String> propNames = new ArrayList<>(propNameMap.keySet());
             N.sort(propNames);
 
             for (final String propName : propNames) {
+                @SuppressWarnings("resource")
                 final String clsNameList = Stream.of(propNameMap.get(propName)).sorted().join(", ", "{@code [", "]}");
 
-                sb.append(LINE_SEPERATOR)
-                        .append("    /** Property(field) name {@code \"" + propName + "\"} for classes: ")
+                sb.append(LINE_SEPARATOR)
+                        .append("    /** Property(field) name {@code \"")
+                        .append(propName)
+                        .append("\"} for classes: ")
                         .append(clsNameList)
                         .append(" */")
-                        .append(LINE_SEPERATOR)
-                        .append("    String " + (Strings.isKeyword(propName) ? "_" : "") + propName + " = \"" + propName + "\";")
-                        .append(LINE_SEPERATOR);
+                        .append(LINE_SEPARATOR)
+                        .append("    String ")
+                        .append(Strings.isKeyword(propName) ? "_" : "")
+                        .append(propName)
+                        .append(" = \"")
+                        .append(propName)
+                        .append("\";")
+                        .append(LINE_SEPARATOR);
             }
 
             if (generateClassPropNameList) {
                 for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                     final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                    sb.append(LINE_SEPERATOR)
-                            .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                    //noinspection resource
+                    sb.append(LINE_SEPARATOR)
+                            .append("    /** Unmodifiable property(field) name list for class: {@code \"")
+                            .append(classPropNameListEntry.getKey())
+                            .append("\"}.")
                             .append(" */")
-                            .append(LINE_SEPERATOR)
-                            .append("    List<String> " + (propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                    + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
-                            .append(LINE_SEPERATOR);
+                            .append(LINE_SEPARATOR)
+                            .append("    List<String> ")
+                            .append(propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "")
+                            .append(fieldNameForPropNameList)
+                            .append(" = List.of(")
+                            .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                            .append(");")
+                            .append(LINE_SEPARATOR);
                 }
             }
         }
@@ -405,58 +430,77 @@ public final class CodeGenerationUtil {
                     }
                 }
 
-                sb.append(LINE_SEPERATOR)
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("/**")
-                        .append(LINE_SEPERATOR)
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for lower case property(field) name table for classes: {@code " + allClassName + "}")
-                        .append(LINE_SEPERATOR)
+                        .append(" * Auto-generated class for lower case property(field) name table for classes: {@code ")
+                        .append(allClassName)
+                        .append("}")
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append(" */");
 
-                sb.append(LINE_SEPERATOR)
+                //noinspection DuplicateExpressions
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append("public interface " + N.defaultIfEmpty(codeConfig.getClassNameForLowerCaseWithUnderscore(), SL))
+                        .append("public interface ")
+                        .append(N.defaultIfEmpty(codeConfig.getClassNameForLowerCaseWithUnderscore(), SL))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPERATOR); //
+                        .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
+                    @SuppressWarnings("resource")
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
-                    sb.append(LINE_SEPERATOR)
+                    sb.append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    /** Property(field) name in lower case concatenated with underscore: {@code \"" + propNameTP._2 + "\"} for classes: ")
+                            .append("    /** Property(field) name in lower case concatenated with underscore: {@code \"")
+                            .append(propNameTP._2)
+                            .append("\"} for classes: ")
                             .append(clsNameList)
                             .append(" */")
-                            .append(LINE_SEPERATOR)
+                            .append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    String " + (Strings.isKeyword(propNameTP._1) ? "_" : "") + propNameTP._1 + " = \"" + propNameTP._2 + "\";")
-                            .append(LINE_SEPERATOR);
+                            .append("    String ")
+                            .append(Strings.isKeyword(propNameTP._1) ? "_" : "")
+                            .append(propNameTP._1)
+                            .append(" = \"")
+                            .append(propNameTP._2)
+                            .append("\";")
+                            .append(LINE_SEPARATOR);
                 }
 
                 if (generateClassPropNameList) {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                        sb.append(LINE_SEPERATOR)
+                        //noinspection resource
+                        sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                                .append("    /** Unmodifiable property(field) name list for class: {@code \"")
+                                .append(classPropNameListEntry.getKey())
+                                .append("\"}.")
                                 .append(" */")
-                                .append(LINE_SEPERATOR)
+                                .append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    List<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                        + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
-                                .append(LINE_SEPERATOR);
+                                .append("    List<String> ")
+                                .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
+                                .append(fieldNameForPropNameList)
+                                .append(" = List.of(")
+                                .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(");")
+                                .append(LINE_SEPARATOR);
                     }
                 }
 
-                sb.append(LINE_SEPERATOR).append(INDENTATION).append("}").append(LINE_SEPERATOR);
+                sb.append(LINE_SEPARATOR).append(INDENTATION).append("}").append(LINE_SEPARATOR);
             }
 
         }
@@ -494,58 +538,77 @@ public final class CodeGenerationUtil {
                     }
                 }
 
-                sb.append(LINE_SEPERATOR)
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("/**")
-                        .append(LINE_SEPERATOR)
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for upper case property(field) name table for classes: {@code " + allClassName + "}")
-                        .append(LINE_SEPERATOR)
+                        .append(" * Auto-generated class for upper case property(field) name table for classes: {@code ")
+                        .append(allClassName)
+                        .append("}")
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append(" */");
 
-                sb.append(LINE_SEPERATOR)
+                //noinspection DuplicateExpressions
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append("public interface " + N.defaultIfEmpty(codeConfig.getClassNameForUpperCaseWithUnderscore(), SU))
+                        .append("public interface ")
+                        .append(N.defaultIfEmpty(codeConfig.getClassNameForUpperCaseWithUnderscore(), SU))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPERATOR); //
+                        .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
+                    @SuppressWarnings("resource")
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
-                    sb.append(LINE_SEPERATOR)
+                    sb.append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    /** Property(field) name in upper case concatenated with underscore: {@code \"" + propNameTP._2 + "\"} for classes: ")
+                            .append("    /** Property(field) name in upper case concatenated with underscore: {@code \"")
+                            .append(propNameTP._2)
+                            .append("\"} for classes: ")
                             .append(clsNameList)
                             .append(" */")
-                            .append(LINE_SEPERATOR)
+                            .append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    String " + (Strings.isKeyword(propNameTP._1) ? "_" : "") + propNameTP._1 + " = \"" + propNameTP._2 + "\";")
-                            .append(LINE_SEPERATOR);
+                            .append("    String ")
+                            .append(Strings.isKeyword(propNameTP._1) ? "_" : "")
+                            .append(propNameTP._1)
+                            .append(" = \"")
+                            .append(propNameTP._2)
+                            .append("\";")
+                            .append(LINE_SEPARATOR);
                 }
 
                 if (generateClassPropNameList) {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                        sb.append(LINE_SEPERATOR)
+                        //noinspection resource
+                        sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                                .append("    /** Unmodifiable property(field) name list for class: {@code \"")
+                                .append(classPropNameListEntry.getKey())
+                                .append("\"}.")
                                 .append(" */")
-                                .append(LINE_SEPERATOR)
+                                .append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    List<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                        + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
-                                .append(LINE_SEPERATOR);
+                                .append("    List<String> ")
+                                .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
+                                .append(fieldNameForPropNameList)
+                                .append(" = List.of(")
+                                .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(");")
+                                .append(LINE_SEPARATOR);
                     }
                 }
 
-                sb.append(LINE_SEPERATOR).append(INDENTATION).append("}").append(LINE_SEPERATOR);
+                sb.append(LINE_SEPARATOR).append(INDENTATION).append("}").append(LINE_SEPARATOR);
             }
         }
 
@@ -573,6 +636,7 @@ public final class CodeGenerationUtil {
                                 continue;
                             }
 
+                            //noinspection DataFlowIssue
                             funcPropName = propFunc.apply(cls, ClassUtil.getPropGetMethod(cls, propName).getReturnType(), newPropName);
 
                             if (Strings.isEmpty(funcPropName)) {
@@ -586,51 +650,61 @@ public final class CodeGenerationUtil {
                     funcPropNameMapList.add(funcPropNameMap);
                 }
 
-                sb.append(LINE_SEPERATOR)
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("/**")
-                        .append(LINE_SEPERATOR)
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for function property(field) name table for classes: {@code " + allClassName + "}")
-                        .append(LINE_SEPERATOR)
+                        .append(" * Auto-generated class for function property(field) name table for classes: {@code ")
+                        .append(allClassName)
+                        .append("}")
+                        .append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append(" */");
 
                 //    if (Character.isLowerCase(propNameTableClassName.charAt(0))) {
-                //        sb.append(LINE_SEPERATOR).append("@SuppressWarnings(\"java:S1192\")");
+                //        sb.append(LINE_SEPARATOR).append("@SuppressWarnings(\"java:S1192\")");
                 //    }
 
-                sb.append(LINE_SEPERATOR)
+                sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
-                        .append("public interface " + functionClassName)
+                        .append("public interface ")
+                        .append(functionClassName)
                         .append(" {")
                         .append(Character.isLowerCase(functionClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPERATOR); //
+                        .append(LINE_SEPARATOR); //
 
                 for (final ListMultimap<Tuple2<String, String>, String> funcPropNameMap : funcPropNameMapList) {
                     final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(funcPropNameMap.keySet());
                     N.sortBy(propNameTPs, it -> it._1);
 
                     for (final Tuple2<String, String> propNameTP : propNameTPs) {
+                        @SuppressWarnings("resource")
                         final String clsNameList = Stream.of(funcPropNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
-                        sb.append(LINE_SEPERATOR)
+                        sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    /** Function property(field) name {@code \"" + propNameTP._2 + "\"} for classes: ")
+                                .append("    /** Function property(field) name {@code \"")
+                                .append(propNameTP._2)
+                                .append("\"} for classes: ")
                                 .append(clsNameList)
                                 .append(" */")
-                                .append(LINE_SEPERATOR)
+                                .append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    String " + propNameTP._1 + " = \"" + propNameTP._2 + "\";")
-                                .append(LINE_SEPERATOR);
+                                .append("    String ")
+                                .append(propNameTP._1)
+                                .append(" = \"")
+                                .append(propNameTP._2)
+                                .append("\";")
+                                .append(LINE_SEPARATOR);
                     }
                 }
 
-                sb.append(LINE_SEPERATOR).append(INDENTATION).append("}").append(LINE_SEPERATOR);
+                sb.append(LINE_SEPARATOR).append(INDENTATION).append("}").append(LINE_SEPARATOR);
             }
         }
 
-        sb.append(LINE_SEPERATOR).append("}").append(LINE_SEPERATOR);
+        sb.append(LINE_SEPARATOR).append("}").append(LINE_SEPARATOR);
 
         final String ret = sb.toString();
 
@@ -669,7 +743,7 @@ public final class CodeGenerationUtil {
      *          .className(CodeGenerationUtil.S)
      *          .packageName("com.landawn.abacus.samples.util")
      *          .srcDir("./samples")
-     *          .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createTime" : propName) // default is: (cls, propName) -> propName
+     *          .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName) // default is: (cls, propName) -> propName
      *          .generateClassPropNameList(true)
      *          .generateLowerCaseWithUnderscore(true)
      *          .generateUpperCaseWithUnderscore(true)

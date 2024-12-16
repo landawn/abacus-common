@@ -109,10 +109,10 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public Optional<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = getColumnValue(rs, columnIndex, elementType.clazz());
+        final T obj = getColumnValue(rs, columnIndex, elementType.clazz());
 
         return obj == null ? (Optional<T>) Optional.empty()
-                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
     }
 
     /**
@@ -124,10 +124,10 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public Optional<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = getColumnValue(rs, columnLabel, elementType.clazz());
+        final T obj = getColumnValue(rs, columnLabel, elementType.clazz());
 
         return obj == null ? (Optional<T>) Optional.empty()
-                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
     }
 
     /**

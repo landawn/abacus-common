@@ -104,14 +104,17 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public C noCharQuotation() {
         return setCharQuotation((char) 0);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public C noStringQuotation() {
         return setStringQuotation((char) 0);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public C noQuotation() {
         return setCharQuotation((char) 0).setStringQuotation((char) 0);
     }

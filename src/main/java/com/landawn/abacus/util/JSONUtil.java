@@ -194,7 +194,7 @@ public final class JSONUtil {
      * @throws JSONException if there is an error during the unwrapping process.
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
-        return unwrap(jsonObject, N.<T> typeOf(targetType));
+        return unwrap(jsonObject, N.typeOf(targetType));
     }
 
     /**
@@ -208,7 +208,7 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
-        targetType = targetType.isObjectType() ? N.<T> typeOf("Map<String, Object>") : targetType;
+        targetType = targetType.isObjectType() ? N.typeOf("Map<String, Object>") : targetType;
         final Class<?> cls = targetType.clazz();
 
         if (targetType.clazz().isAssignableFrom(JSONObject.class)) {
@@ -266,7 +266,7 @@ public final class JSONUtil {
                 propInfo.setPropValue(result, value);
             }
 
-            return (T) beanInfo.finishBeanResult(result);
+            return beanInfo.finishBeanResult(result);
         } else {
             throw new IllegalArgumentException(targetType.name() + " is not a map or bean type");
         }
@@ -294,7 +294,7 @@ public final class JSONUtil {
      * @throws JSONException if there is an error during the unwrapping process.
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
-        return unwrap(jsonArray, N.<T> typeOf(targetType));
+        return unwrap(jsonArray, N.typeOf(targetType));
     }
 
     /**
@@ -308,7 +308,7 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
-        targetType = targetType.isObjectType() ? N.<T> typeOf("List<Object>") : targetType;
+        targetType = targetType.isObjectType() ? N.typeOf("List<Object>") : targetType;
         final int len = jsonArray.length();
 
         if (targetType.clazz().isAssignableFrom(JSONArray.class)) {

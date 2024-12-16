@@ -72,7 +72,7 @@ public enum CalendarField {
      */
     YEAR(Calendar.YEAR);
 
-    private static Map<Integer, CalendarField> m = new HashMap<>();
+    private static final Map<Integer, CalendarField> m = new HashMap<>();
 
     static {
         for (final CalendarField value : CalendarField.values()) {

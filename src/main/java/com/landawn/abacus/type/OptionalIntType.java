@@ -128,7 +128,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
             appendable.append(N.stringOf(x.get()));
@@ -144,7 +144,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalInt x, final JSONXMLSerializationConfig<?> config) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             writer.writeInt(x.get());

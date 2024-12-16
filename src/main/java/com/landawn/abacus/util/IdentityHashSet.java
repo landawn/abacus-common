@@ -135,7 +135,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     @Override
     public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
-            if (map.size() > 0) {
+            if (!map.isEmpty()) {
                 map.clear();
                 return true;
             }
@@ -165,6 +165,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      */
     @Override
     public boolean contains(final Object valueToFind) {
+        //noinspection SuspiciousMethodCalls
         return map.containsKey(valueToFind);
     }
 

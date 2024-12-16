@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiPredicate;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.function.TriPredicate;
 
 /**
@@ -216,6 +217,7 @@ public class Difference<L, R> {
             final Multiset<T2> bOccurrences = Multiset.create(b);
 
             for (final T1 e : a) {
+                //noinspection SuspiciousMethodCalls
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
@@ -824,6 +826,7 @@ public class Difference<L, R> {
             return compare(map1, map2, valueEquivalence);
         }
 
+        @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
         @SuppressWarnings("unlikely-arg-type")
         private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compare(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
@@ -852,13 +855,16 @@ public class Difference<L, R> {
                 for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
                     key1 = entry1.getKey();
                     val1 = entry1.getValue();
+                    //noinspection SuspiciousMethodCalls
                     val2 = map2.get(key1);
 
                     if (val2 == null) {
+                        //noinspection SuspiciousMethodCalls
                         if (map2.containsKey(key1)) {
                             if (entry1.getValue() == null) {
                                 common.put(key1, val1);
                             } else {
+                                //noinspection ConstantValue
                                 withDifferentValues.put(key1, Pair.of(val1, val2));
                             }
                         } else {
@@ -874,6 +880,7 @@ public class Difference<L, R> {
                 for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
                     key2 = entry2.getKey();
 
+                    //noinspection SuspiciousMethodCalls
                     if (common.containsKey(key2) || withDifferentValues.containsKey(key2)) {
                         continue;
                     }

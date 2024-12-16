@@ -27,14 +27,14 @@ import java.util.NoSuchElementException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
- * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
  *
  * An Iterator over the lines in a {@code Reader}.
  * <p>
  * {@code LineIterator} holds a reference to an open {@code Reader}.
  * When you have finished with the iterator you should close the reader
  * to free internal resources. This can be done by closing the reader directly,
- * or by calling the {@link #close()} or {@link #closeAllQuietly(LineIterator)}
+ * or by calling the {@link #close()} or {@link IOUtil#closeQuietly(AutoCloseable)}
  * method on the iterator.
  * <p>
  * The recommended usage pattern is:
@@ -84,7 +84,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * When you have finished with the iterator you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
-     * {@link IOUtil#closeQuietly(LineIterator)} method.
+     * {@link IOUtil#closeQuietly(AutoCloseable)} method.
      * <p>
      * The recommended usage pattern is:
      * <pre>
@@ -105,7 +105,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
      * @throws UncheckedIOException in case of an I/O error (file closed)
-     * @see #lineIterator(File, Charset)
+     * @see #of(File, Charset)
      */
     public static LineIterator of(final File file) {
         return of(file, Charsets.DEFAULT);
@@ -118,7 +118,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * When you have finished with the iterator you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
-     * {@link IOUtil#closeQuietly(LineIterator)} method.
+     * {@link IOUtil#closeQuietly(AutoCloseable)} method.
      * <p>
      * The recommended usage pattern is:
      * <pre>
@@ -154,7 +154,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
 
             return iter;
         } finally {
-            if (noException == false && reader != null) {
+            if (!noException && reader != null) {
                 IOUtil.closeQuietly(reader);
             }
         }
@@ -177,7 +177,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * {@code InputStream} specified here. When you have finished with
      * the iterator you should close the stream to free internal resources.
      * This can be done by closing the stream directly, or by calling
-     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(LineIterator)}.
+     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
      * <p>
      * The recommended usage pattern is:
      * <pre>
@@ -242,6 +242,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     //    }
 
     //-----------------------------------------------------------------------
+
     /**
      * Indicates whether the {@code Reader} has more lines.
      * If there is an {@code IOException} then {@link #close()} will

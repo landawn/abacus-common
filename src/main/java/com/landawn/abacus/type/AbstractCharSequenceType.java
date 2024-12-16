@@ -25,13 +25,4 @@ public abstract class AbstractCharSequenceType<T extends CharSequence> extends A
         return true;
     }
 
-    /**
-     * Checks if is comparable.
-     *
-     * @return {@code true}, if is comparable
-     */
-    @Override
-    public boolean isComparable() {
-        return true;
-    }
 }

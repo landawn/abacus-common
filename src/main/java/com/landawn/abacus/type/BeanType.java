@@ -35,53 +35,28 @@ public final class BeanType<T> extends AbstractType<T> {
         return typeClass;
     }
 
-    /**
-     * Checks if is bean.
-     *
-     * @return {@code true}, if is bean
-     */
     @Override
     public boolean isBean() {
         return true;
     }
 
-    /**
-     * Checks if is serializable.
-     *
-     * @return {@code true}, if is serializable
-     */
     @Override
     public boolean isSerializable() {
         return false;
     }
 
-    /**
-     * Gets the serialization type.
-     *
-     * @return
-     */
     @Override
     public SerializationType getSerializationType() {
         return SerializationType.ENTITY;
     }
 
-    /**
-     *
-     * @param x
-     * @return
-     */
     @Override
     public String stringOf(final T x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
-    /**
-     *
-     * @param str
-     * @return
-     */
     @Override
     public T valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : (T) Utils.jsonParser.deserialize(str, typeClass);
+        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 }

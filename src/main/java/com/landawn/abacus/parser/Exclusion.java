@@ -30,5 +30,5 @@ public enum Exclusion {
     /**
      * No bean property is excluded.
      */
-    NONE;
+    NONE
 }

@@ -34,6 +34,7 @@ import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
+@SuppressWarnings("JavadocLinkAsPlainText")
 public final class HARUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HARUtil.class);
@@ -104,8 +105,8 @@ public final class HARUtil {
      * @param targetUrl
      * @return
      */
-    public static String sendRequstByHAR(final File har, final String targetUrl) {
-        return sendRequstByHAR(har, Fn.equal(targetUrl));
+    public static String sendRequestByHAR(final File har, final String targetUrl) {
+        return sendRequestByHAR(har, Fn.equal(targetUrl));
     }
 
     /**
@@ -117,8 +118,8 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return
      */
-    public static String sendRequstByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return sendRequstByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static String sendRequestByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return sendRequestByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -130,8 +131,8 @@ public final class HARUtil {
      * @param targetUrl
      * @return
      */
-    public static String sendRequstByHAR(final String har, final String targetUrl) {
-        return sendRequstByHAR(har, Fn.equal(targetUrl));
+    public static String sendRequestByHAR(final String har, final String targetUrl) {
+        return sendRequestByHAR(har, Fn.equal(targetUrl));
     }
 
     /**
@@ -144,10 +145,11 @@ public final class HARUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static String sendRequstByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static String sendRequestByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
+        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
                 // .peek(m -> N.println(m.get("url")))
@@ -167,8 +169,8 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return
      */
-    public static List<String> sendMultiRequstsByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return sendMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static List<String> sendMultiRequestsByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return sendMultiRequestsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -181,10 +183,11 @@ public final class HARUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static List<String> sendMultiRequstsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static List<String> sendMultiRequestsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
+        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 // .peek(m -> N.println(m.get("url")))
@@ -203,9 +206,9 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return first element in the returned {@code Tuple2} is {@code url}. The second element is HttpResponse.
      */
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final File har,
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequestsByHAR(final File har,
             final Predicate<? super String> filterForTargetUrl) {
-        return streamMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+        return streamMultiRequestsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -218,11 +221,12 @@ public final class HARUtil {
      * @return first element in the returned {@code Tuple2} is {@code url}. The second element is HttpResponse.
      */
     @SuppressWarnings("rawtypes")
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final String har,
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequestsByHAR(final String har,
             final Predicate<? super String> filterForTargetUrl) {
         final Map map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
+        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 // .peek(m -> N.println(m.get("url")))
@@ -253,7 +257,7 @@ public final class HARUtil {
 
         final Tuple3<Boolean, Character, Consumer<? super String>> tp = logRequestCurlForHARRequest_TL.get();
 
-        if (tp._1.booleanValue() && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
+        if (tp._1 && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
             tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyType, tp._2));
         }
 
@@ -281,6 +285,7 @@ public final class HARUtil {
         final Map map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
+        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))

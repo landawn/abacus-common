@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.util.AbstractMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import java.util.Map;
 @com.landawn.abacus.annotation.Immutable
 public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Immutable {
 
+    @Serial
     private static final long serialVersionUID = -7667037689002186862L;
 
     ImmutableEntry(final K key, final V value) {

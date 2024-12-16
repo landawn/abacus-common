@@ -30,5 +30,5 @@ public enum EvictionPolicy {
     /**
      * Field ACCESSED_COUNT.
      */
-    ACCESS_COUNT;
+    ACCESS_COUNT
 }

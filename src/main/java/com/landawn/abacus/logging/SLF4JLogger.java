@@ -35,7 +35,7 @@ class SLF4JLogger extends AbstractLogger {
     public SLF4JLogger(final String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {
-            throw new RuntimeException("Failed to initilze SLF4J Logger Factory");
+            throw new RuntimeException("Failed to initialize SLF4J Logger Factory");
         }
 
         loggerImpl = org.slf4j.LoggerFactory.getLogger(name);
@@ -130,9 +130,9 @@ class SLF4JLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is warn enabled.
+     * Checks if warning leve log is enabled.
      *
-     * @return {@code true}, if is warn enabled
+     * @return {@code true}, if warning leve log is enabled.
      */
     @Override
     public boolean isWarnEnabled() {

@@ -42,7 +42,7 @@ public final class Objectory {
 
     private static final Logger logger = LoggerFactory.getLogger(Objectory.class);
 
-    private static AtomicInteger created = new AtomicInteger();
+    private static final AtomicInteger created = new AtomicInteger();
 
     static final int KB = 1024;
 
@@ -147,7 +147,6 @@ public final class Objectory {
      * @deprecated for internal use only
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createMap() {
         final Map<K, V> map = (Map<K, V>) mapPool.poll();
 
@@ -163,7 +162,6 @@ public final class Objectory {
      * @deprecated for internal use only
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createLinkedHashMap() {
         final Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
 
@@ -589,7 +587,7 @@ public final class Objectory {
      */
     private static void logCreated(final String methodName) {
         if (logger.isWarnEnabled() && (created.incrementAndGet() % 1000) == 0) {
-            logger.warn("The " + created.get() + "th cachable object is created by " + methodName,
+            logger.warn("The " + created.get() + "th cacheable object is created by " + methodName,
                     new RuntimeException("No error. It's only for debug to print stack trace:"));
         }
     }

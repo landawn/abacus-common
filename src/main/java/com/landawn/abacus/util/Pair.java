@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
@@ -27,6 +28,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <L>
  * @param <R>
  */
+@SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     // implements Map.Entry<L, R> {
     public L left; //NOSONAR
@@ -125,7 +127,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Gets the and set left.
+     * Returns the current left value and then sets it with the specified value.
      *
      * @param newLeft
      * @return
@@ -137,7 +139,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets the and get left.
+     * Sets left with the specified value and then return it.
      *
      * @param newLeft
      * @return
@@ -148,19 +150,19 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Gets the and set right.
+     Returns the current right value and then sets it with the specified value.
      *
      * @param newRight
      * @return
      */
     public R getAndSetRight(final R newRight) {
-        final R res = newRight;
+        final R res = right;
         right = newRight;
         return res;
     }
 
     /**
-     * Sets the and get right.
+     * Sets right with the specified value and then return it.
      *
      * @param newRight
      * @return
@@ -326,14 +328,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      *
      * @param <E>
-     * @param comsumer
+     * @param consumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> comsumer) throws E {
-        final Throwables.Consumer<Object, E> objComsumer = (Throwables.Consumer<Object, E>) comsumer;
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
+        final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
-        objComsumer.accept(left);
-        objComsumer.accept(right);
+        objConsumer.accept(left);
+        objConsumer.accept(right);
     }
 
     /**
@@ -388,7 +390,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @throws E the e
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
-        return predicate.test(left, right) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
+        return predicate.test(left, right) ? Optional.of(this) : Optional.empty();
     }
 
     /**
@@ -399,7 +401,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @throws E the e
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
+        return predicate.test(this) ? Optional.of(this) : Optional.empty();
     }
 
     //    /**

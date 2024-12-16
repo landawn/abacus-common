@@ -85,7 +85,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param initialCapacity the initial capacity of the Multimap.
      */
     Multimap(final int initialCapacity) {
-        this(N.<K, V> newHashMap(initialCapacity), (Supplier<V>) Suppliers.ofList());
+        this(N.newHashMap(initialCapacity), (Supplier<V>) Suppliers.ofList());
     }
 
     /**
@@ -182,6 +182,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return The value collection associated with the specified key, or {@code null} if the key is not present in the Multimap.
      */
     public V get(final Object key) {
+        //noinspection SuspiciousMethodCalls
         return backingMap.get(key);
     }
 
@@ -197,6 +198,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return The value collection associated with the specified key, or the default value if the key is not present in the Multimap.
      */
     public V getOrDefault(final Object key, final V defaultValue) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V value = backingMap.get(key);
 
         if (value == null) {
@@ -443,10 +445,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if the element was successfully removed from the collection of values associated with the specified key, {@code false} otherwise.
      */
     public boolean removeOne(final Object key, final Object e) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V val = backingMap.get(key);
 
+        //noinspection SuspiciousMethodCalls
         if (val != null && val.remove(e)) {
             if (val.isEmpty()) {
+                //noinspection SuspiciousMethodCalls
                 backingMap.remove(key);
             }
 
@@ -476,12 +481,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
             key = e.getKey();
+            //noinspection SuspiciousMethodCalls
             val = backingMap.get(key);
 
             if (N.notEmpty(val)) {
                 wasModified |= val.remove(e.getValue());
 
                 if (val.isEmpty()) {
+                    //noinspection SuspiciousMethodCalls
                     backingMap.remove(key);
                 }
             }
@@ -498,6 +505,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return The collection of values that were associated with the specified key, or {@code null} if the key was not present in the Multimap.
      */
     public V removeAll(final Object key) {
+        //noinspection SuspiciousMethodCalls
         return backingMap.remove(key);
     }
 
@@ -518,12 +526,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         boolean wasModified = false;
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V val = backingMap.get(key);
 
         if (N.notEmpty(val)) {
+            //noinspection SuspiciousMethodCalls
             wasModified = val.removeAll(c);
 
             if (val.isEmpty()) {
+                //noinspection SuspiciousMethodCalls
                 backingMap.remove(key);
             }
         }
@@ -560,12 +571,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             key = e.getKey();
+            //noinspection SuspiciousMethodCalls
             val = backingMap.get(key);
 
             if (N.notEmpty(val) && N.notEmpty(e.getValue())) {
+                //noinspection SuspiciousMethodCalls
                 wasModified |= val.removeAll(e.getValue());
 
                 if (val.isEmpty()) {
+                    //noinspection SuspiciousMethodCalls
                     backingMap.remove(key);
                 }
             }
@@ -597,12 +611,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             key = e.getKey();
+            //noinspection SuspiciousMethodCalls
             val = backingMap.get(key);
 
             if (N.notEmpty(val) && N.notEmpty(e.getValue())) {
+                //noinspection SuspiciousMethodCalls
                 wasModified |= val.removeAll(e.getValue());
 
                 if (val.isEmpty()) {
+                    //noinspection SuspiciousMethodCalls
                     backingMap.remove(key);
                 }
             }
@@ -1340,6 +1357,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V oldValue = get(key);
 
         if (oldValue == null) {
+            //noinspection ConstantValue
             return oldValue;
         }
 
@@ -1636,9 +1654,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if the Multimap contains the specified key-value pair, {@code false} otherwise.
      */
     public boolean contains(final Object key, final Object e) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V val = backingMap.get(key);
 
-        return val == null ? false : val.contains(e);
+        //noinspection SuspiciousMethodCalls
+        return val != null && val.contains(e);
     }
 
     /**
@@ -1648,6 +1668,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if the Multimap contains the specified key, {@code false} otherwise.
      */
     public boolean containsKey(final Object key) {
+        //noinspection SuspiciousMethodCalls
         return backingMap.containsKey(key);
     }
 
@@ -1664,6 +1685,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final Collection<V> values = values();
 
         for (final V val : values) {
+            //noinspection SuspiciousMethodCalls
             if (val.contains(e)) {
                 return true;
             }
@@ -1683,9 +1705,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if the Multimap contains all elements of the specified collection for the given key, {@code false} otherwise.
      */
     public boolean containsAll(final Object key, final Collection<?> c) {
+        @SuppressWarnings("SuspiciousMethodCalls")
         final V val = backingMap.get(key);
 
-        return val == null ? false : (N.isEmpty(c) ? true : val.containsAll(c));
+        //noinspection SuspiciousMethodCalls
+        return val != null && (N.isEmpty(c) || val.containsAll(c));
     }
 
     /**
@@ -2013,7 +2037,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     //     *
     //     * @see Collections#synchronizedMap(Map)
     //     */
-    //    public Multimap<K, E, V> synchronizedd() {
+    //    public Multimap<K, E, V> synchronized() {
     //        return new Multimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
     //    }
 
@@ -2055,7 +2079,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns an EntryStream of the entries in the Multimap..
+     * Returns an EntryStream of the entries in the Multimap.
      * Each element in the EntryStream is a Map.Entry where the key is a key in the Multimap and the value is the corresponding collection of values.
      *
      * @return An EntryStream of the entries in the Multimap.
@@ -2139,7 +2163,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @throws X if the function throws an exception of type X.
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
-        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
+        return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
     }
 
     /**

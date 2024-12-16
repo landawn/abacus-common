@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,13 +95,13 @@ public enum Percentage {
     /** The  99 9999. */
     _99_9999("99.9999%", 0.999999);
 
-    private static final Map<Integer, Percentage> valuePool = new HashMap<>();
-
-    static {
-        for (final Percentage p : Percentage.values()) {
-            valuePool.put(intValue(p), p);
-        }
-    }
+    //    private static final Map<Integer, Percentage> valuePool = new HashMap<>();
+    //
+    //    static {
+    //        for (final Percentage p : Percentage.values()) {
+    //            valuePool.put(intValue(p), p);
+    //        }
+    //    }
 
     private static final Map<String, ImmutableSet<Percentage>> rangePool = new ConcurrentHashMap<>();
 

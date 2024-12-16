@@ -29,6 +29,9 @@ public final class InternalUtil {
     public static final String ERROR_MSG_FOR_NO_SUCH_EX = "Target object/value does not exist or is not found";
     public static final String ERROR_MSG_FOR_NULL_ELEMENT_EX = "Target object/value does not exist or is not found, or its value is null";
 
+    // To avoid SpotBugs: CD_CIRCULAR_DEPENDENCY, IC_INIT_CIRCULARITY
+    static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
+
     /**
      *
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
@@ -183,7 +186,7 @@ public final class InternalUtil {
 
     //    /**
     //     *
-    //     * @param a the specified array should not be modified after it's used to
+    //     * @param a the array should not be modified after it's used to
     //     *            create the new String.
     //     * @param share the same array will be shared with the new created ArrayList
     //     *            if it's true.

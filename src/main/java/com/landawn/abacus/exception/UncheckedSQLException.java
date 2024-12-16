@@ -14,12 +14,12 @@
 
 package com.landawn.abacus.exception;
 
+import java.io.Serial;
 import java.sql.SQLException;
 
 public class UncheckedSQLException extends UncheckedException {
-    /**
-     * serialVersionUID
-     */
+
+    @Serial
     private static final long serialVersionUID = 9083988895292299710L;
 
     private final SQLException sqlException;

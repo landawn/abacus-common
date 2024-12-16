@@ -14,11 +14,14 @@
 
 package com.landawn.abacus.exception;
 
+import java.io.Serial;
+
 public class TooManyElementsException extends IllegalStateException {
 
     /**
      * Field serialVersionUID.
      */
+    @Serial
     private static final long serialVersionUID = 4230938963102900489L;
 
     /**

@@ -121,7 +121,7 @@ public final class ExceptionUtil {
             throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
         }
 
-        toRuntimeExceptionFuncMap.put((Class) exceptionClass, (Function) runtimeExceptionMapper);
+        toRuntimeExceptionFuncMap.put(exceptionClass, (Function) runtimeExceptionMapper);
     }
 
     /**
@@ -145,7 +145,7 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise returns itself.
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise, returns itself.
      *
      * @param e
      * @param throwIfItIsError
@@ -159,23 +159,23 @@ public final class ExceptionUtil {
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
-        Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candicate = null;
+        Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candidate = null;
 
         if (func == null) {
             for (final Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
-                if (entry.getKey().isAssignableFrom(cls) && (candicate == null || candicate.getKey().isAssignableFrom(entry.getKey()))) {
-                    candicate = entry;
+                if (entry.getKey().isAssignableFrom(cls) && (candidate == null || candidate.getKey().isAssignableFrom(entry.getKey()))) {
+                    candidate = entry;
                 }
             }
 
-            if (candicate == null) {
+            if (candidate == null) {
                 if (e instanceof RuntimeException) {
                     func = RUNTIME_FUNC;
                 } else {
                     func = CHECKED_FUNC;
                 }
             } else {
-                func = candicate.getValue();
+                func = candidate.getValue();
             }
 
             toRuntimeExceptionFuncMap.put(cls, func);
@@ -404,6 +404,7 @@ public final class ExceptionUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the stack trace from a Throwable as a String.
      *

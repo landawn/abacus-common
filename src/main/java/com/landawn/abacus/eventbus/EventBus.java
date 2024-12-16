@@ -16,14 +16,7 @@ package com.landawn.abacus.eventbus;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -43,12 +36,13 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.ThreadMode;
 
 // DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
+
 /**
- * It is responsible for managing the registration and unregistration of subscribers,
+ * It is responsible for managing the registration and un-registration of subscribers,
  * posting events to subscribers, and handling sticky events. It also provides methods to get all registered subscribers,
  * get subscribers for a specific event type, and remove sticky events.
  * <br />
- * The EventBus class is thread-safe and can be used in a multi-threaded environment.
+ * The EventBus class is thread-safe and can be used in a multi-thread environment.
  *
  * <pre>
  * <code>
@@ -132,6 +126,7 @@ public class EventBus {
 
     private static final EventBus INSTANCE = new EventBus("default");
 
+    @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
     public EventBus() {
         this(Strings.guid());
     }
@@ -154,24 +149,22 @@ public class EventBus {
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
 
         if (executor != DEFAULT_EXECUTOR && executor instanceof ExecutorService) {
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    final ExecutorService executorService = (ExecutorService) executor;
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                final ExecutorService executorService = (ExecutorService) executor;
 
-                    logger.warn("Starting to shutdown task in EventBus");
+                logger.warn("Starting to shutdown task in EventBus");
 
-                    try {
-                        executorService.shutdown();
+                try {
+                    executorService.shutdown();
 
-                        executorService.awaitTermination(60, TimeUnit.SECONDS);
-                    } catch (final InterruptedException e) {
-                        logger.warn("Not all the requests/tasks executed in Eventbus are completed successfully before shutdown.");
-                    } finally {
-                        logger.warn("Completed to shutdown task in Eventbus");
-                    }
+                    //noinspection ResultOfMethodCallIgnored
+                    executorService.awaitTermination(60, TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    logger.warn("Not all the requests/tasks executed in Eventbus are completed successfully before shutdown.");
+                } finally {
+                    logger.warn("Completed to shutdown task in Eventbus");
                 }
-            });
+            }));
         }
     }
 
@@ -180,6 +173,7 @@ public class EventBus {
      *
      * @return
      */
+    @SuppressFBWarnings("MS_EXPOSE_REP")
     public static EventBus getDefault() {
         return INSTANCE;
     }
@@ -189,7 +183,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the subscriber which is registered with specified {@code eventType}(or its sub types) and {@code null} event id.
+     * Returns the subscriber which is registered with specified {@code eventType}(or its subtypes) and {@code null} event id.
      *
      * @param eventType
      * @return
@@ -199,7 +193,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the subscriber which is registered with specified {@code eventType}(or its sub types) and {@code eventId}.
+     * Returns the subscriber which is registered with specified {@code eventType}(or its subtypes) and {@code eventId}.
      * @param eventId
      * @param eventType
      *
@@ -250,7 +244,7 @@ public class EventBus {
      * @return
      */
     public EventBus register(final Object subscriber, final String eventId) {
-        return register(subscriber, eventId, (ThreadMode) null);
+        return register(subscriber, eventId, null);
     }
 
     /**
@@ -265,7 +259,7 @@ public class EventBus {
 
     /**
      * Register the subscriber with the specified {@code eventId} and {@code threadMode}.
-     * If the same register has been registered before, it be over-written with the new specified {@code eventId} and {@code threadMode}.
+     * If the same register has been registered before, it can be over-written with the new specified {@code eventId} and {@code threadMode}.
      *
      * @param subscriber
      * @param eventId
@@ -433,7 +427,7 @@ public class EventBus {
      * @return
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
-        return register(subscriber, eventId, (ThreadMode) null);
+        return register(subscriber, eventId, null);
     }
 
     //    /**
@@ -468,10 +462,10 @@ public class EventBus {
             logger.debug("Unregistering subscriber: " + subscriber);
         }
 
-        List<SubIdentifier> subEvents = null;
+        Set<SubIdentifier> subEvents = null;
 
         synchronized (registeredSubMap) {
-            subEvents = registeredSubMap.remove(subscriber);
+            subEvents = N.newHashSet(registeredSubMap.remove(subscriber));
             listOfSubEventSubs = null;
         }
 
@@ -541,7 +535,7 @@ public class EventBus {
                     listOfEventIdSubMap.put(eventId, listOfEventIdSub);
                 }
 
-                listOfSubs = Arrays.asList(listOfEventIdSub);
+                listOfSubs = Collections.singletonList(listOfEventIdSub);
             }
         }
 
@@ -566,7 +560,7 @@ public class EventBus {
      * @return
      */
     public EventBus postSticky(final Object event) {
-        return postSticky((String) null, event);
+        return postSticky(null, event);
     }
 
     /**
@@ -744,6 +738,7 @@ public class EventBus {
     protected void post(final SubIdentifier sub, final Object event) {
         try {
             if (sub.intervalInMillis > 0 || sub.deduplicate) {
+                //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (sub) { //NOSONAR
                     if (sub.intervalInMillis > 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalInMillis) {
                         // ignore.
@@ -786,7 +781,7 @@ public class EventBus {
     /**
      * The Class SubIdentifier.
      */
-    private static final class SubIdentifier {
+    public static final class SubIdentifier {
 
         /** The cached classes. */
         final Map<Class<?>, Boolean> cachedClasses = new ConcurrentHashMap<>();
@@ -840,10 +835,10 @@ public class EventBus {
                     : method.getParameterTypes()[0];
             eventId = subscribe == null || Strings.isEmpty(subscribe.eventId()) ? null : subscribe.eventId();
             threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
-            strictEventType = subscribe == null ? false : subscribe.strictEventType();
-            sticky = subscribe == null ? false : subscribe.sticky();
+            strictEventType = subscribe != null && subscribe.strictEventType();
+            sticky = subscribe != null && subscribe.sticky();
             intervalInMillis = subscribe == null ? 0 : subscribe.interval();
-            deduplicate = subscribe == null ? false : subscribe.deduplicate();
+            deduplicate = subscribe != null && subscribe.deduplicate();
 
             isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")
                     && parameterType.equals(Object.class) && subscribe == null;
@@ -884,15 +879,7 @@ public class EventBus {
                 return false;
             }
 
-            Boolean b = cachedClasses.get(eventType);
-
-            if (b == null) {
-                b = strictEventType ? parameterType.equals(eventType) : parameterType.isAssignableFrom(eventType);
-
-                cachedClasses.put(eventType, b);
-            }
-
-            return b;
+            return cachedClasses.computeIfAbsent(eventType, k -> strictEventType ? parameterType.equals(eventType) : parameterType.isAssignableFrom(eventType));
         }
 
         @Override

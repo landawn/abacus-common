@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  */
 public final class DoubleList extends PrimitiveList<Double, double[], DoubleList> {
 
+    @Serial
     private static final long serialVersionUID = 766157472430159621L;
 
     static final Random RAND = new SecureRandom();
@@ -439,7 +441,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1210,7 +1212,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.DoubleConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1246,7 +1248,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntDoubleConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1457,17 +1459,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new DoubleList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code DoubleList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code DoubleList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

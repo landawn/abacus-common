@@ -79,9 +79,7 @@ public final class Timed<T> implements Immutable {
             return true;
         }
 
-        if (obj instanceof Timed) {
-            final Timed<?> other = (Timed<?>) obj;
-
+        if (obj instanceof Timed<?> other) {
             return timeInMillis == other.timeInMillis && N.equals(value, other.value);
         }
 

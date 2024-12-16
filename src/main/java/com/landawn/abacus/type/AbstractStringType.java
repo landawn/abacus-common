@@ -20,6 +20,7 @@ import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -47,16 +48,6 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public boolean isString() {
-        return true;
-    }
-
-    /**
-     * Checks if is immutable.
-     *
-     * @return {@code true}, if is immutable
-     */
-    @Override
-    public boolean isImmutable() {
         return true;
     }
 
@@ -176,11 +167,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public void appendTo(final Appendable appendable, final String x) throws IOException {
-        if (x == null) {
-            appendable.append(NULL_STRING);
-        } else {
-            appendable.append(x);
-        }
+        appendable.append(Objects.requireNonNullElse(x, NULL_STRING));
     }
 
     /**

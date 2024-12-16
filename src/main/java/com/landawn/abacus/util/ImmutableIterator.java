@@ -41,7 +41,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     }
 
     public Set<T> toSet() {
-        return toCollection(Suppliers.<T> ofSet());
+        return toCollection(Suppliers.ofSet());
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     }
 
     public ImmutableList<T> toImmutableList() {
-        return ImmutableList.wrap(toCollection(Suppliers.<T> ofList()));
+        return ImmutableList.wrap(toCollection(Suppliers.ofList()));
     }
 
     public ImmutableSet<T> toImmutableSet() {

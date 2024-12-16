@@ -84,7 +84,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createTimestamp(parseLong(cbuf, offset, len));
+                return DateUtil.createdTimestamp(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

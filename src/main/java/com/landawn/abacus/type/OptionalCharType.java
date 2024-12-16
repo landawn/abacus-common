@@ -70,9 +70,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalChar.empty()
-                : OptionalChar.of(obj instanceof Character ? (Character) obj
-                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : Strings.parseChar(obj.toString())));
+        if (obj instanceof Character) {
+            return OptionalChar.of((Character) obj);
+        } else if (obj instanceof Integer) {
+            return OptionalChar.of((char) ((Integer) obj).intValue());
+        } else {
+            return obj == null ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(obj.toString()));
+        }
     }
 
     /**
@@ -86,9 +90,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     public OptionalChar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalChar.empty()
-                : OptionalChar.of(obj instanceof Character ? (Character) obj
-                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : Strings.parseChar(obj.toString())));
+        if (obj instanceof Character) {
+            return OptionalChar.of((Character) obj);
+        } else if (obj instanceof Integer) {
+            return OptionalChar.of((char) ((Integer) obj).intValue());
+        } else {
+            return obj == null ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(obj.toString()));
+        }
     }
 
     /**
@@ -131,7 +139,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalChar x) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
             appendable.append(x.get());
@@ -147,7 +155,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalChar x, final JSONXMLSerializationConfig<?> config) throws IOException {
-        if (x == null) {
+        if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             final char ch = config == null ? 0 : config.getCharQuotation();

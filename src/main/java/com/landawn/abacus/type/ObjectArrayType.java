@@ -154,8 +154,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     public T[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
-            return (T[]) Array.newInstance(elementType.clazz(), 0);
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+            return Array.newInstance(elementType.clazz(), 0);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
         }

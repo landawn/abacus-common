@@ -141,9 +141,6 @@ public abstract class Configuration {
         }
     }
 
-    /**
-     * Inits the.
-     */
     protected void init() {
     }
 
@@ -152,7 +149,7 @@ public abstract class Configuration {
      * @param element
      */
     protected void complexElement2Attr(final Element element) {
-        throw new RuntimeException("Unknow element: " + element.getNodeName());
+        throw new RuntimeException("Unknown element: " + element.getNodeName());
     }
 
     /**
@@ -171,7 +168,7 @@ public abstract class Configuration {
      * @return a list of common configuration paths
      */
     public static List<String> getCommonConfigPath() {
-        String currentLocation = getCurrrentSourceCodeLocation().getAbsolutePath();
+        String currentLocation = getCurrentSourceCodeLocation().getAbsolutePath();
 
         if (logger.isInfoEnabled()) {
             logger.info("current source location: " + currentLocation);
@@ -274,7 +271,7 @@ public abstract class Configuration {
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
             folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
-            folderPrefix = folderPrefix.replaceAll("\\.\\.\\" + File.separatorChar, "");
+            folderPrefix = folderPrefix.replace("\\.\\.\\" + File.separatorChar, "");
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
         }
@@ -293,7 +290,7 @@ public abstract class Configuration {
             }
         }
 
-        //    File dir = getCurrrentSourceCodeLocation();
+        //    File dir = getCurrentSourceCodeLocation();
         //
         //    if (logger.isInfoEnabled()) {
         //        logger.info("start to find simplified file: '" + simpleConfigFileName + "' from source path: '" + dir.getAbsolutePath()
@@ -455,11 +452,11 @@ public abstract class Configuration {
     }
 
     /**
-     * Gets the currrent source code location.
+     * Gets the current source code location.
      *
      * @return
      */
-    private static File getCurrrentSourceCodeLocation() {
+    private static File getCurrentSourceCodeLocation() {
         File dir = new File(getSourceCodeLocation(Configuration.class));
 
         if (dir.isFile() && dir.getParentFile().exists()) {
@@ -521,8 +518,10 @@ public abstract class Configuration {
      * @see FilenameUtil#normalize(String)
      */
     public static File formatPath(File file) {
-        if (!file.exists() && (new File(file.getAbsolutePath().replace("%20", " "))).exists()) { //NOSONAR
-            file = new File(file.getAbsolutePath().replace("%20", " ")); //NOSONAR
+        final String formattedPath = file.getAbsolutePath().replace("%20", " ");
+
+        if (!file.exists() && (new File(formattedPath)).exists()) { //NOSONAR
+            file = new File(formattedPath); //NOSONAR
         }
 
         return file;
@@ -537,7 +536,7 @@ public abstract class Configuration {
      * @return The time in milliseconds.
      */
     public static long readTimeInMillis(String value) {
-        value = value == null ? value : value.trim();
+        value = Strings.trimToNull(value);
 
         if (Strings.isEmpty(value)) {
             return 0;
@@ -632,12 +631,13 @@ public abstract class Configuration {
      * @param attrValue
      * @return String
      */
+    @SuppressWarnings("UnusedReturnValue")
     protected String setAttribute(final String attrName, String attrValue) {
         if (attrValue != null) {
             String attrVal = attrValue;
             attrVal = attrVal.trim();
 
-            if ((props.size() > 0) && attrVal.startsWith("${") && attrVal.endsWith("}")) {
+            if ((!props.isEmpty()) && attrVal.startsWith("${") && attrVal.endsWith("}")) {
                 attrVal = props.get(attrVal.substring(2, attrVal.length() - 1));
 
                 if (attrVal != null) {

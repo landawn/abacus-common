@@ -68,7 +68,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Returns an ImmutableSet containing just the provided element.
      *
      * @param <E> the type of the element
-     * @param e1 the element to be included in the ImmutableSet
+     * @param e the element to be included in the ImmutableSet
      * @return an ImmutableSet containing the provided element
      */
     public static <E> ImmutableSet<E> just(final E e) {
@@ -349,7 +349,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * @param elements
          * @return
          */
-        public Builder<E> add(final E... elements) {
+        @SafeVarargs
+        public final Builder<E> add(final E... elements) {
             if (N.notEmpty(elements)) {
                 set.addAll(Arrays.asList(elements));
             }

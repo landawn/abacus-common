@@ -293,7 +293,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      */
     @Override
     public int compareTo(final Duration other) {
-        return (milliseconds > other.milliseconds) ? 1 : ((milliseconds == other.milliseconds) ? 0 : -1);
+        return Long.compare(milliseconds, other.milliseconds);
     }
 
     /**
@@ -312,7 +312,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
     @Override
     public int hashCode() {
-        return ((int) (milliseconds ^ (milliseconds >>> 32)));
+        return (Long.hashCode(milliseconds));
     }
 
     @Override

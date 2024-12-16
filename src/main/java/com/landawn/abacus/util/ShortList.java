@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  */
 public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
+    @Serial
     private static final long serialVersionUID = 25682021483156507L;
 
     static final Random RAND = new SecureRandom();
@@ -486,7 +488,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1257,7 +1259,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ShortConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1293,7 +1295,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntShortConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1504,13 +1506,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     @Override
     public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new ShortList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code ShortList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code ShortList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex

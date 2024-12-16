@@ -20,6 +20,7 @@ public interface NConsumer<T> {
      *
      * @param args
      */
+    @SuppressWarnings("unchecked")
     void accept(T... args);
 
     /**

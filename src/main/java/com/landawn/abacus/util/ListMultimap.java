@@ -52,7 +52,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param initialCapacity the initial capacity of the ListMultimap.
      */
     ListMultimap(final int initialCapacity) {
-        this(N.<K, List<E>> newHashMap(initialCapacity), ArrayList.class);
+        this(N.newHashMap(initialCapacity), ArrayList.class);
     }
 
     /**
@@ -295,6 +295,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return a new instance of ListMultimap with the key-value pairs from the specified map
      */
     public static <K, E> ListMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
+        //noinspection rawtypes
         final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
 
         if (N.notEmpty(map)) {
@@ -458,7 +459,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <K, E> ListMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
-            return b == null ? N.<K, E> newListMultimap() : create(b);
+            return b == null ? N.newListMultimap() : create(b);
         } else {
             final ListMultimap<K, E> res = create(a);
             res.put(b);
@@ -480,7 +481,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             final Map<? extends K, ? extends E> c) {
         if (a == null) {
             if (b == null) {
-                return c == null ? N.<K, E> newListMultimap() : create(c);
+                return c == null ? N.newListMultimap() : create(c);
             } else {
                 final ListMultimap<K, E> res = create(b);
                 res.put(c);
@@ -556,14 +557,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return a new instance of ListMultimap backed by the provided map.
      * @throws IllegalArgumentException if the provided map or valueSupplier is null
      */
-    @SuppressWarnings("rawtypes")
     @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
         N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
-        return new ListMultimap<>((Map) map, valueSupplier);
+        return new ListMultimap<>((Map<K, List<E>>) map, valueSupplier);
     }
 
     /**
@@ -596,10 +596,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * @return a new instance of ListMultimap where the original keys are now values and the original values are now keys
      */
-    @SuppressWarnings("rawtypes")
     public ListMultimap<E, K> inverse() {
         final ListMultimap<K, E> multimap = this;
-        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(backingMap), (Supplier) valueSupplier);
+        //noinspection rawtypes
+        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, List<E>> entry : multimap.entrySet()) {
@@ -743,7 +743,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //     * @see Collections#synchronizedMap(Map)
     //     */
     //    @Override
-    //    public ListMultimap<K, E> synchronizedd() {
+    //    public ListMultimap<K, E> synchronized() {
     //        return new ListMultimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
     //    }
 

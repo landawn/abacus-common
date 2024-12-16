@@ -97,7 +97,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which satisfy the given predicate.
      *
      * @param filter
      * @return
@@ -111,7 +111,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Removes the all.
+     * Removes all the elements contained in the specified collection.
      *
      * @param oldElements
      * @return

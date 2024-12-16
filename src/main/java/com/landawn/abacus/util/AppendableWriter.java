@@ -167,7 +167,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      */
     @Override
     public void close() throws IOException {
-        if (closed == false) {
+        if (!closed) {
             closed = true;
 
             flush();

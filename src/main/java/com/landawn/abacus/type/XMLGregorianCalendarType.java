@@ -121,7 +121,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createdTimestamp(x.toGregorianCalendar()));
     }
 
     /**
@@ -133,7 +133,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createdTimestamp(x.toGregorianCalendar()));
     }
 
     /**

@@ -199,7 +199,9 @@ public interface EntityId {
 
     int size();
 
-    boolean isEmpty();
+    default boolean isEmpty() {
+        return size() == 0;
+    }
 
     static EntityIdBuilder builder() {
         return new EntityIdBuilder();
@@ -214,7 +216,7 @@ public interface EntityId {
         return new EntityIdBuilder(entityName);
     }
 
-    public static class EntityIdBuilder {
+    class EntityIdBuilder {
         private Seid entityId = null;
 
         EntityIdBuilder() {

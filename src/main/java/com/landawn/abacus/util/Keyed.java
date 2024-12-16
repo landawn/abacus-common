@@ -35,7 +35,6 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
     }
 
     /**
-     *
      * @param <K> the key type
      * @param <T>
      * @param key
@@ -60,7 +59,6 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
     }
 
     /**
-     *
      * @param obj
      * @return
      */
@@ -70,7 +68,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
             return true;
         }
 
-        if (obj != null && Keyed.class.equals(obj.getClass())) {
+        if (obj != null && this.getClass().equals(obj.getClass())) {
             return N.equals(((Keyed<K, T>) obj).key, key);
         }
 

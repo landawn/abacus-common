@@ -122,9 +122,9 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is warn enabled.
+     * Checks if warning leve log is enabled.
      *
-     * @return {@code true}, if is warn enabled
+     * @return {@code true}, if warning leve log is enabled.
      */
     @Override
     public boolean isWarnEnabled() {

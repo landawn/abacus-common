@@ -76,21 +76,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         return typeClass;
     }
 
-    /**
-     * Gets the parameter types.
-     *
-     * @return
-     */
     @Override
     public Type<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
-    /**
-     * Checks if is map.
-     *
-     * @return {@code true}, if is map
-     */
     @Override
     public boolean isMap() {
         return true;
@@ -136,7 +126,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
-        } else if (x.size() == 0) {
+        } else if (x.isEmpty()) {
             return "{}";
         }
 
@@ -149,12 +139,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @return
      */
     @MayReturnNull
-    @SuppressWarnings("unchecked")
     @Override
     public T valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || "{}".equals(str)) {
+        } else if (str.isEmpty() || "{}".equals(str)) {
             return (T) N.newMap(typeClass);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);

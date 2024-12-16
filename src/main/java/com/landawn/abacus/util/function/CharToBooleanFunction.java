@@ -19,7 +19,7 @@ public interface CharToBooleanFunction {
     /**
      * Converts a char value to a boolean: {@code true} if the value is 'Y', 'y', or '1', otherwise {@code false}.
      */
-    CharToBooleanFunction DEFAULT = value -> (value == 'Y' || value == 'y' || value == '1') == true;
+    CharToBooleanFunction DEFAULT = value -> (value == 'Y' || value == 'y' || value == '1');
 
     /**
      *

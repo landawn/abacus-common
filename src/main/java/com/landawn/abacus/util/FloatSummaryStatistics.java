@@ -122,6 +122,6 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     @Override
     public String toString() {
-        return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format("{min=%f, max=%f, count=%d, sum=%f, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

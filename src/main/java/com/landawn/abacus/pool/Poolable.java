@@ -28,7 +28,7 @@ public interface Poolable {
     void destroy();
 
     /**
-     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
+     * Wrap the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -39,7 +39,7 @@ public interface Poolable {
     }
 
     /**
-     * Wrap the the source object with specified {@code liveTime} and {@code maxIdleTime}.
+     * Wrap the source object with specified {@code liveTime} and {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject

@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
- * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
  *
  * General File System utilities.
  * <p>
@@ -66,8 +66,9 @@ final class FileSystemUtil {
     private static final String DF;
 
     static {
-        int os = OTHER;
         String dfPath = "df";
+        int os = OTHER;
+
         try {
             String osName = System.getProperty("os.name");
             if (osName == null) {
@@ -75,18 +76,16 @@ final class FileSystemUtil {
             }
             osName = osName.toLowerCase(Locale.ENGLISH);
             // match
-            if (osName.indexOf("windows") != -1) {
+            if (osName.contains("windows")) {
                 os = WINDOWS;
-            } else if (osName.indexOf("linux") != -1 || osName.indexOf("mpe/ix") != -1 || osName.indexOf("freebsd") != -1 || osName.indexOf("irix") != -1
-                    || osName.indexOf("digital unix") != -1 || osName.indexOf("unix") != -1 || osName.indexOf("mac os x") != -1) {
+            } else if (osName.contains("linux") || osName.contains("mpe/ix") || osName.contains("freebsd") || osName.contains("irix")
+                    || osName.contains("digital unix") || osName.contains("unix") || osName.contains("mac os x")) {
                 os = UNIX;
-            } else if (osName.indexOf("sun os") != -1 || osName.indexOf("sunos") != -1 || osName.indexOf("solaris") != -1) {
+            } else if (osName.contains("sun os") || osName.contains("sunos") || osName.contains("solaris")) {
                 os = POSIX_UNIX;
                 dfPath = "/usr/xpg4/bin/df"; //NOSONAR
-            } else if (osName.indexOf("hp-ux") != -1 || osName.indexOf("aix") != -1) {
+            } else if (osName.contains("hp-ux") || osName.contains("aix")) {
                 os = POSIX_UNIX;
-            } else {
-                os = OTHER;
             }
 
         } catch (final Exception ex) {
@@ -103,6 +102,7 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the free space on a drive or volume in kilobytes by invoking
      * the command line.
@@ -113,7 +113,7 @@ final class FileSystemUtil {
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
      * <p>
-     * In order to work, you must be running Windows, or have a implementation of
+     * In order to work, you must be running Windows, or have an implementation of
      * Unix df that supports GNU format when passed -k (or -kP). If you are going
      * to rely on this code, please check that it works on your OS by running
      * some simple tests to compare the command line with the output from this class.
@@ -140,7 +140,7 @@ final class FileSystemUtil {
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
      * <p>
-     * In order to work, you must be running Windows, or have a implementation of
+     * In order to work, you must be running Windows, or have an implementation of
      * Unix df that supports GNU format when passed -k (or -kP). If you are going
      * to rely on this code, please check that it works on your OS by running
      * some simple tests to compare the command line with the output from this class.
@@ -194,6 +194,7 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the free space on a drive or volume in a cross-platform manner.
      * Note that some OS's are NOT currently supported, including OS/390.
@@ -233,6 +234,7 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Find free space on the Windows platform using the <i>dir</i> command.
      *
@@ -244,15 +246,15 @@ final class FileSystemUtil {
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
         path = FilenameUtil.normalize(path, false);
-        if (path.length() > 0 && path.charAt(0) != '"') {
+        if (!path.isEmpty() && path.charAt(0) != '"') {
             path = "\"" + path + "\"";
         }
 
         // build and run the 'dir' command
-        final String[] cmdAttribs = { "cmd.exe", "/C", "dir /a /-c " + path };
+        final String[] cmdAttrs = { "cmd.exe", "/C", "dir /a /-c " + path };
 
         // read in the output of the command to an ArrayList
-        final List<String> lines = performCommand(cmdAttribs, Integer.MAX_VALUE, timeout);
+        final List<String> lines = performCommand(cmdAttrs, Integer.MAX_VALUE, timeout);
 
         // now iterate over the lines we just read and find the LAST
         // non-empty line (the free space bytes should be in the last element
@@ -260,7 +262,7 @@ final class FileSystemUtil {
         // not, still assuming it is on the last non-blank line)
         for (int i = lines.size() - 1; i >= 0; i--) {
             final String line = lines.get(i);
-            if (line.length() > 0) {
+            if (!line.isEmpty()) {
                 return parseDir(line, path);
             }
         }
@@ -290,6 +292,7 @@ final class FileSystemUtil {
                 // found the last numeric character, this is the end of
                 // the free space bytes count
                 bytesEnd = j + 1;
+                //noinspection UnnecessaryLabelOnBreakStatement
                 break innerLoop1;
             }
             j--;
@@ -300,6 +303,7 @@ final class FileSystemUtil {
                 // found the next non-numeric character, this is the
                 // beginning of the free space bytes count
                 bytesStart = j + 1;
+                //noinspection UnnecessaryLabelOnBreakStatement
                 break innerLoop2;
             }
             j--;
@@ -319,6 +323,7 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Find free space on the *nix platform using the <i>df</i> command.
      *
@@ -343,10 +348,10 @@ final class FileSystemUtil {
         if (posix) {
             flags += "P";
         }
-        final String[] cmdAttribs = flags.length() > 1 ? new String[] { DF, flags, path } : new String[] { DF, path };
+        final String[] cmdAttrs = flags.length() > 1 ? new String[] { DF, flags, path } : new String[] { DF, path };
 
         // perform the command, asking for up to 3 lines (header, interesting, overflow)
-        final List<String> lines = performCommand(cmdAttribs, 3, timeout);
+        final List<String> lines = performCommand(cmdAttrs, 3, timeout);
         if (lines.size() < 2) {
             // unknown problem, throw exception
             throw new IOException("Command line '" + DF + "' did not return info as expected " + "for path '" + path + "'- response was " + lines); //NOSONAR
@@ -373,6 +378,7 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Parses the bytes from a string.
      *
@@ -395,24 +401,25 @@ final class FileSystemUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Performs the os command.
      *
-     * @param cmdAttribs the command line parameters
+     * @param cmdAttrs the command line parameters
      * @param max The maximum limit for the lines returned
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs
      */
-    List<String> performCommand(final String[] cmdAttribs, final int max, final long timeout) throws IOException {
+    List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
         // this method does what it can to avoid the 'Too many open files' error
         // based on trial and error and these links:
         // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4784692
         // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4801027
         // http://forum.java.sun.com/thread.jspa?threadID=533029&messageID=2572018
-        // however, its still not perfect as the JDK support is so poor
-        // (see commons-exec or Ant for a better multi-threaded multi-os solution)
+        // however, it's still not perfect as the JDK support is so poor
+        // (see commons-exec or Ant for a better multi-thread multi-os solution)
 
         final List<String> lines = new ArrayList<>(20);
         Process proc = null;
@@ -424,7 +431,7 @@ final class FileSystemUtil {
 
             final Thread monitor = ThreadMonitor.start(timeout);
 
-            proc = openProcess(cmdAttribs);
+            proc = openProcess(cmdAttrs);
             in = proc.getInputStream();
             out = proc.getOutputStream();
             err = proc.getErrorStream();
@@ -443,16 +450,16 @@ final class FileSystemUtil {
 
             if (proc.exitValue() != 0) {
                 // os command problem, throw exception
-                throw new IOException("Command line returned OS error code '" + proc.exitValue() + "' for command " + Arrays.asList(cmdAttribs));
+                throw new IOException("Command line returned OS error code '" + proc.exitValue() + "' for command " + Arrays.asList(cmdAttrs));
             }
             if (lines.isEmpty()) {
                 // unknown problem, throw exception
-                throw new IOException("Command line did not return any info " + "for command " + Arrays.asList(cmdAttribs));
+                throw new IOException("Command line did not return any info " + "for command " + Arrays.asList(cmdAttrs));
             }
             return lines;
 
         } catch (final InterruptedException ex) {
-            throw new IOException("Command line threw an InterruptedException " + "for command " + Arrays.asList(cmdAttribs) + " timeout=" + timeout, ex);
+            throw new IOException("Command line threw an InterruptedException " + "for command " + Arrays.asList(cmdAttrs) + " timeout=" + timeout, ex);
         } finally {
             IOUtil.closeQuietly(in);
             IOUtil.closeQuietly(out);
@@ -467,12 +474,12 @@ final class FileSystemUtil {
     /**
      * Opens the process to the operating system.
      *
-     * @param cmdAttribs the command line parameters
+     * @param cmdAttrs the command line parameters
      * @return
      * @throws IOException if an error occurs
      */
-    Process openProcess(final String[] cmdAttribs) throws IOException {
-        return Runtime.getRuntime().exec(cmdAttribs);
+    Process openProcess(final String[] cmdAttrs) throws IOException {
+        return Runtime.getRuntime().exec(cmdAttrs);
     }
 
 }

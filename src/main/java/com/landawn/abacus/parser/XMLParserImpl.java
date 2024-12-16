@@ -38,6 +38,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -324,10 +325,10 @@ final class XMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        final Exclusion exlusion = getExclusion(config, beanInfo);
+        final Exclusion exclusion = getExclusion(config, beanInfo);
 
-        final boolean ignoreNullProperty = (exlusion == Exclusion.NULL) || (exlusion == Exclusion.DEFAULT);
-        final boolean ignoreDefaultProperty = (exlusion == Exclusion.DEFAULT);
+        final boolean ignoreNullProperty = (exclusion == Exclusion.NULL) || (exclusion == Exclusion.DEFAULT);
+        final boolean ignoreDefaultProperty = (exclusion == Exclusion.DEFAULT);
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean tagByPropertyName = config.tagByPropertyName();
@@ -395,6 +396,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (propInfo.hasFormat) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
+                    //noinspection DataFlowIssue
                     writeValue(propValue, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, propInfo, propInfo.jsonXmlType, bw);
                 }
 
@@ -453,6 +455,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         for (final Map.Entry<Object, Object> entry : ((Map<Object, Object>) m).entrySet()) {
             key = entry.getKey();
 
+            //noinspection SuspiciousMethodCalls
             if ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(key)) {
                 continue;
             }
@@ -1180,6 +1183,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      * @throws XMLStreamException the XML stream exception
      */
+    @SuppressFBWarnings("SF_SWITCH_NO_DEFAULT")
     @SuppressWarnings({ "null", "fallthrough", "deprecation" })
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, PropInfo propInfo, Type<?> propType,
             Class<?> targetClass) throws XMLStreamException {
@@ -1259,7 +1263,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 }
 
                             } else {
-                                if (propInfo == null || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                if (propInfo == null || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     for (int startCount = 1, e = xmlReader.next();; e = xmlReader.next()) {
                                         startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
 
@@ -1283,7 +1287,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     } else {
                                         @SuppressWarnings("rawtypes")
                                         final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
+                                                ? N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -1304,7 +1308,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                 if (xmlReader.getEventType() == XMLStreamConstants.END_ELEMENT && xmlReader.getLocalName().equals(propName)) {
                                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
-                                            || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                            || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                         // ignore.
                                     } else {
                                         propInfo.setPropValue(result, propValue);
@@ -1330,7 +1334,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
                                             sb.append(text);
-                                        } else if (sb.length() == 0) {
+                                        } else if (sb.isEmpty()) {
                                             sb.append(text);
                                         }
 
@@ -1346,7 +1350,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 propValue = propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text);
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
-                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                    if (propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                         // ignore;
                                     } else {
@@ -1367,7 +1371,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 return beanInfo.finishBeanResult(result);
                             } else {
                                 if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
-                                        || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                        || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
                                     propInfo.setPropValue(result, propValue == null ? propType.defaultValue() : propValue);
@@ -1453,7 +1457,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 }
                             } else {
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     for (int startCount = 1, e = xmlReader.next();; e = xmlReader.next()) {
                                         startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
 
@@ -1477,7 +1481,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     } else {
                                         @SuppressWarnings("rawtypes")
                                         final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
+                                                ? N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -1497,7 +1501,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 }
 
                                 if (xmlReader.getEventType() == XMLStreamConstants.END_ELEMENT && xmlReader.getLocalName().equals(propName)) {
-                                    if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                         // ignore.
                                     } else {
                                         map.put(isStringKey ? propName : keyType.valueOf(propName), propValue);
@@ -1522,7 +1526,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
-                                    } else if (sb.length() == 0) {
+                                    } else if (sb.isEmpty()) {
                                         sb.append(text);
                                     }
 
@@ -1555,7 +1559,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             if (propName == null) {
                                 return (T) map;
                             } else {
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
                                 } else {
                                     map.put(isStringKey ? propName : keyType.valueOf(propName), propValue == null ? propType.defaultValue() : propValue);
@@ -1625,7 +1629,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 }
                             } else {
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     for (int startCount = 1, e = xmlReader.next();; e = xmlReader.next()) {
                                         startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
 
@@ -1649,7 +1653,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     } else {
                                         @SuppressWarnings("rawtypes")
                                         final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
+                                                ? N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -1669,7 +1673,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 }
 
                                 if (xmlReader.getEventType() == XMLStreamConstants.END_ELEMENT && xmlReader.getLocalName().equals(propName)) {
-                                    if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                         // ignore.
                                     } else {
                                         mapEntity.set(propName, propValue);
@@ -1694,7 +1698,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
-                                    } else if (sb.length() == 0) {
+                                    } else if (sb.isEmpty()) {
                                         sb.append(text);
                                     }
 
@@ -1732,7 +1736,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             if (propName == null) {
                                 return (T) mapEntity;
                             } else {
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
                                 } else {
                                     mapEntity.set(propName, propValue == null ? propType.defaultValue() : propValue);
@@ -1793,7 +1797,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
                                             sb.append(text);
-                                        } else if (sb.length() == 0) {
+                                        } else if (sb.isEmpty()) {
                                             sb.append(text);
                                         }
 
@@ -1881,7 +1885,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
-                                    } else if (sb.length() == 0) {
+                                    } else if (sb.isEmpty()) {
                                         sb.append(text);
                                     }
 
@@ -1943,27 +1947,26 @@ final class XMLParserImpl extends AbstractXMLParser {
     protected <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         final XMLDeserializationConfig configToUse = check(config);
 
-        return readByDOMParser(node, configToUse, null, configToUse.getElementType(), false, false, false, true, targetClass);
+        return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetClass);
     }
 
     /**
      * Read by DOM parser.
+     *
+     * @param <T>
      * @param node
-     * @param propName
+     * @param config
      * @param propType
      * @param checkedAttr
      * @param isTagByPropertyName
      * @param ignoreTypeInfo
      * @param isFirstCall
      * @param inputClass
-     * @param configToUse
-     *
-     * @param <T>
      * @return
      */
     @SuppressWarnings({ "unchecked", "null", "deprecation" })
-    protected <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, String propName, Type<?> propType, boolean checkedAttr,
-            boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, Class<T> inputClass) {
+    protected <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
+            boolean ignoreTypeInfo, final boolean isFirstCall, Class<T> inputClass) {
         if (node.getNodeType() == Document.TEXT_NODE) {
             return null;
         }
@@ -2010,10 +2013,11 @@ final class XMLParserImpl extends AbstractXMLParser {
         final SerializationType deserializationType = getDeserializationType(targetClass);
 
         PropInfo propInfo = null;
+        String propName = null;
         Node propNode = null;
         Object propValue = null;
         NodeList propNodes = node.getChildNodes();
-        int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
+        int propNodeLength = getNodeLength(propNodes);
 
         switch (deserializationType) {
             case ENTITY: {
@@ -2060,6 +2064,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
+                    //noinspection ConstantValue
                     propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
                             inputClass);
 
@@ -2098,9 +2103,11 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final Map<Object, Object> mResult = newPropInstance(typeClass, node);
 
                 propNodes = node.getChildNodes();
-                propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
+                propNodeLength = getNodeLength(propNodes);
+                //noinspection DataFlowIssue
                 propNode = null;
                 propType = null;
+                //noinspection DataFlowIssue
                 propValue = null;
 
                 for (int i = 0; i < propNodeLength; i++) {
@@ -2132,6 +2139,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
+                    //noinspection ConstantValue
                     propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
                             inputClass);
 
@@ -2158,9 +2166,11 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final MapEntity mResult = new MapEntity(node.getNodeName());
 
                 propNodes = node.getChildNodes();
-                propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
+                propNodeLength = getNodeLength(propNodes);
+                //noinspection DataFlowIssue
                 propNode = null;
                 propType = null;
+                //noinspection DataFlowIssue
                 propValue = null;
 
                 for (int i = 0; i < propNodeLength; i++) {
@@ -2192,6 +2202,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
+                    //noinspection ConstantValue
                     propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
                             inputClass);
 
@@ -2254,6 +2265,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             propType = defaultValueType;
                         }
 
+                        //noinspection ConstantValue
                         propValue = getPropValue(eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                 inputClass);
 
@@ -2317,6 +2329,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
+                    //noinspection ConstantValue
                     propValue = getPropValue(eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                             inputClass);
 
@@ -2384,17 +2397,16 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 propType = propType.isObjectType() ? (MapEntity.class.equals(inputClass) ? N.typeOf(MapEntity.class) : N.typeOf(Map.class)) : propType;
 
-                propValue = readByDOMParser(propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass);
+                propValue = readByDOMParser(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass);
             } else {
                 @SuppressWarnings("rawtypes")
-                final Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz())
-                        ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
+                final Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz()) ? N.newCollection((Class<Collection>) propType.clazz())
                         : new ArrayList<>();
 
                 final Type<?> propEleType = getPropEleType(propType);
 
                 final NodeList subPropNodes = propNode.getChildNodes();
-                final int subPropNodeLength = (subPropNodes == null) ? 0 : subPropNodes.getLength();
+                final int subPropNodeLength = getNodeLength(subPropNodes);
                 Node subPropNode = null;
                 for (int k = 0; k < subPropNodeLength; k++) {
                     subPropNode = subPropNodes.item(k);
@@ -2402,7 +2414,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    coll.add(readByDOMParser(subPropNode, config, propName, propEleType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass));
+                    coll.add(readByDOMParser(subPropNode, config, propEleType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass));
                 }
 
                 propValue = propType.clazz().isArray() ? collection2Array(coll, propType.clazz()) : coll;

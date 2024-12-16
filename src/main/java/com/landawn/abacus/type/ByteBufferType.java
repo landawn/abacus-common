@@ -68,7 +68,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     public ByteBuffer valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0) {
+        } else if (str.isEmpty()) {
             return valueOf(N.EMPTY_BYTE_ARRAY);
         } else {
             return valueOf(Strings.base64Decode(str));

@@ -128,7 +128,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return A ContinuableFuture that is already completed with the provided result.
      */
     public static <T> ContinuableFuture<T> completed(final T result) {
-        return new ContinuableFuture<>(new Future<T>() {
+        return new ContinuableFuture<>(new Future<>() {
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 return false;
@@ -485,7 +485,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws Exception if the function throws an exception
      */
     public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
-        return new ContinuableFuture<>(new Future<U>() {
+        //noinspection Convert2Diamond
+        return new ContinuableFuture<>(new Future<U>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 return ContinuableFuture.this.cancel(mayInterruptIfRunning);
@@ -1491,7 +1492,7 @@ public class ContinuableFuture<T> implements Future<T> {
         asyncExecutor.execute(futureTask);
 
         @SuppressWarnings("rawtypes")
-        final List<ContinuableFuture<?>> upFutureList = other == null ? (List) Arrays.asList(this) : Arrays.asList(this, other);
+        final List<ContinuableFuture<?>> upFutureList = other == null ? (List) List.of(this) : Arrays.asList(this, other);
         return new ContinuableFuture<>(futureTask, upFutureList, asyncExecutor);
     }
 
@@ -1533,7 +1534,8 @@ public class ContinuableFuture<T> implements Future<T> {
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {
         N.checkArgNotNull(executor);
 
-        return new ContinuableFuture<>(new Future<T>() {
+        //noinspection Convert2Diamond
+        return new ContinuableFuture<>(new Future<T>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             private final long delayInMillis = unit.toMillis(delay);
             private final long startTime = System.currentTimeMillis();
             private volatile boolean isDelayed = false;

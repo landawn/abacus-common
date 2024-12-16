@@ -14,9 +14,11 @@
 
 package com.landawn.abacus.exception;
 
+import java.io.Serial;
+
 public class ObjectNotFoundException extends IllegalStateException {
 
-    /** serialVersionUID. */
+    @Serial
     private static final long serialVersionUID = -1806452586200243492L;
 
     /**

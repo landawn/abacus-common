@@ -1,3 +1,8 @@
+### 5.6.6
+
+* Improve javaDoc by `Intellij`
+* Improvements and bug fixes by `Intellij`
+
 ### 5.6.5
 
 * Improve javaDoc

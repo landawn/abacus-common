@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 
 public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, RuntimeException> { //NOSONAR
 
-    ToBooleanFunction<Boolean> UNBOX = value -> value == null ? false : value;
+    ToBooleanFunction<Boolean> UNBOX = value -> value != null && value;
 
     /**
      *

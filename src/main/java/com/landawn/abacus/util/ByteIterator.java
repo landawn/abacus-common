@@ -48,6 +48,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static ByteIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (a == null || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns an ByteIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the ByteIterator instance when the ByteIterator's methods are first called.
+     * The Supplier is responsible for producing the ByteIterator instance when the first method in the returned {@code ByteIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the ByteIterator when needed.
      * @return A ByteIterator that is initialized on the first call to hasNext() or nextByte().

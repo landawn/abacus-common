@@ -154,7 +154,7 @@ import com.landawn.abacus.util.u.OptionalShort;
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
  * So content must be encoded with Base64 if the specified input is String or Reader, otherwise the content must NOT be encoded with Base64 if the specified input is File or InputStream.
- * The reason not to encoded the content with Base64 for File/OutputStream is to provide higher performance solution.
+ * The reason not to encode the content with Base64 for File/OutputStream is to provide higher performance solution.
  *
  */
 public final class KryoParser extends AbstractParser<KryoSerializationConfig, KryoDeserializationConfig> {
@@ -411,6 +411,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param config
      * @return
      */
+    @SuppressWarnings("UnusedReturnValue")
     protected KryoSerializationConfig check(final KryoSerializationConfig config) {
         //        if (config != null) {
         //            throw new ParseException("No serialization configuration is supported");
@@ -426,6 +427,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param config
      * @return
      */
+    @SuppressWarnings("UnusedReturnValue")
     protected KryoDeserializationConfig check(final KryoDeserializationConfig config) {
         //        if (config != null) {
         //            throw new ParseException("No deserialization configuration is supported");
@@ -785,14 +787,14 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
             }
 
             if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
-                for (final Class<?> cls : ParserFactory._kryoClassIdMap.keySet()) {
-                    kryo.register(cls, ParserFactory._kryoClassIdMap.get(cls));
+                for (Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
+                    kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
             if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
-                for (final Class<?> cls : ParserFactory._kryoClassSerializerMap.keySet()) {
-                    kryo.register(cls, ParserFactory._kryoClassSerializerMap.get(cls));
+                for (Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
+                    kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
@@ -809,14 +811,14 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
             }
 
             if (N.notEmpty(kryoClassIdMap)) {
-                for (final Class<?> cls : kryoClassIdMap.keySet()) { //NOSONAR
-                    kryo.register(cls, kryoClassIdMap.get(cls));
+                for (Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
+                    kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
             if (N.notEmpty(kryoClassSerializerMap)) {
-                for (final Class<?> cls : kryoClassSerializerMap.keySet()) { //NOSONAR
-                    kryo.register(cls, kryoClassSerializerMap.get(cls));
+                for (Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
+                    kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
@@ -832,7 +834,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    protected void recycle(final Kryo kryo) {
+    void recycle(final Kryo kryo) {
         if (kryo == null) {
             return;
         }
@@ -844,7 +846,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    protected static Output createOutput() {
+    static Output createOutput() {
         synchronized (outputPool) {
             if (outputPool.size() > 0) {
                 return outputPool.remove(outputPool.size() - 1);
@@ -853,7 +855,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    protected static void recycle(final Output output) {
+    static void recycle(final Output output) {
         if ((output == null) || ((output.getBuffer() != null) && (output.getBuffer().length > BUFFER_SIZE))) {
             return;
         }
@@ -866,7 +868,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    protected static Input createInput() {
+    static Input createInput() {
         synchronized (inputPool) {
             if (inputPool.size() > 0) {
                 return inputPool.remove(inputPool.size() - 1);
@@ -875,7 +877,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    protected static void recycle(final Input input) {
+    static void recycle(final Input input) {
         if ((input == null) || ((input.getBuffer() != null) && (input.getBuffer().length > BUFFER_SIZE))) {
             return;
         }

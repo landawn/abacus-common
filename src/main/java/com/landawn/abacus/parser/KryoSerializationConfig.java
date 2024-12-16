@@ -30,9 +30,9 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     }
 
     /**
-     * Checks if is write class.
+     * Checks if class name should be written.
      *
-     * @return {@code true}, if is write class
+     * @return {@code true}, if class name should be written
      */
     public boolean writeClass() {
         return writeClass;
@@ -97,11 +97,8 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
         }
 
         if (obj instanceof final KryoSerializationConfig other) { //NOSONAR
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
-                    && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass)) {
-
-                return true;
-            }
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
+                    && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass);
         }
 
         return false;

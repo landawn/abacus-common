@@ -24,10 +24,10 @@ import com.landawn.abacus.util.N;
 @com.landawn.abacus.annotation.Immutable
 public final class PoolableWrapper<T> extends AbstractPoolable implements Immutable {
 
-    private T srcObject;
+    private final T srcObject;
 
     /**
-     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
+     * Wrap the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param srcObject
      */
@@ -47,7 +47,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
+     * Wrap the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -58,7 +58,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * Wrap the the source object with specified {@code liveTime} and {@code maxIdleTime}.
+     * Wrap the source object with specified {@code liveTime} and {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -83,7 +83,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      */
     @Override
     public void destroy() {
-        // should not set the srcobject to null because it may be retrieved by
+        // should not set the srcObject to null because it may be retrieved by
         // other thread and evicted out pool later.
         // srcObject = null;
     }
@@ -98,7 +98,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * @param obj
      * @return {@code true}, if successful
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
         return this == obj || (obj instanceof PoolableWrapper && N.equals(((PoolableWrapper<?>) obj).srcObject, srcObject));

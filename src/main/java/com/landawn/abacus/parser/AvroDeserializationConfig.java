@@ -88,14 +88,10 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
             return true;
         }
 
-        if ((obj instanceof final AvroDeserializationConfig other) // NOSONAR
-                && (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty()) //NOSONAR
-                        && N.equals(schema, other.schema))) {
-
-            return true;
-        }
-
-        return false;
+        return (obj instanceof final AvroDeserializationConfig other) // NOSONAR
+                && (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty())
+                //NOSONAR
+                        && N.equals(schema, other.schema));
     }
 
     @Override

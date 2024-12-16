@@ -28,7 +28,7 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * It's is a multiple-thread safety map with fixed size. it's designed for frequent get and few add/remove operation
+ * It's a multiple-thread safety map with fixed size. it's designed for frequent get and few add/remove operation
  * with a few limited keys.
  *
  * @param <K> the key type
@@ -108,11 +108,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         final int i = hash & indexMask;
 
         //            if (size() > capacity) {
-        //                throw new IndexOutOfBoundsException("Object pool is full with capacity=" + capacity);
+        //                throw new IndexOutOfBoundsException("Object pool is full of capacity=" + capacity);
         //            }
         //
 
-        if (isWarningLoggedForCapacity == false && size() > capacity) {
+        if (!isWarningLoggedForCapacity && size() > capacity) {
             final Set<Map.Entry<K, V>> entrySet = entrySet();
 
             logger.warn("Pool size={} is bigger than capacity={}, first entry={}, last entry={}", size(), capacity, N.firstElement(entrySet),
@@ -235,7 +235,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
         for (final Entry<K, V> element : table) {
             for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                if ((entry.value != null) && value.equals(entry.value)) {
+                if (value.equals(entry.value)) {
                     return true;
                 }
             }
@@ -383,7 +383,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         Entry<K, V> next;
 
         /** The hash. */
-        int hash;
+        final int hash;
 
         /**
          * Creates new entry.

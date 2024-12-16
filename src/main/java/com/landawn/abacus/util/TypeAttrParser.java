@@ -113,7 +113,7 @@ public final class TypeAttrParser {
                 }
             }
 
-            typeParameters = typeParameterList.toArray(new String[typeParameterList.size()]);
+            typeParameters = typeParameterList.toArray(new String[0]);
 
             beginIndex = endIndex;
         }
@@ -160,21 +160,21 @@ public final class TypeAttrParser {
 
         if (parameterLength > 0) {
             Class<?>[] parameterTypes = new Class[parameterLength];
-            Object[] paramters = new Object[parameterLength];
+            Object[] parameters = new Object[parameterLength];
 
             for (int i = 0; i < args.length; i++) {
                 parameterTypes[i / 2] = (Class<?>) args[i];
-                paramters[i / 2] = args[++i];
+                parameters[i / 2] = args[++i];
             }
 
             for (int i = 0; i < attrTypeParameters.length; i++) {
                 parameterTypes[i + (args.length / 2)] = String.class;
-                paramters[i + (args.length / 2)] = attrTypeParameters[i];
+                parameters[i + (args.length / 2)] = attrTypeParameters[i];
             }
 
             for (int i = 0; i < attrParameters.length; i++) {
                 parameterTypes[i + (args.length / 2) + attrTypeParameters.length] = String.class;
-                paramters[i + (args.length / 2) + attrTypeParameters.length] = attrParameters[i];
+                parameters[i + (args.length / 2) + attrTypeParameters.length] = attrParameters[i];
             }
 
             Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
@@ -184,21 +184,21 @@ public final class TypeAttrParser {
 
                 if (parameterLength > 0) {
                     parameterTypes = new Class[parameterLength];
-                    paramters = new Object[parameterLength];
+                    parameters = new Object[parameterLength];
 
                     for (int i = 0; i < args.length; i++) {
                         parameterTypes[i / 2] = (Class<?>) args[i];
-                        paramters[i / 2] = args[++i];
+                        parameters[i / 2] = args[++i];
                     }
 
                     for (int i = 0; i < attrTypeParameters.length; i++) {
                         parameterTypes[i + (args.length / 2)] = String.class;
-                        paramters[i + (args.length / 2)] = attrTypeParameters[i];
+                        parameters[i + (args.length / 2)] = attrTypeParameters[i];
                     }
 
                     if (attrParameters.length > 1) {
                         parameterTypes[parameterTypes.length - 1] = String[].class;
-                        paramters[paramters.length - 1] = attrParameters;
+                        parameters[parameters.length - 1] = attrParameters;
                     }
                 }
 
@@ -212,7 +212,7 @@ public final class TypeAttrParser {
 
             ClassUtil.setAccessibleQuietly(constructor, true);
 
-            return (T) ClassUtil.invokeConstructor(constructor, paramters);
+            return (T) ClassUtil.invokeConstructor(constructor, parameters);
         } else {
             return (T) N.newInstance(cls);
         }

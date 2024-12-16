@@ -17,11 +17,13 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 // cs -> constant String; ps -> parameter String; fs -> field string. s -> string?
 @Beta // Not sure if it's a good idea or not.
 @Internal
-@SuppressWarnings("java:S1845")
+@SuppressWarnings({ "java:S1845", "java:S115" })
+@SuppressFBWarnings
 public final class cs { // NOSONAR
     public static final String a = "a";
 
@@ -216,7 +218,7 @@ public final class cs { // NOSONAR
     public static final String resultClass = "resultClass";
     public static final String resultHandler = "resultHandler";
     public static final String resultType = "resultType";
-    public static final String retryIntervallInMillis = "retryIntervallInMillis";
+    public static final String retryIntervalInMillis = "retryIntervalInMillis";
     public static final String retryTimes = "retryTimes";
     public static final String rightKeyExtractor = "rightKeyExtractor";
     public static final String rnd = "rnd";
@@ -263,7 +265,7 @@ public final class cs { // NOSONAR
     public static final String valueMapper = "valueMapper";
     // public static final String valueExtractor = "valueExtractor";
     public static final String valuesToFind = "valuesToFind";
-    public static final String valuesToExeclude = "valuesToExeclude";
+    public static final String valuesToExclude = "valuesToExclude";
     public static final String valueSupplier = "valueSupplier";
     public static final String valueType = "valueType";
     public static final String where = "where";
@@ -288,6 +290,9 @@ public final class cs { // NOSONAR
     public static final String checkedException = "checkedException";
 
     public static final String maxThreadNumForZipFunction = "maxThreadNumForZipFunction";
+
+    public static final String sortedSet = "sortedSet";
+    public static final String sortedMap = "sortedMap";
 
     private cs() {
         // Utility class for constant string values.

@@ -38,9 +38,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * It's designed to provide a convenient way to parameterized the generic type (e.g. {@code List.<String>class}).
+ * It's designed to provide a convenient way to parameterize the generic type (e.g. {@code List.<String>class}).
  * <br />
- * But the returned Class by all the methods doesn't have the actual parameterized type informations. For example:
+ * But the returned Class by all the methods doesn't have the actual parameterized type information. For example:
  * <pre>
  * <code>
  * {@code Class<List<String>> clazz = Clazz.ofList(String.class);}
@@ -50,7 +50,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * {@code Type<List<String>> type = Type.of("List<String>"); // or Type.ofList(String.class)}
  *
  * // Or
- * Type&ltList&ltString&gt&gt type = new TypeReference&ltList&ltString&gt&gt() {}.type();
+ * Type&lt;List&lt;String&gt;&gt; type = new TypeReference&lt;List&lt;String&gt;&gt;() {}.type();
  *
  * </code>
  * </pre>

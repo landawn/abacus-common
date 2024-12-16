@@ -86,21 +86,22 @@ public final class ParserUtil {
 
     static final Logger logger = LoggerFactory.getLogger(ParserUtil.class);
 
-    private static final PropInfo PROP_INFO_MASK = new PropInfo("PROP_INFO_MASK");
+    static final char[] NULL_CHAR_ARRAY = "null".toCharArray();
+
+    // private static final PropInfo PROP_INFO_MASK = new PropInfo("PROP_INFO_MASK");
 
     private static final char PROP_NAME_SEPARATOR = '.';
 
     // ...
-    private static final String GET = "get".intern();
+    private static final String GET = "get";
 
-    private static final String SET = "set".intern();
+    private static final String SET = "set";
 
-    private static final String IS = "is".intern();
+    private static final String IS = "is";
 
-    private static final String HAS = "has".intern();
+    private static final String HAS = "has";
 
-    private static final Set<Class<?>> idTypeSet = N.<Class<?>> asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class,
-            UUID.class);
+    private static final Set<Class<?>> idTypeSet = N.asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class, UUID.class);
 
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
@@ -466,6 +467,7 @@ public final class ParserUtil {
             }
         }
 
+        //noinspection ConstantValue
         if (N.notEmpty(alias) && field != null) {
             alias = N.removeAllOccurrences(alias, field.getName());
         }
@@ -594,7 +596,7 @@ public final class ParserUtil {
 
         final Set<String> transientSeriPropNameSet = N.newHashSet();
 
-        private final Map<String, PropInfo> propInfoMap;
+        private final Map<String, Optional<PropInfo>> propInfoMap;
 
         private final Map<String, List<PropInfo>> propInfoQueueMap;
 
@@ -630,6 +632,7 @@ public final class ParserUtil {
             boolean localIsImmutable = true;
 
             if (ClassUtil.isRecordClass(cls)) {
+                //noinspection DataFlowIssue
                 localIsImmutable = true;
             } else if (ClassUtil.isRegisteredXMLBindingClass(cls)) {
                 localIsImmutable = false;
@@ -719,26 +722,28 @@ public final class ParserUtil {
                                 readOnlyIdPropNames);
 
                 propInfos[idx++] = propInfo;
-                propInfoMap.put(propName, propInfo);
+
+                final Optional<PropInfo> propInfoOpt = Optional.of(propInfo);
+                propInfoMap.put(propName, propInfoOpt);
                 String jsonTagName = null;
 
                 for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
                     jsonTagName = String.valueOf(nameTag.name);
 
                     if (!propInfoMap.containsKey(jsonTagName)) {
-                        propInfoMap.put(jsonTagName, propInfo);
+                        propInfoMap.put(jsonTagName, propInfoOpt);
                     }
                 }
 
                 if (propInfo.columnName.isPresent() && !propInfoMap.containsKey(propInfo.columnName.get())) {
-                    propInfoMap.put(propInfo.columnName.get(), propInfo);
+                    propInfoMap.put(propInfo.columnName.get(), propInfoOpt);
 
                     if (!propInfoMap.containsKey(propInfo.columnName.get().toLowerCase())) {
-                        propInfoMap.put(propInfo.columnName.get().toLowerCase(), propInfo);
+                        propInfoMap.put(propInfo.columnName.get().toLowerCase(), propInfoOpt);
                     }
 
                     if (!propInfoMap.containsKey(propInfo.columnName.get().toUpperCase())) {
-                        propInfoMap.put(propInfo.columnName.get().toUpperCase(), propInfo);
+                        propInfoMap.put(propInfo.columnName.get().toUpperCase(), propInfoOpt);
                     }
                 }
 
@@ -751,7 +756,7 @@ public final class ParserUtil {
                                     + " is a property/field name in class: " + cls);
                         }
 
-                        propInfoMap.put(str, propInfo);
+                        propInfoMap.put(str, propInfoOpt);
                     }
                 }
 
@@ -783,9 +788,9 @@ public final class ParserUtil {
                 maxLength = Math.max(propInfo.jsonNameTags[defaultNameIndex].name.length, maxLength);
             }
 
-            jsonXmlSerializablePropInfos = seriPropInfoList.toArray(new PropInfo[seriPropInfoList.size()]);
-            nonTransientSeriPropInfos = nonTransientSeriPropInfoList.toArray(new PropInfo[nonTransientSeriPropInfoList.size()]);
-            transientSeriPropInfos = transientSeriPropInfoList.toArray(new PropInfo[transientSeriPropInfoList.size()]);
+            jsonXmlSerializablePropInfos = seriPropInfoList.toArray(new PropInfo[0]);
+            nonTransientSeriPropInfos = nonTransientSeriPropInfoList.toArray(new PropInfo[0]);
+            transientSeriPropInfos = transientSeriPropInfoList.toArray(new PropInfo[0]);
 
             propInfoArray = new PropInfo[maxLength + 1];
 
@@ -846,7 +851,7 @@ public final class ParserUtil {
                 throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + cls);
             }
 
-            tableName = Strings.isEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
+            tableName = Strings.isEmpty(tmpTableName) ? Optional.empty() : Optional.ofNullable(tmpTableName);
 
             fieldTypes = new Class[propInfos.length];
             defaultFieldValues = new Object[propInfos.length];
@@ -910,36 +915,43 @@ public final class ParserUtil {
             // return propInfoArray[len];
             // }
 
-            PropInfo propInfo = propInfoMap.get(propName);
+            Optional<PropInfo> propInfoOpt = propInfoMap.get(propName);
 
-            if (propInfo == null) {
+            if (propInfoOpt == null) {
+                PropInfo propInfo = null;
+
                 final Method method = ClassUtil.getPropGetMethod(clazz, propName);
 
                 if (method != null) {
-                    propInfo = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
+                    propInfoOpt = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
                 }
 
-                if (propInfo == null) {
-                    for (final String key : propInfoMap.keySet()) { //NOSONAR
-                        if (isPropName(clazz, propName, key)) {
-                            propInfo = propInfoMap.get(key);
+                if (propInfoOpt == null) {
+                    for (final Map.Entry<String, Optional<PropInfo>> entry : propInfoMap.entrySet()) { //NOSONAR
+                        if (isPropName(clazz, propName, entry.getKey())) {
+                            propInfoOpt = entry.getValue();
 
                             break;
                         }
                     }
 
-                    if ((propInfo == null) && !propName.equalsIgnoreCase(ClassUtil.formalizePropName(propName))) {
+                    if ((propInfoOpt == null) && !propName.equalsIgnoreCase(ClassUtil.formalizePropName(propName))) {
                         propInfo = getPropInfo(ClassUtil.formalizePropName(propName));
+
+                        if (propInfo != null) {
+                            propInfoOpt = Optional.of(propInfo);
+                        }
                     }
                 }
 
                 // set method mask to avoid query next time.
-                if (propInfo == null) {
-                    propInfo = PROP_INFO_MASK;
+                if (propInfoOpt == null) {
+                    propInfoOpt = Optional.empty();
                 } else {
-                    if (propInfo == PROP_INFO_MASK) {
+                    if (propInfoOpt.isEmpty()) {
                         // ignore.
                     } else {
+                        propInfo = propInfoOpt.orElseThrow();
                         hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
                     }
                 }
@@ -951,10 +963,10 @@ public final class ParserUtil {
                 //                    logger.error(msg, new RuntimeException(msg));
                 //                }
 
-                propInfoMap.put(propName, propInfo);
+                propInfoMap.put(propName, propInfoOpt);
             }
 
-            return (propInfo == PROP_INFO_MASK) ? null : propInfo;
+            return propInfoOpt.orElseNull();
         }
 
         /**
@@ -1001,10 +1013,11 @@ public final class ParserUtil {
                 if (propInfoQueue.size() == 0) {
                     throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                 } else {
+                    final int len = propInfoQueue.size();
                     Object propBean = obj;
 
-                    for (int i = 0, len = propInfoQueue.size(); i < len; i++) {
-                        propBean = propInfoQueue.get(i).getPropValue(propBean);
+                    for (final PropInfo info : propInfoQueue) {
+                        propBean = info.getPropValue(propBean);
 
                         if (propBean == null) {
                             return (T) propInfoQueue.get(len - 1).type.defaultValue();
@@ -1147,7 +1160,7 @@ public final class ParserUtil {
          */
         private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
             if (inputPropName.length() > 128) {
-                throw new RuntimeException("The property name execeed 128: " + inputPropName);
+                throw new RuntimeException("The property name exceed 128: " + inputPropName);
             }
 
             inputPropName = inputPropName.trim();
@@ -1204,7 +1217,7 @@ public final class ParserUtil {
                     }
                 }
 
-                propInfoQueue = N.isEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.wrap(propInfoQueue);
+                propInfoQueue = N.isEmpty(propInfoQueue) ? N.emptyList() : ImmutableList.wrap(propInfoQueue);
 
                 propInfoQueueMap.put(propName, propInfoQueue);
             }
@@ -1430,8 +1443,6 @@ public final class ParserUtil {
 
     public static class PropInfo {
 
-        static final char[] NULL_CHAR_ARRAY = "null".toCharArray();
-
         public final Class<Object> declaringClass;
 
         public final String name;
@@ -1506,49 +1517,49 @@ public final class ParserUtil {
 
         volatile int failureCountForSetProp = 0;
 
-        @SuppressWarnings("deprecation")
-        PropInfo(final String propName) {
-            declaringClass = null;
-            name = propName;
-            aliases = ImmutableList.empty();
-            field = null;
-            getMethod = null;
-            setMethod = null;
-            annotations = ImmutableMap.empty();
-            clazz = null;
-            type = null;
-
-            jsonXmlType = null;
-            dbType = null;
-            xmlNameTags = null;
-            jsonNameTags = null;
-            isFieldAccessible = false;
-            isFieldSettable = false;
-            dateFormat = null;
-            timeZone = null;
-            zoneId = null;
-            dateTimeFormatter = null;
-            isJsonRawValue = false;
-            jodaDTFH = null;
-            isLongDateFormat = false;
-            numberFormat = null;
-            hasFormat = false;
-
-            isTransient = false;
-            isMarkedToId = false;
-            isMarkedToReadOnlyId = false;
-            jsonXmlExpose = JsonXmlField.Expose.DEFAULT;
-
-            isMarkedToColumn = false;
-            isSubEntity = false;
-            columnName = Optional.<String> empty();
-            tablePrefix = Optional.<String> empty();
-            canSetFieldByGetMethod = false;
-
-            fieldOrder = -1;
-            isImmutableBean = false;
-            isByBuilder = false;
-        }
+        //    @SuppressWarnings("deprecation")
+        //    PropInfo(final String propName) {
+        //        declaringClass = null;
+        //        name = propName;
+        //        aliases = ImmutableList.empty();
+        //        field = null;
+        //        getMethod = null;
+        //        setMethod = null;
+        //        annotations = ImmutableMap.empty();
+        //        clazz = null;
+        //        type = null;
+        //
+        //        jsonXmlType = null;
+        //        dbType = null;
+        //        xmlNameTags = null;
+        //        jsonNameTags = null;
+        //        isFieldAccessible = false;
+        //        isFieldSettable = false;
+        //        dateFormat = null;
+        //        timeZone = null;
+        //        zoneId = null;
+        //        dateTimeFormatter = null;
+        //        isJsonRawValue = false;
+        //        jodaDTFH = null;
+        //        isLongDateFormat = false;
+        //        numberFormat = null;
+        //        hasFormat = false;
+        //
+        //        isTransient = false;
+        //        isMarkedToId = false;
+        //        isMarkedToReadOnlyId = false;
+        //        jsonXmlExpose = JsonXmlField.Expose.DEFAULT;
+        //
+        //        isMarkedToColumn = false;
+        //        isSubEntity = false;
+        //        columnName = Optional.empty();
+        //        tablePrefix = Optional.empty();
+        //        canSetFieldByGetMethod = false;
+        //
+        //        fieldOrder = -1;
+        //        isImmutableBean = false;
+        //        isByBuilder = false;
+        //    }
 
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
@@ -1592,6 +1603,7 @@ public final class ParserUtil {
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
 
             try {
+                //noinspection ConstantValue
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     tmpJodaDTFH = new JodaDateTimeFormatterHolder(dateFormat, timeZone);
                 }
@@ -1681,10 +1693,10 @@ public final class ParserUtil {
 
             isSubEntity = !isMarkedToColumn && (type.isBean() || (type.isCollection() && type.getElementType().isBean()));
 
-            columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
+            columnName = Strings.isEmpty(tmpColumnName) ? Optional.empty() : Optional.ofNullable(tmpColumnName);
 
             tablePrefix = type.isBean() && clazz.getAnnotation(Table.class) != null ? Optional.ofNullable(clazz.getAnnotation(Table.class).alias())
-                    : Optional.<String> empty();
+                    : Optional.empty();
 
             canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
@@ -1749,6 +1761,7 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
+                        //noinspection NonAtomicOperationOnVolatileField
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -1767,6 +1780,7 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
+                        //noinspection NonAtomicOperationOnVolatileField
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -1776,6 +1790,7 @@ public final class ParserUtil {
                     // Checking value type first may not improve performance.
 
                     if (failureCountForSetProp < 1000) {
+                        //noinspection NonAtomicOperationOnVolatileField
                         failureCountForSetProp++; // NOSONAR
                     }
 
@@ -1942,7 +1957,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) {
                     if (propInfo.isLongDateFormat) {
                         // writer.write(x.atStartOfDay(propInfo.zoneId).toInstant().toEpochMilli());
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalDate");
@@ -1964,7 +1979,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) {
                     if (propInfo.isLongDateFormat) {
                         // writer.write(java.sql.Time.valueOf(x).getTime());
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime");
@@ -1995,6 +2010,7 @@ public final class ParserUtil {
             });
 
             try {
+                //noinspection ConstantValue
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     propFuncMap.put(org.joda.time.DateTime.class, new DateTimeReaderWriter<org.joda.time.DateTime>() {
                         @Override
@@ -2349,8 +2365,8 @@ public final class ParserUtil {
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
                             final String str = annoType.substring(start, i);
 
-                            if (str.length() > 0 && N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
-                                sb.append(pkgName + "." + str);
+                            if (!str.isEmpty() && N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
+                                sb.append(pkgName).append(".").append(str);
                             } else {
                                 sb.append(str);
                             }
@@ -2364,7 +2380,7 @@ public final class ParserUtil {
                         final String str = annoType.substring(start);
 
                         if (N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
-                            sb.append(pkgName + "." + str);
+                            sb.append(pkgName).append(".").append(str);
                         } else {
                             sb.append(str);
                         }
@@ -2398,6 +2414,7 @@ public final class ParserUtil {
         }
     }
 
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static class ASMPropInfo extends PropInfo { //NOSONAR
         final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
         final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
@@ -2471,6 +2488,7 @@ public final class ParserUtil {
                 }
 
                 if (failureCountForSetProp > 0) {
+                    //noinspection NonAtomicOperationOnVolatileField
                     failureCountForSetProp--; // NOSONAR
                 }
             } else {
@@ -2486,6 +2504,7 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
+                        //noinspection NonAtomicOperationOnVolatileField
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (final IllegalAccessException e) {
@@ -2495,6 +2514,7 @@ public final class ParserUtil {
                     // Checking value type first may not improve performance.
 
                     if (failureCountForSetProp < 1000) {
+                        //noinspection NonAtomicOperationOnVolatileField
                         failureCountForSetProp++; // NOSONAR
                     }
 
@@ -2694,7 +2714,7 @@ public final class ParserUtil {
     //        private final Class<T> clazz;
     //        private final BeanInfo beanInfo;
     //        private final Function<Object[], T> creator;
-    //        private) final ImmutableList<String> fieldNames;
+    //        private final ImmutableList<String> fieldNames;
     //        private final ImmutableMap<String, Tuple5<String, Field, Method, PropInfo, Integer>> fieldMap;
     //    }
 }

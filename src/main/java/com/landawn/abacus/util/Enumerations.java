@@ -95,6 +95,7 @@ public final class Enumerations {
      * @param a
      * @return
      */
+    @SafeVarargs
     public static <T> Enumeration<T> of(final T... a) {
         if (N.isEmpty(a)) {
             return empty();

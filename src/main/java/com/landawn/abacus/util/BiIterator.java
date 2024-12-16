@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  * The BiIterator class is an abstract class that extends ImmutableIterator.
  * It represents an iterator over a pair of values of type A and B.
- * This class provides a blueprint for classes that need to implement a bi-directional iterator.
+ * This class provides a blueprint for classes that need to implement a bidirectional iterator.
  *
  * @param <A> the first type of elements returned by this iterator
  * @param <B> the second type of elements returned by this iterator
@@ -72,7 +72,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         @Override
-        public void foreachRemaining(final Throwables.BiConsumer action) throws IllegalArgumentException, Exception {
+        public void foreachRemaining(final Throwables.BiConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action);
         }
 
@@ -571,8 +571,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a BiIterator that iterates over pairs of elements from the two iterators
      */
     public static <A, B> BiIterator<A, B> zip(final Iterator<A> iterA, final Iterator<B> iterB, final A valueForNoneA, final B valueForNoneB) {
-        final Iterator<A> iter1 = iterA == null ? ObjIterator.<A> empty() : iterA;
-        final Iterator<B> iter2 = iterB == null ? ObjIterator.<B> empty() : iterB;
+        final Iterator<A> iter1 = iterA == null ? ObjIterator.empty() : iterA;
+        final Iterator<B> iter2 = iterB == null ? ObjIterator.empty() : iterB;
 
         return new BiIterator<>() {
             @Override
@@ -803,6 +803,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             private void skip() {
                 long idx = 0;
 
+                @SuppressWarnings("UnnecessaryLocalVariable")
                 final Throwables.BiConsumer<A, B, RuntimeException> action = DO_NOTHING;
 
                 while (idx++ < n && iter.hasNext()) {
@@ -826,7 +827,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
-            return BiIterator.<A, B> empty();
+            return BiIterator.empty();
         }
 
         final BiIterator<A, B> iter = this;
@@ -884,7 +885,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 if (cnt > 0) {
                     return iter.<R> map(mapper).limit(cnt);
                 } else {
-                    return ObjIterator.<R> empty();
+                    return ObjIterator.empty();
                 }
             }
         };
@@ -1018,7 +1019,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         if (hasNext()) {
             return Optional.of(next());
         } else {
-            return Optional.<Pair<A, B>> empty();
+            return Optional.empty();
         }
     }
 
@@ -1037,7 +1038,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             return Optional.of(next);
         } else {
-            return Optional.<Pair<A, B>> empty();
+            return Optional.empty();
         }
     }
 
@@ -1092,7 +1093,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a List containing all pairs of elements in this BiIterator
      */
     public List<Pair<A, B>> toList() {
-        return toCollection(Suppliers.<Pair<A, B>> ofList());
+        return toCollection(Suppliers.ofList());
     }
 
     /**

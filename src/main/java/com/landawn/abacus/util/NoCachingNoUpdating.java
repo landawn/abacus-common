@@ -32,7 +32,7 @@ import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+ * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
  *
  *
  */
@@ -42,7 +42,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 public interface NoCachingNoUpdating {
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      *
@@ -52,9 +52,9 @@ public interface NoCachingNoUpdating {
     @SequentialOnly
     @Stateful
     @SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
-    public static class DisposableArray<T> implements NoCachingNoUpdating, Cloneable, Iterable<T> {
+    class DisposableArray<T> implements NoCachingNoUpdating, Iterable<T> {
 
-        /** The a. */
+        /** The element array */
         private final T[] a;
 
         /**
@@ -117,13 +117,12 @@ public interface NoCachingNoUpdating {
             return target;
         }
 
-        @Override
-        public T[] clone() { //NOSONAR
+        public T[] copy() { //NOSONAR
             return N.clone(a);
         }
 
         public List<T> toList() {
-            return N.toList(clone());
+            return N.toList(a);
         }
 
         public Set<T> toSet() {
@@ -212,14 +211,14 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableObjArray extends DisposableArray<Object> {
+    class DisposableObjArray extends DisposableArray<Object> {
 
         /**
          * Instantiates a new disposable obj array.
@@ -264,16 +263,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableBooleanArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableBooleanArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final boolean[] a;
 
         /**
@@ -317,8 +316,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public boolean[] clone() { //NOSONAR
+        public boolean[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -327,7 +325,7 @@ public interface NoCachingNoUpdating {
         }
 
         public BooleanList toList() {
-            return BooleanList.of(clone());
+            return BooleanList.of(copy());
         }
 
         /**
@@ -411,16 +409,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableCharArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableCharArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final char[] a;
 
         /**
@@ -464,8 +462,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public char[] clone() { //NOSONAR
+        public char[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -474,7 +471,7 @@ public interface NoCachingNoUpdating {
         }
 
         public CharList toList() {
-            return CharList.of(clone());
+            return CharList.of(copy());
         }
 
         /**
@@ -574,16 +571,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableByteArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableByteArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final byte[] a;
 
         /**
@@ -627,8 +624,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public byte[] clone() { //NOSONAR
+        public byte[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -637,7 +633,7 @@ public interface NoCachingNoUpdating {
         }
 
         public ByteList toList() {
-            return ByteList.of(clone());
+            return ByteList.of(copy());
         }
 
         /**
@@ -737,16 +733,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableShortArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableShortArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final short[] a;
 
         /**
@@ -790,8 +786,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public short[] clone() { //NOSONAR
+        public short[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -800,7 +795,7 @@ public interface NoCachingNoUpdating {
         }
 
         public ShortList toList() {
-            return ShortList.of(clone());
+            return ShortList.of(copy());
         }
 
         /**
@@ -900,16 +895,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableIntArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableIntArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final int[] a;
 
         /**
@@ -953,8 +948,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public int[] clone() { //NOSONAR
+        public int[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -963,7 +957,7 @@ public interface NoCachingNoUpdating {
         }
 
         public IntList toList() {
-            return IntList.of(clone());
+            return IntList.of(copy());
         }
 
         /**
@@ -1063,16 +1057,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableLongArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableLongArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final long[] a;
 
         /**
@@ -1116,8 +1110,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public long[] clone() { //NOSONAR
+        public long[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1126,7 +1119,7 @@ public interface NoCachingNoUpdating {
         }
 
         public LongList toList() {
-            return LongList.of(clone());
+            return LongList.of(copy());
         }
 
         /**
@@ -1226,16 +1219,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableFloatArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableFloatArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final float[] a;
 
         /**
@@ -1279,8 +1272,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public float[] clone() { //NOSONAR
+        public float[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1289,7 +1281,7 @@ public interface NoCachingNoUpdating {
         }
 
         public FloatList toList() {
-            return FloatList.of(clone());
+            return FloatList.of(copy());
         }
 
         /**
@@ -1389,16 +1381,16 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableDoubleArray implements NoCachingNoUpdating, Cloneable {
+    class DisposableDoubleArray implements NoCachingNoUpdating {
 
-        /** The a. */
+        /** The element array */
         private final double[] a;
 
         /**
@@ -1442,8 +1434,7 @@ public interface NoCachingNoUpdating {
             return a.length;
         }
 
-        @Override
-        public double[] clone() { //NOSONAR
+        public double[] copy() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1452,7 +1443,7 @@ public interface NoCachingNoUpdating {
         }
 
         public DoubleList toList() {
-            return DoubleList.of(clone());
+            return DoubleList.of(copy());
         }
 
         /**
@@ -1552,7 +1543,7 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Queue} itself.
      *
@@ -1561,7 +1552,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableDeque<T> implements NoCachingNoUpdating {
+    class DisposableDeque<T> implements NoCachingNoUpdating {
 
         /** The deque. */
         private final Deque<T> deque;
@@ -1709,7 +1700,7 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Entry} itself.
      *
@@ -1719,7 +1710,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public abstract static class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
+    abstract class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
 
         /**
          *
@@ -1816,7 +1807,7 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Pair} itself.
      *
@@ -1826,7 +1817,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public abstract static class DisposablePair<L, R> implements NoCachingNoUpdating {
+    abstract class DisposablePair<L, R> implements NoCachingNoUpdating {
 
         /**
          *
@@ -1892,7 +1883,7 @@ public interface NoCachingNoUpdating {
     }
 
     /**
-     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code copy()}.
      * <br />
      * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Tripe} itself.
      *
@@ -1903,7 +1894,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public abstract static class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
+    abstract class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
 
         /**
          *
@@ -1975,7 +1966,7 @@ public interface NoCachingNoUpdating {
         }
     }
 
-    public static class Timed<T> implements NoCachingNoUpdating {
+    class Timed<T> implements NoCachingNoUpdating {
 
         protected T value;
         protected long timeInMillis;
@@ -2029,9 +2020,7 @@ public interface NoCachingNoUpdating {
                 return true;
             }
 
-            if (obj instanceof Timed) {
-                final Timed<?> other = (Timed<?>) obj;
-
+            if (obj instanceof Timed<?> other) {
                 return timeInMillis == other.timeInMillis && N.equals(value, other.value);
             }
 

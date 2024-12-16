@@ -46,7 +46,7 @@ class Log4Jv2Logger extends AbstractLogger {
     public Log4Jv2Logger(final String name) {
         super(name);
         // if (!existsLog4JFile) {
-        // throw new RuntimeException("Failed to initilze Log4j Logger Factory");
+        // throw new RuntimeException("Failed to initialize Log4j Logger Factory");
         // }
         //
         loggerImpl = (ExtendedLogger) org.apache.logging.log4j.LogManager.getLogger(name);
@@ -140,9 +140,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if is warn enabled.
+     * Checks if warning level logging is enabled.
      *
-     * @return {@code true}, if is warn enabled
+     * @return {@code true}, if warning level logging is enabled.
      */
     @Override
     public boolean isWarnEnabled() {

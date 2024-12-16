@@ -467,8 +467,8 @@ public final class HttpHeaders {
         /** The Constant NO_REFERRER. */
         public static final String NO_REFERRER = "no-referrer";
 
-        /** The Constant NO_REFFERER_WHEN_DOWNGRADE. */
-        public static final String NO_REFFERER_WHEN_DOWNGRADE = "no-referrer-when-downgrade";
+        /** The Constant NO_REFERRER_WHEN_DOWNGRADE. */
+        public static final String NO_REFERRER_WHEN_DOWNGRADE = "no-referrer-when-downgrade";
 
         /** The Constant SAME_ORIGIN. */
         public static final String SAME_ORIGIN = "same-origin";
@@ -776,7 +776,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Sets the accept charset.
+     * Sets the {@code }Accept-Charset} header.
      *
      * @param acceptCharset
      * @return

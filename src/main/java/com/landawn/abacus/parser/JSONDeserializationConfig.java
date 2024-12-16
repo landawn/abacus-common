@@ -113,7 +113,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      * Sets property handler/converter for (Big) collection values property.
      *
-     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For example: {@code account.devices.model}
      * @param handler the first parameter will be Collection or Map, the second parameter will be the current element or entry
      * @return
      * @throws IllegalArgumentException
@@ -195,14 +195,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         }
 
         if (obj instanceof final JSONDeserializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
                     && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)
-                    && N.equals(mapInstanceType, other.mapInstanceType) && N.equals(propHandlerMap, other.propHandlerMap)) {
-
-                return true;
-            }
+                    && N.equals(mapInstanceType, other.mapInstanceType) && N.equals(propHandlerMap, other.propHandlerMap);
         }
 
         return false;

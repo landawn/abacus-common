@@ -17,17 +17,18 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
  * A mutable {@code boolean} wrapper.
  * <p>
- * Note that as MutableBoolean does not extend Boolean, it is not treated by String.format as a Boolean parameter.
+ * Note that as MutableBoolean does not extend Boolean, it is not treated by {@code }String.format} as a Boolean parameter.
  *
  * <p>
  * {@code MutableBoolean} is NOT thread-safe.
@@ -37,11 +38,7 @@ import java.io.Serializable;
  */
 public final class MutableBoolean implements Mutable, Serializable, Comparable<MutableBoolean> {
 
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
+    @Serial
     private static final long serialVersionUID = -4830728138360036487L;
 
     private boolean value;
@@ -75,6 +72,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the value as a Boolean instance.
      *
@@ -96,7 +94,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Gets the and set.
+     * Returns the current value and then set new value
      *
      * @param value
      * @return
@@ -108,7 +106,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Sets the and get.
+     * Sets with the specified value and then return it.
      *
      * @param value
      * @return
@@ -119,7 +117,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Gets the and invert.
+     * Returns the current value and then invert.
      *
      * @return
      */
@@ -196,6 +194,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks if the current value is {@code true}.
      *
@@ -222,6 +221,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this mutable to another in ascending order.
      *
@@ -235,6 +235,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if the argument is
      * not {@code null} and is an {@code MutableBoolean} object that contains the same
@@ -262,6 +263,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the String value of this mutable.
      *

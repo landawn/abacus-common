@@ -79,7 +79,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     public Boolean[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }
 

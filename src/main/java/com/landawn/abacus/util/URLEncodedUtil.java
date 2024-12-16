@@ -42,7 +42,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 
 /**
  * <p>
- * Note: it's copied from Apache HttpComponents developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache HttpComponents developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
@@ -91,14 +91,14 @@ public final class URLEncodedUtil {
     private static final BitSet PUNCT = new BitSet(256);
 
     /**
-     * Characters which are safe to use in userinfo, i.e. {@link #UNRESERVED} plus {@link #PUNCT}uation
+     * Characters which are safe to use in userinfo, i.e. {@link #UNRESERVED} plus {@link #PUNCT} ration
      */
     private static final BitSet USERINFO = new BitSet(256);
 
     /**
-     * Characters which are safe to use in a path, i.e. {@link #UNRESERVED} plus {@link #PUNCT}uation plus / @
+     * Characters which are safe to use in a path, i.e. {@link #UNRESERVED} plus {@link #PUNCT} ration plus / @
      */
-    private static final BitSet PATHSAFE = new BitSet(256);
+    private static final BitSet PATH_SAFE = new BitSet(256);
 
     /**
      * Characters which are safe to use in a urlQuery or a fragment, i.e. {@link #RESERVED} plus {@link #UNRESERVED}
@@ -117,7 +117,7 @@ public final class URLEncodedUtil {
      * Safe characters for x-www-form-urlencoded data, as per java.net.URLEncoder and browser behaviour, i.e.
      * alphanumeric plus {@code "-", "_", ".", "*"}
      */
-    private static final BitSet URLENCODER = new BitSet(256);
+    private static final BitSet URL_ENCODER = new BitSet(256);
 
     static {
         // unreserved chars
@@ -135,11 +135,11 @@ public final class URLEncodedUtil {
             UNRESERVED.set(i);
         }
 
-        UNRESERVED.set('_'); // these are the charactes of the "mark" list
+        UNRESERVED.set('_'); // these are the characters of the "mark" list
         UNRESERVED.set('-');
         UNRESERVED.set('.');
         UNRESERVED.set('*');
-        URLENCODER.or(UNRESERVED); // skip remaining unreserved characters
+        URL_ENCODER.or(UNRESERVED); // skip remaining unreserved characters
         UNRESERVED.set('!');
         UNRESERVED.set('~');
         UNRESERVED.set('\'');
@@ -158,16 +158,16 @@ public final class URLEncodedUtil {
         USERINFO.or(PUNCT);
 
         // URL path safe
-        PATHSAFE.or(UNRESERVED);
-        PATHSAFE.set('/'); // segment separator
-        PATHSAFE.set(';'); // param separator
-        PATHSAFE.set(':'); // rest as per list in 2396, i.e. : @ & = + $ ,
-        PATHSAFE.set('@');
-        PATHSAFE.set('&');
-        PATHSAFE.set('=');
-        PATHSAFE.set('+');
-        PATHSAFE.set('$');
-        PATHSAFE.set(',');
+        PATH_SAFE.or(UNRESERVED);
+        PATH_SAFE.set('/'); // segment separator
+        PATH_SAFE.set(';'); // param separator
+        PATH_SAFE.set(':'); // rest as per list in 2396, i.e. : @ & = + $ ,
+        PATH_SAFE.set('@');
+        PATH_SAFE.set('&');
+        PATH_SAFE.set('=');
+        PATH_SAFE.set('+');
+        PATH_SAFE.set('$');
+        PATH_SAFE.set(',');
 
         RESERVED.set(';');
         RESERVED.set('/');
@@ -324,7 +324,7 @@ public final class URLEncodedUtil {
         final Object result = beanInfo.createBeanResult();
 
         if (Strings.isEmpty(urlQuery)) {
-            return (T) beanInfo.finishBeanResult(result);
+            return beanInfo.finishBeanResult(result);
         }
 
         try (final Scanner scanner = new Scanner(urlQuery)) {
@@ -359,7 +359,7 @@ public final class URLEncodedUtil {
             }
         }
 
-        return (T) beanInfo.finishBeanResult(result);
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
@@ -378,16 +378,16 @@ public final class URLEncodedUtil {
         final Object result = beanInfo.createBeanResult();
 
         if (N.isEmpty(parameters)) {
-            return (T) beanInfo.finishBeanResult(result);
+            return beanInfo.finishBeanResult(result);
         }
 
         PropInfo propInfo = null;
         Object propValue = null;
         String[] values = null;
 
-        for (final String key : parameters.keySet()) { //NOSONAR
-            propInfo = beanInfo.getPropInfo(key);
-            values = parameters.get(key);
+        for (final Map.Entry<String, String[]> entry : parameters.entrySet()) { //NOSONAR
+            propInfo = beanInfo.getPropInfo(entry.getKey());
+            values = entry.getValue();
 
             if (N.isEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
                 propValue = propInfo.jsonXmlType.defaultValue();
@@ -402,7 +402,7 @@ public final class URLEncodedUtil {
             propInfo.setPropValue(result, propValue);
         }
 
-        return (T) beanInfo.finishBeanResult(result);
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
@@ -668,9 +668,7 @@ public final class URLEncodedUtil {
 
     /**
      * Encode/escape www-url-form-encoded content.
-     * <p>
-     * Uses the {@link #URLENCODER} set of characters, rather than the {@link #UNRSERVED} set; this is for compatibilty
-     * with previous releases, URLEncoder.encode() and most browsers.
+     *
      * @param content the content to encode, will convert space to '+'
      * @param charset the charset to use
      * @param output
@@ -679,10 +677,10 @@ public final class URLEncodedUtil {
      * @throws IOException
      */
     private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
-        urlEncode(content, (charset != null) ? charset : Charsets.DEFAULT, URLENCODER, true, output);
+        urlEncode(content, (charset != null) ? charset : Charsets.DEFAULT, URL_ENCODER, true, output);
     }
 
-    private static void urlEncode(final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus, final Appendable output)
+    private static void urlEncode(final String content, final Charset charset, final BitSet safeChars, final boolean blankAsPlus, final Appendable output)
             throws IOException {
         if (content == null) {
             output.append(Strings.NULL_STRING);
@@ -695,7 +693,7 @@ public final class URLEncodedUtil {
         while (bb.hasRemaining()) {
             final int b = bb.get() & 0xff;
 
-            if (safechars.get(b)) {
+            if (safeChars.get(b)) {
                 output.append((char) b);
             } else if (blankAsPlus && (b == ' ')) {
                 output.append('+');
@@ -741,7 +739,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode a String using the {@link #PATHSAFE} set of characters.
+     * Encode a String using the {@link #PATH_SAFE} set of characters.
      * <p>
      * Used by URIBuilder to encode path segments.
      * @param content the string to encode, does not convert space to '+'
@@ -752,6 +750,6 @@ public final class URLEncodedUtil {
      * @throws IOException
      */
     static void encPath(final String content, final Charset charset, final Appendable output) throws IOException {
-        urlEncode(content, charset, PATHSAFE, false, output);
+        urlEncode(content, charset, PATH_SAFE, false, output);
     }
 }

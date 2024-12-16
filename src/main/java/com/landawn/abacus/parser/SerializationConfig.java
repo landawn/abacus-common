@@ -98,11 +98,8 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         if (obj instanceof SerializationConfig) {
             final SerializationConfig<C> other = (SerializationConfig<C>) obj;
 
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(exclusion, other.exclusion)
-                    && N.equals(skipTransientField, other.skipTransientField)) {
-
-                return true;
-            }
+            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(exclusion, other.exclusion)
+                    && N.equals(skipTransientField, other.skipTransientField);
         }
 
         return false;

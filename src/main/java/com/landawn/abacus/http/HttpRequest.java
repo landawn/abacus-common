@@ -1040,7 +1040,7 @@ public final class HttpRequest {
      * @param executor
      * @return
      */
-    protected <R> ContinuableFuture<R> execute(final Callable<R> cmd, final Executor executor) {
+    <R> ContinuableFuture<R> execute(final Callable<R> cmd, final Executor executor) {
         N.checkArgNotNull(executor, cs.executor);
 
         return N.asyncExecute(cmd, executor);
@@ -1049,7 +1049,7 @@ public final class HttpRequest {
     /**
      * Check settings.
      */
-    protected HttpSettings checkSettings() {
+    HttpSettings checkSettings() {
         if (settings == null) {
             settings = new HttpSettings();
         }

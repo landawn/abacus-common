@@ -99,8 +99,7 @@ public final class Futures {
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet) {
-        return compose(cf1, cf2, zipFunctionForGet,
-                (Throwables.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1, t._2));
+        return compose(cf1, cf2, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2));
     }
 
     /**
@@ -120,8 +119,7 @@ public final class Futures {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1)),
-                (Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
-                        .apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), t._2, t._3)));
+                t -> zipFunctionTimeoutGet.apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), t._2, t._3)));
     }
 
     /**
@@ -161,8 +159,7 @@ public final class Futures {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1), (Future<T3>) c.get(2)),
-                (Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
-                        .apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), (Future<T3>) t._1.get(2), t._2, t._3)));
+                t -> zipFunctionTimeoutGet.apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), (Future<T3>) t._1.get(2), t._2, t._3)));
     }
 
     /**
@@ -177,7 +174,7 @@ public final class Futures {
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
-        return compose(cfs, zipFunctionForGet, (Throwables.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1));
+        return compose(cfs, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1));
     }
 
     /**
@@ -197,7 +194,7 @@ public final class Futures {
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
 
-        return ContinuableFuture.wrap(new Future<R>() {
+        return ContinuableFuture.wrap(new Future<>() {
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
@@ -248,6 +245,8 @@ public final class Futures {
             public R get() throws InterruptedException, ExecutionException {
                 try {
                     return zipFunctionForGet.apply(cfs);
+                } catch (InterruptedException | ExecutionException e) {
+                    throw e;
                 } catch (final Exception e) {
                     throw N.toRuntimeException(e);
                 }
@@ -259,6 +258,8 @@ public final class Futures {
 
                 try {
                     return zipFunctionTimeoutGet.apply(t);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    throw e;
                 } catch (final Exception e) {
                     throw N.toRuntimeException(e);
                 }
@@ -444,7 +445,7 @@ public final class Futures {
     //    }
 
     /**
-     * Returns a new ContinuableFuture that is completed when all of the given Futures complete.
+     * Returns a new ContinuableFuture that is completed when all the given Futures complete.
      * If any of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
      * @param <T> The result type of the input futures.
@@ -457,7 +458,7 @@ public final class Futures {
     }
 
     /**
-     * Returns a new ContinuableFuture that is completed when all of the given Futures complete.
+     * Returns a new ContinuableFuture that is completed when all the given Futures complete.
      * If any of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
      * @param <T> The result type of the input futures.
@@ -471,7 +472,7 @@ public final class Futures {
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
-        return ContinuableFuture.wrap(new Future<List<T>>() {
+        return ContinuableFuture.wrap(new Future<>() {
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
@@ -548,7 +549,7 @@ public final class Futures {
 
     /**
      * Returns a new ContinuableFuture that is completed when any of the given Futures complete.
-     * If all of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
+     * If all the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
      * @param <T> The result type of the input futures.
      * @param cfs The array of input futures.
@@ -561,7 +562,7 @@ public final class Futures {
 
     /**
      * Returns a new ContinuableFuture that is completed when any of the given Futures complete.
-     * If all of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
+     * If all the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
      * @param <T> The result type of the input futures.
      * @param cfs The collection of input futures.
@@ -574,7 +575,7 @@ public final class Futures {
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
-        return ContinuableFuture.wrap(new Future<T>() {
+        return ContinuableFuture.wrap(new Future<>() {
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
@@ -634,7 +635,18 @@ public final class Futures {
                     }
                 }
 
-                return handle(result);
+                //noinspection DataFlowIssue
+                if (result.isFailure()) {
+                    if (result.getException() instanceof InterruptedException) {
+                        throw ((InterruptedException) result.getException());
+                    } else if (result.getException() instanceof ExecutionException) {
+                        throw ((ExecutionException) result.getException());
+                    } else {
+                        throw N.toRuntimeException(result.getException());
+                    }
+                }
+
+                return result.orElseIfFailure(null);
             }
 
             @Override
@@ -650,6 +662,7 @@ public final class Futures {
                     }
                 }
 
+                //noinspection DataFlowIssue
                 return handle(result);
             }
         });
@@ -761,6 +774,7 @@ public final class Futures {
 
         return new ObjIterator<>() {
             private final Set<Future<? extends T>> activeFutures = N.newSetFromMap(new IdentityHashMap<>());
+
             { //NOSONAR
                 activeFutures.addAll(cfs);
             }
@@ -780,7 +794,7 @@ public final class Futures {
                     for (final Future<? extends T> cf : activeFutures) {
                         if (cf.isDone()) {
                             try {
-                                return resultHandler.apply(Result.<T, Exception> of(cf.get(), null));
+                                return resultHandler.apply(Result.of(cf.get(), null));
                             } catch (final Exception e) {
                                 return resultHandler.apply(Result.of(null, e));
                             } finally {
@@ -790,7 +804,7 @@ public final class Futures {
                     }
 
                     if (System.currentTimeMillis() - now >= totalTimeoutForAllInMillis) {
-                        return resultHandler.apply(Result.<T, Exception> of(null, new TimeoutException()));
+                        return resultHandler.apply(Result.of(null, new TimeoutException()));
                     }
 
                     N.sleepUninterruptibly(1);
@@ -799,12 +813,14 @@ public final class Futures {
         };
     }
 
-    private static <R> R handle(final Result<R, Exception> result) throws InterruptedException, ExecutionException {
+    private static <R> R handle(final Result<R, Exception> result) throws InterruptedException, ExecutionException, TimeoutException {
         if (result.isFailure()) {
             if (result.getException() instanceof InterruptedException) {
                 throw ((InterruptedException) result.getException());
             } else if (result.getException() instanceof ExecutionException) {
                 throw ((ExecutionException) result.getException());
+            } else if (result.getException() instanceof TimeoutException) {
+                throw ((TimeoutException) result.getException());
             } else {
                 throw N.toRuntimeException(result.getException());
             }

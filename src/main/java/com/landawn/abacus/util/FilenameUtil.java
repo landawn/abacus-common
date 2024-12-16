@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Stack;
 
 /**
- * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
  *
  * General filename and filepath manipulation utilities.
  * <p>
@@ -112,6 +112,7 @@ public final class FilenameUtil {
      * The separator character that is the opposite of the system separator.
      */
     private static final char OTHER_SEPARATOR;
+
     static {
         if (IOUtil.IS_OS_WINDOWS) {
             OTHER_SEPARATOR = UNIX_SEPARATOR;
@@ -128,6 +129,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks if the character is a separator.
      *
@@ -139,6 +141,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Normalizes a path, removing double and single dot path steps.
      * <p>
@@ -232,6 +235,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Normalizes a path, removing double and single dot path steps,
      * and removing any final directory separator.
@@ -423,6 +427,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Concatenates a filename to a base path using normal command line style rules.
      * <p>
@@ -519,6 +524,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Converts all separators to the Unix separator of forward slash.
      *
@@ -563,6 +569,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Returns the length of the filename prefix, such as {@code C:/} or {@code ~/}.
      * <p>
@@ -592,7 +599,7 @@ public final class FilenameUtil {
      * </pre>
      * <p>
      * The output will be the same irrespective of the machine that the code is running on.
-     * ie. both Unix and Windows prefixes are matched regardless.
+     * i.e. both Unix and Windows prefixes are matched regardless.
      *
      * Note that a leading // (or \\) is used to indicate a UNC name on Windows.
      * These must be followed by a server name, so double-slashes are not collapsed
@@ -702,6 +709,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Gets the prefix from a full filename, such as {@code C:/}
      * or {@code ~/}.
@@ -726,7 +734,7 @@ public final class FilenameUtil {
      * </pre>
      * <p>
      * The output will be the same irrespective of the machine that the code is running on.
-     * ie. both Unix and Windows prefixes are matched regardless.
+     * i.e. both Unix and Windows prefixes are matched regardless.
      *
      * @param filename the filename to query, {@code null} returns null
      * @return the prefix of the file, {@code null} if invalid. Null bytes inside string will be removed
@@ -948,7 +956,7 @@ public final class FilenameUtil {
     }
 
     /**
-     * Check the input for {@code null} bytes, a sign of unsanitized data being passed to to file level functions.
+     * Check the input for {@code null} bytes, a sign of unsanitized data being passed to file level functions.
      *
      * This may be used for poison byte attacks.
      * @param path the path to check
@@ -1016,6 +1024,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Removes the extension from a filename.
      * <p>
@@ -1048,6 +1057,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks whether two filenames are equal exactly.
      * <p>
@@ -1079,6 +1089,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks whether two filenames are equal after both have been normalized.
      * <p>
@@ -1139,6 +1150,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks whether the extension of the filename is that specified.
      * <p>
@@ -1225,6 +1237,7 @@ public final class FilenameUtil {
     }
 
     //-----------------------------------------------------------------------
+
     /**
      * Checks a filename to see if it matches the specified wildcard matcher,
      * always testing case-sensitive.
@@ -1349,7 +1362,7 @@ public final class FilenameUtil {
                     } else {
                         // matching from current position
                         if (!caseSensitivity.checkRegionMatches(filename, textIdx, wcs[wcsIdx])) {
-                            // couldnt match token
+                            // couldn't match token
                             break;
                         }
                     }
@@ -1394,7 +1407,7 @@ public final class FilenameUtil {
         char prevChar = 0;
         for (final char ch : array) {
             if (ch == '?' || ch == '*') {
-                if (buffer.length() != 0) {
+                if (!buffer.isEmpty()) {
                     list.add(buffer.toString());
                     buffer.setLength(0);
                 }
@@ -1408,10 +1421,10 @@ public final class FilenameUtil {
             }
             prevChar = ch;
         }
-        if (buffer.length() != 0) {
+        if (!buffer.isEmpty()) {
             list.add(buffer.toString());
         }
 
-        return list.toArray(new String[list.size()]);
+        return list.toArray(new String[0]);
     }
 }

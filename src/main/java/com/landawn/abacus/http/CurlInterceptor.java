@@ -82,11 +82,12 @@ class CurlInterceptor implements Interceptor {
         if (requestBody != null) {
             Charset charset = Charset.defaultCharset();
             final String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
+            //noinspection DataFlowIssue
             bodyType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
 
-            if (Strings.isNotEmpty(bodyType) && bodyType.indexOf("charset") >= 0) {
+            if (Strings.isNotEmpty(bodyType) && bodyType.contains("charset")) {
                 charset = HttpUtil.getCharset(bodyType);
-            } else if (Strings.isNotEmpty(contentType) && contentType.indexOf("charset") >= 0) {
+            } else if (Strings.isNotEmpty(contentType) && contentType.contains("charset")) {
                 charset = HttpUtil.getCharset(contentType);
             }
 

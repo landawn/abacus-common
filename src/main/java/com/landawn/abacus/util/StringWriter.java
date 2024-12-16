@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.io.IOException;
-
 /**
  * Built on {@code StringBuilder}. Not like <code/>java.io.StringWriter</code>. it's not multi-thread safety.
  *
@@ -66,10 +64,9 @@ public final class StringWriter extends AppendableWriter {
      *
      * @param csq
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public StringWriter append(final CharSequence csq) throws IOException {
+    public StringWriter append(final CharSequence csq) {
         buf.append(csq);
 
         return this;
@@ -81,10 +78,9 @@ public final class StringWriter extends AppendableWriter {
      * @param start
      * @param end
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public StringWriter append(final CharSequence csq, final int start, final int end) throws IOException {
+    public StringWriter append(final CharSequence csq, final int start, final int end) {
         buf.append(csq, start, end);
 
         return this;
@@ -102,10 +98,9 @@ public final class StringWriter extends AppendableWriter {
     /**
      *
      * @param cbuf
-     * @throws IOException
      */
     @Override
-    public void write(final char[] cbuf) throws IOException {
+    public void write(final char[] cbuf) {
         buf.append(cbuf);
     }
 
@@ -150,10 +145,9 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      *
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void close() throws IOException { //NOSONAR
+    public void close() { //NOSONAR
         // Do nothing
     }
 

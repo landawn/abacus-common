@@ -48,6 +48,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static IntIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Returns an IntIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the IntIterator instance when the IntIterator's methods are first called.
+     * The Supplier is responsible for producing the IntIterator instance when the first method in the returned {@code IntIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the IntIterator when needed.
      * @return A IntIterator that is initialized on the first call to hasNext() or nextByte().

@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 
@@ -26,6 +27,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <M>
  * @param <R>
  */
+@SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 public final class Triple<L, M, R> implements Mutable {
 
     public L left; //NOSONAR
@@ -138,7 +140,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Gets the and set left.
+     * Returns the current left value and then sets it with the specified value
      *
      * @param newLeft
      * @return
@@ -150,7 +152,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets the and get left.
+     * Sets left with the specified value and then return it.
      *
      * @param newLeft
      * @return
@@ -161,7 +163,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Gets the and set middle.
+     * Returns the current middle value and then sets it with the specified value
      *
      * @param newMiddle
      * @return
@@ -173,7 +175,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets the and get middle.
+     * Sets middle with the specified value and then return it.
      *
      * @param newMiddle
      * @return
@@ -184,19 +186,19 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Gets the and set right.
+     Returns the current right value and then sets it with the specified value.
      *
      * @param newRight
      * @return
      */
     public R getAndSetRight(final R newRight) {
-        final R res = newRight;
+        final R res = right;
         right = newRight;
         return res;
     }
 
     /**
-     * Sets the and get right.
+     * Sets right with the specified value and then return it.
      *
      * @param newRight
      * @return
@@ -347,15 +349,15 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      *
      * @param <E>
-     * @param comsumer
+     * @param consumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> comsumer) throws E {
-        final Throwables.Consumer<Object, E> objComsumer = (Throwables.Consumer<Object, E>) comsumer;
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
+        final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
-        objComsumer.accept(left);
-        objComsumer.accept(middle);
-        objComsumer.accept(right);
+        objConsumer.accept(left);
+        objConsumer.accept(middle);
+        objConsumer.accept(right);
     }
 
     /**
@@ -410,7 +412,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
-        return predicate.test(left, middle, right) ? Optional.of(this) : Optional.<Triple<L, M, R>> empty();
+        return predicate.test(left, middle, right) ? Optional.of(this) : Optional.empty();
     }
 
     /**
@@ -421,7 +423,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.Predicate<? super Triple<L, M, R>, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<Triple<L, M, R>> empty();
+        return predicate.test(this) ? Optional.of(this) : Optional.empty();
     }
 
     //    /**

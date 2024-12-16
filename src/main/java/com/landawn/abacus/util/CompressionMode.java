@@ -20,5 +20,5 @@ package com.landawn.abacus.util;
  */
 public enum CompressionMode {
 
-    NONE, LZ4, SNAPPY, GZIP;
+    NONE, LZ4, SNAPPY, GZIP
 }

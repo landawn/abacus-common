@@ -48,6 +48,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     };
 
+    @SuppressWarnings("SameReturnValue")
     public static FloatIterator empty() { //NOSONAR
         return EMPTY;
     }
@@ -73,7 +74,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (fromIndex == toIndex) {
+        if (a == null || fromIndex == toIndex) {
             return EMPTY;
         }
 
@@ -108,7 +109,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Returns an FloatIterator instance that is created lazily using the provided Supplier.
-     * The Supplier is responsible for producing the FloatIterator instance when the FloatIterator's methods are first called.
+     * The Supplier is responsible for producing the FloatIterator instance when the first method in the returned {@code FloatIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the FloatIterator when needed.
      * @return A FloatIterator that is initialized on the first call to hasNext() or nextByte().

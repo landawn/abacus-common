@@ -92,7 +92,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws SQLException {
-        stmt.setBoolean(columnIndex, (x == null) ? false : x.value());
+        stmt.setBoolean(columnIndex, x != null && x.value());
     }
 
     /**
@@ -104,7 +104,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws SQLException {
-        stmt.setBoolean(parameterName, (x == null) ? false : x.value());
+        stmt.setBoolean(parameterName, x != null && x.value());
     }
 
     /**

@@ -63,16 +63,15 @@ public final class Comparators {
 
     static final Comparator<String> COMPARING_IGNORE_CASE = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
 
-    static final Comparator<CharSequence> COMPARING_BY_LENGTH = (a, b) -> Integer.compare(a == null ? 0 : a.length(), b == null ? 0 : b.length());
+    static final Comparator<CharSequence> COMPARING_BY_LENGTH = Comparator.comparingInt(a -> a == null ? 0 : a.length());
 
-    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = (a, b) -> Integer.compare(a == null ? 0 : Array.getLength(a),
-            b == null ? 0 : Array.getLength(b));
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator<Collection> COMPARING_BY_SIZE = (a, b) -> Integer.compare(a == null ? 0 : a.size(), b == null ? 0 : b.size());
+    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = Comparator.comparingInt(a -> a == null ? 0 : Array.getLength(a));
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<Map> COMPARING_BY_MAP_SIZE = (a, b) -> Integer.compare(a == null ? 0 : a.size(), b == null ? 0 : b.size());
+    static final Comparator<Collection> COMPARING_BY_SIZE = Comparator.comparingInt(a -> a == null ? 0 : a.size());
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator<Map> COMPARING_BY_MAP_SIZE = Comparator.comparingInt(a -> a == null ? 0 : a.size());
 
     public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -537,7 +536,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Character.compare(keyExtractor.applyAsChar(a), keyExtractor.applyAsChar(b));
+        return Comparator.comparingInt(keyExtractor::applyAsChar);
     }
 
     /**
@@ -550,7 +549,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Byte.compare(keyExtractor.applyAsByte(a), keyExtractor.applyAsByte(b));
+        return Comparator.comparingInt(keyExtractor::applyAsByte);
     }
 
     /**
@@ -563,7 +562,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Short.compare(keyExtractor.applyAsShort(a), keyExtractor.applyAsShort(b));
+        return Comparator.comparingInt(keyExtractor::applyAsShort);
     }
 
     /**
@@ -576,7 +575,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Integer.compare(keyExtractor.applyAsInt(a), keyExtractor.applyAsInt(b));
+        return Comparator.comparingInt(keyExtractor);
     }
 
     /**
@@ -589,7 +588,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Long.compare(keyExtractor.applyAsLong(a), keyExtractor.applyAsLong(b));
+        return Comparator.comparingLong(keyExtractor);
     }
 
     /**
@@ -615,7 +614,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (a, b) -> Double.compare(keyExtractor.applyAsDouble(a), keyExtractor.applyAsDouble(b));
+        return Comparator.comparingDouble(keyExtractor);
     }
 
     /**
@@ -917,20 +916,17 @@ public final class Comparators {
                 return 1;
             }
 
-            final Iterator<T> iterA = a;
-            final Iterator<T> iterB = b;
-
             int result = 0;
 
-            while (iterA.hasNext() && iterB.hasNext()) {
-                result = cmp.compare(iterA.next(), iterB.next());
+            while (a.hasNext() && b.hasNext()) {
+                result = cmp.compare(a.next(), b.next());
 
                 if (result != 0) {
                     return result;
                 }
             }
 
-            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
+            return a.hasNext() ? 1 : (b.hasNext() ? -1 : 0);
         };
     }
 

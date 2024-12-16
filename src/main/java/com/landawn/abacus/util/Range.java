@@ -16,6 +16,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.function.Function;
@@ -24,7 +25,7 @@ import com.landawn.abacus.util.u.Optional;
 
 /**
  * <p>
- * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
+ * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
@@ -42,6 +43,7 @@ import com.landawn.abacus.util.u.Optional;
 @com.landawn.abacus.annotation.Immutable
 public final class Range<T extends Comparable<? super T>> implements Serializable, Immutable {
 
+    @Serial
     private static final long serialVersionUID = 545606166758706779L;
 
     /**
@@ -55,7 +57,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
     private final BoundType boundType;
 
-    @SuppressWarnings("unchecked")
     private Range(final LowerEndpoint<T> lowerEndpoint, final UpperEndpoint<T> upperEndpoint, final BoundType boundType) {
         this.lowerEndpoint = lowerEndpoint;
         this.upperEndpoint = upperEndpoint;
@@ -297,7 +298,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * <p>
      * Returns {@code -1} if this range is before the specified element,
-     * {@code 1} if the this range is after the specified element, otherwise {@code 0} if the specified element is contained in this range.
+     * {@code 1} if this range is after the specified element, otherwise {@code 0} if the specified element is contained in this range.
      * </p>
      *
      * @param element
@@ -398,11 +399,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *             if ranges cannot be compared
      */
     public boolean isOverlappedBy(final Range<T> other) {
-        if (other == null || isAfterRange(other) || isBeforeRange(other)) {//NOSONAR
-            return false;
-        }
-
-        return true;
+        //NOSONAR
+        return other != null && !isAfterRange(other) && !isBeforeRange(other);
     }
 
     /**
@@ -470,11 +468,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @return {@code true}, if is empty
      */
     public boolean isEmpty() {
-        if (lowerEndpoint.isClosed || upperEndpoint.isClosed || lowerEndpoint.compareTo(upperEndpoint.value) != 0) {//NOSONAR
-            return false;
-        }
-
-        return true;
+        //NOSONAR
+        return !lowerEndpoint.isClosed && !upperEndpoint.isClosed && lowerEndpoint.compareTo(upperEndpoint.value) == 0;
     }
 
     // Basics
@@ -551,7 +546,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     abstract static class Endpoint<T extends Comparable<? super T>> implements Serializable {
 
-        /** The Constant serialVersionUID. */
+        @Serial
         private static final long serialVersionUID = -1404748904424344410L;
 
         /** The value. */
@@ -596,7 +591,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     static class LowerEndpoint<T extends Comparable<? super T>> extends Endpoint<T> {
 
-        /** The Constant serialVersionUID. */
+        @Serial
         private static final long serialVersionUID = -1369183906861608859L;
 
         /**
@@ -674,7 +669,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     static class UpperEndpoint<T extends Comparable<? super T>> extends Endpoint<T> {
 
-        /** The Constant serialVersionUID. */
+        @Serial
         private static final long serialVersionUID = 3180376045860768477L;
 
         /**

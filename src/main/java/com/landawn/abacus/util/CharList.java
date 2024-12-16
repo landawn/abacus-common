@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.stream.CharStream;
  */
 public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
+    @Serial
     private static final long serialVersionUID = 7293826835233022514L;
 
     static final Random RAND = new SecureRandom();
@@ -227,22 +229,22 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      *
-     * @param candicates
+     * @param candidates
      * @param len
      * @return
      */
-    public static CharList random(final char[] candicates, final int len) {
-        if (N.isEmpty(candicates) || candicates.length >= Integer.MAX_VALUE) {
+    public static CharList random(final char[] candidates, final int len) {
+        if (N.isEmpty(candidates) || candidates.length == Integer.MAX_VALUE) {
             throw new IllegalArgumentException();
-        } else if (candicates.length == 1) {
-            return repeat(candicates[0], len);
+        } else if (candidates.length == 1) {
+            return repeat(candidates[0], len);
         }
 
-        final int n = candicates.length;
+        final int n = candidates.length;
         final char[] a = new char[len];
 
         for (int i = 0; i < len; i++) {
-            a[i] = candicates[RAND.nextInt(n)];
+            a[i] = candidates[RAND.nextInt(n)];
         }
 
         return of(a);
@@ -525,7 +527,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Removes the if.
+     * Removes the elements which match the given predicate.
      *
      * @param <E>
      * @param p
@@ -1296,7 +1298,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.CharConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1332,7 +1334,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntCharConsumer<E> action)
             throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -1543,17 +1545,17 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         return new CharList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**
-     * Returns List of {@code CharList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code CharList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

@@ -81,28 +81,28 @@ public final class HttpClient {
     public static final int DEFAULT_READ_TIMEOUT = 16000;
 
     // ...
-    protected final String _url; //NOSONAR
+    private final String _url; //NOSONAR
 
-    protected final int _maxConnection; //NOSONAR
+    private final int _maxConnection; //NOSONAR
 
-    protected final long _connectionTimeoutInMillis; //NOSONAR
+    private final long _connectionTimeoutInMillis; //NOSONAR
 
-    protected final long _readTimeoutInMillis; //NOSONAR
+    private final long _readTimeoutInMillis; //NOSONAR
 
-    protected final HttpSettings _settings; //NOSONAR
+    private final HttpSettings _settings; //NOSONAR
 
-    protected final AsyncExecutor _asyncExecutor; //NOSONAR
+    final AsyncExecutor _asyncExecutor; //NOSONAR
 
-    protected final URL _netURL; //NOSONAR
+    private final URL _netURL; //NOSONAR
 
-    protected final AtomicInteger _activeConnectionCounter; //NOSONAR
+    private final AtomicInteger _activeConnectionCounter; //NOSONAR
 
-    protected HttpClient(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    private HttpClient(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         this(null, url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
-    protected HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url can not be null or empty");
 
@@ -112,7 +112,7 @@ public final class HttpClient {
         }
 
         _netURL = netUrl == null ? createNetUrl(url) : netUrl;
-        _url = Strings.isEmpty(url) ? netUrl.toString() : url;
+        _url = Strings.isEmpty(url) ? _netURL.toString() : url;
         _maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
         _connectionTimeoutInMillis = (connectionTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeoutInMillis;
         _readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
@@ -965,8 +965,8 @@ public final class HttpClient {
 
                 final Type<Object> type = N.typeOf(request.getClass());
 
-                if (request instanceof File) {
-                    try (InputStream fileInputStream = IOUtil.newFileInputStream((File) request)) {
+                if (request instanceof final File fileRequest) {
+                    try (InputStream fileInputStream = IOUtil.newFileInputStream(fileRequest)) {
                         IOUtil.write(fileInputStream, os);
                     }
                 } else if (type.isInputStream()) {
@@ -1081,7 +1081,7 @@ public final class HttpClient {
      * @param resultClass
      * @return {@code true}, if is one way request
      */
-    protected boolean isOneWayRequest(final HttpMethod httpMethod, final HttpSettings settings, final Class<?> resultClass) {
+    boolean isOneWayRequest(final HttpMethod httpMethod, final HttpSettings settings, final Class<?> resultClass) {
         return HttpMethod.HEAD == httpMethod || resultClass == null || Void.class.equals(resultClass)
                 || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest());
     }
@@ -1092,7 +1092,7 @@ public final class HttpClient {
      * @param settings
      * @return
      */
-    protected ContentFormat getContentFormat(final HttpSettings settings) {
+    ContentFormat getContentFormat(final HttpSettings settings) {
         ContentFormat contentFormat = null;
 
         if (settings != null) {
@@ -1112,7 +1112,7 @@ public final class HttpClient {
      * @param settings
      * @return
      */
-    protected String getContentType(final HttpSettings settings) {
+    String getContentType(final HttpSettings settings) {
         String contentType = null;
 
         if (settings != null) {
@@ -1132,7 +1132,7 @@ public final class HttpClient {
      * @param settings
      * @return
      */
-    protected String getContentEncoding(final HttpSettings settings) {
+    private String getContentEncoding(final HttpSettings settings) {
         String contentEncoding = null;
 
         if (settings != null) {
@@ -1235,6 +1235,7 @@ public final class HttpClient {
 
             connection.setUseCaches((settings != null && settings.getUseCaches()) || (_settings != null && _settings.getUseCaches()));
 
+            //noinspection DataFlowIssue
             setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
 
             if (isOneWayRequest(httpMethod, settings, resultClass)) {
