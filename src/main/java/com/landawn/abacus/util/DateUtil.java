@@ -515,10 +515,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new Time object representing the same point in time as the provided {@code Calendar} object.
      * @throws IllegalArgumentException if the provided {@code Calendar} object is {@code null}.
      */
-    public static Time createdTime(final Calendar calendar) throws IllegalArgumentException {
+    public static Time createTime(final Calendar calendar) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
 
-        return createdTime(calendar.getTimeInMillis());
+        return createTime(calendar.getTimeInMillis());
     }
 
     /**
@@ -528,10 +528,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new java.sql.Time object representing the same point in time as the provided {@code java.util.Date} object.
      * @throws IllegalArgumentException if the provided {@code java.util.Date} object is {@code null}.
      */
-    public static Time createdTime(final java.util.Date date) throws IllegalArgumentException {
+    public static Time createTime(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return createdTime(date.getTime());
+        return createTime(date.getTime());
     }
 
     /**
@@ -540,7 +540,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param timeInMillis The time in milliseconds since the epoch (01-01-1970).
      * @return A new Time object representing the same point in time as the provided time in milliseconds.
      */
-    public static Time createdTime(final long timeInMillis) {
+    public static Time createTime(final long timeInMillis) {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -557,10 +557,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new Timestamp object representing the same point in time as the provided {@code Calendar} object.
      * @throws IllegalArgumentException if the provided {@code Calendar} object is {@code null}.
      */
-    public static Timestamp createdTimestamp(final Calendar calendar) throws IllegalArgumentException {
+    public static Timestamp createTimestamp(final Calendar calendar) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
 
-        return createdTimestamp(calendar.getTimeInMillis());
+        return createTimestamp(calendar.getTimeInMillis());
     }
 
     /**
@@ -570,10 +570,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return A new java.sql.Timestamp object representing the same point in time as the provided {@code java.util.Date} object.
      * @throws IllegalArgumentException if the provided {@code java.util.Date} object is {@code null}.
      */
-    public static Timestamp createdTimestamp(final java.util.Date date) throws IllegalArgumentException {
+    public static Timestamp createTimestamp(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return createdTimestamp(date.getTime());
+        return createTimestamp(date.getTime());
     }
 
     /**
@@ -582,7 +582,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param timeInMillis The time in milliseconds since the epoch (01-01-1970).
      * @return A new Timestamp object representing the same point in time as the provided time in milliseconds.
      */
-    public static Timestamp createdTimestamp(final long timeInMillis) {
+    public static Timestamp createTimestamp(final long timeInMillis) {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -943,7 +943,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createdTime(parse(date, format, timeZone));
+        return createTime(parse(date, format, timeZone));
     }
 
     /**
@@ -984,7 +984,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createdTimestamp(parse(date, format, timeZone));
+        return createTimestamp(parse(date, format, timeZone));
     }
 
     /**

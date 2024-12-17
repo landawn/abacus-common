@@ -74,7 +74,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createdTimestamp(x));
+        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x));
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createdTimestamp(x));
+        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x));
     }
 
     /**

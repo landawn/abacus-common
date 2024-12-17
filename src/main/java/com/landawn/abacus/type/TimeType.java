@@ -84,7 +84,7 @@ public class TimeType extends AbstractDateType<Time> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createdTime(parseLong(cbuf, offset, len));
+                return DateUtil.createTime(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

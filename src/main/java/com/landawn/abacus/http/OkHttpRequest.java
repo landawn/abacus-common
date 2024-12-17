@@ -739,6 +739,7 @@ public final class OkHttpRequest {
                 final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
                 final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
                 final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
+                //noinspection DataFlowIssue
                 final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
                 if (resultClass.equals(String.class)) {

@@ -4129,7 +4129,7 @@ public final class IOUtil {
      * @param charset    The Charset to be used to open the specified file for writing.
      * @param targetFile The file to which the elements' string representations will be appended, not {@code null}.
      * @throws IOException if an I/O error occurs.
-     * @see #writeLines(Iterable, Charset, File)
+     * @see #writeLines(Iterable, File) 
      * @see N#toString(Object)
      */
     public static void appendLines(final Iterable<?> lines, final Charset charset, final File targetFile) throws IOException {
