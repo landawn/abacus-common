@@ -30,6 +30,9 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalShort;
+import com.landawn.abacus.util.function.ShortConsumer;
+import com.landawn.abacus.util.function.ShortPredicate;
+import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
@@ -490,12 +493,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the elements which match the given predicate.
      *
-     * @param <E>
      * @param p
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final Throwables.ShortPredicate<E> p) throws E {
+    public boolean removeIf(final ShortPredicate p) {
         final ShortList tmp = new ShortList(size());
 
         for (int i = 0; i < size; i++) {
@@ -789,11 +790,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      *
-     * @param <E>
      * @param operator
-     * @throws E the e
      */
-    public <E extends Exception> void replaceAll(final Throwables.ShortUnaryOperator<E> operator) throws E {
+    public void replaceAll(final ShortUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsShort(elementData[i]);
         }
@@ -801,13 +800,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      *
-     * @param <E>
      * @param predicate
      * @param newValue
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
+    public boolean replaceIf(final ShortPredicate predicate, final short newValue) {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1240,25 +1237,20 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      *
-     * @param <E>
      * @param action
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
+    public void forEach(final ShortConsumer action) {
         forEach(0, size, action);
     }
 
     /**
      *
-     * @param <E>
      * @param fromIndex
      * @param toIndex
      * @param action
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ShortConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
+    public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
@@ -1274,41 +1266,41 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final Throwables.IntShortConsumer<E> action) throws E {
-        forEachIndexed(0, size, action);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntShortConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-
-        if (size > 0) {
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, elementData[i]);
-                }
-            } else {
-                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-                    action.accept(i, elementData[i]);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final Throwables.IntShortConsumer<E> action) throws E {
+    //        forEachIndexed(0, size, action);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param action
+    //     * @throws IndexOutOfBoundsException
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntShortConsumer<E> action)
+    //            throws IndexOutOfBoundsException, E {
+    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+    //
+    //        if (size > 0) {
+    //            if (fromIndex <= toIndex) {
+    //                for (int i = fromIndex; i < toIndex; i++) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            } else {
+    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            }
+    //        }
+    //    }
 
     public OptionalShort first() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[0]);

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
@@ -443,12 +446,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the elements which match the given predicate.
      *
-     * @param <E>
      * @param p
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final Throwables.DoublePredicate<E> p) throws E {
+    public boolean removeIf(final DoublePredicate p) {
         final DoubleList tmp = new DoubleList(size());
 
         for (int i = 0; i < size; i++) {
@@ -742,11 +743,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      *
-     * @param <E>
      * @param operator
-     * @throws E the e
      */
-    public <E extends Exception> void replaceAll(final Throwables.DoubleUnaryOperator<E> operator) throws E {
+    public void replaceAll(final DoubleUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsDouble(elementData[i]);
         }
@@ -754,13 +753,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      *
-     * @param <E>
      * @param predicate
      * @param newValue
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
+    public boolean replaceIf(final DoublePredicate predicate, final double newValue) {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1193,25 +1190,20 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      *
-     * @param <E>
      * @param action
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
+    public void forEach(final DoubleConsumer action) {
         forEach(0, size, action);
     }
 
     /**
      *
-     * @param <E>
      * @param fromIndex
      * @param toIndex
      * @param action
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.DoubleConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
+    public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
@@ -1227,41 +1219,41 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final Throwables.IntDoubleConsumer<E> action) throws E {
-        forEachIndexed(0, size, action);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntDoubleConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-
-        if (size > 0) {
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, elementData[i]);
-                }
-            } else {
-                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-                    action.accept(i, elementData[i]);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final Throwables.IntDoubleConsumer<E> action) throws E {
+    //        forEachIndexed(0, size, action);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param action
+    //     * @throws IndexOutOfBoundsException
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntDoubleConsumer<E> action)
+    //            throws IndexOutOfBoundsException, E {
+    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+    //
+    //        if (size > 0) {
+    //            if (fromIndex <= toIndex) {
+    //                for (int i = fromIndex; i < toIndex; i++) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            } else {
+    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            }
+    //        }
+    //    }
 
     public OptionalDouble first() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[0]);

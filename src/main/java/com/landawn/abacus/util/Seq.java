@@ -14,9 +14,14 @@
 
 package com.landawn.abacus.util;
 
-import java.io.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Serial;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -83,11 +88,11 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
+import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.IntStream;
@@ -1585,7 +1590,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a function to map the chunk from and to index to an element in the resulting stream
      * @return a sequence of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
-     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction) 
+     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
      */
     public static <T, E extends Exception> Seq<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
             final Throwables.IntBiFunction<? extends T, ? extends E> mapper) {
@@ -9570,13 +9575,605 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //        }
     //    }
 
+    //    /**
+    //     *
+    //     * @param <E2>
+    //     * @param threadNum
+    //     * @param action
+    //     * @throws IllegalArgumentException
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     */
     //    @Beta
     //    @TerminalOp
-    //    public void foreach(java.util.function.Consumer<? super T> action) throws E {
+    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action)
+    //            throws IllegalArgumentException, E, E2 {
+    //        assertNotClosed();
+    //        checkArgNotNull(action, cs.action);
+    //
+    //        try {
+    //            unchecked().parallel(threadNum).forEach(action);
+    //        } catch (final Exception e) {
+    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E2>
+    //     * @param threadNum
+    //     * @param action
+    //     * @param executor
+    //     * @throws IllegalArgumentException
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     */
+    //    @Beta
+    //    @TerminalOp
+    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action, final Executor executor)
+    //            throws IllegalArgumentException, E, E2 {
+    //        assertNotClosed();
+    //        checkArgNotNull(action, cs.action);
+    //
+    //        try {
+    //            unchecked().parallel(threadNum, executor).forEach(action);
+    //        } catch (final Exception e) {
+    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+    //        }
+    //    }
+
+    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
+    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
+    //    // So, remove them.
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        forEach(Fnn.from(action));
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                            errorConsumer.accept(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
     //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (type.isAssignableFrom(e.getClass())) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorPredicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorCounter.decrementAndGet() >= 0) {
+    //                                if (errorPredicate.test(e)) {
+    //                                    logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                    errorConsumer.accept(e);
+    //                                } else {
+    //                                    throwThrowable(e);
+    //                                }
+    //                            } else {
+    //                                break;
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                        next = fallbackValue;
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (type.isAssignableFrom(e.getClass())) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param supplierForFallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = supplierForFallbackValue.get();
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param mapperForFallbackValue
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (errorCounter.decrementAndGet() >= 0) {
+    //                            if (predicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                                next = mapperForFallbackValue.apply(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        } else {
+    //                            // break;
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorStop() {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorStop", e);
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    private void throwThrowable(Throwable e) throws E {
+    //        if (e instanceof Error) {
+    //            throw (Error) e;
+    //        } else {
+    //            throw (E) e;
+    //        }
+    //    }
+
+    /**
+     *
+     * @param action
+     * @throws E
+     * @see #forEach(Throwables.Consumer)
+     */
+    @Beta
+    @TerminalOp
+    public void foreach(final Consumer<? super T> action) throws E {
+        assertNotClosed();
+        checkArgNotNull(action, cs.action);
+
+        try {
+            while (elements.hasNext()) {
+                action.accept(elements.next());
+            }
+        } finally {
+            close();
+        }
+    }
 
     /**
      * Performs the given action for each element of this sequence.
@@ -10035,6 +10632,538 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //            unchecked().parallel(threadNum, executor).forEach(action);
     //        } catch (final Exception e) {
     //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+    //        }
+    //    }
+
+    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
+    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
+    //    // So, remove them.
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                            errorConsumer.accept(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (type.isAssignableFrom(e.getClass())) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorPredicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorCounter.decrementAndGet() >= 0) {
+    //                                if (errorPredicate.test(e)) {
+    //                                    logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                    errorConsumer.accept(e);
+    //                                } else {
+    //                                    throwThrowable(e);
+    //                                }
+    //                            } else {
+    //                                break;
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                        next = fallbackValue;
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (type.isAssignableFrom(e.getClass())) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param supplierForFallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = supplierForFallbackValue.get();
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param mapperForFallbackValue
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (errorCounter.decrementAndGet() >= 0) {
+    //                            if (predicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                                next = mapperForFallbackValue.apply(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        } else {
+    //                            // break;
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> onErrorStop() {
+    //        assertNotClosed();
+    //
+    //        return create(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //                //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorStop", e);
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //                //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    private void throwThrowable(Throwable e) throws E {
+    //        if (e instanceof Error) {
+    //            throw (Error) e;
+    //        } else {
+    //            throw (E) e;
     //        }
     //    }
 
@@ -10588,7 +11717,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return {@code true} if this sequence contains all the elements in the specified collection, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
-     * @see N#containsAll(Collection, Collection) 
+     * @see N#containsAll(Collection, Collection)
      */
     @TerminalOp
     public boolean containsAll(final Collection<? extends T> c) throws IllegalStateException, E {
@@ -12253,7 +13382,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the accumulator function is null
      * @throws E if an exception occurs during the reduction
      * @throws E2 if the accumulator function throws an exception
-     * @see Stream#reduce(BinaryOperator) 
+     * @see Stream#reduce(BinaryOperator)
      */
     @TerminalOp
     public <E2 extends Exception> Optional<T> reduce(final Throwables.BinaryOperator<T, E2> accumulator)
@@ -12291,7 +13420,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the accumulator function is null
      * @throws E if an exception occurs during the reduction
      * @throws E2 if the accumulator function throws an exception
-     * @see Stream#reduce(Object, BinaryOperator) 
+     * @see Stream#reduce(Object, BinaryOperator)
      */
     @TerminalOp
     public <U, E2 extends Exception> U reduce(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator)

@@ -30,6 +30,9 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.function.FloatConsumer;
+import com.landawn.abacus.util.function.FloatPredicate;
+import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**
@@ -443,12 +446,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the elements which match the given predicate.
      *
-     * @param <E>
      * @param p
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final Throwables.FloatPredicate<E> p) throws E {
+    public boolean removeIf(final FloatPredicate p) {
         final FloatList tmp = new FloatList(size());
 
         for (int i = 0; i < size; i++) {
@@ -743,11 +744,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      *
-     * @param <E>
      * @param operator
-     * @throws E the e
      */
-    public <E extends Exception> void replaceAll(final Throwables.FloatUnaryOperator<E> operator) throws E {
+    public void replaceAll(final FloatUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsFloat(elementData[i]);
         }
@@ -755,13 +754,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      *
-     * @param <E>
      * @param predicate
      * @param newValue
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
+    public boolean replaceIf(final FloatPredicate predicate, final float newValue) {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1194,25 +1191,20 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      *
-     * @param <E>
      * @param action
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
+    public void forEach(final FloatConsumer action) {
         forEach(0, size, action);
     }
 
     /**
      *
-     * @param <E>
      * @param fromIndex
      * @param toIndex
      * @param action
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.FloatConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
+    public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
@@ -1228,41 +1220,41 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final Throwables.IntFloatConsumer<E> action) throws E {
-        forEachIndexed(0, size, action);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntFloatConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-
-        if (size > 0) {
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, elementData[i]);
-                }
-            } else {
-                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-                    action.accept(i, elementData[i]);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final Throwables.IntFloatConsumer<E> action) throws E {
+    //        forEachIndexed(0, size, action);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param action
+    //     * @throws IndexOutOfBoundsException
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntFloatConsumer<E> action)
+    //            throws IndexOutOfBoundsException, E {
+    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+    //
+    //        if (size > 0) {
+    //            if (fromIndex <= toIndex) {
+    //                for (int i = fromIndex; i < toIndex; i++) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            } else {
+    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            }
+    //        }
+    //    }
 
     public OptionalFloat first() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[0]);

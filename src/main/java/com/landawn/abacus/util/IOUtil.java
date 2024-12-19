@@ -4129,7 +4129,7 @@ public final class IOUtil {
      * @param charset    The Charset to be used to open the specified file for writing.
      * @param targetFile The file to which the elements' string representations will be appended, not {@code null}.
      * @throws IOException if an I/O error occurs.
-     * @see #writeLines(Iterable, File) 
+     * @see #writeLines(Iterable, File)
      * @see N#toString(Object)
      */
     public static void appendLines(final Iterable<?> lines, final Charset charset, final File targetFile) throws IOException {
@@ -5849,7 +5849,7 @@ public final class IOUtil {
      *
      * @param directory directory to clean
      * @return {@code false} if some of its sub files can't be deleted.
-     * @see #deleteFiles(File, com.landawn.abacus.util.Throwables.BiPredicate)
+     * @see #deleteFiles(File, Throwables.BiPredicate)
      */
     public static boolean cleanDirectory(final File directory) {
         if (directory == null || !directory.isDirectory()) {
@@ -7159,7 +7159,7 @@ public final class IOUtil {
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E                    If the lineParser throws an exception.
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
         parse(source, lineParser, Fn.emptyAction());
@@ -7177,7 +7177,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7195,7 +7195,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7216,7 +7216,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7236,7 +7236,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7259,7 +7259,7 @@ public final class IOUtil {
      * @throws E                    If the lineParser throws an exception.
      * @throws E2                   If the onComplete throws an exception.
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7277,7 +7277,7 @@ public final class IOUtil {
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E                    If the lineParser throws an exception.
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -7296,7 +7296,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7314,7 +7314,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7335,7 +7335,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7355,7 +7355,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7376,7 +7376,7 @@ public final class IOUtil {
      * @throws E                    If the lineParser throws an exception.
      * @throws E2                   If the onComplete throws an exception.
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7424,7 +7424,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7446,7 +7446,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7468,7 +7468,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7492,7 +7492,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7513,7 +7513,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7535,7 +7535,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7557,7 +7557,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7581,7 +7581,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser,
@@ -7626,7 +7626,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -7645,7 +7645,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7663,7 +7663,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7684,7 +7684,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7704,7 +7704,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7727,7 +7727,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7750,7 +7750,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -7769,7 +7769,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7787,7 +7787,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7808,7 +7808,7 @@ public final class IOUtil {
      * @throws E                    the e
      * @throws E2                   the e2
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7828,7 +7828,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7850,7 +7850,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)

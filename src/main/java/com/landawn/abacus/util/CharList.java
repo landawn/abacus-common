@@ -30,6 +30,9 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.function.CharConsumer;
+import com.landawn.abacus.util.function.CharPredicate;
+import com.landawn.abacus.util.function.CharUnaryOperator;
 import com.landawn.abacus.util.stream.CharStream;
 
 /**
@@ -529,12 +532,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the elements which match the given predicate.
      *
-     * @param <E>
      * @param p
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final Throwables.CharPredicate<E> p) throws E {
+    public boolean removeIf(final CharPredicate p) {
         final CharList tmp = new CharList(size());
 
         for (int i = 0; i < size; i++) {
@@ -828,11 +829,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      *
-     * @param <E>
      * @param operator
-     * @throws E the e
      */
-    public <E extends Exception> void replaceAll(final Throwables.CharUnaryOperator<E> operator) throws E {
+    public void replaceAll(final CharUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsChar(elementData[i]);
         }
@@ -840,13 +839,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      *
-     * @param <E>
      * @param predicate
      * @param newValue
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
+    public boolean replaceIf(final CharPredicate predicate, final char newValue) {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1279,25 +1276,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      *
-     * @param <E>
      * @param action
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
+    public void forEach(final CharConsumer action) {
         forEach(0, size, action);
     }
 
     /**
      *
-     * @param <E>
      * @param fromIndex
      * @param toIndex
      * @param action
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.CharConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
+    public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
@@ -1313,41 +1305,41 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws E {
-        forEachIndexed(0, size, action);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntCharConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-
-        if (size > 0) {
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, elementData[i]);
-                }
-            } else {
-                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-                    action.accept(i, elementData[i]);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws E {
+    //        forEachIndexed(0, size, action);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param action
+    //     * @throws IndexOutOfBoundsException
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntCharConsumer<E> action)
+    //            throws IndexOutOfBoundsException, E {
+    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+    //
+    //        if (size > 0) {
+    //            if (fromIndex <= toIndex) {
+    //                for (int i = fromIndex; i < toIndex; i++) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            } else {
+    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            }
+    //        }
+    //    }
 
     public OptionalChar first() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[0]);

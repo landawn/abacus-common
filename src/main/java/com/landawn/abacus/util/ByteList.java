@@ -30,6 +30,9 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalByte;
+import com.landawn.abacus.util.function.ByteConsumer;
+import com.landawn.abacus.util.function.BytePredicate;
+import com.landawn.abacus.util.function.ByteUnaryOperator;
 import com.landawn.abacus.util.stream.ByteStream;
 
 /**
@@ -492,12 +495,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the elements which match the given predicate.
      *
-     * @param <E>
      * @param p
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final Throwables.BytePredicate<E> p) throws E {
+    public boolean removeIf(final BytePredicate p) {
         final ByteList tmp = new ByteList(size());
 
         for (int i = 0; i < size; i++) {
@@ -791,11 +792,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     * @param <E>
      * @param operator
-     * @throws E the e
      */
-    public <E extends Exception> void replaceAll(final Throwables.ByteUnaryOperator<E> operator) throws E {
+    public void replaceAll(final ByteUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsByte(elementData[i]);
         }
@@ -803,13 +802,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     * @param <E>
      * @param predicate
      * @param newValue
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
+    public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1242,25 +1239,20 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     * @param <E>
      * @param action
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
+    public void forEach(final ByteConsumer action) {
         forEach(0, size, action);
     }
 
     /**
      *
-     * @param <E>
      * @param fromIndex
      * @param toIndex
      * @param action
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ByteConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
+    public void forEach(final int fromIndex, final int toIndex, final ByteConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
 
         if (size > 0) {
@@ -1276,41 +1268,41 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws E {
-        forEachIndexed(0, size, action);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntByteConsumer<E> action)
-            throws IndexOutOfBoundsException, E {
-        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-
-        if (size > 0) {
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, elementData[i]);
-                }
-            } else {
-                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-                    action.accept(i, elementData[i]);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws E {
+    //        forEachIndexed(0, size, action);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param action
+    //     * @throws IndexOutOfBoundsException
+    //     * @throws E the e
+    //     */
+    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntByteConsumer<E> action)
+    //            throws IndexOutOfBoundsException, E {
+    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+    //
+    //        if (size > 0) {
+    //            if (fromIndex <= toIndex) {
+    //                for (int i = fromIndex; i < toIndex; i++) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            } else {
+    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+    //                    action.accept(i, elementData[i]);
+    //                }
+    //            }
+    //        }
+    //    }
 
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);

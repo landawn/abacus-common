@@ -5087,7 +5087,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array in which to replace values.
      * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
      * @see #setAll(Object[], IntFunction)
-     * @see #setAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #setAll(Object[], Throwables.IntObjFunction)
      * @see Arrays#setAll(Object[], IntFunction)
      * @see Arrays#parallelSetAll(Object[], IntFunction)
      */
@@ -5109,9 +5109,69 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param list The list in which to replace values.
      * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
      * @see #setAll(List, IntFunction)
-     * @see #setAll(List, com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #setAll(List, Throwables.IntObjFunction)
      */
     public static <T> void replaceAll(final List<T> list, final UnaryOperator<T> operator) {
+        if (isEmpty(list)) {
+            return;
+        }
+
+        final int size = list.size();
+
+        if (size < REPLACE_ALL_THRESHOLD || list instanceof RandomAccess) {
+            for (int i = 0; i < size; i++) {
+                list.set(i, operator.apply(list.get(i)));
+            }
+        } else {
+            final ListIterator<T> itr = list.listIterator();
+
+            for (int i = 0; i < size; i++) {
+                itr.set(operator.apply(itr.next()));
+            }
+        }
+    }
+
+    /**
+     * Replaces all elements in the given array using the specified {@code UnaryOperator}.
+     * If the input array is empty or {@code null}, no replacements are made.
+     *
+     * @param <T> The type of elements in the array.
+     * @param <E> The type of exception may thrown out.
+     * @param a The array in which to replace values.
+     * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
+     * @throws E the exception may be thrown out.
+     * @see #replaceAll(Object[], UnaryOperator)
+     * @see #setAll(Object[], IntFunction)
+     * @see #setAll(Object[], Throwables.IntObjFunction)
+     * @see Arrays#setAll(Object[], IntFunction)
+     * @see Arrays#parallelSetAll(Object[], IntFunction)
+     */
+    @Beta
+    public static <T, E extends Exception> void updateAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.apply(a[i]);
+        }
+    }
+
+    /**
+     * Replaces all elements in the given list using the specified {@code UnaryOperator}.
+     * If the input list is empty or {@code null}, no replacements are made.
+     *
+     * @param <T> The type of elements in the list.
+     * @param <E> The type of exception may thrown out.
+     * @param list The list in which to replace values.
+     * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
+     * @throws E the exception may be thrown out.
+     * @see #replaceAll(List, UnaryOperator)
+     * @see #setAll(List, IntFunction)
+     * @see #setAll(List, Throwables.IntObjFunction)
+     */
+    @Beta
+    public static <T, E extends Exception> void updateAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (isEmpty(list)) {
             return;
         }
@@ -5318,7 +5378,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(Object[], UnaryOperator)
-     * @see #setAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #setAll(Object[], Throwables.IntObjFunction)
      * @see Arrays#setAll(Object[], IntFunction)
      * @see Arrays#parallelSetAll(Object[], IntFunction)
      */
@@ -5338,7 +5398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param list the list to be modified
      * @param generator the function used to generate new values for the list elements
      * @see #replaceAll(List, UnaryOperator)
-     * @see #setAll(List, com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #setAll(List, Throwables.IntObjFunction)
      */
     public static <T> void setAll(final List<T> list, final IntFunction<? extends T> generator) {
         if (isEmpty(list)) {
@@ -5429,7 +5489,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to be copied and modified
      * @param generator the function used to generate new values for the array elements
      * @return a new array with elements copied from the specified array and modified by the generator function
-     * @see #copyThenSetAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      * @see #copyThenReplaceAll(Object[], UnaryOperator)
      */
     @MayReturnNull
@@ -5490,7 +5550,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
      * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator}
      * @see #copyThenSetAll(Object[], IntFunction)
-     * @see #copyThenSetAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+     * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      */
     @MayReturnNull
     public static <T> T[] copyThenReplaceAll(final T[] a, final UnaryOperator<T> operator) {

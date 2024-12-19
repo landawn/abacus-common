@@ -13355,7 +13355,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     * @see #copyThenStrip(String[])
     //     * @see #copyThenSetAll(CharSequence[], Function)
     //     * @see N#setAll(Object[], java.util.function.IntFunction)
-    //     * @see N#setAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see N#setAll(Object[], Throwables.IntObjFunction)
     //     * @see N#replaceAll(Object[], java.util.function.UnaryOperator)
     //     */
     //    @Beta
@@ -13383,7 +13383,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     * @see #copyThenTrim(String[])
     //     * @see #copyThenStrip(String[])
     //     * @see N#copyThenSetAll(Object[], java.util.function.IntFunction)
-    //     * @see N#copyThenSetAll(Object[], com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see N#copyThenSetAll(Object[], Throwables.IntObjFunction)
     //     */
     //    @Beta
     //    @MayReturnNull
