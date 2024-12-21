@@ -5171,7 +5171,7 @@ public final class IOUtil {
             try {
                 closeable.close();
             } catch (final Exception e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -5234,7 +5234,7 @@ public final class IOUtil {
         }
 
         if (ex != null) {
-            throw N.toRuntimeException(ex);
+            throw ExceptionUtil.toRuntimeException(ex, true);
         }
     }
 

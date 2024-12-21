@@ -164,7 +164,7 @@ public final class XmlUtil {
 
             return writer.toString();
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -198,7 +198,7 @@ public final class XmlUtil {
 
             return (T) unmarshaller.unmarshal(reader);
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -221,7 +221,7 @@ public final class XmlUtil {
 
             return jc.createMarshaller();
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -244,7 +244,7 @@ public final class XmlUtil {
 
             return jc.createMarshaller();
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -267,7 +267,7 @@ public final class XmlUtil {
 
             return jc.createUnmarshaller();
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -290,7 +290,7 @@ public final class XmlUtil {
 
             return jc.createUnmarshaller();
         } catch (final JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -305,7 +305,7 @@ public final class XmlUtil {
             try {
                 return docBuilderFactory.newDocumentBuilder();
             } catch (final ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -334,7 +334,7 @@ public final class XmlUtil {
                 docBuilderFactory.setIgnoringComments(orgIgnoreComments);
                 docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
             } catch (final ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -370,7 +370,7 @@ public final class XmlUtil {
                     docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
                 }
             } catch (final ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
 
             return documentBuilder;
@@ -410,7 +410,7 @@ public final class XmlUtil {
                 try {
                     saxParser = saxParserFactory.newSAXParser();
                 } catch (final ParserConfigurationException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final SAXException e) {
                     throw new ParseException(e);
                 }
@@ -450,7 +450,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -466,7 +466,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -483,7 +483,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source, encoding);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -500,7 +500,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createFilteredReader(source, filter);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -516,7 +516,7 @@ public final class XmlUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -532,7 +532,7 @@ public final class XmlUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -549,7 +549,7 @@ public final class XmlUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output, encoding);
         } catch (final XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -564,7 +564,7 @@ public final class XmlUtil {
         try {
             return transferFactory.newTransformer();
         } catch (final TransformerConfigurationException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -613,7 +613,7 @@ public final class XmlUtil {
         try {
             createXMLTransformer().transform(domSource, result);
         } catch (final TransformerException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -634,7 +634,7 @@ public final class XmlUtil {
         try {
             createXMLTransformer().transform(domSource, result);
         } catch (final TransformerException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 

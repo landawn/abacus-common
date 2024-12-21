@@ -3392,7 +3392,7 @@ public final class Iterators {
                 try {
                     countDownLatch.await();
                 } catch (final InterruptedException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 if (errorHolder.value() == null && onComplete != null) {
@@ -3404,7 +3404,7 @@ public final class Iterators {
                 }
 
                 if (errorHolder.value() != null) {
-                    throw N.toRuntimeException(errorHolder.value());
+                    throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
                 }
             }
         } finally {

@@ -27693,11 +27693,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             countDownLatch.await();
         } catch (final InterruptedException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
 
         if (errorHolder.value() != null) {
-            throw N.toRuntimeException(errorHolder.value());
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
         }
     }
 
@@ -27820,11 +27820,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        try {
     //            latch.await();
     //        } catch (InterruptedException e) {
-    //            N.toRuntimeException(e);
+    //            ExceptionUtil.toRuntimeException(e, true);
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw N.toRuntimeException(errorHolder.value());
+    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
     //        }
     //
     //        N.sort(result, Comparators.comparingInt(Indexed::index));
@@ -29029,11 +29029,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             countDownLatch.await();
         } catch (final InterruptedException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
 
         if (errorHolder.value() != null) {
-            throw N.toRuntimeException(errorHolder.value());
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
         }
     }
 
@@ -29156,11 +29156,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        try {
     //            latch.await();
     //        } catch (InterruptedException e) {
-    //            N.toRuntimeException(e);
+    //            ExceptionUtil.toRuntimeException(e, true);
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw N.toRuntimeException(errorHolder.value());
+    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
     //        }
     //
     //        N.sort(result, Comparators.comparingInt(Indexed::index));
@@ -29466,7 +29466,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -29494,7 +29494,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(cmd);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -29860,7 +29860,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                                 //        iter.next().cancel(false);
                                 //    }
 
-                                throw toRuntimeException(e);
+                                throw ExceptionUtil.toRuntimeException(e, true);
                             }
 
                             iter.remove();
@@ -29993,7 +29993,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                                 //        iter.next().cancel(false);
                                 //    }
 
-                                throw toRuntimeException(e);
+                                throw ExceptionUtil.toRuntimeException(e, true);
                             }
 
                             iter.remove();
@@ -30056,7 +30056,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException && (!f2.isDone())) { // NOSONAR
                 f2.cancel(false);
@@ -30093,7 +30093,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30139,7 +30139,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30193,7 +30193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30273,7 +30273,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 for (final ContinuableFuture<Void> f : futures) {
@@ -30315,7 +30315,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException && (!f2.isDone())) { // NOSONAR
                 f2.cancel(false);
@@ -30357,7 +30357,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30410,7 +30410,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3, r4);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30471,7 +30471,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3, r4, r5);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 if (!f2.isDone()) {
@@ -30557,7 +30557,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return result;
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (hasException) {
                 for (final ContinuableFuture<? extends R> f : futures) {
@@ -31178,7 +31178,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             TimeUnit.MILLISECONDS.sleep(timeoutInMillis);
         } catch (final InterruptedException e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -31199,7 +31199,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             unit.sleep(timeout);
         } catch (final InterruptedException e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -31821,21 +31821,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return ExceptionUtil.toRuntimeException(e);
     }
 
-    /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked exception,
-     * or throws it if it's an {@code Error}, based on the provided flag.
-     *
-     * @param e the throwable to be converted to a runtime exception or thrown if it's an error
-     * @param throwIfItIsError a flag indicating whether to throw the throwable if it's an error
-     * @return a RuntimeException that represents the provided throwable
-     * @throws Error if the throwable is an error and the flag is set to true
-     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
-     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-     */
-    @Beta
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
-        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
-    }
+    //    /**
+    //     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked exception,
+    //     * or throws it if it's an {@code Error}, based on the provided flag.
+    //     *
+    //     * @param e the throwable to be converted to a runtime exception or thrown if it's an error
+    //     * @param throwIfItIsError a flag indicating whether to throw the throwable if it's an error
+    //     * @return a RuntimeException that represents the provided throwable
+    //     * @throws Error if the throwable is an error and the flag is set to true
+    //     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+    //     */
+    //    @Beta
+    //    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+    //        return ExceptionUtil.toRuntimeException(e, true, throwIfItIsError);
+    //    }
 
     //    /**
     //     *

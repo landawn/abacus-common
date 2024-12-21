@@ -248,7 +248,7 @@ public final class Futures {
                 } catch (InterruptedException | ExecutionException e) {
                     throw e;
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -261,7 +261,7 @@ public final class Futures {
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     throw e;
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         });
@@ -642,7 +642,7 @@ public final class Futures {
                     } else if (result.getException() instanceof ExecutionException) {
                         throw ((ExecutionException) result.getException());
                     } else {
-                        throw N.toRuntimeException(result.getException());
+                        throw ExceptionUtil.toRuntimeException(result.getException(), true);
                     }
                 }
 
@@ -822,7 +822,7 @@ public final class Futures {
             } else if (result.getException() instanceof TimeoutException) {
                 throw ((TimeoutException) result.getException());
             } else {
-                throw N.toRuntimeException(result.getException());
+                throw ExceptionUtil.toRuntimeException(result.getException(), true);
             }
         }
 

@@ -503,7 +503,7 @@ public final class ClassUtil {
         try {
             FIELD_MASK = ClassMask.class.getDeclaredField(ClassMask.FIELD_MASK);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -2084,7 +2084,7 @@ public final class ClassUtil {
         try {
             return (T) propGetMethod.invoke(bean);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -2194,13 +2194,13 @@ public final class ClassUtil {
             try {
                 propSetMethod.invoke(bean, propValue);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else {
             try {
                 propSetMethod.invoke(bean, propValue);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to set value for field by method: {} in class: {} with value type {}", propSetMethod.getName(),
@@ -2212,7 +2212,7 @@ public final class ClassUtil {
                 try {
                     propSetMethod.invoke(bean, propValue);
                 } catch (IllegalAccessException | InvocationTargetException e2) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         }
@@ -2751,7 +2751,7 @@ public final class ClassUtil {
         try {
             return constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -2784,7 +2784,7 @@ public final class ClassUtil {
         try {
             return (T) method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 

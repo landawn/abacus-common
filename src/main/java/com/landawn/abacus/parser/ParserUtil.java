@@ -65,6 +65,7 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.InternalUtil;
@@ -1723,7 +1724,7 @@ public final class ParserUtil {
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
             } catch (final Exception e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1765,7 +1766,7 @@ public final class ParserUtil {
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             } else {
                 try {
@@ -1784,7 +1785,7 @@ public final class ParserUtil {
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
@@ -1812,7 +1813,7 @@ public final class ParserUtil {
                             field.set(obj, propValue); //NOSONAR
                         }
                     } catch (IllegalAccessException | InvocationTargetException e2) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e, true);
                     }
                 }
             }
@@ -2483,7 +2484,7 @@ public final class ParserUtil {
                     try {
                         field.set(obj, propValue); //NOSONAR
                     } catch (final IllegalAccessException e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e, true);
                     }
                 }
 
@@ -2508,7 +2509,7 @@ public final class ParserUtil {
                         failureCountForSetProp--; // NOSONAR
                     }
                 } catch (final IllegalAccessException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
@@ -2535,7 +2536,7 @@ public final class ParserUtil {
                         try {
                             field.set(obj, propValue); //NOSONAR
                         } catch (final IllegalAccessException e2) {
-                            throw N.toRuntimeException(e);
+                            throw ExceptionUtil.toRuntimeException(e, true);
                         }
                     }
                 }
@@ -2683,7 +2684,7 @@ public final class ParserUtil {
     //                }
     //            } catch (NoSuchMethodException | SecurityException e) {
     //                // Should never happen.
-    //                throw N.toRuntimeException(e);
+    //                throw ExceptionUtil.toRuntimeException(e, true);
     //            }
     //
     //            final Constructor<?> constructor = recordClass.getDeclaredConstructors()[0];
@@ -2695,7 +2696,7 @@ public final class ParserUtil {
     //                        return (T) constructor.newInstance(args);
     //                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
     //                        // Should never happen.
-    //                        throw N.toRuntimeException(e);
+    //                        throw ExceptionUtil.toRuntimeException(e, true);
     //                    }
     //                }
     //            };

@@ -1237,7 +1237,7 @@ public final class CSVUtil {
                 IOUtil.closeQuietly(reader);
             }
 
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 

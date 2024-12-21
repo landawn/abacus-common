@@ -94,7 +94,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.writeValueAsString(obj);
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -112,7 +112,7 @@ public final class XmlMappers {
                 return defaultXmlMapper.writeValueAsString(obj);
             }
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -139,7 +139,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.writeValueAsString(obj);
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -154,7 +154,7 @@ public final class XmlMappers {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -170,7 +170,7 @@ public final class XmlMappers {
         try {
             xmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -185,7 +185,7 @@ public final class XmlMappers {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -201,7 +201,7 @@ public final class XmlMappers {
         try {
             xmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -216,7 +216,7 @@ public final class XmlMappers {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -232,7 +232,7 @@ public final class XmlMappers {
         try {
             xmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -247,7 +247,7 @@ public final class XmlMappers {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -263,7 +263,7 @@ public final class XmlMappers {
         try {
             xmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -281,7 +281,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -299,7 +299,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, offset, len, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -315,7 +315,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -336,7 +336,7 @@ public final class XmlMappers {
         try {
             return N.defaultIfNull(defaultXmlMapper.readValue(json, targetType), defaultIfNull);
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -370,7 +370,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -388,7 +388,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -407,7 +407,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -425,7 +425,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -444,7 +444,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -462,7 +462,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -481,7 +481,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -499,7 +499,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -518,7 +518,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -536,7 +536,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -555,7 +555,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -573,7 +573,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -591,7 +591,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, offset, len, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -607,7 +607,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -628,7 +628,7 @@ public final class XmlMappers {
         try {
             return N.defaultIfNull(defaultXmlMapper.readValue(json, targetType), defaultIfNull);
         } catch (final JsonProcessingException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -662,7 +662,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -680,7 +680,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -699,7 +699,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -717,7 +717,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -736,7 +736,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -754,7 +754,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -773,7 +773,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -791,7 +791,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -810,7 +810,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, targetType);
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -828,7 +828,7 @@ public final class XmlMappers {
         try {
             return defaultXmlMapper.readValue(json, defaultXmlMapper.constructType(targetType));
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -847,7 +847,7 @@ public final class XmlMappers {
         try {
             return xmlMapper.readValue(json, xmlMapper.constructType(targetType));
         } catch (final IOException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             recycle(xmlMapper);
         }
@@ -972,7 +972,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.writeValueAsString(obj);
             } catch (final JsonProcessingException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -990,7 +990,7 @@ public final class XmlMappers {
                     return xmlMapper.writeValueAsString(obj);
                 }
             } catch (final JsonProcessingException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1003,7 +1003,7 @@ public final class XmlMappers {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1016,7 +1016,7 @@ public final class XmlMappers {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1029,7 +1029,7 @@ public final class XmlMappers {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1042,7 +1042,7 @@ public final class XmlMappers {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1058,7 +1058,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1076,7 +1076,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, offset, len, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1092,7 +1092,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final JsonProcessingException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1113,7 +1113,7 @@ public final class XmlMappers {
             try {
                 return N.defaultIfNull(xmlMapper.readValue(json, targetType), defaultIfNull);
             } catch (final JsonProcessingException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1129,7 +1129,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1145,7 +1145,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1161,7 +1161,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1177,7 +1177,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1193,7 +1193,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1209,7 +1209,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1227,7 +1227,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, offset, len, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1243,7 +1243,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1264,7 +1264,7 @@ public final class XmlMappers {
             try {
                 return N.defaultIfNull(xmlMapper.readValue(json, targetType), defaultIfNull);
             } catch (final JsonProcessingException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1280,7 +1280,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1296,7 +1296,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1312,7 +1312,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1328,7 +1328,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, targetType);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -1344,7 +1344,7 @@ public final class XmlMappers {
             try {
                 return xmlMapper.readValue(json, xmlMapper.constructType(targetType));
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }

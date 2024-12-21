@@ -912,7 +912,7 @@ public final class PropertiesUtil {
 
             writer.flush();
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             IOUtil.close(writer);
         }

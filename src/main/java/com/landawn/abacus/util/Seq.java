@@ -159,7 +159,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //                final long count = Seq.<SQLException> range(0, len).map(it -> maybeThrowSQLException()).count();
     //                assertEquals(len, count);
     //            } catch (final SQLException e) {
-    //                throw N.toRuntimeException(e);
+    //                throw ExceptionUtil.toRuntimeException(e, true);
     //            }
     //        }).printResult();
     //
@@ -13803,7 +13803,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -13885,7 +13885,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -13961,7 +13961,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14038,7 +14038,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14121,7 +14121,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14229,7 +14229,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         stmt.execute();
                     }
                 } catch (final SQLException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14241,7 +14241,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     try {
                         DataSourceUtil.executeBatch(stmt);
                     } catch (final SQLException e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e, true);
                     }
                 }
             }
@@ -14337,7 +14337,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         stmt.execute();
                     }
                 } catch (final SQLException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14351,7 +14351,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                             DataSourceUtil.executeBatch(stmt);
                         }
                     } catch (final SQLException e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e, true);
                     } finally {
                         DataSourceUtil.closeQuietly(stmt);
                     }
@@ -14364,7 +14364,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     stmt = conn.prepareStatement(insertSQL);
                 } catch (final SQLException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         };
@@ -14460,7 +14460,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         stmt.execute();
                     }
                 } catch (final SQLException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
 
                 return next;
@@ -14475,7 +14475,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                                 DataSourceUtil.executeBatch(stmt);
                             }
                         } catch (final SQLException e) {
-                            throw N.toRuntimeException(e);
+                            throw ExceptionUtil.toRuntimeException(e, true);
                         } finally {
                             DataSourceUtil.closeQuietly(stmt);
                         }
@@ -14500,7 +14500,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         DataSourceUtil.releaseConnection(conn, ds);
                     }
 
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         };
@@ -17493,7 +17493,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.hasNext();
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -17501,7 +17501,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.next();
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -17510,7 +17510,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     elements.advance(n);
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -17519,7 +17519,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.count();
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -17888,17 +17888,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() != null) {
-                throw toRuntimeException(errorHolder.getAndSet(null), true);
+                throw toRuntimeException(errorHolder.getAndSet(null), false);
             }
         }
     }
 
     private static RuntimeException toRuntimeException(final Exception e) {
-        return N.toRuntimeException(e);
+        return ExceptionUtil.toRuntimeException(e, true);
     }
 
     private static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
-        return N.toRuntimeException(e, throwIfItIsError);
+        return ExceptionUtil.toRuntimeException(e, true, throwIfItIsError);
     }
 
     private static boolean isSameComparator(final Comparator<?> a, final Comparator<?> b) {

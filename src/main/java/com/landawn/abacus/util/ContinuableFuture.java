@@ -466,7 +466,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //        try {
     //            action.accept(get());
     //        } catch (InterruptedException | ExecutionException e) {
-    //            throw N.toRuntimeException(e);
+    //            throw ExceptionUtil.toRuntimeException(e, true);
     //        }
     //    }
     //
@@ -509,7 +509,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 try {
                     return func.apply(ret);
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
 
@@ -520,7 +520,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 try {
                     return func.apply(ret);
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         }, null, asyncExecutor) {
@@ -1415,7 +1415,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //                    } else if (result.right instanceof ExecutionException) {
     //                        throw ((ExecutionException) result.right);
     //                    } else {
-    //                        throw N.toRuntimeException(result.right);
+    //                        throw ExceptionUtil.toRuntimeException(result.right);
     //                    }
     //                } else {
     //                    action.accept(result.orElse(null), result.getException());
@@ -1439,7 +1439,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //                    } else if (result.right instanceof ExecutionException) {
     //                        throw ((ExecutionException) result.right);
     //                    } else {
-    //                        throw N.toRuntimeException(result.right);
+    //                        throw ExceptionUtil.toRuntimeException(result.right);
     //                    }
     //                } else {
     //                    action.accept(result.orElse(null), result.getException());

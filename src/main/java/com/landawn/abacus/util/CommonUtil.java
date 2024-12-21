@@ -2542,7 +2542,7 @@ sealed class CommonUtil permits N {
                 //noinspection DataFlowIssue
                 return invoke(ClassUtil.getDeclaredConstructor(cls, instance.getClass()), instance);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else {
             try {
@@ -2554,7 +2554,7 @@ sealed class CommonUtil permits N {
 
                 return invoke(constructor);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }

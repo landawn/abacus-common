@@ -169,9 +169,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public T get() throws NoSuchElementException {
             return orElseThrow();
@@ -739,7 +740,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof Optional<?> other) {
+            if (obj instanceof final Optional<?> other) {
                 return N.equals(value, other.value);
             }
 
@@ -827,9 +828,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public boolean get() throws NoSuchElementException { // NOSONAR
             return orElseThrow();
@@ -1449,9 +1451,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public char get() throws NoSuchElementException {
             return orElseThrow();
@@ -2018,9 +2021,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public byte get() throws NoSuchElementException {
             return orElseThrow();
@@ -2568,9 +2572,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public short get() throws NoSuchElementException {
             return orElseThrow();
@@ -3131,13 +3136,18 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public int get() throws NoSuchElementException {
             return orElseThrow();
         }
+
+        //    public int getAsInt() throws NoSuchElementException {
+        //        return orElseThrow();
+        //    }
 
         public boolean isPresent() {
             return isPresent;
@@ -3788,13 +3798,18 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public long get() throws NoSuchElementException {
             return orElseThrow();
         }
+
+        //    public long getAsLong() throws NoSuchElementException {
+        //        return orElseThrow();
+        //    }
 
         public boolean isPresent() {
             return isPresent;
@@ -4362,9 +4377,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public float get() throws NoSuchElementException {
             return orElseThrow();
@@ -4931,13 +4947,18 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public double get() throws NoSuchElementException {
             return orElseThrow();
         }
+
+        //    public double getAsDouble() throws NoSuchElementException {
+        //        return orElseThrow();
+        //    }
 
         public boolean isPresent() {
             return isPresent;
@@ -5549,9 +5570,10 @@ public class u { // NOSONAR
         }
 
         /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return
-         * @throws NoSuchElementException the no such element exception
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
          */
         public T get() throws NoSuchElementException {
             return orElseThrow();
@@ -6211,6 +6233,12 @@ public class u { // NOSONAR
         //        return isPresent() ? value : null;
         //    }
 
+        /**
+         * Returns the value if present, otherwise returns {@code null}.
+         *
+         * @return the value if present, otherwise {@code null}
+         * @see #orElse()
+         */
         @Beta
         public T orElseNull() {
             return isPresent() ? value : null;
@@ -6223,6 +6251,16 @@ public class u { // NOSONAR
          */
         public T orElse(final T other) {
             return isPresent() ? value : other;
+        }
+
+        /**
+         * Or else if {@code null}.
+         *
+         * @param other
+         * @return
+         */
+        public T orElseIfNull(final T other) {
+            return isNotNull() ? value : other;
         }
 
         /**
@@ -6240,16 +6278,6 @@ public class u { // NOSONAR
             } else {
                 return other.get();
             }
-        }
-
-        /**
-         * Or else if {@code null}.
-         *
-         * @param other
-         * @return
-         */
-        public T orElseIfNull(final T other) {
-            return isNotNull() ? value : other;
         }
 
         /**
@@ -6625,9 +6653,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code Optional} if it's empty or value is {@code null}.
+         * Returns an {@code Optional} containing the value if present and not {@code null}, otherwise an empty {@code Optional}
          *
-         * @return
+         * @return an {@code Optional} containing the value if present and not {@code null}, otherwise an empty {@code Optional}
          */
         public Optional<T> toOptional() {
             if (value == null) {
@@ -6638,9 +6666,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code java.util.Optional} if it's empty or value is {@code null}.
+         * Returns an {@code java.util.Optional} containing the value if present and not {@code null}, otherwise an empty {@code java.util.Optional}
          *
-         * @return
+         * @return an {@code java.util.Optional} containing the value if present and not {@code null}, otherwise an empty {@code java.util.Optional}
          */
         public java.util.Optional<T> toJdkOptional() {
             if (value == null) {
@@ -6661,7 +6689,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof Nullable<?> other) {
+            if (obj instanceof final Nullable<?> other) {
                 return N.equals(isPresent, other.isPresent) && N.equals(value, other.value);
             }
 

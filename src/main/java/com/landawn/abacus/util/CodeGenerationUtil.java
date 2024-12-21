@@ -205,7 +205,7 @@ public final class CodeGenerationUtil {
             try {
                 IOUtil.writeLines(lines, file);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 
@@ -728,7 +728,7 @@ public final class CodeGenerationUtil {
             try {
                 IOUtil.write(ret, file);
             } catch (final IOException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
 

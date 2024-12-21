@@ -128,7 +128,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             cmd.run();
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -164,7 +164,7 @@ public final class Try<T extends AutoCloseable> {
     //        try (final T autoCloseable = targetResource) {
     //            cmd.accept(autoCloseable);
     //        } catch (Exception e) {
-    //            throw N.toRuntimeException(e);
+    //            throw ExceptionUtil.toRuntimeException(e, true);
     //        }
     //    }
 
@@ -186,7 +186,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             return cmd.call();
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -285,7 +285,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -316,7 +316,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -334,7 +334,7 @@ public final class Try<T extends AutoCloseable> {
     //        try (final T autoCloseable = targetResource) {
     //            return cmd.apply(autoCloseable);
     //        } catch (Exception e) {
-    //            throw N.toRuntimeException(e);
+    //            throw ExceptionUtil.toRuntimeException(e, true);
     //        }
     //    }
 
@@ -354,7 +354,7 @@ public final class Try<T extends AutoCloseable> {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             cmd.accept(closeable);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (finalAction != null) {
                 finalAction.run();
@@ -389,7 +389,7 @@ public final class Try<T extends AutoCloseable> {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
         } catch (final Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (finalAction != null) {
                 finalAction.run();
@@ -471,7 +471,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         } finally {
             if (finalAction != null) {
@@ -496,7 +496,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         } finally {
             if (finalAction != null) {

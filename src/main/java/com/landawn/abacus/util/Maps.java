@@ -4587,7 +4587,7 @@ public final class Maps {
     //            }
     //        } catch (IllegalAccessException | InvocationTargetException e) {
     //            // Should never happen.
-    //            throw N.toRuntimeException(e);
+    //            throw ExceptionUtil.toRuntimeException(e, true);
     //        }
     //
     //        return output;

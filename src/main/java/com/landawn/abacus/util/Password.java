@@ -36,7 +36,7 @@ public final class Password {
         try {
             msgDigest = MessageDigest.getInstance(algorithm);
         } catch (final NoSuchAlgorithmException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 

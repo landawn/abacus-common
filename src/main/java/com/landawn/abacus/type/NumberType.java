@@ -84,7 +84,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                         && Modifier.isStatic(it.getModifiers()) //
                         && typeClass.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 1 //
-                        && (valueType.isAssignableFrom(it.getParameterTypes()[0]))).orElseNull();
+                        && (valueType.isAssignableFrom(it.getParameterTypes()[0]))).orElse(null);
             } catch (final Exception e) {
                 // ignore
             }
@@ -112,7 +112,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                             .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                                     && it.getParameterCount() == 1 //
                                     && (Number.class.isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0])))))
-                            .orElseNull();
+                            .orElse(null);
                 } catch (final Exception e) {
                     // ignore
                 }

@@ -178,7 +178,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
                 } catch (final IOException e) {
                     throw e;
                 } catch (final Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }
         }

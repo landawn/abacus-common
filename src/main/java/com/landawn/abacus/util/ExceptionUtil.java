@@ -65,10 +65,7 @@ public final class ExceptionUtil {
 
         toRuntimeExceptionFuncMap.put(ParseException.class, e -> new UncheckedParseException((ParseException) e));
 
-        toRuntimeExceptionFuncMap.put(InterruptedException.class, e -> {
-            Thread.currentThread().interrupt();// TODO is it needed ? is it right to do here?
-            return new UncheckedInterruptedException((InterruptedException) e);
-        });
+        toRuntimeExceptionFuncMap.put(InterruptedException.class, e -> new UncheckedInterruptedException((InterruptedException) e));
 
         toRuntimeExceptionFuncMap.put(ExecutionException.class, e -> e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause()));
 
@@ -125,35 +122,65 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}. Otherwise, returns itself.
      *
-     * @param e
-     * @return
+     * @param e the exception to convert
+     * @return the converted runtime exception
      */
     public static RuntimeException toRuntimeException(final Exception e) {
-        return toRuntimeException(e, false);
+        return toRuntimeException(e, false, false);
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception} or an {@code Error}, otherwise returns itself.
+     * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}. Otherwise, returns itself.
      *
-     * @param e
-     * @return
-     * @see #registerRuntimeExceptionMapper(Class, Function)
+     * @param e the exception to convert
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
+     * @return the converted runtime exception
+     */
+    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
+        return toRuntimeException(e, callInterrupt, false);
+    }
+
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}.
+     * Otherwise, returns itself.
+     *
+     * @param e the throwable to convert
+     * @return the converted runtime exception
      */
     public static RuntimeException toRuntimeException(final Throwable e) {
-        return toRuntimeException(e, false);
+        return toRuntimeException(e, false, false);
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise, returns itself.
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception},
+     * or throw it if it's an {@code Error}. Otherwise, returns itself.
      *
-     * @param e
-     * @param throwIfItIsError
-     * @return
+     * @param e the throwable to convert
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
+     * @return the converted runtime exception
      */
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
+        return toRuntimeException(e, callInterrupt, false);
+    }
+
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception},
+     * or throws it if it's an {@code Error}. Otherwise, returns itself.
+     *
+     * @param e the throwable to convert
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
+     * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
+     * @return the converted runtime exception
+     */
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
         if (throwIfItIsError && e instanceof Error) {
             throw (Error) e;
+        }
+
+        if (callInterrupt && e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
         }
 
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
