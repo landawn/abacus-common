@@ -1018,7 +1018,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof final Fraction other)) {
+        if (!(obj instanceof Fraction other)) {
             return false;
         }
         return getNumerator() == other.getNumerator() && getDenominator() == other.getDenominator();

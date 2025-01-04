@@ -1298,13 +1298,13 @@ public final class Numbers {
             return ((Long) obj);
         }
 
-        if (obj instanceof final BigInteger bigInt) {
+        if (obj instanceof BigInteger bigInt) {
             if (bigInt.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0 || bigInt.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return bigInt.longValue();
-        } else if (obj instanceof final BigDecimal bigDecimal) {
+        } else if (obj instanceof BigDecimal bigDecimal) {
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }

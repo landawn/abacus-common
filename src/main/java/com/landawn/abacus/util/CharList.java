@@ -1898,7 +1898,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             return true;
         }
 
-        if (obj instanceof final CharList other) {
+        if (obj instanceof CharList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

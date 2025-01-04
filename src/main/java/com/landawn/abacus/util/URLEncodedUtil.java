@@ -572,7 +572,7 @@ public final class URLEncodedUtil {
                 }
             } else if (ClassUtil.isBeanClass(parameters.getClass())) {
                 encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
-            } else if (parameters instanceof final Object[] a) {
+            } else if (parameters instanceof Object[] a) {
                 if (0 != (a.length % 2)) {
                     throw new IllegalArgumentException(
                             "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");

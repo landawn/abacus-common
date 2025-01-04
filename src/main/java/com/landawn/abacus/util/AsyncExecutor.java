@@ -377,7 +377,7 @@ public class AsyncExecutor {
      * @param timeUnit the time unit of the terminationTimeout argument
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
-        if (executor == null || !(executor instanceof final ExecutorService executorService)) {
+        if (executor == null || !(executor instanceof ExecutorService executorService)) {
             return;
         }
 

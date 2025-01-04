@@ -1456,7 +1456,7 @@ public final class PropertiesUtil {
                 return true;
             }
 
-            if (obj instanceof final ConfigBean other) {
+            if (obj instanceof ConfigBean other) {
                 return N.equals(other.id, id) && N.equals(other.name, name) && N.equals(other.content, content)
                         && N.equals(other.includedServers, includedServers) && N.equals(other.excludedServers, excludedServers)
                         && N.equals(other.status, status) && N.equals(other.description, description) && N.equals(other.lastUpdateTime, lastUpdateTime)
@@ -1569,7 +1569,7 @@ public final class PropertiesUtil {
                 return true;
             }
 
-            if (obj instanceof final Resource other) {
+            if (obj instanceof Resource other) {
                 return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath);
 
             }

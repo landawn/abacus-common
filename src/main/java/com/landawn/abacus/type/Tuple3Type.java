@@ -140,7 +140,7 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 

@@ -136,7 +136,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 

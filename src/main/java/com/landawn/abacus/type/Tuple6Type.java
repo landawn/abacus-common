@@ -159,7 +159,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 

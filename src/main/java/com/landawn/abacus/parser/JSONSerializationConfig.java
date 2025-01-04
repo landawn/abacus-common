@@ -333,7 +333,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
             return true;
         }
 
-        if (obj instanceof final JSONSerializationConfig other) {
+        if (obj instanceof JSONSerializationConfig other) {
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())

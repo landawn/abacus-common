@@ -696,7 +696,7 @@ public final class HttpRequest {
     }
 
     private HttpClient checkUrlAndHttpClient() {
-        if (query == null || (query instanceof final String strQuery && Strings.isEmpty(strQuery))) {
+        if (query == null || (query instanceof String strQuery && Strings.isEmpty(strQuery))) {
             if (uri == null) {
                 requestBuilder.uri(URI.create(url));
             } else {

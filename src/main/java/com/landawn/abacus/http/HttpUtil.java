@@ -262,7 +262,7 @@ public final class HttpUtil {
             return Strings.EMPTY_STRING;
         }
 
-        if (value instanceof final Collection c) {
+        if (value instanceof Collection c) {
             if (N.isEmpty(c)) {
                 return Strings.EMPTY_STRING;
             } else if (c.size() == 1) {

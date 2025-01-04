@@ -1796,7 +1796,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             return true;
         }
 
-        if (obj instanceof final DoubleList other) {
+        if (obj instanceof DoubleList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

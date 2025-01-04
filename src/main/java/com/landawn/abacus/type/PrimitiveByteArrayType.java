@@ -144,7 +144,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     public byte[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof final Blob blob) {
+        } else if (obj instanceof Blob blob) {
             try {
                 return blob.getBytes(1, (int) blob.length());
             } catch (final SQLException e) {

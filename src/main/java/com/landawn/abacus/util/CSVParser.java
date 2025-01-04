@@ -240,7 +240,7 @@ public class CSVParser {
      * must the different.
      *
      * @param separator The defined separator character
-     * @param quoteChar The defined quotation cahracter
+     * @param quoteChar The defined quotation character
      * @param escape The defined escape character
      * @return True if any two of the three are the same.
      */

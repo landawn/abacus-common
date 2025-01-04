@@ -909,7 +909,7 @@ public class EventBus {
                 return true;
             }
 
-            if (obj instanceof final SubIdentifier other) {
+            if (obj instanceof SubIdentifier other) {
                 return N.equals(instance, other.instance) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
                         && N.equals(eventId, other.eventId) && N.equals(threadMode, other.threadMode) && N.equals(strictEventType, other.strictEventType)
                         && N.equals(sticky, other.sticky) && N.equals(intervalInMillis, other.intervalInMillis) && N.equals(deduplicate, other.deduplicate)

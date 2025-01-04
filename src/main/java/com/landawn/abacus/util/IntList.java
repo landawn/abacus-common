@@ -1950,7 +1950,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             return true;
         }
 
-        if (obj instanceof final IntList other) {
+        if (obj instanceof IntList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

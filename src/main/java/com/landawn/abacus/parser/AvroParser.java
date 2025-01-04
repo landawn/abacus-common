@@ -115,17 +115,15 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     public void serialize(final Object obj, final AvroSerializationConfig config, final OutputStream output) {
         final Type<Object> type = N.typeOf(obj.getClass());
 
-        if (obj instanceof final SpecificRecord specificRecord) {
+        if (obj instanceof SpecificRecord specificRecord) {
             final DatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
             final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
 
-            try {
+            try (dataFileWriter) {
                 dataFileWriter.create(specificRecord.getSchema(), output);
                 dataFileWriter.append(specificRecord);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
-            } finally {
-                IOUtil.close(dataFileWriter);
             }
         } else if (type.isCollection() && ((Collection<Object>) obj).size() > 0 && ((Collection<Object>) obj).iterator().next() instanceof SpecificRecord) {
             final Collection<SpecificRecord> c = (Collection<SpecificRecord>) obj;
@@ -133,7 +131,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final DatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
             final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
 
-            try {
+            try (dataFileWriter) {
                 dataFileWriter.create(specificRecord.getSchema(), output);
 
                 for (final SpecificRecord e : c) {
@@ -141,8 +139,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
-            } finally {
-                IOUtil.close(dataFileWriter);
             }
         } else if (type.isObjectArray() && ((Object[]) obj).length > 0 && ((Object[]) obj)[0] instanceof SpecificRecord) {
             final Object[] a = (Object[]) obj;
@@ -150,7 +146,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final DatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
             final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
 
-            try {
+            try (dataFileWriter) {
                 dataFileWriter.create(specificRecord.getSchema(), output);
 
                 for (final Object e : a) {
@@ -158,8 +154,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
-            } finally {
-                IOUtil.close(dataFileWriter);
             }
         } else {
             if (config == null || config.getSchema() == null) {

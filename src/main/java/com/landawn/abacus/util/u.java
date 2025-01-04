@@ -740,7 +740,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final Optional<?> other) {
+            if (obj instanceof Optional<?> other) {
                 return N.equals(value, other.value);
             }
 
@@ -1353,7 +1353,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalBoolean other) {
+            if (obj instanceof OptionalBoolean other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -1924,7 +1924,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalChar other) {
+            if (obj instanceof OptionalChar other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -2475,7 +2475,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalByte other) {
+            if (obj instanceof OptionalByte other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -3026,7 +3026,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalShort other) {
+            if (obj instanceof OptionalShort other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -3688,7 +3688,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalInt other) {
+            if (obj instanceof OptionalInt other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -4293,7 +4293,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalLong other) {
+            if (obj instanceof OptionalLong other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -4850,7 +4850,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalFloat other) {
+            if (obj instanceof OptionalFloat other) {
                 return (isPresent && other.isPresent) ? N.equals(value, other.value) : isPresent == other.isPresent;
             }
 
@@ -5442,7 +5442,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final OptionalDouble other) {
+            if (obj instanceof OptionalDouble other) {
                 return (isPresent && other.isPresent) ? N.equals(value, other.value) : isPresent == other.isPresent;
             }
 
@@ -6237,7 +6237,7 @@ public class u { // NOSONAR
          * Returns the value if present, otherwise returns {@code null}.
          *
          * @return the value if present, otherwise {@code null}
-         * @see #orElse()
+         * @see #orElse(Object)
          */
         @Beta
         public T orElseNull() {
@@ -6689,7 +6689,7 @@ public class u { // NOSONAR
                 return true;
             }
 
-            if (obj instanceof final Nullable<?> other) {
+            if (obj instanceof Nullable<?> other) {
                 return N.equals(isPresent, other.isPresent) && N.equals(value, other.value);
             }
 

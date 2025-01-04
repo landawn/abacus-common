@@ -777,7 +777,7 @@ public final class Objectory {
      * @param writer
      */
     public static void recycle(final java.io.BufferedWriter writer) {
-        if (writer instanceof final BufferedWriter bw) {
+        if (writer instanceof BufferedWriter bw) {
             try {
                 bw.flushBufferToWriter();
             } catch (final IOException e) {
@@ -794,7 +794,7 @@ public final class Objectory {
      * @param reader
      */
     public static void recycle(final java.io.BufferedReader reader) {
-        if (reader instanceof final BufferedReader br) {
+        if (reader instanceof BufferedReader br) {
             br._reset();
             bufferedReaderPool.offer(br);
         }

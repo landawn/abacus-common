@@ -966,7 +966,7 @@ public final class HttpClient {
 
                 final Type<Object> type = N.typeOf(request.getClass());
 
-                if (request instanceof final File fileRequest) {
+                if (request instanceof File fileRequest) {
                     try (InputStream fileInputStream = IOUtil.newFileInputStream(fileRequest)) {
                         IOUtil.write(fileInputStream, os);
                     }

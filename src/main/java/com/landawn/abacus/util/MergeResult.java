@@ -130,14 +130,15 @@ public enum MergeResult {
      * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
-     * @return
-     * @deprecated Use {@link Fn#switchOnNext()} instead
+     * @return a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
+     * @deprecated Use {@link Fn#alternate()} instead
+     * @see Fn#alternate()
      */
     @Deprecated
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T> BiFunction<T, T, MergeResult> switchOnNext() {
-        return Fn.switchOnNext();
+    public static <T> BiFunction<T, T, MergeResult> alternate() {
+        return Fn.alternate();
     }
 }

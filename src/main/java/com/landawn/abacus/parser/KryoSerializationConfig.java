@@ -96,7 +96,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
             return true;
         }
 
-        if (obj instanceof final KryoSerializationConfig other) { //NOSONAR
+        if (obj instanceof KryoSerializationConfig other) { //NOSONAR
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
                     && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass);
         }

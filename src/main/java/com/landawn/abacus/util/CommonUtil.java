@@ -1390,7 +1390,7 @@ sealed class CommonUtil permits N {
             return (T) new StringReader(srcObj.toString());
         }
 
-        if (srcObj instanceof final AutoCloseable closeable) {
+        if (srcObj instanceof AutoCloseable closeable) {
             try {
                 return targetType.valueOf(srcObj);
             } finally {
@@ -4548,7 +4548,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final boolean[] result = new boolean[len];
 
-        if (c instanceof final List<Boolean> list && c instanceof RandomAccess) {
+        if (c instanceof List<Boolean> list && c instanceof RandomAccess) {
             Boolean val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4682,7 +4682,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final char[] result = new char[len];
 
-        if (c instanceof final List<Character> list && c instanceof RandomAccess) {
+        if (c instanceof List<Character> list && c instanceof RandomAccess) {
             Character val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4772,7 +4772,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final byte[] result = new byte[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4884,7 +4884,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final short[] result = new short[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -4974,7 +4974,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final int[] result = new int[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5108,7 +5108,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final long[] result = new long[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5198,7 +5198,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final float[] result = new float[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -5288,7 +5288,7 @@ sealed class CommonUtil permits N {
         final int len = toIndex - fromIndex;
         final double[] result = new double[len];
 
-        if (c instanceof final List<? extends Number> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends Number> list && c instanceof RandomAccess) {
             Number val = null;
 
             for (int i = 0; i < len; i++) {
@@ -8602,10 +8602,10 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
+        if (c instanceof Collection<? extends T> coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
+            } else if (coll instanceof List<? extends T> list) { // NOSONAR
                 return new ArrayList<>((list).subList(0, n));
             }
         }
@@ -8674,10 +8674,10 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
+        if (c instanceof Collection<? extends T> coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
+            } else if (coll instanceof List<? extends T> list) { // NOSONAR
                 return new ArrayList<>(list.subList(list.size() - n, list.size()));
             }
         }
@@ -17354,10 +17354,10 @@ sealed class CommonUtil permits N {
         if (obj.getClass().isArray()) {
             return typeOf(obj.getClass()).toString(obj);
         }
-        if (obj instanceof final Iterator<?> iter) { // NOSONAR
+        if (obj instanceof Iterator<?> iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
-        if (obj instanceof final Iterable<?> iter) { // NOSONAR
+        if (obj instanceof Iterable<?> iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
 
@@ -26089,7 +26089,7 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        if (c instanceof final List<?> list && c instanceof RandomAccess) {
+        if (c instanceof List<?> list && c instanceof RandomAccess) {
 
             for (int i = N.max(fromIndex, 0); i < len; i++) {
                 if (equals(list.get(i), valueToFind)) {
@@ -27234,7 +27234,7 @@ sealed class CommonUtil permits N {
 
         final IntList result = new IntList();
 
-        if (c instanceof final List<?> list && c instanceof RandomAccess) {
+        if (c instanceof List<?> list && c instanceof RandomAccess) {
 
             for (int idx = N.max(startIndex, 0); idx < size; idx++) {
                 if (N.equals(list.get(idx), valueToFind)) {
@@ -27332,7 +27332,7 @@ sealed class CommonUtil permits N {
 
         final IntList result = new IntList();
 
-        if (c instanceof final List<? extends T> list && c instanceof RandomAccess) {
+        if (c instanceof List<? extends T> list && c instanceof RandomAccess) {
 
             for (int i = N.max(fromIndex, 0); i < size; i++) {
                 if (predicate.test(list.get(i))) {

@@ -1860,7 +1860,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return true;
         }
 
-        if (obj instanceof final ByteList other) {
+        if (obj instanceof ByteList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

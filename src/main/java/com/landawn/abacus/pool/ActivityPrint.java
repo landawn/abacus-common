@@ -230,7 +230,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
             return true;
         }
 
-        if (obj instanceof final ActivityPrint other) {
+        if (obj instanceof ActivityPrint other) {
             return (createdTime == other.createdTime) && (liveTime == other.liveTime) && (maxIdleTime == other.maxIdleTime)
                     && (lastAccessTime == other.lastAccessTime) && (accessCount == other.accessCount);
         }

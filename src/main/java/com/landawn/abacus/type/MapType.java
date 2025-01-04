@@ -163,7 +163,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         } else {
             // writer.write(stringOf(x));
 
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 Utils.jsonParser.serialize(x, Utils.jsc, writer);
             } else {
                 appendable.append(Utils.jsonParser.serialize(x, Utils.jsc));

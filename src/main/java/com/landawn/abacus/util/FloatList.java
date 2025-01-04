@@ -1812,7 +1812,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             return true;
         }
 
-        if (obj instanceof final FloatList other) {
+        if (obj instanceof FloatList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

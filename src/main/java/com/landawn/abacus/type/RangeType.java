@@ -179,7 +179,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 type = TypeFactory.getType(x.upperEndpoint().getClass());
             }
 
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 

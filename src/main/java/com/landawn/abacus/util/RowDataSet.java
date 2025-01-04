@@ -306,7 +306,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return true;
         }
 
-        if (columnNames instanceof final ImmutableList<String> immutableList) { // NOSONAR
+        if (columnNames instanceof ImmutableList<String> immutableList) { // NOSONAR
             return immutableList.list == _columnNameList;
         }
 
@@ -9048,7 +9048,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return true;
         }
 
-        if (obj instanceof final RowDataSet other) {
+        if (obj instanceof RowDataSet other) {
             return (size() == other.size()) && N.equals(_columnNameList, other._columnNameList) && N.equals(_columnList, other._columnList);
         }
 

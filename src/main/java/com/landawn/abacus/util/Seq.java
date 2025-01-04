@@ -7833,11 +7833,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new {@code Seq} consisting of the last {@code n} elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code n} is negative
-     * @see Stream#last(int)
+     * @see Stream#takeLast(int)
+     * @deprecated Use {@link #takeLast(int)} instead
      */
+    @Deprecated
     @Beta
     @IntermediateOp
     public Seq<T, E> last(final int n) throws IllegalStateException, IllegalArgumentException {
+        return takeLast(n);
+    }
+
+    /**
+     * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
+     * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
+     * It may cause <code>out of memory error</code> if {@code n} is big enough.
+     *
+     * <br />
+     * All the elements will be loaded to get the last {@code n} elements and the sequence will be closed after that, if a terminal operation is triggered.
+     *
+     * @param n the number of elements to retain from the end of the sequence
+     * @return a new {@code Seq} consisting of the last {@code n} elements
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code n} is negative
+     * @see Stream#takeLast(int)
+     */
+    @Beta
+    @IntermediateOp
+    public Seq<T, E> takeLast(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 

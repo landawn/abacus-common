@@ -349,7 +349,7 @@ public final class CodeGenerationUtil {
             sb.append(LINE_SEPARATOR)
                     .append(interfaceName)
                     .append(" {")
-                    .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
+                    .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
                     .append(LINE_SEPARATOR); //
 
             final List<String> propNames = new ArrayList<>(propNameMap.keySet());

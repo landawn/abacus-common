@@ -843,7 +843,7 @@ public final class XmlUtil {
         for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
             final Node childNode = childNodeList.item(childNodeIndex);
 
-            if (childNode instanceof final Element childElement) {
+            if (childNode instanceof Element childElement) {
                 readElement(nextParentNodeName, childElement, output);
             }
         }

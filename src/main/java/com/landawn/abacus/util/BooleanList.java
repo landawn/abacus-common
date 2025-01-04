@@ -1724,7 +1724,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return true;
         }
 
-        if (obj instanceof final BooleanList other) {
+        if (obj instanceof BooleanList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

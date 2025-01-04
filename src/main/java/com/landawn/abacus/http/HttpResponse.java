@@ -194,7 +194,7 @@ public class HttpResponse {
             return true;
         }
 
-        if (obj instanceof final HttpResponse other) {
+        if (obj instanceof HttpResponse other) {
             return N.equals(requestUrl, other.requestUrl) && statusCode == other.statusCode && N.equals(message, other.message)
                     && N.equals(headers, other.headers) && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
         }

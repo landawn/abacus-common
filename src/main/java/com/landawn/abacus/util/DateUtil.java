@@ -16,6 +16,8 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.nio.CharBuffer;
 import java.sql.Date;
 import java.sql.Time;
@@ -40,7 +42,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.LongFunction;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -270,8 +275,81 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             .put("uuuu-MM-dd", DateTimeFormatter.ISO_LOCAL_DATE)
             .build();
 
+    static final Map<Class<? extends java.util.Date>, LongFunction<? extends java.util.Date>> dateCreatorPool = new ConcurrentHashMap<>();
+
+    static {
+        dateCreatorPool.put(java.util.Date.class, java.util.Date::new);
+        dateCreatorPool.put(java.sql.Date.class, java.sql.Date::new);
+        dateCreatorPool.put(Time.class, Time::new);
+        dateCreatorPool.put(Timestamp.class, Timestamp::new);
+    }
+
+    static final Map<Class<? extends java.util.Calendar>, BiFunction<? super Long, ? super Calendar, ? extends java.util.Calendar>> calendarCreatorPool = new ConcurrentHashMap<>();
+
+    static {
+        calendarCreatorPool.put(java.util.Calendar.class, (millis, c) -> {
+            final Calendar ret = Calendar.getInstance();
+            ret.setTimeInMillis(millis);
+
+            if (N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
+                ret.setTimeZone(c.getTimeZone());
+            }
+
+            return ret;
+        });
+
+        calendarCreatorPool.put(java.util.GregorianCalendar.class, (millis, c) -> {
+            final Calendar ret = GregorianCalendar.getInstance();
+            ret.setTimeInMillis(millis);
+
+            if (N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
+                ret.setTimeZone(c.getTimeZone());
+            }
+
+            return ret;
+        });
+    }
+
     DateUtil() {
         // singleton
+    }
+
+    /**
+     * Registers a custom date creator for a specific date class.
+     *
+     * @param <T> the type of the date
+     * @param dateClass the class of the date to register the creator for
+     * @param dateCreator the function that creates instances of the date class. The function takes one argument: the time in milliseconds.
+     * @return {@code true} if the date creator was successfully registered, {@code false} otherwise
+     */
+    public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator) {
+        if (dateCreatorPool.containsKey(dateClass) && !Strings.startsWithAny(ClassUtil.getPackageName(dateClass), "java.", "javax.", "com.landawn.abacus")) {
+            return false;
+        }
+
+        dateCreatorPool.put(dateClass, dateCreator);
+
+        return true;
+    }
+
+    /**
+     * Registers a custom calendar creator for a specific calendar class.
+     *
+     * @param <T> the type of the calendar
+     * @param calendarClass the class of the calendar to register the creator for
+     * @param dateCreator the function that creates instances of the calendar class. The function takes two arguments: the time in milliseconds and the calendar to use as a template.
+     * @return {@code true} if the calendar creator was successfully registered, {@code false} otherwise
+     */
+    public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
+            final BiFunction<? super Long, ? super Calendar, ? extends T> dateCreator) {
+        if (calendarCreatorPool.containsKey(calendarClass)
+                && !Strings.startsWithAny(ClassUtil.getPackageName(calendarClass), "java.", "javax.", "com.landawn.abacus")) {
+            return false;
+        }
+
+        calendarCreatorPool.put(calendarClass, dateCreator);
+
+        return true;
     }
 
     /**
@@ -3865,44 +3943,39 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     private static <T extends java.util.Date> T createDate(final long millis, final Class<? extends java.util.Date> cls) {
-        java.util.Date result = null;
+        final LongFunction<? extends java.util.Date> creator = dateCreatorPool.get(cls);
 
-        if (cls.equals(java.util.Date.class)) {
-            result = new java.util.Date(millis);
-        } else if (cls.equals(java.sql.Date.class)) { // NOSONAR
-            result = new java.sql.Date(millis); // NOSONAR
-        } else if (cls.equals(Time.class)) {
-            result = new Time(millis);
-        } else if (cls.equals(Timestamp.class)) {
-            result = new Timestamp(millis);
+        if (creator != null) {
+            return (T) creator.apply(millis);
         } else {
-            result = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(cls, long.class), millis);
+            return (T) ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(cls, long.class), millis);
         }
-
-        return (T) result;
     }
 
-    private static <T extends Calendar> T createCalendar(final T c, final long millis) {
-        final Class<T> cls = (Class<T>) c.getClass();
+    private static <T extends Calendar> T createCalendar(final T source, final long millis) {
+        final Class<T> cls = (Class<T>) source.getClass();
+        final BiFunction<? super Long, ? super Calendar, ? extends java.util.Calendar> creator = calendarCreatorPool.get(cls);
 
-        Calendar result = null;
-
-        //noinspection ConstantValue
-        if (cls.equals(Calendar.class)) {
-            result = Calendar.getInstance();
-        } else if (cls.equals(GregorianCalendar.class)) {
-            result = GregorianCalendar.getInstance();
+        if (creator != null) {
+            return (T) creator.apply(millis, source);
         } else {
-            result = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(cls, long.class), millis);
+            Calendar result = null;
+            Constructor<T> constructor = ClassUtil.getDeclaredConstructor(cls, long.class);
+
+            if (constructor != null && Modifier.isPublic(constructor.getModifiers())) {
+                result = ClassUtil.invokeConstructor(constructor, millis);
+            } else {
+                constructor = ClassUtil.getDeclaredConstructor(cls);
+                result = ClassUtil.invokeConstructor(constructor);
+                result.setTimeInMillis(millis);
+            }
+
+            if (!N.equals(source.getTimeZone(), result.getTimeZone())) {
+                result.setTimeZone(source.getTimeZone());
+            }
+
+            return (T) result;
         }
-
-        result.setTimeInMillis(millis);
-
-        if (!N.equals(c.getTimeZone(), result.getTimeZone())) {
-            result.setTimeZone(c.getTimeZone());
-        }
-
-        return (T) result;
     }
 
     private enum ModifyType {

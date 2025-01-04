@@ -11420,7 +11420,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        if (c instanceof final Collection<?> coll) { // NOSONAR
+        if (c instanceof Collection<?> coll) { // NOSONAR
             return join(coll, 0, coll.size(), delimiter, prefix, suffix, trim);
         } else {
             return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
@@ -11610,7 +11610,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = toIndex - fromIndex;
         final String[] elements = new String[len];
 
-        if (c instanceof final List<?> list && c instanceof RandomAccess) {
+        if (c instanceof List<?> list && c instanceof RandomAccess) {
 
             for (int i = fromIndex, j = 0; i < toIndex; i++, j++) {
                 elements[j] = toString(list.get(i), trim);

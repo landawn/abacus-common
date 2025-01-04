@@ -137,7 +137,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     public InputStream valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof final Blob blob) {
+        } else if (obj instanceof Blob blob) {
             try {
                 return blob.getBinaryStream();
             } catch (final SQLException e) {
@@ -233,7 +233,7 @@ public class InputStreamType extends AbstractType<InputStream> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 IOUtil.write(new InputStreamReader(x), writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));

@@ -140,7 +140,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     public char[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof final Clob clob) {
+        } else if (obj instanceof Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length()).toCharArray();
             } catch (final SQLException e) {

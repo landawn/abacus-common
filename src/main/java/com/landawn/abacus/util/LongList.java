@@ -1872,7 +1872,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             return true;
         }
 
-        if (obj instanceof final LongList other) {
+        if (obj instanceof LongList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

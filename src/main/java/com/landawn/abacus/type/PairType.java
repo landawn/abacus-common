@@ -130,7 +130,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 

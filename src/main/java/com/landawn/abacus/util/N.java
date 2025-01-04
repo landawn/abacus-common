@@ -6063,7 +6063,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        if (elementsToAdd instanceof final Collection<? extends T> coll) { // NOSONAR
+        if (elementsToAdd instanceof Collection<? extends T> coll) { // NOSONAR
             return c.addAll(coll);
         } else {
             return addAll(c, elementsToAdd.iterator());
@@ -8265,7 +8265,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return wasModified;
         } else {
-            if (valuesToRemove instanceof final Collection<?> coll) { // NOSONAR
+            if (valuesToRemove instanceof Collection<?> coll) { // NOSONAR
                 //noinspection SuspiciousMethodCalls
                 return c.removeAll(coll);
             } else {
@@ -8287,7 +8287,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        if (c instanceof final Set<T> set) {
+        if (c instanceof Set<T> set) {
             final int originalSize = set.size();
 
             while (valuesToRemove.hasNext()) {
@@ -23276,7 +23276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return atLeast == 0;
         }
 
-        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
+        if (c instanceof Collection<? extends T> coll) { // NOSONAR
             final int size = coll.size();
 
             if (size < atLeast) {
@@ -31796,11 +31796,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Converts the provided exception to a runtime exception.
+     * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}, otherwise returns itself.
      *
      * @param e The exception to be converted to a runtime exception.
      * @return A RuntimeException that represents the provided exception.
      * @see ExceptionUtil#toRuntimeException(Exception)
+     * @see ExceptionUtil#toRuntimeException(Exception, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean, boolean)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta
@@ -31814,6 +31818,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param e The throwable to be converted to a runtime exception.
      * @return A RuntimeException that represents the provided throwable.
      * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean, boolean)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta

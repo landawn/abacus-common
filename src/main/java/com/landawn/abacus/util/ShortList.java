@@ -1858,7 +1858,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return true;
         }
 
-        if (obj instanceof final ShortList other) {
+        if (obj instanceof ShortList other) {
             return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 

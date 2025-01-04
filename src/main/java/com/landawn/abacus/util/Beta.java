@@ -46,7 +46,7 @@ public final class Beta {
 
         long ret = 1;
 
-        if (obj instanceof final Iterable iter) {
+        if (obj instanceof Iterable iter) {
             for (final Object e : iter) {
                 ret = 31 * ret + hashCodeEverything(e);
             }
@@ -58,14 +58,14 @@ public final class Beta {
                 ret = 31 * ret + hashCodeEverything(entry.getValue());
             }
         } else if (obj.getClass().isArray()) {
-            if (obj instanceof final Object[] a) {
+            if (obj instanceof Object[] a) {
                 for (final Object e : a) {
                     ret = 31 * ret + hashCodeEverything(e);
                 }
             } else {
                 ret = 31 * ret + N.deepHashCode(obj);
             }
-        } else if (obj instanceof final Iterator iter) {
+        } else if (obj instanceof Iterator iter) {
             while (iter.hasNext()) {
                 ret = 31 * ret + hashCodeEverything(iter.next());
             }

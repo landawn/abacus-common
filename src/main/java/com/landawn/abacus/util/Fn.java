@@ -491,10 +491,9 @@ public final class Fn {
     //     * @param <T>
     //     * @param <R>
     //     * @param func
-    //     * @return
+    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse but it can be used in parallel stream.
     //     */
     //    @Beta
-    //    @SequentialOnly
     //    @Stateful
     //    public static <R> IntFunction<R> memoize(final IntFunction<? extends R> func) {
     //        return new IntFunction<R>() {
@@ -571,7 +570,7 @@ public final class Fn {
     //     * @param <T>
     //     * @param <C>
     //     * @param supplier
-    //     * @return
+    //     * @return a stateful {@code Supplier}. Don't save or cache for reuse or use it in parallel stream.
     //     * @see {@code Stream.split/sliding};
     //     * @deprecated
     //     */
@@ -604,7 +603,7 @@ public final class Fn {
     //     * @param <T>
     //     * @param <C>
     //     * @param supplier
-    //     * @return
+    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
     //     * @see {@code Stream.split/sliding};
     //     * @deprecated
     //     */
@@ -889,11 +888,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param permitsPerSecond
-     * @return
+     * @return a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
      * @see RateLimiter#acquire()
      * @see RateLimiter#create(double)
      */
@@ -903,11 +902,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param rateLimiter
-     * @return
+     * @return a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
      * @see RateLimiter#acquire()
      */
     @Stateful
@@ -1374,17 +1373,17 @@ public final class Fn {
         return NULL_TO_EMPTY;
     }
 
-    /**
-     *
-     * @param <T>
-     * @return
-     * @deprecated replaced by {@code nullToEmptyList}
-     */
-    @Deprecated
-    @SuppressWarnings("rawtypes")
-    public static <T> UnaryOperator<List<T>> nullToEmptyL() {
-        return (UnaryOperator) NULL_TO_EMPTY_LIST;
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @return
+    //     * @deprecated replaced by {@code nullToEmptyList}
+    //     */
+    //    @Deprecated
+    //    @SuppressWarnings("rawtypes")
+    //    public static <T> UnaryOperator<List<T>> nullToEmptyL() {
+    //        return (UnaryOperator) NULL_TO_EMPTY_LIST;
+    //    }
 
     /**
      *
@@ -1396,17 +1395,17 @@ public final class Fn {
         return (UnaryOperator) NULL_TO_EMPTY_LIST;
     }
 
-    /**
-     *
-     * @param <T>
-     * @return
-     * @deprecated replaced by {@code nullToEmptySet}
-     */
-    @Deprecated
-    @SuppressWarnings("rawtypes")
-    public static <T> UnaryOperator<Set<T>> nullToEmptyS() {
-        return (UnaryOperator) NULL_TO_EMPTY_SET;
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @return
+    //     * @deprecated replaced by {@code nullToEmptySet}
+    //     */
+    //    @Deprecated
+    //    @SuppressWarnings("rawtypes")
+    //    public static <T> UnaryOperator<Set<T>> nullToEmptyS() {
+    //        return (UnaryOperator) NULL_TO_EMPTY_SET;
+    //    }
 
     /**
      *
@@ -1418,18 +1417,18 @@ public final class Fn {
         return (UnaryOperator) NULL_TO_EMPTY_SET;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
-     * @deprecated replaced by {@code nullToEmptyMap}
-     */
-    @Deprecated
-    @SuppressWarnings("rawtypes")
-    public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyM() {
-        return (UnaryOperator) NULL_TO_EMPTY_MAP;
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @return
+    //     * @deprecated replaced by {@code nullToEmptyMap}
+    //     */
+    //    @Deprecated
+    //    @SuppressWarnings("rawtypes")
+    //    public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyM() {
+    //        return (UnaryOperator) NULL_TO_EMPTY_MAP;
+    //    }
 
     /**
      *
@@ -3094,7 +3093,7 @@ public final class Fn {
      *
      * @param <T>
      * @param count
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3117,16 +3116,15 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param limit
      * @param predicate
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> limitThenFilter(final int limit, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
         N.checkArgNotNegative(limit, cs.limit);
@@ -3143,17 +3141,16 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param <U>
      * @param limit
      * @param predicate
-     * @return
+     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final java.util.function.BiPredicate<T, U> predicate)
             throws IllegalArgumentException {
@@ -3171,16 +3168,15 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param predicate
      * @param limit
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> filterThenLimit(final java.util.function.Predicate<T> predicate, final int limit) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -3197,17 +3193,16 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param <U>
      * @param predicate
      * @param limit
-     * @return
+     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T, U> BiPredicate<T, U> filterThenLimit(final java.util.function.BiPredicate<T, U> predicate, final int limit)
             throws IllegalArgumentException {
@@ -3225,15 +3220,14 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param timeInMillis
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final long timeInMillis) throws IllegalArgumentException {
         N.checkArgNotNegative(timeInMillis, cs.timeInMillis);
@@ -3257,15 +3251,14 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      *
      * @param <T>
      * @param duration
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final Duration duration) throws IllegalArgumentException {
         N.checkArgNotNull(duration, cs.duration);
@@ -3277,7 +3270,7 @@ public final class Fn {
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
-     * @return
+     * @return a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
      */
     @Beta
     @SequentialOnly
@@ -3298,7 +3291,7 @@ public final class Fn {
      *
      * @param <T>
      * @param predicate
-     * @return
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      */
     @Beta
     @SequentialOnly
@@ -3724,6 +3717,7 @@ public final class Fn {
      * @param <T>
      * @param predicate
      * @return
+     * @see #from(java.util.function.Predicate)
      */
     @Beta
     public static <T> Predicate<T> p(final Predicate<T> predicate) {
@@ -3770,6 +3764,7 @@ public final class Fn {
      * @param <U>
      * @param biPredicate
      * @return
+     * @see #from(java.util.function.BiPredicate)
      */
     @Beta
     public static <T, U> BiPredicate<T, U> p(final BiPredicate<T, U> biPredicate) {
@@ -3809,12 +3804,13 @@ public final class Fn {
     /**
      *
      * @param <T>
-     * @param predicate
+     * @param consumer
      * @return
+     * @see #from(java.util.function.Consumer)
      */
     @Beta
-    public static <T> Consumer<T> c(final Consumer<T> predicate) {
-        return predicate;
+    public static <T> Consumer<T> c(final Consumer<T> consumer) {
+        return consumer;
     }
 
     /**
@@ -3857,6 +3853,7 @@ public final class Fn {
      * @param <U>
      * @param biConsumer
      * @return
+     * @see #from(java.util.function.BiConsumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> c(final BiConsumer<T, U> biConsumer) {
@@ -3897,12 +3894,13 @@ public final class Fn {
      *
      * @param <T>
      * @param <R>
-     * @param predicate
+     * @param function
      * @return
+     * @see #from(java.util.function.Function)
      */
     @Beta
-    public static <T, R> Function<T, R> f(final Function<T, R> predicate) {
-        return predicate;
+    public static <T, R> Function<T, R> f(final Function<T, R> function) {
+        return function;
     }
 
     /**
@@ -3948,6 +3946,7 @@ public final class Fn {
      * @param <R>
      * @param biFunction
      * @return
+     * @see #from(java.util.function.BiFunction)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> f(final BiFunction<T, U, R> biFunction) {
@@ -5116,12 +5115,12 @@ public final class Fn {
      * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
-     * @return
+     * @return a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T> BiFunction<T, T, MergeResult> switchOnNext() {
+    public static <T> BiFunction<T, T, MergeResult> alternate() {
         return new BiFunction<>() {
             private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -6130,33 +6129,33 @@ public final class Fn {
             throw new UnsupportedOperationException();
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <C>
-         * @param supplier
-         * @return
-         * @deprecated
-         */
-        @Deprecated
-        @SequentialOnly
-        @Stateful
-        public static <T, C extends Collection<T>> Supplier<? extends C> single(final java.util.function.Supplier<? extends C> supplier) {
-            return new Supplier<>() {
-                private C c = null;
-
-                @Override
-                public C get() {
-                    if (c == null) {
-                        c = supplier.get();
-                    } else {
-                        c.clear();
-                    }
-
-                    return c;
-                }
-            };
-        }
+        //    /**
+        //     *
+        //     * @param <T>
+        //     * @param <C>
+        //     * @param supplier
+        //     * @return a stateful {@code Supplier}. Don't save or cache for reuse or use it in parallel stream.
+        //     * @deprecated
+        //     */
+        //    @Deprecated
+        //    @SequentialOnly
+        //    @Stateful
+        //    public static <T, C extends Collection<T>> Supplier<? extends C> single(final java.util.function.Supplier<? extends C> supplier) {
+        //        return new Supplier<>() {
+        //            private C c = null;
+        //
+        //            @Override
+        //            public C get() {
+        //                if (c == null) {
+        //                    c = supplier.get();
+        //                } else {
+        //                    c.clear();
+        //                }
+        //
+        //                return c;
+        //            }
+        //        };
+        //    }
 
         private static final Supplier<Exception> EXCEPTION = Exception::new;
 
@@ -6793,8 +6792,9 @@ public final class Fn {
         }
 
         /**
+         * Returns a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableObjArray} which is defined as a private field.
          *
-         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableObjArray} which is defined as a private field.
+         * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
         @Beta
         @SequentialOnly
@@ -6815,10 +6815,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
          *
          * @param <T>
          * @param componentType
-         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
+         * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
         @Beta
         @SequentialOnly
@@ -7107,33 +7108,33 @@ public final class Fn {
             throw new UnsupportedOperationException();
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <C>
-         * @param supplier
-         * @return
-         * @deprecated
-         */
-        @Deprecated
-        @SequentialOnly
-        @Stateful
-        public static <T, C extends Collection<T>> IntFunction<? extends C> single(final java.util.function.IntFunction<? extends C> supplier) {
-            return new IntFunction<>() {
-                private C c = null;
-
-                @Override
-                public C apply(final int t) {
-                    if (c == null) {
-                        c = supplier.apply(t);
-                    } else {
-                        c.clear();
-                    }
-
-                    return c;
-                }
-            };
-        }
+        //    /**
+        //     *
+        //     * @param <T>
+        //     * @param <C>
+        //     * @param supplier
+        //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
+        //     * @deprecated
+        //     */
+        //    @Deprecated
+        //    @SequentialOnly
+        //    @Stateful
+        //    public static <T, C extends Collection<T>> IntFunction<? extends C> single(final java.util.function.IntFunction<? extends C> supplier) {
+        //        return new IntFunction<>() {
+        //            private C c = null;
+        //
+        //            @Override
+        //            public C apply(final int t) {
+        //                if (c == null) {
+        //                    c = supplier.apply(t);
+        //                } else {
+        //                    c.clear();
+        //                }
+        //
+        //                return c;
+        //            }
+        //        };
+        //    }
     }
 
     /**
@@ -7157,7 +7158,7 @@ public final class Fn {
          *
          * @param <T>
          * @param predicate
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -7180,7 +7181,7 @@ public final class Fn {
          * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          */
         @Beta
         @SequentialOnly
@@ -7201,7 +7202,7 @@ public final class Fn {
          *
          * @param <T>
          * @param mapper
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          */
         @Beta
         @SequentialOnly
@@ -7218,13 +7219,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
          *
          * @param <T>
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
          */
         @Beta
-        @SequentialOnly
         @Stateful
         public static <T> Predicate<T> concurrentDistinct() {
             return new Predicate<>() {
@@ -7238,14 +7238,13 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
          *
          * @param <T>
          * @param mapper
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
          */
         @Beta
-        @SequentialOnly
         @Stateful
         public static <T> Predicate<T> concurrentDistinctBy(final java.util.function.Function<? super T, ?> mapper) {
             return new Predicate<>() {
@@ -7263,7 +7262,7 @@ public final class Fn {
          * Remove the continuous repeat elements.
          *
          * @param <T>
-         * @return
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          */
         @Beta
         @SequentialOnly
@@ -7348,7 +7347,7 @@ public final class Fn {
          * @param <T>
          * @param <U>
          * @param predicate
-         * @return
+         * @return a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -7420,7 +7419,7 @@ public final class Fn {
          *
          * @param <T>
          * @param action
-         * @return
+         * @return a stateful {@code Consumer}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -7618,7 +7617,7 @@ public final class Fn {
          * @param <T>
          * @param <U>
          * @param action
-         * @return
+         * @return a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -7660,7 +7659,7 @@ public final class Fn {
          * @param <T>
          * @param <R>
          * @param func
-         * @return
+         * @return a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -7896,7 +7895,7 @@ public final class Fn {
          * @param <U>
          * @param <R>
          * @param func
-         * @return
+         * @return a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -8673,14 +8672,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code CharBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code CharBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static CharBiFunction<MergeResult> alternated() {
+        public static CharBiFunction<MergeResult> alternate() {
             return new CharBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -8834,14 +8831,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code ByteBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code ByteBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static ByteBiFunction<MergeResult> alternated() {
+        public static ByteBiFunction<MergeResult> alternate() {
             return new ByteBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -8995,14 +8990,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code ShortBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code ShortBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static ShortBiFunction<MergeResult> alternated() {
+        public static ShortBiFunction<MergeResult> alternate() {
             return new ShortBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -9156,14 +9149,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code IntBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code IntBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static IntBiFunction<MergeResult> alternated() {
+        public static IntBiFunction<MergeResult> alternate() {
             return new IntBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -9317,14 +9308,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code LongBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code LongBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static LongBiFunction<MergeResult> alternated() {
+        public static LongBiFunction<MergeResult> alternate() {
             return new LongBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -9478,14 +9467,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code FloatBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code FloatBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static FloatBiFunction<MergeResult> alternated() {
+        public static FloatBiFunction<MergeResult> alternate() {
             return new FloatBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -9639,14 +9626,12 @@ public final class Fn {
         /**
          * Returns a stateful {@code DoubleBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @return
-         * @deprecated
+         * @return a stateful {@code DoubleBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          */
-        @Deprecated
         @Beta
         @SequentialOnly
         @Stateful
-        public static DoubleBiFunction<MergeResult> alternated() {
+        public static DoubleBiFunction<MergeResult> alternate() {
             return new DoubleBiFunction<>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -10047,12 +10032,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
          *
          * @param <T>
          * @param <E>
          * @param permitsPerSecond
-         * @return
+         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
          * @see RateLimiter#acquire()
          * @see RateLimiter#create(double)
          */
@@ -10062,12 +10047,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
          *
          * @param <T>
          * @param <E>
          * @param rateLimiter
-         * @return
+         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
          * @see RateLimiter#acquire()
          */
         @Stateful
@@ -10654,7 +10639,7 @@ public final class Fn {
          * @param <T>
          * @param <E>
          * @param count
-         * @return
+         * @return a stateful {@code Throwables.Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -10813,6 +10798,7 @@ public final class Fn {
          * @param <E>
          * @param predicate
          * @return
+         * @see #from(java.util.function.Predicate)
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> p(final Throwables.Predicate<T, E> predicate) {
@@ -10864,6 +10850,7 @@ public final class Fn {
          * @param <E>
          * @param biPredicate
          * @return
+         * @see #from(java.util.function.BiPredicate)
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final Throwables.BiPredicate<T, U, E> biPredicate) {
@@ -10907,12 +10894,13 @@ public final class Fn {
          *
          * @param <T>
          * @param <E>
-         * @param predicate
+         * @param consumer
          * @return
+         * @see #from(java.util.function.Consumer)
          */
         @Beta
-        public static <T, E extends Throwable> Throwables.Consumer<T, E> c(final Throwables.Consumer<T, E> predicate) {
-            return predicate;
+        public static <T, E extends Throwable> Throwables.Consumer<T, E> c(final Throwables.Consumer<T, E> consumer) {
+            return consumer;
         }
 
         /**
@@ -10960,6 +10948,7 @@ public final class Fn {
          * @param <E>
          * @param biConsumer
          * @return
+         * @see #from(java.util.function.BiConsumer)
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final Throwables.BiConsumer<T, U, E> biConsumer) {
@@ -11004,12 +10993,13 @@ public final class Fn {
          * @param <T>
          * @param <R>
          * @param <E>
-         * @param predicate
+         * @param function
          * @return
+         * @see #from(java.util.function.Function)
          */
         @Beta
-        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> f(final Throwables.Function<T, R, E> predicate) {
-            return predicate;
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> f(final Throwables.Function<T, R, E> function) {
+            return function;
         }
 
         /**
@@ -11060,6 +11050,7 @@ public final class Fn {
          * @param <E>
          * @param biFunction
          * @return
+         * @see #from(java.util.function.BiFunction)
          */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final Throwables.BiFunction<T, U, R, E> biFunction) {
@@ -11108,6 +11099,7 @@ public final class Fn {
          * @param predicate
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.Predicate)
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<T> predicate) throws IllegalArgumentException {
@@ -11162,6 +11154,7 @@ public final class Fn {
          * @param biPredicate
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.BiPredicate)
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
@@ -11214,6 +11207,7 @@ public final class Fn {
          * @param consumer
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.Consumer)
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<T> consumer) throws IllegalArgumentException {
@@ -11268,6 +11262,7 @@ public final class Fn {
          * @param biConsumer
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.BiConsumer)
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
@@ -11321,6 +11316,7 @@ public final class Fn {
          * @param function
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.Function)
          */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, ? extends R> function) throws IllegalArgumentException {
@@ -11378,6 +11374,7 @@ public final class Fn {
          * @param biFunction
          * @return
          * @throws IllegalArgumentException
+         * @see #from(java.util.function.BiFunction)
          */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction)

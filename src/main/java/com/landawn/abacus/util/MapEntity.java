@@ -249,7 +249,7 @@ public final class MapEntity implements Serializable {
             return true;
         }
 
-        if (obj instanceof final MapEntity other) {
+        if (obj instanceof MapEntity other) {
             return N.equals(entityName, other.entityName) && N.equals(values, other.values);
         }
 

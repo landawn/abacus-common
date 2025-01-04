@@ -132,7 +132,7 @@ public class ReaderType extends AbstractType<Reader> {
     public Reader valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof final Clob clob) {
+        } else if (obj instanceof Clob clob) {
             try {
                 return clob.getCharacterStream();
             } catch (final SQLException e) {
@@ -228,7 +228,7 @@ public class ReaderType extends AbstractType<Reader> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof final Writer writer) {
+            if (appendable instanceof Writer writer) {
                 IOUtil.write(x, writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
