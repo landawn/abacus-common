@@ -1416,6 +1416,8 @@ public final class Iterators {
      * @param <T> The type of elements in the Iterable objects.
      * @param c The collection of Iterable objects to be concatenated.
      * @return An ObjIterator that will iterate over the elements of each provided Iterable.
+     * @see N#concat(Iterable...)
+     * @see N#iterateEach(Collection)
      */
     public static <T> ObjIterator<T> concatIterables(final Collection<? extends Iterable<? extends T>> c) {
         if (N.isEmpty(c)) {

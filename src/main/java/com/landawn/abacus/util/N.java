@@ -6063,7 +6063,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        if (elementsToAdd instanceof Collection<? extends T> coll) { // NOSONAR
+        if (elementsToAdd instanceof final Collection<? extends T> coll) { // NOSONAR
             return c.addAll(coll);
         } else {
             return addAll(c, elementsToAdd.iterator());
@@ -8265,7 +8265,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return wasModified;
         } else {
-            if (valuesToRemove instanceof Collection<?> coll) { // NOSONAR
+            if (valuesToRemove instanceof final Collection<?> coll) { // NOSONAR
                 //noinspection SuspiciousMethodCalls
                 return c.removeAll(coll);
             } else {
@@ -8287,7 +8287,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        if (c instanceof Set<T> set) {
+        if (c instanceof final Set<T> set) {
             final int originalSize = set.size();
 
             while (valuesToRemove.hasNext()) {
@@ -23276,7 +23276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return atLeast == 0;
         }
 
-        if (c instanceof Collection<? extends T> coll) { // NOSONAR
+        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
             final int size = coll.size();
 
             if (size < atLeast) {
@@ -25749,7 +25749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ObjIterator#of(Object[], int, int)
      */
     @Beta
-    public static <T> Iterator<T> iterate(final T[] a) {
+    public static <T> ObjIterator<T> iterate(final T[] a) {
         return ObjIterator.of(a);
     }
 
@@ -25802,9 +25802,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterables
      * @param iterables the collection of iterables to iterate over
      * @return a list of iterators for each iterable in the specified collection
+     * @see N#concat(Iterable...)
+     * @see Iterators#concatIterables(Collection)
+     * @see N#iterateAll(Collection)
      */
     @Beta
-    public static <T> List<Iterator<T>> iterateAll(final Collection<? extends Iterable<? extends T>> iterables) {
+    public static <T> List<Iterator<T>> iterateEach(final Collection<? extends Iterable<? extends T>> iterables) {
         final List<Iterator<T>> iterators = new ArrayList<>(size(iterables));
 
         if (iterables != null) {
@@ -25814,6 +25817,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return iterators;
+    }
+
+    /**
+     * Returns an iterator over the elements in the specified iterables.
+     *
+     * @param <T>
+     * @param iterables
+     * @return
+     * @see N#concat(Collection...)
+     * @see Iterators#concatIterables(Collection)
+     * @see N#iterateEach(Collection)
+     */
+    @Beta
+    public static <T> ObjIterator<T> iterateAll(final Collection<? extends Iterable<? extends T>> iterables) {
+        return Iterators.concatIterables(iterables);
     }
 
     /**

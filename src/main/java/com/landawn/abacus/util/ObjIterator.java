@@ -18,9 +18,11 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
@@ -628,6 +630,28 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     @Beta
     public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
         return Iterators.map(this, mapper);
+    }
+
+    /**
+     * Returns a new ObjIterator with distinct elements based on their natural equality.
+     *
+     * @return
+     */
+    public ObjIterator<T> distinct() {
+        final Set<T> elements = new HashSet<>();
+        return filter(e -> elements.add(e));
+    }
+
+    /**
+     * Returns a new ObjIterator with distinct elements based on the keyExtractor.
+     * The keyExtractor is used to extract the key for each element, and the key is used to determine the uniqueness of the element.
+     * If the keyExtractor returns the same key for multiple elements, only the first element with that key is included in the resulting ObjIterator.
+     * @param keyExtractor
+     * @return
+     */
+    public ObjIterator<T> distinctBy(final Function<? super T, ?> keyExtractor) {
+        final Set<Object> elements = new HashSet<>();
+        return filter(e -> elements.add(keyExtractor.apply(e)));
     }
 
     /**

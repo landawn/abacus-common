@@ -19,7 +19,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
-// cs -> constant String; ps -> parameter String; fs -> field string. s -> string?
+// cs -> constant/common String; ps -> parameter String; fs -> field string. s -> string?
 @Beta // Not sure if it's a good idea or not.
 @Internal
 @SuppressWarnings({ "java:S1845", "java:S115" })

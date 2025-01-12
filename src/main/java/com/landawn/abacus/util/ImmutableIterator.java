@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Suppliers;
 
 /**
@@ -66,6 +67,23 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
 
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.wrap(toSet());
+    }
+
+    /**
+     * Returns the number of elements in this
+     *
+     * @return
+     */
+    @Beta
+    public long count() {
+        long count = 0;
+
+        while (hasNext()) {
+            next();
+            count++;
+        }
+
+        return count;
     }
 
     // Not efficient for primitive iterators because function is not for primitives.
