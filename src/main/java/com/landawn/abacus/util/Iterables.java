@@ -271,6 +271,7 @@ public final class Iterables {
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? (Comparator<T>) N.NULL_MAX_COMPARATOR : cmp;
+        final boolean isNullMinComparator = cmp == N.NULL_MIN_COMPARATOR;
 
         if (iter == null || !iter.hasNext()) {
             return Nullable.empty();
@@ -282,7 +283,7 @@ public final class Iterables {
         do {
             next = iter.next();
 
-            if (next == null && cmp == N.NULL_MIN_COMPARATOR) { // NOSONAR
+            if (isNullMinComparator && next == null) { // NOSONAR
                 //noinspection ConstantValue
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) < 0) {
@@ -743,6 +744,7 @@ public final class Iterables {
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? (Comparator<T>) N.NULL_MIN_COMPARATOR : cmp;
+        final boolean isNullMaxComparator = cmp == N.NULL_MAX_COMPARATOR;
 
         if (iter == null || !iter.hasNext()) {
             return Nullable.empty();
@@ -754,7 +756,7 @@ public final class Iterables {
         do {
             next = iter.next();
 
-            if (next == null && cmp == N.NULL_MAX_COMPARATOR) { // NOSONAR
+            if (isNullMaxComparator && next == null) { // NOSONAR
                 //noinspection ConstantValue
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) > 0) {
@@ -3400,7 +3402,7 @@ public final class Iterables {
          */
         @Override
         public boolean contains(final Object obj) {
-            if (obj instanceof Set<?> set) {
+            if (obj instanceof final Set<?> set) {
                 //noinspection SuspiciousMethodCalls
                 return inputSet.keySet().containsAll(set);
             }
@@ -3414,7 +3416,7 @@ public final class Iterables {
          */
         @Override
         public boolean equals(final Object obj) {
-            if (obj instanceof PowerSet<?> that) {
+            if (obj instanceof final PowerSet<?> that) {
                 return inputSet.equals(that.inputSet);
             }
             return super.equals(obj);
@@ -3809,11 +3811,7 @@ public final class Iterables {
          */
         @Override
         public boolean contains(final Object obj) {
-            if (!(obj instanceof Collection<?> c)) {
-                return false;
-            }
-
-            if (c.size() != axes.length) {
+            if (!(obj instanceof final Collection<?> c) || (c.size() != axes.length)) {
                 return false;
             }
 

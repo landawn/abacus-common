@@ -1,3 +1,8 @@
+### 5.7.0
+
+* Improve javaDoc
+* Improvements and bug fixes.
+
 ### 5.6.12
 
 * Improve javaDoc

@@ -14174,6 +14174,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
+        final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
 
         T candidate = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -14181,7 +14182,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = a[i];
             }
 
-            if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
+            if (isNullMinComparator && candidate == null) { // NOSONAR
                 return null;
             }
         }
@@ -14226,6 +14227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
+        final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
 
         T candidate = null;
         T e = null;
@@ -14241,7 +14243,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     candidate = e;
                 }
 
-                if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
+                if (isNullMinComparator && candidate == null) { // NOSONAR
                     return null;
                 }
             }
@@ -14260,7 +14262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         candidate = e;
                     }
 
-                    if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
+                    if (isNullMinComparator && candidate == null) { // NOSONAR
                         return null;
                     }
                 }
@@ -14330,6 +14332,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator can not be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
+        final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
 
         T candidate = iter.next();
         T e = null;
@@ -14341,12 +14344,61 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = e;
             }
 
-            if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
+            if (isNullMinComparator && candidate == null) { // NOSONAR
                 return null;
             }
         }
 
         return candidate;
+    }
+
+    /**
+     * Returns the minimum element from the provided array according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one smallest elements, the first one will be returned.
+     *
+     * @param <T>
+     * @param a
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
+     * @see Comparators#nullsLastBy(Function)
+     * @see Iterables#minBy(Object[], Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T minBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return min(a, Comparators.nullsLastBy(keyExtractor));
+    }
+
+    /**
+     * Returns the minimum element from the provided iterable according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one smallest elements, the first one will be returned.
+     * @param <T>
+     * @param c
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the specified iterable is {@code null} or empty.
+     * @see Comparators#nullsLastBy(Function)
+     * @see Iterables#minBy(Iterable, Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return min(c, Comparators.nullsLastBy(keyExtractor));
+    }
+
+    /**
+     * Returns the minimum element from the provided iterator according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one smallest elements, the first one will be returned.
+     * @param <T>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the specified iterator is {@code null} or empty.
+     * @see Comparators#nullsLastBy(Function)
+     * @see Iterables#minBy(Iterator, Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return min(iter, Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
@@ -15470,6 +15522,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
+        final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
 
         T candidate = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -15477,7 +15530,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = a[i];
             }
 
-            if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
+            if (isNullMaxComparator && candidate == null) { // NOSONAR
                 return null;
             }
         }
@@ -15524,6 +15577,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
+        final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
 
         T candidate = null;
         T e = null;
@@ -15539,7 +15593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     candidate = e;
                 }
 
-                if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
+                if (isNullMaxComparator && candidate == null) { // NOSONAR
                     return null;
                 }
             }
@@ -15560,7 +15614,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     }
                 }
 
-                if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
+                if (isNullMaxComparator && candidate == null) { // NOSONAR
                     return null;
                 }
             }
@@ -15629,6 +15683,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator can not be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
+        final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
 
         T candidate = iter.next();
         T e = null;
@@ -15640,12 +15695,61 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = e;
             }
 
-            if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
+            if (isNullMaxComparator && candidate == null) { // NOSONAR
                 return null;
             }
         }
 
         return candidate;
+    }
+
+    /**
+     * Returns the biggest element from the provided array according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one biggest elements, the first one will be returned.
+     *
+     * @param <T>
+     * @param a
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
+     * @see Comparators#nullsFirstBy(Function)
+     * @see Iterables#maxBy(Object[], Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return max(a, Comparators.nullsFirstBy(keyExtractor));
+    }
+
+    /**
+     * Returns the biggest element from the provided iterable according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one biggest elements, the first one will be returned.
+     * @param <T>
+     * @param c
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the specified iterable is {@code null} or empty.
+     * @see Comparators#nullsFirstBy(Function)
+     * @see Iterables#maxBy(Iterable, Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return max(c, Comparators.nullsFirstBy(keyExtractor));
+    }
+
+    /**
+     * Returns the biggest element from the provided iterator according to the key extracted by the {@code keyExtractor} function.
+     * If there are more than one biggest elements, the first one will be returned.
+     * @param <T>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws IllegalArgumentException if the specified iterator is {@code null} or empty.
+     * @see Comparators#nullsFirstBy(Function)
+     * @see Iterables#maxBy(Iterator, Function)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        return max(iter, Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
