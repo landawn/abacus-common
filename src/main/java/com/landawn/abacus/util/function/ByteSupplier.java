@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> { //NOSONAR
 
     ByteSupplier ZERO = () -> 0;

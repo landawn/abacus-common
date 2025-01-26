@@ -22,6 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
+@FunctionalInterface
 public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, RuntimeException>, java.util.function.BiFunction<T, U, R> { //NOSONAR
 
     /**

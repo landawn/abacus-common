@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, RuntimeException> { //NOSONAR
     BooleanFunction<Boolean> BOX = value -> value;
 

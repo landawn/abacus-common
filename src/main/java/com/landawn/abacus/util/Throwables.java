@@ -826,6 +826,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface Runnable<E extends Throwable> {
 
         /**
@@ -852,6 +853,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface Callable<R, E extends Throwable> {
 
         /**
@@ -879,6 +881,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface Supplier<T, E extends Throwable> {
 
         /**
@@ -905,6 +908,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanSupplier<E extends Throwable> {
 
         /**
@@ -921,6 +925,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharSupplier<E extends Throwable> {
 
         /**
@@ -937,6 +942,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteSupplier<E extends Throwable> {
 
         /**
@@ -953,6 +959,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortSupplier<E extends Throwable> {
 
         /**
@@ -969,6 +976,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntSupplier<E extends Throwable> {
 
         /**
@@ -985,6 +993,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongSupplier<E extends Throwable> {
 
         /**
@@ -1001,6 +1010,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatSupplier<E extends Throwable> {
 
         /**
@@ -1017,6 +1027,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleSupplier<E extends Throwable> {
 
         /**
@@ -1034,6 +1045,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface Predicate<T, E extends Throwable> {
 
         /**
@@ -1067,6 +1079,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiPredicate<T, U, E extends Throwable> {
 
         /**
@@ -1098,6 +1111,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
+    @FunctionalInterface
     public interface TriPredicate<A, B, C, E extends Throwable> {
 
         /**
@@ -1120,6 +1134,7 @@ public final class Throwables {
      * @param <D>
      * @param <E>
      */
+    @FunctionalInterface
     public interface QuadPredicate<A, B, C, D, E extends Throwable> {
 
         /**
@@ -1141,6 +1156,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface Function<T, R, E extends Throwable> {
 
         /**
@@ -1171,6 +1187,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiFunction<T, U, R, E extends Throwable> {
 
         /**
@@ -1203,6 +1220,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface TriFunction<A, B, C, R, E extends Throwable> {
 
         /**
@@ -1226,6 +1244,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface QuadFunction<A, B, C, D, R, E extends Throwable> {
 
         /**
@@ -1246,6 +1265,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface Consumer<T, E extends Throwable> {
 
         /**
@@ -1274,6 +1294,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiConsumer<T, U, E extends Throwable> {
 
         /**
@@ -1304,6 +1325,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
+    @FunctionalInterface
     public interface TriConsumer<A, B, C, E extends Throwable> {
 
         /**
@@ -1325,6 +1347,7 @@ public final class Throwables {
      * @param <D>
      * @param <E>
      */
+    @FunctionalInterface
     public interface QuadConsumer<A, B, C, D, E extends Throwable> {
 
         /**
@@ -1343,6 +1366,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanConsumer<E extends Throwable> {
 
         /**
@@ -1358,6 +1382,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanPredicate<E extends Throwable> {
 
         /**
@@ -1375,6 +1400,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanFunction<R, E extends Throwable> {
 
         /**
@@ -1391,6 +1417,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharConsumer<E extends Throwable> {
 
         /**
@@ -1406,6 +1433,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharPredicate<E extends Throwable> {
 
         /**
@@ -1423,6 +1451,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharFunction<R, E extends Throwable> {
 
         /**
@@ -1439,6 +1468,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteConsumer<E extends Throwable> {
 
         /**
@@ -1454,6 +1484,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BytePredicate<E extends Throwable> {
 
         /**
@@ -1471,6 +1502,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteFunction<R, E extends Throwable> {
 
         /**
@@ -1487,6 +1519,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortConsumer<E extends Throwable> {
 
         /**
@@ -1502,6 +1535,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortPredicate<E extends Throwable> {
 
         /**
@@ -1519,6 +1553,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortFunction<R, E extends Throwable> {
 
         /**
@@ -1535,6 +1570,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntConsumer<E extends Throwable> {
 
         /**
@@ -1550,6 +1586,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntPredicate<E extends Throwable> {
 
         /**
@@ -1567,6 +1604,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntFunction<R, E extends Throwable> {
 
         /**
@@ -1583,6 +1621,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntToLongFunction<E extends Throwable> {
 
         /**
@@ -1599,6 +1638,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntToDoubleFunction<E extends Throwable> {
 
         /**
@@ -1615,6 +1655,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongConsumer<E extends Throwable> {
 
         /**
@@ -1630,6 +1671,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongPredicate<E extends Throwable> {
 
         /**
@@ -1647,6 +1689,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongFunction<R, E extends Throwable> {
 
         /**
@@ -1663,6 +1706,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongToIntFunction<E extends Throwable> {
 
         /**
@@ -1679,6 +1723,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongToDoubleFunction<E extends Throwable> {
 
         /**
@@ -1695,6 +1740,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatConsumer<E extends Throwable> {
 
         /**
@@ -1710,6 +1756,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatPredicate<E extends Throwable> {
 
         /**
@@ -1727,6 +1774,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatFunction<R, E extends Throwable> {
 
         /**
@@ -1743,6 +1791,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleConsumer<E extends Throwable> {
 
         /**
@@ -1758,6 +1807,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoublePredicate<E extends Throwable> {
 
         /**
@@ -1775,6 +1825,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleFunction<R, E extends Throwable> {
 
         /**
@@ -1791,6 +1842,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleToIntFunction<E extends Throwable> {
 
         /**
@@ -1807,6 +1859,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleToLongFunction<E extends Throwable> {
 
         /**
@@ -1824,6 +1877,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToBooleanFunction<T, E extends Throwable> {
 
         /**
@@ -1842,6 +1896,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToCharFunction<T, E extends Throwable> {
 
         /**
@@ -1860,6 +1915,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToByteFunction<T, E extends Throwable> {
 
         /**
@@ -1878,6 +1934,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToShortFunction<T, E extends Throwable> {
 
         /**
@@ -1896,6 +1953,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToIntFunction<T, E extends Throwable> {
 
         /**
@@ -1914,6 +1972,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToLongFunction<T, E extends Throwable> {
 
         /**
@@ -1932,6 +1991,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToFloatFunction<T, E extends Throwable> {
 
         /**
@@ -1950,6 +2010,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToDoubleFunction<T, E extends Throwable> {
 
         /**
@@ -1969,6 +2030,7 @@ public final class Throwables {
      * @param <B>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToIntBiFunction<A, B, E extends Throwable> {
 
         /**
@@ -1988,6 +2050,7 @@ public final class Throwables {
      * @param <B>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToLongBiFunction<A, B, E extends Throwable> {
 
         /**
@@ -2007,6 +2070,7 @@ public final class Throwables {
      * @param <B>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToDoubleBiFunction<A, B, E extends Throwable> {
 
         /**
@@ -2027,6 +2091,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToIntTriFunction<A, B, C, E extends Throwable> {
 
         /**
@@ -2048,6 +2113,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToLongTriFunction<A, B, C, E extends Throwable> {
 
         /**
@@ -2069,6 +2135,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ToDoubleTriFunction<A, B, C, E extends Throwable> {
 
         /**
@@ -2088,6 +2155,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface UnaryOperator<T, E extends Throwable> extends Function<T, T, E> {
     }
 
@@ -2097,6 +2165,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BinaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
     }
 
@@ -2106,6 +2175,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface TernaryOperator<T, E extends Throwable> {
 
         /**
@@ -2125,6 +2195,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanUnaryOperator<E extends Throwable> {
 
         /**
@@ -2142,6 +2213,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharUnaryOperator<E extends Throwable> {
 
         /**
@@ -2159,6 +2231,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteUnaryOperator<E extends Throwable> {
 
         /**
@@ -2176,6 +2249,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortUnaryOperator<E extends Throwable> {
 
         /**
@@ -2193,6 +2267,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntUnaryOperator<E extends Throwable> {
 
         /**
@@ -2211,6 +2286,7 @@ public final class Throwables {
      * @param <E>
      */
     @Beta
+    @FunctionalInterface
     public interface IntObjOperator<T, E extends Throwable> {
 
         /**
@@ -2229,6 +2305,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongUnaryOperator<E extends Throwable> {
 
         /**
@@ -2246,6 +2323,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatUnaryOperator<E extends Throwable> {
 
         /**
@@ -2263,6 +2341,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleUnaryOperator<E extends Throwable> {
 
         /**
@@ -2280,6 +2359,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanBinaryOperator<E extends Throwable> {
 
         /**
@@ -2298,6 +2378,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharBinaryOperator<E extends Throwable> {
 
         /**
@@ -2316,6 +2397,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteBinaryOperator<E extends Throwable> {
 
         /**
@@ -2334,6 +2416,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortBinaryOperator<E extends Throwable> {
 
         /**
@@ -2352,6 +2435,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntBinaryOperator<E extends Throwable> {
 
         /**
@@ -2370,6 +2454,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongBinaryOperator<E extends Throwable> {
 
         /**
@@ -2388,6 +2473,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatBinaryOperator<E extends Throwable> {
 
         /**
@@ -2406,6 +2492,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleBinaryOperator<E extends Throwable> {
 
         /**
@@ -2424,6 +2511,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanTernaryOperator<E extends Throwable> {
 
         /**
@@ -2443,6 +2531,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharTernaryOperator<E extends Throwable> {
 
         /**
@@ -2462,6 +2551,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteTernaryOperator<E extends Throwable> {
 
         /**
@@ -2481,6 +2571,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortTernaryOperator<E extends Throwable> {
 
         /**
@@ -2500,6 +2591,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntTernaryOperator<E extends Throwable> {
 
         /**
@@ -2519,6 +2611,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongTernaryOperator<E extends Throwable> {
 
         /**
@@ -2538,6 +2631,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatTernaryOperator<E extends Throwable> {
 
         /**
@@ -2557,6 +2651,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleTernaryOperator<E extends Throwable> {
 
         /**
@@ -2576,6 +2671,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanBiPredicate<E extends Throwable> {
 
         /**
@@ -2593,6 +2689,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharBiPredicate<E extends Throwable> {
 
         /**
@@ -2610,6 +2707,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteBiPredicate<E extends Throwable> {
 
         /**
@@ -2627,6 +2725,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortBiPredicate<E extends Throwable> {
 
         /**
@@ -2644,6 +2743,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntBiPredicate<E extends Throwable> {
 
         /**
@@ -2661,6 +2761,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongBiPredicate<E extends Throwable> {
 
         /**
@@ -2678,6 +2779,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatBiPredicate<E extends Throwable> {
 
         /**
@@ -2695,6 +2797,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleBiPredicate<E extends Throwable> {
 
         /**
@@ -2713,6 +2816,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanBiFunction<R, E extends Throwable> {
 
         /**
@@ -2731,6 +2835,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharBiFunction<R, E extends Throwable> {
 
         /**
@@ -2749,6 +2854,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteBiFunction<R, E extends Throwable> {
 
         /**
@@ -2767,6 +2873,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortBiFunction<R, E extends Throwable> {
 
         /**
@@ -2785,6 +2892,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntBiFunction<R, E extends Throwable> {
 
         /**
@@ -2803,6 +2911,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongBiFunction<R, E extends Throwable> {
 
         /**
@@ -2821,6 +2930,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatBiFunction<R, E extends Throwable> {
 
         /**
@@ -2839,6 +2949,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleBiFunction<R, E extends Throwable> {
 
         /**
@@ -2856,6 +2967,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanBiConsumer<E extends Throwable> {
 
         /**
@@ -2872,6 +2984,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharBiConsumer<E extends Throwable> {
 
         /**
@@ -2888,6 +3001,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteBiConsumer<E extends Throwable> {
 
         /**
@@ -2904,6 +3018,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortBiConsumer<E extends Throwable> {
 
         /**
@@ -2920,6 +3035,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntBiConsumer<E extends Throwable> extends IntIntConsumer<E> {
 
         /**
@@ -2937,6 +3053,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongBiConsumer<E extends Throwable> {
 
         /**
@@ -2953,6 +3070,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatBiConsumer<E extends Throwable> {
 
         /**
@@ -2969,6 +3087,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleBiConsumer<E extends Throwable> {
 
         /**
@@ -2985,6 +3104,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanTriPredicate<E extends Throwable> {
 
         /**
@@ -3003,6 +3123,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharTriPredicate<E extends Throwable> {
 
         /**
@@ -3021,6 +3142,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteTriPredicate<E extends Throwable> {
 
         /**
@@ -3039,6 +3161,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortTriPredicate<E extends Throwable> {
 
         /**
@@ -3057,6 +3180,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntTriPredicate<E extends Throwable> {
 
         /**
@@ -3075,6 +3199,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongTriPredicate<E extends Throwable> {
 
         /**
@@ -3093,6 +3218,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatTriPredicate<E extends Throwable> {
 
         /**
@@ -3111,6 +3237,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleTriPredicate<E extends Throwable> {
 
         /**
@@ -3130,6 +3257,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanTriFunction<R, E extends Throwable> {
 
         /**
@@ -3149,6 +3277,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharTriFunction<R, E extends Throwable> {
 
         /**
@@ -3168,6 +3297,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteTriFunction<R, E extends Throwable> {
 
         /**
@@ -3187,6 +3317,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortTriFunction<R, E extends Throwable> {
 
         /**
@@ -3206,6 +3337,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntTriFunction<R, E extends Throwable> {
 
         /**
@@ -3225,6 +3357,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongTriFunction<R, E extends Throwable> {
 
         /**
@@ -3244,6 +3377,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatTriFunction<R, E extends Throwable> {
 
         /**
@@ -3263,6 +3397,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleTriFunction<R, E extends Throwable> {
 
         /**
@@ -3281,6 +3416,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface BooleanTriConsumer<E extends Throwable> {
 
         /**
@@ -3298,6 +3434,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface CharTriConsumer<E extends Throwable> {
 
         /**
@@ -3315,6 +3452,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ByteTriConsumer<E extends Throwable> {
 
         /**
@@ -3332,6 +3470,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface ShortTriConsumer<E extends Throwable> {
 
         /**
@@ -3349,6 +3488,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntTriConsumer<E extends Throwable> {
 
         /**
@@ -3366,6 +3506,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface LongTriConsumer<E extends Throwable> {
 
         /**
@@ -3383,6 +3524,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface FloatTriConsumer<E extends Throwable> {
 
         /**
@@ -3400,6 +3542,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface DoubleTriConsumer<E extends Throwable> {
 
         /**
@@ -3418,6 +3561,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjBooleanConsumer<T, E extends Throwable> {
 
         /**
@@ -3435,6 +3579,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjCharConsumer<T, E extends Throwable> {
 
         /**
@@ -3452,6 +3597,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjByteConsumer<T, E extends Throwable> {
 
         /**
@@ -3469,6 +3615,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjShortConsumer<T, E extends Throwable> {
 
         /**
@@ -3486,6 +3633,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjIntConsumer<T, E extends Throwable> {
 
         /**
@@ -3504,6 +3652,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjIntFunction<T, R, E extends Throwable> {
 
         /**
@@ -3522,6 +3671,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjIntPredicate<T, E extends Throwable> {
 
         /**
@@ -3540,6 +3690,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjLongConsumer<T, E extends Throwable> {
 
         /**
@@ -3558,6 +3709,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjLongFunction<T, R, E extends Throwable> {
 
         /**
@@ -3576,6 +3728,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjLongPredicate<T, E extends Throwable> {
 
         /**
@@ -3594,6 +3747,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjFloatConsumer<T, E extends Throwable> {
 
         /**
@@ -3611,6 +3765,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjDoubleConsumer<T, E extends Throwable> {
 
         /**
@@ -3629,6 +3784,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjDoubleFunction<T, R, E extends Throwable> {
 
         /**
@@ -3647,6 +3803,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
+    @FunctionalInterface
     public interface ObjDoublePredicate<T, E extends Throwable> {
 
         /**
@@ -3659,6 +3816,7 @@ public final class Throwables {
         boolean test(T t, double u) throws E;
     }
 
+    @FunctionalInterface
     public interface ObjBiIntConsumer<T, E extends Throwable> {
 
         /**
@@ -3671,6 +3829,7 @@ public final class Throwables {
         void accept(T t, int i, int j) throws E;
     }
 
+    @FunctionalInterface
     public interface ObjBiIntFunction<T, R, E extends Throwable> {
 
         /**
@@ -3684,6 +3843,7 @@ public final class Throwables {
         R apply(T t, int i, int j) throws E;
     }
 
+    @FunctionalInterface
     public interface ObjBiIntPredicate<T, E extends Throwable> {
 
         /**
@@ -3704,6 +3864,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiObjIntConsumer<T, U, E extends Throwable> {
 
         /**
@@ -3724,6 +3885,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiObjIntFunction<T, U, R, E extends Throwable> {
 
         /**
@@ -3744,6 +3906,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
+    @FunctionalInterface
     public interface BiObjIntPredicate<T, U, E extends Throwable> {
 
         /**
@@ -3757,6 +3920,7 @@ public final class Throwables {
         boolean test(T t, U u, int i) throws E;
     }
 
+    @FunctionalInterface
     public interface IntObjConsumer<T, E extends Throwable> {
 
         /**
@@ -3779,6 +3943,7 @@ public final class Throwables {
         void accept(int i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface IntObjFunction<T, R, E extends Throwable> {
 
         /**
@@ -3803,6 +3968,7 @@ public final class Throwables {
         R apply(int i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface IntObjPredicate<T, E extends Throwable> {
 
         /**
@@ -3826,6 +3992,7 @@ public final class Throwables {
         boolean test(int i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface IntBiObjConsumer<T, U, E extends Throwable> {
         /**
          *
@@ -3837,6 +4004,7 @@ public final class Throwables {
         void accept(int i, T t, U u) throws E;
     }
 
+    @FunctionalInterface
     public interface IntBiObjFunction<T, U, R, E extends Throwable> {
 
         /**
@@ -3850,6 +4018,7 @@ public final class Throwables {
         R apply(int i, T t, U u) throws E;
     }
 
+    @FunctionalInterface
     public interface IntBiObjPredicate<T, U, E extends Throwable> {
 
         /**
@@ -3863,6 +4032,7 @@ public final class Throwables {
         boolean test(int i, T t, U u) throws E;
     }
 
+    @FunctionalInterface
     public interface BiIntObjConsumer<T, E extends Throwable> {
 
         /**
@@ -3875,6 +4045,7 @@ public final class Throwables {
         void accept(int i, int j, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface BiIntObjFunction<T, R, E extends Throwable> {
 
         /**
@@ -3888,6 +4059,7 @@ public final class Throwables {
         R apply(int i, int j, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface BiIntObjPredicate<T, E extends Throwable> {
 
         /**
@@ -3901,6 +4073,7 @@ public final class Throwables {
         boolean test(int i, int j, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface LongObjConsumer<T, E extends Throwable> {
         /**
          *
@@ -3911,6 +4084,7 @@ public final class Throwables {
         void accept(long i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface LongObjFunction<T, R, E extends Throwable> {
         /**
          *
@@ -3922,6 +4096,7 @@ public final class Throwables {
         R apply(long i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface LongObjPredicate<T, E extends Throwable> {
         /**
          *
@@ -3933,6 +4108,7 @@ public final class Throwables {
         boolean test(long i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface DoubleObjConsumer<T, E extends Throwable> {
         /**
          *
@@ -3943,6 +4119,7 @@ public final class Throwables {
         void accept(double i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface DoubleObjFunction<T, R, E extends Throwable> {
         /**
          *
@@ -3954,6 +4131,7 @@ public final class Throwables {
         R apply(double i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface DoubleObjPredicate<T, E extends Throwable> {
         /**
          *
@@ -3965,6 +4143,7 @@ public final class Throwables {
         boolean test(double i, T t) throws E;
     }
 
+    @FunctionalInterface
     public interface BooleanNFunction<R, E extends Throwable> {
 
         /**
@@ -3986,6 +4165,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface CharNFunction<R, E extends Throwable> {
 
         /**
@@ -4007,6 +4187,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface ByteNFunction<R, E extends Throwable> {
 
         /**
@@ -4028,6 +4209,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface ShortNFunction<R, E extends Throwable> {
         /**
          *
@@ -4048,6 +4230,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface IntNFunction<R, E extends Throwable> {
 
         /**
@@ -4069,6 +4252,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface LongNFunction<R, E extends Throwable> {
 
         /**
@@ -4090,6 +4274,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface FloatNFunction<R, E extends Throwable> {
 
         /**
@@ -4111,6 +4296,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface DoubleNFunction<R, E extends Throwable> {
 
         /**
@@ -4132,6 +4318,7 @@ public final class Throwables {
         }
     }
 
+    @FunctionalInterface
     public interface NFunction<T, R, E extends Throwable> {
 
         /**
@@ -4159,6 +4346,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntBooleanConsumer<E extends Throwable> {
 
         /**
@@ -4175,6 +4363,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntCharConsumer<E extends Throwable> {
 
         /**
@@ -4191,6 +4380,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntByteConsumer<E extends Throwable> {
 
         /**
@@ -4207,6 +4397,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntShortConsumer<E extends Throwable> {
 
         /**
@@ -4223,6 +4414,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntIntConsumer<E extends Throwable> {
 
         /**
@@ -4239,6 +4431,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntLongConsumer<E extends Throwable> {
 
         /**
@@ -4255,6 +4448,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntFloatConsumer<E extends Throwable> {
 
         /**
@@ -4271,6 +4465,7 @@ public final class Throwables {
      *
      * @param <E>
      */
+    @FunctionalInterface
     public interface IntDoubleConsumer<E extends Throwable> {
 
         /**
@@ -4287,6 +4482,7 @@ public final class Throwables {
             // Singleton. Utility class.
         }
 
+        @FunctionalInterface
         public interface Runnable<E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4298,6 +4494,7 @@ public final class Throwables {
             void run() throws E, E2;
         }
 
+        @FunctionalInterface
         public interface Callable<R, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4310,6 +4507,7 @@ public final class Throwables {
             R call() throws E, E2;
         }
 
+        @FunctionalInterface
         public interface Supplier<T, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4322,6 +4520,7 @@ public final class Throwables {
             T get() throws E, E2;
         }
 
+        @FunctionalInterface
         public interface Predicate<T, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4335,6 +4534,7 @@ public final class Throwables {
             boolean test(T t) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4349,6 +4549,7 @@ public final class Throwables {
             boolean test(T t, U u) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4364,6 +4565,7 @@ public final class Throwables {
             boolean test(A a, B b, C c) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface Function<T, R, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4377,6 +4579,7 @@ public final class Throwables {
             R apply(T t) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4391,6 +4594,7 @@ public final class Throwables {
             R apply(T t, U u) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4406,6 +4610,7 @@ public final class Throwables {
             R apply(A a, B b, C c) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface Consumer<T, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4418,6 +4623,7 @@ public final class Throwables {
             void accept(T t) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4431,6 +4637,7 @@ public final class Throwables {
             void accept(T t, U u) throws E, E2;
         }
 
+        @FunctionalInterface
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
@@ -4455,6 +4662,7 @@ public final class Throwables {
             // Singleton. Utility class.
         }
 
+        @FunctionalInterface
         public interface Runnable<E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4467,6 +4675,7 @@ public final class Throwables {
             void run() throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface Callable<R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4480,6 +4689,7 @@ public final class Throwables {
             R call() throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface Supplier<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4493,6 +4703,7 @@ public final class Throwables {
             T get() throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface Predicate<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4507,6 +4718,7 @@ public final class Throwables {
             boolean test(T t) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4522,6 +4734,7 @@ public final class Throwables {
             boolean test(T t, U u) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4538,6 +4751,7 @@ public final class Throwables {
             boolean test(A a, B b, C c) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface Function<T, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4552,6 +4766,7 @@ public final class Throwables {
             R apply(T t) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4567,6 +4782,7 @@ public final class Throwables {
             R apply(T t, U u) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4583,6 +4799,7 @@ public final class Throwables {
             R apply(A a, B b, C c) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface Consumer<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4596,6 +4813,7 @@ public final class Throwables {
             void accept(T t) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
@@ -4610,6 +4828,7 @@ public final class Throwables {
             void accept(T t, U u) throws E, E2, E3;
         }
 
+        @FunctionalInterface
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**

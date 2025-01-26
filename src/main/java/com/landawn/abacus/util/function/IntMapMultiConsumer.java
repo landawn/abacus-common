@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR
 
     /**

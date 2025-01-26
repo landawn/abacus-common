@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
     /**

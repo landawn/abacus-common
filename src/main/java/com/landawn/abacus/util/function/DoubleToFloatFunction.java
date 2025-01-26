@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface DoubleToFloatFunction {
 
     DoubleToFloatFunction DEFAULT = value -> (float) value;

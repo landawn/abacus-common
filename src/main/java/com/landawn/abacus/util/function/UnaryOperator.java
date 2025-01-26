@@ -21,6 +21,7 @@ import com.landawn.abacus.util.Throwables;
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
  *
  */
+@FunctionalInterface
 public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> { //NOSONAR
 
     /**

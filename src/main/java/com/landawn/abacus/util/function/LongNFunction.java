@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeException> { //NOSONAR
 
     /**

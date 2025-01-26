@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface IntToCharFunction {
 
     IntToCharFunction DEFAULT = value -> (char) value;

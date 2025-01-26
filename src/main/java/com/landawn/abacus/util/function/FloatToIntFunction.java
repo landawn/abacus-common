@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface FloatToIntFunction {
 
     FloatToIntFunction DEFAULT = value -> (int) value;

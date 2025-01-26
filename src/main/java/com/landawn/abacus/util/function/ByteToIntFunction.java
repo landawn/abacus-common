@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface ByteToIntFunction {
 
     ByteToIntFunction DEFAULT = value -> value;

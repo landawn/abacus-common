@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeException> { //NOSONAR
     FloatFunction<Float> BOX = value -> value;
 

@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> { //NOSONAR
 
     CharSupplier ZERO = () -> 0;

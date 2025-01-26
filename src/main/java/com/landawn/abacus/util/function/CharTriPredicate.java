@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeException> { //NOSONAR
 
     CharTriPredicate ALWAYS_TRUE = (a, b, c) -> true;

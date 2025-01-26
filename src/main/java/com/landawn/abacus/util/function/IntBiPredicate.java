@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeException> { //NOSONAR
 
     IntBiPredicate ALWAYS_TRUE = (t, u) -> true;

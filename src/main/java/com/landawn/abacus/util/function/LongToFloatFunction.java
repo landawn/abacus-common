@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface LongToFloatFunction {
 
     LongToFloatFunction DEFAULT = value -> value;

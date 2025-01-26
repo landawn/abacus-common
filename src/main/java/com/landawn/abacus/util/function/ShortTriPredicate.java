@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeException> { //NOSONAR
 
     ShortTriPredicate ALWAYS_TRUE = (a, b, c) -> true;

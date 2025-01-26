@@ -17,6 +17,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR
 
     /**

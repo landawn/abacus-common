@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
 
     /**

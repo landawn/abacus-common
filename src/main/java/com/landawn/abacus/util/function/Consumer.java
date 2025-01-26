@@ -22,6 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
+@FunctionalInterface
 public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, java.util.function.Consumer<T> { //NOSONAR
 
     /**

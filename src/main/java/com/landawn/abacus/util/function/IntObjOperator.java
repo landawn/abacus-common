@@ -22,6 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 @Beta
+@FunctionalInterface
 public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeException> { //NOSONAR
 
     /**

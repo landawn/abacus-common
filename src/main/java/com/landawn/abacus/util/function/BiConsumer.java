@@ -22,6 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
+@FunctionalInterface
 public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeException>, java.util.function.BiConsumer<T, U> { //NOSONAR
 
     /**

@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> { //NOSONAR
 
     ToCharFunction<Character> UNBOX = value -> value == null ? 0 : value;

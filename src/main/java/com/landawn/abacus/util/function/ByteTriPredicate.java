@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeException> { //NOSONAR
 
     ByteTriPredicate ALWAYS_TRUE = (a, b, c) -> true;

@@ -17,6 +17,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> { //NOSONAR
 
     /**

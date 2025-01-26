@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> { //NOSONAR
     CharFunction<Character> BOX = value -> value;
 

@@ -22,6 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
+@FunctionalInterface
 public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.BinaryOperator<T, RuntimeException>, java.util.function.BinaryOperator<T> { //NOSONAR
 
     /**

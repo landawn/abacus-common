@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR
 
     /**

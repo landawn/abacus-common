@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeException> { //NOSONAR
 
     ShortFunction<Short> BOX = value -> value;

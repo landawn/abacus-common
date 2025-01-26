@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> { //NOSONAR
 
     ShortBiPredicate ALWAYS_TRUE = (t, u) -> true;

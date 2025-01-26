@@ -17,6 +17,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> { //NOSONAR
 
     @Override

@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U, RuntimeException> { //NOSONAR
 
     /**

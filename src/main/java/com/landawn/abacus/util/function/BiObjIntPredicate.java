@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T, U, RuntimeException> { //NOSONAR
 
     /**

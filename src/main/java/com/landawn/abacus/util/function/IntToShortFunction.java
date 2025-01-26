@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+@FunctionalInterface
 public interface IntToShortFunction {
 
     IntToShortFunction DEFAULT = value -> (short) value;

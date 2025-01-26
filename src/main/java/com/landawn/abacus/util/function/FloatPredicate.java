@@ -17,6 +17,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR
 
     FloatPredicate ALWAYS_TRUE = value -> true;

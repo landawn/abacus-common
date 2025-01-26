@@ -16,6 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+@FunctionalInterface
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR
     ByteFunction<Byte> BOX = value -> value;
 

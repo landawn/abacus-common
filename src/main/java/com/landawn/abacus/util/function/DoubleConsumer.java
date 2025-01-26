@@ -21,6 +21,7 @@ import com.landawn.abacus.util.Throwables;
  *
  */
 
+@FunctionalInterface
 public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeException>, java.util.function.DoubleConsumer { //NOSONAR
 
     /**
