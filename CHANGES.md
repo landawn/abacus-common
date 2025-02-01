@@ -1,3 +1,8 @@
+### 5.7.2
+
+* Rename `IOUtil.parse` to `IOUtil.forLines`
+* Improvements and bug fixes.
+
 ### 5.7.1
 
 * Improve javaDoc

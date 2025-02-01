@@ -7151,50 +7151,19 @@ public final class IOUtil {
     }
 
     /**
-     * Execute the specified {@code cmd} command on each lines from the specified {@code source} File.
-     *
-     * @param <E>        The type of exception that the lineParser can throw.
-     * @param source     The source file to be parsed.
-     * @param cmd A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineParser throws an exception.
-     * @see #parse(File, Throwables.Consumer)
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
-     */
-    @Beta
-    public static <E extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> cmd) throws UncheckedIOException, E {
-        parse(source, cmd, Fn.emptyAction());
-    }
-
-    /**
-     * Execute the specified {@code cmd} command on each lines from the specified {@code source} Reader.
-     *
-     * @param <E> the type of exception that the lineParser can throw
-     * @param source the reader to be parsed
-     * @param cmd a consumer that takes a line of the reader as a string and performs the desired operation
-     * @throws UncheckedIOException if an I/O error occurs
-     * @throws E if the lineParser throws an exception
-     * @see #parse(Reader, Throwables.Consumer)
-     */
-    @Beta
-    public static <E extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> cmd) throws UncheckedIOException, E {
-        parse(source, cmd, Fn.emptyAction());
-    }
-
-    /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>        The type of exception that the lineParser can throw.
+     * @param <E>        The type of exception that the lineAction can throw.
      * @param source     The source file to be parsed.
-     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineParser throws an exception.
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @throws E                    If the lineAction throws an exception.
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> lineAction)
+            throws UncheckedIOException, E {
+        forLines(source, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7203,17 +7172,17 @@ public final class IOUtil {
      * @param <E>
      * @param <E2>
      * @param source
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser,
+    public static <E extends Exception, E2 extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, 0, Long.MAX_VALUE, lineParser, onComplete);
+        forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
     /**
@@ -7223,15 +7192,15 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final File source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7242,17 +7211,17 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, lineOffset, count, 0, 0, lineParser, onComplete);
+    public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
     /**
@@ -7264,118 +7233,118 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum, final int queueSize,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineParser can throw.
+     * @param <E>              The type of exception that the lineAction can throw.
      * @param <E2>             The type of exception that the onComplete can throw.
      * @param source           The source file/directory to be parsed.
      * @param lineOffset       The line number from where to start parsing.
      * @param count            The number of lines to be parsed.
      * @param processThreadNum The number of threads to be used for parsing.
      * @param queueSize        The size of the queue for holding lines to be parsed.
-     * @param lineParser       A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param lineAction       A Consumer that takes a line of the file as a String and performs the desired operation.
      * @param onComplete       A Runnable that is executed after the parsing is complete.
      * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineParser throws an exception.
+     * @throws E                    If the lineAction throws an exception.
      * @throws E2                   If the onComplete throws an exception.
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        parse(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, processThreadNum, queueSize, lineParser,
+        forLines(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, processThreadNum, queueSize, lineAction,
                 onComplete);
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineParser can throw.
+     * @param <E>        The type of exception that the lineAction can throw.
      * @param files      The collection of files to be parsed.
-     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineParser throws an exception.
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @throws E                    If the lineAction throws an exception.
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser)
+    public static <E extends Exception> void forLines(final Collection<File> files, final Throwables.Consumer<? super String, E> lineAction)
             throws UncheckedIOException, E {
-        parse(files, lineParser, Fn.emptyAction());
+        forLines(files, lineAction, Fn.emptyAction());
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
      * @param files
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser,
-            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(files, 0, Long.MAX_VALUE, lineParser, onComplete);
+    public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files,
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        forLines(files, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(files, lineOffset, count, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(files, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
      * @param files
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(files, lineOffset, count, 0, 0, lineParser, onComplete);
+    public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        forLines(files, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -7383,35 +7352,35 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(files, lineOffset, count, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(files, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineParser can throw.
+     * @param <E>        The type of exception that the lineAction can throw.
      * @param <E2>       The type of exception that the onComplete can throw.
      * @param files      The collection of files to be parsed.
      * @param lineOffset The line number from where to start parsing.
      * @param count      The number of lines to be parsed.
-     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
      * @param onComplete A Runnable that is executed after the parsing is complete.
      * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineParser throws an exception.
+     * @throws E                    If the lineAction throws an exception.
      * @throws E2                   If the onComplete throws an exception.
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
         if (N.isEmpty(files)) {
             return;
@@ -7436,7 +7405,7 @@ public final class IOUtil {
                 iterators.add(new LineIterator(reader));
             }
 
-            Iterators.forEach(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineParser, onComplete);
+            Iterators.forEach(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineAction, onComplete);
         } finally {
             for (final Reader reader : readers) {
                 closeQuietly(reader);
@@ -7452,15 +7421,15 @@ public final class IOUtil {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum, final int queueSize,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, readThreadNum, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final File source, final int readThreadNum, final int processThreadNum, final int queueSize,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7472,18 +7441,18 @@ public final class IOUtil {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final File source, final int readThreadNum, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        parse(source, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
+        forLines(source, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
     }
 
     /**
@@ -7496,15 +7465,15 @@ public final class IOUtil {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count, final int readThreadNum,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7518,42 +7487,42 @@ public final class IOUtil {
      * @param readThreadNum    new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count, final int readThreadNum,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        parse(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, readThreadNum, processThreadNum, queueSize,
-                lineParser, onComplete);
+        forLines(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, readThreadNum, processThreadNum, queueSize,
+                lineAction, onComplete);
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum, final int queueSize,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(files, readThreadNum, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Collection<File> files, final int readThreadNum, final int processThreadNum, final int queueSize,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(files, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
@@ -7561,22 +7530,22 @@ public final class IOUtil {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final int readThreadNum, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        parse(files, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
+        forLines(files, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -7585,19 +7554,19 @@ public final class IOUtil {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(files, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count, final int readThreadNum,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(files, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineParser.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
@@ -7607,16 +7576,16 @@ public final class IOUtil {
      * @param readThreadNum    new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser,
+    public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
         if (N.isEmpty(files)) {
             return;
@@ -7641,7 +7610,7 @@ public final class IOUtil {
                 iterators.add(new LineIterator(reader));
             }
 
-            Iterators.forEach(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
+            Iterators.forEach(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
         } finally {
             for (final Reader reader : readers) {
                 closeQuietly(reader);
@@ -7654,15 +7623,15 @@ public final class IOUtil {
      *
      * @param <E>
      * @param source
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser)
+    public static <E extends Exception> void forLines(final InputStream source, final Throwables.Consumer<? super String, E> lineAction)
             throws UncheckedIOException, E {
-        parse(source, lineParser, Fn.emptyAction());
+        forLines(source, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7671,17 +7640,17 @@ public final class IOUtil {
      * @param <E>
      * @param <E2>
      * @param source
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser,
+    public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, 0, Long.MAX_VALUE, lineParser, onComplete);
+        forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
     /**
@@ -7691,15 +7660,15 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7710,17 +7679,17 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, lineOffset, count, 0, 0, lineParser, onComplete);
+    public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
     /**
@@ -7732,15 +7701,15 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final InputStream source, final long lineOffset, final long count, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7753,21 +7722,21 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
         final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            parse(br, lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
+            forLines(br, lineOffset, count, processThreadNum, queueSize, lineAction, onComplete);
         } finally {
             Objectory.recycle(br);
         }
@@ -7778,15 +7747,15 @@ public final class IOUtil {
      *
      * @param <E>
      * @param source
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser)
+    public static <E extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> lineAction)
             throws UncheckedIOException, E {
-        parse(source, lineParser, Fn.emptyAction());
+        forLines(source, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7795,17 +7764,17 @@ public final class IOUtil {
      * @param <E>
      * @param <E2>
      * @param source
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser,
+    public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, 0, Long.MAX_VALUE, lineParser, onComplete);
+        forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
     /**
@@ -7815,15 +7784,15 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7834,17 +7803,17 @@ public final class IOUtil {
      * @param source
      * @param lineOffset
      * @param count
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(source, lineOffset, count, 0, 0, lineParser, onComplete);
+    public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
     /**
@@ -7856,15 +7825,15 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum
      * @param queueSize
-     * @param lineParser
+     * @param lineAction
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
-     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
-        parse(source, lineOffset, count, processThreadNum, queueSize, lineParser, Fn.emptyAction());
+    public static <E extends Exception> void forLines(final Reader source, final long lineOffset, final long count, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+        forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
     /**
@@ -7877,17 +7846,17 @@ public final class IOUtil {
      * @param count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param lineParser
+     * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    the e
      * @throws E2                   the e2
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
-    public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
+    public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        Iterators.forEach(new LineIterator(source), lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
+        Iterators.forEach(new LineIterator(source), lineOffset, count, processThreadNum, queueSize, lineAction, onComplete);
     }
 
     /**
