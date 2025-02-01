@@ -572,6 +572,16 @@ public final class Futures {
         return anyOf2(cfs);
     }
 
+    /**
+     * Returns a {@link ContinuableFuture} that is completed when any of the provided futures in the collection are completed.
+     * The returned future allows managing the lifecycle (e.g., cancellation) of the combined set of futures and propagates the result
+     * or exception of the first completed future.
+     *
+     * @param <T> the type of the result produced by the futures
+     * @param cfs the collection of futures to monitor for completion; cannot be null or empty
+     * @return a continuable future that completes when any of the provided futures completes
+     * @throws IllegalArgumentException if the provided collection of futures is null or empty
+     */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 

@@ -51,7 +51,7 @@ public class Array {
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
         if (length == 0) {
-            Object result = N.CLASS_EMPTY_ARRAY.computeIfAbsent(componentType, k -> java.lang.reflect.Array.newInstance(componentType, length));
+            final Object result = N.CLASS_EMPTY_ARRAY.computeIfAbsent(componentType, k -> java.lang.reflect.Array.newInstance(componentType, length));
 
             return (T) result;
         }
@@ -1036,11 +1036,13 @@ public class Array {
             return N.EMPTY_LONG_ARRAY;
         }
 
-        if (endExclusive - startInclusive < 0 || endExclusive - startInclusive > Integer.MAX_VALUE) {
+        final long range = endExclusive - startInclusive;
+
+        if (range < 0 || range > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("overflow");
         }
 
-        final long[] a = new long[(int) (endExclusive - startInclusive)];
+        final long[] a = new long[(int) range];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1265,7 +1267,7 @@ public class Array {
             final BigInteger m = BigInteger.valueOf(endExclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(by));
 
             if (m.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-                throw new IllegalArgumentException("overflow");
+                throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + m);
             }
 
             len = m.multiply(BigInteger.valueOf(by)).add(BigInteger.valueOf(startInclusive)).equals(BigInteger.valueOf(endExclusive)) ? m.longValue()
@@ -1466,11 +1468,13 @@ public class Array {
             return Array.of(startInclusive);
         }
 
-        if (endInclusive - startInclusive + 1 <= 0 || endInclusive - startInclusive + 1 > Integer.MAX_VALUE) {
+        final long range = endInclusive - startInclusive + 1;
+
+        if (range <= 0 || range > Integer.MAX_VALUE) { // Check the final length
             throw new IllegalArgumentException("overflow");
         }
 
-        final long[] a = new long[(int) (endInclusive - startInclusive + 1)];
+        final long[] a = new long[(int) range];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1695,7 +1699,7 @@ public class Array {
             final BigInteger m = BigInteger.valueOf(endInclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(by));
 
             if (m.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-                throw new IllegalArgumentException("overflow");
+                throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + m);
             }
 
             len = m.longValue() + 1;

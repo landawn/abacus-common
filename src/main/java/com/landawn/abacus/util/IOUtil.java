@@ -7151,6 +7151,38 @@ public final class IOUtil {
     }
 
     /**
+     * Execute the specified {@code cmd} command on each lines from the specified {@code source} File.
+     *
+     * @param <E>        The type of exception that the lineParser can throw.
+     * @param source     The source file to be parsed.
+     * @param cmd A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws E                    If the lineParser throws an exception.
+     * @see #parse(File, Throwables.Consumer)
+     * @see #parse(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     */
+    @Beta
+    public static <E extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> cmd) throws UncheckedIOException, E {
+        parse(source, cmd, Fn.emptyAction());
+    }
+
+    /**
+     * Execute the specified {@code cmd} command on each lines from the specified {@code source} Reader.
+     *
+     * @param <E> the type of exception that the lineParser can throw
+     * @param source the reader to be parsed
+     * @param cmd a consumer that takes a line of the reader as a string and performs the desired operation
+     * @throws UncheckedIOException if an I/O error occurs
+     * @throws E if the lineParser throws an exception
+     * @see #parse(Reader, Throwables.Consumer)
+     */
+    @Beta
+    public static <E extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> cmd) throws UncheckedIOException, E {
+        parse(source, cmd, Fn.emptyAction());
+    }
+
+    /**
      * Parse the specified file/directory line by line.
      *
      * @param <E>        The type of exception that the lineParser can throw.

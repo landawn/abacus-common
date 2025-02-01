@@ -64,10 +64,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     };
 
     /**
-     * Returns an empty ObjIterator.
+     * Returns an empty ObjIterator instance.
      *
-     * @param <T> The type of the elements in the iterator.
-     * @return An empty ObjIterator.
+     * @return an ObjIterator with no elements
      */
     public static <T> ObjIterator<T> empty() {
         return EMPTY;
@@ -639,7 +638,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      */
     public ObjIterator<T> distinct() {
         final Set<T> elements = new HashSet<>();
-        return filter(e -> elements.add(e));
+        return filter(elements::add);
     }
 
     /**
