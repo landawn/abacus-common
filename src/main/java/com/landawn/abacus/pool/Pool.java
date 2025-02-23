@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -33,7 +33,7 @@ public interface Pool extends Serializable {
      *
      * @return
      */
-    int getCapacity();
+    int capacity();
 
     int size();
 
@@ -54,6 +54,8 @@ public interface Pool extends Serializable {
      */
     void clear();
 
+    PoolStats stats();
+
     /**
      * Close.
      */
@@ -65,17 +67,4 @@ public interface Pool extends Serializable {
      * @return {@code true}, if is closed
      */
     boolean isClosed();
-
-    long putCount();
-
-    long hitCount();
-
-    long missCount();
-
-    /**
-     *  Returns the number of values that have been evicted.
-     *
-     * @return
-     */
-    long evictionCount();
 }

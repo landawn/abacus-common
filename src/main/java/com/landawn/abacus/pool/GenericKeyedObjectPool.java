@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -42,11 +42,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     @Serial
     private static final long serialVersionUID = 4137548490922758243L;
 
-    private final long maxMemorySize;
-
     private final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure;
-
-    private long usedMemorySize = 0;
 
     final Map<K, E> pool;
 
@@ -70,9 +66,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
-        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
+        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
-        this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
         pool = new HashMap<>(Math.min(capacity, 1000));
 
@@ -138,7 +133,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            if (pool.size() >= capacity || usedMemorySize > maxMemorySize) {
+            if (pool.size() >= capacity || usedMemorySize.get() > maxMemorySize) {
                 if (autoBalance) {
                     vacate();
                 } else {
@@ -148,7 +143,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             final long memorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, e);
 
-            if (memoryMeasure != null && memorySize > maxMemorySize - usedMemorySize) {
+            if (memoryMeasure != null && memorySize > maxMemorySize - usedMemorySize.get()) {
                 // ignore.
 
                 return false;
@@ -160,7 +155,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (memoryMeasure != null) {
-                    usedMemorySize += memorySize; //NOSONAR
+                    usedMemorySize.addAndGet(memorySize);
                 }
 
                 notEmpty.signal();
@@ -215,14 +210,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 final ActivityPrint activityPrint = e.activityPrint();
                 activityPrint.updateLastAccessTime();
                 activityPrint.updateAccessCount();
+            }
 
+            return e;
+        } finally {
+            if (e != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
 
-            return e;
-        } finally {
             lock.unlock();
         }
     }
@@ -250,7 +247,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    usedMemorySize -= memoryMeasure.sizeOf(key, e); //NOSONAR
+                    usedMemorySize.addAndGet(-memoryMeasure.sizeOf(key, e)); //NOSONAR
                 }
 
                 notFull.signal();
@@ -523,7 +520,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if (memoryMeasure != null) {
-                usedMemorySize -= memoryMeasure.sizeOf(key, value); //NOSONAR
+                usedMemorySize.addAndGet(-memoryMeasure.sizeOf(key, value));
             }
 
             try {

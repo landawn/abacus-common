@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -43,11 +43,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     @Serial
     private static final long serialVersionUID = -5055744987721643286L;
 
-    private final long maxMemorySize;
-
     private final ObjectPool.MemoryMeasure<E> memoryMeasure;
-
-    private long usedMemorySize = 0;
 
     final Deque<E> pool;
 
@@ -71,9 +67,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
-        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
+        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
-        this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
         pool = new ArrayDeque<>(Math.min(capacity, 1000));
 
@@ -147,7 +142,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
             }
 
-            if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - usedMemorySize) {
+            if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - usedMemorySize.get()) {
                 // ignore.
 
                 return false;
@@ -155,7 +150,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 pool.push(e);
 
                 if (memoryMeasure != null) {
-                    usedMemorySize += memoryMeasure.sizeOf(e); //NOSONAR
+                    usedMemorySize.addAndGet(memoryMeasure.sizeOf(e)); //NOSONAR
                 }
 
                 notEmpty.signal();
@@ -221,7 +216,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             while (true) {
                 if (pool.size() < capacity) {
-                    if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - usedMemorySize) {
+                    if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - usedMemorySize.get()) {
                         // ignore.
 
                         return false;
@@ -229,7 +224,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         pool.push(e);
 
                         if (memoryMeasure != null) {
-                            usedMemorySize += memoryMeasure.sizeOf(e); //NOSONAR
+                            usedMemorySize.addAndGet(memoryMeasure.sizeOf(e)); //NOSONAR
                         }
 
                         notEmpty.signal();
@@ -295,16 +290,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    usedMemorySize -= memoryMeasure.sizeOf(e); //NOSONAR
+                    usedMemorySize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
                 }
 
-                hitCount.incrementAndGet();
-
                 notFull.signal();
+            }
+        } finally {
+            if (e != null) {
+                hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
-        } finally {
+
             lock.unlock();
         }
 
@@ -338,10 +335,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        usedMemorySize -= memoryMeasure.sizeOf(e); //NOSONAR
+                        usedMemorySize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
                     }
-
-                    hitCount.incrementAndGet();
 
                     notFull.signal();
 
@@ -349,14 +344,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
 
                 if (nanos <= 0) {
-                    missCount.incrementAndGet();
-
                     return null;
                 }
 
                 nanos = notEmpty.awaitNanos(nanos);
             }
         } finally {
+            if (e != null) {
+                hitCount.incrementAndGet();
+            } else {
+                missCount.incrementAndGet();
+            }
+
             lock.unlock();
         }
     }
@@ -541,7 +540,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             if (memoryMeasure != null) {
-                usedMemorySize -= memoryMeasure.sizeOf(value); //NOSONAR
+                usedMemorySize.addAndGet(memoryMeasure.sizeOf(value));
             }
 
             try {

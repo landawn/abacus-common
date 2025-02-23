@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -56,6 +56,8 @@ public abstract class AbstractPool implements Pool {
 
     final AtomicLong evictionCount = new AtomicLong();
 
+    final AtomicLong usedMemorySize = new AtomicLong();
+
     final ReentrantLock lock = new ReentrantLock();
 
     final transient Condition notEmpty = lock.newCondition();
@@ -63,6 +65,8 @@ public abstract class AbstractPool implements Pool {
     final transient Condition notFull = lock.newCondition();
 
     final int capacity;
+
+    final long maxMemorySize;
 
     final EvictionPolicy evictionPolicy;
 
@@ -72,14 +76,15 @@ public abstract class AbstractPool implements Pool {
 
     boolean isClosed = false;
 
-    protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor) {
-        if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
-            throw new IllegalArgumentException(
-                    "Capacity(" + capacity + "), evict delay(" + evictDelay + "), balance factor(" + balanceFactor + ") can not be negative");
+    protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor,
+            final long maxMemorySize) {
+        if (capacity < 0 || evictDelay < 0 || balanceFactor < 0 || maxMemorySize < 0) {
+            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelay + "), balance factor(" + balanceFactor
+                    + "), max memory size(" + maxMemorySize + ") can not be negative");
         }
 
         this.capacity = capacity;
+        this.maxMemorySize = maxMemorySize;
         this.evictionPolicy = evictionPolicy == null ? EvictionPolicy.LAST_ACCESS_TIME : evictionPolicy;
         this.autoBalance = autoBalance;
         this.balanceFactor = balanceFactor == 0f ? DEFAULT_BALANCE_FACTOR : balanceFactor; // NOSONAR
@@ -119,28 +124,18 @@ public abstract class AbstractPool implements Pool {
      * @return
      */
     @Override
-    public int getCapacity() {
+    public int capacity() {
         return capacity;
     }
 
     @Override
-    public long putCount() {
-        return putCount.get();
-    }
+    public PoolStats stats() {
+        final long currentHitCount = hitCount.get();
+        final long currentMissCount = missCount.get();
+        final long currentGetCount = currentHitCount + currentMissCount;
 
-    @Override
-    public long hitCount() {
-        return hitCount.get();
-    }
-
-    @Override
-    public long missCount() {
-        return missCount.get();
-    }
-
-    @Override
-    public long evictionCount() {
-        return evictionCount.get();
+        return new PoolStats(capacity, putCount.get(), currentGetCount, currentHitCount, currentMissCount, evictionCount.get(),
+                maxMemorySize <= 0 ? -1 : maxMemorySize, maxMemorySize <= 0 ? -1 : usedMemorySize.get());
     }
 
     /**

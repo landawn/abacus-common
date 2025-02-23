@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -959,17 +959,7 @@ public final class IOUtil {
      */
     @Beta
     public static char[] readChars(final File source, final Charset encoding) throws IOException {
-        final Holder<ZipFile> outputZipFile = new Holder<>();
-        InputStream is = null;
-
-        try {
-            is = openFile(source, outputZipFile);
-
-            return readChars(is, encoding);
-        } finally {
-            close(is);
-            close(outputZipFile.value());
-        }
+        return readChars(source, encoding, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -1052,13 +1042,7 @@ public final class IOUtil {
      */
     @Beta
     public static char[] readChars(final InputStream source, final Charset encoding) throws IOException {
-        final Reader reader = createReader(source, encoding);
-
-        //    try {
-        return readChars(reader, 0, Long.MAX_VALUE);
-        //    } finally {
-        //        close(reader);
-        //    }
+        return readChars(source, encoding, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -1086,14 +1070,12 @@ public final class IOUtil {
      * @return A character array containing the read characters from the InputStream.
      * @throws IOException if an I/O error occurs.
      */
-    public static char[] readChars(final InputStream source, Charset encoding, final long offset, final int maxLen) throws IOException {
+    public static char[] readChars(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(maxLen, cs.maxLen);
 
-        encoding = checkCharset(encoding);
-
         // try {
-        final Reader reader = createReader(source, encoding);
+        final Reader reader = createReader(source, checkCharset(encoding));
         // } finally {
         // // close(reader);
         // }
@@ -1202,9 +1184,19 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final File source, final Charset encoding) throws UncheckedIOException {
-        final byte[] bytes = readAllBytes(source);
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
 
-        return new String(bytes, checkCharset(encoding));
+        try {
+            is = openFile(source, outputZipFile);
+
+            return readAllToString(is, encoding);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
     }
 
     /**
@@ -1233,6 +1225,15 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final InputStream source, final Charset encoding) throws UncheckedIOException {
+        //    // try {
+        //    final Reader reader = createReader(source, checkCharset(encoding));
+        //    // } finally {
+        //    // // close(reader);
+        //    // }
+        //    return readAllToString(reader);
+
+        // For better performance. But maybe overflow for large size of InputStream.
+        // It may work for char[] as well but not for byte[].
         final byte[] bytes = readAllBytes(source);
 
         return new String(bytes, checkCharset(encoding));
@@ -1280,9 +1281,20 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static String readToString(final File source, final Charset encoding, final long offset, final int maxLen) throws IOException {
-        final byte[] bytes = readBytes(source, offset, maxLen);
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxLen, cs.maxLen);
 
-        return new String(bytes, checkCharset(encoding));
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(source, outputZipFile);
+
+            return readToString(is, encoding, offset, maxLen);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
     }
 
     /**
@@ -1311,9 +1323,16 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static String readToString(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
-        final byte[] bytes = readBytes(source, offset, maxLen);
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxLen, cs.maxLen);
 
-        return new String(bytes, checkCharset(encoding));
+        // try {
+        final Reader reader = createReader(source, checkCharset(encoding));
+        // } finally {
+        // // close(reader);
+        // }
+
+        return readToString(reader, offset, maxLen);
     }
 
     /**
@@ -1432,6 +1451,195 @@ public final class IOUtil {
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            if (!isBufferedReader) {
+                Objectory.recycle(br);
+            }
+        }
+
+        return res;
+    }
+
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException if an I/O error occurs.
+    //     * @deprecated replaced by {@link #readAllLines(File)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final File source) throws UncheckedIOException {
+    //        return readAllLines(source);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @param encoding
+    //     * @return
+    //     * @throws UncheckedIOException if an I/O error occurs.
+    //     * @deprecated replaced by {@link #readAllLines(File, Charset)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final File source, final Charset encoding) throws UncheckedIOException {
+    //        return readAllLines(source, encoding);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException if an I/O error occurs.
+    //     * @deprecated replaced by {@link #readAllLines(InputStream)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final InputStream source) throws UncheckedIOException {
+    //        return readAllLines(source);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @param encoding
+    //     * @return
+    //     * @throws UncheckedIOException if an I/O error occurs.
+    //     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
+    //        return readAllLines(source, encoding);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException if an I/O error occurs.
+    //     * @deprecated replaced by {@link #readAllLines(Reader)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final Reader source) throws UncheckedIOException {
+    //        try {
+    //            return readLines(source, 0, Integer.MAX_VALUE);
+    //        } catch (IOException e) {
+    //            throw new UncheckedIOException(e);
+    //        }
+    //    }
+
+    /**
+     * Reads a specified number of lines from a file using the default charset and returns them as a List of Strings.
+     * The lines to read are determined by the provided offset (0-based) and count.
+     *
+     * @param source The file to read lines from, not {@code null}.
+     * @param offset The starting position in lines in the file, from where to start reading.
+     * @param count  The number of lines to read from the file.
+     * @return A List of Strings, each string being a line from the file.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static List<String> readLines(final File source, final int offset, final int count) throws IOException {
+        return readLines(source, DEFAULT_CHARSET, offset, count);
+    }
+
+    /**
+     * Reads a specified number of lines from a file using the provided charset and returns them as a List of Strings.
+     * The lines to read are determined by the provided offset (0-based) and count.
+     *
+     * @param source   The file to read lines from, not {@code null}.
+     * @param encoding The charset to be used to open the specified file for reading.
+     * @param offset   The starting position in lines in the file, from where to start reading.
+     * @param count    The number of lines to read from the file.
+     * @return A List of Strings, each string being a line from the file.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static List<String> readLines(final File source, final Charset encoding, final int offset, final int count) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(source, outputZipFile);
+
+            return readLines(is, encoding, offset, count);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
+    }
+
+    /**
+     * Reads a specified number of lines from an InputStream using the default charset  and returns them as a List of Strings.
+     * The lines to read are determined by the provided offset (0-based) and count.
+     *
+     * @param source The InputStream to read lines from, not {@code null}.
+     * @param offset The starting position in lines in the InputStream, from where to start reading.
+     * @param count  The number of lines to read from the InputStream.
+     * @return A List of Strings, each string being a line from the InputStream.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static List<String> readLines(final InputStream source, final int offset, final int count) throws IOException {
+        return readLines(source, DEFAULT_CHARSET, offset, count);
+    }
+
+    /**
+     * Reads a specified number of lines from an InputStream using the provided charset  and returns them as a List of Strings.
+     * The lines to read are determined by the provided offset (0-based) and count.
+     *
+     * @param source   The InputStream to read lines from, not {@code null}.
+     * @param encoding The charset to be used to open the specified InputStream for reading
+     * @param offset   The starting position in lines in the InputStream, from where to start reading.
+     * @param count    The number of lines to read from the InputStream.
+     * @return A List of Strings, each string being a line from the InputStream.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static List<String> readLines(final InputStream source, final Charset encoding, final int offset, final int count) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
+        return readLines(createReader(source, encoding), offset, count);
+    }
+
+    /**
+     * Reads a specified number of lines from a Reader and returns them as a List of Strings.
+     * The lines to read are determined by the provided offset (0-based) and count.
+     *
+     * @param source The Reader to read lines from, not {@code null}.
+     * @param offset The starting position in lines in the Reader, from where to start reading.
+     * @param count  The number of lines to read from the Reader.
+     * @return A List of Strings, each string being a line from the Reader.
+     * @throws IOException if an I/O error occurs.
+     */
+    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
+    public static List<String> readLines(final Reader source, int offset, int count) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
+        final List<String> res = new ArrayList<>();
+
+        try {
+            while (offset-- > 0 && br.readLine() != null) { //NOSONAR
+                // continue
+            }
+
+            String line = null;
+
+            while (count-- > 0 && (line = br.readLine()) != null) { //NOSONAR
+                res.add(line);
+            }
+
         } finally {
             if (!isBufferedReader) {
                 Objectory.recycle(br);
@@ -1702,195 +1910,6 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(File)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final File source) throws UncheckedIOException {
-    //        return readAllLines(source);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @param encoding
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(File, Charset)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final File source, final Charset encoding) throws UncheckedIOException {
-    //        return readAllLines(source, encoding);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(InputStream)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final InputStream source) throws UncheckedIOException {
-    //        return readAllLines(source);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @param encoding
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
-    //        return readAllLines(source, encoding);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(Reader)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final Reader source) throws UncheckedIOException {
-    //        try {
-    //            return readLines(source, 0, Integer.MAX_VALUE);
-    //        } catch (IOException e) {
-    //            throw new UncheckedIOException(e);
-    //        }
-    //    }
-
-    /**
-     * Reads a specified number of lines from a file using the default charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
-     *
-     * @param source The file to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the file, from where to start reading.
-     * @param count  The number of lines to read from the file.
-     * @return A List of Strings, each string being a line from the file.
-     * @throws IOException if an I/O error occurs.
-     */
-    public static List<String> readLines(final File source, final int offset, final int count) throws IOException {
-        return readLines(source, DEFAULT_CHARSET, offset, count);
-    }
-
-    /**
-     * Reads a specified number of lines from a file using the provided charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
-     *
-     * @param source   The file to read lines from, not {@code null}.
-     * @param encoding The charset to be used to open the specified file for reading.
-     * @param offset   The starting position in lines in the file, from where to start reading.
-     * @param count    The number of lines to read from the file.
-     * @return A List of Strings, each string being a line from the file.
-     * @throws IOException if an I/O error occurs.
-     */
-    public static List<String> readLines(final File source, final Charset encoding, final int offset, final int count) throws IOException {
-        N.checkArgNotNegative(offset, cs.offset);
-        N.checkArgNotNegative(count, cs.count);
-
-        final Holder<ZipFile> outputZipFile = new Holder<>();
-        InputStream is = null;
-
-        try {
-            is = openFile(source, outputZipFile);
-
-            return readLines(is, encoding, offset, count);
-        } finally {
-            close(is);
-            close(outputZipFile.value());
-        }
-    }
-
-    /**
-     * Reads a specified number of lines from an InputStream using the default charset  and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
-     *
-     * @param source The InputStream to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the InputStream, from where to start reading.
-     * @param count  The number of lines to read from the InputStream.
-     * @return A List of Strings, each string being a line from the InputStream.
-     * @throws IOException if an I/O error occurs.
-     */
-    public static List<String> readLines(final InputStream source, final int offset, final int count) throws IOException {
-        return readLines(source, DEFAULT_CHARSET, offset, count);
-    }
-
-    /**
-     * Reads a specified number of lines from an InputStream using the provided charset  and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
-     *
-     * @param source   The InputStream to read lines from, not {@code null}.
-     * @param encoding The charset to be used to open the specified InputStream for reading
-     * @param offset   The starting position in lines in the InputStream, from where to start reading.
-     * @param count    The number of lines to read from the InputStream.
-     * @return A List of Strings, each string being a line from the InputStream.
-     * @throws IOException if an I/O error occurs.
-     */
-    public static List<String> readLines(final InputStream source, final Charset encoding, final int offset, final int count) throws IOException {
-        N.checkArgNotNegative(offset, cs.offset);
-        N.checkArgNotNegative(count, cs.count);
-
-        return readLines(createReader(source, encoding), offset, count);
-    }
-
-    /**
-     * Reads a specified number of lines from a Reader and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
-     *
-     * @param source The Reader to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the Reader, from where to start reading.
-     * @param count  The number of lines to read from the Reader.
-     * @return A List of Strings, each string being a line from the Reader.
-     * @throws IOException if an I/O error occurs.
-     */
-    @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
-    public static List<String> readLines(final Reader source, int offset, int count) throws IOException {
-        N.checkArgNotNegative(offset, cs.offset);
-        N.checkArgNotNegative(count, cs.count);
-
-        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
-        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
-        final List<String> res = new ArrayList<>();
-
-        try {
-            while (offset-- > 0 && br.readLine() != null) { //NOSONAR
-                // continue
-            }
-
-            String line = null;
-
-            while (count-- > 0 && (line = br.readLine()) != null) { //NOSONAR
-                res.add(line);
-            }
-
-        } finally {
-            if (!isBufferedReader) {
-                Objectory.recycle(br);
-            }
-        }
-
-        return res;
-    }
-
     /**
      * Reads data from a file into a byte array buffer.
      *
@@ -2026,14 +2045,16 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final Charset charset, final char[] buf, final int off, final int len) throws IOException {
-        Reader reader = null;
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
 
-        try { //NOSONAR
-            reader = IOUtil.newFileReader(source, checkCharset(charset));
+        try {
+            is = openFile(source, outputZipFile);
 
-            return read(reader, buf, off, len);
+            return read(createReader(is, charset), buf, off, len);
         } finally {
-            closeQuietly(reader);
+            close(is);
+            close(outputZipFile.value());
         }
     }
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -8228,6 +8228,80 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the first character of the given string as an OptionalChar.
+     * If the string is {@code null} or empty, an empty OptionalChar is returned.
+     *
+     * @param str the input string
+     * @return an OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty
+     */
+    public static OptionalChar firstChar(final String str) {
+        if (str == null || str.isEmpty()) {
+            return OptionalChar.empty();
+        }
+
+        return OptionalChar.of(str.charAt(0));
+    }
+
+    /**
+     * Returns the last character of the given string as an OptionalChar.
+     * If the string is {@code null} or empty, an empty OptionalChar is returned.
+     *
+     * @param str the input string
+     * @return an OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty
+     */
+    public static OptionalChar lastChar(final String str) {
+        if (str == null || str.isEmpty()) {
+            return OptionalChar.empty();
+        }
+
+        return OptionalChar.of(str.charAt(str.length() - 1));
+    }
+
+    /**
+     * Returns at most first {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
+     * or an empty String {@code ""} if {@code str} is empty or {@code null}, or itself it's length equal to or less than {@code n}.
+     *
+     * @param str
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static String firstChars(final String str, final int n) throws IllegalArgumentException {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (str == null || str.isEmpty() || n == 0) {
+            return EMPTY_STRING;
+        } else if (str.length() <= n) {
+            return str;
+        } else {
+            return str.substring(0, n);
+        }
+    }
+
+    /**
+     * Returns at most last {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
+     * or an empty String {@code ""} if {@code str} is empty or {@code null}, or itself it's length equal to or less than {@code n}.
+     *
+     * @param str
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static String lastChars(final String str, final int n) throws IllegalArgumentException {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (str == null || str.isEmpty() || n == 0) {
+            return EMPTY_STRING;
+        } else if (str.length() <= n) {
+            return str;
+        } else {
+            return str.substring(str.length() - n);
+        }
+    }
+
+    /**
      * Returns {@code null} which means it doesn't exist if {@code (str == {@code null} || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
      * otherwise returns: {@code str.substring(inclusiveBeginIndex)}.
      *
@@ -8503,7 +8577,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()), exclusiveEndIndex);
-
     }
 
     /**
@@ -9574,80 +9647,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex));
-    }
-
-    /**
-     * Returns the first character of the given string as an OptionalChar.
-     * If the string is {@code null} or empty, an empty OptionalChar is returned.
-     *
-     * @param str the input string
-     * @return an OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty
-     */
-    public static OptionalChar firstChar(final String str) {
-        if (str == null || str.isEmpty()) {
-            return OptionalChar.empty();
-        }
-
-        return OptionalChar.of(str.charAt(0));
-    }
-
-    /**
-     * Returns the last character of the given string as an OptionalChar.
-     * If the string is {@code null} or empty, an empty OptionalChar is returned.
-     *
-     * @param str the input string
-     * @return an OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty
-     */
-    public static OptionalChar lastChar(final String str) {
-        if (str == null || str.isEmpty()) {
-            return OptionalChar.empty();
-        }
-
-        return OptionalChar.of(str.charAt(str.length() - 1));
-    }
-
-    /**
-     * Returns at most first {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
-     * or an empty String {@code ""} if {@code str} is empty or {@code null}, or itself it's length equal to or less than {@code n}.
-     *
-     * @param str
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
-     */
-    @Beta
-    public static String firstChars(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, cs.n);
-
-        if (str == null || str.isEmpty() || n == 0) {
-            return EMPTY_STRING;
-        } else if (str.length() <= n) {
-            return str;
-        } else {
-            return str.substring(0, n);
-        }
-    }
-
-    /**
-     * Returns at most last {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
-     * or an empty String {@code ""} if {@code str} is empty or {@code null}, or itself it's length equal to or less than {@code n}.
-     *
-     * @param str
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
-     */
-    @Beta
-    public static String lastChars(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, cs.n);
-
-        if (str == null || str.isEmpty() || n == 0) {
-            return EMPTY_STRING;
-        } else if (str.length() <= n) {
-            return str;
-        } else {
-            return str.substring(str.length() - n);
-        }
     }
 
     /**
@@ -11420,7 +11419,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        if (c instanceof Collection<?> coll) { // NOSONAR
+        if (c instanceof final Collection<?> coll) { // NOSONAR
             return join(coll, 0, coll.size(), delimiter, prefix, suffix, trim);
         } else {
             return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
@@ -11610,7 +11609,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = toIndex - fromIndex;
         final String[] elements = new String[len];
 
-        if (c instanceof List<?> list && c instanceof RandomAccess) {
+        if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
             for (int i = fromIndex, j = 0; i < toIndex; i++, j++) {
                 elements[j] = toString(list.get(i), trim);
