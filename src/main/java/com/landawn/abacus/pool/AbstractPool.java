@@ -56,7 +56,7 @@ public abstract class AbstractPool implements Pool {
 
     final AtomicLong evictionCount = new AtomicLong();
 
-    final AtomicLong usedMemorySize = new AtomicLong();
+    final AtomicLong totalDataSize = new AtomicLong();
 
     final ReentrantLock lock = new ReentrantLock();
 
@@ -134,8 +134,8 @@ public abstract class AbstractPool implements Pool {
         final long currentMissCount = missCount.get();
         final long currentGetCount = currentHitCount + currentMissCount;
 
-        return new PoolStats(capacity, putCount.get(), currentGetCount, currentHitCount, currentMissCount, evictionCount.get(),
-                maxMemorySize <= 0 ? -1 : maxMemorySize, maxMemorySize <= 0 ? -1 : usedMemorySize.get());
+        return new PoolStats(capacity, size(), putCount.get(), currentGetCount, currentHitCount, currentMissCount, evictionCount.get(),
+                maxMemorySize <= 0 ? -1 : maxMemorySize, maxMemorySize <= 0 ? -1 : totalDataSize.get());
     }
 
     /**

@@ -133,7 +133,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            if (pool.size() >= capacity || usedMemorySize.get() > maxMemorySize) {
+            if (pool.size() >= capacity || totalDataSize.get() > maxMemorySize) {
                 if (autoBalance) {
                     vacate();
                 } else {
@@ -143,7 +143,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             final long memorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, e);
 
-            if (memoryMeasure != null && memorySize > maxMemorySize - usedMemorySize.get()) {
+            if (memoryMeasure != null && memorySize > maxMemorySize - totalDataSize.get()) {
                 // ignore.
 
                 return false;
@@ -155,7 +155,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (memoryMeasure != null) {
-                    usedMemorySize.addAndGet(memorySize);
+                    totalDataSize.addAndGet(memorySize);
                 }
 
                 notEmpty.signal();
@@ -247,7 +247,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    usedMemorySize.addAndGet(-memoryMeasure.sizeOf(key, e)); //NOSONAR
+                    totalDataSize.addAndGet(-memoryMeasure.sizeOf(key, e)); //NOSONAR
                 }
 
                 notFull.signal();
@@ -520,7 +520,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if (memoryMeasure != null) {
-                usedMemorySize.addAndGet(-memoryMeasure.sizeOf(key, value));
+                totalDataSize.addAndGet(-memoryMeasure.sizeOf(key, value));
             }
 
             try {

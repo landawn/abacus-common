@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.pool;
 
-public record PoolStats(int capacity, long putCount, long getCount, long hitCount, long missCount, long evictionCount, long maxMemory, long usedMemory) {
+public record PoolStats(int capacity, int cachedCount, long putCount, long getCount, long hitCount, long missCount, long evictionCount, long maxMemory,
+        long dataSize) {
 
 }
