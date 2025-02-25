@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.pool.Poolable.Caller;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
@@ -151,7 +152,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 final E oldValue = pool.put(key, e);
 
                 if (oldValue != null) {
-                    destroy(key, oldValue);
+                    destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
 
                 if (memoryMeasure != null) {
@@ -182,7 +183,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             success = put(key, e);
         } finally {
             if (autoDestroyOnFailedToPut && !success && e != null) {
-                e.destroy();
+                e.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
@@ -208,8 +209,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             if (e != null) {
                 final ActivityPrint activityPrint = e.activityPrint();
-                activityPrint.updateLastAccessTime();
-                activityPrint.updateAccessCount();
+
+                if (activityPrint.isExpired()) {
+                    pool.remove(key);
+                    destroy(key, e, Caller.EVICT);
+                    e = null;
+                } else {
+                    activityPrint.updateLastAccessTime();
+                    activityPrint.updateAccessCount();
+                }
             }
 
             return e;
@@ -272,7 +280,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            return pool.get(key);
+            final E e = pool.get(key);
+
+            if (e != null) {
+                final ActivityPrint activityPrint = e.activityPrint();
+
+                if (activityPrint.isExpired()) {
+                    pool.remove(key);
+                    destroy(key, e, Caller.EVICT);
+
+                    return null;
+                }
+            }
+
+            return e;
         } finally {
             lock.unlock();
         }
@@ -361,7 +382,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public void clear() throws IllegalStateException {
         assertNotClosed();
 
-        removeAll();
+        removeAll(Caller.REMOVE_REPLACE_CLEAR);
     }
 
     /**
@@ -380,7 +401,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 scheduleFuture.cancel(true);
             }
         } finally {
-            removeAll();
+            removeAll(Caller.CLOSE);
         }
     }
 
@@ -444,7 +465,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         final int size = pool.size();
 
         if (vacationNumber >= size) {
-            destroyAll(new HashMap<>(pool));
+            destroyAll(new HashMap<>(pool), Caller.VACATE);
             pool.clear();
         } else {
             final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, cmp);
@@ -465,7 +486,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 removingObjects.put(entry.getKey(), entry.getValue());
             }
 
-            destroyAll(removingObjects);
+            destroyAll(removingObjects, Caller.VACATE);
         }
     }
 
@@ -495,7 +516,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     pool.remove(key);
                 }
 
-                destroyAll(removingObjects);
+                destroyAll(removingObjects, Caller.EVICT);
 
                 notFull.signalAll();
             }
@@ -510,13 +531,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param key
      * @param value
+     * @param caller
      */
-    protected void destroy(final K key, final E value) {
-        evictionCount.incrementAndGet();
+    protected void destroy(final K key, final E value, final Caller caller) {
+        if (caller == Caller.EVICT || caller == Caller.VACATE) {
+            evictionCount.incrementAndGet();
+        }
 
         if (value != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
             }
 
             if (memoryMeasure != null) {
@@ -524,7 +548,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             try {
-                value.destroy();
+                value.destroy(caller);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
@@ -536,23 +560,25 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      *
      * @param map
+     * @param caller
      */
-    protected void destroyAll(final Map<K, E> map) {
+    protected void destroyAll(final Map<K, E> map, final Caller caller) {
         if (N.notEmpty(map)) {
             for (final Map.Entry<K, E> entry : map.entrySet()) {
-                destroy(entry.getKey(), entry.getValue());
+                destroy(entry.getKey(), entry.getValue(), caller);
             }
         }
     }
 
     /**
      * Removes the all.
+     * @param caller
      */
-    private void removeAll() {
+    private void removeAll(final Caller caller) {
         lock.lock();
 
         try {
-            destroyAll(new HashMap<>(pool));
+            destroyAll(new HashMap<>(pool), caller);
 
             pool.clear();
 

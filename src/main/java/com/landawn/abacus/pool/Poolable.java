@@ -23,9 +23,11 @@ public interface Poolable {
     ActivityPrint activityPrint();
 
     /**
-     * Method destroy.
+     *
+     * @param caller
+     * @Ssee Caller
      */
-    void destroy();
+    void destroy(Caller caller);
 
     /**
      * Wrap the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
@@ -49,5 +51,19 @@ public interface Poolable {
      */
     static <T> PoolableWrapper<T> wrap(final T srcObject, final long liveTime, final long maxIdleTime) {
         return PoolableWrapper.of(srcObject, liveTime, maxIdleTime);
+    }
+
+    enum Caller {
+        CLOSE(0), EVICT(1), VACATE(2), REMOVE_REPLACE_CLEAR(3), PUT_ADD_FAILURE(4), OTHER_OUTER(5);
+
+        private final int value;
+
+        Caller(final int value) {
+            this.value = value;
+        }
+
+        public int value() {
+            return value;
+        }
     }
 }

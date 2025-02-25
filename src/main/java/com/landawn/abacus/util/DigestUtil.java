@@ -31,8 +31,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-
-
 /**
  * Note: copied from <a href="https://commons.apache.org/proper/commons-codec">Apache commons-codec</a>.
  * <p />

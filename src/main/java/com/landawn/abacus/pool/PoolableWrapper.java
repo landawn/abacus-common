@@ -79,10 +79,10 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * Destroy.
+     * @param caller
      */
     @Override
-    public void destroy() {
+    public void destroy(final Caller caller) {
         // should not set the srcObject to null because it may be retrieved by
         // other thread and evicted out pool later.
         // srcObject = null;

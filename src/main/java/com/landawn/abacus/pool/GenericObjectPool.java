@@ -29,6 +29,7 @@ import java.util.Queue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.pool.Poolable.Caller;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
@@ -176,7 +177,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             success = add(e);
         } finally {
             if (autoDestroyOnFailedToAdd && !success && e != null) {
-                e.destroy();
+                e.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
@@ -261,7 +262,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             success = add(e, timeout, unit);
         } finally {
             if (autoDestroyOnFailedToAdd && !success && e != null) {
-                e.destroy();
+                e.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
@@ -286,11 +287,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             if (e != null) {
                 final ActivityPrint activityPrint = e.activityPrint();
-                activityPrint.updateLastAccessTime();
-                activityPrint.updateAccessCount();
 
-                if (memoryMeasure != null) {
-                    totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                if (activityPrint.isExpired()) {
+                    destroy(e, Caller.EVICT);
+                    e = null;
+                } else {
+                    activityPrint.updateLastAccessTime();
+                    activityPrint.updateAccessCount();
+
+                    if (memoryMeasure != null) {
+                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                    }
                 }
 
                 notFull.signal();
@@ -331,16 +338,24 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                 if (e != null) {
                     final ActivityPrint activityPrint = e.activityPrint();
-                    activityPrint.updateLastAccessTime();
-                    activityPrint.updateAccessCount();
 
-                    if (memoryMeasure != null) {
-                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                    if (activityPrint.isExpired()) {
+                        destroy(e, Caller.EVICT);
+                        e = null;
+                    } else {
+                        activityPrint.updateLastAccessTime();
+                        activityPrint.updateAccessCount();
+
+                        if (memoryMeasure != null) {
+                            totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                        }
                     }
 
                     notFull.signal();
 
-                    return e;
+                    if (e != null) {
+                        return e;
+                    }
                 }
 
                 if (nanos <= 0) {
@@ -406,7 +421,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public void clear() throws IllegalStateException {
         assertNotClosed();
 
-        removeAll();
+        removeAll(Caller.REMOVE_REPLACE_CLEAR);
     }
 
     /**
@@ -425,7 +440,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 scheduleFuture.cancel(true);
             }
         } finally {
-            removeAll();
+            removeAll(Caller.CLOSE);
         }
     }
 
@@ -470,7 +485,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         final int size = pool.size();
 
         if (vacationNumber >= size) {
-            destroyAll(new ArrayList<>(pool));
+            destroyAll(new ArrayList<>(pool), Caller.VACATE);
             pool.clear();
         } else {
             final Queue<E> heap = new PriorityQueue<>(vacationNumber, cmp);
@@ -488,7 +503,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 pool.remove(e);
             }
 
-            destroyAll(heap);
+            destroyAll(heap, Caller.VACATE);
         }
     }
 
@@ -516,7 +531,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             if (N.notEmpty(removingObjects)) {
                 pool.removeAll(removingObjects);
 
-                destroyAll(removingObjects);
+                destroyAll(removingObjects, Caller.EVICT);
 
                 notFull.signalAll();
             }
@@ -530,13 +545,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      *
      * @param value
+     * @param caller
      */
-    protected void destroy(final E value) {
-        evictionCount.incrementAndGet();
+    protected void destroy(final E value, final Caller caller) {
+        if (caller == Caller.EVICT || caller == Caller.VACATE) {
+            evictionCount.incrementAndGet();
+        }
 
         if (value != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
             }
 
             if (memoryMeasure != null) {
@@ -544,7 +562,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             try {
-                value.destroy();
+                value.destroy(caller);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
@@ -556,23 +574,25 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      *
      * @param c
+     * @param caller
      */
-    protected void destroyAll(final Collection<E> c) {
+    protected void destroyAll(final Collection<E> c, final Caller caller) {
         if (N.notEmpty(c)) {
             for (final E e : c) {
-                destroy(e);
+                destroy(e, caller);
             }
         }
     }
 
     /**
      * Removes the all.
+     * @param caller
      */
-    private void removeAll() {
+    private void removeAll(final Caller caller) {
         lock.lock();
 
         try {
-            destroyAll(new ArrayList<>(pool));
+            destroyAll(new ArrayList<>(pool), caller);
 
             pool.clear();
 
