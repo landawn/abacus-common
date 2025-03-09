@@ -51,6 +51,7 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -81,6 +82,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.URLEncodedUtil
  * @see com.landawn.abacus.util.AppendableWriter
  * @see com.landawn.abacus.util.StringWriter
+ * @see com.landawn.abacus.util.Patterns
  */
 @SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
 public abstract sealed class Strings permits Strings.StringUtil {
@@ -214,25 +216,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //        }
     //    }
 
-    private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$", Pattern.UNICODE_CHARACTER_CLASS);
-
-    // https://www.baeldung.com/java-email-validation-regex
-    // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
-    // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
-    private static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
-            //NOSONAR
-            Pattern.UNICODE_CHARACTER_CLASS);
-
-    // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
-            //NOSONAR
-            Pattern.UNICODE_CHARACTER_CLASS);
-
-    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
-            //NOSONAR
-            Pattern.UNICODE_CHARACTER_CLASS);
-
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
 
     private static final Decoder BASE64_DECODER = java.util.Base64.getDecoder();
@@ -305,7 +288,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
+        return Patterns.JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -325,7 +308,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
+        return Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -342,7 +325,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return URL_PATTERN.matcher(cs).matches();
+        return Patterns.URL_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -360,7 +343,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return HTTP_URL_PATTERN.matcher(cs).matches();
+        return Patterns.HTTP_URL_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -2972,30 +2955,198 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
     }
 
+    //    /**
+    //     * Replaces each substring of the source String that matches the given
+    //     * regular expression with the given replacement using the
+    //     * {@link Pattern#DOTALL} option. DOTALL is also know as single-line mode in
+    //     * Perl. This call is also equivalent to:
+    //     * <ul>
+    //     * <li>{@code source.replaceAll(&quot;(?s)&quot; + regex, replacement)}</li>
+    //     * <li>
+    //     * {@code Pattern.compile(regex, Pattern.DOTALL).filter(source).replaceAll(replacement)}
+    //     * </li>
+    //     * </ul>
+    //     *
+    //     * @param source
+    //     *            the source string
+    //     * @param regex
+    //     *            the regular expression to which this string is to be matched
+    //     * @param replacement
+    //     *            the string to be substituted for each match
+    //     * @return The resulting {@code String}
+    //     * @see String#replaceAll(String, String)
+    //     * @see Pattern#DOTALL
+    //     * @see #replaceAllByPattern(String, String, String)
+    //     * @deprecated replaced by {@link #replaceAllByPattern(String, String, String)}
+    //     */
+    //    @Deprecated
+    //    public static String replacePattern(final String source, final String regex, final String replacement) {
+    //        return Pattern.compile(regex, Pattern.DOTALL).matcher(source).replaceAll(replacement);
+    //    }
+
     /**
-     * Replaces each substring of the source String that matches the given
-     * regular expression with the given replacement using the
-     * {@link Pattern#DOTALL} option. DOTALL is also know as single-line mode in
-     * Perl. This call is also equivalent to:
-     * <ul>
-     * <li>{@code source.replaceAll(&quot;(?s)&quot; + regex, replacement)}</li>
-     * <li>
-     * {@code Pattern.compile(regex, Pattern.DOTALL).filter(source).replaceAll(replacement)}
-     * </li>
-     * </ul>
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}
      *
      * @param source
-     *            the source string
      * @param regex
-     *            the regular expression to which this string is to be matched
      * @param replacement
-     *            the string to be substituted for each match
-     * @return The resulting {@code String}
-     * @see String#replaceAll(String, String)
-     * @see Pattern#DOTALL
+     * @return
+     * @see Matcher#replaceAll(String)
      */
-    public static String replacePattern(final String source, final String regex, final String replacement) {
-        return Pattern.compile(regex, Pattern.DOTALL).matcher(source).replaceAll(replacement);
+    public static String replaceAllByPattern(final String source, final String regex, final String replacement) {
+        return Pattern.compile(regex).matcher(source).replaceAll(replacement);
+    }
+
+    /**
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceAll(Function)
+     */
+    public static String replaceAllByPattern(final String source, final String regex, final Function<String, String> replacer) {
+        return Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+    }
+
+    /**
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()))}
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceAll(Function)
+     */
+    public static String replaceAllByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+        return Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+    }
+
+    /**
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(replacement)}
+     *
+     * @param source
+     * @param regex
+     * @param replacement
+     * @return
+     * @see Matcher#replaceFirst(String)
+     */
+    public static String replaceFirstByPattern(final String source, final String regex, final String replacement) {
+        return Pattern.compile(regex).matcher(source).replaceFirst(replacement);
+    }
+
+    /**
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    public static String replaceFirstByPattern(final String source, final String regex, final Function<String, String> replacer) {
+        return Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+    }
+
+    /**
+     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()))}
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    public static String replaceFirstByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+        return Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     *
+     * @param source
+     * @param regex
+     * @param replacement
+     * @return
+     * @see Matcher#replaceFirst(String)
+     */
+    @Beta
+    public static String replaceLastByPattern(final String source, final String regex, final String replacement) {
+        final Matcher matcher = Pattern.compile(regex).matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacement);
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacement);
+            }
+        }
+
+        return source;
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLastByPattern(final String source, final String regex, final Function<String, String> replacer) {
+        final Matcher matcher = Pattern.compile(regex).matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+            }
+        }
+
+        return source;
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param regex
+     * @param replacer
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLastByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+        final Matcher matcher = Pattern.compile(regex).matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+            }
+        }
+
+        return source;
     }
 
     /**
@@ -3400,7 +3551,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see Pattern#DOTALL
      */
     public static String removePattern(final String source, final String regex) {
-        return replacePattern(source, regex, EMPTY_STRING);
+        return replaceAllByPattern(source, regex, EMPTY_STRING);
     }
 
     /**
@@ -13303,7 +13454,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         // ^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
         // Matcher matcher = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(str);
@@ -13331,7 +13482,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return new ArrayList<>();
         }
 
-        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         final List<String> result = new ArrayList<>();
 
@@ -13436,6 +13587,29 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     public static String[] copyThenStrip(final String[] strs) {
         return N.copyThenReplaceAll(strs, Fn.strip());
+    }
+
+    /**
+     * Formats the given value as a percentage string.
+     *
+     * @param value the value to be formatted as a percentage
+     * @return the formatted percentage string
+     * @see Numbers#format(double, String)
+     */
+    public static String formatToPercentage(final double value) {
+        return Numbers.round(value * 100, 2) + "%";
+    }
+
+    /**
+     * Formats the given value as a percentage string with the specified scale.
+     *
+     * @param value the value to be formatted as a percentage
+     * @param scale the number of decimal places to include in the formatted percentage
+     * @return the formatted percentage string
+     * @see Numbers#format(double, String)
+     */
+    public static String formatToPercentage(final double value, final int scale) {
+        return Numbers.round(value * 100, scale) + "%";
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {

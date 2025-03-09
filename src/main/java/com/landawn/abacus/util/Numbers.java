@@ -758,6 +758,8 @@ public final class Numbers {
      * <code>
      * Numbers.format(12.105f, "0.00"); // returns "12.10"
      * Numbers.format(12.105f, "#.##"); // returns "12.1"
+     * Numbers.format(0.121, "#.##%"); // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
      * </code>
      * </pre>
      *
@@ -793,6 +795,8 @@ public final class Numbers {
      * Numbers.format(12.105f, "0.00"); // returns "12.10"
      * Numbers.format(12.105f, "#.##"); // returns "12.1"
      * Numbers.format(null, "0.00"); // returns "0.00"
+     * Numbers.format(0.121, "#.##%"); // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
      * </code>
      * </pre>
      *
@@ -829,6 +833,8 @@ public final class Numbers {
      * <code>
      * Numbers.format(12.105, "0.00"); // returns "12.10"
      * Numbers.format(12.105, "#.##"); // returns "12.1"
+     * Numbers.format(0.121, "#.##%"); // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
      * </code>
      * </pre>
      *
@@ -864,6 +870,8 @@ public final class Numbers {
      * Numbers.format(12.105, "0.00"); // returns "12.10"
      * Numbers.format(12.105, "#.##"); // returns "12.1"
      * Numbers.format(null, "0.00"); // returns "0.00"
+     * Numbers.format(0.121, "#.##%"); // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
      * </code>
      * </pre>
      *
@@ -1298,13 +1306,13 @@ public final class Numbers {
             return ((Long) obj);
         }
 
-        if (obj instanceof BigInteger bigInt) {
+        if (obj instanceof final BigInteger bigInt) {
             if (bigInt.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0 || bigInt.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return bigInt.longValue();
-        } else if (obj instanceof BigDecimal bigDecimal) {
+        } else if (obj instanceof final BigDecimal bigDecimal) {
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
@@ -2117,7 +2125,7 @@ public final class Numbers {
      *
      * @param str the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric
-     * @see Strings#isNumeric(CharSequence) 
+     * @see Strings#isNumeric(CharSequence)
      */
     public static boolean isDigits(final String str) {
         return Strings.isNumeric(str);

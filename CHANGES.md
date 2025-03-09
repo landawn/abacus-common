@@ -1,3 +1,8 @@
+### 5.7.7
+
+* Add `Strings.replaceAll/First/LastByPattern`.
+* Improvements and bug fixes.
+
 ### 5.7.6
 
 * Improvements and bug fixes.
