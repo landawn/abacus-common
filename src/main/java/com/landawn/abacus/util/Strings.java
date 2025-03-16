@@ -52,6 +52,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.IntBiFunction;
+import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -82,7 +83,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.URLEncodedUtil
  * @see com.landawn.abacus.util.AppendableWriter
  * @see com.landawn.abacus.util.StringWriter
- * @see com.landawn.abacus.util.Patterns
+ * @see com.landawn.abacus.util.RegExUtil
  */
 @SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
 public abstract sealed class Strings permits Strings.StringUtil {
@@ -288,7 +289,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return Patterns.JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
+        return RegExUtil.JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -308,7 +309,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
+        return RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -325,7 +326,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return Patterns.URL_PATTERN.matcher(cs).matches();
+        return RegExUtil.URL_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -343,7 +344,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return Patterns.HTTP_URL_PATTERN.matcher(cs).matches();
+        return RegExUtil.HTTP_URL_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -2992,9 +2993,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement
      * @return
      * @see Matcher#replaceAll(String)
+     * @see RegExUtil#replaceAll(String, String, String)
+     * @see RegExUtil#replaceAll(String, Pattern, String)
      */
+    @Beta
     public static String replaceAllByPattern(final String source, final String regex, final String replacement) {
-        return Pattern.compile(regex).matcher(source).replaceAll(replacement);
+        return RegExUtil.replaceAll(source, regex, replacement);
     }
 
     /**
@@ -3002,12 +3006,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
      * @see Matcher#replaceAll(Function)
+     * @see RegExUtil#replaceAll(String, String, Function)
+     * @see RegExUtil#replaceAll(String, Pattern, Function)
      */
+    @Beta
     public static String replaceAllByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        return Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        return RegExUtil.replaceAll(source, regex, replacer);
     }
 
     /**
@@ -3015,12 +3022,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
      * @see Matcher#replaceAll(Function)
+     * @see RegExUtil#replaceAll(String, String, IntBiFunction)
+     * @see RegExUtil#replaceAll(String, Pattern, IntBiFunction)
      */
+    @Beta
     public static String replaceAllByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        return Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        return RegExUtil.replaceAll(source, regex, replacer);
     }
 
     /**
@@ -3031,9 +3041,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement
      * @return
      * @see Matcher#replaceFirst(String)
+     * @see RegExUtil#replaceFirst(String, String, String)
+     * @see RegExUtil#replaceFirst(String, Pattern, String)
      */
+    @Beta
     public static String replaceFirstByPattern(final String source, final String regex, final String replacement) {
-        return Pattern.compile(regex).matcher(source).replaceFirst(replacement);
+        return RegExUtil.replaceFirst(source, regex, replacement);
     }
 
     /**
@@ -3041,12 +3054,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
      * @see Matcher#replaceFirst(Function)
+     * @see RegExUtil#replaceFirst(String, String, Function)
+     * @see RegExUtil#replaceFirst(String, Pattern, Function)
      */
+    @Beta
     public static String replaceFirstByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        return Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        return RegExUtil.replaceFirst(source, regex, replacer);
     }
 
     /**
@@ -3054,12 +3070,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
      * @see Matcher#replaceFirst(Function)
+     * @see RegExUtil#replaceFirst(String, String, IntBiFunction)
+     * @see RegExUtil#replaceFirst(String, Pattern, IntBiFunction)
      */
+    @Beta
     public static String replaceFirstByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        return Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        return RegExUtil.replaceFirst(source, regex, replacer);
     }
 
     /**
@@ -3069,26 +3088,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param regex
      * @param replacement
      * @return
-     * @see Matcher#replaceFirst(String)
+     * @see RegExUtil#replaceLast(String, String, String)
+     * @see RegExUtil#replaceLast(String, Pattern, String)
      */
     @Beta
     public static String replaceLastByPattern(final String source, final String regex, final String replacement) {
-        final Matcher matcher = Pattern.compile(regex).matcher(source);
-
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacement);
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacement);
-            }
-        }
-
-        return source;
+        return RegExUtil.replaceLast(source, regex, replacement);
     }
 
     /**
@@ -3096,28 +3101,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
-     * @see Matcher#replaceFirst(Function)
+     * @see RegExUtil#replaceLast(String, String, Function)
+     * @see RegExUtil#replaceLast(String, Pattern, Function)
      */
     @Beta
     public static String replaceLastByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        final Matcher matcher = Pattern.compile(regex).matcher(source);
-
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
-            }
-        }
-
-        return source;
+        return RegExUtil.replaceLast(source, regex, replacer);
     }
 
     /**
@@ -3125,28 +3116,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param source
      * @param regex
-     * @param replacer
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return
-     * @see Matcher#replaceFirst(Function)
+     * @see RegExUtil#replaceLast(String, String, IntBiFunction)
+     * @see RegExUtil#replaceLast(String, Pattern, IntBiFunction)
      */
     @Beta
     public static String replaceLastByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        final Matcher matcher = Pattern.compile(regex).matcher(source);
-
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
-            }
-        }
-
-        return source;
+        return RegExUtil.replaceLast(source, regex, replacer);
     }
 
     /**
@@ -3539,19 +3516,47 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Removes each substring of the source String that matches the given
-     * regular expression using the DOTALL option.
+     * Removes each substring of the source String that matches the given regular expression.
      *
-     * @param source
-     *            the source string
-     * @param regex
-     *            the regular expression to which this string is to be matched
+     * @param source the source string
+     * @param regex the regular expression to which this string is to be matched
      * @return The resulting {@code String}
      * @see String#replaceAll(String, String)
-     * @see Pattern#DOTALL
+     * @see #replaceAllByPattern(String, String, String)
+     * @see RegExUtil#removeAll(String, String)
      */
-    public static String removePattern(final String source, final String regex) {
-        return replaceAllByPattern(source, regex, EMPTY_STRING);
+    @Beta
+    public static String removeAllByPattern(final String source, final String regex) {
+        return RegExUtil.removeAll(source, regex);
+    }
+
+    /**
+     * Removes the first substring of the source string that matches the given regular expression.
+     *
+     * @param source the source string
+     * @param regex the regular expression to which this string is to be matched
+     * @return The resulting {@code String}
+     * @see String#replaceFirst(String, String)
+     * @see #replaceFirstByPattern(String, String, String)
+     * @see RegExUtil#removeFirst(String, String)
+     */
+    @Beta
+    public static String removeFirstByPattern(final String source, final String regex) {
+        return RegExUtil.removeFirst(source, regex);
+    }
+
+    /**
+     * Removes the last substring of the source string that matches the given regular expression.
+     *
+     * @param source the source string
+     * @param regex the regular expression to which this string is to be matched
+     * @return The resulting {@code String}
+     * @see #replaceLastByPattern(String, String, String)
+     * @see RegExUtil#removeLast(String, String)
+     */
+    @Beta
+    public static String removeLastByPattern(final String source, final String regex) {
+        return RegExUtil.removeLast(source, regex);
     }
 
     /**
@@ -6317,7 +6322,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur.
      */
-    public static int indexOf(final String str, final int charValueToFind, final int fromIndex) {
+    public static int indexOf(final String str, final int charValueToFind, int fromIndex) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6354,7 +6361,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      */
-    public static int indexOf(final String str, final String valueToFind, final int fromIndex) {
+    public static int indexOf(final String str, final String valueToFind, int fromIndex) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6389,7 +6398,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if none of the characters occur.
      */
     @SafeVarargs
-    public static int indexOfAny(final String str, final int fromIndex, final char... valuesToFind) {
+    public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -6450,7 +6461,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if none of the substrings occur.
      */
     @SafeVarargs
-    public static int indexOfAny(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int indexOfAny(final String str, int fromIndex, final String... valuesToFind) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6503,7 +6516,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
      */
     @SafeVarargs
-    public static int indexOfAnyBut(final String str, final int fromIndex, final char... valuesToExclude) {
+    public static int indexOfAnyBut(final String str, int fromIndex, final char... valuesToExclude) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         checkInputChars(valuesToExclude, cs.valuesToExclude, true);
 
         if (str == null || str.isEmpty()) {
@@ -6571,7 +6586,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      */
-    public static int indexOf(final String str, final String valueToFind, final String delimiter, final int fromIndex) {
+    public static int indexOf(final String str, final String valueToFind, final String delimiter, int fromIndex) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (isEmpty(delimiter)) {
             return indexOf(str, valueToFind, fromIndex);
         }
@@ -6642,7 +6659,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      */
-    public static int indexOfIgnoreCase(final String str, final String valueToFind, final int fromIndex) {
+    public static int indexOfIgnoreCase(final String str, final String valueToFind, int fromIndex) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6681,7 +6700,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param fromIndex The index to start the search from.
      * @return The index of the first occurrence of the substring in the character sequence represented by this object, or -1 if the substring does not occur.
      */
-    public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter, final int fromIndex) {
+    public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter, int fromIndex) {
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+
         if (isEmpty(delimiter)) {
             return indexOfIgnoreCase(str, valueToFind, fromIndex);
         }
@@ -6781,10 +6802,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or equal to {@code fromIndex}, or {@code -1} if the
      *         character does not occur before that point.
      */
-    public static int lastIndexOf(final String str, final int charValueToFind, final int startIndexFromBack) {
+    public static int lastIndexOf(final String str, final int charValueToFind, int startIndexFromBack) {
         if (str == null || str.isEmpty() || startIndexFromBack < 0) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         return str.lastIndexOf(charValueToFind, startIndexFromBack);
     }
@@ -6824,10 +6847,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param startIndexFromBack The index to start the search from, searching backward.
      * @return
      */
-    public static int lastIndexOf(final String str, final String valueToFind, final int startIndexFromBack) {
+    public static int lastIndexOf(final String str, final String valueToFind, int startIndexFromBack) {
         if (str == null || valueToFind == null || startIndexFromBack < 0 || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         return str.lastIndexOf(valueToFind, startIndexFromBack);
     }
@@ -6861,12 +6886,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      */
-    public static int lastIndexOf(final String str, final String valueToFind, final String delimiter, final int startIndexFromBack) {
+    public static int lastIndexOf(final String str, final String valueToFind, final String delimiter, int startIndexFromBack) {
         if (isEmpty(delimiter)) {
             return lastIndexOf(str, valueToFind, startIndexFromBack);
         } else if (str == null || valueToFind == null || startIndexFromBack < 0) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         final int len = str.length();
         final int substrLen = valueToFind.length();
@@ -6933,10 +6960,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      */
-    public static int lastIndexOfIgnoreCase(final String str, final String valueToFind, final int startIndexFromBack) {
+    public static int lastIndexOfIgnoreCase(final String str, final String valueToFind, int startIndexFromBack) {
         if (str == null || valueToFind == null || startIndexFromBack < 0 || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         for (int i = N.min(startIndexFromBack, str.length() - valueToFind.length()), substrLen = valueToFind.length(); i >= 0; i--) {
             if (str.regionMatches(true, i, valueToFind, 0, substrLen)) {
@@ -7088,8 +7117,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if none of the substrings occur.
      */
     @SafeVarargs
-    public static int smallestIndicesOfAll(final String str, final String... valuesToFind) {
-        return smallestIndicesOfAll(str, 0, valuesToFind);
+    public static int smallestIndexOfAll(final String str, final String... valuesToFind) {
+        return smallestIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -7103,10 +7132,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String[])
      */
     @SafeVarargs
-    public static int smallestIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int smallestIndexOfAll(final String str, int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
+
+        fromIndex = fromIndex < 0 ? 0 : fromIndex;
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
@@ -7137,8 +7168,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestIndicesOfAll(final String str, final String... valuesToFind) {
-        return largestIndicesOfAll(str, 0, valuesToFind);
+    public static int largestIndexOfAll(final String str, final String... valuesToFind) {
+        return largestIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -7151,15 +7182,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see #indexOfAny(String, int, String[])
      */
-    public static int largestIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int largestIndexOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
+        final int fromIndexToUse = fromIndex < 0 ? 0 : fromIndex;
+
         final int len = str.length();
         @SuppressWarnings("resource")
         final List<String> sortedSubstrs = Stream.of(valuesToFind) //
-                .filter(it -> !(it == null || (fromIndex + it.length() > len)))
+                .filter(it -> !(it == null || (fromIndexToUse + it.length() > len)))
                 .sortedByInt(N::len)
                 .toList();
 
@@ -7187,8 +7220,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestLastIndicesOfAll(final String str, final String... valuesToFind) {
-        return smallestLastIndicesOfAll(str, N.len(str), valuesToFind);
+    public static int smallestLastIndexOfAll(final String str, final String... valuesToFind) {
+        return smallestLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -7196,15 +7229,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param fromIndex
+     * @param startIndexFromBack
      * @param valuesToFind
      * @return
      * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestLastIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int smallestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
@@ -7214,7 +7249,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 continue;
             }
 
-            final int tmp = str.lastIndexOf(substr, fromIndex);
+            final int tmp = str.lastIndexOf(substr, startIndexFromBack);
 
             result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
@@ -7235,8 +7270,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestLastIndicesOfAll(final String str, final String... valuesToFind) {
-        return largestLastIndicesOfAll(str, N.len(str), valuesToFind);
+    public static int largestLastIndexOfAll(final String str, final String... valuesToFind) {
+        return largestLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -7244,16 +7279,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param fromIndex
+     * @param startIndexFromBack
      * @param valuesToFind
      * @return
      * @see #indexOfAny(String, int, String[])
      */
     @SafeVarargs
-    public static int largestLastIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int largestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
+
+        startIndexFromBack = Math.min(startIndexFromBack, str.length() - 1);
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
@@ -7263,9 +7300,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 continue;
             }
 
-            result = N.max(result, str.lastIndexOf(substr, fromIndex));
+            result = N.max(result, str.lastIndexOf(substr, startIndexFromBack));
 
-            if (result == fromIndex) {
+            if (result == startIndexFromBack) {
                 break;
             }
         }
@@ -7297,6 +7334,134 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static int lastOrdinalIndexOf(final String str, final String valueToFind, final int ordinal) {
         return ordinalIndexOf(str, valueToFind, ordinal, true);
+    }
+
+    /**
+     * Returns a stream of indices of all occurrences of the specified substring.
+     *
+     * <pre>
+     * <code>
+     * Strings.indicesOf("abca", "a").join(", ") ==> "0, 3"
+     * Strings.indicesOf("abcA", "a").join(", ") ==> "0"
+     * Strings.indicesOf("abcA", null).join(", ") ==> ""
+     * Strings.indicesOf(null, "").join(", ") ==> ""
+     * Strings.indicesOf("", null).join(", ") ==> ""
+     * Strings.indicesOf("abcA", "").join(", ") ==> "0, 1, 2, 3"
+     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ") ==> "0, 3"
+     * </code>
+     * </pre>
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see RegExUtil#matchIndices(String, String)
+     * @see RegExUtil#matchIndices(String, Pattern)
+     * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
+     */
+    public static IntStream indicesOf(final String str, final String valueToFind) {
+        return indicesOf(str, valueToFind, 0);
+    }
+
+    /**
+     * Returns a stream of indices of all occurrences of the specified substring, starting the search at the specified index.
+     *
+     * <pre>
+     * <code>
+     * Strings.indicesOf("abca", "a").join(", ") ==> "0, 3"
+     * Strings.indicesOf("abcA", "a").join(", ") ==> "0"
+     * Strings.indicesOf("abcA", null).join(", ") ==> ""
+     * Strings.indicesOf(null, "").join(", ") ==> ""
+     * Strings.indicesOf("", null).join(", ") ==> ""
+     * Strings.indicesOf("abcA", "").join(", ") ==> "0, 1, 2, 3"
+     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ") ==> "0, 3"
+     * </code>
+     * </pre>
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @param fromIndex the index to start the search from
+     * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see RegExUtil#matchIndices(String, String)
+     * @see RegExUtil#matchIndices(String, Pattern)
+     * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
+     */
+    public static IntStream indicesOf(final String str, final String valueToFind, final int fromIndex) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
+            return IntStream.empty();
+        }
+
+        final int increment = Math.max(valueToFind.length(), 1);
+
+        return IntStream.ofIndices(str, fromIndex, increment, (s, from) -> s.indexOf(valueToFind, from));
+    }
+
+    /**
+     * Returns a stream of indices of all occurrences of the specified substring, ignoring case considerations.
+     *
+     * <pre>
+     * <code>
+     * Strings.indicesOf("abca", "a").join(", ") ==> "0, 3"
+     * Strings.indicesOf("abcA", "a").join(", ") ==> "0"
+     * Strings.indicesOf("abcA", null).join(", ") ==> ""
+     * Strings.indicesOf(null, "").join(", ") ==> ""
+     * Strings.indicesOf("", null).join(", ") ==> ""
+     * Strings.indicesOf("abcA", "").join(", ") ==> "0, 1, 2, 3"
+     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ") ==> "0, 3"
+     * </code>
+     * </pre>
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see RegExUtil#matchIndices(String, String)
+     * @see RegExUtil#matchIndices(String, Pattern)
+     * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
+     */
+    public static IntStream indicesOfIgnoreCase(final String str, final String valueToFind) {
+        return indicesOfIgnoreCase(str, valueToFind, 0);
+    }
+
+    /**
+     * Returns a stream of indices of all occurrences of the specified substring, starting the search at the specified index, ignoring case considerations.
+     *
+     * <pre>
+     * <code>
+     * Strings.indicesOf("abca", "a").join(", ") ==> "0, 3"
+     * Strings.indicesOf("abcA", "a").join(", ") ==> "0"
+     * Strings.indicesOf("abcA", null).join(", ") ==> ""
+     * Strings.indicesOf(null, "").join(", ") ==> ""
+     * Strings.indicesOf("", null).join(", ") ==> ""
+     * Strings.indicesOf("abcA", "").join(", ") ==> "0, 1, 2, 3"
+     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ") ==> "0, 3"
+     * </code>
+     * </pre>
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @param fromIndex the index to start the search from
+     * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see RegExUtil#matchIndices(String, String)
+     * @see RegExUtil#matchIndices(String, Pattern)
+     * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
+     */
+    public static IntStream indicesOfIgnoreCase(final String str, final String valueToFind, final int fromIndex) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
+            return IntStream.empty();
+        }
+
+        final int strLen = str.length();
+        final int increment = Math.max(valueToFind.length(), 1);
+        final int end = strLen - increment + 1;
+
+        return IntStream.ofIndices(str, fromIndex, increment, (s, from) -> {
+            for (int idx = from; idx < end; idx++) {
+                if (str.regionMatches(true, idx, valueToFind, 0, increment)) {
+                    return idx;
+                }
+            }
+
+            return N.INDEX_NOT_FOUND;
+        });
     }
 
     /**
@@ -7351,6 +7516,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return occurrences;
+    }
+
+    /**
+     * Counts the number of occurrences of the specified pattern in the given string.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param regexToFind the regular expression pattern to be counted
+     * @return the number of occurrences of the specified pattern in the string, or 0 if the string is {@code null} or empty
+     * @see RegExUtil#countMatches(String, String)
+     * @see RegExUtil#countMatches(String, Pattern)
+     */
+    @Beta
+    public static int countMatchesByPattern(final String str, final String regexToFind) {
+        return RegExUtil.countMatches(str, regexToFind);
     }
 
     /**
@@ -13454,7 +13633,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final Matcher matcher = Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         // ^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
         // Matcher matcher = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(str);
@@ -13482,7 +13661,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return new ArrayList<>();
         }
 
-        final Matcher matcher = Patterns.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         final List<String> result = new ArrayList<>();
 

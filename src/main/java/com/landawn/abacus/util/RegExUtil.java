@@ -16,7 +16,15 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.function.Function;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.function.IntBiFunction;
 
 /**
  * Note: Copied from Apache Commons Lang under Apache License V2.
@@ -25,425 +33,702 @@ import java.util.regex.Pattern;
  *
  * <p>Helpers to process Strings using regular expressions.</p>
  * @see java.util.regex.Pattern
+ * @see java.util.regex.Matcher
+ * @see com.landawn.abacus.util.Strings
  */
 public final class RegExUtil {
+
+    public static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$");
+    // https://www.baeldung.com/java-email-validation-regex
+    // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
+    // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+    public static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+    // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+    public static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+    public static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+    // https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers
+    public static final Pattern INTEGER_PATTERN = Pattern.compile("^-?\\d+$");
+    public static final Pattern POSITIVE_INTEGER_PATTERN = Pattern.compile("^\\d+$");
+    public static final Pattern NEGATIVE_INTEGER_PATTERN = Pattern.compile("^-\\d+$");
+    public static final Pattern POSITIVE_NUMBER_PATTERN = Pattern.compile("^\\d*\\.?\\d+$");
+    public static final Pattern NEGATIVE_NUMBER_PATTERN = Pattern.compile("^-\\d*\\.?\\d+$");
+    public static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d*\\.?\\d+$");
+    public static final Pattern PHONE_NUMBER_PATTERN = Pattern.compile("^\\+?[\\d\\s]{3,}$");
+    public static final Pattern PHONE_NUMBER_WITH_CODE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    /**
+     * Pattern for alphanumeric string without space.
+     */
+    public static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    /**
+     * Pattern for alphanumeric string with space.
+     */
+    public static final Pattern ALPHANUMERIC_WITH_SPACE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    /**
+     * Pattern for alphanumeric string without space.
+     * @deprecated replaced by {@link #ALPHANUMERIC_PATTERN}
+     */
+    @Deprecated
+    public static final Pattern ALPHANUMERIC_WITHOUT_SPACE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+
+    private static final String PATTERNS_STR = "pattern";
 
     private RegExUtil() {
         // Singleton for utility class.
     }
 
     /**
-     * <p>Removes each substring of the text String that matches the given regular expression pattern.</p>
+     * <p>Removes each substring of the source string that matches the given regular expression.</p>
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
-     * </ul>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
-     * <pre>
-     * StringUtils.removeAll(null, *)      = null
-     * StringUtils.removeAll("any", (Pattern) null)  = "any"
-     * StringUtils.removeAll("any", Pattern.compile(""))    = "any"
-     * StringUtils.removeAll("any", Pattern.compile(".*"))  = ""
-     * StringUtils.removeAll("any", Pattern.compile(".+"))  = ""
-     * StringUtils.removeAll("abc", Pattern.compile(".?"))  = ""
-     * StringUtils.removeAll("A&lt;__&gt;\n&lt;__&gt;B", Pattern.compile("&lt;.*&gt;"))      = "A\nB"
-     * StringUtils.removeAll("A&lt;__&gt;\n&lt;__&gt;B", Pattern.compile("(?s)&lt;.*&gt;"))  = "AB"
-     * StringUtils.removeAll("A&lt;__&gt;\n&lt;__&gt;B", Pattern.compile("&lt;.*&gt;", Pattern.DOTALL))  = "AB"
-     * StringUtils.removeAll("ABCabc123abc", Pattern.compile("[a-z]"))     = "ABC123"
-     * </pre>
-     *
-     * @param text text to remove from, may be null
+     * @param source source string to remove from, may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the text with any removes processed,
-     *              {@code null} if {@code null} String input
+     * @return the source string with any removes processed,  {@code null} if {@code null} String input
+     * @see #replaceAll(String, String, String)
+     * @see String#replaceAll(String, String)
+     */
+    public static String removeAll(final String source, final String regex) {
+        return replaceAll(source, regex, Strings.EMPTY_STRING);
+    }
+
+    /**
+     * <p>Removes each substring of the source string that matches the given regular expression pattern.</p>
      *
+     * @param source source string to remove from, may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @return the source string with any removes processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replaceAll(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceAll(String)
-     * @see java.util.regex.Pattern
      */
-    public static String removeAll(final String text, final Pattern regex) {
-        return replaceAll(text, regex, Strings.EMPTY_STRING);
+    public static String removeAll(final String source, final Pattern pattern) throws IllegalArgumentException {
+        return replaceAll(source, pattern, Strings.EMPTY_STRING);
     }
 
     /**
-     * <p>Removes each substring of the text String that matches the given regular expression.</p>
+     * <p>Removes the first substring of the source string that matches the given regular expression.</p>
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code text.replaceAll(regex, Strings.EMPTY_STRING)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
-     * </ul>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
-     * <p>Unlike in the {@link #removePattern(String, String)} method, the {@link Pattern#DOTALL} option
-     * is NOT automatically added.
-     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
-     * DOTALL is also known as single-line mode in Perl.</p>
-     *
-     * <pre>
-     * StringUtils.removeAll(null, *)      = null
-     * StringUtils.removeAll("any", (String) null)  = "any"
-     * StringUtils.removeAll("any", "")    = "any"
-     * StringUtils.removeAll("any", ".*")  = ""
-     * StringUtils.removeAll("any", ".+")  = ""
-     * StringUtils.removeAll("abc", ".?")  = ""
-     * StringUtils.removeAll("A&lt;__&gt;\n&lt;__&gt;B", "&lt;.*&gt;")      = "A\nB"
-     * StringUtils.removeAll("A&lt;__&gt;\n&lt;__&gt;B", "(?s)&lt;.*&gt;")  = "AB"
-     * StringUtils.removeAll("ABCabc123abc", "[a-z]")     = "ABC123"
-     * </pre>
-     *
-     * @param text text to remove from, may be null
+     * @param source source string to remove from, may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the text with any removes processed,
-     *              {@code null} if {@code null} String input
-     * @see #replaceAll(String, String, String)
-     * @see #removePattern(String, String)
-     * @see String#replaceAll(String, String)
+     * @return the source string with the first replacement processed,  {@code null} if {@code null} String input
+     * @see #replaceFirst(String, String, String)
+     * @see String#replaceFirst(String, String)
      * @see java.util.regex.Pattern
-     * @see java.util.regex.Pattern#DOTALL
      */
-    public static String removeAll(final String text, final String regex) {
-        return replaceAll(text, regex, Strings.EMPTY_STRING);
+    public static String removeFirst(final String source, final String regex) {
+        return replaceFirst(source, regex, Strings.EMPTY_STRING);
     }
 
     /**
-     * <p>Removes the first substring of the text string that matches the given regular expression pattern.</p>
+     * <p>Removes the first substring of the source string that matches the given regular expression pattern.</p>
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(text).replaceFirst(Strings.EMPTY_STRING)}</li>
-     * </ul>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
-     * <pre>
-     * StringUtils.removeFirst(null, *)      = null
-     * StringUtils.removeFirst("any", (Pattern) null)  = "any"
-     * StringUtils.removeFirst("any", Pattern.compile(""))    = "any"
-     * StringUtils.removeFirst("any", Pattern.compile(".*"))  = ""
-     * StringUtils.removeFirst("any", Pattern.compile(".+"))  = ""
-     * StringUtils.removeFirst("abc", Pattern.compile(".?"))  = "bc"
-     * StringUtils.removeFirst("A&lt;__&gt;\n&lt;__&gt;B", Pattern.compile("&lt;.*&gt;"))      = "A\n&lt;__&gt;B"
-     * StringUtils.removeFirst("A&lt;__&gt;\n&lt;__&gt;B", Pattern.compile("(?s)&lt;.*&gt;"))  = "AB"
-     * StringUtils.removeFirst("ABCabc123", Pattern.compile("[a-z]"))          = "ABCbc123"
-     * StringUtils.removeFirst("ABCabc123abc", Pattern.compile("[a-z]+"))      = "ABC123abc"
-     * </pre>
-     *
-     * @param text text to remove from, may be null
-     * @param regex the regular expression pattern to which this string is to be matched
-     * @return the text with the first replacement processed,
-     *              {@code null} if {@code null} String input
-     *
+     * @param source source string to remove from, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replaceFirst(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceFirst(String)
      * @see java.util.regex.Pattern
      */
-    public static String removeFirst(final String text, final Pattern regex) {
-        return replaceFirst(text, regex, Strings.EMPTY_STRING);
+    public static String removeFirst(final String source, final Pattern pattern) throws IllegalArgumentException {
+        return replaceFirst(source, pattern, Strings.EMPTY_STRING);
     }
 
     /**
-     * <p>Removes the first substring of the text string that matches the given regular expression.</p>
+     * <p>Removes the last substring of the source string that matches the given regular expression.</p>
+     *
+     * @param source source string to remove from, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @return the source string with the last replacement processed,  {@code null} if {@code null} String input
+     * @see #replaceFirst(String, String, String)
+     * @see String#replaceLast(String, String)
+     * @see java.util.regex.Pattern
+     */
+    @Beta
+    public static String removeLast(final String source, final String regex) {
+        return replaceLast(source, regex, Strings.EMPTY_STRING);
+    }
+
+    /**
+     * <p>Removes the last substring of the source string that matches the given regular expression pattern.</p>
+     *
+     * @param source source string to remove from, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @return the source string with the last replacement processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see #replaceLast(String, Pattern, String)
+     * @see java.util.regex.Pattern
+     */
+    @Beta
+    public static String removeLast(final String source, final Pattern pattern) throws IllegalArgumentException {
+        return replaceLast(source, pattern, Strings.EMPTY_STRING);
+    }
+
+    /**
+     * <p>Replaces each substring of the source string that matches the given regular expression
+     * with the given replacement.</p>
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code text.replaceFirst(regex, Strings.EMPTY_STRING)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(Strings.EMPTY_STRING)}</li>
+     *  <li>{@code source.replaceAll(regex, replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}</li>
      * </ul>
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
-     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
-     * DOTALL is also known as single-line mode in Perl.</p>
-     *
-     * <pre>
-     * StringUtils.removeFirst(null, *)      = null
-     * StringUtils.removeFirst("any", (String) null)  = "any"
-     * StringUtils.removeFirst("any", "")    = "any"
-     * StringUtils.removeFirst("any", ".*")  = ""
-     * StringUtils.removeFirst("any", ".+")  = ""
-     * StringUtils.removeFirst("abc", ".?")  = "bc"
-     * StringUtils.removeFirst("A&lt;__&gt;\n&lt;__&gt;B", "&lt;.*&gt;")      = "A\n&lt;__&gt;B"
-     * StringUtils.removeFirst("A&lt;__&gt;\n&lt;__&gt;B", "(?s)&lt;.*&gt;")  = "AB"
-     * StringUtils.removeFirst("ABCabc123", "[a-z]")          = "ABCbc123"
-     * StringUtils.removeFirst("ABCabc123abc", "[a-z]+")      = "ABC123abc"
-     * </pre>
-     *
-     * @param text text to remove from, may be null
+     * @param source source string to search and replace in, may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the text with the first replacement processed,
-     *              {@code null} if {@code null} String input
-     * @see #replaceFirst(String, String, String)
-     * @see String#replaceFirst(String, String)
-     * @see java.util.regex.Pattern
-     * @see java.util.regex.Pattern#DOTALL
-     */
-    public static String removeFirst(final String text, final String regex) {
-        return replaceFirst(text, regex, Strings.EMPTY_STRING);
-    }
-
-    /**
-     * <p>Removes each substring of the source String that matches the given regular expression using the DOTALL option.</p>
-     *
-     * This call is a {@code null} safe equivalent to:
-     * <ul>
-     * <li>{@code text.replaceAll(&quot;(?s)&quot; + regex, Strings.EMPTY_STRING)}</li>
-     * <li>{@code Pattern.compile(regex, Pattern.DOTALL).matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
-     * </ul>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
-     * <pre>
-     * StringUtils.removePattern(null, *)       = null
-     * StringUtils.removePattern("any", (String) null)   = "any"
-     * StringUtils.removePattern("A&lt;__&gt;\n&lt;__&gt;B", "&lt;.*&gt;")  = "AB"
-     * StringUtils.removePattern("ABCabc123", "[a-z]")    = "ABC123"
-     * </pre>
-     *
-     * @param text
-     *            the source string
-     * @param regex
-     *            the regular expression to which this string is to be matched
-     * @return The resulting {@code String}
+     * @param replacement the string to be substituted for each match
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
      * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
-     * @see Pattern#DOTALL
      */
-    public static String removePattern(final String text, final String regex) {
-        return replacePattern(text, regex, Strings.EMPTY_STRING);
-    }
-
-    /**
-     * <p>Replaces the first substring of the text string that matches the given regular expression pattern
-     * with the given replacement.</p>
-     *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(text).replaceFirst(replacement)}</li>
-     * </ul>
-     *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
-     * <pre>
-     * StringUtils.replaceFirst(null, *, *)       = null
-     * StringUtils.replaceFirst("any", (Pattern) {@code null}, *)   = "any"
-     * StringUtils.replaceFirst("any", *, null)   = "any"
-     * StringUtils.replaceFirst("", Pattern.compile(""), "zzz")    = "zzz"
-     * StringUtils.replaceFirst("", Pattern.compile(".*"), "zzz")  = "zzz"
-     * StringUtils.replaceFirst("", Pattern.compile(".+"), "zzz")  = ""
-     * StringUtils.replaceFirst("abc", Pattern.compile(""), "ZZ")  = "ZZabc"
-     * StringUtils.replaceFirst("&lt;__&gt;\n&lt;__&gt;", Pattern.compile("&lt;.*&gt;"), "z")      = "z\n&lt;__&gt;"
-     * StringUtils.replaceFirst("&lt;__&gt;\n&lt;__&gt;", Pattern.compile("(?s)&lt;.*&gt;"), "z")  = "z"
-     * StringUtils.replaceFirst("ABCabc123", Pattern.compile("[a-z]"), "_")          = "ABC_bc123"
-     * StringUtils.replaceFirst("ABCabc123abc", Pattern.compile("[^A-Z0-9]+"), "_")  = "ABC_123abc"
-     * StringUtils.replaceFirst("ABCabc123abc", Pattern.compile("[^A-Z0-9]+"), "")   = "ABC123abc"
-     * StringUtils.replaceFirst("Lorem ipsum  dolor   sit", Pattern.compile("( +)([a-z]+)"), "_$2")  = "Lorem_ipsum  dolor   sit"
-     * </pre>
-     *
-     * @param text text to search and replace in, may be null
-     * @param regex the regular expression pattern to which this string is to be matched
-     * @param replacement the string to be substituted for the first match
-     * @return the text with the first replacement processed,
-     *              {@code null} if {@code null} String input
-     *
-     * @see java.util.regex.Matcher#replaceFirst(String)
-     * @see java.util.regex.Pattern
-     */
-    public static String replaceFirst(final String text, final Pattern regex, final String replacement) {
-        if (text == null || regex == null || replacement == null) {
-            return text;
+    public static String replaceAll(final String source, final String regex, final String replacement) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
         }
-        return regex.matcher(text).replaceFirst(replacement);
+
+        return replaceAll(source, Pattern.compile(regex), Strings.nullToEmpty(replacement));
     }
 
     /**
-     * <p>Replaces the first substring of the text string that matches the given regular expression
+     * <p>Replaces each substring of the source string that matches the given regular expression
      * with the given replacement.</p>
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code text.replaceFirst(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(replacement)}</li>
+     *  <li>{@code source.replaceAll(regex, replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
      * </ul>
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
-     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
-     * DOTALL is also known as single-line mode in Perl.</p>
-     *
-     * <pre>
-     * StringUtils.replaceFirst(null, *, *)       = null
-     * StringUtils.replaceFirst("any", (String) {@code null}, *)   = "any"
-     * StringUtils.replaceFirst("any", *, null)   = "any"
-     * StringUtils.replaceFirst("", "", "zzz")    = "zzz"
-     * StringUtils.replaceFirst("", ".*", "zzz")  = "zzz"
-     * StringUtils.replaceFirst("", ".+", "zzz")  = ""
-     * StringUtils.replaceFirst("abc", "", "ZZ")  = "ZZabc"
-     * StringUtils.replaceFirst("&lt;__&gt;\n&lt;__&gt;", "&lt;.*&gt;", "z")      = "z\n&lt;__&gt;"
-     * StringUtils.replaceFirst("&lt;__&gt;\n&lt;__&gt;", "(?s)&lt;.*&gt;", "z")  = "z"
-     * StringUtils.replaceFirst("ABCabc123", "[a-z]", "_")          = "ABC_bc123"
-     * StringUtils.replaceFirst("ABCabc123abc", "[^A-Z0-9]+", "_")  = "ABC_123abc"
-     * StringUtils.replaceFirst("ABCabc123abc", "[^A-Z0-9]+", "")   = "ABC123abc"
-     * StringUtils.replaceFirst("Lorem ipsum  dolor   sit", "( +)([a-z]+)", "_$2")  = "Lorem_ipsum  dolor   sit"
-     * </pre>
-     *
-     * @param text text to search and replace in, may be null
+     * @param source source string to search and replace in, may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacement the string to be substituted for the first match
-     * @return the text with the first replacement processed,
-     *              {@code null} if {@code null} String input
-     * @see String#replaceFirst(String, String)
-     * @see java.util.regex.Pattern
-     * @see java.util.regex.Pattern#DOTALL
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
+     * @see #replacePattern(String, String, String)
+     * @see String#replaceAll(String, String)
      */
-    public static String replaceFirst(final String text, final String regex, final String replacement) {
-        if (text == null || regex == null || replacement == null) {
-            return text;
+    public static String replaceAll(final String source, final String regex, final Function<String, String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
         }
-        return text.replaceFirst(regex, replacement);
+
+        return replaceAll(source, Pattern.compile(regex), replacer);
     }
 
     /**
-     * <p>Replaces each substring of the text String that matches the given regular expression pattern with the given replacement.</p>
+     * <p>Replaces each substring of the source string that matches the given regular expression
+     * with the given replacement.</p>
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code pattern.matcher(text).replaceAll(replacement)}</li>
+     *  <li>{@code source.replaceAll(regex, replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
      * </ul>
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <pre>
-     * StringUtils.replaceAll(null, *, *)       = null
-     * StringUtils.replaceAll("any", (Pattern) {@code null}, *)   = "any"
-     * StringUtils.replaceAll("any", *, null)   = "any"
-     * StringUtils.replaceAll("", Pattern.compile(""), "zzz")    = "zzz"
-     * StringUtils.replaceAll("", Pattern.compile(".*"), "zzz")  = "zzz"
-     * StringUtils.replaceAll("", Pattern.compile(".+"), "zzz")  = ""
-     * StringUtils.replaceAll("abc", Pattern.compile(""), "ZZ")  = "ZZaZZbZZcZZ"
-     * StringUtils.replaceAll("&lt;__&gt;\n&lt;__&gt;", Pattern.compile("&lt;.*&gt;"), "z")                 = "z\nz"
-     * StringUtils.replaceAll("&lt;__&gt;\n&lt;__&gt;", Pattern.compile("&lt;.*&gt;", Pattern.DOTALL), "z") = "z"
-     * StringUtils.replaceAll("&lt;__&gt;\n&lt;__&gt;", Pattern.compile("(?s)&lt;.*&gt;"), "z")             = "z"
-     * StringUtils.replaceAll("ABCabc123", Pattern.compile("[a-z]"), "_")       = "ABC___123"
-     * StringUtils.replaceAll("ABCabc123", Pattern.compile("[^A-Z0-9]+"), "_")  = "ABC_123"
-     * StringUtils.replaceAll("ABCabc123", Pattern.compile("[^A-Z0-9]+"), "")   = "ABC123"
-     * StringUtils.replaceAll("Lorem ipsum  dolor   sit", Pattern.compile("( +)([a-z]+)"), "_$2")  = "Lorem_ipsum_dolor_sit"
-     * </pre>
+     * @param source source string to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
+     * @see #replacePattern(String, String, String)
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final String regex, final IntBiFunction<String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceAll(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * <p>Replaces each substring of the source string that matches the given regular expression pattern with the given replacement.</p>
      *
-     * @param text text to search and replace in, may be null
-     * @param regex the regular expression pattern to which this string is to be matched
+     * This method is a {@code null} safe equivalent to:
+     * <ul>
+     *  <li>{@code pattern.matcher(source).replaceAll(replacement)}</li>
+     * </ul>
+     *
+     *
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for each match
-     * @return the text with any replacements processed,
-     *              {@code null} if {@code null} String input
-     *
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
      * @see java.util.regex.Matcher#replaceAll(String)
      * @see java.util.regex.Pattern
      */
-    public static String replaceAll(final String text, final Pattern regex, final String replacement) {
-        if (text == null || regex == null || replacement == null) {
-            return text;
+    public static String replaceAll(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
         }
-        return regex.matcher(text).replaceAll(replacement);
+
+        return pattern.matcher(source).replaceAll(Strings.nullToEmpty(replacement));
     }
 
     /**
-     * <p>Replaces each substring of the text String that matches the given regular expression
+     * <p>Replaces each substring of the source string that matches the given regular expression
      * with the given replacement.</p>
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code text.replaceAll(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
      * </ul>
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <p>Unlike in the {@link #replacePattern(String, String, String)} method, the {@link Pattern#DOTALL} option
-     * is NOT automatically added.
-     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
-     * DOTALL is also known as single-line mode in Perl.</p>
-     *
-     * <pre>
-     * StringUtils.replaceAll(null, *, *)       = null
-     * StringUtils.replaceAll("any", (String) {@code null}, *)   = "any"
-     * StringUtils.replaceAll("any", *, null)   = "any"
-     * StringUtils.replaceAll("", "", "zzz")    = "zzz"
-     * StringUtils.replaceAll("", ".*", "zzz")  = "zzz"
-     * StringUtils.replaceAll("", ".+", "zzz")  = ""
-     * StringUtils.replaceAll("abc", "", "ZZ")  = "ZZaZZbZZcZZ"
-     * StringUtils.replaceAll("&lt;__&gt;\n&lt;__&gt;", "&lt;.*&gt;", "z")      = "z\nz"
-     * StringUtils.replaceAll("&lt;__&gt;\n&lt;__&gt;", "(?s)&lt;.*&gt;", "z")  = "z"
-     * StringUtils.replaceAll("ABCabc123", "[a-z]", "_")       = "ABC___123"
-     * StringUtils.replaceAll("ABCabc123", "[^A-Z0-9]+", "_")  = "ABC_123"
-     * StringUtils.replaceAll("ABCabc123", "[^A-Z0-9]+", "")   = "ABC123"
-     * StringUtils.replaceAll("Lorem ipsum  dolor   sit", "( +)([a-z]+)", "_$2")  = "Lorem_ipsum_dolor_sit"
-     * </pre>
-     *
-     * @param text text to search and replace in, may be null
-     * @param regex the regular expression to which this string is to be matched
-     * @param replacement the string to be substituted for each match
-     * @return the text with any replacements processed,
-     *              {@code null} if {@code null} String input
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
-     * @see java.util.regex.Pattern
-     * @see java.util.regex.Pattern#DOTALL
      */
-    public static String replaceAll(final String text, final String regex, final String replacement) {
-        if (text == null || regex == null || replacement == null) {
-            return text;
+    public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
         }
-        return text.replaceAll(regex, replacement);
+
+        return pattern.matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
     }
 
     /**
-     * <p>Replaces each substring of the source String that matches the given regular expression with the given
-     * replacement using the {@link Pattern#DOTALL} option. DOTALL is also known as single-line mode in Perl.</p>
+     * <p>Replaces each substring of the source string that matches the given regular expression
+     * with the given replacement.</p>
      *
-     * This call is a {@code null} safe equivalent to:
+     * This method is a {@code null} safe equivalent to:
      * <ul>
-     * <li>{@code text.replaceAll(&quot;(?s)&quot; + regex, replacement)}</li>
-     * <li>{@code Pattern.compile(regex, Pattern.DOTALL).matcher(text).replaceAll(replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
      * </ul>
      *
-     * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <pre>
-     * StringUtils.replacePattern(null, *, *)       = null
-     * StringUtils.replacePattern("any", (String) {@code null}, *)   = "any"
-     * StringUtils.replacePattern("any", *, null)   = "any"
-     * StringUtils.replacePattern("", "", "zzz")    = "zzz"
-     * StringUtils.replacePattern("", ".*", "zzz")  = "zzz"
-     * StringUtils.replacePattern("", ".+", "zzz")  = ""
-     * StringUtils.replacePattern("&lt;__&gt;\n&lt;__&gt;", "&lt;.*&gt;", "z")       = "z"
-     * StringUtils.replacePattern("ABCabc123", "[a-z]", "_")       = "ABC___123"
-     * StringUtils.replacePattern("ABCabc123", "[^A-Z0-9]+", "_")  = "ABC_123"
-     * StringUtils.replacePattern("ABCabc123", "[^A-Z0-9]+", "")   = "ABC123"
-     * StringUtils.replacePattern("Lorem ipsum  dolor   sit", "( +)([a-z]+)", "_$2")  = "Lorem_ipsum_dolor_sit"
-     * </pre>
-     *
-     * @param text
-     *            the source string
-     * @param regex
-     *            the regular expression to which this string is to be matched
-     * @param replacement
-     *            the string to be substituted for each match
-     * @return The resulting {@code String}
-     * @see #replaceAll(String, String, String)
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
-     * @see Pattern#DOTALL
      */
-    public static String replacePattern(final String text, final String regex, final String replacement) {
-        if (text == null || regex == null || replacement == null) {
-            return text;
+    public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
         }
-        return Pattern.compile(regex, Pattern.DOTALL).matcher(text).replaceAll(replacement);
+
+        return pattern.matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
     }
 
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     *
+     * @param source source string to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacement the string to be substituted for the first match
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @see String#replaceFirst(String, String)
+     */
+    public static String replaceFirst(final String source, final String regex, final String replacement) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceFirst(source, Pattern.compile(regex), N.nullToEmpty(replacement));
+    }
+
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     *
+     * @param source source string to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @see String#replaceFirst(String, String)
+     */
+    public static String replaceFirst(final String source, final String regex, final Function<String, String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceFirst(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     *
+     * @param source source string to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @see String#replaceFirst(String, String)
+     */
+    public static String replaceFirst(final String source, final String regex, final IntBiFunction<String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceFirst(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacement.</p>
+     *
+     * This method is a {@code null} safe equivalent to:
+     * <ul>
+     *  <li>{@code pattern.matcher(source).replaceFirst(replacement)}</li>
+     * </ul>
+     *
+     *
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @param replacement the string to be substituted for the first match
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see java.util.regex.Matcher#replaceFirst(String)
+     */
+    public static String replaceFirst(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        return pattern.matcher(source).replaceFirst(Strings.nullToEmpty(replacement));
+    }
+
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.</p>
+     *
+     * This method is a {@code null} safe equivalent to:
+     * <ul>
+     *  <li>{@code pattern.matcher(source).replaceFirst(replacer)}</li>
+     * </ul>
+     *
+     *
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see java.util.regex.Matcher#replaceFirst(String)
+     */
+    public static String replaceFirst(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        return pattern.matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+    }
+
+    /**
+     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.</p>
+     *
+     * This method is a {@code null} safe equivalent to:
+     * <ul>
+     *  <li>{@code pattern.matcher(source).replaceFirst(replacer)}</li>
+     * </ul>
+     *
+     *
+     * @param source source string to search and replace in, may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with the first replacement processed, {@code null} if {@code null} String input
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see java.util.regex.Matcher#replaceFirst(String)
+     */
+    public static String replaceFirst(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        return pattern.matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     *
+     * @param source
+     * @param regex
+     * @param replacement
+     * @return
+     * @see Matcher#replaceFirst(String)
+     */
+    @Beta
+    public static String replaceLast(final String source, final String regex, final String replacement) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceLast(source, Pattern.compile(regex), replacement);
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param regex
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLast(final String source, final String regex, final Function<String, String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceLast(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param regex
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLast(final String source, final String regex, final IntBiFunction<String> replacer) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return source;
+        }
+
+        return replaceLast(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     *
+     * @param source
+     * @param pattern
+     * @param replacement
+     * @return
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see Matcher#replaceFirst(String)
+     */
+    @Beta
+    public static String replaceLast(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        final Matcher matcher = pattern.matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacement);
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacement);
+            }
+        }
+
+        return source;
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param pattern
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLast(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        final Matcher matcher = pattern.matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+            }
+        }
+
+        return source;
+    }
+
+    /**
+     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     *
+     * @param source
+     * @param pattern
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see Matcher#replaceFirst(Function)
+     */
+    @Beta
+    public static String replaceLast(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return source;
+        }
+
+        final Matcher matcher = pattern.matcher(source);
+
+        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+            if (matcher.find(i)) {
+                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
+                    start = matcher.start();
+                    end = matcher.end();
+                } else {
+                    return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+                }
+            } else if (start >= 0) {
+                return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+            }
+        }
+
+        return source;
+    }
+
+    /**
+     * Counts the number of occurrences of the specified pattern in the given string.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param regexToFind the regular expression pattern to be counted
+     * @return the number of occurrences of the specified pattern in the string, or 0 if the string is {@code null} or empty
+     * @see #countMatches(String, String)
+     */
+    public static int countMatches(final String source, final String regexToFind) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regexToFind)) {
+            return 0;
+        }
+
+        return countMatches(source, Pattern.compile(regexToFind));
+    }
+
+    /**
+     * Counts the number of occurrences of the specified pattern in the given string.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param pattern the regular expression pattern to be counted
+     * @return the number of occurrences of the specified pattern in the string, or 0 if the string is {@code null} or empty
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see #countMatches(String, String)
+     */
+    public static int countMatches(final String source, final Pattern pattern) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return 0;
+        }
+
+        final Matcher matcher = pattern.matcher(source);
+        int occurrences = 0;
+
+        while (matcher.find()) {
+            occurrences++;
+        }
+
+        return occurrences;
+    }
+
+    /**
+     * Finds all the occurrences of the specified pattern in the given string.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param regexToFind the regular expression pattern to be counted
+     * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
+     * @see Matcher#results()
+     * @see Strings#occurrences(String, String)
+     */
+    public static Stream<MatchResult> matchResults(final String source, final String regexToFind) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regexToFind)) {
+            return Stream.empty();
+        }
+
+        return matchResults(source, Pattern.compile(regexToFind));
+    }
+
+    /**
+     * Finds all the occurrences of the specified pattern in the given string.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param pattern the regular expression pattern to be counted
+     * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see Matcher#results()
+     */
+    public static Stream<MatchResult> matchResults(final String source, final Pattern pattern) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return Stream.empty();
+        }
+
+        return pattern.matcher(source).results();
+    }
+
+    /**
+     * Finds all the occurrences of the specified pattern in the given string and returns a stream of start indices.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param regexToFind the regular expression pattern to be counted
+     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
+     * @see Matcher#results()
+     * @see Strings#indicesOf(String, String)
+     * @see Strings#indicesOf(String, String, int)
+     */
+    public static IntStream matchIndices(final String source, final String regexToFind) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regexToFind)) {
+            return IntStream.empty();
+        }
+
+        return matchIndices(source, Pattern.compile(regexToFind));
+    }
+
+    /**
+     * Finds all the occurrences of the specified pattern in the given string and returns a stream of start indices.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param pattern the regular expression pattern to be counted
+     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see Matcher#results()
+     * @see Strings#indicesOf(String, String)
+     * @see Strings#indicesOf(String, String, int)
+     */
+    public static IntStream matchIndices(final String source, final Pattern pattern) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, PATTERNS_STR);
+
+        if (Strings.isEmpty(source)) {
+            return IntStream.empty();
+        }
+
+        return pattern.matcher(source).results().mapToInt(MatchResult::start);
+    }
 }
