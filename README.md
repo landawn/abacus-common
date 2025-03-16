@@ -158,7 +158,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.7.8/com/lan
 [ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/ClassUtil.html),
 [CSVUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/CSVUtil.html),
 [EscapeUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/EscapeUtil.html),
-[RegExUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/RegExUtil.html),
 [FilenameUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/FilenameUtil.html),
 [AddrUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/AddrUtil.html),
 [WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-common/5.7.8/com/landawn/abacus/util/WSSecurityUtil.html),
