@@ -51,6 +51,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Clazz](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Clazz_view.html), 
 [Hex](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Hex_view.html), 
 [DigestUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DigestUtil_view.html), 
+[RegExUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/RegExUtil_view.html), 
 [URLEncodedUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/URLEncodedUtil_view.html), 
 [AsyncExecutor](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/AsyncExecutor_view.html), 
 [ContinuableFuture](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ContinuableFuture_view.html), 
