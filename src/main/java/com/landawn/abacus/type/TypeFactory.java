@@ -94,6 +94,24 @@ public final class TypeFactory {
 
     static final Map<String, Type<?>> typePool = new ObjectPool<>(POOL_SIZE);
 
+    static final Class<?> guavaMultisetClass; // could be null if Guava library is not in the classpath.
+    static final Class<?> guavaMultimapClass; // could be null if Guava library is not in the classpath.
+
+    static {
+        Class<?> multisetClass = null;
+        Class<?> multimapClass = null;
+
+        try {
+            multisetClass = Class.forName("com.google.common.collect.Multiset");
+            multimapClass = Class.forName("com.google.common.collect.Multimap");
+        } catch (final Throwable e) {
+            // ignore.
+        }
+
+        guavaMultisetClass = multisetClass;
+        guavaMultimapClass = multimapClass;
+    }
+
     static {
         // initializing built-in types
 
@@ -569,9 +587,9 @@ public final class TypeFactory {
                     }
 
                     if (typeParameters.length == 0) {
-                        type = new ListMultimapType(ObjectType.OBJECT, ObjectType.OBJECT);
+                        type = new ListMultimapType(cls, ObjectType.OBJECT, ObjectType.OBJECT);
                     } else {
-                        type = new ListMultimapType(typeParameters[0], typeParameters[1]);
+                        type = new ListMultimapType(cls, typeParameters[0], typeParameters[1]);
                     }
                 } else if (SetMultimap.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
@@ -583,23 +601,27 @@ public final class TypeFactory {
                     }
 
                     if (typeParameters.length == 0) {
-                        type = new SetMultimapType(ObjectType.OBJECT, ObjectType.OBJECT);
+                        type = new SetMultimapType(cls, ObjectType.OBJECT, ObjectType.OBJECT);
                     } else {
-                        type = new SetMultimapType(typeParameters[0], typeParameters[1]);
+                        type = new SetMultimapType(cls, typeParameters[0], typeParameters[1]);
                     }
                 } else if (Multimap.class.isAssignableFrom(cls)) {
-                    if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
+                    final int typeParamCount = typeParameters.length;
+
+                    if (!(typeParamCount == 0 || typeParamCount == 2 || typeParamCount == 3)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Multimap Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Multimap Type can only have zero, two or three type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Multimap Type can only have zero parameter.");
                     }
 
                     if (typeParameters.length == 0) {
-                        type = new MultimapType(ObjectType.OBJECT, "List<Object>");
+                        type = new MultimapType(cls, ObjectType.OBJECT, ObjectType.OBJECT, "List<Object>");
+                    } else if (typeParameters.length == 2) {
+                        type = new MultimapType(cls, typeParameters[0], null, typeParameters[1]);
                     } else {
-                        type = new MultimapType(typeParameters[0], typeParameters[1]);
+                        type = new MultimapType(cls, typeParameters[0], typeParameters[1], typeParameters[2]);
                     }
                 } else if (Range.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
@@ -669,13 +691,48 @@ public final class TypeFactory {
                     } else {
                         type = new ImmutableSetType(typeParameters[0]);
                     }
+                } else if (guavaMultisetClass != null && guavaMultisetClass.isAssignableFrom(cls)) {
+                    if (typeParameters.length > 1) {
+                        throw new IllegalArgumentException(
+                                "Incorrect type parameters: " + typeName + ". Guava Multiset Type can only have zero or one type parameter.");
+                    }
+
+                    if (parameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Guava Multiset Type can only have zero parameter.");
+                    }
+
+                    if (typeParameters.length == 0) {
+                        type = new GuavaMultisetType(cls, ObjectType.OBJECT);
+                    } else {
+                        type = new GuavaMultisetType(cls, typeParameters[0]);
+                    }
+                } else if (guavaMultimapClass != null && guavaMultimapClass.isAssignableFrom(cls)) {
+                    if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
+                        throw new IllegalArgumentException(
+                                "Incorrect type parameters: " + typeName + ". Guava Multimap Type can only have zero or two type parameter.");
+                    }
+
+                    if (parameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Guava Multimap can only have zero parameter.");
+                    }
+
+                    if (typeParameters.length == 0) {
+                        type = new GuavaMultimapType(cls, ObjectType.OBJECT, ObjectType.OBJECT);
+                    } else {
+                        type = new GuavaMultimapType(cls, typeParameters[0], typeParameters[1]);
+                    }
                 } else if (Collection.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
                         throw new IllegalArgumentException(
                                 "Incorrect type parameters: " + typeName + ". Collection Type can only have zero or one type parameter.");
                     }
+
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Collection Type can only have zero parameter.");
+                    }
+
+                    if (guavaMultisetClass != null && guavaMultisetClass.isAssignableFrom(cls)) {
+
                     }
 
                     if (typeParameters.length == 0) {

@@ -15,16 +15,13 @@
 package com.landawn.abacus.type;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
 
 /**
  *
@@ -32,47 +29,10 @@ import com.landawn.abacus.util.WD;
  * @param <E>
  */
 @SuppressWarnings("java:S2160")
-public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
+public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
 
-    private static final Class<?> typeClass = ListMultimap.class;
-
-    private final String declaringName;
-
-    private final Type<?>[] parameterTypes;
-
-    private final JSONDeserializationConfig jdc;
-
-    ListMultimapType(final String keyTypeName, final String valueTypeName) {
-        super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
-        parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
-
-        declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
-
-        jdc = JDC.create()
-                .setMapKeyType(parameterTypes[0])
-                .setMapValueType(TypeFactory.getType("List<" + valueTypeName + ">"))
-                .setElementType(parameterTypes[1]);
-    }
-
-    @Override
-    public String declaringName() {
-        return declaringName;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public Class<ListMultimap<K, E>> clazz() {
-        return (Class) typeClass;
-    }
-
-    /**
-     * Gets the parameter types.
-     *
-     * @return
-     */
-    @Override
-    public Type<?>[] getParameterTypes() {
-        return parameterTypes;
+    ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
+        super(typeClass, keyTypeName, valueElementTypeName, null);
     }
 
     /**
@@ -128,24 +88,4 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
         return multiMap;
     }
 
-    /**
-     * Gets the type name.
-     *
-     * @param typeClass
-     * @param keyTypeName
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
-     */
-    @SuppressWarnings("hiding")
-    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
-        if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
-        } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(valueTypeName).name() + WD.GREATER_THAN;
-
-        }
-    }
 }

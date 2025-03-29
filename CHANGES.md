@@ -1,3 +1,7 @@
+### 5.7.9
+
+* Improvements and bug fixes.
+
 ### 5.7.8
 
 * Add `RegExUtil.remove/replaceAll/First/Last/matchResults/matchIndices`.

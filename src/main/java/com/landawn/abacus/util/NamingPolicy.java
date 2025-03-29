@@ -49,4 +49,14 @@ public enum NamingPolicy {
     public String convert(final String str) {
         return converter.apply(str);
     }
+
+    /**
+     * Returns the function that converts a string according to the policy.
+     *
+     * @return
+     */
+    @Beta
+    public Function<String, String> func() {
+        return converter;
+    }
 }

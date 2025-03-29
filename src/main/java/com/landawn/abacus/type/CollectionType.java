@@ -109,16 +109,6 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Gets the element type.
-     *
-     * @return
-     */
-    @Override
-    public Type<E> getElementType() {
-        return elementType;
-    }
-
-    /**
      * Gets the parameter types.
      *
      * @return
@@ -126,6 +116,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     @Override
     public Type<E>[] getParameterTypes() {
         return parameterTypes;
+    }
+
+    /**
+     * Gets the element type.
+     *
+     * @return
+     */
+    @Override
+    public Type<E> getElementType() {
+        return elementType;
     }
 
     @Override

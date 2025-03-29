@@ -127,13 +127,13 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
         final Map<E, Integer> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
-        final Multiset<E> multiSet = N.newMultiset(map.size());
+        final Multiset<E> multiset = N.newMultiset(map.size());
 
         for (final Map.Entry<E, Integer> entry : map.entrySet()) {
-            multiSet.add(entry.getKey(), entry.getValue());
+            multiset.add(entry.getKey(), entry.getValue());
         }
 
-        return multiSet;
+        return multiset;
     }
 
     /**

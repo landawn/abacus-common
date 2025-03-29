@@ -171,15 +171,6 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         }
     }
 
-    /**
-     * Gets the type name.
-     *
-     * @param typeClass
-     * @param keyTypeName
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
-     */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE

@@ -17,13 +17,20 @@ package com.landawn.abacus.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.function.BiPredicate;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.function.TriPredicate;
 
 /**
@@ -695,8 +702,31 @@ public class Difference<L, R> {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj != null && obj.getClass().equals(Difference.class)) {
+            final Difference<?, ?> other = (Difference<?, ?>) obj;
+            return inCommon().equals(other.inCommon()) && onLeftOnly().equals(other.onLeftOnly()) && onRightOnly().equals(other.onRightOnly());
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + N.hashCode(inCommon());
+        result = prime * result + N.hashCode(onLeftOnly());
+        return prime * result + N.hashCode(onRightOnly());
+    }
+
+    @Override
     public String toString() {
-        return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";
+        return "{areEqual=" + areEqual() + ", inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";
     }
 
     /**
@@ -755,7 +785,33 @@ public class Difference<L, R> {
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
-            return of(map1, map2, Fn.equal());
+            return compareMaps(map1, map2, null, (k, v1, v2) -> N.equals(v1, v2));
+        }
+
+        /**
+         * Compares two maps and finds the common elements, elements only in the left map, elements only in the right map, and elements with different values.
+         * Only the entries with key in {@code keysToCompare} will be compared.
+         *
+         * @param <CK>
+         * @param <K>
+         * @param <V1>
+         * @param <V2>
+         * @param map1
+         * @param map2
+         * @param keysToCompare
+         * @return
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
+         */
+        public static <CK, K extends CK, V1, V2> MapDifference<Map<K, V1>, Map<K, V2>, Map<CK, Pair<V1, V2>>> of(final Map<? extends K, ? extends V1> map1,
+                final Map<? extends K, ? extends V2> map2, final Collection<? extends CK> keysToCompare) {
+            return compareMaps(map1, map2, keysToCompare, (k, v1, v2) -> N.equals(v1, v2));
         }
 
         /**
@@ -784,17 +840,7 @@ public class Difference<L, R> {
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
-            return compare(map1, map2, valueEquivalence);
-        }
-
-        private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compare(
-                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
-                final BiPredicate<? super V1, ? super V2> valueEquivalence) {
-            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
-
-            final TriPredicate<K1, V1, V2> triValueEquivalenceToUse = (k, v1, v2) -> valueEquivalence.test(v1, v2);
-
-            return of(map1, map2, triValueEquivalenceToUse);
+            return compareMaps(map1, map2, null, (k, v1, v2) -> valueEquivalence.test(v1, v2));
         }
 
         /**
@@ -823,73 +869,137 @@ public class Difference<L, R> {
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
-            return compare(map1, map2, valueEquivalence);
+            return compareMaps(map1, map2, null, valueEquivalence);
         }
 
         @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
         @SuppressWarnings("unlikely-arg-type")
-        private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compare(
-                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
+        private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compareMaps(
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2, final Collection<? extends CK> keysToCompare,
                 final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            final Map<K1, V1> common = new LinkedHashMap<>();
-            final Map<K1, V1> leftOnly = new LinkedHashMap<>();
-            final Map<K2, V2> rightOnly = new LinkedHashMap<>();
-            final Map<CK, Pair<V1, V2>> withDifferentValues = new LinkedHashMap<>();
+            final boolean isOrderedMap = (map1 instanceof LinkedHashMap || map1 instanceof SortedMap)
+                    || (map2 instanceof LinkedHashMap || map2 instanceof SortedMap);
 
-            if (N.isEmpty(map1)) {
-                if (N.isEmpty(map2)) {
-                    // Do nothing. All empty.
-                } else {
-                    rightOnly.putAll(map2);
-                }
-            } else if (N.isEmpty(map2)) {
-                leftOnly.putAll(map1);
-            } else {
-                K1 key1 = null;
-                V1 val1 = null;
-                K2 key2 = null;
-                V2 val2 = null;
+            final Map<K1, V1> common = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
+            final Map<K1, V1> leftOnly = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
+            final Map<K2, V2> rightOnly = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
+            final Map<CK, Pair<V1, V2>> withDifferentValues = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
 
-                for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
-                    key1 = entry1.getKey();
-                    val1 = entry1.getValue();
-                    //noinspection SuspiciousMethodCalls
-                    val2 = map2.get(key1);
-
-                    if (val2 == null) {
-                        //noinspection SuspiciousMethodCalls
-                        if (map2.containsKey(key1)) {
-                            if (entry1.getValue() == null) {
-                                common.put(key1, val1);
-                            } else {
-                                //noinspection ConstantValue
-                                withDifferentValues.put(key1, Pair.of(val1, val2));
-                            }
-                        } else {
-                            leftOnly.put(key1, val1);
-                        }
-                    } else if (valueEquivalence.test(key1, val1, val2)) {
-                        common.put(key1, val1);
+            if (N.isEmpty(keysToCompare)) {
+                if (N.isEmpty(map1)) {
+                    if (N.isEmpty(map2)) {
+                        // Do nothing. All empty.
                     } else {
-                        withDifferentValues.put(key1, Pair.of(val1, val2));
+                        rightOnly.putAll(map2);
+                    }
+                } else if (N.isEmpty(map2)) {
+                    leftOnly.putAll(map1);
+                } else {
+                    K1 key1 = null;
+                    V1 val1 = null;
+                    K2 key2 = null;
+                    V2 val2 = null;
+
+                    for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
+                        key1 = entry1.getKey();
+                        val1 = entry1.getValue();
+                        //noinspection SuspiciousMethodCalls
+                        val2 = map2.get(key1);
+
+                        if (val2 == null) {
+                            //noinspection SuspiciousMethodCalls
+                            if (map2.containsKey(key1)) {
+                                if (entry1.getValue() == null) {
+                                    common.put(key1, val1);
+                                } else {
+                                    //noinspection ConstantValue
+                                    withDifferentValues.put(key1, Pair.of(val1, val2));
+                                }
+                            } else {
+                                leftOnly.put(key1, val1);
+                            }
+                        } else if (valueEquivalence.test(key1, val1, val2)) {
+                            common.put(key1, val1);
+                        } else {
+                            withDifferentValues.put(key1, Pair.of(val1, val2));
+                        }
+                    }
+
+                    for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
+                        key2 = entry2.getKey();
+
+                        //noinspection SuspiciousMethodCalls
+                        if (common.containsKey(key2) || withDifferentValues.containsKey(key2)) {
+                            continue;
+                        }
+
+                        rightOnly.put(key2, entry2.getValue());
                     }
                 }
 
-                for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
-                    key2 = entry2.getKey();
+                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
+            } else {
+                if (N.isEmpty(map1)) {
+                    if (N.isEmpty(map2)) {
+                        // Do nothing. All empty.
+                    } else {
+                        Maps.putIf(rightOnly, map2, k -> keysToCompare.contains(k));
+                    }
+                } else if (N.isEmpty(map2)) {
+                    Maps.putIf(leftOnly, map1, k -> keysToCompare.contains(k));
+                } else {
+                    K1 key1 = null;
+                    V1 val1 = null;
+                    K2 key2 = null;
+                    V2 val2 = null;
 
-                    //noinspection SuspiciousMethodCalls
-                    if (common.containsKey(key2) || withDifferentValues.containsKey(key2)) {
-                        continue;
+                    for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
+                        key1 = entry1.getKey();
+
+                        if (!keysToCompare.contains(key1)) {
+                            continue;
+                        }
+
+                        val1 = entry1.getValue();
+                        //noinspection SuspiciousMethodCalls
+                        val2 = map2.get(key1);
+
+                        if (val2 == null) {
+                            //noinspection SuspiciousMethodCalls
+                            if (map2.containsKey(key1)) {
+                                if (entry1.getValue() == null) {
+                                    common.put(key1, val1);
+                                } else {
+                                    //noinspection ConstantValue
+                                    withDifferentValues.put(key1, Pair.of(val1, val2));
+                                }
+                            } else {
+                                leftOnly.put(key1, val1);
+                            }
+                        } else if (valueEquivalence.test(key1, val1, val2)) {
+                            common.put(key1, val1);
+                        } else {
+                            withDifferentValues.put(key1, Pair.of(val1, val2));
+                        }
                     }
 
-                    rightOnly.put(key2, entry2.getValue());
+                    for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
+                        key2 = entry2.getKey();
+
+                        //noinspection SuspiciousMethodCalls
+                        if (!keysToCompare.contains(key2) || common.containsKey(key2) || withDifferentValues.containsKey(key2)) {
+                            continue;
+                        }
+
+                        rightOnly.put(key2, entry2.getValue());
+                    }
                 }
+
+                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
+
             }
-
-            return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
         }
 
         /**
@@ -910,11 +1020,12 @@ public class Difference<L, R> {
          * @see N#commonSet(Collection, Collection)
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
-            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
-            }
+            return compareBeans(bean1, bean2, null, (k, v1, v2) -> N.equals(v1, v2));
+        }
 
-            return of(Maps.bean2Map(bean1), Maps.bean2Map(bean2));
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
+                final Collection<String> propNamesToCompare) {
+            return compareBeans(bean1, bean2, propNamesToCompare, (k, v1, v2) -> N.equals(v1, v2));
         }
 
         /**
@@ -937,15 +1048,9 @@ public class Difference<L, R> {
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
-            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
-            }
-
-            final Map<String, Object> map1 = Maps.bean2Map(bean1);
-            final Map<String, Object> map2 = Maps.bean2Map(bean2);
             final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
 
-            return compare(map1, map2, valueEquivalenceToUse);
+            return compareBeans(bean1, bean2, null, (k, v1, v2) -> valueEquivalenceToUse.test(v1, v2));
         }
 
         /**
@@ -968,15 +1073,133 @@ public class Difference<L, R> {
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final TriPredicate<String, ?, ?> valueEquivalence) {
-            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
+            return compareBeans(bean1, bean2, null, valueEquivalence);
+        }
+
+        @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
+        private static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> compareBeans(final Object bean1,
+                final Object bean2, final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) {
+            if (bean1 != null && !ClassUtil.isBeanClass(bean1.getClass())) {
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
-            final Map<String, Object> map1 = Maps.bean2Map(bean1);
-            final Map<String, Object> map2 = Maps.bean2Map(bean2);
-            final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
+            if (bean2 != null && !ClassUtil.isBeanClass(bean2.getClass())) {
+                throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
+            }
 
-            return compare(map1, map2, valueEquivalenceToUse);
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
+            final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
+            final Map<String, Object> common = new LinkedHashMap<>();
+            final Map<String, Object> leftOnly = new LinkedHashMap<>();
+            final Map<String, Object> rightOnly = new LinkedHashMap<>();
+            final Map<String, Pair<Object, Object>> withDifferentValues = new LinkedHashMap<>();
+
+            if (N.isEmpty(propNamesToCompare)) {
+                if (bean1 == null) {
+                    if (bean2 == null) {
+                        // Do nothing. All empty.
+                    } else {
+                        Maps.bean2Map(bean2, true, rightOnly);
+                    }
+                } else if (bean2 == null) {
+                    Maps.bean2Map(bean1, true, leftOnly);
+                } else {
+                    final Set<String> ignoredPropNamesForNullValues = new HashSet<>();
+                    final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+                    final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
+                    PropInfo propInfo2 = null;
+                    Object val1 = null;
+                    Object val2 = null;
+
+                    for (final PropInfo propInfo1 : beanInfo1.propInfoList) {
+                        val1 = propInfo1.getPropValue(bean1);
+                        propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
+
+                        if (propInfo2 == null) {
+                            leftOnly.put(propInfo1.name, val1);
+                        } else {
+                            val2 = propInfo2.getPropValue(bean2);
+
+                            if (val2 == null && val1 == null) {
+                                ignoredPropNamesForNullValues.add(propInfo1.name);
+                                continue; // ignore null value comparison.
+                            }
+
+                            if (valueEquivalenceToUse.test(propInfo1.name, val1, val2)) {
+                                common.put(propInfo1.name, val1);
+                            } else {
+                                withDifferentValues.put(propInfo1.name, Pair.of(val1, val2));
+                            }
+                        }
+                    }
+
+                    for (final PropInfo propInfo : beanInfo2.propInfoList) {
+                        if (ignoredPropNamesForNullValues.contains(propInfo.name) || common.containsKey(propInfo.name)
+                                || withDifferentValues.containsKey(propInfo.name)) {
+                            continue;
+                        }
+
+                        rightOnly.put(propInfo.name, propInfo2.getPropValue(bean2));
+                    }
+                }
+
+                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
+            } else {
+                if (bean1 == null) {
+                    if (bean2 == null) {
+                        // Do nothing. All empty.
+                    } else {
+                        Maps.bean2Map(bean2, propNamesToCompare, rightOnly);
+                    }
+                } else if (bean2 == null) {
+                    Maps.bean2Map(bean1, propNamesToCompare, leftOnly);
+                } else {
+                    final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+                    final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
+                    PropInfo propInfo1 = null;
+                    PropInfo propInfo2 = null;
+                    Object val1 = null;
+                    Object val2 = null;
+
+                    for (String propName : propNamesToCompare) {
+                        propInfo1 = beanInfo1.getPropInfo(propName);
+
+                        if (propInfo1 == null) {
+                            continue;
+                        }
+
+                        val1 = propInfo1.getPropValue(bean1);
+
+                        propInfo2 = beanInfo2.getPropInfo(propName);
+
+                        if (propInfo2 == null) {
+                            leftOnly.put(propName, val1);
+                        } else {
+                            val2 = propInfo2.getPropValue(bean2);
+
+                            if ((val2 == null && val1 == null) // Compare all specified properties even values are both null
+                                    || valueEquivalenceToUse.test(propName, val1, val2)) {
+                                common.put(propName, val1);
+                            } else {
+                                withDifferentValues.put(propName, Pair.of(val1, val2));
+                            }
+                        }
+                    }
+
+                    for (String propName : propNamesToCompare) {
+                        propInfo2 = beanInfo2.getPropInfo(propName);
+
+                        if (propInfo2 == null || common.containsKey(propName) || withDifferentValues.containsKey(propName)) {
+                            continue;
+                        }
+
+                        rightOnly.put(propName, propInfo2.getPropValue(bean2));
+                    }
+                }
+
+                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
+            }
         }
 
         /**
@@ -1000,8 +1223,34 @@ public class Difference<L, R> {
         }
 
         @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj != null && obj.getClass().equals(MapDifference.class)) {
+                final MapDifference<?, ?, ?> other = (MapDifference<?, ?, ?>) obj;
+                return inCommon().equals(other.inCommon()) && onLeftOnly().equals(other.onLeftOnly()) && onRightOnly().equals(other.onRightOnly())
+                        && withDifferentValues().equals(other.withDifferentValues());
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + N.hashCode(inCommon());
+            result = prime * result + N.hashCode(onLeftOnly());
+            result = prime * result + N.hashCode(onRightOnly());
+            return prime * result + N.hashCode(withDifferentValues());
+        }
+
+        @Override
         public String toString() {
-            return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + ", withDifferentValues=" + diffValues + "}";
+            return "{areEqual=" + areEqual() + ", inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + ", withDifferentValues="
+                    + diffValues + "}";
         }
     }
 }

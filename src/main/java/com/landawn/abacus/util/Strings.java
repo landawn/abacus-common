@@ -1694,8 +1694,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (N.isEmpty(str)) {
+        if (N.isEmpty(str) || n == 0) {
             return EMPTY_STRING;
+        } else if (n == 1) {
+            return str;
         }
 
         return str.repeat(n);
@@ -3530,34 +3532,34 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return RegExUtil.removeAll(source, regex);
     }
 
-    /**
-     * Removes the first substring of the source string that matches the given regular expression.
-     *
-     * @param source the source string
-     * @param regex the regular expression to which this string is to be matched
-     * @return The resulting {@code String}
-     * @see String#replaceFirst(String, String)
-     * @see #replaceFirstByPattern(String, String, String)
-     * @see RegExUtil#removeFirst(String, String)
-     */
-    @Beta
-    public static String removeFirstByPattern(final String source, final String regex) {
-        return RegExUtil.removeFirst(source, regex);
-    }
-
-    /**
-     * Removes the last substring of the source string that matches the given regular expression.
-     *
-     * @param source the source string
-     * @param regex the regular expression to which this string is to be matched
-     * @return The resulting {@code String}
-     * @see #replaceLastByPattern(String, String, String)
-     * @see RegExUtil#removeLast(String, String)
-     */
-    @Beta
-    public static String removeLastByPattern(final String source, final String regex) {
-        return RegExUtil.removeLast(source, regex);
-    }
+    //    /**
+    //     * Removes the first substring of the source string that matches the given regular expression.
+    //     *
+    //     * @param source the source string
+    //     * @param regex the regular expression to which this string is to be matched
+    //     * @return The resulting {@code String}
+    //     * @see String#replaceFirst(String, String)
+    //     * @see #replaceFirstByPattern(String, String, String)
+    //     * @see RegExUtil#removeFirst(String, String)
+    //     */
+    //    @Beta
+    //    public static String removeFirstByPattern(final String source, final String regex) {
+    //        return RegExUtil.removeFirst(source, regex);
+    //    }
+    //
+    //    /**
+    //     * Removes the last substring of the source string that matches the given regular expression.
+    //     *
+    //     * @param source the source string
+    //     * @param regex the regular expression to which this string is to be matched
+    //     * @return The resulting {@code String}
+    //     * @see #replaceLastByPattern(String, String, String)
+    //     * @see RegExUtil#removeLast(String, String)
+    //     */
+    //    @Beta
+    //    public static String removeLastByPattern(final String source, final String regex) {
+    //        return RegExUtil.removeLast(source, regex);
+    //    }
 
     /**
      * Splits the given string into an array of substrings, using the specified delimiter character.
@@ -6399,7 +6401,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(fromIndex, 0);
 
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
@@ -6410,7 +6412,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int strLen = str.length();
         char ch = 0;
 
-        for (int i = Math.max(fromIndex, 0); i < strLen; i++) {
+        for (int i = fromIndex; i < strLen; i++) {
             ch = str.charAt(i);
 
             for (final char c : valuesToFind) {
@@ -6517,7 +6519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, int fromIndex, final char... valuesToExclude) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(fromIndex, 0);
 
         checkInputChars(valuesToExclude, cs.valuesToExclude, true);
 
@@ -6532,7 +6534,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int strLen = str.length();
         char ch = 0;
 
-        outer: for (int i = Math.max(fromIndex, 0); i < strLen; i++) {//NOSONAR
+        outer: for (int i = fromIndex; i < strLen; i++) {//NOSONAR
             ch = str.charAt(i);
 
             for (final char c : valuesToExclude) {

@@ -89,56 +89,6 @@ public final class Maps {
         // Utility class.
     }
 
-    /**
-     * Returns an immutable/unmodifiable key set of the specified {@code map}.
-     * An empty immutable/unmodifiable set is returned if the specified {@code map} is {@code null} or empty.
-     *
-     * @param <K>
-     * @param map
-     * @return
-     * @deprecated replaced by {@code N.nullToEmpty(map).keySet()}
-     * @see N#nullToEmpty(Map)
-     */
-    @Deprecated
-    @Beta
-    public static <K> ImmutableSet<K> keys(final Map<? extends K, ?> map) {
-        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap(map.keySet());
-    }
-
-    /**
-     * Returns an immutable/unmodifiable value collection of the specified {@code map}.
-     * An empty immutable/unmodifiable collection is returned if the specified {@code map} is {@code null} or empty.
-     *
-     * @param <V>
-     * @param map
-     * @return
-     * @deprecated replaced by {@code N.nullToEmpty(map).values()}
-     * @see N#nullToEmpty(Map)
-     */
-    @Deprecated
-    @Beta
-    public static <V> ImmutableCollection<V> values(final Map<?, ? extends V> map) {
-        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableCollection.wrap(map.values());
-    }
-
-    /**
-     * Returns an immutable/unmodifiable entry set of the specified {@code map}.
-     * An empty immutable/unmodifiable entry set is returned if the specified {@code map} is {@code null} or empty.
-     *
-     * @param <K>
-     * @param <V>
-     * @param map
-     * @return
-     * @deprecated replaced by {@code N.nullToEmpty(map).entrySet()}
-     * @see N#nullToEmpty(Map)
-     */
-    @Deprecated
-    @Beta
-    @SuppressWarnings({ "rawtypes" })
-    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(final Map<? extends K, ? extends V> map) {
-        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap((Set) map.entrySet());
-    }
-
     //    /**
     //     *
     //     * @param <T>
@@ -663,6 +613,47 @@ public final class Maps {
         }
 
         return N.newMap(m.getClass(), m.size());
+    }
+
+    /**
+     * Returns the key set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable set is returned.
+     *
+     * @param <K>
+     * @param map
+     * @return
+     * @see N#nullToEmpty(Map)
+     */
+    @Beta
+    public static <K> Set<K> keys(final Map<? extends K, ?> map) {
+        return N.isEmpty(map) ? ImmutableSet.empty() : (Set<K>) map.keySet();
+    }
+
+    /**
+     * Returns the value set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable collection is returned.
+     *
+     * @param <V>
+     * @param map
+     * @return
+     * @see N#nullToEmpty(Map)
+     */
+    @Beta
+    public static <V> Collection<V> values(final Map<?, ? extends V> map) {
+        return N.isEmpty(map) ? ImmutableList.empty() : (Set<V>) map.values();
+    }
+
+    /**
+     * Returns the entry set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable set is returned.
+     *
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @return
+     * @see N#nullToEmpty(Map)
+     */
+    @Beta
+    @SuppressWarnings({ "rawtypes" })
+    public static <K, V> Set<Map.Entry<K, V>> entrySet(final Map<? extends K, ? extends V> map) {
+        return N.isEmpty(map) ? ImmutableSet.empty() : (Set) map.entrySet();
     }
 
     /**
@@ -2328,11 +2319,15 @@ public final class Maps {
      * @see Collection#retainAll(Collection)
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<?, ?> map2) {
-        if (N.isEmpty(map) || N.isEmpty(map2)) {
-            return new LinkedHashMap<>();
+        if (map == null) {
+            return new HashMap<>();
         }
 
-        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
+        if (N.isEmpty(map2)) {
+            return newTargetMap(map, 0);
+        }
+
+        final Map<K, V> result = Maps.newTargetMap(map, N.size(map) / 2);
         Object val = null;
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -2367,11 +2362,11 @@ public final class Maps {
      * @see Difference.MapDifference#of(Map, Map)
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
-        if (N.isEmpty(map)) {
-            return new LinkedHashMap<>();
+        if (map == null) {
+            return new HashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
+        final Map<K, Pair<V, Nullable<V>>> result = newTargetMap(map);
 
         if (N.isEmpty(map2)) {
             for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -2417,7 +2412,8 @@ public final class Maps {
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
         final boolean isIdentityHashMap = (N.notEmpty(map) && map instanceof IdentityHashMap) || (N.notEmpty(map2) && map2 instanceof IdentityHashMap);
 
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>()
+                : (map == null ? new HashMap<>() : Maps.newTargetMap(map, Math.max(N.size(map), N.size(map2))));
 
         if (N.notEmpty(map)) {
             if (N.isEmpty(map2)) {
@@ -2538,6 +2534,62 @@ public final class Maps {
         }
 
         return v;
+    }
+
+    /**
+     * Puts all entries from the source map into the target map, but only if the key passes the filter.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map the target map to which entries will be added
+     * @param sourceMap the source map from which entries will be taken
+     * @param filter a predicate that filters keys to be added to the target map
+     * @return {@code true} if any entries were added, {@code false} otherwise
+     */
+    @Beta
+    public static <K, V> boolean putIf(final Map<K, V> map, final Map<? extends K, ? extends V> sourceMap, Predicate<? super K> filter) {
+        if (N.isEmpty(sourceMap)) {
+            return false;
+        }
+
+        boolean changed = false;
+
+        for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
+            if (filter.test(entry.getKey())) {
+                map.put(entry.getKey(), entry.getValue());
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    /**
+     * Puts all entries from the source map into the target map, but only if the key and value pass the filter.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map the target map to which entries will be added
+     * @param sourceMap the source map from which entries will be taken
+     * @param filter a predicate that filters keys and values to be added to the target map
+     * @return {@code true} if any entries were added, {@code false} otherwise
+     */
+    @Beta
+    public static <K, V> boolean putIf(final Map<K, V> map, final Map<? extends K, ? extends V> sourceMap, BiPredicate<? super K, ? super V> filter) {
+        if (N.isEmpty(sourceMap)) {
+            return false;
+        }
+
+        boolean changed = false;
+
+        for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
+            if (filter.test(entry.getKey(), entry.getValue())) {
+                map.put(entry.getKey(), entry.getValue());
+                changed = true;
+            }
+        }
+
+        return changed;
     }
 
     /**
@@ -3360,12 +3412,13 @@ public final class Maps {
      * Converts a map into a bean object of the specified type.
      * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
      * The resulting bean object has its properties set to the values from the map.
-     * The targetType parameter specifies the type of the bean object to be returned.
+     * Unmatched properties from the specified map are ignored by default.
      *
      * @param <T> The type of the bean object to be returned.
      * @param m The map to be converted into a bean object.
      * @param targetType The type of the bean object to be returned.
      * @return A bean object of the specified type with its properties set to the values from the map.
+     * @see #map2Bean(Map, boolean, boolean, Class)
      * @see #map2Bean(Map, Collection, Class)
      */
     public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetType) {
@@ -3416,7 +3469,7 @@ public final class Maps {
             if (propInfo == null) {
                 beanInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isBean()) {
+                if (propValue != null && propInfo.type.isBean() && N.typeOf(propValue.getClass()).isMap()) {
                     propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
@@ -3454,16 +3507,12 @@ public final class Maps {
         for (final String propName : selectPropNames) {
             propValue = m.get(propName);
 
-            if (propValue == null && !m.containsKey(propName)) {
-                throw new IllegalArgumentException("Property name: " + propName + " is not found in map with key set: " + m.keySet());
-            }
-
             propInfo = beanInfo.getPropInfo(propName);
 
             if (propInfo == null) {
                 beanInfo.setPropValue(result, propName, propValue, false);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isBean()) {
+                if (propValue != null && propInfo.type.isBean() && N.typeOf(propValue.getClass()).isMap()) {
                     propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
@@ -3484,7 +3533,7 @@ public final class Maps {
      * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      * @see #map2Bean(Collection, Collection, Class)
      */
-    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetType) {
+    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final Class<? extends T> targetType) {
         return map2Bean(mList, false, true, targetType);
     }
 
@@ -3502,8 +3551,8 @@ public final class Maps {
      * @param targetType The type of the bean objects to be returned.
      * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
-            final Class<? extends T> targetType) {
+    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final boolean ignoreNullProperty,
+            final boolean ignoreUnmatchedProperty, final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
@@ -3525,7 +3574,7 @@ public final class Maps {
      * @param targetType The type of the bean objects to be returned.
      * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
+    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final Collection<String> selectPropNames,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 

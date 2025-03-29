@@ -41,10 +41,12 @@ import com.landawn.abacus.util.WD;
 @SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
 
-    private final String declaringName;
+    private static final String MAP_IMMUTABLE_ENTRY = "Map.ImmutableEntry";
 
     @SuppressWarnings("rawtypes")
     private final Class<AbstractMap.SimpleImmutableEntry<K, V>> typeClass = (Class) AbstractMap.SimpleImmutableEntry.class; //NOSONAR
+
+    private final String declaringName;
 
     private final Type<K> keyType;
 
@@ -203,10 +205,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return "Map.ImmutableEntry" + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
+            return MAP_IMMUTABLE_ENTRY + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
         } else {
-            return "Map.ImmutableEntry" + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(valueTypeName).name()
+            return MAP_IMMUTABLE_ENTRY + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(valueTypeName).name()
                     + WD.GREATER_THAN;
         }
     }
