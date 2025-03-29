@@ -36,26 +36,6 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
     }
 
     /**
-     * Checks if is generic type.
-     *
-     * @return {@code true}, if is generic type
-     */
-    @Override
-    public boolean isGenericType() {
-        return true;
-    }
-
-    /**
-     * Checks if is serializable.
-     *
-     * @return {@code true}, if is serializable
-     */
-    @Override
-    public boolean isSerializable() {
-        return true;
-    }
-
-    /**
      *
      * @param x
      * @return

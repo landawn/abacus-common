@@ -186,13 +186,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
                     if (method != null && Modifier.isStatic(method.getModifiers()) && Modifier.isPublic(method.getModifiers())
                             && typeClass.isAssignableFrom(method.getReturnType())) {
-                        return (T) ClassUtil.invokeMethod(method);
+                        return ClassUtil.invokeMethod(method);
                     } else {
                         method = ClassUtil.getDeclaredMethod(typeClass, "create", int.class);
 
                         if (method != null && Modifier.isStatic(method.getModifiers()) && Modifier.isPublic(method.getModifiers())
                                 && typeClass.isAssignableFrom(method.getReturnType())) {
-                            return (T) ClassUtil.invokeMethod(method, size);
+                            return ClassUtil.invokeMethod(method, size);
                         }
                     }
                 }

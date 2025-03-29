@@ -345,7 +345,6 @@ public final class CodeGenerationUtil {
             //        sb.append(LINE_SEPARATOR).append("@SuppressWarnings(\"java:S1192\")");
             //    }
 
-            //noinspection DuplicateExpressions
             sb.append(LINE_SEPARATOR)
                     .append(interfaceName)
                     .append(" {")

@@ -6325,7 +6325,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the character does not occur.
      */
     public static int indexOf(final String str, final int charValueToFind, int fromIndex) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (str == null || str.isEmpty()) {
             return N.INDEX_NOT_FOUND;
@@ -6364,7 +6364,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the substring does not occur.
      */
     public static int indexOf(final String str, final String valueToFind, int fromIndex) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
@@ -6401,7 +6401,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
-        fromIndex = Math.max(fromIndex, 0);
+        fromIndex = Math.max(0, fromIndex);
 
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
@@ -6464,7 +6464,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, int fromIndex, final String... valuesToFind) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
@@ -6519,7 +6519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, int fromIndex, final char... valuesToExclude) {
-        fromIndex = Math.max(fromIndex, 0);
+        fromIndex = Math.max(0, fromIndex);
 
         checkInputChars(valuesToExclude, cs.valuesToExclude, true);
 
@@ -6589,7 +6589,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the substring does not occur.
      */
     public static int indexOf(final String str, final String valueToFind, final String delimiter, int fromIndex) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (isEmpty(delimiter)) {
             return indexOf(str, valueToFind, fromIndex);
@@ -6662,7 +6662,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         or -1 if the substring does not occur.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind, int fromIndex) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
@@ -6703,7 +6703,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of the substring in the character sequence represented by this object, or -1 if the substring does not occur.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter, int fromIndex) {
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         if (isEmpty(delimiter)) {
             return indexOfIgnoreCase(str, valueToFind, fromIndex);
@@ -7139,7 +7139,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.INDEX_NOT_FOUND;
         }
 
-        fromIndex = fromIndex < 0 ? 0 : fromIndex;
+        fromIndex = Math.max(0, fromIndex);
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
@@ -7189,7 +7189,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.INDEX_NOT_FOUND;
         }
 
-        final int fromIndexToUse = fromIndex < 0 ? 0 : fromIndex;
+        final int fromIndexToUse = Math.max(0, fromIndex);
 
         final int len = str.length();
         @SuppressWarnings("resource")

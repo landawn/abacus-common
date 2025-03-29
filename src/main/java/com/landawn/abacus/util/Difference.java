@@ -939,16 +939,15 @@ public class Difference<L, R> {
                     }
                 }
 
-                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
             } else {
                 if (N.isEmpty(map1)) {
                     if (N.isEmpty(map2)) {
                         // Do nothing. All empty.
                     } else {
-                        Maps.putIf(rightOnly, map2, k -> keysToCompare.contains(k));
+                        Maps.putIf(rightOnly, map2, keysToCompare::contains);
                     }
                 } else if (N.isEmpty(map2)) {
-                    Maps.putIf(leftOnly, map1, k -> keysToCompare.contains(k));
+                    Maps.putIf(leftOnly, map1, keysToCompare::contains);
                 } else {
                     K1 key1 = null;
                     V1 val1 = null;
@@ -997,9 +996,8 @@ public class Difference<L, R> {
                     }
                 }
 
-                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
-
             }
+            return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
         }
 
         /**
@@ -1108,43 +1106,44 @@ public class Difference<L, R> {
                     final Set<String> ignoredPropNamesForNullValues = new HashSet<>();
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
-                    PropInfo propInfo2 = null;
                     Object val1 = null;
                     Object val2 = null;
 
-                    for (final PropInfo propInfo1 : beanInfo1.propInfoList) {
-                        val1 = propInfo1.getPropValue(bean1);
-                        propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
+                    {
+                        PropInfo propInfo2 = null;
+                        for (final PropInfo propInfo1 : beanInfo1.propInfoList) {
+                            val1 = propInfo1.getPropValue(bean1);
+                            propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
 
-                        if (propInfo2 == null) {
-                            leftOnly.put(propInfo1.name, val1);
-                        } else {
-                            val2 = propInfo2.getPropValue(bean2);
-
-                            if (val2 == null && val1 == null) {
-                                ignoredPropNamesForNullValues.add(propInfo1.name);
-                                continue; // ignore null value comparison.
-                            }
-
-                            if (valueEquivalenceToUse.test(propInfo1.name, val1, val2)) {
-                                common.put(propInfo1.name, val1);
+                            if (propInfo2 == null) {
+                                leftOnly.put(propInfo1.name, val1);
                             } else {
-                                withDifferentValues.put(propInfo1.name, Pair.of(val1, val2));
+                                val2 = propInfo2.getPropValue(bean2);
+
+                                if (val2 == null && val1 == null) {
+                                    ignoredPropNamesForNullValues.add(propInfo1.name);
+                                    continue; // ignore null value comparison.
+                                }
+
+                                if (valueEquivalenceToUse.test(propInfo1.name, val1, val2)) {
+                                    common.put(propInfo1.name, val1);
+                                } else {
+                                    withDifferentValues.put(propInfo1.name, Pair.of(val1, val2));
+                                }
                             }
                         }
                     }
 
-                    for (final PropInfo propInfo : beanInfo2.propInfoList) {
-                        if (ignoredPropNamesForNullValues.contains(propInfo.name) || common.containsKey(propInfo.name)
-                                || withDifferentValues.containsKey(propInfo.name)) {
+                    for (final PropInfo propInfo2 : beanInfo2.propInfoList) {
+                        if (ignoredPropNamesForNullValues.contains(propInfo2.name) || common.containsKey(propInfo2.name)
+                                || withDifferentValues.containsKey(propInfo2.name)) {
                             continue;
                         }
 
-                        rightOnly.put(propInfo.name, propInfo2.getPropValue(bean2));
+                        rightOnly.put(propInfo2.name, propInfo2.getPropValue(bean2));
                     }
                 }
 
-                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
             } else {
                 if (bean1 == null) {
                     if (bean2 == null) {
@@ -1198,8 +1197,8 @@ public class Difference<L, R> {
                     }
                 }
 
-                return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
             }
+            return new MapDifference<>(common, leftOnly, rightOnly, withDifferentValues);
         }
 
         /**

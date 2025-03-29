@@ -54,7 +54,6 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
     private final JSONDeserializationConfig jdc;
 
-    @SuppressWarnings("unchecked")
     GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
@@ -140,7 +139,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         }
 
         final Map<K, Collection<V>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
-        final int avgValueSize = (int) map.values().stream().mapToInt(v -> v.size()).average().orElse(0);
+        final int avgValueSize = (int) map.values().stream().mapToInt(Collection::size).average().orElse(0);
 
         final T multimap = newInstance(map.size(), avgValueSize);
 
@@ -199,13 +198,13 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
                     if (method != null && Modifier.isStatic(method.getModifiers()) && Modifier.isPublic(method.getModifiers())
                             && typeClass.isAssignableFrom(method.getReturnType())) {
-                        return (T) ClassUtil.invokeMethod(method);
+                        return ClassUtil.invokeMethod(method);
                     } else {
                         method = ClassUtil.getDeclaredMethod(typeClass, "create", int.class, int.class);
 
                         if (method != null && Modifier.isStatic(method.getModifiers()) && Modifier.isPublic(method.getModifiers())
                                 && typeClass.isAssignableFrom(method.getReturnType())) {
-                            return (T) ClassUtil.invokeMethod(method, keySize);
+                            return ClassUtil.invokeMethod(method, keySize);
                         }
                     }
                 }

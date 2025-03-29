@@ -91,7 +91,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
         return declaringName;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public Class<T> clazz() {
         return (Class) typeClass;
@@ -143,7 +143,6 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @return
      */
     @MayReturnNull
-    @SuppressWarnings("unchecked")
     @Override
     public T valueOf(final String str) {
         if (Strings.isEmpty(str)) {

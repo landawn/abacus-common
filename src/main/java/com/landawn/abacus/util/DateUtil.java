@@ -3959,7 +3959,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         if (creator != null) {
             return (T) creator.apply(millis, source);
         } else {
-            Calendar result = null;
+            T result = null;
             Constructor<T> constructor = ClassUtil.getDeclaredConstructor(cls, long.class);
 
             if (constructor != null && Modifier.isPublic(constructor.getModifiers())) {
@@ -3974,7 +3974,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 result.setTimeZone(source.getTimeZone());
             }
 
-            return (T) result;
+            return result;
         }
     }
 

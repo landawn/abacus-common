@@ -1349,7 +1349,7 @@ public class DigestUtil {
      * @throws IOException On error reading from the stream
      * @since 1.14
      */
-    @SuppressWarnings("resource") // Closing RandomAccessFile closes the channel.
+    // Closing RandomAccessFile closes the channel.
     public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
         return updateDigest(digest, data.getChannel());
     }

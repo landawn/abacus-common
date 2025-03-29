@@ -36,26 +36,6 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
     }
 
     /**
-     * Checks if is generic type.
-     *
-     * @return {@code true}, if is generic type
-     */
-    @Override
-    public boolean isGenericType() {
-        return true;
-    }
-
-    /**
-     * Checks if is serializable.
-     *
-     * @return {@code true}, if is serializable
-     */
-    @Override
-    public boolean isSerializable() {
-        return true;
-    }
-
-    /**
      *
      * @param x
      * @return
