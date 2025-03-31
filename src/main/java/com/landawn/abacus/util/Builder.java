@@ -3117,6 +3117,11 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Returns 1 if the values on left(1st parameters) are greater than the values on right(2nd parameter), or 0 if they are equal, or -1 if the values on left(1st parameters) are less than the values on right(2nd parameter).
+         *
+         * @return the result of the comparison
+         */
         public int result() {
             return result;
         }
@@ -3310,6 +3315,11 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Returns {@code true} if the values are equal, {@code false} otherwise.
+         * 
+         * @return
+         */
         public boolean result() {
             return result;
         }
@@ -3454,6 +3464,11 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Returns the hash code of the values.
+         *
+         * @return the hash code
+         */
         public int result() {
             return result;
         }

@@ -1134,13 +1134,13 @@ public class Difference<L, R> {
                         }
                     }
 
-                    for (final PropInfo propInfo2 : beanInfo2.propInfoList) {
-                        if (ignoredPropNamesForNullValues.contains(propInfo2.name) || common.containsKey(propInfo2.name)
-                                || withDifferentValues.containsKey(propInfo2.name)) {
+                    for (final PropInfo propInfo : beanInfo2.propInfoList) {
+                        if (ignoredPropNamesForNullValues.contains(propInfo.name) || common.containsKey(propInfo.name)
+                                || withDifferentValues.containsKey(propInfo.name)) {
                             continue;
                         }
 
-                        rightOnly.put(propInfo2.name, propInfo2.getPropValue(bean2));
+                        rightOnly.put(propInfo.name, propInfo.getPropValue(bean2));
                     }
                 }
 

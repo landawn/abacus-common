@@ -1837,7 +1837,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(writer, x, propInfo.dateFormat, propInfo.timeZone);
+                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1860,7 +1860,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTimeInMillis());
                     } else {
-                        DateUtil.formatTo(writer, x, propInfo.dateFormat, propInfo.timeZone);
+                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
 
                 }
@@ -1881,7 +1881,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(writer, x, propInfo.dateFormat, propInfo.timeZone);
+                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1901,7 +1901,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(writer, x, propInfo.dateFormat, propInfo.timeZone);
+                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1921,7 +1921,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(writer, x, propInfo.dateFormat, propInfo.timeZone);
+                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });

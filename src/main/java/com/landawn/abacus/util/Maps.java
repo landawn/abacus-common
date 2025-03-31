@@ -2366,7 +2366,7 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = newTargetMap(map);
+        final Map<K, Pair<V, Nullable<V>>> result = newTargetMap(map, N.size(map) / 2);
 
         if (N.isEmpty(map2)) {
             for (final Map.Entry<K, V> entry : map.entrySet()) {

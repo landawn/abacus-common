@@ -1516,120 +1516,120 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      * Formats the provided java.util.Date instance into a string representation and appends it to the provided Appendable.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param date The java.util.Date instance to be formatted.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Date)
      */
-    public static void formatTo(final Appendable appendable, final java.util.Date date) {
-        formatTo(appendable, date, null, null);
+    public static void formatTo(final java.util.Date date, final Appendable appendable) {
+        formatTo(date, null, null, appendable);
     }
 
     /**
      * Formats the provided java.util.Date instance into a string representation according to the provided format.
      * The string representation is appended to the provided Appendable instance.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param date The java.util.Date instance to be formatted.
      * @param format The format to be used for formatting the java.util.Date instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Date, String)
      */
-    public static void formatTo(final Appendable appendable, final java.util.Date date, final String format) {
-        formatTo(appendable, date, format, null);
+    public static void formatTo(final java.util.Date date, final String format, final Appendable appendable) {
+        formatTo(date, format, null, appendable);
     }
 
     /**
      * Formats the provided java.util.Date instance into a string representation according to the provided format and timezone.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param date The java.util.Date instance to be formatted.
      * @param format The format to be used for formatting the java.util.Date instance.
      * @param timeZone The timezone to be used for formatting the java.util.Date instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Date, String, TimeZone)
      */
-    public static void formatTo(final Appendable appendable, final java.util.Date date, final String format, final TimeZone timeZone) {
+    public static void formatTo(final java.util.Date date, final String format, final TimeZone timeZone, final Appendable appendable) {
         formatDate(appendable, date, format, timeZone);
     }
 
     /**
      * Formats the provided java.util.Calendar instance into a string representation and appends it to the provided Appendable.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The java.util.Calendar instance to be formatted.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Calendar)
      */
-    public static void formatTo(final Appendable appendable, final Calendar calendar) {
-        formatTo(appendable, calendar, null, null);
+    public static void formatTo(final Calendar calendar, final Appendable appendable) {
+        formatTo(calendar, null, null, appendable);
     }
 
     /**
      * Formats the provided java.util.Calendar instance into a string representation according to the provided format.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The java.util.Calendar instance to be formatted.
      * @param format The format to be used for formatting the java.util.Calendar instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Calendar, String)
      */
-    public static void formatTo(final Appendable appendable, final Calendar calendar, final String format) {
-        formatTo(appendable, calendar, format, null);
+    public static void formatTo(final Calendar calendar, final String format, final Appendable appendable) {
+        formatTo(calendar, format, null, appendable);
     }
 
     /**
      * Formats the provided java.util.Calendar instance into a string representation according to the provided format and timezone.
      * The string representation is appended to the provided Appendable instance.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The java.util.Calendar instance to be formatted.
      * @param format The format to be used for formatting the java.util.Calendar instance.
      * @param timeZone The timezone to be used for formatting the java.util.Calendar instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(java.util.Calendar, String, TimeZone)
      */
-    public static void formatTo(final Appendable appendable, final Calendar calendar, final String format, final TimeZone timeZone) {
+    public static void formatTo(final Calendar calendar, final String format, final TimeZone timeZone, final Appendable appendable) {
         if ((format == null) && (timeZone == null)) {
             fastDateFormat(null, appendable, calendar.getTimeInMillis(), false);
         } else {
-            formatTo(appendable, createJUDate(calendar), format, timeZone);
+            formatTo(createJUDate(calendar), format, timeZone, appendable);
         }
     }
 
     /**
      * Formats the provided XMLGregorianCalendar instance into a string representation and appends it to the provided Appendable.
      * The default format is used for formatting the XMLGregorianCalendar instance.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The XMLGregorianCalendar instance to be formatted.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(XMLGregorianCalendar)
      */
-    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar calendar) {
-        formatTo(appendable, calendar, null, null);
+    public static void formatTo(final XMLGregorianCalendar calendar, final Appendable appendable) {
+        formatTo(calendar, null, null, appendable);
     }
 
     /**
      * Formats the provided XMLGregorianCalendar instance into a string representation according to the provided format.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The XMLGregorianCalendar instance to be formatted.
      * @param format The format to be used for formatting the XMLGregorianCalendar instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(XMLGregorianCalendar, String)
      */
-    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar calendar, final String format) {
-        formatTo(appendable, calendar, format, null);
+    public static void formatTo(final XMLGregorianCalendar calendar, final String format, final Appendable appendable) {
+        formatTo(calendar, format, null, appendable);
     }
 
     /**
      * Formats the provided XMLGregorianCalendar instance into a string representation according to the provided format and timezone.
-     *
-     * @param appendable The Appendable to which the formatted date string is to be appended.
      * @param calendar The XMLGregorianCalendar instance to be formatted.
      * @param format The format to be used for formatting the XMLGregorianCalendar instance.
      * @param timeZone The timezone to be used for formatting the XMLGregorianCalendar instance.
+     * @param appendable The Appendable to which the formatted date string is to be appended.
+     *
      * @see #format(XMLGregorianCalendar, String, TimeZone)
      */
-    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone) {
+    public static void formatTo(final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone, final Appendable appendable) {
         if ((format == null) && (timeZone == null)) {
             fastDateFormat(null, appendable, calendar.toGregorianCalendar().getTimeInMillis(), false);
         } else {
-            formatTo(appendable, createJUDate(calendar.toGregorianCalendar()), format, timeZone);
+            formatTo(createJUDate(calendar.toGregorianCalendar()), format, timeZone, appendable);
         }
     }
 
@@ -4057,6 +4057,53 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         cal.setTime(date);
 
         return cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+    }
+
+    /**
+     * Checks if two date ranges overlap.
+     *
+     * @param startTimeOne Start time of the first range. Must not be {@code null}.
+     * @param endTimeOne End time of the first range. Must not be {@code null}.
+     * @param startTimeTwo Start time of the second range. Must not be {@code null}.
+     * @param endTimeTwo End time of the second range. Must not be {@code null}.
+     * @return {@code true} if the two date ranges overlap.
+     * @throws IllegalArgumentException if any date is {@code null} or invalid.
+     */
+    public static boolean isOverlap(java.util.Date startTimeOne, java.util.Date endTimeOne, java.util.Date startTimeTwo, java.util.Date endTimeTwo) {
+        if (startTimeOne == null || endTimeOne == null || startTimeTwo == null || endTimeTwo == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+
+        if (startTimeOne.after(endTimeOne) || startTimeTwo.after(endTimeTwo)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
+        return startTimeOne.before(endTimeTwo) && startTimeTwo.before(endTimeOne);
+    }
+
+    /**
+     * Checks if the given date is between the specified start date and end date, inclusive.
+     * It means {@code startDate <= date <= endDate}.
+     *
+     * @param date The date to check. Must not be {@code null}.
+     * @param startDate The start time of the range. Must not be {@code null}.
+     * @param endDate The end time of the range. Must not be {@code null}.
+     * @return {@code true} if the date is within the specified range.
+     * @throws IllegalArgumentException if any date is {@code null} or invalid.
+     * @see N#geAndLe(Comparable, Comparable, Comparable)
+     * @see N#gtAndLt(Comparable, Comparable, Comparable)
+     */
+    @Beta
+    public static boolean isBetween(java.util.Date date, java.util.Date startDate, java.util.Date endDate) {
+        if (date == null || startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+
+        if (startDate.after(endDate)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
+        return N.geAndLe(date, startDate, endDate);
     }
 
     //    /**

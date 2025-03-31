@@ -145,7 +145,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     public void write(final Date date) throws UncheckedIOException {
-        DateUtil.formatTo(this, date, null, null);
+        DateUtil.formatTo(date, null, null, this);
     }
 
     /**
@@ -154,7 +154,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     public void write(final Calendar c) throws UncheckedIOException {
-        DateUtil.formatTo(this, c, null, null);
+        DateUtil.formatTo(c, null, null, this);
     }
 
     /**
@@ -163,7 +163,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     public void write(final XMLGregorianCalendar c) throws UncheckedIOException {
-        DateUtil.formatTo(this, c, null, null);
+        DateUtil.formatTo(c, null, null, this);
     }
 
     /**

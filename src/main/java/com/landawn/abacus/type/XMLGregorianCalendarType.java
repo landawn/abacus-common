@@ -147,7 +147,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(appendable, x, null, null);
+            DateUtil.formatTo(x, null, null, appendable);
         }
     }
 
@@ -171,7 +171,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.formatTo(writer, x, null, null);
+                DateUtil.formatTo(x, null, null, writer);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -180,12 +180,12 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null);
+                        DateUtil.formatTo(x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null, writer);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null);
+                        DateUtil.formatTo(x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null, writer);
 
                         break;
 

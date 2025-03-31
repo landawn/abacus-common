@@ -91,7 +91,7 @@ public enum CalendarField {
      * @param intValue
      * @return
      */
-    public static CalendarField valueOf(final int intValue) {
+    public static CalendarField of(final int intValue) {
         final CalendarField result = m.get(intValue);
 
         if (result == null) {
@@ -99,6 +99,16 @@ public enum CalendarField {
         }
 
         return result;
+    }
+
+    /**
+     *
+     * @param intValue
+     * @return
+     * @deprecated Use {@link #of(int)} instead
+     */
+    public static CalendarField valueOf(final int intValue) {
+        return of(intValue);
     }
 
     public int value() {

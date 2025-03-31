@@ -100,7 +100,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(appendable, x);
+            DateUtil.formatTo(x, appendable);
         }
     }
 
@@ -124,7 +124,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.formatTo(writer, x);
+                DateUtil.formatTo(x, writer);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -133,12 +133,12 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null);
+                        DateUtil.formatTo(x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null, writer);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null);
+                        DateUtil.formatTo(x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null, writer);
 
                         break;
 

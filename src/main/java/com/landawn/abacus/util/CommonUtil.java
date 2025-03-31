@@ -15988,36 +15988,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
-     * @deprecated replaced by {@code gtAndLt(Comparable, Comparable, Comparable)}
-     * @see #gtAndLt(Comparable, Comparable, Comparable)
-     */
-    @Deprecated
-    public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
-        return gtAndLt(value, min, max);
-    }
-
-    /**
-     * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
+     * Checks if the given value is between the specified minimum and maximum values, inclusive.
+     * It means {@code min <= value <= max}.
+     * {@code null} is considered as the smallest value in nature order.
+     * @implNote it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
      * @param min the minimum value, must not be null
      * @param max the maximum value, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
-     * @deprecated replaced by {@code gtAndLt(Comparable, Comparable, Comparable, Comparator)}
-     * @see #gtAndLt(Object, Object, Object, Comparator)
+     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
+     * @deprecated Use {@link #geAndLe(Comparable, Comparable, Comparable)} instead.
+     */
+    @Deprecated
+    public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
+        return geAndLe(value, min, max);
+    }
+
+    /**
+     * Checks if the given value is between the specified minimum and maximum values, inclusive. 
+     * It means {@code min <= value <= max}.
+     * @implNote it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to compare the values, must not be null
+     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
+     * @deprecated Use {@link #geAndLe(Object, Object, Object, Comparator)} instead.
      */
     @Deprecated
     public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
-        return gtAndLt(value, min, max, cmp);
+        return geAndLe(value, min, max, cmp);
     }
 
     /**
