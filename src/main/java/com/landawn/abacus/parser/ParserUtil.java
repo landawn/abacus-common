@@ -293,9 +293,9 @@ public final class ParserUtil {
             }
         }
 
-        if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
-            throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
-        }
+        //    if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
+        //        throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
+        //    }
 
         return isJsonRawValue;
     }
@@ -2139,7 +2139,7 @@ public final class ParserUtil {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(((CharSequence) x).toString());
+                    writer.write(jsonXmlType.stringOf(x));
                 }
             } else {
                 jsonXmlType.writeCharacter(writer, x, config);

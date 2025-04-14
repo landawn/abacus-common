@@ -393,10 +393,11 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                if (propInfo.hasFormat) {
+                if (propInfo.isJsonRawValue) {
+                    strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
+                } else if (propInfo.hasFormat) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
-                    //noinspection DataFlowIssue
                     writeValue(propValue, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, propInfo, propInfo.jsonXmlType, bw);
                 }
 
@@ -783,7 +784,9 @@ final class XMLParserImpl extends AbstractXMLParser {
         //        return;
         //    }
 
-        if (valueType.isSerializable()) {
+        if (propInfo != null && propInfo.isJsonRawValue) {
+            strType.writeCharacter(bw, jsonParser.serialize(value, getJSC(config)), config);
+        } else if (valueType.isSerializable()) {
             if (valueType.isObjectArray() || valueType.isCollection()) {
                 // jsonParser.serialize(bw, value);
 

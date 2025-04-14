@@ -118,23 +118,25 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
 
+    static final Characteristics[] CH_NOID = {};
+
+    static final Characteristics[] CH_ID = { Characteristics.IDENTITY_FINISH };
+
+    static final Characteristics[] CH_UNORDERED_NOID = { Characteristics.UNORDERED };
+
+    static final Characteristics[] CH_UNORDERED_ID = { Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH };
+
     /**
      * @deprecated This class is not intended to be used.
      */
     @Deprecated
-    static final Set<Characteristics> CH_CONCURRENT_ID = Collections
-            .unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH));
+    static final Characteristics[] CH_CONCURRENT_NOID = { Characteristics.CONCURRENT, Characteristics.UNORDERED };
+
     /**
      * @deprecated This class is not intended to be used.
      */
     @Deprecated
-    static final Set<Characteristics> CH_CONCURRENT_NOID = Collections.unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED));
-
-    static final Set<Characteristics> CH_UNORDERED_ID = Collections.unmodifiableSet(EnumSet.of(Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH));
-    static final Set<Characteristics> CH_UNORDERED_NOID = Collections.unmodifiableSet(EnumSet.of(Characteristics.UNORDERED));
-
-    static final Set<Characteristics> CH_ID = Collections.unmodifiableSet(EnumSet.of(Characteristics.IDENTITY_FINISH));
-    static final Set<Characteristics> CH_NOID = Collections.emptySet();
+    static final Characteristics[] CH_CONCURRENT_ID = { Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH };
 
     // ============================================================================================================
 
@@ -823,54 +825,128 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     Collectors() {
     }
 
-    static class CollectorImpl<T, A, R> implements Collector<T, A, R> {
-        private static final Function<Object, Object> IDENTITY_FINISHER = t -> t;
+    //    static class CollectorImpl<T, A, R> implements Collector<T, A, R> {
+    //        private static final Function<Object, Object> IDENTITY_FINISHER = t -> t;
+    //
+    //        private final Supplier<A> supplier;
+    //        private final BiConsumer<A, T> accumulator;
+    //        private final BinaryOperator<A> combiner;
+    //        private final Function<A, R> finisher;
+    //        private final Set<Characteristics> characteristics;
+    //
+    //        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
+    //                final Set<Characteristics> characteristics) {
+    //            this(supplier, accumulator, combiner, (Function<A, R>) IDENTITY_FINISHER, characteristics);
+    //        }
+    //
+    //        @SuppressWarnings("rawtypes")
+    //        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
+    //                final Function<? super A, ? extends R> finisher, final Set<Characteristics> characteristics) {
+    //            this.supplier = (Supplier) supplier;
+    //            this.accumulator = (BiConsumer) accumulator;
+    //            this.combiner = combiner;
+    //            this.finisher = (Function) finisher;
+    //            this.characteristics = characteristics == null ? N.emptySet() : characteristics;
+    //        }
+    //
+    //        @Override
+    //        public BiConsumer<A, T> accumulator() {
+    //            return accumulator;
+    //        }
+    //
+    //        @Override
+    //        public Supplier<A> supplier() {
+    //            return supplier;
+    //        }
+    //
+    //        @Override
+    //        public BinaryOperator<A> combiner() {
+    //            return combiner;
+    //        }
+    //
+    //        @Override
+    //        public Function<A, R> finisher() {
+    //            return finisher;
+    //        }
+    //
+    //        @Override
+    //        public Set<Characteristics> characteristics() {
+    //            return characteristics;
+    //        }
+    //    }
 
-        private final Supplier<A> supplier;
-        private final BiConsumer<A, T> accumulator;
-        private final BinaryOperator<A> combiner;
-        private final Function<A, R> finisher;
-        private final Set<Characteristics> characteristics;
+    /**
+     * Creates a new `Collector` with the specified supplier, accumulator, and combiner.
+     *
+     * @param <T> the type of input elements to the collector
+     * @param <R> the type of the mutable result container and the final result
+     * @param supplier the supplier function that provides a new mutable result container
+     * @param accumulator the accumulator function that folds a value into a mutable result container
+     * @param combiner the combiner function that merges two result containers
+     * @param characteristics optional characteristics of the collector
+     * @return a new `Collector` with the specified supplier, accumulator, and combiner
+     * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Characteristics...)
+     */
+    public static <T, R> Collector<T, R, R> create(final Supplier<? extends R> supplier, final BiConsumer<? super R, ? super T> accumulator,
+            final BinaryOperator<R> combiner, final Characteristics... characteristics) {
+        return Collector.of((Supplier<R>) supplier, (BiConsumer<R, T>) accumulator, combiner, characteristics);
+    }
 
-        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
-                final Set<Characteristics> characteristics) {
-            this(supplier, accumulator, combiner, (Function<A, R>) IDENTITY_FINISHER, characteristics);
-        }
+    /**
+     * Creates a new `Collector` with the specified supplier, accumulator, and combiner.
+     *
+     * @param <T> the type of input elements to the collector
+     * @param <R> the type of the mutable result container and the final result
+     * @param supplier the supplier function that provides a new mutable result container
+     * @param accumulator the accumulator function that folds a value into a mutable result container
+     * @param combiner the combiner function that merges two result containers
+     * @param characteristics optional characteristics of the collector
+     * @return a new `Collector` with the specified supplier, accumulator, and combiner
+     * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Characteristics...)
+     */
+    public static <T, R> Collector<T, R, R> create(final Supplier<? extends R> supplier, final BiConsumer<? super R, ? super T> accumulator,
+            final BinaryOperator<R> combiner, final Collection<Characteristics> characteristics) {
+        return Collector.of((Supplier<R>) supplier, (BiConsumer<R, T>) accumulator, combiner,
+                N.isEmpty(characteristics) ? CH_NOID : characteristics.toArray(Characteristics[]::new));
+    }
 
-        @SuppressWarnings("rawtypes")
-        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
-                final Function<? super A, ? extends R> finisher, final Set<Characteristics> characteristics) {
-            this.supplier = (Supplier) supplier;
-            this.accumulator = (BiConsumer) accumulator;
-            this.combiner = combiner;
-            this.finisher = (Function) finisher;
-            this.characteristics = characteristics == null ? N.emptySet() : characteristics;
-        }
+    /**
+     * Creates a new `Collector` with the specified supplier, accumulator, combiner, and finisher.
+     *
+     * @param <T> the type of input elements to the collector
+     * @param <A> the type of the intermediate accumulation result
+     * @param <R> the type of the final result of the collector
+     * @param supplier the supplier function that provides a new mutable result container
+     * @param accumulator the accumulator function that folds a value into a mutable result container
+     * @param combiner the combiner function that merges two result containers
+     * @param finisher the function that transforms the intermediate result to the final result
+     * @param characteristics optional characteristics of the collector
+     * @return a new `Collector` with the specified components
+     * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Function, Characteristics...)
+     */
+    public static <T, A, R> Collector<T, A, R> create(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator,
+            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Characteristics... characteristics) {
+        return Collector.of((Supplier<A>) supplier, (BiConsumer<A, T>) accumulator, combiner, (Function<A, R>) finisher, characteristics);
+    }
 
-        @Override
-        public BiConsumer<A, T> accumulator() {
-            return accumulator;
-        }
-
-        @Override
-        public Supplier<A> supplier() {
-            return supplier;
-        }
-
-        @Override
-        public BinaryOperator<A> combiner() {
-            return combiner;
-        }
-
-        @Override
-        public Function<A, R> finisher() {
-            return finisher;
-        }
-
-        @Override
-        public Set<Characteristics> characteristics() {
-            return characteristics;
-        }
+    /**
+     * Creates a new `Collector` with the specified supplier, accumulator, combiner, and finisher.
+     *
+     * @param <T> the type of input elements to the collector
+     * @param <A> the type of the intermediate accumulation result
+     * @param <R> the type of the final result of the collector
+     * @param supplier the supplier function that provides a new mutable result container
+     * @param accumulator the accumulator function that folds a value into a mutable result container
+     * @param combiner the combiner function that merges two result containers
+     * @param finisher the function that transforms the intermediate result to the final result
+     * @param characteristics optional characteristics of the collector
+     * @return a new `Collector` with the specified components
+     * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Function, Characteristics...)
+     */
+    public static <T, A, R> Collector<T, A, R> create(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator,
+            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Collection<Characteristics> characteristics) {
+        return Collector.of((Supplier<A>) supplier, (BiConsumer<A, T>) accumulator, combiner, (Function<A, R>) finisher,
+                N.isEmpty(characteristics) ? CH_NOID : characteristics.toArray(Characteristics[]::new));
     }
 
     /**
@@ -1020,7 +1096,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
         final BinaryOperator<C> combiner = BinaryOperators.ofAddAllToBigger();
 
-        return new CollectorImpl<>(collectionFactory, accumulator, combiner, CH_ID);
+        return create(collectionFactory, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -1060,7 +1136,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return a;
         };
 
-        return new CollectorImpl<>(collectionFactory, accumulator, combiner, CH_ID);
+        return create(collectionFactory, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -1088,7 +1164,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator,
             final BinaryOperator<C> combiner) {
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -1113,7 +1189,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<Multiset<T>, T> accumulator = (BiConsumer) Multiset_Accumulator;
         final BinaryOperator<Multiset<T>> combiner = (BinaryOperator) Multiset_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -1147,7 +1223,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -1164,7 +1240,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<List<A>> combiner = BinaryOperators.ofAddAllToBigger();
         final Function<List<A>, A[]> finisher = t -> t.toArray(arraySupplier.apply(t.size()));
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1173,7 +1249,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<BooleanList, Boolean> accumulator = BooleanList_Accumulator;
         final BinaryOperator<BooleanList> combiner = BooleanList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1183,7 +1259,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<BooleanList> combiner = BooleanList_Combiner;
         final Function<BooleanList, boolean[]> finisher = BooleanArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1192,7 +1268,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<CharList, Character> accumulator = CharList_Accumulator;
         final BinaryOperator<CharList> combiner = CharList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1202,7 +1278,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<CharList> combiner = CharList_Combiner;
         final Function<CharList, char[]> finisher = CharArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1211,7 +1287,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<ByteList, Byte> accumulator = ByteList_Accumulator;
         final BinaryOperator<ByteList> combiner = ByteList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1221,7 +1297,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<ByteList> combiner = ByteList_Combiner;
         final Function<ByteList, byte[]> finisher = ByteArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1230,7 +1306,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<ShortList, Short> accumulator = ShortList_Accumulator;
         final BinaryOperator<ShortList> combiner = ShortList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1240,7 +1316,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<ShortList> combiner = ShortList_Combiner;
         final Function<ShortList, short[]> finisher = ShortArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1249,7 +1325,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<IntList, Integer> accumulator = IntList_Accumulator;
         final BinaryOperator<IntList> combiner = IntList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1259,7 +1335,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<IntList> combiner = IntList_Combiner;
         final Function<IntList, int[]> finisher = IntArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1268,7 +1344,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<LongList, Long> accumulator = LongList_Accumulator;
         final BinaryOperator<LongList> combiner = LongList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1278,7 +1354,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<LongList> combiner = LongList_Combiner;
         final Function<LongList, long[]> finisher = LongArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1287,7 +1363,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<FloatList, Float> accumulator = FloatList_Accumulator;
         final BinaryOperator<FloatList> combiner = FloatList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1297,7 +1373,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<FloatList> combiner = FloatList_Combiner;
         final Function<FloatList, float[]> finisher = FloatArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1306,7 +1382,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<DoubleList, Double> accumulator = DoubleList_Accumulator;
         final BinaryOperator<DoubleList> combiner = DoubleList_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -1316,7 +1392,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<DoubleList> combiner = DoubleList_Combiner;
         final Function<DoubleList, double[]> finisher = DoubleArray_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     private static final Supplier<Holder<Optional<Object>>> onlyOne_supplier = () -> Holder.of(Optional.empty());
@@ -1352,7 +1428,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<Holder<Optional<T>>> combiner = (BinaryOperator) onlyOne_combiner;
         final Function<Holder<Optional<T>>, Optional<T>> finisher = (Function) onlyOne_finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -1402,7 +1478,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<Holder<T>> combiner = (BinaryOperator) first_last_combiner;
         final Function<Holder<T>, Optional<T>> finisher = (Function) first_last_finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -1419,7 +1495,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<Holder<T>> combiner = (BinaryOperator) first_last_combiner;
         final Function<Holder<T>, Optional<T>> finisher = (Function) first_last_finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -1450,7 +1526,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return a.size() > 0 ? a : b;
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -1491,7 +1567,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Deque<T>, List<T>> finisher = ArrayList::new;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     public static Collector<CharSequence, ?, String> joining() {
@@ -1523,7 +1599,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<Joiner> combiner = Joiner_Combiner;
         final Function<Joiner, String> finisher = Joiner_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -1569,7 +1645,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1616,7 +1692,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BiConsumer<A, T> accumulator = (a, t) -> downstreamAccumulator.accept(a, mapper.apply(t));
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1655,7 +1731,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1694,7 +1770,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1736,7 +1812,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1781,7 +1857,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
     /**
@@ -1825,7 +1901,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //            }
     //        };
     //
-    //        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     //    }
     //
     //    /**
@@ -1869,7 +1945,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //            }
     //        };
     //
-    //        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     //    }
     //
     //    /**
@@ -1912,7 +1988,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
             if (characteristics.size() == 1) {
-                characteristics = Collectors.CH_NOID;
+                characteristics = N.emptySet();
             } else {
                 characteristics = EnumSet.copyOf(characteristics);
                 characteristics.remove(Characteristics.IDENTITY_FINISH);
@@ -1920,7 +1996,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         }
 
-        return new CollectorImpl<>(downstream.supplier(), downstream.accumulator(), downstream.combiner(), thenFinisher, characteristics);
+        return create(downstream.supplier(), downstream.accumulator(), downstream.combiner(), thenFinisher, characteristics);
     }
 
     /**
@@ -1957,7 +2033,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
             if (characteristics.size() == 1) {
-                characteristics = Collectors.CH_NOID;
+                characteristics = N.emptySet();
             } else {
                 characteristics = EnumSet.copyOf(characteristics);
                 characteristics.remove(Characteristics.IDENTITY_FINISH);
@@ -1965,7 +2041,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         }
 
-        return new CollectorImpl<>(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
+        return create(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
     }
 
     /**
@@ -2018,7 +2094,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
             if (characteristics.size() == 1) {
-                characteristics = Collectors.CH_NOID;
+                characteristics = N.emptySet();
             } else {
                 characteristics = EnumSet.copyOf(characteristics);
                 characteristics.remove(Characteristics.IDENTITY_FINISH);
@@ -2026,7 +2102,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         }
 
-        return new CollectorImpl<>(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
+        return create(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
     }
 
     /**
@@ -2125,7 +2201,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return c;
         };
 
-        return new CollectorImpl<>(mappSupplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(mappSupplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -2154,7 +2230,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Set<Object>, Integer> finisher = Set::size;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -2725,7 +2801,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<T, List<T>>, List<T>> finisher = a -> a.right;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -2852,7 +2928,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<T, Object>, R> finisher = t -> downstreamFinisher.apply(t.right);
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -2975,7 +3051,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return finisher.apply(result);
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finalFinisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finalFinisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3121,7 +3197,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) {
         final BiConsumer<int[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
 
-        return new CollectorImpl<>(SummingInt_Supplier, accumulator, SummingInt_Combiner, SummingInt_Finisher, CH_UNORDERED_NOID);
+        return create(SummingInt_Supplier, accumulator, SummingInt_Combiner, SummingInt_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3133,7 +3209,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Long> summingIntToLong(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
 
-        return new CollectorImpl<>(SummingIntToLong_Supplier, accumulator, SummingIntToLong_Combiner, SummingIntToLong_Finisher, CH_UNORDERED_NOID);
+        return create(SummingIntToLong_Supplier, accumulator, SummingIntToLong_Combiner, SummingIntToLong_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3145,7 +3221,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsLong(t);
 
-        return new CollectorImpl<>(SummingLong_Supplier, accumulator, SummingLong_Combiner, SummingLong_Finisher, CH_UNORDERED_NOID);
+        return create(SummingLong_Supplier, accumulator, SummingLong_Combiner, SummingLong_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3157,7 +3233,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return new CollectorImpl<>(SummingDouble_Supplier, accumulator, SummingDouble_Combiner, SummingDouble_Finisher, CH_UNORDERED_NOID);
+        return create(SummingDouble_Supplier, accumulator, SummingDouble_Combiner, SummingDouble_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3169,7 +3245,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, BigInteger> summingBigInteger(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<BigInteger[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
 
-        return new CollectorImpl<>(SummingBigInteger_Supplier, accumulator, SummingBigInteger_Combiner, SummingBigInteger_Finisher, CH_UNORDERED_NOID);
+        return create(SummingBigInteger_Supplier, accumulator, SummingBigInteger_Combiner, SummingBigInteger_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3181,7 +3257,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
 
-        return new CollectorImpl<>(SummingBigDecimal_Supplier, accumulator, SummingBigDecimal_Combiner, SummingBigDecimal_Finisher, CH_UNORDERED_NOID);
+        return create(SummingBigDecimal_Supplier, accumulator, SummingBigDecimal_Combiner, SummingBigDecimal_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3196,7 +3272,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return new CollectorImpl<>(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher_op, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3211,7 +3287,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return new CollectorImpl<>(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3226,7 +3302,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return new CollectorImpl<>(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher_op, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3241,7 +3317,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return new CollectorImpl<>(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3253,7 +3329,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, OptionalDouble> averagingDouble(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return new CollectorImpl<>(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_op, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3265,7 +3341,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return new CollectorImpl<>(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3280,7 +3356,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right[0] += 1;
         };
 
-        return new CollectorImpl<>(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher_op, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3295,7 +3371,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right[0] += 1;
         };
 
-        return new CollectorImpl<>(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3310,7 +3386,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right[0] += 1;
         };
 
-        return new CollectorImpl<>(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher_op, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3325,7 +3401,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right[0] += 1;
         };
 
-        return new CollectorImpl<>(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3342,7 +3418,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<CharSummaryStatistics> combiner = SummarizingChar_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3359,7 +3435,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<ByteSummaryStatistics> combiner = SummarizingByte_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3376,7 +3452,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<ShortSummaryStatistics> combiner = SummarizingShort_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3393,7 +3469,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<IntSummaryStatistics> combiner = SummarizingInt_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3410,7 +3486,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<LongSummaryStatistics> combiner = SummarizingLong_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3427,7 +3503,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<FloatSummaryStatistics> combiner = SummarizingFloat_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3444,7 +3520,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<DoubleSummaryStatistics> combiner = SummarizingDouble_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3461,7 +3537,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<BigIntegerSummaryStatistics> combiner = SummarizingBigInteger_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3478,7 +3554,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<BigDecimalSummaryStatistics> combiner = SummarizingBigDecimal_Combiner;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -3499,7 +3575,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         @SuppressWarnings("rawtypes")
         final Function<Holder<T>, T> finisher = (Function) Reducing_Finisher_0;
 
-        return new CollectorImpl<>(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3516,7 +3592,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<OptHolder<T>> combiner = (BinaryOperator) Reducing_Combiner;
         final Function<OptHolder<T>, Optional<T>> finisher = (Function) Reducing_Finisher;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3535,7 +3611,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<OptHolder<T>, T> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3570,7 +3646,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3594,7 +3670,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         @SuppressWarnings("rawtypes")
         final Function<Holder<R>, R> finisher = (Function) Reducing_Finisher_0;
 
-        return new CollectorImpl<>(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3613,7 +3689,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
         final Function<MappingOptHolder<T, R>, Optional<R>> finisher = (Function) Reducing_Finisher_2;
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     private static <T> Supplier<Holder<T>> holderSupplier(final T identity) {
@@ -3680,7 +3756,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
         final Function<MappingOptHolder<T, R>, R> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3707,7 +3783,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3791,7 +3867,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<CharSequence, Integer>, String> finisher = a -> a.left == null || a.right <= 0 ? "" : a.left.subSequence(0, a.right).toString();
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3875,7 +3951,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return a.left.subSequence(aLen - a.right, aLen).toString();
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3964,7 +4040,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return (M) intermediate;
         };
 
-        return new CollectorImpl<>(mangledFactory, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(mangledFactory, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -4040,11 +4116,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         };
 
         final BinaryOperator<ConcurrentMap<K, A>> combiner = Collectors.mapMerger(downstream.combiner());
-        @SuppressWarnings("unchecked")
-        final Supplier<ConcurrentMap<K, A>> mangledFactory = (Supplier<ConcurrentMap<K, A>>) mapFactory;
 
-        if (downstream.characteristics().contains(Collector.Characteristics.IDENTITY_FINISH)) {
-            return new CollectorImpl<>(mangledFactory, accumulator, combiner, CH_UNORDERED_ID);
+        if (downstream.characteristics().contains(Characteristics.IDENTITY_FINISH)) {
+            return create(mapFactory, (BiConsumer<M, T>) accumulator, (BinaryOperator<M>) combiner, CH_UNORDERED_ID);
         } else {
             @SuppressWarnings("unchecked")
             final Function<A, A> downstreamFinisher = (Function<A, A>) downstream.finisher();
@@ -4056,7 +4130,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 return (M) intermediate;
             };
 
-            return new CollectorImpl<>(mangledFactory, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+            return create((Supplier<ConcurrentMap<K, A>>) mapFactory, accumulator, combiner, finisher, CH_UNORDERED_NOID);
         }
     }
 
@@ -4110,7 +4184,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return result;
         };
 
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -4295,7 +4369,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = mapMerger(mergeFunction);
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4500,7 +4574,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = concurrentMapMerger(mergeFunction);
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4665,7 +4739,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4714,7 +4788,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4762,7 +4836,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4810,7 +4884,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     /**
@@ -4858,7 +4932,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
 
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) {
@@ -5006,7 +5080,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //
     //        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
     //
-    //        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    //        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     //    }
     //
     //    /**
@@ -5057,7 +5131,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //
     //        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
     //
-    //        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    //        return create(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     //    }
 
     /**
@@ -5094,7 +5168,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1] += mapper2.applyAsInt(t);
             };
 
-            return new CollectorImpl<>(SummingInt_Supplier_2, accumulator, SummingInt_Combiner_2, SummingInt_Finisher_2, CH_UNORDERED_NOID);
+            return create(SummingInt_Supplier_2, accumulator, SummingInt_Combiner_2, SummingInt_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5113,7 +5187,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2] += mapper3.applyAsInt(t);
             };
 
-            return new CollectorImpl<>(SummingInt_Supplier_3, accumulator, SummingInt_Combiner_3, SummingInt_Finisher_3, CH_UNORDERED_NOID);
+            return create(SummingInt_Supplier_3, accumulator, SummingInt_Combiner_3, SummingInt_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5129,7 +5203,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1] += mapper2.applyAsInt(t);
             };
 
-            return new CollectorImpl<>(SummingIntToLong_Supplier_2, accumulator, SummingIntToLong_Combiner_2, SummingIntToLong_Finisher_2, CH_UNORDERED_NOID);
+            return create(SummingIntToLong_Supplier_2, accumulator, SummingIntToLong_Combiner_2, SummingIntToLong_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5148,7 +5222,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2] += mapper3.applyAsInt(t);
             };
 
-            return new CollectorImpl<>(SummingIntToLong_Supplier_3, accumulator, SummingIntToLong_Combiner_3, SummingIntToLong_Finisher_3, CH_UNORDERED_NOID);
+            return create(SummingIntToLong_Supplier_3, accumulator, SummingIntToLong_Combiner_3, SummingIntToLong_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5164,7 +5238,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1] += mapper2.applyAsLong(t);
             };
 
-            return new CollectorImpl<>(SummingLong_Supplier_2, accumulator, SummingLong_Combiner_2, SummingLong_Finisher_2, CH_UNORDERED_NOID);
+            return create(SummingLong_Supplier_2, accumulator, SummingLong_Combiner_2, SummingLong_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5183,7 +5257,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2] += mapper3.applyAsLong(t);
             };
 
-            return new CollectorImpl<>(SummingLong_Supplier_3, accumulator, SummingLong_Combiner_3, SummingLong_Finisher_3, CH_UNORDERED_NOID);
+            return create(SummingLong_Supplier_3, accumulator, SummingLong_Combiner_3, SummingLong_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5200,7 +5274,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1].add(mapper2.applyAsDouble(t));
             };
 
-            return new CollectorImpl<>(SummingDouble_Supplier_2, accumulator, SummingDouble_Combiner_2, SummingDouble_Finisher_2, CH_UNORDERED_NOID);
+            return create(SummingDouble_Supplier_2, accumulator, SummingDouble_Combiner_2, SummingDouble_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5219,7 +5293,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2].add(mapper3.applyAsDouble(t));
             };
 
-            return new CollectorImpl<>(SummingDouble_Supplier_3, accumulator, SummingDouble_Combiner_3, SummingDouble_Finisher_3, CH_UNORDERED_NOID);
+            return create(SummingDouble_Supplier_3, accumulator, SummingDouble_Combiner_3, SummingDouble_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5236,8 +5310,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1] = a[1].add(mapper2.apply(t));
             };
 
-            return new CollectorImpl<>(SummingBigInteger_Supplier_2, accumulator, SummingBigInteger_Combiner_2, SummingBigInteger_Finisher_2,
-                    CH_UNORDERED_NOID);
+            return create(SummingBigInteger_Supplier_2, accumulator, SummingBigInteger_Combiner_2, SummingBigInteger_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5256,8 +5329,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2] = a[2].add(mapper3.apply(t));
             };
 
-            return new CollectorImpl<>(SummingBigInteger_Supplier_3, accumulator, SummingBigInteger_Combiner_3, SummingBigInteger_Finisher_3,
-                    CH_UNORDERED_NOID);
+            return create(SummingBigInteger_Supplier_3, accumulator, SummingBigInteger_Combiner_3, SummingBigInteger_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5274,8 +5346,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1] = a[1].add(mapper2.apply(t));
             };
 
-            return new CollectorImpl<>(SummingBigDecimal_Supplier_2, accumulator, SummingBigDecimal_Combiner_2, SummingBigDecimal_Finisher_2,
-                    CH_UNORDERED_NOID);
+            return create(SummingBigDecimal_Supplier_2, accumulator, SummingBigDecimal_Combiner_2, SummingBigDecimal_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5294,8 +5365,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2] = a[2].add(mapper3.apply(t));
             };
 
-            return new CollectorImpl<>(SummingBigDecimal_Supplier_3, accumulator, SummingBigDecimal_Combiner_3, SummingBigDecimal_Finisher_3,
-                    CH_UNORDERED_NOID);
+            return create(SummingBigDecimal_Supplier_3, accumulator, SummingBigDecimal_Combiner_3, SummingBigDecimal_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5313,7 +5383,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[1] += 1;
             };
 
-            return new CollectorImpl<>(AveragingInt_Supplier_2, accumulator, AveragingInt_Combiner_2, AveragingInt_Finisher_2, CH_UNORDERED_NOID);
+            return create(AveragingInt_Supplier_2, accumulator, AveragingInt_Combiner_2, AveragingInt_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5335,7 +5405,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[2] += 1;
             };
 
-            return new CollectorImpl<>(AveragingInt_Supplier_3, accumulator, AveragingInt_Combiner_3, AveragingInt_Finisher_3, CH_UNORDERED_NOID);
+            return create(AveragingInt_Supplier_3, accumulator, AveragingInt_Combiner_3, AveragingInt_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5354,7 +5424,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[1] += 1;
             };
 
-            return new CollectorImpl<>(AveragingLong_Supplier_2, accumulator, AveragingLong_Combiner_2, AveragingLong_Finisher_2, CH_UNORDERED_NOID);
+            return create(AveragingLong_Supplier_2, accumulator, AveragingLong_Combiner_2, AveragingLong_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5376,7 +5446,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[2] += 1;
             };
 
-            return new CollectorImpl<>(AveragingLong_Supplier_3, accumulator, AveragingLong_Combiner_3, AveragingLong_Finisher_3, CH_UNORDERED_NOID);
+            return create(AveragingLong_Supplier_3, accumulator, AveragingLong_Combiner_3, AveragingLong_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5393,7 +5463,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[1].add(mapper2.applyAsDouble(t));
             };
 
-            return new CollectorImpl<>(AveragingDouble_Supplier_2, accumulator, AveragingDouble_Combiner_2, AveragingDouble_Finisher_2, CH_UNORDERED_NOID);
+            return create(AveragingDouble_Supplier_2, accumulator, AveragingDouble_Combiner_2, AveragingDouble_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5412,7 +5482,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a[2].add(mapper3.applyAsDouble(t));
             };
 
-            return new CollectorImpl<>(AveragingDouble_Supplier_3, accumulator, AveragingDouble_Combiner_3, AveragingDouble_Finisher_3, CH_UNORDERED_NOID);
+            return create(AveragingDouble_Supplier_3, accumulator, AveragingDouble_Combiner_3, AveragingDouble_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5431,8 +5501,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[1] += 1;
             };
 
-            return new CollectorImpl<>(AveragingBigInteger_Supplier_2, accumulator, AveragingBigInteger_Combiner_2, AveragingBigInteger_Finisher_2,
-                    CH_UNORDERED_NOID);
+            return create(AveragingBigInteger_Supplier_2, accumulator, AveragingBigInteger_Combiner_2, AveragingBigInteger_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5454,8 +5523,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[2] += 1;
             };
 
-            return new CollectorImpl<>(AveragingBigInteger_Supplier_3, accumulator, AveragingBigInteger_Combiner_3, AveragingBigInteger_Finisher_3,
-                    CH_UNORDERED_NOID);
+            return create(AveragingBigInteger_Supplier_3, accumulator, AveragingBigInteger_Combiner_3, AveragingBigInteger_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5474,8 +5542,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[1] += 1;
             };
 
-            return new CollectorImpl<>(AveragingBigDecimal_Supplier_2, accumulator, AveragingBigDecimal_Combiner_2, AveragingBigDecimal_Finisher_2,
-                    CH_UNORDERED_NOID);
+            return create(AveragingBigDecimal_Supplier_2, accumulator, AveragingBigDecimal_Combiner_2, AveragingBigDecimal_Finisher_2, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5497,8 +5564,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.right[2] += 1;
             };
 
-            return new CollectorImpl<>(AveragingBigDecimal_Supplier_3, accumulator, AveragingBigDecimal_Combiner_3, AveragingBigDecimal_Finisher_3,
-                    CH_UNORDERED_NOID);
+            return create(AveragingBigDecimal_Supplier_3, accumulator, AveragingBigDecimal_Combiner_3, AveragingBigDecimal_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
@@ -5699,9 +5765,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
             final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
             common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? N.emptySet() : N.newHashSet(common);
 
-            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
+            return create(supplier, accumulator, combiner, finisher, characteristics);
         }
 
         /**
@@ -5756,9 +5822,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
             final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
             common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? N.emptySet() : N.newHashSet(common);
 
-            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
+            return create(supplier, accumulator, combiner, finisher, characteristics);
         }
 
         /**
@@ -5849,9 +5915,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
             common.remove(Characteristics.IDENTITY_FINISH);
 
-            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? N.emptySet() : N.newHashSet(common);
 
-            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
+            return create(supplier, accumulator, combiner, finisher, characteristics);
         }
 
         /**
@@ -5875,7 +5941,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
             final Function<List<T>, DataSet> finisher = t -> N.newDataSet(columnNames, t);
 
-            return new Collectors.CollectorImpl<>(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, Collectors.CH_NOID);
+            return create(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, Collectors.CH_NOID);
         }
     }
 }

@@ -212,6 +212,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             return;
         }
 
+        if (propInfo != null && propInfo.isJsonRawValue) {
+            strType.writeCharacter(bw, jsonParser.serialize(obj, getJSC(config)), config);
+            return;
+        }
+
         final Class<?> cls = obj.getClass();
         final Type<Object> type = N.typeOf(cls);
 
@@ -415,8 +420,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                //noinspection DataFlowIssue
-                if (propInfo.jsonXmlType.isSerializable()) {
+                if (propInfo.isJsonRawValue) {
+                    strType.writeCharacter(bw, jsonParser.serialize(obj, getJSC(config)), config);
+                } else if (propInfo.jsonXmlType.isSerializable()) {
                     if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
                         // jsonParser.serialize(bw, propValue);
 

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import static com.landawn.abacus.parser.AbstractJSONReader.eventChars;
 import static com.landawn.abacus.parser.JSONReader.COLON;
 import static com.landawn.abacus.parser.JSONReader.COMMA;
 import static com.landawn.abacus.parser.JSONReader.END_BRACE;
@@ -754,8 +755,9 @@ final class JSONParserImpl extends AbstractJSONParser {
                     bw.write(propInfo.jsonNameTags[nameTagIdx].nameWithColon);
                 }
 
-                //noinspection DataFlowIssue
-                if (propInfo.jsonXmlType.isSerializable()) {
+                if (propInfo.isJsonRawValue) {
+                    strType.writeCharacter(bw, serialize(propValue, config), config);
+                } else if (propInfo.jsonXmlType.isSerializable()) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
                     write(propValue, config, false, nextIndentation, serializedObjects, bw);
@@ -763,7 +765,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.wrapRootValue()) {
+        if (config.wrapRootValue())
+
+        {
             if (isPrettyFormat && cnt > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -2231,9 +2235,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        propValue = readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null);
+                        readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null);
                     } else {
-                        if (propInfo.isJsonRawValue) {
+                        if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
                             final StringBuilder sb = Objectory.createStringBuilder();
                             sb.append('{');
 
@@ -2255,10 +2259,10 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     if (nextToken == EOF) {
                                         break;
                                     } else if (nextToken == COMMA || nextToken == COLON) {
-                                        sb.append(AbstractJSONReader.eventChars[nextToken]);
+                                        sb.append(eventChars[nextToken]);
                                         sb.append(' ');
                                     } else {
-                                        sb.append(AbstractJSONReader.eventChars[nextToken]);
+                                        sb.append(eventChars[nextToken]);
                                     }
                                 }
 
@@ -2283,9 +2287,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        propValue = readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null);
+                        readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null);
                     } else {
-                        if (propInfo.isJsonRawValue) {
+                        if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
                             final StringBuilder sb = Objectory.createStringBuilder();
                             sb.append('[');
 
@@ -2307,10 +2311,10 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     if (nextToken == EOF) {
                                         break;
                                     } else if (nextToken == COMMA || nextToken == COLON) {
-                                        sb.append(AbstractJSONReader.eventChars[nextToken]);
+                                        sb.append(eventChars[nextToken]);
                                         sb.append(' ');
                                     } else {
-                                        sb.append(AbstractJSONReader.eventChars[nextToken]);
+                                        sb.append(eventChars[nextToken]);
                                     }
                                 }
 

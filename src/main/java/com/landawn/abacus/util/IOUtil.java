@@ -36,6 +36,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
@@ -1899,7 +1900,7 @@ public final class IOUtil {
             //
             // Has trouble for reading first/last line from empty file? // TODO
             //    if (result == null) {
-            //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " excceded the total line count of the specified reader/file"); // Should throw IllegalArgumentException
+            //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " exceeded the total line count of the specified reader/file"); // Should throw IllegalArgumentException
             //    }
 
             return br.readLine(); //NOSONAR
@@ -6041,6 +6042,7 @@ public final class IOUtil {
      *             of (must not be {@code null}).
      * @return the length of the file, or recursive size of the directory, provided (in bytes).
      * @throws IllegalArgumentException if the file is {@code null} or the file does not exist.
+     * @see #sizeOfAsBigInteger(File)
      */
     public static long sizeOf(final File file) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
@@ -6068,6 +6070,7 @@ public final class IOUtil {
      * @param directory directory to inspect, must not be {@code null}
      * @return size of directory in bytes, 0 if directory is security restricted, a negative number when the real total is greater than {@link Long#MAX_VALUE}.
      * @throws IllegalArgumentException if the directory is {@code null} or it's not existed directory.
+     * @see #sizeOfDirectoryAsBigInteger(File)
      */
     public static long sizeOfDirectory(final File directory) throws IllegalArgumentException {
         N.checkArgNotNull(directory, cs.directory);
@@ -6100,6 +6103,71 @@ public final class IOUtil {
                 if (size < 0) {
                     break;
                 }
+            }
+        }
+
+        return size;
+    }
+
+    /**
+     * Returns the size of the specified file or directory as a BigInteger.
+     * 
+     * @param file
+     * @return
+     * @see #sizeOf(File)
+     * @see #sizeOfDirectoryAsBigInteger(File)
+     */
+    public static BigInteger sizeOfAsBigInteger(final File file) {
+        N.checkArgNotNull(file, cs.file);
+
+        if (!file.exists()) {
+            final String message = file + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (file.isDirectory()) {
+            return sizeOfDirectoryAsBigInteger(file); // private method; expects directory
+        }
+
+        return BigInteger.valueOf(file.length());
+    }
+
+    /**
+     * Returns the size of the specified directory as a BigInteger.
+     * 
+     * @param directory
+     * @return
+     * @see #sizeOfDirectory(File)
+     * @see #sizeOfAsBigInteger(File)
+     */
+    public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) {
+        N.checkArgNotNull(directory, cs.directory);
+
+        checkDirectory(directory);
+
+        return sizeOfDirectoryAsBigInteger0(directory);
+    }
+
+    private static BigInteger sizeOfAsBigInteger0(final File file) {
+        if (file.isDirectory()) {
+            return sizeOfDirectoryAsBigInteger0(file);
+        }
+
+        return BigInteger.valueOf(file.length()); // will be 0 if file does not exist
+    }
+
+    private static BigInteger sizeOfDirectoryAsBigInteger0(final File directory) {
+        final File[] files = directory.listFiles();
+
+        if (files == null) { // null if security restricted
+            return BigInteger.ZERO;
+        }
+
+        BigInteger size = BigInteger.ZERO;
+
+        for (final File file : files) {
+            if (!isSymbolicLink(file)) {
+                size = size.add(sizeOfAsBigInteger0(file)); // internal method 
             }
         }
 
