@@ -14,7 +14,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Iterables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Iterables_view.html), 
 [Iterators](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Iterators_view.html), 
 [Maps](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Maps_view.html), 
-[DateUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DateUtil_view.html), 
+[Dates](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Dates_view.html), 
 [IOUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/IOUtil_view.html), 
 [Files](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Files_view.html), 
 [Index](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Index_view.html), 
