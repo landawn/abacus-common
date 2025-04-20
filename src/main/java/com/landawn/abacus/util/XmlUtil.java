@@ -785,7 +785,7 @@ public final class XmlUtil {
      * @return A map containing the attributes of the given node, where the keys are attribute names and the values are attribute values.
      */
     public static Map<String, String> readAttributes(final Node node) {
-        return readAttributes(Strings.EMPTY_STRING, node, new LinkedHashMap<>());
+        return readAttributes(Strings.EMPTY, node, new LinkedHashMap<>());
     }
 
     private static Map<String, String> readAttributes(final String parentNodeName, final Node node, final Map<String, String> output) {
@@ -818,7 +818,7 @@ public final class XmlUtil {
      * @return A map containing the attributes and text content of the given element, where the keys are attribute names and the values are attribute values.
      */
     public static Map<String, String> readElement(final Element element) {
-        return readElement(Strings.EMPTY_STRING, element, new LinkedHashMap<>());
+        return readElement(Strings.EMPTY, element, new LinkedHashMap<>());
     }
 
     private static Map<String, String> readElement(final String parentNodeName, final Element element, final Map<String, String> output) {
@@ -982,7 +982,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs.
      */
     public static void writeCharacters(String str, final StringBuilder output) throws IOException {
-        str = (str == null) ? Strings.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 
@@ -1038,7 +1038,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs.
      */
     public static void writeCharacters(String str, final OutputStream output) throws IOException {
-        str = (str == null) ? Strings.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 
@@ -1104,7 +1104,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs.
      */
     public static void writeCharacters(String str, final Writer output) throws IOException {
-        str = (str == null) ? Strings.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 

@@ -4122,7 +4122,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     static void formatToForNull(final Appendable appendable) {
         try {
-            appendable.append(Strings.NULL_STRING);
+            appendable.append(Strings.NULL);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -80,7 +80,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public String valueOf(final char[] cbuf, final int offset, final int len) {
-        return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY_STRING : String.valueOf(cbuf, offset, len));
+        return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY : String.valueOf(cbuf, offset, len));
     }
 
     /**
@@ -179,7 +179,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, String x, final JSONXMLSerializationConfig<?> config) throws IOException {
-        x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY_STRING : x;
+        x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY : x;
 
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

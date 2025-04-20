@@ -247,7 +247,7 @@ public interface EntityId {
         @SuppressWarnings("deprecation")
         public EntityId build() {
             if (entityId == null) {
-                entityId = new Seid(Strings.EMPTY_STRING);
+                entityId = new Seid(Strings.EMPTY);
             }
 
             return entityId;

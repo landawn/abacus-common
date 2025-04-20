@@ -107,7 +107,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
@@ -208,7 +208,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final XMLSerializationConfig configToUse = check(config);
 
         if (obj == null) {
-            IOUtil.write(Strings.EMPTY_STRING, bw);
+            IOUtil.write(Strings.EMPTY, bw);
             return;
         }
 
@@ -314,7 +314,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         writeProperties(obj, config, propIndentation, serializedObjects, type, bw);
 
@@ -362,7 +362,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
-        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY : propIndentation) + config.getIndentation()) : null;
         final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
@@ -487,7 +487,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String entryIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String entryIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String keyValueIndentation = entryIndentation + config.getIndentation();
         final String nextIndentation = keyValueIndentation + config.getIndentation();
 
@@ -656,7 +656,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String nextIndentation = eleIndentation + config.getIndentation();
         final Object[] a = (Object[]) obj;
         Type<Object> eleType = null;
@@ -762,7 +762,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String nextIndentation = eleIndentation + config.getIndentation();
 
         Type<Object> eleType = null;
@@ -1318,7 +1318,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     // ignore;
                                 } else {
                                     propInfo.setPropValue(result,
-                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
+                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
                                 }
 
                                 propName = null;
@@ -1339,7 +1339,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     // ignore;
                                 } else {
                                     propInfo.setPropValue(result,
-                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
+                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
                                 }
 
                                 propName = null;
@@ -1456,7 +1456,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     break;
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    key = isNullValue ? null : (key == null ? entryKeyType.valueOf(Strings.EMPTY_STRING) : key);
+                                    key = isNullValue ? null : (key == null ? entryKeyType.valueOf(Strings.EMPTY) : key);
 
                                     break;
                                 }
@@ -1521,7 +1521,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     break;
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    propValue = isNullValue ? null : (propValue == null ? entryValueType.valueOf(Strings.EMPTY_STRING) : propValue);
+                                    propValue = isNullValue ? null : (propValue == null ? entryValueType.valueOf(Strings.EMPTY) : propValue);
 
                                     break;
                                 }
@@ -1630,7 +1630,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
 
                                     case XMLStreamConstants.END_ELEMENT: {
-                                        list.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY_STRING));
+                                        list.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY));
 
                                         break;
                                     }
@@ -1782,7 +1782,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 }
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    result.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY_STRING));
+                                    result.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY));
 
                                     break;
                                 }

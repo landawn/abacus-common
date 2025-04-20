@@ -189,18 +189,18 @@ public final class HttpUtil {
                 if (Strings.containsIgnoreCase(entry.getKey().name(), KRYO)) {
                     contentEncoding2Format.put(KRYO, entry.getKey());
                 }
-                contentEncoding2Format.put(Strings.EMPTY_STRING, entry.getKey());
+                contentEncoding2Format.put(Strings.EMPTY, entry.getKey());
             }
         }
 
-        final Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.computeIfAbsent(Strings.EMPTY_STRING, k -> new HashMap<>());
+        final Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.computeIfAbsent(Strings.EMPTY, k -> new HashMap<>());
 
         contentEncoding2Format.put(GZIP, ContentFormat.GZIP);
         contentEncoding2Format.put(BR, ContentFormat.BR);
         contentEncoding2Format.put(SNAPPY, ContentFormat.SNAPPY);
         contentEncoding2Format.put(LZ4, ContentFormat.LZ4);
         contentEncoding2Format.put(KRYO, ContentFormat.KRYO);
-        contentEncoding2Format.put(Strings.EMPTY_STRING, ContentFormat.NONE);
+        contentEncoding2Format.put(Strings.EMPTY, ContentFormat.NONE);
     }
 
     private HttpUtil() {
@@ -258,12 +258,12 @@ public final class HttpUtil {
      */
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         if (value instanceof Collection<?> c) {
             if (N.isEmpty(c)) {
-                return Strings.EMPTY_STRING;
+                return Strings.EMPTY;
             } else if (c.size() == 1) {
                 return N.stringOf(N.firstOrNullIfEmpty(c));
             } else {
@@ -628,11 +628,11 @@ public final class HttpUtil {
      */
     public static ContentFormat getContentFormat(String contentType, String contentEncoding) {
         if (contentType == null) {
-            contentType = Strings.EMPTY_STRING;
+            contentType = Strings.EMPTY;
         }
 
         if (contentEncoding == null) {
-            contentEncoding = Strings.EMPTY_STRING;
+            contentEncoding = Strings.EMPTY;
         }
 
         Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(contentType);
@@ -659,7 +659,7 @@ public final class HttpUtil {
             } else if (Strings.containsIgnoreCase(contentType, KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             } else {
-                contentEncoding2Format = contentTypeEncoding2Format.get(Strings.EMPTY_STRING);
+                contentEncoding2Format = contentTypeEncoding2Format.get(Strings.EMPTY);
             }
         }
 
@@ -677,7 +677,7 @@ public final class HttpUtil {
             } else if (Strings.containsIgnoreCase(contentEncoding, KRYO)) {
                 contentFormat = contentEncoding2Format.get(KRYO);
             } else {
-                contentFormat = contentEncoding2Format.get(Strings.EMPTY_STRING);
+                contentFormat = contentEncoding2Format.get(Strings.EMPTY);
             }
         }
 

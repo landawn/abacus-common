@@ -94,18 +94,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String with value {@code "null"}.
      */
     @Beta
-    public static final String NULL_STRING = "null";
+    public static final String NULL = "null";
 
     /**
      *
      * Char array with value {@code "['n', 'u', 'l', 'l']"}.
      */
-    static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
+    static final char[] NULL_CHAR_ARRAY = NULL.toCharArray();
 
     /**
      * The empty String {@code ""}.
      */
-    public static final String EMPTY_STRING = "";
+    public static final String EMPTY = "";
+
+    
 
     //    /**
     //     * The empty String {@code ""}.
@@ -115,7 +117,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //    public static final String EMPTY = EMPTY_STRING;
 
     /**
-     * A String for a space character.
+     * A String for a space character: {@code " "}.
      *
      */
     public static final String SPACE = WD.SPACE;
@@ -1009,7 +1011,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see N#nullToEmpty(String)
      */
     public static String nullToEmpty(final String str) {
-        return str == null ? EMPTY_STRING : str;
+        return str == null ? EMPTY : str;
     }
 
     /**
@@ -1026,7 +1028,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = strs[i] == null ? EMPTY_STRING : strs[i];
+            strs[i] = strs[i] == null ? EMPTY : strs[i];
         }
     }
 
@@ -1063,7 +1065,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return An empty string if the input string is blank, otherwise the original string.
      */
     public static String blankToEmpty(final String str) {
-        return isBlank(str) ? EMPTY_STRING : str;
+        return isBlank(str) ? EMPTY : str;
     }
 
     /**
@@ -1078,7 +1080,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = isBlank(strs[i]) ? EMPTY_STRING : strs[i];
+            strs[i] = isBlank(strs[i]) ? EMPTY : strs[i];
         }
     }
 
@@ -1271,7 +1273,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             throw new IllegalArgumentException(String.format("Minimum abbreviation width is %d", minAbbrevWidth));
         }
 
-        if (isNotEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
+        if (isNotEmpty(str) && EMPTY.equals(abbrevMarker) && maxWidth > 0) {
             return Strings.substring(str, 0, maxWidth);
         } else if (isAnyEmpty(str, abbrevMarker)) {
             return str;
@@ -1398,7 +1400,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotNegative(size, cs.size);
 
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= size) {
@@ -1439,7 +1441,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         // N.checkArgNotEmpty(padStr, "padStr");
 
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= minLength) {
@@ -1482,7 +1484,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= minLength) {
@@ -1506,7 +1508,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String padStart(String str, final int minLength, final String padStr) {
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= minLength) {
@@ -1570,7 +1572,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= minLength) {
@@ -1594,7 +1596,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
-            str = EMPTY_STRING;
+            str = EMPTY;
         }
 
         if (str.length() >= minLength) {
@@ -1646,7 +1648,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (n == 1) {
             return N.stringOf(ch);
         }
@@ -1707,7 +1709,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotNegative(n, cs.n);
 
         if (N.isEmpty(str) || n == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (n == 1) {
             return str;
         }
@@ -1729,7 +1731,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return repeat(str, n);
         }
 
-        return repeat(str, n, delimiter, EMPTY_STRING, EMPTY_STRING);
+        return repeat(str, n, delimiter, EMPTY, EMPTY);
     }
 
     /**
@@ -1747,10 +1749,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        str = str == null ? EMPTY_STRING : str;
-        delimiter = delimiter == null ? EMPTY_STRING : delimiter;
-        prefix = prefix == null ? EMPTY_STRING : prefix;
-        suffix = suffix == null ? EMPTY_STRING : suffix;
+        str = str == null ? EMPTY : str;
+        delimiter = delimiter == null ? EMPTY : delimiter;
+        prefix = prefix == null ? EMPTY : prefix;
+        suffix = suffix == null ? EMPTY : suffix;
 
         if (n == 0 || (isEmpty(str) && isEmpty(delimiter))) {
             return concat(prefix + suffix);
@@ -3526,7 +3528,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        return replace(str, fromIndex, removeStr, EMPTY_STRING, -1);
+        return replace(str, fromIndex, removeStr, EMPTY, -1);
     }
 
     /**
@@ -3757,7 +3759,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         //    final Splitter splitter = preserveSplitterPool.get(delimiter);
@@ -3789,7 +3791,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         //    if (trim) {
@@ -3840,7 +3842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         //    final Splitter splitter = preserveSplitterPool.get(delimiter);
@@ -3875,7 +3877,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         //    if (trim) {
@@ -3921,7 +3923,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         if (max == 1) {
@@ -3967,7 +3969,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { EMPTY_STRING };
+            return new String[] { EMPTY };
         }
 
         if (max == 1) {
@@ -3987,7 +3989,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
+            return preserveAllTokens ? new String[] { EMPTY } : N.EMPTY_STRING_ARRAY;
         }
 
         final int len = str.length();
@@ -4039,7 +4041,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
+            return preserveAllTokens ? new String[] { EMPTY } : N.EMPTY_STRING_ARRAY;
         }
 
         if (N.len(delimiter) == 1) {
@@ -4122,7 +4124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { Strings.EMPTY };
         }
 
         return lineSplitter.splitToArray(str);
@@ -4144,7 +4146,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null || (str.isEmpty() && omitEmptyLines)) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { Strings.EMPTY };
         }
 
         if (trim) {
@@ -4284,7 +4286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String trimToEmpty(final String str) {
-        return isEmpty(str) ? EMPTY_STRING : str.trim();
+        return isEmpty(str) ? EMPTY : str.trim();
     }
 
     /**
@@ -4435,7 +4437,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String stripToEmpty(final String str) {
-        return isEmpty(str) ? EMPTY_STRING : strip(str, null);
+        return isEmpty(str) ? EMPTY : strip(str, null);
     }
 
     /**
@@ -4692,7 +4694,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(str, Normalizer.Form.NFD));
         convertRemainingAccentCharacters(decomposed);
         // Note that this doesn't correctly remove ligatures...
-        return STRIP_ACCENTS_PATTERN.matcher(decomposed).replaceAll(EMPTY_STRING);
+        return STRIP_ACCENTS_PATTERN.matcher(decomposed).replaceAll(EMPTY);
     }
 
     /**
@@ -4772,7 +4774,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             final char ch = str.charAt(0);
 
             if (ch == CHAR_CR || ch == CHAR_LF) {
-                return EMPTY_STRING;
+                return EMPTY;
             }
 
             return str;
@@ -4847,7 +4849,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int strLen = str.length();
 
         if (strLen < 2) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int lastIdx = strLen - 1;
@@ -4978,7 +4980,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return null;
         } else if (str.length() <= offset || maxWidth == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (str.length() - offset <= maxWidth) {
             return offset == 0 ? str : str.substring(offset);
         } else {
@@ -8338,7 +8340,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String commonPrefix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int commonPrefixLen = lengthOfCommonPrefix(a, b);
@@ -8362,19 +8364,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String commonPrefix(final CharSequence... strs) {
         if (N.isEmpty(strs)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         if (strs.length == 1) {
-            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
+            return isEmpty(strs[0]) ? EMPTY : strs[0].toString();
         } else if (isAnyEmpty(strs)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         String commonPrefix = commonPrefix(strs[0], strs[1]);
 
         if (isEmpty(commonPrefix)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
@@ -8402,7 +8404,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String commonSuffix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int aLength = a.length();
@@ -8426,19 +8428,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String commonSuffix(final CharSequence... strs) {
         if (N.isEmpty(strs)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         if (strs.length == 1) {
-            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
+            return isEmpty(strs[0]) ? EMPTY : strs[0].toString();
         } else if (isAnyEmpty(strs)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         String commonSuffix = commonSuffix(strs[0], strs[1]);
 
         if (isEmpty(commonSuffix)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
@@ -8478,7 +8480,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String longestCommonSubstring(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int lenA = N.len(a);
@@ -8533,7 +8535,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (maxLen == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return a.subSequence(endIndex - maxLen, endIndex).toString();
@@ -8583,7 +8585,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotNegative(n, cs.n);
 
         if (str == null || str.isEmpty() || n == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (str.length() <= n) {
             return str;
         } else {
@@ -8605,7 +8607,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotNegative(n, cs.n);
 
         if (str == null || str.isEmpty() || n == 0) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (str.length() <= n) {
             return str;
         } else {
@@ -8840,7 +8842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveEndIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
@@ -8885,7 +8887,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfInclusiveBeginIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()), exclusiveEndIndex);
@@ -9005,7 +9007,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveBeginIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
@@ -9032,7 +9034,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveBeginIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (exclusiveEndIndex == 0) {
             return null;
         }
@@ -9138,7 +9140,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveEndIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
@@ -9165,7 +9167,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveEndIndex.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (inclusiveBeginIndex == str.length()) {
             return null;
         }
@@ -9882,7 +9884,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (N.isEmpty(str)) {
-            return replacement == null ? EMPTY_STRING : replacement;
+            return replacement == null ? EMPTY : replacement;
         } else if (fromIndex == toIndex && N.isEmpty(replacement)) {
             return str;
         }
@@ -9913,7 +9915,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
 
         if (N.isEmpty(str)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
@@ -9949,13 +9951,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, len);
 
         if (N.isEmpty(str)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         if (fromIndex == toIndex || fromIndex >= len) {
             return str;
         } else if (toIndex - fromIndex >= len) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex));
@@ -9982,7 +9984,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final boolean[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -9998,7 +10000,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final boolean[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10019,7 +10021,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10056,7 +10058,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10103,7 +10105,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -10167,7 +10169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final char[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10183,7 +10185,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final char[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10204,7 +10206,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10241,7 +10243,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10288,7 +10290,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -10352,7 +10354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final byte[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10368,7 +10370,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final byte[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10389,7 +10391,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10426,7 +10428,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10473,7 +10475,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -10537,7 +10539,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final short[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10553,7 +10555,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final short[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10574,7 +10576,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10611,7 +10613,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10658,7 +10660,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -10722,7 +10724,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final int[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10738,7 +10740,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final int[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10759,7 +10761,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10796,7 +10798,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10843,7 +10845,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -10907,7 +10909,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final long[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10923,7 +10925,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final long[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -10944,7 +10946,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -10981,7 +10983,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -11028,7 +11030,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -11092,7 +11094,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final float[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11108,7 +11110,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final float[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11129,7 +11131,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -11166,7 +11168,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -11213,7 +11215,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -11277,7 +11279,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final double[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11293,7 +11295,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final double[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11314,7 +11316,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -11351,7 +11353,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -11398,7 +11400,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -11462,7 +11464,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Object[] a, final char delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11478,7 +11480,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Object[] a, final String delimiter) {
         if (N.isEmpty(a)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -11616,7 +11618,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -11769,7 +11771,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
@@ -11847,7 +11849,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -11967,7 +11969,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Iterator<?> iter, final char delimiter) {
         if (iter == null) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         //    final StringBuilder sb = Objectory.createStringBuilder();
@@ -12000,7 +12002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final String delimiter) {
-        return join(iter, delimiter, EMPTY_STRING, EMPTY_STRING, false);
+        return join(iter, delimiter, EMPTY, EMPTY, false);
     }
 
     /**
@@ -12030,7 +12032,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -12106,7 +12108,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter) {
         if (N.isEmpty(m)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter);
@@ -12122,7 +12124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
         if (N.isEmpty(m)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter);
@@ -12139,7 +12141,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
         if (N.isEmpty(m)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
@@ -12156,7 +12158,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
         if (N.isEmpty(m)) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
@@ -12221,7 +12223,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(m)) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -12358,7 +12360,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
@@ -12427,7 +12429,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY_STRING;
+                return EMPTY;
             } else if (isEmpty(prefix)) {
                 return suffix;
             } else if (isEmpty(suffix)) {
@@ -12489,7 +12491,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String concat(final String a, final String b) {
         if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? Strings.EMPTY_STRING : b;
+            return N.isEmpty(b) ? Strings.EMPTY : b;
         } else {
             return N.isEmpty(b) ? a : a.concat(b);
         }
@@ -12505,7 +12507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c));
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c));
     }
 
     /**
@@ -12519,7 +12521,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d));
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d));
     }
 
     /**
@@ -12534,7 +12536,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e));
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e));
     }
 
     /**
@@ -12550,7 +12552,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f));
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f));
     }
 
     /**
@@ -12567,7 +12569,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f),
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f),
                 nullToEmpty(g));
     }
 
@@ -12587,7 +12589,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g,
             final String h) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
                 nullToEmpty(h));
     }
 
@@ -12608,7 +12610,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g, final String h,
             final String i) {
-        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
                 nullToEmpty(h), nullToEmpty(i));
     }
 
@@ -12624,7 +12626,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         switch (len) {
             case 0:
-                return EMPTY_STRING;
+                return EMPTY;
 
             case 1:
                 return nullToEmpty(a[0]);
@@ -12650,7 +12652,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             default: {
                 final String[] b = N.copyThenReplaceAll(a, Fn.nullToEmpty());
 
-                return String.join(Strings.EMPTY_STRING, b);
+                return String.join(Strings.EMPTY, b);
             }
         }
     }
@@ -12841,7 +12843,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     private static String toString(final Object e, final boolean trim) {
         if (e == null) {
-            return NULL_STRING;
+            return NULL;
         }
 
         if (trim) {
@@ -13284,7 +13286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64Encode(final byte[] binaryData) {
         if (N.isEmpty(binaryData)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return BASE64_ENCODER.encodeToString(binaryData);
@@ -13298,7 +13300,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64EncodeString(final String str) {
         if (Strings.isEmpty(str)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return BASE64_ENCODER.encodeToString(str.getBytes()); // NOSONAR
@@ -13325,7 +13327,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64EncodeString(final String str, final Charset charset) {
         if (Strings.isEmpty(str)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return BASE64_ENCODER.encodeToString(str.getBytes(charset)); // NOSONAR
@@ -13353,7 +13355,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64DecodeToString(final String base64String) {
         if (Strings.isEmpty(base64String)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return new String(base64Decode(base64String)); // NOSONAR
@@ -13379,7 +13381,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64DecodeToString(final String base64String, final Charset charset) {
         if (Strings.isEmpty(base64String)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return new String(base64Decode(base64String), charset); // NOSONAR
@@ -13393,7 +13395,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64UrlEncode(final byte[] binaryData) {
         if (N.isEmpty(binaryData)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return BASE64_URL_ENCODER.encodeToString(binaryData);
@@ -13421,7 +13423,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64UrlDecodeToString(final String base64String) {
         if (Strings.isEmpty(base64String)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return new String(BASE64_URL_DECODER.decode(base64String)); // NOSONAR
@@ -13446,7 +13448,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String base64UrlDecodeToString(final String base64String, final Charset charset) {
         if (Strings.isEmpty(base64String)) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return new String(BASE64_URL_DECODER.decode(base64String), charset);

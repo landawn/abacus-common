@@ -103,7 +103,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
                     //noinspection ConstantValue
                     if (cls != null) {
-                        simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : Strings.EMPTY_STRING);
+                        simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : Strings.EMPTY);
                     }
                 }
             } catch (final Exception e) {

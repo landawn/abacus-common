@@ -277,7 +277,7 @@ public final class Fn {
 
     private static final UnaryOperator<String> STRIP_TO_NULL = Strings::stripToNull;
 
-    private static final UnaryOperator<String> NULL_TO_EMPTY = t -> t == null ? Strings.EMPTY_STRING : t;
+    private static final UnaryOperator<String> NULL_TO_EMPTY = t -> t == null ? Strings.EMPTY : t;
 
     @SuppressWarnings("rawtypes")
     private static final UnaryOperator<List> NULL_TO_EMPTY_LIST = t -> t == null ? N.emptyList() : t;
@@ -5180,7 +5180,7 @@ public final class Fn {
         private static final Supplier<Object[]> EMPTY_OBJECT_ARRAY = () -> N.EMPTY_OBJECT_ARRAY;
 
         /** The Constant EMPTY_STRING. */
-        private static final Supplier<String> EMPTY_STRING = () -> Strings.EMPTY_STRING;
+        private static final Supplier<String> EMPTY_STRING = () -> Strings.EMPTY;
 
         /** The Constant BOOLEAN_LIST. */
         private static final Supplier<BooleanList> BOOLEAN_LIST = BooleanList::new;

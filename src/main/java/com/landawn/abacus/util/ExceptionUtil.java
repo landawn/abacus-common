@@ -446,7 +446,7 @@ public final class ExceptionUtil {
      */
     public static String getStackTrace(final Throwable throwable) {
         if (throwable == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
         final StringWriter sw = new StringWriter();
         throwable.printStackTrace(new PrintWriter(sw, true));

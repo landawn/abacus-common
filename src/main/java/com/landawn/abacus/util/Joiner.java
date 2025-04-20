@@ -64,7 +64,7 @@ public final class Joiner implements Closeable {
 
     private boolean useCachedBuffer = false;
 
-    private String nullText = Strings.NULL_STRING;
+    private String nullText = Strings.NULL;
 
     private StringBuilder buffer;
 
@@ -214,7 +214,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner useForNull(final String nullText) {
-        this.nullText = nullText == null ? Strings.NULL_STRING : nullText;
+        this.nullText = nullText == null ? Strings.NULL : nullText;
 
         return this;
     }

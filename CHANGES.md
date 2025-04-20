@@ -1,3 +1,7 @@
+### 5.8.0
+
+* Improvements and bug fixes.
+
 ### 5.7.13
 
 * Rename `DateUtil` to `Dates`.

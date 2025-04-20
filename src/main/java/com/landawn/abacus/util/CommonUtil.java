@@ -9796,7 +9796,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static String nullToEmpty(final String str) {
-        return str == null ? Strings.EMPTY_STRING : str;
+        return str == null ? Strings.EMPTY : str;
     }
 
     /**
@@ -10063,7 +10063,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, len = a.length; i < len; i++) {
-            a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+            a[i] = a[i] == null ? Strings.EMPTY : a[i];
         }
 
         return a;
@@ -17469,7 +17469,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final Object obj) {
         if (obj == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (obj instanceof CharSequence) {
             return obj.toString();
         }
@@ -17540,7 +17540,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final boolean[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17561,7 +17561,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17586,7 +17586,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final boolean[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -17625,7 +17625,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final char[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17646,7 +17646,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17671,7 +17671,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final char[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -17709,7 +17709,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final byte[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17730,7 +17730,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17755,7 +17755,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final byte[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -17793,7 +17793,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final short[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17814,7 +17814,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17839,7 +17839,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final short[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -17877,7 +17877,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final int[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17898,7 +17898,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17923,7 +17923,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final int[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -17961,7 +17961,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final long[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -17982,7 +17982,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18007,7 +18007,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final long[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -18045,7 +18045,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final float[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18066,7 +18066,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18091,7 +18091,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final float[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -18129,7 +18129,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final double[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18150,7 +18150,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18175,7 +18175,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final double[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -18213,7 +18213,7 @@ sealed class CommonUtil permits N {
      */
     public static String toString(final Object[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18234,7 +18234,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -18259,7 +18259,7 @@ sealed class CommonUtil permits N {
      */
     static void toString(final StringBuilder sb, final Object[] a) {
         if (a == null) {
-            sb.append(Strings.NULL_STRING);
+            sb.append(Strings.NULL);
         } else if (a.length == 0) {
             sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
@@ -18297,7 +18297,7 @@ sealed class CommonUtil permits N {
      */
     public static String deepToString(final Object obj) {
         if (obj == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         }
 
         final Class<?> cls = obj.getClass();
@@ -18354,7 +18354,7 @@ sealed class CommonUtil permits N {
      */
     public static String deepToString(final Object[] a) {
         if (a == null) {
-            return Strings.NULL_STRING;
+            return Strings.NULL;
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
@@ -21883,7 +21883,7 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndex, toIndex, len);
 
         if (fromIndex == 0 && toIndex == len) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         return str.substring(fromIndex, toIndex);
@@ -21911,7 +21911,7 @@ sealed class CommonUtil permits N {
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         if (step == 1) {

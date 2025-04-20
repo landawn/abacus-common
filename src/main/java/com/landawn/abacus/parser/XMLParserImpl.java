@@ -81,7 +81,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
@@ -181,7 +181,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final XMLSerializationConfig configToUse = check(config);
 
         if (obj == null) {
-            IOUtil.write(Strings.EMPTY_STRING, bw);
+            IOUtil.write(Strings.EMPTY, bw);
             return;
         }
 
@@ -287,7 +287,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         writeProperties(obj, config, propIndentation, serializedObjects, type, bw);
 
@@ -337,7 +337,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
-        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY : propIndentation) + config.getIndentation()) : null;
         final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
@@ -445,7 +445,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String nextIndentation = propIndentation + config.getIndentation();
 
         String strKey = null;
@@ -551,7 +551,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String nextIndentation = propIndentation + config.getIndentation();
 
         Object value = null;
@@ -650,7 +650,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final Object[] a = (Object[]) obj;
         final boolean isSerializableByJSON = isSerializableByJSON(a);
 
@@ -730,7 +730,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final boolean isSerializableByJSON = isSerializableByJSON(c);
 
         if (isSerializableByJSON) {

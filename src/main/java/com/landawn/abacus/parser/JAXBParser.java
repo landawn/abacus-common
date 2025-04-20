@@ -56,7 +56,7 @@ final class JAXBParser extends AbstractXMLParser {
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         final BufferedWriter bw = Objectory.createBufferedWriter();
@@ -153,7 +153,7 @@ final class JAXBParser extends AbstractXMLParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(Strings.EMPTY_STRING, output);
+                IOUtil.write(Strings.EMPTY, output);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }

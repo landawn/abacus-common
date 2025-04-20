@@ -56,7 +56,7 @@ public final class Splitter {
             end--;
         }
 
-        return start >= end ? Strings.EMPTY_STRING : source.subSequence(start, end).toString();
+        return start >= end ? Strings.EMPTY : source.subSequence(start, end).toString();
     };
 
     private static final SubStringFunc stripSubStringFunc = (source, start, end) -> {
@@ -68,7 +68,7 @@ public final class Splitter {
             end--;
         }
 
-        return start >= end ? Strings.EMPTY_STRING : source.subSequence(start, end).toString();
+        return start >= end ? Strings.EMPTY : source.subSequence(start, end).toString();
     };
 
     private final Strategy strategy;

@@ -64,7 +64,7 @@ public class u { // NOSONAR
         /** Presents {@code Boolean.FALSE}. */
         public static final Optional<Boolean> FALSE = new Optional<>(Boolean.FALSE);
 
-        private static final Optional<String> EMPTY_STRING = new Optional<>(Strings.EMPTY_STRING);
+        private static final Optional<String> EMPTY_STRING = new Optional<>(Strings.EMPTY);
 
         /** The Constant EMPTY. */
         private static final Optional<?> EMPTY = new Optional<>();
@@ -5482,7 +5482,7 @@ public class u { // NOSONAR
 
         private static final Nullable<String> NULL_STRING = new Nullable<>(null);
 
-        private static final Nullable<String> EMPTY_STRING = new Nullable<>(Strings.EMPTY_STRING);
+        private static final Nullable<String> EMPTY_STRING = new Nullable<>(Strings.EMPTY);
 
         /** The Constant EMPTY. */
         private static final Nullable<?> EMPTY = new Nullable<>();

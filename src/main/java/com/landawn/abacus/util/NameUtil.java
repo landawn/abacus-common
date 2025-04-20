@@ -180,7 +180,7 @@ public final class NameUtil {
             final int index = name.lastIndexOf(WD._PERIOD);
 
             if (index < 1) {
-                parentName = Strings.EMPTY_STRING;
+                parentName = Strings.EMPTY;
             } else {
                 parentName = NameUtil.getCachedName(name.substring(0, index));
             }

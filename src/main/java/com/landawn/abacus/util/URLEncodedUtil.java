@@ -439,7 +439,7 @@ public final class URLEncodedUtil {
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         if (parameters == null) {
-            return Strings.EMPTY_STRING;
+            return Strings.EMPTY;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -683,7 +683,7 @@ public final class URLEncodedUtil {
     private static void urlEncode(final String content, final Charset charset, final BitSet safeChars, final boolean blankAsPlus, final Appendable output)
             throws IOException {
         if (content == null) {
-            output.append(Strings.NULL_STRING);
+            output.append(Strings.NULL);
 
             return;
         }

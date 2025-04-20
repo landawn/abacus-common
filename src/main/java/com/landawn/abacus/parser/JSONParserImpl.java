@@ -374,7 +374,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(Strings.EMPTY_STRING, output);
+                IOUtil.write(Strings.EMPTY, output);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -423,7 +423,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(Strings.EMPTY_STRING, output);
+                IOUtil.write(Strings.EMPTY, output);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -468,7 +468,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(Strings.EMPTY_STRING, output);
+                IOUtil.write(Strings.EMPTY, output);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -673,7 +673,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACE_L);
         }
 
-        String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         if (config.wrapRootValue()) {
             if (isPrettyFormat) {
@@ -824,7 +824,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACE_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         Object key = null;
         Object value = null;
@@ -921,7 +921,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACKET_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         final Object[] a = isPrimitiveArray ? null : (Object[]) obj;
         final int len = isPrimitiveArray ? Array.getLength(obj) : a.length;
@@ -987,7 +987,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACKET_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         int i = 0;
 
         for (final Object element : c) {
@@ -1076,7 +1076,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (!mapEntity.isEmpty()) {
             final String nextIndentation = isPrettyFormat
-                    ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
+                    ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation() + config.getIndentation())
                     : null;
             int i = 0;
 
@@ -1187,7 +1187,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (!entityId.isEmpty()) {
             final String nextIndentation = isPrettyFormat
-                    ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
+                    ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation() + config.getIndentation())
                     : null;
             int i = 0;
 
@@ -1273,7 +1273,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final boolean isPrettyFormat = config.prettyFormat();
         final boolean writeColumnType = config.writeColumnType();
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
@@ -1528,7 +1528,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final boolean writeRowColumnKeyType = config.writeRowColumnKeyType();
         final boolean writeColumnType = config.writeColumnType();
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
 
         if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);

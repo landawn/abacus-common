@@ -87,7 +87,7 @@ public final class RegExUtil {
      * @see String#replaceAll(String, String)
      */
     public static String removeAll(final String source, final String regex) {
-        return replaceAll(source, regex, Strings.EMPTY_STRING);
+        return replaceAll(source, regex, Strings.EMPTY);
     }
 
     /**
@@ -101,7 +101,7 @@ public final class RegExUtil {
      * @see java.util.regex.Matcher#replaceAll(String)
      */
     public static String removeAll(final String source, final Pattern pattern) throws IllegalArgumentException {
-        return replaceAll(source, pattern, Strings.EMPTY_STRING);
+        return replaceAll(source, pattern, Strings.EMPTY);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static String removeFirst(final String source, final String regex) {
-        return replaceFirst(source, regex, Strings.EMPTY_STRING);
+        return replaceFirst(source, regex, Strings.EMPTY);
     }
 
     /**
@@ -130,7 +130,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static String removeFirst(final String source, final Pattern pattern) throws IllegalArgumentException {
-        return replaceFirst(source, pattern, Strings.EMPTY_STRING);
+        return replaceFirst(source, pattern, Strings.EMPTY);
     }
 
     /**
@@ -144,7 +144,7 @@ public final class RegExUtil {
      */
     @Beta
     public static String removeLast(final String source, final String regex) {
-        return replaceLast(source, regex, Strings.EMPTY_STRING);
+        return replaceLast(source, regex, Strings.EMPTY);
     }
 
     /**
@@ -159,7 +159,7 @@ public final class RegExUtil {
      */
     @Beta
     public static String removeLast(final String source, final Pattern pattern) throws IllegalArgumentException {
-        return replaceLast(source, pattern, Strings.EMPTY_STRING);
+        return replaceLast(source, pattern, Strings.EMPTY);
     }
 
     /**

@@ -210,7 +210,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * Char array with value {@code "['n', 'u', 'l', 'l']"}.
      */
-    private static final char[] NULL_CHAR_ARRAY = Strings.NULL_STRING.toCharArray();
+    private static final char[] NULL_CHAR_ARRAY = Strings.NULL.toCharArray();
 
     private static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Strings.ELEMENT_SEPARATOR.toCharArray();
 
