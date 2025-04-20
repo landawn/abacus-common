@@ -90,8 +90,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    // ... it has to be big enough to make it's safety to add element to
-    // ArrayBlockingQueue.
+    // ... it has to be big enough to make it's safety to add an element to ArrayBlockingQueue.
     static final int POOL_SIZE = 1000;
 
     static final int CLS_POOL_SIZE = 3000;

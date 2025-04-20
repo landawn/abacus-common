@@ -654,7 +654,6 @@ public final class Fn {
      * @param a
      * @return
      */
-    @SafeVarargs
     public static Runnable closeAll(final AutoCloseable... a) {
         return new Runnable() {
             private volatile boolean isClosed = false;
@@ -719,7 +718,6 @@ public final class Fn {
      * @param a
      * @return
      */
-    @SafeVarargs
     public static Runnable closeAllQuietly(final AutoCloseable... a) {
         return new Runnable() {
             private volatile boolean isClosed = false;

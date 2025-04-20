@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 
 public class MillisTimeType extends TimeType {
 
@@ -41,7 +41,7 @@ public class MillisTimeType extends TimeType {
     public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
         final long lng = rs.getLong(columnIndex);
 
-        return (lng == 0) ? null : DateUtil.createTime(lng);
+        return (lng == 0) ? null : Dates.createTime(lng);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MillisTimeType extends TimeType {
     public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
         final long lng = rs.getLong(columnLabel);
 
-        return (lng == 0) ? null : DateUtil.createTime(lng);
+        return (lng == 0) ? null : Dates.createTime(lng);
     }
 
     /**

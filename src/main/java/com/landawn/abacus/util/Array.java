@@ -81,7 +81,6 @@ public class Array {
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
-    @SafeVarargs
     public static <T> T newInstance(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
         return (T) java.lang.reflect.Array.newInstance(componentType, dimensions);
     }
@@ -574,7 +573,6 @@ public class Array {
      * @param a the input array of booleans
      * @return the same input array
      */
-    @SafeVarargs
     public static boolean[] of(final boolean... a) {
         return a;
     }
@@ -585,7 +583,6 @@ public class Array {
      * @param a the input array of characters
      * @return the same input array
      */
-    @SafeVarargs
     public static char[] of(final char... a) {
         return a;
     }
@@ -596,7 +593,6 @@ public class Array {
      * @param a the input array of bytes
      * @return the same input array
      */
-    @SafeVarargs
     public static byte[] of(final byte... a) {
         return a;
     }
@@ -607,7 +603,6 @@ public class Array {
      * @param a the input array of shorts
      * @return the same input array
      */
-    @SafeVarargs
     public static short[] of(final short... a) {
         return a;
     }
@@ -618,7 +613,6 @@ public class Array {
      * @param a the input array of integers
      * @return the same input array
      */
-    @SafeVarargs
     public static int[] of(final int... a) {
         return a;
     }
@@ -629,7 +623,6 @@ public class Array {
      * @param a the input array of longs
      * @return the same input array
      */
-    @SafeVarargs
     public static long[] of(final long... a) {
         return a;
     }
@@ -640,7 +633,6 @@ public class Array {
      * @param a the input array of floats
      * @return the same input array
      */
-    @SafeVarargs
     public static float[] of(final float... a) {
         return a;
     }
@@ -651,7 +643,6 @@ public class Array {
      * @param a the input array of doubles
      * @return the same input array
      */
-    @SafeVarargs
     public static double[] of(final double... a) {
         return a;
     }
@@ -663,7 +654,6 @@ public class Array {
      * @return the same input array
      * @see N#asArray(Object...)
      */
-    @SafeVarargs
     public static String[] of(final String... a) {
         return a;
     }
@@ -910,7 +900,7 @@ public class Array {
     //        return a;
     //    }
 
-    //    // Only for Java 8. it's ambiguous in the Java version before 8.
+    //    // Only for Java 8. It's ambiguous in the Java version before 8.
     //    /**
     //     * Returns the input array
     //     *
@@ -2493,7 +2483,6 @@ public class Array {
      * @return An array of Boolean objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Boolean[] box(final boolean... a) {
         if (a == null) {
             return null;
@@ -2537,7 +2526,6 @@ public class Array {
      * @return An array of Character objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Character[] box(final char... a) {
         if (a == null) {
             return null;
@@ -2581,7 +2569,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Byte[] box(final byte... a) {
         if (a == null) {
             return null;
@@ -2625,7 +2612,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Short[] box(final short... a) {
         if (a == null) {
             return null;
@@ -2669,7 +2655,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Integer[] box(final int... a) {
         if (a == null) {
             return null;
@@ -2713,7 +2698,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Long[] box(final long... a) {
         if (a == null) {
             return null;
@@ -2757,7 +2741,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Float[] box(final float... a) {
         if (a == null) {
             return null;
@@ -2801,7 +2784,6 @@ public class Array {
      * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
-    @SafeVarargs
     public static Double[] box(final double... a) {
         if (a == null) {
             return null;
@@ -3209,7 +3191,6 @@ public class Array {
      * @see #unbox(Boolean[], boolean)
      * @see #unbox(Boolean[], int, int, boolean)
      */
-    @SafeVarargs
     public static boolean[] unbox(final Boolean... a) {
         return unbox(a, false);
     }
@@ -3272,7 +3253,6 @@ public class Array {
      * @see #unbox(Character[], char)
      * @see #unbox(Character[], int, int, char)
      */
-    @SafeVarargs
     public static char[] unbox(final Character... a) {
         return unbox(a, (char) 0);
     }
@@ -3336,7 +3316,6 @@ public class Array {
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[], int, int, byte)
      */
-    @SafeVarargs
     public static byte[] unbox(final Byte... a) {
         return unbox(a, (byte) 0);
     }
@@ -3400,7 +3379,6 @@ public class Array {
      * @see #unbox(Short[], short)
      * @see #unbox(Short[], int, int, short)
      */
-    @SafeVarargs
     public static short[] unbox(final Short... a) {
         return unbox(a, (short) 0);
     }
@@ -3464,7 +3442,6 @@ public class Array {
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer[], int, int, int)
      */
-    @SafeVarargs
     public static int[] unbox(final Integer... a) {
         return unbox(a, 0);
     }
@@ -3529,7 +3506,6 @@ public class Array {
      * @see #unbox(Long[], long)
      * @see #unbox(Long[], int, int, long)
      */
-    @SafeVarargs
     public static long[] unbox(final Long... a) {
         return unbox(a, 0L);
     }
@@ -3594,7 +3570,6 @@ public class Array {
      * @see #unbox(Float[], float)
      * @see #unbox(Float[], int, int, float)
      */
-    @SafeVarargs
     public static float[] unbox(final Float... a) {
         return unbox(a, 0f);
     }
@@ -3659,7 +3634,6 @@ public class Array {
      * @see #unbox(Double[], double)
      * @see #unbox(Double[], int, int, double)
      */
-    @SafeVarargs
     public static double[] unbox(final Double... a) {
         return unbox(a, 0d);
     }

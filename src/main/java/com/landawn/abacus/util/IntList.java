@@ -98,7 +98,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param a the array of integers to be used as the element array for this list
      * @return a new IntList containing the elements of the specified array
      */
-    @SafeVarargs
     public static IntList of(final int... a) {
         return new IntList(N.nullToEmpty(a));
     }
@@ -678,8 +677,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

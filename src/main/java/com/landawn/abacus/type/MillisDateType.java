@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 
 public class MillisDateType extends DateType {
 
@@ -41,7 +41,7 @@ public class MillisDateType extends DateType {
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
         final long lng = rs.getLong(columnIndex);
 
-        return (lng == 0) ? null : DateUtil.createDate(lng);
+        return (lng == 0) ? null : Dates.createDate(lng);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MillisDateType extends DateType {
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
         final long lng = rs.getLong(columnLabel);
 
-        return (lng == 0) ? null : DateUtil.createDate(lng);
+        return (lng == 0) ? null : Dates.createDate(lng);
     }
 
     /**

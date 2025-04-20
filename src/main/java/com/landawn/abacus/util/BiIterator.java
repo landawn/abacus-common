@@ -412,7 +412,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Zips two arrays into a BiIterator.
      * The resulting BiIterator will iterate over pairs of elements from the two arrays.
      * If the arrays have different lengths, the resulting BiIterator will have the length of the shorter array.
-     * If either arrays is {@code null}, returns an empty BiIterator.
+     * If either array is {@code null}, returns an empty BiIterator.
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
@@ -1076,7 +1076,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Converts the elements in this BiIterator to an array of the specified type.
      *
-     * @param <T> the type of the array elements. It should be super type of Pair.
+     * @param <T> the type of the array elements. It should be a super type of Pair.
      * @param a the array into which the elements of this BiIterator are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return an array containing the elements of this BiIterator

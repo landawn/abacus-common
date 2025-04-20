@@ -1472,7 +1472,6 @@ public final class ClassUtil {
      * @param parameterTypes the parameter types of the constructor
      * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found.
      */
-    @SafeVarargs
     public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
         Constructor<?> constructor = null;
 
@@ -1554,7 +1553,6 @@ public final class ClassUtil {
      * @param parameterTypes the parameter types of the method
      * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
      */
-    @SafeVarargs
     public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
         Method method = null;
 
@@ -2746,7 +2744,6 @@ public final class ClassUtil {
      * @return the newly created object
      * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class or the underlying constructor is inaccessible or the underlying constructor throws an exception.
      */
-    @SafeVarargs
     public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) {
         try {
             return constructor.newInstance(args);
@@ -2764,7 +2761,6 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
      */
-    @SafeVarargs
     public static <T> T invokeMethod(final Method method, final Object... args) {
         return invokeMethod(null, method, args);
     }
@@ -2779,7 +2775,6 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments, or the underlying method throws an exception
      */
-    @SafeVarargs
     public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
         try {
             return (T) method.invoke(instance, args);

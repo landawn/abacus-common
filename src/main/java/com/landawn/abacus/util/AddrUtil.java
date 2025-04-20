@@ -61,7 +61,7 @@ public final class AddrUtil {
      * "host:port host2:port" or "host:port, host2:port" into a List of InetSocketAddress instances suitable for
      * instantiating a MemcachedClient.
      *
-     * Note that colon-delimited IPv6 is also supported. For example: ::1:11211
+     * Note that colon-delimited IPv6 is also supported. For example: {@code ::1:11211}
      *
      * @param servers
      * @return

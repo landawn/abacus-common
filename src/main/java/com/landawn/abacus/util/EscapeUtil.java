@@ -314,7 +314,7 @@ public final class EscapeUtil {
      * <p>The only difference between Java strings and Json strings
      * is that in Json, forward-slash (/) is escaped.</p>
      *
-     * <p>See http://www.ietf.org/rfc/rfc4627.txt for further details. </p>
+     * <p>See <a href="http://www.ietf.org/rfc/rfc4627.txt">rfc4627</a> for further details. </p>
      *
      * <p>Example:</p>
      * <pre>
@@ -676,7 +676,6 @@ public final class EscapeUtil {
          * @param translators CharSequenceTranslator array of translators to merge with this one
          * @return CharSequenceTranslator merging this translator with the others
          */
-        @SafeVarargs
         public final CharSequenceTranslator with(final CharSequenceTranslator... translators) {
             final CharSequenceTranslator[] newArray = new CharSequenceTranslator[translators.length + 1];
             newArray[0] = this;
@@ -711,7 +710,6 @@ public final class EscapeUtil {
          *
          * @param translators CharSequenceTranslator array to aggregate
          */
-        @SafeVarargs
         public AggregateTranslator(final CharSequenceTranslator... translators) {
             this.translators = N.clone(translators);
         }
@@ -1205,7 +1203,6 @@ public final class EscapeUtil {
          *
          * @param options to apply to this unescaper
          */
-        @SafeVarargs
         public NumericBeanUnescaper(final OPTION... options) {
             if (options.length > 0) {
                 this.options = EnumSet.copyOf(Arrays.asList(options));
@@ -1315,7 +1312,6 @@ public final class EscapeUtil {
          *
          * @param lookup CharSequence[][] table of size [*][2]
          */
-        @SafeVarargs
         public LookupTranslator(final CharSequence[]... lookup) {
             lookupMap = new HashMap<>();
             prefixSet = N.newHashSet();

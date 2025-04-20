@@ -33,7 +33,7 @@ public final class Beta {
     }
 
     /**
-     * Recursively hashcode each element in Array/Iterable/Iterator or each key/value in Map or each property/field in bean object.
+     * Recursively hashcode each element in Array/Iterable/Iterator or each key/value in Map or each property/field in a bean object.
      *
      * @param obj
      * @return

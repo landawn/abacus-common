@@ -98,7 +98,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param a the array of floats to be used as the element array for this list
      * @return a new FloatList containing the elements of the specified array
      */
-    @SafeVarargs
     public static FloatList of(final float... a) {
         return new FloatList(N.nullToEmpty(a));
     }
@@ -596,8 +595,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

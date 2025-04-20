@@ -112,8 +112,7 @@ final class ReflectASM<T> {
      * @param args
      * @return
      */
-    @SafeVarargs
-    public final <V> V invoke(final String methodName, final Object... args) {
+    public <V> V invoke(final String methodName, final Object... args) {
         final MethodAccess methodAccess = getMethodAccess(cls);
 
         return (V) methodAccess.invoke(target, methodName, args);
@@ -125,8 +124,7 @@ final class ReflectASM<T> {
      * @param args
      * @return
      */
-    @SafeVarargs
-    public final ReflectASM<T> call(final String methodName, final Object... args) {
+    public ReflectASM<T> call(final String methodName, final Object... args) {
         invoke(methodName, args);
 
         return this;

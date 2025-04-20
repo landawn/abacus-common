@@ -4645,7 +4645,6 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code values} is empty
      */
-    @SafeVarargs
     public static double mean(final int... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         // The upper bound on the length of an array and the bounds on the int values mean that, in
@@ -4670,7 +4669,6 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code values} is empty
      */
-    @SafeVarargs
     public static double mean(final long... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;
@@ -4689,7 +4687,6 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException
      */
-    @SafeVarargs
     public static double mean(final double... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;

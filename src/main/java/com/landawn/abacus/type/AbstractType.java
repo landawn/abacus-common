@@ -152,9 +152,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is primitive type.
+     * Checks if is a primitive type.
      *
-     * @return {@code true}, if it is primitive type
+     * @return {@code true}, if it is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {
@@ -162,9 +162,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Checks if is a primitive wrapper.
      *
-     * @return {@code true}, if it is primitive wrapper
+     * @return {@code true}, if it is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -172,9 +172,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is primitive list.
+     * Checks if is a primitive list.
      *
-     * @return {@code true}, if it is primitive list
+     * @return {@code true}, if it is a primitive list
      */
     @Override
     public boolean isPrimitiveList() {
@@ -237,7 +237,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is type of Joda {@code DateTime}.
+     * Checks if this is a type of Joda {@code DateTime}.
      *
      * @return {@code true}, if it is Joda {@code DateTime} type
      */
@@ -247,9 +247,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is type of primitive {@code array}.
+     * Checks if this is a type of primitive {@code array}.
      *
-     * @return {@code true}, if it is primitive {@code array} type
+     * @return {@code true}, if it is a primitive {@code array} type
      */
     @Override
     public boolean isPrimitiveArray() {
@@ -267,7 +267,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is type of object {@code array}.
+     * Checks if this is a type of object {@code array}.
      *
      * @return {@code true}, if it is object {@code array} type
      */
@@ -397,9 +397,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is generic type.
+     * Checks if this is a generic type.
      *
-     * @return {@code true}, if it is generic type
+     * @return {@code true}, if it is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -407,7 +407,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is immutable type.
+     * Checks if this is an immutable type.
      *
      * @return {@code true}, if it is immutable
      */
@@ -417,7 +417,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is comparable type.
+     * Checks if this is a comparable type.
      *
      * @return {@code true}, if it is comparable
      */
@@ -427,7 +427,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is serializable type.
+     * Checks if this is a serializable type.
      *
      * @return {@code true}, if it is serializable
      */

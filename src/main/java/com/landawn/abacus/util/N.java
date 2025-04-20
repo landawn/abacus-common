@@ -822,7 +822,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
      * @return {@code true} if the given {@code Collection} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Collection} or the given {@code Collection} is {@code null} or empty.
      */
-    @SafeVarargs
     public static boolean containsAll(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(valuesToFind)) {
             return true;
@@ -906,7 +905,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valuesToFind The values to be checked for their presence in the {given {@code Collection}.
      * @return {@code true} if the given {@code Collection} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
      */
-    @SafeVarargs
     public static boolean containsAny(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
             return false;
@@ -979,7 +977,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
      * @return {@code true} if the given {@code Collection} doesn't contain any elements in {@code valuesToFind} or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
      */
-    @SafeVarargs
     public static boolean containsNone(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
             return true;
@@ -1958,7 +1955,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static boolean[] concat(final boolean[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -2025,7 +2021,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static char[] concat(final char[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_CHAR_ARRAY;
@@ -2092,7 +2087,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static byte[] concat(final byte[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_BYTE_ARRAY;
@@ -2159,7 +2153,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static short[] concat(final short[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_SHORT_ARRAY;
@@ -2226,7 +2219,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static int[] concat(final int[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_INT_ARRAY;
@@ -2293,7 +2285,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static long[] concat(final long[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_LONG_ARRAY;
@@ -2360,7 +2351,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static float[] concat(final float[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_FLOAT_ARRAY;
@@ -2427,7 +2417,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
      *         If {@code 'aa'} contains only one array, a clone of this array is returned.
      */
-    @SafeVarargs
     public static double[] concat(final double[]... aa) {
         if (isEmpty(aa)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -5802,7 +5791,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new boolean array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static boolean[] addAll(final boolean[] a, final boolean... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_BOOLEAN_ARRAY : elementsToAdd.clone();
@@ -5825,7 +5813,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new char array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static char[] addAll(final char[] a, final char... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_CHAR_ARRAY : elementsToAdd.clone();
@@ -5848,7 +5835,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new byte array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static byte[] addAll(final byte[] a, final byte... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_BYTE_ARRAY : elementsToAdd.clone();
@@ -5871,7 +5857,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new short array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static short[] addAll(final short[] a, final short... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_SHORT_ARRAY : elementsToAdd.clone();
@@ -5894,7 +5879,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new int array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static int[] addAll(final int[] a, final int... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_INT_ARRAY : elementsToAdd.clone();
@@ -5917,7 +5901,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new long array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static long[] addAll(final long[] a, final long... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_LONG_ARRAY : elementsToAdd.clone();
@@ -5940,7 +5923,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new float array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static float[] addAll(final float[] a, final float... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_FLOAT_ARRAY : elementsToAdd.clone();
@@ -5963,7 +5945,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new double array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static double[] addAll(final double[] a, final double... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_DOUBLE_ARRAY : elementsToAdd.clone();
@@ -5986,7 +5967,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToAdd The additional elements to be added to the new array.
      * @return A new String array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
      */
-    @SafeVarargs
     public static String[] addAll(final String[] a, final String... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_STRING_ARRAY : elementsToAdd.clone();
@@ -6474,7 +6454,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static boolean[] insertAll(final boolean[] a, final int index, final boolean... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6508,7 +6487,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static char[] insertAll(final char[] a, final int index, final char... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6542,7 +6520,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static byte[] insertAll(final byte[] a, final int index, final byte... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6576,7 +6553,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static short[] insertAll(final short[] a, final int index, final short... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6610,7 +6586,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static int[] insertAll(final int[] a, final int index, final int... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6644,7 +6619,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static long[] insertAll(final long[] a, final int index, final long... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6678,7 +6652,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static float[] insertAll(final float[] a, final int index, final float... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6712,7 +6685,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static double[] insertAll(final double[] a, final int index, final double... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -6746,7 +6718,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with the original elements and the inserted elements
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
-    @SafeVarargs
     public static String[] insertAll(final String[] a, final int index, final String... elementsToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
 
@@ -7154,8 +7125,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new boolean array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static boolean[] deleteAllByIndices(final boolean[] a, int... indices) throws IndexOutOfBoundsException {
+    public static boolean[] deleteAllByIndices(final boolean[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7164,19 +7134,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7186,9 +7156,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final boolean[] result = new boolean[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7212,8 +7182,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new char array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static char[] deleteAllByIndices(final char[] a, int... indices) throws IndexOutOfBoundsException {
+    public static char[] deleteAllByIndices(final char[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7222,19 +7191,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7244,9 +7213,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final char[] result = new char[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7270,8 +7239,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new byte array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static byte[] deleteAllByIndices(final byte[] a, int... indices) throws IndexOutOfBoundsException {
+    public static byte[] deleteAllByIndices(final byte[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7280,19 +7248,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7302,9 +7270,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final byte[] result = new byte[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7328,8 +7296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new short array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static short[] deleteAllByIndices(final short[] a, int... indices) throws IndexOutOfBoundsException {
+    public static short[] deleteAllByIndices(final short[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7338,19 +7305,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7360,9 +7327,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final short[] result = new short[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7386,8 +7353,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new int array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static int[] deleteAllByIndices(final int[] a, int... indices) throws IndexOutOfBoundsException {
+    public static int[] deleteAllByIndices(final int[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7396,19 +7362,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7418,9 +7384,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int[] result = new int[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7444,8 +7410,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new long array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static long[] deleteAllByIndices(final long[] a, int... indices) throws IndexOutOfBoundsException {
+    public static long[] deleteAllByIndices(final long[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7454,19 +7419,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7476,9 +7441,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final long[] result = new long[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7502,7 +7467,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new float array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
     public static float[] deleteAllByIndices(final float[] a, int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
@@ -7512,19 +7476,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7534,9 +7498,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final float[] result = new float[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7560,8 +7524,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new double array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static double[] deleteAllByIndices(final double[] a, int... indices) throws IndexOutOfBoundsException {
+    public static double[] deleteAllByIndices(final double[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
 
         if (isEmpty(indices)) {
@@ -7570,19 +7533,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        final int lastIndex = indices[countOfIndex - 1];
+        final int lastIndex = indexes[countOfIndex - 1];
         final int arrayLen = a.length;
 
-        if (indices[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
+        if (indexes[0] < 0 || lastIndex >= arrayLen) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
         for (int i = 1; i < countOfIndex; i++) {
-            if (indices[i] == indices[i - 1]) {
+            if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
@@ -7592,9 +7555,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final double[] result = new double[arrayLen - diff];
         int dest = 0;
         int len = 0;
-        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
-            if (indices[i] - preIndex > 1) {
-                len = indices[i] - preIndex - 1;
+        for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
+            if (indexes[i] - preIndex > 1) {
+                len = indexes[i] - preIndex - 1;
                 copy(a, preIndex + 1, result, dest, len);
                 dest += len;
             }
@@ -7618,18 +7581,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new String array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static String[] deleteAllByIndices(final String[] a, int... indices) throws IndexOutOfBoundsException {
+    public static String[] deleteAllByIndices(final String[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        return deleteAllBySortedIndices(a, indices);
+        return deleteAllBySortedIndices(a, indexes);
     }
 
     /**
@@ -7643,8 +7605,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @SafeVarargs
-    public static <T> T[] deleteAllByIndices(@NotNull final T[] a, int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T[] deleteAllByIndices(@NotNull final T[] a, final int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
 
         if (isEmpty(indices)) {
@@ -7653,10 +7614,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteByIndex(a, indices[0]);
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        return deleteAllBySortedIndices(a, indices);
+        return deleteAllBySortedIndices(a, indexes);
     }
 
     private static <T> T[] deleteAllBySortedIndices(final T[] a, final int[] indices) throws IndexOutOfBoundsException {
@@ -7706,8 +7667,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the input list is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    @SafeVarargs
-    public static boolean deleteAllByIndices(@NotNull final List<?> list, int... indices) throws IllegalArgumentException {
+    public static boolean deleteAllByIndices(@NotNull final List<?> list, final int... indices) throws IllegalArgumentException {
         checkArgNotNull(list);
 
         if (isEmpty(indices)) {
@@ -7717,23 +7677,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        indices = indices.clone();
-        sort(indices);
+        final int[] indexes = indices.clone();
+        sort(indexes);
 
-        if (indices[0] < 0 || indices[indices.length - 1] >= list.size()) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + indices[indices.length - 1]);
+        if (indexes[0] < 0 || indexes[indexes.length - 1] >= list.size()) {
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + indexes[indexes.length - 1]);
         }
 
         if (list instanceof LinkedList) {
             final Iterator<?> iterator = list.iterator();
 
             int idx = -1;
-            for (int i = 0, len = indices.length; i < len; i++) {
-                if (i > 0 && indices[i] == indices[i - 1]) {
+            for (int i = 0, len = indexes.length; i < len; i++) {
+                if (i > 0 && indexes[i] == indexes[i - 1]) {
                     continue;
                 }
 
-                while (idx < indices[i]) {
+                while (idx < indexes[i]) {
                     idx++;
                     iterator.next();
                 }
@@ -7742,7 +7702,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         } else {
             final Object[] a = list.toArray();
-            final Object[] res = deleteAllBySortedIndices(a, indices);
+            final Object[] res = deleteAllBySortedIndices(a, indexes);
             list.clear();
             list.addAll((List) Arrays.asList(res));
         }
@@ -7966,7 +7926,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static boolean[] removeAll(final boolean[] a, final boolean... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -7991,7 +7950,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static char[] removeAll(final char[] a, final char... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
@@ -8016,7 +7974,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static byte[] removeAll(final byte[] a, final byte... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
@@ -8041,7 +7998,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static short[] removeAll(final short[] a, final short... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
@@ -8066,7 +8022,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static int[] removeAll(final int[] a, final int... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
@@ -8091,7 +8046,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static long[] removeAll(final long[] a, final long... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
@@ -8116,7 +8070,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static float[] removeAll(final float[] a, final float... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
@@ -8141,7 +8094,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static double[] removeAll(final double[] a, final double... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -8166,7 +8118,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
-    @SafeVarargs
     public static String[] removeAll(final String[] a, final String... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
@@ -11868,7 +11819,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of characters to be summed.
      * @return The sum of all characters in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static int sum(final char... a) {
         if (isEmpty(a)) {
             return 0;
@@ -11908,7 +11858,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of bytes to be summed.
      * @return The sum of all bytes in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static int sum(final byte... a) {
         if (isEmpty(a)) {
             return 0;
@@ -11948,7 +11897,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of shorts to be summed.
      * @return The sum of all shorts in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static int sum(final short... a) {
         if (isEmpty(a)) {
             return 0;
@@ -11988,7 +11936,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of ints to be summed.
      * @return The sum of all ints in the array. If the array is {@code null} or empty, {@code 0} is returned
      */
-    @SafeVarargs
     public static int sum(final int... a) {
         if (isEmpty(a)) {
             return 0;
@@ -12016,7 +11963,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of longs to be summed.
      * @return The sum of all ints in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static long sumToLong(final int... a) {
         if (isEmpty(a)) {
             return 0;
@@ -12056,7 +12002,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of longs to be summed.
      * @return The sum of all longs in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static long sum(final long... a) {
         if (isEmpty(a)) {
             return 0L;
@@ -12096,7 +12041,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of floats to be summed.
      * @return The sum of all floats in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static float sum(final float... a) {
         if (isEmpty(a)) {
             return 0f;
@@ -12136,7 +12080,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of floats to be summed.
      * @return The sum of all floats in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double sumToDouble(final float... a) {
         if (isEmpty(a)) {
             return 0f;
@@ -12176,7 +12119,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of doubles to be summed.
      * @return The sum of all doubles in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double sum(final double... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12216,7 +12158,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of characters to be averaged.
      * @return The average of all characters in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final char... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12250,7 +12191,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of bytes to be averaged.
      * @return The average of all bytes in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final byte... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12284,7 +12224,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of shorts to be averaged.
      * @return The average of all shorts in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final short... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12318,7 +12257,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of ints to be averaged.
      * @return The average of all ints in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final int... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12358,7 +12296,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of longs to be averaged.
      * @return The average of all longs in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final long... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12392,7 +12329,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of floats to be averaged.
      * @return The average of all floats in the array. If the array is {@code null} or empty, {@code 0} is returned.
      */
-    @SafeVarargs
     public static double average(final float... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -12432,7 +12368,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array of doubles to be averaged.
      * @return The average of all doubles in the array. If the array is {@code null} or empty, {@code 0} is returned
      */
-    @SafeVarargs
     public static double average(final double... a) {
         if (isEmpty(a)) {
             return 0d;
@@ -13840,7 +13775,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the smallest char value in the array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    @SafeVarargs
     public static char min(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty"); //NOSONAR
 
@@ -13882,7 +13816,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the smallest byte value in the array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    @SafeVarargs
     public static byte min(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -13920,7 +13853,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the smallest short value in the array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    @SafeVarargs
     public static short min(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -13958,7 +13890,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the smallest int value in the array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    @SafeVarargs
     public static int min(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -13996,7 +13927,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the smallest long value in the array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    @SafeVarargs
     public static long min(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -14035,7 +13965,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see IEEE754rUtil#min(float[]) that handles NaN differently
      */
-    @SafeVarargs
     public static float min(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -14077,7 +14006,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see IEEE754rUtil#min(double[]) that handles NaN differently
      */
-    @SafeVarargs
     public static double min(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15190,7 +15118,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the biggest char value in the array.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
-    @SafeVarargs
     public static char max(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15228,7 +15155,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the biggest byte value in the array.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
-    @SafeVarargs
     public static byte max(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15266,7 +15192,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the biggest short value in the array.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
-    @SafeVarargs
     public static short max(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15304,7 +15229,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the biggest int value in the array.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
-    @SafeVarargs
     public static int max(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15342,7 +15266,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the biggest long value in the array.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
-    @SafeVarargs
     public static long max(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15381,7 +15304,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see IEEE754rUtil#max(float[]) that handles NaN differently
      */
-    @SafeVarargs
     public static float max(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -15423,7 +15345,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see IEEE754rUtil#max(double[]) that handles NaN differently
      */
-    @SafeVarargs
     public static double max(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16371,7 +16292,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static char median(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16417,7 +16337,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static byte median(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16463,7 +16382,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static short median(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16520,7 +16438,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      */
-    @SafeVarargs
     public static int median(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16566,7 +16483,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static long median(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16612,7 +16528,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static float median(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -16658,7 +16573,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      */
-    @SafeVarargs
     public static double median(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array can not be null or empty");
 
@@ -25929,7 +25843,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param iterables
      * @return
-     * @see N#concat(Collection...)
+     * @see N#concat(Iterable...)
      * @see Iterators#concatIterables(Collection)
      * @see N#iterateEach(Collection)
      */
@@ -32055,7 +31969,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see String#format(String, Object...)
      * @see #println(Object)
      */
-    @SafeVarargs
     public static void fprintln(final String format, final Object... args) {
         System.out.printf(format, args); //NOSONAR
         System.out.println(); //NOSONAR

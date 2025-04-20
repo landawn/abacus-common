@@ -148,9 +148,8 @@ public class EventBus {
         this.identifier = identifier;
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
 
-        if (executor != DEFAULT_EXECUTOR && executor instanceof ExecutorService) {
+        if (executor != DEFAULT_EXECUTOR && executor instanceof ExecutorService executorService) {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                final ExecutorService executorService = (ExecutorService) executor;
 
                 logger.warn("Starting to shutdown task in EventBus");
 

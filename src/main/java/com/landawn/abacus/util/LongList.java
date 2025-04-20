@@ -98,7 +98,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a the array of longs to be used as the element array for this list
      * @return a new LongList containing the elements of the specified array
      */
-    @SafeVarargs
     public static LongList of(final long... a) {
         return new LongList(N.nullToEmpty(a));
     }
@@ -642,8 +641,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

@@ -86,7 +86,7 @@ public class AsyncExecutor {
      * @param maxThreadPoolSize the maximum number of threads to allow in the pool
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
      * @param unit the time unit for the keepAliveTime argument
-     * @throws IllegalArgumentException if any of the arguments are negative or if the maximum pool size is less than the core pool size
+     * @throws IllegalArgumentException if any of the arguments are negative, or if the maximum pool size is less than the core pool size
      */
     public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -275,7 +275,7 @@ public class AsyncExecutor {
     }
 
     /**
-     * Executes the provided command asynchronously with retry mechanism.
+     * Executes the provided command asynchronously with a retry mechanism.
      * The method retries the execution of the command for a specified number of times if it fails, with a specified interval between retries.
      * The retryCondition is a Predicate that determines whether to retry the execution based on the exception thrown.
      *

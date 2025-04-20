@@ -58,7 +58,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param a
      * @return
      */
-    @SafeVarargs
     public static IntIterator of(final int... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }

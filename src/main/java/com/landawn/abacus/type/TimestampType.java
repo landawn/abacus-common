@@ -21,7 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -65,7 +65,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     @Override
     public Timestamp valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentTimestamp() : DateUtil.parseTimestamp(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
     }
 
     /**
@@ -84,7 +84,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createTimestamp(parseLong(cbuf, offset, len));
+                return Dates.createTimestamp(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

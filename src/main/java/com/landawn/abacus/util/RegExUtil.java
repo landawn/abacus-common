@@ -140,7 +140,6 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @return the source string with the last replacement processed,  {@code null} if {@code null} String input
      * @see #replaceFirst(String, String, String)
-     * @see String#replaceLast(String, String)
      * @see java.util.regex.Pattern
      */
     @Beta
@@ -178,7 +177,6 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for each match
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
-     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(final String source, final String regex, final String replacement) {
@@ -204,7 +202,6 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
-     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(final String source, final String regex, final Function<String, String> replacer) {
@@ -230,7 +227,6 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
-     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(final String source, final String regex, final IntBiFunction<String> replacer) {
@@ -283,7 +279,6 @@ public final class RegExUtil {
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
@@ -311,7 +306,6 @@ public final class RegExUtil {
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
@@ -664,7 +658,6 @@ public final class RegExUtil {
      * @param regexToFind the regular expression pattern to be counted
      * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
      * @see Matcher#results()
-     * @see Strings#occurrences(String, String)
      */
     public static Stream<MatchResult> matchResults(final String source, final String regexToFind) {
         if (Strings.isEmpty(source) || Strings.isEmpty(regexToFind)) {

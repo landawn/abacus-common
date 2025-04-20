@@ -120,8 +120,8 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * <br />
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
  * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
@@ -2298,7 +2298,6 @@ sealed class CommonUtil permits N {
      * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
      */
-    @SafeVarargs
     public static void erase(final Object bean, final String... propNames) {
         if (bean == null || isEmpty(propNames)) {
             return;
@@ -2656,7 +2655,6 @@ sealed class CommonUtil permits N {
      * @throws NegativeArraySizeException if any of the specified dimensions are negative
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
-    @SafeVarargs
     public static <T> T newArray(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
         return Array.newInstance(componentType, dimensions);
     }
@@ -6949,7 +6947,6 @@ sealed class CommonUtil permits N {
      * @deprecated
      */
     @Deprecated
-    @SafeVarargs
     @NullSafe
     public static <K, V> Map<K, V> asMap(final Object... a) {
         if (isEmpty(a)) {
@@ -7140,7 +7137,6 @@ sealed class CommonUtil permits N {
      * @deprecated
      */
     @Deprecated
-    @SafeVarargs
     @NullSafe
     public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
         if (isEmpty(a)) {
@@ -7262,7 +7258,6 @@ sealed class CommonUtil permits N {
      * @deprecated
      */
     @Deprecated
-    @SafeVarargs
     public static Map<String, Object> asProps(final Object... a) {
         if (isEmpty(a)) {
             return N.newLinkedHashMap();
@@ -8996,6 +8991,34 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty map from the given maps.
+     * If both maps are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the maps
+     * @param a the first map to check
+     * @param b the second map to check
+     * @return an Optional containing the first non-empty map, or an empty Optional if both maps are empty or null
+     */
+    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && !a.isEmpty() ? Optional.of(a) : (b != null && !b.isEmpty() ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-empty map from the given maps.
+     * If all maps are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the maps
+     * @param a the first map to check
+     * @param b the second map to check
+     * @param c the third map to check
+     * @return an Optional containing the first non-empty map, or an empty Optional if all maps are empty or null
+     */
+    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && !a.isEmpty() ? Optional.of(a)
+                : (b != null && !b.isEmpty() ? Optional.of(b) : (c != null && !c.isEmpty() ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
      * Returns the first non-empty CharSequence from the given CharSequences.
      * If both CharSequences are empty or {@code null}, it returns an empty Optional.
      *
@@ -9003,6 +9026,7 @@ sealed class CommonUtil permits N {
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both CharSequences are empty or null
+     * @see Strings#firstNonEmpty(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
         return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.empty());
@@ -9017,6 +9041,7 @@ sealed class CommonUtil permits N {
      * @param b the second CharSequence to check
      * @param c the third CharSequence to check
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
+     * @see Strings#firstNonEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
         return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.empty()));
@@ -9029,6 +9054,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the CharSequences
      * @param a the array of CharSequences to check
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
+     * @see Strings#firstNonEmpty(CharSequence...)
      */
     @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
@@ -9046,6 +9072,29 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns an Optional containing the first non-empty CharSequence from the given Iterable of CharSequences.
+     * If all CharSequences are empty or the Iterable is empty, returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequence
+     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the Iterable is empty
+     * @see Strings#firstNonEmpty(Iterable)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final Iterable<? extends T> css) {
+        if (N.isEmpty(css)) {
+            return Optional.empty();
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotEmpty(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * Returns the first non-blank CharSequence from the given CharSequences.
      * If both CharSequences are blank or {@code null}, it returns an empty Optional.
      *
@@ -9053,6 +9102,7 @@ sealed class CommonUtil permits N {
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both CharSequences are blank or null
+     * @see Strings#firstNonBlank(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
         return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.empty());
@@ -9067,6 +9117,7 @@ sealed class CommonUtil permits N {
      * @param b the second CharSequence to check
      * @param c the third CharSequence to check
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
+     * @see Strings#firstNonBlank(CharSequence, CharSequence, CharSequence)
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
         return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.empty()));
@@ -9079,6 +9130,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the CharSequences
      * @param a the array of CharSequences to check
      * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
+     * @see Strings#firstNonBlank(CharSequence...)
      */
     @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
@@ -9087,6 +9139,29 @@ sealed class CommonUtil permits N {
         }
 
         for (final T e : a) {
+            if (Strings.isNotBlank(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns an Optional containing the first non-blank CharSequence from the given Iterable of CharSequences.
+     * If all CharSequences are blank or the Iterable is empty, returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequence
+     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the Iterable is empty
+     * @see Strings#firstNonBlank(Iterable)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final Iterable<? extends T> css) {
+        if (N.isEmpty(css)) {
+            return Optional.empty();
+        }
+
+        for (final T e : css) {
             if (Strings.isNotBlank(e)) {
                 return Optional.of(e);
             }
@@ -9717,6 +9792,7 @@ sealed class CommonUtil permits N {
      * @param str the string to check
      * @return the original string if it is not {@code null}, otherwise an empty string
      * @see Strings#nullToEmpty(String)
+     * @see Strings#blankToEmpty(String)
      */
     @Beta
     public static String nullToEmpty(final String str) {
@@ -10324,8 +10400,8 @@ sealed class CommonUtil permits N {
             return true;
         }
 
-        if (c instanceof Collection) {
-            return isEmpty((Collection<?>) c);
+        if (c instanceof Collection<?> coll) {
+            return coll.isEmpty();
         } else {
             return isEmpty(c.iterator());
         }
@@ -10677,7 +10753,6 @@ sealed class CommonUtil permits N {
      * @param a the array of objects to check
      * @return {@code true} if any element in the specified array is {@code null}, otherwise {@code false}
      */
-    @SafeVarargs
     public static boolean anyNull(final Object... a) {
         if (isEmpty(a)) {
             return false;
@@ -10819,6 +10894,29 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if any of the specified maps is empty.
+     *
+     * @param a the first map to check
+     * @param b the second map to check
+     * @return {@code true} if any of the maps is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b) {
+        return a == null || a.isEmpty() || b == null || b.isEmpty();
+    }
+
+    /**
+     * Checks if any of the specified maps is empty.
+     *
+     * @param a the first map to check
+     * @param b the second map to check
+     * @param c the third map to check
+     * @return {@code true} if any of the maps is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
+        return a == null || a.isEmpty() || b == null || b.isEmpty() || c == null || c.isEmpty();
+    }
+
+    /**
      * Checks if any of the specified CharSequences is blank.
      *
      * @param a the first CharSequence to check
@@ -10930,7 +11028,6 @@ sealed class CommonUtil permits N {
      * @param a the objects to check
      * @return {@code true} if all objects are {@code null}, otherwise {@code false}
      */
-    @SafeVarargs
     public static boolean allNull(final Object... a) {
         if (isEmpty(a)) {
             return true;
@@ -11086,6 +11183,29 @@ sealed class CommonUtil permits N {
      * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * Checks if all specified maps are empty.
+     *
+     * @param a the first map to check, may be null
+     * @param b the second map to check, may be null
+     * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * Checks if all specified maps are empty.
+     *
+     * @param a the first map to check, may be null
+     * @param b the second map to check, may be null
+     * @param c the third map to check, may be null
+     * @return {@code true} if all maps are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
 
@@ -25316,7 +25436,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of ints to find the specified value.
-     * The range must be sorted (as by the {@link #sort(int[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(int[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -27404,7 +27524,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static boolean isNotTrue(final Boolean bool) {
-        return bool == null || Boolean.FALSE.equals(bool);
+        return bool == null || !bool;
     }
 
     /**
@@ -27426,7 +27546,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static boolean isNotFalse(final Boolean bool) {
-        return bool == null || Boolean.TRUE.equals(bool);
+        return bool == null || bool;
     }
 
     /**

@@ -20,7 +20,7 @@ import java.util.Date;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 
 /**
  *
@@ -59,7 +59,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      */
     @Override
     public String stringOf(final T x) {
-        return (x == null) ? null : DateUtil.format(x);
+        return (x == null) ? null : Dates.format(x);
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(x, appendable);
+            Dates.formatTo(x, appendable);
         }
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.formatTo(x, writer);
+                Dates.formatTo(x, writer);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -106,12 +106,12 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_DATE_TIME_FORMAT, null, writer);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_TIMESTAMP_FORMAT, null, writer);
 
                         break;
 

@@ -23,7 +23,7 @@ import java.util.Calendar;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 
 /**
  *
@@ -62,7 +62,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @Override
     public String stringOf(final Calendar calendar) {
-        return (calendar == null) ? null : DateUtil.format(calendar);
+        return (calendar == null) ? null : Dates.format(calendar);
     }
 
     /**
@@ -74,7 +74,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x));
+        stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x));
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x));
+        stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x));
     }
 
     /**
@@ -100,7 +100,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(x, appendable);
+            Dates.formatTo(x, appendable);
         }
     }
 
@@ -124,7 +124,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.formatTo(x, writer);
+                Dates.formatTo(x, writer);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -133,12 +133,12 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_DATE_TIME_FORMAT, null, writer);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_TIMESTAMP_FORMAT, null, writer);
 
                         break;
 

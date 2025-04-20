@@ -20,7 +20,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -49,11 +49,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     @Override
     public Calendar valueOf(final Object obj) {
         if (obj instanceof Number) {
-            return DateUtil.createCalendar(((Number) obj).longValue());
+            return Dates.createCalendar(((Number) obj).longValue());
         } else if (obj instanceof java.util.Date) {
-            return DateUtil.createCalendar((java.util.Date) obj);
+            return Dates.createCalendar((java.util.Date) obj);
         } else if (obj instanceof Calendar) {
-            return DateUtil.createCalendar((Calendar) obj);
+            return Dates.createCalendar((Calendar) obj);
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -66,7 +66,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      */
     @Override
     public Calendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentCalendar() : DateUtil.parseCalendar(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentCalendar() : Dates.parseCalendar(str));
     }
 
     /**
@@ -85,7 +85,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createCalendar(parseLong(cbuf, offset, len));
+                return Dates.createCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }
@@ -105,7 +105,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp value = rs.getTimestamp(columnIndex);
 
-        return (value == null) ? null : DateUtil.createCalendar(value);
+        return (value == null) ? null : Dates.createCalendar(value);
     }
 
     /**
@@ -119,6 +119,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp value = rs.getTimestamp(columnLabel);
 
-        return (value == null) ? null : DateUtil.createCalendar(value);
+        return (value == null) ? null : Dates.createCalendar(value);
     }
 }

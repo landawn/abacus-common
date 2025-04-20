@@ -1,3 +1,7 @@
+### 5.7.13
+
+* Improvements and bug fixes.
+
 ### 5.7.12
 
 * Improvements and bug fixes.

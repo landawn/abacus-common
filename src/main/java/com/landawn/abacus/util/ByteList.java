@@ -98,7 +98,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param a the array of bytes to be used as the element array for this list
      * @return a new ByteList containing the elements of the specified array
      */
-    @SafeVarargs
     public static ByteList of(final byte... a) {
         return new ByteList(N.nullToEmpty(a));
     }
@@ -645,8 +644,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

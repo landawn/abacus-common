@@ -21,7 +21,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -47,11 +47,11 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     @Override
     public GregorianCalendar valueOf(final Object obj) {
         if (obj instanceof Number) {
-            return DateUtil.createGregorianCalendar(((Number) obj).longValue());
+            return Dates.createGregorianCalendar(((Number) obj).longValue());
         } else if (obj instanceof java.util.Date) {
-            return DateUtil.createGregorianCalendar((java.util.Date) obj);
+            return Dates.createGregorianCalendar((java.util.Date) obj);
         } else if (obj instanceof Calendar) {
-            return DateUtil.createGregorianCalendar((Calendar) obj);
+            return Dates.createGregorianCalendar((Calendar) obj);
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -64,7 +64,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      */
     @Override
     public GregorianCalendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentGregorianCalendar() : DateUtil.parseGregorianCalendar(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentGregorianCalendar() : Dates.parseGregorianCalendar(str));
     }
 
     /**
@@ -83,7 +83,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createGregorianCalendar(parseLong(cbuf, offset, len));
+                return Dates.createGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

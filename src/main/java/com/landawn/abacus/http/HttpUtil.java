@@ -256,19 +256,18 @@ public final class HttpUtil {
      * @param value
      * @return
      */
-    @SuppressWarnings("rawtypes")
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {
             return Strings.EMPTY_STRING;
         }
 
-        if (value instanceof Collection c) {
+        if (value instanceof Collection<?> c) {
             if (N.isEmpty(c)) {
                 return Strings.EMPTY_STRING;
             } else if (c.size() == 1) {
                 return N.stringOf(N.firstOrNullIfEmpty(c));
             } else {
-                return Strings.join((Collection) value, ",");
+                return Strings.join(c, ",");
             }
         } else {
             return N.stringOf(value);

@@ -110,7 +110,6 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
      */
-    @SafeVarargs
     public static ByteSource asByteSource(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
     }
@@ -122,7 +121,6 @@ public abstract class Files { //NOSONAR
      * will append to the end of the file without truncating it.
      *
      */
-    @SafeVarargs
     public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
         return com.google.common.io.Files.asByteSink(file, modes);
     }
@@ -137,7 +135,6 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
      */
-    @SafeVarargs
     public static ByteSink asByteSink(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSink(path, options);
     }
@@ -160,7 +157,6 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
      */
-    @SafeVarargs
     public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSource(path, charset, options);
     }
@@ -172,7 +168,6 @@ public abstract class Files { //NOSONAR
      * APPEND} mode is provided, writes will append to the end of the file without truncating it.
      *
      */
-    @SafeVarargs
     public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) {
         return com.google.common.io.Files.asCharSink(file, charset, modes);
     }
@@ -187,7 +182,6 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
      */
-    @SafeVarargs
     public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSink(path, charset, options);
     }
@@ -322,7 +316,6 @@ public abstract class Files { //NOSONAR
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
      *     directories of the specified file could not be created.
      */
-    @SafeVarargs
     public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
     }
@@ -644,7 +637,6 @@ public abstract class Files { //NOSONAR
      * @throws IOException if {@code path} or any file in the subtree rooted at it can't be deleted
      *     for any reason
      */
-    @SafeVarargs
     public static void deleteRecursively(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteRecursively(path, options);
     }
@@ -682,7 +674,6 @@ public abstract class Files { //NOSONAR
      *     specified
      * @throws IOException if one or more files can't be deleted for any reason
      */
-    @SafeVarargs
     public static void deleteDirectoryContents(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteDirectoryContents(path, options);
     }

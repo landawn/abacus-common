@@ -58,7 +58,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param a
      * @return
      */
-    @SafeVarargs
     public static DoubleIterator of(final double... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }

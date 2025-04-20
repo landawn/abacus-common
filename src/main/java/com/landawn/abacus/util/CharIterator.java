@@ -57,7 +57,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param a
      * @return
      */
-    @SafeVarargs
     public static CharIterator of(final char... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
@@ -107,7 +106,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Returns an CharIterator instance that is created lazily using the provided Supplier.
+     * Returns a CharIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the CharIterator instance when the first method in the returned {@code CharIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the CharIterator when needed.

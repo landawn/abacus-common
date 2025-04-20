@@ -1367,7 +1367,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    @SafeVarargs
     public final void removeRows(final int... indices) {
         checkFrozen();
 

@@ -104,8 +104,7 @@ public final class Reflection<T> {
      * @param args
      * @return
      */
-    @SafeVarargs
-    public final Reflection<T> _new(final Object... args) { //NOSONAR
+    public Reflection<T> _new(final Object... args) { //NOSONAR
         if (N.isEmpty(args)) {
             return _new();
         }
@@ -171,8 +170,7 @@ public final class Reflection<T> {
      * @param args
      * @return
      */
-    @SafeVarargs
-    public final <V> V invoke(final String methodName, final Object... args) {
+    public <V> V invoke(final String methodName, final Object... args) {
         if (reflectASM != null) {
             return reflectASM.invoke(methodName, args);
         } else {
@@ -193,8 +191,7 @@ public final class Reflection<T> {
      * @param args
      * @return
      */
-    @SafeVarargs
-    public final Reflection<T> call(final String methodName, final Object... args) {
+    public Reflection<T> call(final String methodName, final Object... args) {
         if (reflectASM != null) {
             reflectASM.call(methodName, args);
         } else {

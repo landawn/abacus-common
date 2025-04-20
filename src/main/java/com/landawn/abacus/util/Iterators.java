@@ -701,7 +701,6 @@ public final class Iterators {
      * @param a The boolean arrays to be concatenated.
      * @return A BooleanIterator that will iterate over the elements of each provided boolean array in order.
      */
-    @SafeVarargs
     public static BooleanIterator concat(final boolean[]... a) {
         if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
@@ -739,7 +738,6 @@ public final class Iterators {
      * @param a The char arrays to be concatenated.
      * @return A CharIterator that will iterate over the elements of each provided char array in order.
      */
-    @SafeVarargs
     public static CharIterator concat(final char[]... a) {
         if (N.isEmpty(a)) {
             return CharIterator.EMPTY;
@@ -777,7 +775,6 @@ public final class Iterators {
      * @param a The byte arrays to be concatenated.
      * @return A ByteIterator that will iterate over the elements of each provided byte array in order.
      */
-    @SafeVarargs
     public static ByteIterator concat(final byte[]... a) {
         if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
@@ -815,7 +812,6 @@ public final class Iterators {
      * @param a The short arrays to be concatenated.
      * @return A ShortIterator that will iterate over the elements of each provided short array in order.
      */
-    @SafeVarargs
     public static ShortIterator concat(final short[]... a) {
         if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
@@ -853,7 +849,6 @@ public final class Iterators {
      * @param a The int arrays to be concatenated.
      * @return An IntIterator that will iterate over the elements of each provided int array in order.
      */
-    @SafeVarargs
     public static IntIterator concat(final int[]... a) {
         if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
@@ -891,7 +886,6 @@ public final class Iterators {
      * @param a The long arrays to be concatenated.
      * @return A LongIterator that will iterate over the elements of each provided long array in order.
      */
-    @SafeVarargs
     public static LongIterator concat(final long[]... a) {
         if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
@@ -929,7 +923,6 @@ public final class Iterators {
      * @param a The float arrays to be concatenated.
      * @return A FloatIterator that will iterate over the elements of each provided float array in order.
      */
-    @SafeVarargs
     public static FloatIterator concat(final float[]... a) {
         if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
@@ -967,7 +960,6 @@ public final class Iterators {
      * @param a The double arrays to be concatenated.
      * @return A DoubleIterator that will iterate over the elements of each provided double array in order.
      */
-    @SafeVarargs
     public static DoubleIterator concat(final double[]... a) {
         if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
@@ -1005,7 +997,6 @@ public final class Iterators {
      * @param a The BooleanIterators to be concatenated.
      * @return A BooleanIterator that will iterate over the elements of each provided BooleanIterator in order.
      */
-    @SafeVarargs
     public static BooleanIterator concat(final BooleanIterator... a) {
         if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
@@ -1041,7 +1032,6 @@ public final class Iterators {
      * @param a The CharIterators to be concatenated.
      * @return A CharIterator that will iterate over the elements of each provided CharIterator in order.
      */
-    @SafeVarargs
     public static CharIterator concat(final CharIterator... a) {
         if (N.isEmpty(a)) {
             return CharIterator.EMPTY;
@@ -1077,7 +1067,6 @@ public final class Iterators {
      * @param a The ByteIterators to be concatenated.
      * @return A ByteIterator that will iterate over the elements of each provided ByteIterator in order.
      */
-    @SafeVarargs
     public static ByteIterator concat(final ByteIterator... a) {
         if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
@@ -1113,7 +1102,6 @@ public final class Iterators {
      * @param a The ShortIterators to be concatenated.
      * @return A ShortIterator that will iterate over the elements of each provided ShortIterator in order.
      */
-    @SafeVarargs
     public static ShortIterator concat(final ShortIterator... a) {
         if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
@@ -1149,7 +1137,6 @@ public final class Iterators {
      * @param a The IntIterators to be concatenated.
      * @return An IntIterator that will iterate over the elements of each provided IntIterator in order.
      */
-    @SafeVarargs
     public static IntIterator concat(final IntIterator... a) {
         if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
@@ -1185,7 +1172,6 @@ public final class Iterators {
      * @param a The LongIterators to be concatenated.
      * @return A LongIterator that will iterate over the elements of each provided LongIterator in order.
      */
-    @SafeVarargs
     public static LongIterator concat(final LongIterator... a) {
         if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
@@ -1221,7 +1207,6 @@ public final class Iterators {
      * @param a The FloatIterators to be concatenated.
      * @return A FloatIterator that will iterate over the elements of each provided FloatIterator in order.
      */
-    @SafeVarargs
     public static FloatIterator concat(final FloatIterator... a) {
         if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
@@ -1257,7 +1242,6 @@ public final class Iterators {
      * @param a The DoubleIterators to be concatenated.
      * @return A DoubleIterator that will iterate over the elements of each provided DoubleIterator in order.
      */
-    @SafeVarargs
     public static DoubleIterator concat(final DoubleIterator... a) {
         if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
@@ -3398,6 +3382,7 @@ public final class Iterators {
                 }
 
                 if (errorHolder.value() == null && onComplete != null) {
+                    //noinspection CatchMayIgnoreException
                     try {
                         onComplete.run();
                     } catch (final Exception e) {

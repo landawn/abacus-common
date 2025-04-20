@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import com.google.common.graph.SuccessorsFunction;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -52,7 +51,7 @@ public final class Traverser<T> {
      *       node reachable from it)
      * </ul>
      *
-     * In these cases, use {@link #forGraph(SuccessorsFunction)} instead.
+     * In these cases, use {@link #forGraph(Function)} instead.
      *
      * <p><b>Performance notes</b>
      *
@@ -102,7 +101,7 @@ public final class Traverser<T> {
      * }</pre>
      *
      * @param <T>
-     * @param tree {@link SuccessorsFunction} representing a directed acyclic graph that has at most
+     * @param tree {@link Function} representing a directed acyclic graph that has at most
      *     one path between any two nodes
      * @return
      */
@@ -113,8 +112,7 @@ public final class Traverser<T> {
     /**
      * Creates a new traverser for the given general {@code graph}.
      *
-     * <p>If {@code graph} is known to be tree-shaped, consider using {@link
-     * #forTree(SuccessorsFunction)} instead.
+     * <p>If {@code graph} is known to be tree-shaped, consider using {@link#forTree(Function)} instead.
      *
      * <p><b>Performance notes</b>
      *
@@ -128,7 +126,7 @@ public final class Traverser<T> {
      * </ul>
      *
      * @param <T>
-     * @param graph {@link SuccessorsFunction} representing a general graph that may have cycles.
+     * @param graph {@link Function} representing a general graph that may have cycles.
      * @return
      */
     public static <T> Traverser<T> forGraph(final Function<? super T, ? extends Iterable<T>> graph) {

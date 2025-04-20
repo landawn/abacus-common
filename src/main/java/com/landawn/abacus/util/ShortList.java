@@ -98,7 +98,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a the array of shorts to be used as the element array for this list
      * @return a new ShortList containing the elements of the specified array
      */
-    @SafeVarargs
     public static ShortList of(final short... a) {
         return new ShortList(N.nullToEmpty(a));
     }
@@ -643,8 +642,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

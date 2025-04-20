@@ -98,7 +98,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param a the array of doubles to be used as the element array for this list
      * @return a new DoubleList containing the elements of the specified array
      */
-    @SafeVarargs
     public static DoubleList of(final double... a) {
         return new DoubleList(N.nullToEmpty(a));
     }
@@ -596,8 +595,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

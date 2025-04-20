@@ -26,7 +26,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -50,7 +50,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public XMLGregorianCalendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentXMLGregorianCalendar() : DateUtil.parseXMLGregorianCalendar(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentXMLGregorianCalendar() : Dates.parseXMLGregorianCalendar(str));
     }
 
     /**
@@ -69,7 +69,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
+                return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }
@@ -85,7 +85,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public String stringOf(final XMLGregorianCalendar x) {
-        return (x == null) ? null : DateUtil.format(x);
+        return (x == null) ? null : Dates.format(x);
     }
 
     /**
@@ -97,7 +97,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return DateUtil.createXMLGregorianCalendar(rs.getTimestamp(columnIndex));
+        return Dates.createXMLGregorianCalendar(rs.getTimestamp(columnIndex));
     }
 
     /**
@@ -109,7 +109,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public XMLGregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return DateUtil.createXMLGregorianCalendar(rs.getTimestamp(columnLabel));
+        return Dates.createXMLGregorianCalendar(rs.getTimestamp(columnLabel));
     }
 
     /**
@@ -121,7 +121,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
     }
 
     /**
@@ -133,7 +133,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
     }
 
     /**
@@ -147,7 +147,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(x, null, null, appendable);
+            Dates.formatTo(x, null, null, appendable);
         }
     }
 
@@ -171,7 +171,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.formatTo(x, null, null, writer);
+                Dates.formatTo(x, null, null, writer);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -180,12 +180,12 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_DATE_TIME_FORMAT, null, writer);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.formatTo(x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null, writer);
+                        Dates.formatTo(x, Dates.ISO_8601_TIMESTAMP_FORMAT, null, writer);
 
                         break;
 

@@ -113,7 +113,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          *
          * @param elementClass
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in the future version.
          */
         @Deprecated
         public static AvroDeserializationConfig of(final Class<?> elementClass) {
@@ -124,7 +124,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          *
          * @param schema
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in the future version.
          */
         @Deprecated
         public static AvroDeserializationConfig of(final Schema schema) {
@@ -136,7 +136,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          * @param elementClass
          * @param schema
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in the future version.
          */
         @Deprecated
         public static AvroDeserializationConfig of(final Class<?> elementClass, final Schema schema) {

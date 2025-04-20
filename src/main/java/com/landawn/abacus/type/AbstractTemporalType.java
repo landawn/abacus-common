@@ -18,15 +18,15 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 
 public abstract class AbstractTemporalType<T extends Temporal> extends AbstractType<T> {
 
-    protected static final ZoneId DEFAULT_ZONE_ID = DateUtil.DEFAULT_ZONE_ID;
+    protected static final ZoneId DEFAULT_ZONE_ID = Dates.DEFAULT_ZONE_ID;
 
-    protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATE_TIME_FORMAT).withZone(DEFAULT_ZONE_ID);
+    protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ofPattern(Dates.ISO_8601_DATE_TIME_FORMAT).withZone(DEFAULT_ZONE_ID);
 
-    protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT).withZone(DEFAULT_ZONE_ID);
+    protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ofPattern(Dates.ISO_8601_TIMESTAMP_FORMAT).withZone(DEFAULT_ZONE_ID);
 
     protected AbstractTemporalType(final String typeName) {
         super(typeName);

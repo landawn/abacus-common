@@ -919,8 +919,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        // BufferedReader? will the target parser create the BufferedReader
-        // internally.
+        // BufferedReader? will the target parser create the BufferedReader internally.
         return read(source, config, null, targetClass);
     }
 
@@ -1414,8 +1413,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
                             entryKeyType = Strings.isEmpty(typeAttr) ? keyType : N.typeOf(typeAttr);
                             isStringKey = entryKeyType.clazz().equals(String.class);
+                            event = xmlReader.next();
 
-                            switch (event = xmlReader.next()) {
+                            switch (event) {
                                 case XMLStreamConstants.START_ELEMENT:
                                     key = readByStreamParser(xmlReader, config, entryKeyType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                             inputClass, entryKeyType.clazz());
@@ -1479,7 +1479,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 }
                             }
 
-                            switch (event = xmlReader.next()) {
+                            event = xmlReader.next();
+                            switch (event) {
                                 case XMLStreamConstants.START_ELEMENT:
                                     propValue = readByStreamParser(xmlReader, config, entryValueType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
                                             false, inputClass, entryValueType.clazz());
@@ -1584,8 +1585,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         switch (event) {
                             case XMLStreamConstants.START_ELEMENT: {
                                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                                event = xmlReader.next();
 
-                                switch (event = xmlReader.next()) {
+                                switch (event) {
                                     case XMLStreamConstants.START_ELEMENT: {
                                         list.add(readByStreamParser(xmlReader, config, eleType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                                 inputClass, eleType.clazz()));
@@ -1734,8 +1736,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             // N.println(xmlReader.getLocalName());
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                            event = xmlReader.next();
 
-                            switch (event = xmlReader.next()) {
+                            switch (event) {
                                 case XMLStreamConstants.START_ELEMENT: {
                                     result.add(readByStreamParser(xmlReader, config, eleType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                             inputClass, eleType.clazz()));
@@ -2376,15 +2379,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         return (Class<T>) ((nodeClass == ClassUtil.CLASS_MASK) ? null : nodeClass);
     }
 
-    /**
-     * Gets the xml SAX handler.
-     * @param config
-     * @param nodeClasses
-     * @param targetClass
-     *
-     * @param <T>
-     * @return
-     */
     @SuppressWarnings("unchecked")
     private static <T> XmlSAXHandler<T> getXmlSAXHandler(final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses,
             final Class<? extends T> targetClass) {

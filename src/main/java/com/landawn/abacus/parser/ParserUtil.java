@@ -64,7 +64,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
@@ -76,7 +76,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Strings.StrUtil;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
@@ -1828,7 +1827,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         return new java.util.Date(Numbers.toLong(strValue));
                     } else {
-                        return DateUtil.parseJUDate(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseJUDate(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -1837,7 +1836,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
+                        Dates.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1851,7 +1850,7 @@ public final class ParserUtil {
                         calendar.setTimeZone(propInfo.timeZone);
                         return calendar;
                     } else {
-                        return DateUtil.parseCalendar(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseCalendar(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -1860,7 +1859,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTimeInMillis());
                     } else {
-                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
+                        Dates.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
 
                 }
@@ -1872,7 +1871,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue));
                     } else {
-                        return DateUtil.parseTimestamp(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseTimestamp(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -1881,7 +1880,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
+                        Dates.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1892,7 +1891,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Date(Numbers.toLong(strValue));
                     } else {
-                        return DateUtil.parseDate(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseDate(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -1901,7 +1900,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
+                        Dates.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -1912,7 +1911,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Time(Numbers.toLong(strValue));
                     } else {
-                        return DateUtil.parseTime(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseTime(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -1921,7 +1920,7 @@ public final class ParserUtil {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
-                        DateUtil.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
+                        Dates.formatTo(x, propInfo.dateFormat, propInfo.timeZone, writer);
                     }
                 }
             });
@@ -2271,7 +2270,7 @@ public final class ParserUtil {
         private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
             @SuppressWarnings("deprecation")
 
-            final Optional<String> typeName = StrUtil.firstNonEmpty(typeAnno.value(), typeAnno.name());
+            final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
             if (typeName.isPresent() && !typeName.get().equals(Strings.strip(typeName.get()))) {
                 throw new IllegalArgumentException("Type name: \"" + typeName.get() + "\" must not start or end with any whitespace for field: " + field);

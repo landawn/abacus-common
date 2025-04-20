@@ -25,7 +25,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
     }
 
     /**
-     * Checks if is primitive array.
+     * Checks if is a primitive array.
      *
      * @return {@code true}, if is primitive array
      */

@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -65,7 +65,7 @@ public class DateType extends AbstractDateType<Date> {
      */
     @Override
     public Date valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentDate() : DateUtil.parseDate(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentDate() : Dates.parseDate(str));
     }
 
     /**
@@ -84,7 +84,7 @@ public class DateType extends AbstractDateType<Date> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createDate(parseLong(cbuf, offset, len));
+                return Dates.createDate(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

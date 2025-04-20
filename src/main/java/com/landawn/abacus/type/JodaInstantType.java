@@ -27,7 +27,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
@@ -80,7 +80,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
         }
 
         return str.length() == 20 ? Instant.parse(str, jodaISO8601DateTimeFT)
-                : (str.length() == 24 ? Instant.parse(str, jodaISO8601TimestampFT) : Instant.ofEpochMilli(DateUtil.parseTimestamp(str).getTime()));
+                : (str.length() == 24 ? Instant.parse(str, jodaISO8601TimestampFT) : Instant.ofEpochMilli(Dates.parseTimestamp(str).getTime()));
     }
 
     /**

@@ -380,7 +380,7 @@ public class DigestUtil {
     /**
      * Calculates the MD2 digest and returns the value as a 16 element {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return MD2 digest
      * @since 1.7
      */
@@ -447,7 +447,7 @@ public class DigestUtil {
     /**
      * Calculates the MD5 digest and returns the value as a 16 element {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return MD5 digest
      */
     public static byte[] md5(final String data) {
@@ -550,7 +550,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-1 digest
      */
     public static byte[] sha1(final String data) {
@@ -617,7 +617,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-256 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-256 digest
      * @since 1.4
      */
@@ -685,7 +685,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-224 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA3-224 digest
      * @since 1.12
      */
@@ -753,7 +753,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-256 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA3-256 digest
      * @since 1.12
      */
@@ -821,7 +821,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-384 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA3-384 digest
      * @since 1.12
      */
@@ -889,7 +889,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-512 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA3-512 digest
      * @since 1.12
      */
@@ -957,7 +957,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-384 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-384 digest
      * @since 1.4
      */
@@ -1025,7 +1025,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-512 digest
      * @since 1.4
      */
@@ -1059,7 +1059,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/224 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-512/224 digest
      * @since 1.14
      */
@@ -1127,7 +1127,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/256 digest and returns the value as a {@code byte[]}.
      *
-     * @param data Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param data Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-512/224 digest
      * @since 1.14
      */
@@ -1358,10 +1358,10 @@ public class DigestUtil {
      * Updates the given {@link MessageDigest} from a String (converted to bytes using UTF-8).
      * <p>
      * To update the digest using a different charset for the conversion, convert the String to a byte array using
-     * {@link String#getBytes(java.nio.charset.Charset)} and pass that to the {@link DigestUtils#updateDigest(MessageDigest, byte[])} method
+     * {@link String#getBytes(java.nio.charset.Charset)} and pass that to the {@link DigestUtil#updateDigest(MessageDigest, byte[])} method
      *
      * @param messageDigest the {@link MessageDigest} to update
-     * @param valueToDigest the value to update the {@link MessageDigest} with; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     * @param valueToDigest the value to update the {@link MessageDigest} with; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return the updated {@link MessageDigest}
      * @since 1.7
      */

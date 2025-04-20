@@ -145,7 +145,6 @@ public final class TypeAttrParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @SafeVarargs
     public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
         final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
         final String className = attrResult.getClassName();

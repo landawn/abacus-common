@@ -41,7 +41,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @param <E>
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {

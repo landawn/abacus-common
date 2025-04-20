@@ -850,8 +850,8 @@ public final class Profiler {
          * @return
          */
         protected String time2String(final long timeInMillis) {
-            final Timestamp timestamp = DateUtil.createTimestamp(timeInMillis);
-            return DateUtil.format(timestamp, DateUtil.ISO_LOCAL_DATE_TIME_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
+            final Timestamp timestamp = Dates.createTimestamp(timeInMillis);
+            return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
         }
     }
 

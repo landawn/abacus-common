@@ -50,9 +50,14 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,6 +65,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
@@ -5221,7 +5227,6 @@ public final class IOUtil {
      *
      * @param a The AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    @SafeVarargs
     public static void closeAll(final AutoCloseable... a) {
         if (N.isEmpty(a)) {
             return;
@@ -5283,7 +5288,6 @@ public final class IOUtil {
      *
      * @param a The AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    @SafeVarargs
     public static void closeAllQuietly(final AutoCloseable... a) {
         if (N.isEmpty(a)) {
             return;
@@ -5356,9 +5360,9 @@ public final class IOUtil {
      *
      * @param srcFile The source file or directory to be copied. It must not be {@code null}.
      * @param destDir The destination directory where the source file or directory will be copied to. It must not be {@code null}.
-     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
-    public static void copyToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
+    public static void copyToDirectory(final File srcFile, final File destDir) throws IOException {
         copyToDirectory(srcFile, destDir, true);
     }
 
@@ -5369,9 +5373,9 @@ public final class IOUtil {
      * @param srcFile          The source file or directory to be copied. It must not be {@code null}.
      * @param destDir          The destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate If {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
-    public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
+    public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws IOException {
         copyToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
     }
 
@@ -5384,11 +5388,11 @@ public final class IOUtil {
      * @param destDir          The destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate If {@code true}, the last modified date of the file will be preserved in the copied file.
      * @param filter           A BiPredicate that takes the source and destination files as arguments and returns a boolean. If the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
-     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      * @throws E                    If the filter throws an exception.
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
-            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
+            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
         if (!srcFile.exists()) {
             throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
         }
@@ -5399,24 +5403,19 @@ public final class IOUtil {
             }
         } else {
             if (!destDir.mkdirs()) {
-                throw new UncheckedIOException(new IOException("Failed to create destination directory: " + destDir.getAbsolutePath()));
+                throw new IOException("Failed to create destination directory: " + destDir.getAbsolutePath());
             }
         }
 
         if (!destDir.canWrite()) {
-            throw new UncheckedIOException(new IOException("Destination '" + destDir + "' cannot be written to")); //NOSONAR
+            throw new IOException("Destination '" + destDir + "' cannot be written to"); //NOSONAR
         }
 
-        String destCanonicalPath = null;
-        String srcCanonicalPath = null;
-        try {
-            srcFile = srcFile.getCanonicalFile();
-            destDir = destDir.getCanonicalFile();
-            destCanonicalPath = destDir.getCanonicalPath();
-            srcCanonicalPath = srcFile.getCanonicalPath();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        srcFile = srcFile.getCanonicalFile();
+        destDir = destDir.getCanonicalFile();
+
+        String srcCanonicalPath = srcFile.getCanonicalPath();
+        String destCanonicalPath = destDir.getCanonicalPath();
 
         if (srcFile.isDirectory()) {
             if (destCanonicalPath.startsWith(srcCanonicalPath) && (destCanonicalPath.length() == srcCanonicalPath.length()
@@ -5425,22 +5424,14 @@ public final class IOUtil {
                         "Failed to copy due to the target directory: " + destCanonicalPath + " is in or same as the source directory: " + srcCanonicalPath);
             }
 
-            try {
-                doCopyDirectory(srcFile, destDir, preserveFileDate, filter);
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            doCopyDirectory(srcFile, destDir, preserveFileDate, filter);
         } else {
             File destFile = null;
 
-            try {
-                if (destDir.getCanonicalPath().equals(srcFile.getParentFile().getCanonicalPath())) {
-                    destFile = new File(destDir, "Copy of " + srcFile.getName());
-                } else {
-                    destFile = new File(destDir, srcFile.getName());
-                }
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+            if (destDir.getCanonicalPath().equals(srcFile.getParentFile().getCanonicalPath())) {
+                destFile = new File(destDir, "Copy of " + srcFile.getName());
+            } else {
+                destFile = new File(destDir, srcFile.getName());
             }
 
             doCopyFile(srcFile, destFile, preserveFileDate);
@@ -5463,7 +5454,7 @@ public final class IOUtil {
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
         if (destDir.exists()) {
             if (destDir.isFile()) {
-                throw new IOException("Destination '" + destDir + "' exists but is not a directory");
+                throw new IllegalArgumentException("Destination '" + destDir + "' exists but is not a directory");
             }
         } else {
             if (!destDir.mkdirs()) {
@@ -5498,9 +5489,74 @@ public final class IOUtil {
 
         // Do this last, as the above has probably affected directory metadata
         if (preserveFileDate) {
-            //noinspection ResultOfMethodCallIgnored
-            destDir.setLastModified(srcDir.lastModified()); //NOSONAR
+            setTimes(srcDir, destDir);
         }
+    }
+
+    /**
+     * Throws IllegalArgumentException if the given files' canonical representations are equal.
+     *
+     * @param file1 The first file to compare.
+     * @param file2 The second file to compare.
+     * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if the given files' canonical representations are equal.
+     */
+    private static void requireCanonicalPathsNotEquals(final File file1, final File file2) throws IOException {
+        final String canonicalPath = file1.getCanonicalPath();
+        if (canonicalPath.equals(file2.getCanonicalPath())) {
+            throw new IllegalArgumentException(String.format("File canonical paths are equal: '%s' (file1='%s', file2='%s')", canonicalPath, file1, file2));
+        }
+    }
+
+    /**
+     * Creates all parent directories for a File object, including any necessary but non-existent parent directories. If a parent directory already exists or
+     * is null, nothing happens.
+     *
+     * @param file the File that may need parents, may be null.
+     * @return The parent directory, or {@code null} if the given File does have a parent.
+     * @since 2.9.0
+     */
+    private static boolean createParentDirectories(final File file) {
+        return mkdirsIfNotExists(getParentFile(file));
+    }
+
+    /**
+     * Gets the parent of the given file. The given file may be null. Note that a file's parent may be null as well.
+     *
+     * @param file The file to query, may be null.
+     * @return The parent file or {@code null}. Note that a file's parent may be null as well.
+     */
+    private static File getParentFile(final File file) {
+        return file == null ? null : file.getParentFile();
+    }
+
+    /**
+     * Sets file lastModifiedTime, lastAccessTime and creationTime to match source file
+     *
+     * @param sourceFile The source file to query.
+     * @param targetFile The target file or directory to set.
+     * @return {@code true} if and only if the operation succeeded;
+     *          {@code false} otherwise
+     * @throws NullPointerException if sourceFile is {@code null}.
+     * @throws NullPointerException if targetFile is {@code null}.
+     */
+    private static boolean setTimes(final File sourceFile, final File targetFile) {
+        Objects.requireNonNull(sourceFile, "sourceFile");
+        Objects.requireNonNull(targetFile, "targetFile");
+        try {
+            // Set creation, modified, last accessed to match source file
+            final BasicFileAttributes srcAttr = Files.readAttributes(sourceFile.toPath(), BasicFileAttributes.class);
+            final BasicFileAttributeView destAttrView = Files.getFileAttributeView(targetFile.toPath(), BasicFileAttributeView.class);
+            // null guards are not needed; BasicFileAttributes.setTimes(...) is null safe
+            destAttrView.setTimes(srcAttr.lastModifiedTime(), srcAttr.lastAccessTime(), srcAttr.creationTime());
+            return true;
+        } catch (final IOException ignored) {
+            // Fallback: Only set modified time to match source file
+            return targetFile.setLastModified(sourceFile.lastModified());
+        }
+
+        // TODO: (Help!) Determine historically why setLastModified(File, File) needed PathUtils.setLastModifiedTime() if
+        //  sourceFile.isFile() was true, but needed setLastModifiedTime(File, long) if sourceFile.isFile() was false
     }
 
     /**
@@ -5509,9 +5565,10 @@ public final class IOUtil {
      * @param srcFile          the validated source file, must not be {@code null}
      * @param destFile         the validated destination file, must not be {@code null}
      * @param preserveFileDate whether to preserve the file date
+     * @throws IOException if an error occurs
      */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) {
+    private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
         if (destFile.exists()) {
             throw new IllegalArgumentException("The destination file already existed: " + destFile.getAbsolutePath());
         }
@@ -5535,8 +5592,6 @@ public final class IOUtil {
                 count = ((size - pos) > FILE_COPY_BUFFER_SIZE) ? FILE_COPY_BUFFER_SIZE : (size - pos);
                 pos += output.transferFrom(input, pos, count);
             }
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             close(output);
             close(fos);
@@ -5546,68 +5601,158 @@ public final class IOUtil {
 
         if (srcFile.length() != destFile.length()) {
             deleteAllIfExists(destFile);
-            throw new UncheckedIOException(new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'"));
+            throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
         }
 
-        if (preserveFileDate) {
-            //noinspection ResultOfMethodCallIgnored
-            destFile.setLastModified(srcFile.lastModified()); //NOSONAR
+        if (preserveFileDate && !Files.isSymbolicLink(srcFile.toPath()) && !setTimes(srcFile, destFile)) {
+            throw new IOException("Cannot set the file time.");
         }
     }
 
     /**
-     * Copies a file or directory from the source path to the target path.
+     * Copies a file to a new location preserving the file date.
+     * <p>
+     * This method copies the contents of the specified source file to the specified destination file. The directory
+     * holding the destination file is created if it does not exist. If the destination file exists, then this method
+     * overwrites it. A symbolic link is resolved before copying so the new file is not a link.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
+     * {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is not guaranteed that the
+     * operation will succeed. If the modification operation fails, it falls back to
+     * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
+     * </p>
      *
-     * @param source  The source path of the file or directory to be copied.
-     * @param target  The target path where the file or directory will be copied to.
-     * @param options Optional arguments that specify how the copy should be done.
-     * @return The path to the target file or directory.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see Files#copy(Path, Path, CopyOption...)
+     * @param srcFile an existing file to copy, must not be {@code null}.
+     * @param destFile the new file, must not be {@code null}.
+     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @throws IOException if source or destination is invalid.
+     * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
+     * @throws IOException if the output file length is not the same as the input file length after the copy completes.
+     * @see #copyToDirectory(File, File)
+     * @see #copyFile(File, File, boolean)
      */
-    @SafeVarargs
-    public static Path copy(final Path source, final Path target, final CopyOption... options) throws UncheckedIOException {
-        try {
-            return Files.copy(source, target, options);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+    public static void copyFile(final File srcFile, final File destFile) throws IOException {
+        copyFile(srcFile, destFile, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Copies an existing file to a new file location.
+     * <p>
+     * This method copies the contents of the specified source file to the specified destination file. The directory
+     * holding the destination file is created if it does not exist. If the destination file exists, then this method
+     * overwrites it. A symbolic link is resolved before copying so the new file is not a link.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
+     * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
+     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
+     * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
+     * </p>
+     *
+     * @param srcFile an existing file to copy, must not be {@code null}.
+     * @param destFile the new file, must not be {@code null}.
+     * @param preserveFileDate true if the file date of the copy should be the same as the original.
+     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @throws IOException if source or destination is invalid.
+     * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
+     * @throws IOException if the output file length is not the same as the input file length after the copy completes
+     * @see #copyFile(File, File, boolean, CopyOption...)
+     */
+    public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
+        copyFile(srcFile, destFile, preserveFileDate, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Copies a file to a new location.
+     * <p>
+     * This method copies the contents of the specified source file to the specified destination file. The directory
+     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
+     * it if you use {@link StandardCopyOption#REPLACE_EXISTING}.
+     * </p>
+     *
+     * @param srcFile an existing file to copy, must not be {@code null}.
+     * @param destFile the new file, must not be {@code null}.
+     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
+     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @throws FileNotFoundException if the source does not exist.
+     * @throws IllegalArgumentException if source is not a file.
+     * @throws IOException if an I/O error occurs.
+     * @see StandardCopyOption
+     * @since 2.9.0
+     */
+    public static void copyFile(final File srcFile, final File destFile, final CopyOption... copyOptions) throws IOException {
+        copyFile(srcFile, destFile, true, copyOptions);
+    }
+
+    /**
+     * Copies the contents of a file to a new location.
+     * <p>
+     * This method copies the contents of the specified source file to the specified destination file. The directory
+     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
+     * it with {@link StandardCopyOption#REPLACE_EXISTING}.
+     * </p>
+     *
+     * <p>
+     * By default, a symbolic link is resolved before copying so the new file is not a link.
+     * To copy symbolic links as links, you can pass {@code LinkOption.NO_FOLLOW_LINKS} as the last argument.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
+     * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
+     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
+     * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
+     * </p>
+     *
+     * @param srcFile an existing file to copy, must not be {@code null}.
+     * @param destFile the new file, must not be {@code null}.
+     * @param preserveFileDate true if the file date of the copy should be the same as the original.
+     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
+     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @throws FileNotFoundException if the source does not exist.
+     * @throws IllegalArgumentException if {@code srcFile} or {@code destFile} is not a file
+     * @throws IOException if the output file length is not the same as the input file length after the copy completes, or if an I/O error occurs, setting the last-modified time didn't succeed or the destination is not writable 
+     * @see #copyToDirectory(File, File, boolean)
+     * @since 2.8.0
+     */
+    public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate, final CopyOption... copyOptions) throws IOException {
+        Objects.requireNonNull(destFile, "destination");
+        checkFileExists(srcFile, "srcFile");
+
+        requireCanonicalPathsNotEquals(srcFile, destFile);
+        createParentDirectories(destFile);
+
+        if (destFile.exists()) {
+            checkFileExists(destFile, "destFile");
+        }
+
+        final Path srcPath = srcFile.toPath();
+
+        Files.copy(srcPath, destFile.toPath(), copyOptions);
+
+        // On Windows, the last modified time is copied by default.
+        if (preserveFileDate && !Files.isSymbolicLink(srcPath) && !setTimes(srcFile, destFile)) {
+            throw new IOException("Cannot set the file time.");
         }
     }
 
     /**
-     * Copies the content of the given InputStream to the specified target Path.
+     * Copies bytes from a {@link File} to an {@link OutputStream}.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a {@link BufferedInputStream}.
+     * </p>
      *
-     * @param in      The InputStream to be copied.
-     * @param target  The target Path where the InputStream content will be copied to.
-     * @param options Optional arguments that specify how the copy should be done.
-     * @return The number of bytes read or skipped and written to the target Path.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see Files#copy(InputStream, Path, CopyOption...)
+     * @param input  the {@link File} to read.
+     * @param output the {@link OutputStream} to write.
+     * @return the number of bytes copied
+     * @throws NullPointerException if the File is {@code null}.
+     * @throws NullPointerException if the OutputStream is {@code null}.
+     * @throws IOException          if an I/O error occurs.
+     * @since 2.1
      */
-    @SafeVarargs
-    public static long copy(final InputStream in, final Path target, final CopyOption... options) throws UncheckedIOException {
-        try {
-            return Files.copy(in, target, options);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Copies the content of the file at the given source Path to the specified OutputStream.
-     *
-     * @param source The source Path of the file to be copied.
-     * @param output The OutputStream where the file content will be copied to.
-     * @return The number of bytes read or skipped and written to the OutputStream.
-     * @throws UncheckedIOException if an I/O error occurs during the copy operation.
-     * @see Files#copy(Path, OutputStream)
-     */
-    public static long copy(final Path source, final OutputStream output) throws UncheckedIOException {
-        try {
-            return Files.copy(source, output);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static long copyFile(final File input, final OutputStream output) throws IOException {
+        return copy(input.toPath(), output);
     }
 
     //-----------------------------------------------------------------------
@@ -5625,16 +5770,14 @@ public final class IOUtil {
      * @param source      the {@code URL} to copy bytes from, must not be {@code null}
      * @param destination the non-directory {@code File} to write bytes to
      *                    (possibly overwriting), must not be {@code null}
-     * @throws UncheckedIOException if an IO error occurs during copying
+     * @throws IOException if an IO error occurs during copying
      */
-    public static void copyURLToFile(final URL source, final File destination) throws UncheckedIOException {
+    public static void copyURLToFile(final URL source, final File destination) throws IOException {
         InputStream is = null;
         try {
             is = source.openStream();
 
             write(is, destination);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             close(is);
         }
@@ -5653,9 +5796,9 @@ public final class IOUtil {
      *                          will timeout if no connection could be established to the {@code source}
      * @param readTimeout       the number of milliseconds until this method will
      *                          timeout if no data could be read from the {@code source}
-     * @throws UncheckedIOException if an IO error occurs during copying
+     * @throws IOException if an IO error occurs during copying
      */
-    public static void copyURLToFile(final URL source, final File destination, final int connectionTimeout, final int readTimeout) throws UncheckedIOException {
+    public static void copyURLToFile(final URL source, final File destination, final int connectionTimeout, final int readTimeout) throws IOException {
         InputStream is = null;
         try {
             final URLConnection connection = source.openConnection();
@@ -5664,11 +5807,49 @@ public final class IOUtil {
             is = connection.getInputStream();
 
             write(is, destination);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             close(is);
         }
+    }
+
+    /**
+     * Copies a file or directory from the source path to the target path.
+     *
+     * @param source  The source path of the file or directory to be copied.
+     * @param target  The target path where the file or directory will be copied to.
+     * @param options Optional arguments that specify how the copy should be done.
+     * @return The path to the target file or directory.
+     * @throws IOException if an I/O error occurs.
+     * @see Files#copy(Path, Path, CopyOption...)
+     */
+    public static Path copy(final Path source, final Path target, final CopyOption... options) throws IOException {
+        return Files.copy(source, target, options);
+    }
+
+    /**
+     * Copies the content of the given InputStream to the specified target Path.
+     *
+     * @param in      The InputStream to be copied.
+     * @param target  The target Path where the InputStream content will be copied to.
+     * @param options Optional arguments that specify how the copy should be done.
+     * @return The number of bytes read or skipped and written to the target Path. 
+     * @see Files#copy(InputStream, Path, CopyOption...)
+     */
+    public static long copy(final InputStream in, final Path target, final CopyOption... options) throws IOException {
+        return Files.copy(in, target, options);
+    }
+
+    /**
+     * Copies the content of the file at the given source Path to the specified OutputStream.
+     *
+     * @param source The source Path of the file to be copied.
+     * @param output The OutputStream where the file content will be copied to.
+     * @return The number of bytes read or skipped and written to the OutputStream.
+     * @throws IOException if an I/O error occurs during the copy operation.
+     * @see Files#copy(Path, OutputStream)
+     */
+    public static long copy(final Path source, final OutputStream output) throws IOException {
+        return Files.copy(source, output);
     }
 
     /**
@@ -5676,9 +5857,9 @@ public final class IOUtil {
      *
      * @param srcFile The source file to be moved.
      * @param destDir The target directory where the file will be moved to.
-     * @throws UncheckedIOException if an I/O error occurs..
+     * @throws IOException if an I/O error occurs..
      */
-    public static void move(final File srcFile, final File destDir) throws UncheckedIOException {
+    public static void move(final File srcFile, final File destDir) throws IOException {
         if (!srcFile.exists()) {
             throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
         }
@@ -5689,14 +5870,14 @@ public final class IOUtil {
             }
         } else {
             if (!destDir.mkdirs()) {
-                throw new UncheckedIOException(new IOException("Failed to create destination directory: " + destDir.getAbsolutePath()));
+                throw new IOException("Failed to create destination directory: " + destDir.getAbsolutePath());
             }
         }
 
         final File destFile = new File(destDir, srcFile.getName());
 
         if (!srcFile.renameTo(destFile)) {
-            throw new UncheckedIOException(new IOException("Failed to move file from: " + srcFile.getAbsolutePath() + " to: " + destDir.getAbsolutePath()));
+            throw new IOException("Failed to move file from: " + srcFile.getAbsolutePath() + " to: " + destDir.getAbsolutePath());
         }
     }
 
@@ -5707,15 +5888,11 @@ public final class IOUtil {
      * @param target  The target Path where the file will be moved to.
      * @param options Optional arguments that specify how the move should be done.
      * @return The target path.
-     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
      * @see Files#move(Path, Path, CopyOption...)
      */
-    public static Path move(final Path source, final Path target, final CopyOption... options) throws UncheckedIOException {
-        try {
-            return Files.copy(source, target, options);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static Path move(final Path source, final Path target, final CopyOption... options) throws IOException {
+        return Files.copy(source, target, options);
     }
 
     /**
@@ -6045,15 +6222,30 @@ public final class IOUtil {
      * @see #sizeOfAsBigInteger(File)
      */
     public static long sizeOf(final File file) throws IllegalArgumentException {
+        return sizeOf(file, false);
+    }
+
+    /**
+     * Returns the size of the specified file or directory.
+     * @param file
+     * @param considerNonExistingFileAsEmpty if {@code true}, the size of non-existing file is considered as 0.
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static long sizeOf(final File file, final boolean considerNonExistingFileAsEmpty) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
 
         if (!file.exists()) {
+            if (considerNonExistingFileAsEmpty) {
+                return 0;
+            }
+
             final String message = file + " does not exist";
             throw new IllegalArgumentException(message);
         }
 
         if (file.isDirectory()) {
-            return sizeOfDirectory0(file); // private method; expects directory
+            return sizeOfDirectory0(file, considerNonExistingFileAsEmpty); // private method; expects directory
         }
 
         return file.length();
@@ -6073,22 +6265,38 @@ public final class IOUtil {
      * @see #sizeOfDirectoryAsBigInteger(File)
      */
     public static long sizeOfDirectory(final File directory) throws IllegalArgumentException {
+        return sizeOfDirectory(directory, false);
+    }
+
+    /**
+     * Counts the size of a directory recursively (sum of the length of all files).
+     * 
+     * @param directory
+     * @param considerNonExistingDirectoryAsEmpty if {@code true}, the size of non-existing directory is considered as 0.
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static long sizeOfDirectory(final File directory, final boolean considerNonExistingDirectoryAsEmpty) throws IllegalArgumentException {
         N.checkArgNotNull(directory, cs.directory);
+
+        if (!directory.exists() && considerNonExistingDirectoryAsEmpty) {
+            return 0;
+        }
 
         checkDirectory(directory);
 
-        return sizeOfDirectory0(directory);
+        return sizeOfDirectory0(directory, considerNonExistingDirectoryAsEmpty);
     }
 
-    private static long sizeOf0(final File file) {
+    private static long sizeOf0(final File file, final boolean considerNonExistingFileAsEmpty) {
         if (file.isDirectory()) {
-            return sizeOfDirectory0(file);
+            return sizeOfDirectory0(file, considerNonExistingFileAsEmpty);
         }
 
         return file.length(); // will be 0 if file does not exist
     }
 
-    private static long sizeOfDirectory0(final File directory) {
+    private static long sizeOfDirectory0(final File directory, final boolean considerNonExistingDirectoryAsEmpty) {
         final File[] files = directory.listFiles();
 
         if (files == null) { // null if security restricted
@@ -6099,7 +6307,7 @@ public final class IOUtil {
 
         for (final File file : files) {
             if (!isSymbolicLink(file)) {
-                size += sizeOf0(file); // internal method
+                size += sizeOf0(file, considerNonExistingDirectoryAsEmpty); // internal method
                 if (size < 0) {
                     break;
                 }
@@ -7050,6 +7258,127 @@ public final class IOUtil {
      */
     public static boolean touch(final File source) {
         return source.exists() && source.setLastModified(System.currentTimeMillis());
+    }
+
+    /**
+     * Tests whether the contents of two files are equal.
+     * <p>
+     * This method checks to see if the two files are different lengths or if they point to the same file, before
+     * resorting to byte-by-byte comparison of the contents.
+     * </p>
+     *
+     * @param file1 the first file
+     * @param file2 the second file
+     * @return true if the content of the files are equal or they both don't exist, false otherwise
+     * @throws IllegalArgumentException when an input is not a file.
+     * @throws IOException If an I/O error occurs.
+     */
+    public static boolean contentEquals(final File file1, final File file2) throws IOException {
+        if (file1 == file2) {
+            return true;
+        } else if (file1 == null || file2 == null) {
+            return false;
+        }
+
+        final boolean file1Exists = file1.exists();
+
+        if (file1Exists != file2.exists()) {
+            return false;
+        }
+
+        if (!file1Exists) {
+            // two not existing files are equal
+            return true;
+        }
+
+        checkIsFile(file1, "file1");
+        checkIsFile(file2, "file2");
+
+        if (file1.length() != file2.length()) {
+            // lengths differ, cannot be equal
+            return false;
+        }
+
+        if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
+            // same file
+            return true;
+        }
+
+        try (final InputStream input1 = IOUtil.newFileInputStream(file1); //
+                final InputStream input2 = IOUtil.newFileInputStream(file2)) {
+            return contentEquals(input1, input2);
+        }
+    }
+
+    private static File checkIsFile(final File file, final String name) {
+        if (file.isFile()) {
+            return file;
+        }
+
+        throw new IllegalArgumentException(String.format("Parameter '%s' is not a file: %s", name, file));
+    }
+
+    /**
+     * Compares the contents of two files to determine if they are equal or not.
+     * <p>
+     * This method checks to see if the two files point to the same file,
+     * before resorting to line-by-line comparison of the contents.
+     * </p>
+     *
+     * @param file1       the first file
+     * @param file2       the second file
+     * @param charsetName the name of the requested charset.
+     *                    May be null, in which case the platform default is used
+     * @return true if the content of the files are equal or neither exists,
+     * false otherwise
+     * @throws IllegalArgumentException when an input is not a file.
+     * @throws IOException in case of an I/O error.
+     * @throws UnsupportedCharsetException If the named charset is unavailable (unchecked exception).
+     * @see IOUtil#contentEqualsIgnoreEOL(Reader, Reader)
+     * @since 2.2
+     */
+    public static boolean contentEqualsIgnoreEOL(final File file1, final File file2, final String charsetName) throws IOException {
+        if (file1 == file2) {
+            return true;
+        } else if (file1 == null || file2 == null) {
+            return false;
+        }
+
+        final boolean file1Exists = file1.exists();
+
+        if (file1Exists != file2.exists()) {
+            return false;
+        }
+
+        if (!file1Exists) {
+            // two not existing files are equal
+            return true;
+        }
+
+        checkFileExists(file1, "file1");
+        checkFileExists(file2, "file2");
+
+        if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
+            // same file
+            return true;
+        }
+
+        final Charset charset = Charsets.get(charsetName);
+        try (Reader input1 = new InputStreamReader(Files.newInputStream(file1.toPath()), charset);
+                Reader input2 = new InputStreamReader(Files.newInputStream(file2.toPath()), charset)) {
+            return contentEqualsIgnoreEOL(input1, input2);
+        }
+    }
+
+    private static void checkFileExists(final File file, final String name) throws FileNotFoundException {
+        if (!file.isFile()) {
+            if (file.exists()) {
+                throw new IllegalArgumentException("Parameter '" + name + "' is not a file: " + file);
+            }
+            if (!Files.isSymbolicLink(file.toPath())) {
+                throw new FileNotFoundException("Source '" + file + "' does not exist");
+            }
+        }
     }
 
     /**

@@ -98,7 +98,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a the array of chars to be used as the element array for this list
      * @return a new CharList containing the elements of the specified array
      */
-    @SafeVarargs
     public static CharList of(final char... a) {
         return new CharList(N.nullToEmpty(a));
     }
@@ -682,8 +681,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param indices
      */
     @Override
-    @SafeVarargs
-    public final void deleteAllByIndices(final int... indices) {
+    public void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }

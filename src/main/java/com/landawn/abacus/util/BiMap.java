@@ -769,7 +769,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Returns a string representation of this BiMap.
      * The string representation consists of a list of key-value mappings in the BiMap, enclosed in braces ("{}").
-     * Adjacent mappings are separated by the characters ", " (comma and space).
+     * Adjacent mappings are separated by the characters", " (comma and space).
      * Each key-value mapping is rendered as the key followed by an equals sign ("=") followed by the associated value.
      *
      * @return a string representation of this BiMap.

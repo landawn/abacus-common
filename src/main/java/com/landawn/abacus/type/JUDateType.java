@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -74,7 +74,7 @@ public class JUDateType extends AbstractDateType<Date> {
      */
     @Override
     public Date valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentJUDate() : DateUtil.parseJUDate(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentJUDate() : Dates.parseJUDate(str));
     }
 
     /**
@@ -93,7 +93,7 @@ public class JUDateType extends AbstractDateType<Date> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return DateUtil.createJUDate(parseLong(cbuf, offset, len));
+                return Dates.createJUDate(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
                 // ignore;
             }

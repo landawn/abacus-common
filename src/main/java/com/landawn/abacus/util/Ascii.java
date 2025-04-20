@@ -171,8 +171,8 @@ public final class Ascii {
 
     /**
      * Data Link Escape: A communication control character which will change the meaning of a limited
-     * number of contiguously following characters. It is used exclusively to provide supplementary
-     * controls in data communication networks.
+     * number of the contiguously following characters. It is used exclusively to provide supplementary
+     * controls on data communication networks.
      *
      */
     public static final byte DLE = 16;
@@ -276,7 +276,7 @@ public final class Ascii {
     /**
      * Escape: A control character intended to provide code extension (supplementary characters) in
      * general information interchange. The Escape character itself is a prefix affecting the
-     * interpretation of a limited number of contiguously following characters.
+     * interpretation of a limited number of contiguously the following characters.
      *
      */
     public static final byte ESC = 27;
@@ -319,7 +319,7 @@ public final class Ascii {
 
     /**
      * Space: A normally non-printing graphic character used to separate words. It is also a format
-     * effector which controls the movement of the printing position, one printing position forward.
+     * effector that controls the movement of the printing position, one printing position forward.
      * (Applicable also to display devices.)
      *
      */

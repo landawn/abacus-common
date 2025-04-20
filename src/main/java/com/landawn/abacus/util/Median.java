@@ -50,7 +50,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty"); //NOSONAR
 
@@ -114,7 +113,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
@@ -178,7 +176,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
@@ -259,7 +256,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see N#median(int[])
      */
-    @SafeVarargs
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
@@ -323,7 +319,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
@@ -387,7 +382,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
@@ -451,7 +445,6 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    @SafeVarargs
     public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 

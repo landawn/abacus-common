@@ -111,7 +111,6 @@ public final class Iterables {
      * @return an {@code OptionalChar} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalChar}
      * @see N#min(char...)
      */
-    @SafeVarargs
     public static OptionalChar min(final char... a) {
         return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.min(a));
     }
@@ -124,7 +123,6 @@ public final class Iterables {
      * @return an {@code OptionalByte} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
      * @see N#min(byte...)
      */
-    @SafeVarargs
     public static OptionalByte min(final byte... a) {
         return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(a));
     }
@@ -137,7 +135,6 @@ public final class Iterables {
      * @return an {@code OptionalShort} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalShort}
      * @see N#min(short...)
      */
-    @SafeVarargs
     public static OptionalShort min(final short... a) {
         return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.min(a));
     }
@@ -150,7 +147,6 @@ public final class Iterables {
      * @return an  {@code OptionalInt} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#min(int...)
      */
-    @SafeVarargs
     public static OptionalInt min(final int... a) {
         return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.min(a));
     }
@@ -163,7 +159,6 @@ public final class Iterables {
      * @return an {@code OptionalLong} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#min(long...)
      */
-    @SafeVarargs
     public static OptionalLong min(final long... a) {
         return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.min(a));
     }
@@ -176,7 +171,6 @@ public final class Iterables {
      * @return an {@code OptionalFloat} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}
      * @see N#min(float...)
      */
-    @SafeVarargs
     public static OptionalFloat min(final float... a) {
         return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.min(a));
     }
@@ -189,7 +183,6 @@ public final class Iterables {
      * @return an {@code OptionalDouble} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#min(double...)
      */
-    @SafeVarargs
     public static OptionalDouble min(final double... a) {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(a));
     }
@@ -584,7 +577,6 @@ public final class Iterables {
      * @return an {@code OptionalChar} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalChar}
      * @see N#max(char...)
      */
-    @SafeVarargs
     public static OptionalChar max(final char... a) {
         return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(a));
     }
@@ -597,7 +589,6 @@ public final class Iterables {
      * @return an {@code OptionalByte} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
      * @see N#max(byte...)
      */
-    @SafeVarargs
     public static OptionalByte max(final byte... a) {
         return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(a));
     }
@@ -610,7 +601,6 @@ public final class Iterables {
      * @return an {@code OptionalShort} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalShort}
      * @see N#max(short...)
      */
-    @SafeVarargs
     public static OptionalShort max(final short... a) {
         return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(a));
     }
@@ -623,7 +613,6 @@ public final class Iterables {
      * @return an  {@code OptionalInt} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#max(int...)
      */
-    @SafeVarargs
     public static OptionalInt max(final int... a) {
         return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(a));
     }
@@ -636,7 +625,6 @@ public final class Iterables {
      * @return an {@code OptionalLong} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#max(long...)
      */
-    @SafeVarargs
     public static OptionalLong max(final long... a) {
         return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(a));
     }
@@ -649,7 +637,6 @@ public final class Iterables {
      * @return an {@code OptionalFloat} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}
      * @see N#max(float...)
      */
-    @SafeVarargs
     public static OptionalFloat max(final float... a) {
         return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(a));
     }
@@ -662,7 +649,6 @@ public final class Iterables {
      * @return an {@code OptionalDouble} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
      * @see N#max(double...)
      */
-    @SafeVarargs
     public static OptionalDouble max(final double... a) {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
     }
