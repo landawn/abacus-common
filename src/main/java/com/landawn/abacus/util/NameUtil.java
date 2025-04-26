@@ -132,7 +132,7 @@ public final class NameUtil {
     //            } else if (parentName.equals(getParentName(name))) {
     //                canonicalName = getCachedName(canonicalName);
     //            } else {
-    //                canonicalName = Strings.EMPTY_STRING;
+    //                canonicalName = Strings.EMPTY;
     //            }
     //
     //            canonicalNameMap.put(name, canonicalName);

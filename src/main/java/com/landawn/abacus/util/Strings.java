@@ -107,8 +107,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static final String EMPTY = "";
 
-    
-
     //    /**
     //     * The empty String {@code ""}.
     //     * @deprecated Use {@link #EMPTY_STRING} instead
@@ -12569,8 +12567,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g) {
-        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f),
-                nullToEmpty(g));
+        return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g));
     }
 
     /**

@@ -53,6 +53,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributeView;
@@ -76,11 +77,13 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.BiPredicates;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  * <p>
@@ -95,6 +98,7 @@ import com.landawn.abacus.util.Fn.BiPredicates;
  * @see com.landawn.abacus.guava.Files
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.FilenameUtil
  */
 public final class IOUtil {
 
@@ -4456,44 +4460,59 @@ public final class IOUtil {
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
-     * Returns the <a href="http://en.wikipedia.org/wiki/Filename_extension">file
-     * extension</a> for the given file name, or the empty string if the file has
-     * no extension.  The result does not include the '{@code .}'.
+     * Returns the file extension of the specified file. Empty string is returned if the file has no extension.
      *
-     * @param fullName
-     * @return
-     * @throws IllegalArgumentException
+     * @param file The file whose extension is to be retrieved.
+     * @return The file extension, or {@code null} if the file does not exist.
+     * @see FilenameUtil#getExtension(String) 
      */
-    public static String getFileExtension(final String fullName) throws IllegalArgumentException {
-        N.checkArgNotNull(fullName);
+    @MayReturnNull
+    public static String getFileExtension(final File file) {
+        if (file == null || !file.exists()) {
+            return null;
+        }
 
-        final String fileName = new File(fullName).getName();
-        final int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
+        return FilenameUtil.getExtension(file.getName());
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
-     * Returns the file name without its
-     * <a href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
-     * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
+     * Returns the file extension of the specified file name. Empty string is returned if the file has no extension.
      *
-     * @param file The name of the file to trim the extension from. This can be either a fully
-     *             qualified file name (including a path) or just a file name.
-     * @return The file name without its path or extension.
-     * @throws IllegalArgumentException
+     * @param fileName The name of the file whose extension is to be retrieved.
+     * @return The file extension, or {@code null} if the specified file name is {@code null}.
+     * @see FilenameUtil#getExtension(String)
      */
-    public static String getNameWithoutExtension(final String file) throws IllegalArgumentException {
-        N.checkArgNotNull(file);
+    @MayReturnNull
+    public static String getFileExtension(final String fileName) {
+        return FilenameUtil.getExtension(fileName);
+    }
 
-        final String fileName = new File(file).getName();
-        final int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+    /**
+     * Returns the file name without its extension.
+     *
+     * @param file The file whose name without extension is to be retrieved.
+     * @return The file name without extension, or {@code null} if the file does not exist.
+     * @see FilenameUtil#removeExtension(String)
+     */
+    @MayReturnNull
+    public static String getNameWithoutExtension(final File file) {
+        if (file == null || !file.exists()) {
+            return null;
+        }
+
+        return FilenameUtil.removeExtension(file.getName());
+    }
+
+    /**
+     * Returns the file name without its extension.
+     *
+     * @param fileName The name of the file whose name without extension is to be retrieved.
+     * @return The file name without extension, or {@code null} if the specified file name is {@code null}.
+     * @see FilenameUtil#removeExtension(String)
+     */
+    @MayReturnNull
+    public static String getNameWithoutExtension(final String fileName) {
+        return FilenameUtil.removeExtension(fileName);
     }
 
     /**
@@ -5939,7 +5958,7 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file and all its sub files/directories if it's a directory.
+     * Deletes the specified file and all its sub files/directories recursively if it's a directory.
      *
      * @param file
      * @return {@code true} if the file is deleted successfully, otherwise {@code false} if the file is {@code null} or doesn't exist, or can't be deleted.
@@ -5978,22 +5997,22 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file if it's a file or its sub files/directories if it's a directory.
+     * Deletes sub files/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
      *
-     * @param file The file or directory to be deleted.
+     * @param dir The directory where sub files/directories will be deleted from.
      * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
      * @see File#delete()
      * @see Files#delete(Path)
      */
-    public static boolean deleteFiles(final File file) {
-        return deleteFiles(file, BiPredicates.alwaysTrue());
+    public static boolean deleteFilesFromDirectory(final File dir) {
+        return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
     }
 
     /**
-     * Deletes the specified file if it's a file or its sub files/directories if it's a directory with the specified filter.
+     * Deletes sub files/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
      *
-     * @param <E>    the type of the exception that may be thrown
-     * @param file   The file or directory to be deleted.
+     * @param <E> the type of the exception that may be thrown
+     * @param dir The directory where sub files/directories will be deleted from.
      * @param filter The filter to be applied when deleting files or directories.
      * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
      * @throws E if an exception of type E occurs during the operation.
@@ -6001,42 +6020,37 @@ public final class IOUtil {
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      */
-    public static <E extends Exception> boolean deleteFiles(final File file, final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
-        if ((file == null) || !file.exists()) {
+    public static <E extends Exception> boolean deleteFilesFromDirectory(final File dir, final Throwables.BiPredicate<? super File, ? super File, E> filter)
+            throws E {
+        if ((dir == null) || !dir.exists() || dir.isFile()) {
             return false;
         }
 
-        if (file.isDirectory()) {
-            final File[] files = file.listFiles();
+        final File[] files = dir.listFiles();
 
-            if (N.isEmpty(files)) {
-                return true;
+        if (N.isEmpty(files)) {
+            return true;
+        }
+
+        for (final File subFile : files) {
+            if (subFile == null) {
+                continue;
             }
 
-            for (final File subFile : files) {
-                if (subFile == null) {
-                    continue;
-                }
-
-                if (filter == null || filter.test(file, subFile)) {
-                    if (subFile.isFile()) {
-                        if (!subFile.delete()) { //NOSONAR
-                            return false;
-                        }
-                    } else {
-                        if (!deleteAllIfExists(subFile)) {
-                            return false;
-                        }
+            if (filter == null || filter.test(dir, subFile)) {
+                if (subFile.isFile()) {
+                    if (!subFile.delete()) { //NOSONAR
+                        return false;
                     }
                 } else {
-                    if (subFile.isDirectory() && !deleteFiles(subFile, filter)) {
+                    if (!deleteAllIfExists(subFile)) {
                         return false;
                     }
                 }
-            }
-        } else {
-            if (filter == null || filter.test(file.getParentFile(), file)) {
-                return file.delete(); //NOSONAR
+            } else {
+                if (subFile.isDirectory() && !deleteFilesFromDirectory(subFile, filter)) {
+                    return false;
+                }
             }
         }
 
@@ -6046,16 +6060,12 @@ public final class IOUtil {
     /**
      * Deletes the sub files/directories under the specified {@code directory}. The {@code directory} itself won't be deleted.
      *
-     * @param directory directory to clean
+     * @param dir directory to clean
      * @return {@code false} if some of its sub files can't be deleted.
-     * @see #deleteFiles(File, Throwables.BiPredicate)
+     * @see #deleteFilesFromDirectory(File)
      */
-    public static boolean cleanDirectory(final File directory) {
-        if (directory == null || !directory.isDirectory()) {
-            return true;
-        }
-
-        return deleteFiles(directory, BiPredicates.alwaysTrue());
+    public static boolean cleanDirectory(final File dir) {
+        return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
     }
 
     static void createNewFileIfNotExists(final File file) throws IOException {
@@ -6190,17 +6200,72 @@ public final class IOUtil {
     }
 
     /**
+     * Checks if the specified {@code File} is a file or not.
+     *
+     * @param file the {@code File} to check
+     * @return {@code true} if the {@code File} exists and is a file, {@code false} otherwise
+     * @see File#isFile()
+     */
+    public static boolean isFile(final File file) {
+        return file != null && file.isFile();
+    }
+
+    /**
+     * Checks if the specified {@code File} is a directory or not.
+     *
+     * @param file the {@code File} to check
+     * @return {@code true} if the {@code File} exists and is a directory, {@code false} otherwise
+     * @see File#isDirectory()
+     */
+    public static boolean isDirectory(final File file) {
+        return file != null && file.isDirectory();
+    }
+
+    /**
+     * Tests whether the specified {@link File} is a directory or not. Implemented as a
+     * null-safe delegate to {@link Files#isDirectory(Path path, LinkOption... options)}.
+     *
+     * @param   file the path to the file.
+     * @param   options options indicating how symbolic links are handled
+     * @return  {@code true} if the file is a directory; {@code false} if
+     *          the path is null, the file does not exist, is not a directory, or it cannot
+     *          be determined if the file is a directory or not.
+     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
+     *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
+     *                               access to the directory.
+     * @see Files#isDirectory(Path, LinkOption...)
+     */
+    public static boolean isDirectory(final File file, final LinkOption... options) {
+        return file != null && Files.isDirectory(file.toPath(), options);
+    }
+
+    /**
+     * Tests whether the specified {@link File} is a regular file or not. Implemented as a
+     * null-safe delegate to {@link Files#isRegularFile(Path path, LinkOption... options)}.
+     *
+     * @param   file the path to the file.
+     * @param   options options indicating how symbolic links are handled
+     * @return  {@code true} if the file is a regular file; {@code false} if
+     *          the path is null, the file does not exist, is not a regular file, or it cannot
+     *          be determined if the file is a regular file or not.
+     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
+     *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
+     *                               access to the directory.
+     * @see Files#isRegularFile(Path, LinkOption...)
+     */
+    public static boolean isRegularFile(final File file, final LinkOption... options) {
+        return file != null && Files.isRegularFile(file.toPath(), options);
+    }
+
+    /**
      * Checks if the specified file is a Symbolic Link rather than an actual file.
      *
      * @param file The file to be checked.
      * @return {@code true} if the file is a Symbolic Link, {@code false} otherwise.
-     * @throws IllegalArgumentException if the file is {@code null}.
      * @see Files#isSymbolicLink(Path)
      */
-    public static boolean isSymbolicLink(final File file) throws IllegalArgumentException {
-        N.checkArgNotNull(file, cs.file);
-
-        return Files.isSymbolicLink(file.toPath());
+    public static boolean isSymbolicLink(final File file) {
+        return file != null && Files.isSymbolicLink(file.toPath());
     }
 
     /**
@@ -6908,6 +6973,9 @@ public final class IOUtil {
      *
      * @param parentPath The parent directory from which to list files and directories.
      * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @see Stream#listFiles(File)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static List<String> list(final File parentPath) {
         return list(parentPath, false, false);
@@ -6922,6 +6990,9 @@ public final class IOUtil {
      * @param recursively      A boolean indicating whether to list files in all subdirectories.
      * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
      * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static List<String> list(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
         return list(parentPath, recursively, excludeDirectory ? directories_excluded_filter : all_files_filter);
@@ -6937,6 +7008,9 @@ public final class IOUtil {
      * @param filter      A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
      * @return A list of file names in the specified directory and possibly its subdirectories.
      * @throws E If the filter throws an exception.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static <E extends Exception> List<String> list(File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
@@ -6973,6 +7047,9 @@ public final class IOUtil {
      *
      * @param parentPath The parent directory from which to list files.
      * @return A list of File objects representing all files in the parent directory.
+     * @see Stream#listFiles(File)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static List<File> listFiles(final File parentPath) {
         return listFiles(parentPath, false, false);
@@ -6987,6 +7064,9 @@ public final class IOUtil {
      * @param recursively      A boolean indicating whether to list files in all subdirectories.
      * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
      * @return A list of File objects representing all files in the parent directory.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static List<File> listFiles(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
         return listFiles(parentPath, recursively, excludeDirectory ? directories_excluded_filter : all_files_filter);
@@ -7002,6 +7082,9 @@ public final class IOUtil {
      * @param filter      A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
      * @return A list of files in the specified directory and possibly its subdirectories.
      * @throws E If the filter throws an exception.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
      */
     public static <E extends Exception> List<File> listFiles(final File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
@@ -7036,6 +7119,8 @@ public final class IOUtil {
      *
      * @param parentPath The parent directory from which to list directories.
      * @return A list of File objects representing all directories in the parent directory.
+     * @see Stream#listFiles(File)
+     * @see Fn#isDirectory()
      */
     public static List<File> listDirectories(final File parentPath) {
         return listDirectories(parentPath, false);
@@ -7048,6 +7133,8 @@ public final class IOUtil {
      * @param parentPath  The parent directory from which to list directories.
      * @param recursively A boolean indicating whether to list directories in all subdirectories.
      * @return A list of File objects representing all directories in the parent directory and its subdirectories if recursively is {@code true}.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isDirectory()
      */
     public static List<File> listDirectories(final File parentPath, final boolean recursively) {
         return listFiles(parentPath, recursively, directories_only_filter);

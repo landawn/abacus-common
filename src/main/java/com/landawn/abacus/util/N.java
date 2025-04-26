@@ -5481,6 +5481,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      * @see #copyThenReplaceAll(Object[], UnaryOperator)
      */
+    @Beta
     @MayReturnNull
     public static <T> T[] copyThenSetAll(final T[] a, final IntFunction<? extends T> generator) {
         if (a == null) {
@@ -5512,6 +5513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #copyThenSetAll(Object[], IntFunction)
      * @see #copyThenReplaceAll(Object[], UnaryOperator)
      */
+    @Beta
     @MayReturnNull
     public static <T, E extends Exception> T[] copyThenSetAll(final T[] a, final Throwables.IntObjFunction<? super T, ? extends T, E> converter) throws E {
         if (a == null) {
@@ -5541,8 +5543,41 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #copyThenSetAll(Object[], IntFunction)
      * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      */
+    @Beta
     @MayReturnNull
     public static <T> T[] copyThenReplaceAll(final T[] a, final UnaryOperator<T> operator) {
+        if (a == null) {
+            return null; // NOSONAR
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final T[] copy = a.clone();
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            copy[i] = operator.apply(copy[i]);
+        }
+
+        return a;
+    }
+
+    /**
+     * Creates a copy of the given array and replaces all elements in the copy using the provided {@code UnaryOperator}.
+     * If the specified array is {@code null}, returns {@code null}.
+     * If the specified array is empty, returns itself.
+     *
+     * @param <T> the type of elements in the array
+     * @param <E> the type of exception that the operator may throw
+     * @param a the array to be copied and modified
+     * @param operator The UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
+     * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator}
+     * @throws E if the operator function throws an exception
+     * @see #copyThenSetAll(Object[], IntFunction)
+     * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
+     */
+    @Beta
+    @MayReturnNull
+    public static <T, E extends Exception> T[] copyThenUpdateAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (a == null) {
             return null; // NOSONAR
         } else if (a.length == 0) {

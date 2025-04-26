@@ -10040,7 +10040,7 @@ sealed class CommonUtil permits N {
         //    }
         //
         //    for (int i = 0, len = a.length; i < len; i++) {
-        //        a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+        //        a[i] = a[i] == null ? Strings.EMPTY : a[i];
         //    }
         //
         //    return a;
@@ -10083,7 +10083,7 @@ sealed class CommonUtil permits N {
     //        }
     //
     //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+    //            a[i] = a[i] == null ? Strings.EMPTY : a[i];
     //        }
     //
     //        return a;
