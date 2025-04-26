@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -37,7 +38,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.landawn.abacus.exception.UncheckedException;
-import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions.FreezePane;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -56,9 +56,9 @@ public final class ExcelUtil {
     }
 
     /**
-     * Read the first sheet of the excel file and return the rows as a list of strings.
+     * Read the first sheet of the Excel file and return the rows as a list of strings.
      *
-     * @param excelFile the excel file
+     * @param excelFile the Excel file
      * @return a list of strings representing the rows in the first sheet
      */
     public static List<String> readSheet(final File excelFile) {
@@ -164,20 +164,61 @@ public final class ExcelUtil {
      * @param rows the data to write to the sheet
      */
     public static void writeSheet(final File excelFile, final String sheetName, final List<String> headers, final List<? extends Collection<?>> rows) {
-        writeSheet(excelFile, sheetName, headers, rows, null);
+        writeSheet(excelFile, sheetName, headers, rows, (SheetCreateOptions) null);
     }
 
     /**
-     * Writes the specified data to an Excel file with the given sheet name and headers.
+     * Writes the specified data to an Excel file with the given sheet name, headers, and options.
      *
      * @param excelFile the Excel file to write to
      * @param sheetName the name of the sheet to create
      * @param headers the headers for the columns
      * @param rows the data to write to the sheet
+     * @param sheetCreateOptions options for creating the sheet
      * @param sheetCreateOptions
      */
     public static void writeSheet(final File excelFile, final String sheetName, final List<String> headers, final List<? extends Collection<?>> rows,
             final SheetCreateOptions sheetCreateOptions) {
+        final int columnColumn = headers.size();
+
+        final Consumer<Sheet> sheetSetter = sheetCreateOptions == null ? null : sheet -> {
+            if (sheetCreateOptions.isAutoSizeColumn()) {
+                // Resize columns to fit content
+                for (int i = 0; i < columnColumn; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+            }
+
+            final FreezePane freezePane = sheetCreateOptions.getFreezePane();
+
+            if (freezePane != null) {
+                sheet.createFreezePane(freezePane.colSplit(), freezePane.rowSplit());
+            } else if (sheetCreateOptions.isFreezeFirstRow()) {
+                sheet.createFreezePane(0, 1);
+            }
+
+            if (sheetCreateOptions.getAutoFilter() != null) {
+                sheet.setAutoFilter(sheetCreateOptions.getAutoFilter());
+            } else if (sheetCreateOptions.isAutoFilterByFirstRow()) {
+                sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnColumn));
+            }
+        };
+
+        writeSheet(excelFile, sheetName, headers, rows, sheetSetter);
+    }
+
+    /**
+     * Writes the specified data to an Excel file with the given sheet name, headers, and options.
+     *
+     * @param excelFile the Excel file to write to
+     * @param sheetName the name of the sheet to create
+     * @param headers the headers for the columns
+     * @param rows the data to write to the sheet
+     * @param sheetSetter a consumer to set additional properties on the sheet
+     * @param sheetCreateOptions
+     */
+    public static void writeSheet(final File excelFile, final String sheetName, final List<String> headers, final List<? extends Collection<?>> rows,
+            final Consumer<? super Sheet> sheetSetter) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
 
@@ -218,27 +259,8 @@ public final class ExcelUtil {
             }
         }
 
-        if (sheetCreateOptions != null) {
-            if (sheetCreateOptions.isAutoSizeColumn()) {
-                // Resize columns to fit content
-                for (int i = 0; i < columnColumn; i++) {
-                    sheet.autoSizeColumn(i);
-                }
-            }
-
-            final FreezePane freezePane = sheetCreateOptions.getFreezePane();
-
-            if (freezePane != null) {
-                sheet.createFreezePane(freezePane.colSplit(), freezePane.rowSplit());
-            } else if (sheetCreateOptions.isFreezeFirstRow()) {
-                sheet.createFreezePane(0, 1);
-            }
-
-            if (sheetCreateOptions.getAutoFilter() != null) {
-                sheet.setAutoFilter(sheetCreateOptions.getAutoFilter());
-            } else if (sheetCreateOptions.isAutoFilterByFirstRow()) {
-                sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnColumn));
-            }
+        if (sheetSetter != null) {
+            sheetSetter.accept(sheet);
         }
 
         // Write to file
@@ -256,7 +278,6 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read
      * @param sheetIndex the index of the sheet to save as CSV, starting from 0.
      * @param outputCsvFile the output CSV file
-     * @param charset the character set to use for the CSV file
      * @throws UncheckedException if an I/O error occurs while reading or writing the file
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, File outputCsvFile) {
@@ -269,7 +290,6 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read
      * @param sheetName the name of the sheet to save as CSV
      * @param outputCsvFile the output CSV file
-     * @param charset the character set to use for the CSV file
      * @throws UncheckedException if an I/O error occurs while reading or writing the file
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, File outputCsvFile) {
@@ -277,13 +297,15 @@ public final class ExcelUtil {
     }
 
     /**
-     * Saves the specified sheet from the given Excel file as a CSV file with the specified character set.
+     * Saves the specified sheet from the given Excel file as a CSV file.
      *
      * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to read
-     * @param rowMapper a function to map each row to a string
-     * @return a list of strings representing the rows in the specified sheet
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param sheetIndex the index of the sheet to save as CSV, starting from 0
+     * @param csvHeader a list of strings representing the header row for the CSV file; can be null
+     * @param quoted a boolean indicating whether the cell values should be quoted in the CSV file
+     * @param outputCsvFile the output CSV file to write to
+     * @param charset the character set to use for writing the CSV file
+     * @throws UncheckedException if an I/O error occurs while reading or writing the file
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, List<String> csvHeader, final boolean quoted, File outputCsvFile,
             Charset charset) {
@@ -305,10 +327,12 @@ public final class ExcelUtil {
      * Saves the specified sheet from the given Excel file as a CSV file with the specified character set.
      *
      * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to save as CSV
-     * @param rowMapper a function to map each row to a string
-     * @return a list of strings representing the rows in the specified sheet
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param sheetIndex the index of the sheet to save as CSV, starting from 0
+     * @param csvHeader a list of strings representing the header row for the CSV file; can be null
+     * @param quoted a boolean indicating whether the cell values should be quoted in the CSV file
+     * @param outputCsvFile the output CSV file to write to
+     * @param charset the character set to use for writing the CSV file
+     * @throws UncheckedException if an I/O error occurs while reading or writing the file
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeader, final boolean quoted, File outputCsvFile,
             Charset charset) {
@@ -327,28 +351,29 @@ public final class ExcelUtil {
         }
     }
 
-    public static class RowMappers {
+    public static final class RowMappers {
+        private RowMappers() {
+            // prevent instantiation
+        }
 
         public static final Function<Cell, String> CELL2STRING = cell -> {
-            final String ret = switch (cell.getCellType()) {
+            return switch (cell.getCellType()) {
                 case STRING -> cell.getStringCellValue();
                 case NUMERIC -> String.valueOf(cell.getNumericCellValue());
                 case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
                 case FORMULA -> cell.getCellFormula();
                 case BLANK -> "";
-                default -> throw new RuntimeException();
+                default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
             };
-
-            return ret;
         };
 
         private static final Function<Row, String> ROW2STRING = toString(Strings.ELEMENT_SEPARATOR);
 
-        public static final Function<Row, String> toString(final String cellSeparator) {
+        public static Function<Row, String> toString(final String cellSeparator) {
             return toString(cellSeparator, CELL2STRING);
         }
 
-        public static final Function<Row, String> toString(final String cellSeparator, final Function<Cell, String> cellMapper) {
+        public static Function<Row, String> toString(final String cellSeparator, final Function<Cell, String> cellMapper) {
             return row -> {
                 final StringBuilder sb = Objectory.createStringBuilder();
                 boolean first = true;
@@ -371,11 +396,11 @@ public final class ExcelUtil {
             };
         }
 
-        public static final Function<Row, List<String>> toList() {
+        public static Function<Row, List<String>> toList() {
             return toList(CELL2STRING);
         }
 
-        public static final <T> Function<Row, List<T>> toList(final Function<Cell, T> cellMapper) {
+        public static <T> Function<Row, List<T>> toList(final Function<Cell, T> cellMapper) {
             return row -> {
                 final List<T> list = new ArrayList<>(row.getPhysicalNumberOfCells());
 
@@ -396,8 +421,8 @@ public final class ExcelUtil {
         private boolean freezeFirstRow;
         private CellRangeAddress autoFilter;
         private boolean autoFilterByFirstRow;
+    }
 
-        public static record FreezePane(int colSplit, int rowSplit) {
-        }
+    public static record FreezePane(int colSplit, int rowSplit) {
     }
 }

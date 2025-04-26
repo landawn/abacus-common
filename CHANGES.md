@@ -1,5 +1,6 @@
 ### 5.8.1
 
+* Add `ExcelUtil.java`.
 * Improvements and bug fixes.
 
 ### 5.8.0
