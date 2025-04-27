@@ -802,115 +802,118 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the default value provided by specified {@code Supplier} if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     * Returns the default value provided by specified {@code Supplier} if the specified object is {@code null}, otherwise returns the object itself.
      *
      * @param <T>
      * @param obj
      * @param supplierForDefault
      * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified object is {@code null}.
      */
-    public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) {
+    public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
         if (obj == null) {
-            return requireNonNull(supplierForDefault.get());
+            return N.checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
         }
 
         return obj;
     }
 
     /**
-     * Returns the specified default value if the specified object is empty or itself if the specified object is not empty.
+     * Returns the specified default value if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
      *
      * @param <T>
      * @param str
-     * @param defaultStr
+     * @param defaultForEmpty
      * @return
+     * @throws IllegalArgumentException if the specified default charSequence value is empty.
      * @see Strings#defaultIfEmpty(CharSequence, CharSequence)
-     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultStr, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
-        return isEmpty(str) ? defaultStr : str;
+        return isEmpty(str) ? defaultForEmpty : str;
     }
 
     /**
-     * Returns the default value provided by specified {@code Supplier} if the specified object is empty or itself if the specified object is not empty.
+     * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
      *
      * @param <T>
      * @param str
-     * @param getterForDefaultStr
+     * @param supplierForDefault
      * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
      * @see Strings#defaultIfEmpty(CharSequence, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> getterForDefaultStr) {
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isEmpty(str)) {
-            return requireNonNull(getterForDefaultStr.get());
+            return N.checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
     }
 
     /**
-     * Returns the specified default value if the specified object is blank or itself if the specified object is not blank.
+     * Returns the specified default value if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
      * @param <T>
      * @param str
-     * @param defaultStr
+     * @param defaultForBlank
      * @return
+     * @throws IllegalArgumentException if the specified default charSequence value is bank.
      * @see Strings#defaultIfBlank(CharSequence, CharSequence)
-     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultStr, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultForBlank) throws IllegalArgumentException {
+        N.checkArgNotBlank(defaultForBlank, cs.defaultValue);
 
-        return isBlank(str) ? defaultStr : str;
+        return isBlank(str) ? defaultForBlank : str;
     }
 
     /**
-     * Returns the default value provided by specified {@code Supplier} if the specified object is blank or itself if the specified object is not blank.
+     * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
      * @param <T>
      * @param str
-     * @param getterForDefaultStr
+     * @param supplierForDefault
      * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
      * @see Strings#defaultIfBlank(CharSequence, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> getterForDefaultStr) {
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isBlank(str)) {
-            return requireNonNull(getterForDefaultStr.get());
+            return N.checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
     }
 
     /**
-     * Returns the specified default value if the specified Collection/Map is empty or itself if the specified object is not empty.
+     * Returns the specified default value if the specified Collection is empty, otherwise returns the {@code Collection} itself.
      *
      * @param <T>
      * @param c
-     * @param defaultColl
+     * @param defaultForEmpty
      * @return
-     * @throws IllegalArgumentException if the specified default collection value is {@code null}.
+     * @throws IllegalArgumentException if the specified default collection value is empty.
      */
-    public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultColl) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultColl, cs.defaultValue);
+    public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
-        return isEmpty(c) ? defaultColl : c;
+        return isEmpty(c) ? defaultForEmpty : c;
     }
 
     /**
-     * Returns the specified default value if the specified Collection/Map is empty or itself if the specified object is not empty.
+     * Returns the specified default value if the specified Map is empty, otherwise returns the {@code Map} itself.
      *
      * @param <T>
      * @param m
-     * @param defaultMap
+     * @param defaultForEmpty
      * @return
-     * @throws IllegalArgumentException if the specified default map value is {@code null}.
+     * @throws IllegalArgumentException if the specified default map value is empty.
      */
-    public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultMap) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultMap, cs.defaultValue);
+    public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
-        return isEmpty(m) ? defaultMap : m;
+        return isEmpty(m) ? defaultForEmpty : m;
     }
 
     /**

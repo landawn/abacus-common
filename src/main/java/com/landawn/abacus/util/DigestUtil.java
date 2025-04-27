@@ -148,8 +148,8 @@ public class DigestUtil {
      *                  <a href="https://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#AppA">Appendix A in the Java
      *                  Cryptography Architecture Reference Guide</a> for information about standard algorithm names.
      * @return A digest instance.
-     * @see MessageDigest#getInstance(String)
      * @throws IllegalArgumentException when a {@link NoSuchAlgorithmException} is caught.
+     * @see MessageDigest#getInstance(String)
      */
     public static MessageDigest getDigest(final String algorithm) {
         try {
@@ -167,8 +167,8 @@ public class DigestUtil {
      *                             Cryptography Architecture Reference Guide</a> for information about standard algorithm names.
      * @param defaultMessageDigest The default MessageDigest.
      * @return A digest instance.
-     * @see MessageDigest#getInstance(String)
      * @throws IllegalArgumentException when a {@link NoSuchAlgorithmException} is caught.
+     * @see MessageDigest#getInstance(String)
      * @since 1.11
      */
     public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
@@ -186,8 +186,8 @@ public class DigestUtil {
      *                  <a href="https://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#AppA"> Appendix A in the Java
      *                  Cryptography Architecture Reference Guide</a> for information about standard algorithm names.
      * @return A digest instance.
-     * @see MessageDigest#getInstance(String)
      * @throws NoSuchAlgorithmException if no Provider supports a MessageDigestSpi implementation for the specified algorithm.
+     * @see MessageDigest#getInstance(String)
      */
     private static MessageDigest getMessageDigest(final String algorithm) throws NoSuchAlgorithmException {
         return MessageDigest.getInstance(algorithm);

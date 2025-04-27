@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.NullSafe;
  * @see com.landawn.abacus.util.N
  */
 @SuppressWarnings({ "java:S1168" })
-public class Array {
+public abstract sealed class Array permits Array.ArrayUtil {
     private Array() {
         // Utility class.
     }

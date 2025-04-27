@@ -928,78 +928,123 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the input CharSequence if it is not empty, otherwise returns the default CharSequence.
+     * Returns the specified default value if the given {@code charSequence} is {@code null}, otherwise returns the {@code charSequence} itself.
      *
-     * @param <T> The type of the CharSequence.
-     * @param str The input CharSequence to be checked. It can be {@code null} or empty.
-     * @param defaultStr The default CharSequence to be returned if the input CharSequence is empty.
-     * @return The input CharSequence if it is not empty, otherwise the default CharSequence.
-     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
-     * @see #firstNonEmpty(CharSequence, CharSequence)
-     * @see #firstNonBlank(CharSequence, CharSequence)
-     * @see N#firstNonNull(Object, Object)
+     * @param <T> the type of {@code CharSequence}
+     * @param str the {@code charSequence} to check for {@code null}
+     * @param defaultForNull the default value to return if {@code str} is {@code null}
+     * @return {@code str} if it is not {@code null}, otherwise {@code defaultForNull}
+     * @throws IllegalArgumentException if the specified default value is {@code null}.
+     * @see #defaultIfEmpty(CharSequence, CharSequence)
+     * @see #defaultIfBlank(CharSequence, CharSequence)
+     * @see N#defaultIfNull(Object, Object)
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
-        N.checkArgNotNull(defaultStr, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfNull(final T str, final T defaultForNull) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultForNull, cs.defaultValue);
 
-        return isEmpty(str) ? defaultStr : str;
+        return str == null ? defaultForNull : str;
     }
 
     /**
-     * Returns the input CharSequence if it is not empty, otherwise returns the result produced by the supplier.
+     * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is {@code null}, otherwise returns the {@code charSequence} itself.
      *
-     * @param <T> The type of the CharSequence.
-     * @param str The input CharSequence to be checked. It can be {@code null} or empty.
-     * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is empty. It cannot be {@code null}.
-     * @return The input CharSequence if it is not empty, otherwise the result produced by the supplier.
-     * @see #firstNonEmpty(CharSequence, CharSequence)
-     * @see #firstNonBlank(CharSequence, CharSequence)
-     * @see N#firstNonNull(Object, Object)
+     * @param <T> the type of {@code CharSequence}
+     * @param str the {@code charSequence} to check for {@code null}
+     * @param supplierForDefault
+     * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified {@code charSequence} is {@code null}.
+     * @see #defaultIfEmpty(CharSequence, Supplier)
+     * @see #defaultIfBlank(CharSequence, Supplier)
+     * @see N#defaultIfNull(Object, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefaultValue) {
+    public static <T extends CharSequence> T defaultIfNull(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
+        if (str == null) {
+            return N.checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
+        }
+
+        return str;
+    }
+
+    /**
+     * Returns the specified default value if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
+     *
+     * @param <T>
+     * @param str
+     * @param defaultForEmpty
+     * @return
+     * @throws IllegalArgumentException if the specified default charSequence value is empty.
+     * @see #defaultIfNull(CharSequence, CharSequence)
+     * @see #defaultIfBlank(CharSequence, CharSequence)
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see N#defaultIfEmpty(CharSequence, CharSequence)
+     */
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
+
+        return isEmpty(str) ? defaultForEmpty : str;
+    }
+
+    /**
+     * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
+     *
+     * @param <T>
+     * @param str
+     * @param supplierForDefault
+     * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
+     * @see #defaultIfNull(CharSequence, Supplier)
+     * @see #defaultIfBlank(CharSequence, Supplier)
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see N#defaultIfEmpty(CharSequence, Supplier)
+     */
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isEmpty(str)) {
-            return N.requireNonNull(supplierForDefaultValue.get());
+            return N.checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
     }
 
     /**
-     * Returns the input CharSequence if it is not blank, otherwise returns the default CharSequence.
+     * Returns the specified default value if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
-     * @param <T> The type of the CharSequence.
-     * @param str The input CharSequence to be checked. It can be {@code null} or empty.
-     * @param defaultStr The default CharSequence to be returned if the input CharSequence is blank.
-     * @return The input CharSequence if it is not blank, otherwise the default CharSequence.
-     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
-     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @param <T>
+     * @param str
+     * @param defaultForBlank
+     * @return
+     * @throws IllegalArgumentException if the specified default charSequence value is bank.
+     * @see #defaultIfNull(CharSequence, CharSequence)
+     * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #firstNonBlank(CharSequence, CharSequence)
-     * @see N#firstNonNull(Object, Object)
+     * @see N#defaultIfBlank(CharSequence, CharSequence)
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
-        N.checkArgNotNull(defaultStr, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultForBlank) throws IllegalArgumentException {
+        N.checkArgNotBlank(defaultForBlank, cs.defaultValue);
 
-        return isBlank(str) ? defaultStr : str;
+        return isBlank(str) ? defaultForBlank : str;
     }
 
     /**
-     * Returns the input CharSequence if it is not blank, otherwise returns the result produced by the supplier.
+     * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
-     * @param <T> The type of the CharSequence.
-     * @param str The input CharSequence to be checked. It can be {@code null} or empty.
-     * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is blank. It cannot be {@code null}.
-     * @return The input CharSequence if it is not blank, otherwise the result produced by the supplier.
-     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @param <T>
+     * @param str
+     * @param supplierForDefault
+     * @return
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
+     * @see #defaultIfNull(CharSequence, Supplier)
+     * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #firstNonBlank(CharSequence, CharSequence)
-     * @see N#firstNonNull(Object, Object)
+     * @see N#defaultIfBlank(CharSequence, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefaultValue) {
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isBlank(str)) {
-            return N.requireNonNull(supplierForDefaultValue.get());
+            return N.checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
     }
+
 
     /**
      * Converts the specified String to an empty String {@code ""} if it's {@code null}, otherwise returns the original string.
