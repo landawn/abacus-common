@@ -36,6 +36,16 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
+
+    /**
      *
      * @param b
      * @return
@@ -51,12 +61,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
             return defaultValue();
         }
 
-        if (src instanceof Boolean) {
-            return (Boolean) src;
+        if (src instanceof Boolean b) {
+            return b;
         }
 
-        if (src instanceof Number) {
-            return ((Number) src).longValue() > 0;
+        if (src instanceof Number num) {
+            return num.longValue() > 0;
         }
 
         if (src instanceof CharSequence) {

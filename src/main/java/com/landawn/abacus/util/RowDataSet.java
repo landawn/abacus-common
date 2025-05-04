@@ -3439,7 +3439,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public String toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted) {
-        final BufferedWriter bw = Objectory.createBufferedWriter();
+        final BufferedWriter bw = Objectory.createBufferedCSVWriter();
 
         try {
             toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, bw);
@@ -3531,7 +3531,6 @@ public class RowDataSet implements DataSet, Cloneable {
         toCsv(0, size(), _columnNameList, writeTitle, quoted, output);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
             final Writer output) throws UncheckedIOException {
@@ -3547,25 +3546,16 @@ public class RowDataSet implements DataSet, Cloneable {
         final JSONSerializationConfig config = JSC.create();
         config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
-        if (quoted) {
-            config.quoteMapKey(true);
-            config.quotePropName(true);
-            config.setCharQuotation(WD._QUOTATION_D);
-            config.setStringQuotation(WD._QUOTATION_D);
-        } else {
-            config.quoteMapKey(false);
-            config.quotePropName(false);
-            config.noCharQuotation();
-        }
+        final boolean isBufferedWriter = output instanceof BufferedCSVWriter;
+        final BufferedCSVWriter bw = isBufferedWriter ? (BufferedCSVWriter) output : Objectory.createBufferedCSVWriter(output);
 
-        final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
-        final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
+        final char separator = WD._COMMA;
 
         try {
             if (writeTitle) {
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
-                        bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(separator);
                     }
 
                     // bw.write(getColumnName(columnIndexes[i]));
@@ -3575,7 +3565,6 @@ public class RowDataSet implements DataSet, Cloneable {
                 bw.write(IOUtil.LINE_SEPARATOR);
             }
 
-            Type<Object> type = null;
             Object element = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -3585,22 +3574,12 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
-                        bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(separator);
                     }
 
                     element = _columnList.get(columnIndexes[i]).get(rowIndex);
 
-                    if (element == null) {
-                        bw.write(NULL_CHAR_ARRAY);
-                    } else {
-                        type = N.typeOf(element.getClass());
-
-                        if (type.isSerializable()) {
-                            type.writeCharacter(bw, element, config);
-                        } else {
-                            strType.writeCharacter(bw, jsonParser.serialize(element, config), config);
-                        }
-                    }
+                    CSVUtil.writeField(bw, null, element);
                 }
             }
 

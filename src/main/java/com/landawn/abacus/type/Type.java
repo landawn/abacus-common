@@ -648,6 +648,15 @@ public interface Type<T> {
     boolean isOptionalOrNullable();
 
     /**
+     * Returns {@code true} if this type is a non quoted csv type: Number, Boolean, Date, Calendar,
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    default boolean isNonQuotableCsvType() {
+        return false;
+    }
+
+    /**
      * Gets the serialization type.
      *
      * @return

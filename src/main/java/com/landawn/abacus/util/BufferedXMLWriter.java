@@ -96,14 +96,4 @@ public final class BufferedXMLWriter extends CharacterWriter {
     char getCharQuotation() {
         return WD.CHAR_ZERO;
     }
-
-    /**
-     * Gets the hex string.
-     *
-     * @param ch
-     * @return
-     */
-    static String getHexString(final int ch) {
-        return "&#x" + Integer.toHexString(ch) + ";";
-    }
 }

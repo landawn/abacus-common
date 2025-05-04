@@ -1317,8 +1317,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result,
-                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
                                 }
 
                                 propName = null;
@@ -1338,8 +1337,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result,
-                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY) : propValue));
                                 }
 
                                 propName = null;

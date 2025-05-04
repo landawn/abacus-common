@@ -23,4 +23,14 @@ public abstract class AbstractAtomicType<T> extends AbstractType<T> {
     protected AbstractAtomicType(final String typeName) {
         super(typeName);
     }
+
+    /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
 }

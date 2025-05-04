@@ -748,6 +748,102 @@ public final class Numbers {
     }
 
     /**
+     * Formats the given int value according to the provided decimal format.
+     * 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
+     * @see #format(double, String)
+     * @see java.text.DecimalFormat#format(long)
+     */
+    public static String format(final int x, final String decimalFormat) throws IllegalArgumentException {
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        return df.format(x);
+    }
+
+    /**
+     * Formats the given int value according to the provided decimal format.
+     * 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
+     * @see #format(Double, String)
+     * @see java.text.DecimalFormat#format(long)
+     */
+    public static String format(final Integer x, final String decimalFormat) throws IllegalArgumentException {
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        if (x == null) {
+            return df.format(0);
+        } else {
+            return df.format(x);
+        }
+    }
+
+    /**
+     * Formats the given long value according to the provided decimal format.
+     * 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
+     * @see #format(double, String)
+     * @see java.text.DecimalFormat#format(long)
+     */
+    public static String format(final long x, final String decimalFormat) throws IllegalArgumentException {
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        return df.format(x);
+    }
+
+    /**
+     * Formats the given long value according to the provided decimal format.
+     * 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
+     * @see #format(Double, String)
+     * @see java.text.DecimalFormat#format(long)
+     */
+    public static String format(final Long x, final String decimalFormat) throws IllegalArgumentException {
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        if (x == null) {
+            return df.format(0);
+        } else {
+            return df.format(x);
+        }
+    }
+
+    /**
      * Formats the given float value according to the provided decimal format.
      *
      * <p>This method uses {@link java.text.DecimalFormat} to format the float value. The format should be a valid pattern
@@ -4846,16 +4942,34 @@ public final class Numbers {
     }
 
     static final Map<String, DecimalFormat> decimalFormatPool = ImmutableMap.<String, DecimalFormat> builder()
+            .put("#", new DecimalFormat("#"))
             .put("#.#", new DecimalFormat("#.#"))
             .put("#.##", new DecimalFormat("#.##"))
+            .put("#.###", new DecimalFormat("#.###"))
             .put("#.####", new DecimalFormat("#.####"))
             .put("#.#####", new DecimalFormat("#.#####"))
             .put("#.######", new DecimalFormat("#.######"))
+            .put("0", new DecimalFormat("0"))
             .put("0.0", new DecimalFormat("0.0"))
             .put("0.00", new DecimalFormat("0.00"))
+            .put("0.000", new DecimalFormat("0.000"))
             .put("0.0000", new DecimalFormat("0.0000"))
             .put("0.00000", new DecimalFormat("0.00000"))
             .put("0.000000", new DecimalFormat("0.000000"))
+            .put("#%", new DecimalFormat("#%"))
+            .put("#.#%", new DecimalFormat("#.#%"))
+            .put("#.##%", new DecimalFormat("#.##%"))
+            .put("#.###%", new DecimalFormat("#.###%"))
+            .put("#.####%", new DecimalFormat("#.####%"))
+            .put("#.#####%", new DecimalFormat("#.#####%"))
+            .put("#.######%", new DecimalFormat("#.######%"))
+            .put("0%", new DecimalFormat("0%"))
+            .put("0.0%", new DecimalFormat("0.0%"))
+            .put("0.00%", new DecimalFormat("0.00%"))
+            .put("0.000%", new DecimalFormat("0.000%"))
+            .put("0.0000%", new DecimalFormat("0.0000%"))
+            .put("0.00000%", new DecimalFormat("0.00000%"))
+            .put("0.000000%", new DecimalFormat("0.000000%"))
             .build();
 
     /**

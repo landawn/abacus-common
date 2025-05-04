@@ -1045,7 +1045,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return str;
     }
 
-
     /**
      * Converts the specified String to an empty String {@code ""} if it's {@code null}, otherwise returns the original string.
      *
@@ -2150,26 +2149,53 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Converts the specified string to camel case.
+     * 
+     * <p>
+     * <code>
+     * Strings.toCamelCase("first_name")  ==> "firstName"
+     * </code>
+     * </p>
      *
      * @param str The input string to be converted. It can be {@code null} or empty.
      * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str) {
+        return toCamelCase(str, WD._UNDERSCORE);
+    }
+
+    /**
+     * Converts the specified string to camel case.
+     * 
+     * <p>
+     * <code>
+     * Strings.toCamelCase("first_name")  ==> "firstName"
+     * </code>
+     * </p>
+     *
+     * @param str The input string to be converted. It can be {@code null} or empty.
+     * @param splitChar The character used to split the input string.
+     * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     */
+    public static String toCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
         }
 
-        if (str.indexOf(WD._UNDERSCORE) >= 0) {
-            final String[] substrs = Strings.split(str, WD._UNDERSCORE);
+        if (str.indexOf(splitChar) >= 0) {
+            final String[] substrs = Strings.split(str, splitChar);
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
             try {
+                boolean first = true;
 
                 for (final String substr : substrs) {
                     if (isNotEmpty(substr)) {
-                        sb.append(Strings.toLowerCase(substr));
-                        if (sb.length() > substr.length()) {
-                            sb.setCharAt(sb.length() - substr.length(), Character.toTitleCase(substr.charAt(0)));
+                        sb.append(substr.toLowerCase());
+
+                        if (!first) {
+                            sb.setCharAt(sb.length() - substr.length(), Character.toUpperCase(substr.charAt(0)));
+                        } else {
+                            first = false;
                         }
                     }
                 }
@@ -2183,7 +2209,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         for (int i = 0, len = str.length(); i < len; i++) {
             if (Character.isLowerCase(str.charAt(i))) {
                 if (i == 1) {
-                    return Strings.uncapitalize(str);
+                    return str.substring(0, 1).toLowerCase() + str.substring(1);
                 } else if (i > 1) {
                     return str.substring(0, i - 1).toLowerCase() + str.substring(i - 1);
                 }
@@ -2191,6 +2217,69 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 break;
             } else if ((i + 1) == str.length()) {
                 return str.toLowerCase();
+            }
+        }
+
+        return str;
+    }
+
+    /**
+     * Converts the specified string to Pascal case.
+     * 
+     * <p>
+     * <code>
+     * Strings.toPascalCase("first_name")  ==> "FirstName"
+     * </code>
+     * </p>
+     *
+     * @param str The input string to be converted. It can be {@code null} or empty.
+     * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     */
+    public static String toPascalCase(final String str) {
+        return toPascalCase(str, WD._UNDERSCORE);
+    }
+
+    /**
+     * Converts the specified string to Pascal case.
+     * 
+     * <p>
+     * <code>
+     * Strings.toPascalCase("first_name")  ==> "FirstName"
+     * </code>
+     * </p>
+     *
+     * @param str The input string to be converted. It can be {@code null} or empty.
+     * @param splitChar The character used to split the input string.
+     * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     */
+    public static String toPascalCase(final String str, final char splitChar) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        if (str.indexOf(splitChar) >= 0) {
+            final String[] substrs = Strings.split(str, splitChar);
+            final StringBuilder sb = Objectory.createStringBuilder(str.length());
+
+            try {
+                for (final String substr : substrs) {
+                    if (isNotEmpty(substr)) {
+                        sb.append(substr.toLowerCase());
+                        sb.setCharAt(sb.length() - substr.length(), Character.toUpperCase(substr.charAt(0)));
+                    }
+                }
+
+                return sb.toString();
+            } finally {
+                Objectory.recycle(sb);
+            }
+        }
+
+        if (Character.isLowerCase(str.charAt(0))) {
+            if (str.length() == 1) {
+                return str.toUpperCase();
+            } else {
+                return str.substring(0, 1).toUpperCase() + str.substring(1);
             }
         }
 
@@ -4562,6 +4651,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Strips whitespace from the start of a String.
+     * 
+     * @param str
+     * @return
+     */
+    public static String stripStart(final String str) {
+        return stripStart(str, null);
+    }
+
+    /**
      * <p>
      * Strips any of a set of characters from the start of a String.
      * </p>
@@ -4630,6 +4729,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
         for (int i = 0, len = strs.length; i < len; i++) {
             strs[i] = stripStart(strs[i], stripChars);
         }
+    }
+
+    /**
+     * <p>
+     * Strips whitespace from the end of a String.
+     * </p>
+     * 
+     * @param str
+     * @return
+     */
+    public static String stripEnd(final String str) {
+        return stripEnd(str, null);
     }
 
     /**

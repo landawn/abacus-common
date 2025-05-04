@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
-public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJSONWriter, BufferedXMLWriter {
+public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJSONWriter, BufferedXMLWriter, BufferedCSVWriter {
 
     protected final char[][] replacementsForChars;
 
@@ -155,5 +155,25 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
         } else {
             writeCharacter(InternalUtil.getCharsForReadOnly(str), off, len);
         }
+    }
+
+    /**
+     * Gets the hex string.
+     *
+     * @param ch
+     * @return
+     */
+    static String getHexString(final int ch) {
+        return "&#x" + Integer.toHexString(ch) + ";";
+    }
+
+    /**
+     * Gets the char number.
+     *
+     * @param ch
+     * @return
+     */
+    static String getCharNum(final char ch) {
+        return String.format("\\u%04x", (int) ch);
     }
 }

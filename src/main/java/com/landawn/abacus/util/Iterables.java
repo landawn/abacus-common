@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
@@ -64,9 +65,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p>
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
+ * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
  *
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -189,7 +190,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements based on their natural ordering.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
@@ -215,7 +216,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterable of elements based on their natural ordering.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param c the iterable of elements to evaluate
@@ -241,7 +242,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterator of elements based on their natural ordering.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param iter the iterator of elements to evaluate
@@ -289,7 +290,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
@@ -304,7 +305,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param c the iterable of elements to evaluate
@@ -319,7 +320,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum.
+     * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param iter the iterator of elements to evaluate
@@ -1079,7 +1080,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum and maximum values from the provided iterable of elements according to the provided comparator.
+     * Returns the minimum and maximum values from the provided iterable of elements, according to the provided comparator.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
@@ -1108,7 +1109,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum and maximum values from the provided iterator of elements according to the provided comparator.
+     * Returns the minimum and maximum values from the provided iterator of elements, according to the provided comparator.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
@@ -1137,7 +1138,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array according to the provided comparator.
+     * Returns the <code>length / 2 + 1</code> largest value in the specified array, according to the provided comparator.
      * The result is wrapped in a {@code Nullable}. If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Comparable
@@ -1168,7 +1169,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified collection according to the provided comparator.
+     * Returns the <code>length / 2 + 1</code> largest value in the specified collection, according to the provided comparator.
      * The result is wrapped in a {@code Nullable}. If the collection is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
@@ -2327,6 +2328,84 @@ public final class Iterables {
     }
 
     /**
+     * Fills the specified list with values provided by the specified supplier.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list to be filled
+     * @param supplier provider of the value to fill the list with
+     * @throws IllegalArgumentException if the specified list is null
+     * @see N#fill(List, Object)
+     * @see N#fill(List, int, int, Object)
+     * @see N#setAll(List, java.util.function.IntFunction)
+     * @see N#replaceAll(List, java.util.function.UnaryOperator) 
+     * @see N#padLeft(List, int, Object)
+     * @see N#padRight(Collection, int, Object)
+     */
+    @Beta
+    public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) {
+        N.checkArgNotNull(list, cs.list);
+
+        fill(list, 0, list.size(), supplier);
+    }
+
+    /**
+     * Fills the specified list with the specified with values provided by the specified supplier from the specified start index to the specified end index.
+     * The list will be extended automatically if the size of the list is less than the specified toIndex.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list to be filled
+     * @param fromIndex the starting index (inclusive) to begin filling
+     * @param toIndex the ending index (exclusive) to stop filling
+     * @param supplier provider of the value to fill the list with
+     * @throws IllegalArgumentException if the specified list is null
+     * @throws IndexOutOfBoundsException if the specified indices are out of range
+     * @see N#fill(List, Object)
+     * @see N#fill(List, int, int, Object)
+     * @see N#setAll(List, java.util.function.IntFunction)
+     * @see N#replaceAll(List, java.util.function.UnaryOperator)
+     * @see N#padLeft(List, int, Object)
+     * @see N#padRight(Collection, int, Object)
+     */
+    @Beta
+    public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
+            throws IndexOutOfBoundsException {
+        N.checkArgNotNull(list, cs.list);
+        N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+
+        final int size = list.size();
+
+        if (size < toIndex) {
+            if (fromIndex < size) {
+                for (int i = fromIndex; i < size; i++) {
+                    list.set(i, supplier.get());
+                }
+            } else {
+                for (int i = size; i < fromIndex; i++) {
+                    list.add(null);
+                }
+            }
+
+            for (int i = 0, len = toIndex - list.size(); i < len; i++) {
+                list.add(supplier.get());
+            }
+        } else {
+            if (toIndex - fromIndex < CommonUtil.FILL_THRESHOLD || list instanceof RandomAccess) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    list.set(i, supplier.get());
+                }
+            } else {
+                final ListIterator<? super T> itr = list.listIterator(fromIndex);
+
+                for (int i = fromIndex; i < toIndex; i++) {
+                    itr.next();
+
+                    itr.set(supplier.get());
+                }
+            }
+        }
+    }
+
+    /**
      * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
      *
      * Returns a reversed view of the specified list. For example, {@code
@@ -2760,7 +2839,7 @@ public final class Iterables {
     /**
      * Returns an unmodifiable <b>view</b> of the difference of two sets. The returned set contains
      * all elements that are contained by {@code set1} and not contained by {@code set2}. {@code set2}
-     * may also contain elements not present in {@code set1}; these are simply ignored. The iteration
+     * May also contain elements not present in {@code set1}; these are simply ignored. The iteration
      * order of the returned set matches that of {@code set1}.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
@@ -3026,7 +3105,7 @@ public final class Iterables {
      *
      * @param <E>
      * @param set the set of elements to construct a power set from
-     * @return the sets the
+     * @return the sets of all possible subsets of {@code set}
      * @throws IllegalArgumentException if {@code set} has more than 30 unique
      *     elements (causing the power set size to exceed the {@code int} range)
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at
@@ -3071,7 +3150,7 @@ public final class Iterables {
      * {@link Collection}.
      *
      * <p><i>Notes:</i> This is an implementation of the Plain Changes algorithm
-     * for permutations generation, described in Knuth's "The Art of Computer
+     * for permutation generation, described in Knuth's "The Art of Computer
      * Programming", Volume 4, Chapter 7, Section 7.2.1.2.
      *
      * <p>If the input list contains equal elements, some of the generated
@@ -3457,7 +3536,7 @@ public final class Iterables {
         private final int mask;
 
         /**
-         * Instantiates a new sub set.
+         * Instantiates a new subset.
          *
          * @param inputSet
          * @param mask
@@ -3847,7 +3926,7 @@ public final class Iterables {
         private final int toIndex;
 
         /**
-         * Instantiates a new sub collection.
+         * Instantiates a new subcollection.
          *
          * @param a
          * @param fromIndex
@@ -3858,7 +3937,7 @@ public final class Iterables {
         }
 
         /**
-         * Instantiates a new sub collection.
+         * Instantiates a new subcollection.
          *
          * @param c
          * @param fromIndex
@@ -3871,7 +3950,7 @@ public final class Iterables {
         }
 
         /**
-         * Instantiates a new sub collection.
+         * Instantiates a new subcollection.
          *
          * @param c
          * @param fromIndex

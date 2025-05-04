@@ -96,16 +96,13 @@ public final class EscapeUtil {
     public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
             new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u0001", Strings.EMPTY }, { "\u0002", Strings.EMPTY },
-                    { "\u0003", Strings.EMPTY }, { "\u0004", Strings.EMPTY }, { "\u0005", Strings.EMPTY },
-                    { "\u0006", Strings.EMPTY }, { "\u0007", Strings.EMPTY }, { "\u0008", Strings.EMPTY },
-                    { "\u000b", Strings.EMPTY }, { "\u000c", Strings.EMPTY }, { "\u000e", Strings.EMPTY },
-                    { "\u000f", Strings.EMPTY }, { "\u0010", Strings.EMPTY }, { "\u0011", Strings.EMPTY },
-                    { "\u0012", Strings.EMPTY }, { "\u0013", Strings.EMPTY }, { "\u0014", Strings.EMPTY },
-                    { "\u0015", Strings.EMPTY }, { "\u0016", Strings.EMPTY }, { "\u0017", Strings.EMPTY },
-                    { "\u0018", Strings.EMPTY }, { "\u0019", Strings.EMPTY }, { "\u001a", Strings.EMPTY },
-                    { "\u001b", Strings.EMPTY }, { "\u001c", Strings.EMPTY }, { "\u001d", Strings.EMPTY },
-                    { "\u001e", Strings.EMPTY }, { "\u001f", Strings.EMPTY }, { "\ufffe", Strings.EMPTY },
-                    { "\uffff", Strings.EMPTY } }),
+                    { "\u0003", Strings.EMPTY }, { "\u0004", Strings.EMPTY }, { "\u0005", Strings.EMPTY }, { "\u0006", Strings.EMPTY },
+                    { "\u0007", Strings.EMPTY }, { "\u0008", Strings.EMPTY }, { "\u000b", Strings.EMPTY }, { "\u000c", Strings.EMPTY },
+                    { "\u000e", Strings.EMPTY }, { "\u000f", Strings.EMPTY }, { "\u0010", Strings.EMPTY }, { "\u0011", Strings.EMPTY },
+                    { "\u0012", Strings.EMPTY }, { "\u0013", Strings.EMPTY }, { "\u0014", Strings.EMPTY }, { "\u0015", Strings.EMPTY },
+                    { "\u0016", Strings.EMPTY }, { "\u0017", Strings.EMPTY }, { "\u0018", Strings.EMPTY }, { "\u0019", Strings.EMPTY },
+                    { "\u001a", Strings.EMPTY }, { "\u001b", Strings.EMPTY }, { "\u001c", Strings.EMPTY }, { "\u001d", Strings.EMPTY },
+                    { "\u001e", Strings.EMPTY }, { "\u001f", Strings.EMPTY }, { "\ufffe", Strings.EMPTY }, { "\uffff", Strings.EMPTY } }),
             NumericBeanEscaper.between(0x7f, 0x84), NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 
     /**
@@ -118,8 +115,8 @@ public final class EscapeUtil {
      */
     public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
-            new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u000b", "&#11;" }, { "\u000c", "&#12;" },
-                    { "\ufffe", Strings.EMPTY }, { "\uffff", Strings.EMPTY } }),
+            new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u000b", "&#11;" }, { "\u000c", "&#12;" }, { "\ufffe", Strings.EMPTY },
+                    { "\uffff", Strings.EMPTY } }),
             NumericBeanEscaper.between(0x1, 0x8), NumericBeanEscaper.between(0xe, 0x1f), NumericBeanEscaper.between(0x7f, 0x84),
             NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 

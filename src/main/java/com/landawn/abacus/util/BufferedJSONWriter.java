@@ -114,14 +114,4 @@ public final class BufferedJSONWriter extends CharacterWriter {
     BufferedJSONWriter(final Writer writer) {
         super(writer, REPLACEMENT_CHARS);
     }
-
-    /**
-     * Gets the char num.
-     *
-     * @param ch
-     * @return
-     */
-    static String getCharNum(final char ch) {
-        return String.format("\\u%04x", (int) ch);
-    }
 }

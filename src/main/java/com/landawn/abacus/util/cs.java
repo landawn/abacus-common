@@ -294,6 +294,8 @@ public final class cs { // NOSONAR
     public static final String sortedSet = "sortedSet";
     public static final String sortedMap = "sortedMap";
 
+    public static final String rowExtractor = "rowExtractor";
+
     private cs() {
         // Utility class for constant string values.
     }

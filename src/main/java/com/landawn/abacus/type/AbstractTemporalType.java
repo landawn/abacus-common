@@ -32,4 +32,14 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
         super(typeName);
     }
 
+    /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
+
 }

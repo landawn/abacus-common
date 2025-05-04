@@ -87,6 +87,9 @@ public final class Objectory {
 
     private static final Queue<BufferedJSONWriter> bufferedJSONWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
+    private static final Queue<BufferedCSVWriter> bufferedCSVWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+    private static final Queue<BufferedCSVWriter> backSlashBufferedCSVWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+
     private static final Queue<BufferedReader> bufferedReaderPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
     private Objectory() {
@@ -518,6 +521,65 @@ public final class Objectory {
     }
 
     /**
+     * Creates the buffered CSV writer.
+     *
+     * @return
+     */
+    public static BufferedCSVWriter createBufferedCSVWriter() {
+        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+
+        if (bw == null) {
+            logCreated("createBufferedCSVWriter"); //NOSONAR
+
+            bw = new BufferedCSVWriter();
+        } else {
+            bw.reinit();
+        }
+
+        return bw;
+    }
+
+    /**
+     * Creates the buffered CSV writer.
+     *
+     * @param os
+     * @return
+     */
+    public static BufferedCSVWriter createBufferedCSVWriter(final OutputStream os) {
+        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+
+        if (bw == null) {
+            logCreated("createBufferedCSVWriter");
+
+            bw = new BufferedCSVWriter(os);
+        } else {
+            bw.reinit(os);
+        }
+
+        return bw;
+    }
+
+    /**
+     * Creates the buffered CSV writer.
+     *
+     * @param writer
+     * @return
+     */
+    public static BufferedCSVWriter createBufferedCSVWriter(final Writer writer) {
+        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+
+        if (bw == null) {
+            logCreated("createBufferedCSVWriter");
+
+            bw = new BufferedCSVWriter(writer);
+        } else {
+            bw.reinit(writer);
+        }
+
+        return bw;
+    }
+
+    /**
      * Creates the buffered reader.
      *
      * @param str
@@ -774,10 +836,40 @@ public final class Objectory {
 
     /**
      *
+     * @param bw
+     */
+    public static void recycle(final BufferedCSVWriter bw) {
+        if (bw == null) {
+            return;
+        }
+
+        try {
+            bw.flushBufferToWriter();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        bw._reset();
+
+        if (bw.isBackSlash()) {
+            backSlashBufferedCSVWriterPool.offer(bw);
+        } else {
+            bufferedCSVWriterPool.offer(bw);
+        }
+    }
+
+    /**
+     *
      * @param writer
      */
     public static void recycle(final java.io.BufferedWriter writer) {
-        if (writer instanceof BufferedWriter bw) {
+        if (writer instanceof BufferedJSONWriter) {
+            recycle((BufferedJSONWriter) writer);
+        } else if (writer instanceof BufferedXMLWriter) {
+            recycle((BufferedXMLWriter) writer);
+        } else if (writer instanceof BufferedCSVWriter) {
+            recycle((BufferedCSVWriter) writer);
+        } else if (writer instanceof BufferedWriter bw) {
             try {
                 bw.flushBufferToWriter();
             } catch (final IOException e) {

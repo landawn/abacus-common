@@ -27,6 +27,7 @@ import com.landawn.abacus.exception.ParseException;
  *
  * @author Glen Smith
  * @author Rainer Pruy
+ * @see com.landawn.abacus.util.CSVUtil
  */
 public class CSVParser {
 
@@ -39,7 +40,8 @@ public class CSVParser {
      */
     public static final int INITIAL_READ_SIZE = 1024;
     /**
-     * In most cases we know the size of the line we want to read.  In that case we will set the initial read
+     * In most cases, we know the size of the line we want to read.
+     * In that case, we will set the initial read
      * to that plus a buffer size.
      */
     public static final int READ_BUFFER_SIZE = 128;
@@ -96,8 +98,6 @@ public class CSVParser {
      * Skip over quotation characters when parsing.
      */
     private final boolean ignoreQuotations;
-    private String pending;
-    private boolean inField = false;
 
     /**
      * Constructs CSVParser using a comma for the separator.
@@ -193,6 +193,29 @@ public class CSVParser {
     }
 
     /**
+     * Checks to see if any two of the three characters are the same.
+     * This is because in opencsv the separator, quote, and escape characters must be different.
+     *
+     * @param separator The defined separator character
+     * @param quoteChar The defined quotation character
+     * @param escape The defined escape character
+     * @return True, if any two of the three are the same.
+     */
+    private boolean anyCharactersAreTheSame(final char separator, final char quoteChar, final char escape) {
+        return isSameCharacter(separator, quoteChar) || isSameCharacter(separator, escape) || isSameCharacter(quoteChar, escape);
+    }
+
+    /**
+     * Checks that the two characters are the same and are not the defined NULL_CHARACTER.
+     * @param c1 First character
+     * @param c2 Second character
+     * @return True if both characters are the same and are not the defined NULL_CHARACTER
+     */
+    private boolean isSameCharacter(final char c1, final char c2) {
+        return c1 != NULL_CHARACTER && c1 == c2;
+    }
+
+    /**
      * @return The default separator for this parser.
      */
     public char getSeparator() {
@@ -235,37 +258,6 @@ public class CSVParser {
     }
 
     /**
-     * Checks to see if any two of the three characters are the same.
-     * This is because in opencsv the separator, quote, and escape characters
-     * must the different.
-     *
-     * @param separator The defined separator character
-     * @param quoteChar The defined quotation character
-     * @param escape The defined escape character
-     * @return True if any two of the three are the same.
-     */
-    private boolean anyCharactersAreTheSame(final char separator, final char quoteChar, final char escape) {
-        return isSameCharacter(separator, quoteChar) || isSameCharacter(separator, escape) || isSameCharacter(quoteChar, escape);
-    }
-
-    /**
-     * Checks that the two characters are the same and are not the defined NULL_CHARACTER.
-     * @param c1 First character
-     * @param c2 Second character
-     * @return True if both characters are the same and are not the defined NULL_CHARACTER
-     */
-    private boolean isSameCharacter(final char c1, final char c2) {
-        return c1 != NULL_CHARACTER && c1 == c2;
-    }
-
-    /**
-     * @return True if something was left over from last call(s)
-     */
-    public boolean isPending() {
-        return pending != null;
-    }
-
-    /**
      * Parses an incoming String and returns an array of elements.
      * This method is used when all data is contained in a single line.
      *
@@ -274,19 +266,7 @@ public class CSVParser {
      * @throws ParseException If bad things happen during the read
      */
     public List<String> parseLine(final String nextLine) throws ParseException {
-        return parseLine(nextLine, false);
-    }
-
-    /**
-     * Parses an incoming String and returns an array of elements.
-     * This method is used when the data spans multiple lines.
-     *
-     * @param nextLine Current line to be processed
-     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
-     * @throws ParseException If bad things happen during the read
-     */
-    public List<String> parseLineMulti(final String nextLine) throws ParseException {
-        return parseLine(nextLine, true);
+        return parseLine(nextLine, null);
     }
 
     /**
@@ -296,19 +276,7 @@ public class CSVParser {
      * @throws ParseException
      */
     public String[] parseLineToArray(final String nextLine) throws ParseException {
-        final List<String> ret = parseLine(nextLine);
-
-        return ret.toArray(new String[0]);
-    }
-
-    /**
-     *
-     * @param nextLine
-     * @return
-     * @throws ParseException
-     */
-    public String[] parseLineMultiToArray(final String nextLine) throws ParseException {
-        final List<String> ret = parseLineMulti(nextLine);
+        final List<String> ret = parseLine(nextLine, null);
 
         return ret.toArray(new String[0]);
     }
@@ -319,141 +287,111 @@ public class CSVParser {
      * @throws ParseException
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws ParseException {
-        final List<String> ret = parseLine(nextLine);
+        N.checkArgNotNull(output, "output");
 
-        ret.toArray(output);
-    }
-
-    /**
-     *
-     * @param nextLine
-     * @param output
-     * @return the specified output parameter: {@code output}.
-     * @throws ParseException
-     */
-    public String[] parseLineMultiToArray(final String nextLine, final String[] output) throws ParseException {
-        final List<String> ret = parseLineMulti(nextLine);
-
-        return ret.toArray(output);
+        parseLine(nextLine, output);
     }
 
     /**
      * Parses an incoming String and returns an array of elements.
      *
      * @param nextLine The string to parse
-     * @param multi Does it take multiple lines to form a single record.
      * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
      * @throws ParseException If bad things happen during the read
      */
-    protected List<String> parseLine(final String nextLine, final boolean multi) throws ParseException {
-        if (!multi && pending != null) {
-            pending = null;
-        }
-
+    protected List<String> parseLine(final String nextLine, final String[] output) throws ParseException {
         if (nextLine == null) {
-            if (pending != null) {
-                final String s = pending;
-                pending = null;
-                return List.of(s);
-            }
-
             return N.emptyList();
         }
 
-        final List<String> tokensOnThisLine = new ArrayList<>();
-        StringBuilder sb = new StringBuilder(nextLine.length() + READ_BUFFER_SIZE);
+        final int len = nextLine.length();
+        final boolean isOutputNull = output == null;
+        final List<String> tokensOnThisLine = isOutputNull ? new ArrayList<>() : null;
+
         boolean inQuotes = false;
-        if (pending != null) {
-            sb.append(pending);
-            pending = null;
-            inQuotes = !ignoreQuotations;//true;
-        }
-        for (int i = 0; i < nextLine.length(); i++) {
+        boolean quoted = false;
+        int idx = 0;
 
-            final char c = nextLine.charAt(i);
-            if (c == escape) {
-                if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
-                    i = appendNextCharacterAndAdvanceLoop(nextLine, sb, i);
-                }
-            } else if (c == quoteChar) {
-                if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
-                    i = appendNextCharacterAndAdvanceLoop(nextLine, sb, i);
-                } else {
-                    inQuotes = !inQuotes;
+        final StringBuilder sb = Objectory.createStringBuilder();
 
-                    if (atStartOfField(sb)) {
-                        // continue?
+        try {
+            for (int i = 0; i < len; i++) {
+                final char c = nextLine.charAt(i);
+
+                if (c == escape) {
+                    if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
+                        sb.append(nextLine.charAt(++i));
+                    } else {
+                        sb.append(c); // escape character is not followed by a quote or escape, so append it.
                     }
-
-                    // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
-                    if (!strictQuotes) {
-                        if (i > 2 //not on the beginning of the line  //NOSONAR
+                } else if (c == quoteChar) {
+                    if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
+                        sb.append(nextLine.charAt(++i));
+                    } else {
+                        // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
+                        if (!strictQuotes && !sb.isEmpty() //
+                                && i > 2 //not on the beginning of the line //NOSONAR
                                 && nextLine.charAt(i - 1) != separator //not at the beginning of an escape sequence
-                                && nextLine.length() > (i + 1) && nextLine.charAt(i + 1) != separator //not at the   end of an escape sequence
+                                && i < len - 1 && nextLine.charAt(i + 1) != separator //not at the end of an escape sequence
                         ) {
-
-                            if (ignoreLeadingWhiteSpace && !sb.isEmpty() && Strings.isWhitespace(sb)) {
-                                sb.setLength(0);
-                            } else {
-                                sb.append(c);
-                            }
-
+                            sb.append(c);
+                        } else {
+                            quoted = true;
+                            inQuotes = !inQuotes;
                         }
                     }
-                }
-                inField = !inField;
-            } else if (c == separator && !(inQuotes && !ignoreQuotations)) {
-                tokensOnThisLine.add(sb.toString());
-                sb.setLength(0);
-                inField = false;
-            } else {
-                if (!strictQuotes || (inQuotes && !ignoreQuotations)) {
-                    sb.append(c);
-                    inField = true;
+                } else if (c == separator && !inQuotes(inQuotes)) {
+                    if (!quoted && ignoreLeadingWhiteSpace) {
+                        if (isOutputNull) {
+                            tokensOnThisLine.add(Strings.strip(sb.toString()));
+                        } else {
+                            output[idx++] = Strings.strip(sb.toString());
+                        }
+                    } else {
+                        if (isOutputNull) {
+                            tokensOnThisLine.add(sb.toString());
+                        } else {
+                            output[idx++] = sb.toString();
+                        }
+                    }
+
+                    while (ignoreLeadingWhiteSpace && i < len - 1 && Character.isWhitespace(nextLine.charAt(i + 1))) {
+                        i++;
+                    }
+
+                    sb.setLength(0);
+                    quoted = false;
+                    inQuotes = false;
+                } else {
+                    if (!strictQuotes || inQuotes(inQuotes)) {
+                        sb.append(c);
+                    }
                 }
             }
 
-        }
-        // line is done - check status
-        if ((inQuotes && !ignoreQuotations)) {
-            if (multi) {
-                // continuing a quoted section, re-append newline
-                sb.append('\n');
-                pending = sb.toString();
-                sb = null; // this partial content is not to be added to field list yet
-            } else {
+            // line is done - check status
+            if (inQuotes(inQuotes)) {
                 throw new ParseException("Un-terminated quoted field at end of CSV line");
             }
-            if (inField) {
-                // continue?
-            }
-        } else {
-            inField = false;
-        }
 
-        if (sb != null) {
-            tokensOnThisLine.add(sb.toString());
+            if (!quoted && ignoreLeadingWhiteSpace) {
+                if (isOutputNull) {
+                    tokensOnThisLine.add(Strings.strip(sb.toString()));
+                } else {
+                    output[idx++] = Strings.strip(sb.toString());
+                }
+            } else {
+                if (isOutputNull) {
+                    tokensOnThisLine.add(sb.toString());
+                } else {
+                    output[idx++] = sb.toString();
+                }
+            }
+        } finally {
+            Objectory.recycle(sb);
         }
 
         return tokensOnThisLine;
-    }
-
-    private boolean atStartOfField(final StringBuilder sb) {
-        return sb.isEmpty();
-    }
-
-    /**
-     * Appends the next character in the line to the string buffer.
-     *
-     * @param line Line to process
-     * @param sb Contains the processed character
-     * @param i Current position in the line.
-     * @return New position in the line.
-     */
-    private int appendNextCharacterAndAdvanceLoop(final String line, final StringBuilder sb, int i) {
-        sb.append(line.charAt(i + 1));
-        i++;
-        return i;
     }
 
     /**
@@ -463,7 +401,7 @@ public class CSVParser {
      * @return True if we should process as if we are inside quotes.
      */
     private boolean inQuotes(final boolean inQuotes) {
-        return (inQuotes && !ignoreQuotations) || inField;
+        return inQuotes && !ignoreQuotations;
     }
 
     /**
@@ -477,41 +415,9 @@ public class CSVParser {
      * @return True if the following character is a quote
      */
     private boolean isNextCharacterEscapedQuote(final String nextLine, final boolean inQuotes, final int i) {
-        return inQuotes // we are in quotes, therefore there can be escaped quotes in here.
-                && nextLine.length() > (i + 1) // there is indeed another character to check.
-                && isCharacterQuoteCharacter(nextLine.charAt(i + 1));
-    }
-
-    /**
-     * Checks to see if the passed in character is the defined quotation character.
-     *
-     * @param c Source character
-     * @return True if c is the defined quotation character
-     */
-    private boolean isCharacterQuoteCharacter(final char c) {
-        return c == quoteChar;
-    }
-
-    /**
-     * Checks to see if the character is the defined escape character.
-     *
-     * @param c Source character
-     * @return True if the character is the defined escape character
-     */
-    private boolean isCharacterEscapeCharacter(final char c) {
-        return c == escape;
-    }
-
-    /**
-     * Checks to see if the character passed in could be escapable.
-     * Escapable characters for opencsv are the quotation character or the
-     * escape character.
-     *
-     * @param c Source character
-     * @return True if the character could be escapable.
-     */
-    private boolean isCharacterEscapable(final char c) {
-        return isCharacterQuoteCharacter(c) || isCharacterEscapeCharacter(c);
+        return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.
+                && i < nextLine.length() - 1 // there is indeed another character to check.
+                && nextLine.charAt(i + 1) == quoteChar; // the next character is a quote.;
     }
 
     /**
@@ -527,10 +433,21 @@ public class CSVParser {
      * @param i Current index in line
      * @return True if the following character is a quote
      */
-    protected boolean isNextCharacterEscapable(final String nextLine, final boolean inQuotes, final int i) {
-        return inQuotes // we are in quotes, therefore there can be escaped quotes in here.
-                && nextLine.length() > (i + 1) // there is indeed another character to check.
+    private boolean isNextCharacterEscapable(final String nextLine, final boolean inQuotes, final int i) {
+        return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.
+                && i < nextLine.length() - 1 // there is indeed another character to check.
                 && isCharacterEscapable(nextLine.charAt(i + 1));
     }
 
+    /**
+     * Checks to see if the character passed in could be escapable.
+     * Escapable characters for opencsv are the quotation character or the
+     * escape character.
+     *
+     * @param c Source character
+     * @return True if the character could be escapable.
+     */
+    private boolean isCharacterEscapable(final char c) {
+        return c == quoteChar || c == escape;
+    }
 }

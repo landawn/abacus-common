@@ -86,6 +86,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Immutable;
@@ -507,7 +508,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, cs.typeName);
+        checkArgNotNull(typeName, cs.typeName);
 
         Type<?> type = nameTypePool.get(typeName);
 
@@ -529,7 +530,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+        checkArgNotNull(cls, cs.cls);
 
         Type<?> type = clsTypePool.get(cls);
 
@@ -794,9 +795,10 @@ sealed class CommonUtil permits N {
      * @param defaultForNull the default value to return if {@code obj} is {@code null}
      * @return {@code obj} if it is not {@code null}, otherwise {@code defaultForNull}
      * @throws IllegalArgumentException if the specified default value is {@code null}.
+     * @see Strings#defaultIfNull(CharSequence, CharSequence)
      */
     public static <T> T defaultIfNull(final T obj, final T defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, cs.defaultValue);
+        checkArgNotNull(defaultForNull, cs.defaultValue);
 
         return obj == null ? defaultForNull : obj;
     }
@@ -809,10 +811,11 @@ sealed class CommonUtil permits N {
      * @param supplierForDefault
      * @return
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified object is {@code null}.
+     * @see Strings#defaultIfNull(CharSequence, Supplier)
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
         if (obj == null) {
-            return N.checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
+            return checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
         }
 
         return obj;
@@ -829,7 +832,7 @@ sealed class CommonUtil permits N {
      * @see Strings#defaultIfEmpty(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultForEmpty) throws IllegalArgumentException {
-        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
+        checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
         return isEmpty(str) ? defaultForEmpty : str;
     }
@@ -846,7 +849,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isEmpty(str)) {
-            return N.checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
+            return checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
@@ -863,7 +866,7 @@ sealed class CommonUtil permits N {
      * @see Strings#defaultIfBlank(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultForBlank) throws IllegalArgumentException {
-        N.checkArgNotBlank(defaultForBlank, cs.defaultValue);
+        checkArgNotBlank(defaultForBlank, cs.defaultValue);
 
         return isBlank(str) ? defaultForBlank : str;
     }
@@ -880,7 +883,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) {
         if (isBlank(str)) {
-            return N.checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
+            return checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
         }
 
         return str;
@@ -896,7 +899,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified default collection value is empty.
      */
     public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultForEmpty) throws IllegalArgumentException {
-        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
+        checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
         return isEmpty(c) ? defaultForEmpty : c;
     }
@@ -911,7 +914,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified default map value is empty.
      */
     public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultForEmpty) throws IllegalArgumentException {
-        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
+        checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
         return isEmpty(m) ? defaultForEmpty : m;
     }
@@ -1060,8 +1063,8 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static boolean registerConverter(@NotNull final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
-        N.checkArgNotNull(srcClass, cs.srcClass);
-        N.checkArgNotNull(converter, cs.converter);
+        checkArgNotNull(srcClass, cs.srcClass);
+        checkArgNotNull(converter, cs.converter);
 
         if (isBuiltinClass(srcClass)) {
             throw new IllegalArgumentException("Can't register converter with builtin class: " + ClassUtil.getCanonicalClassName(srcClass));
@@ -1221,7 +1224,7 @@ sealed class CommonUtil permits N {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    final Map<String, Object> result = N.newMap((Class<Map>) targetType.clazz());
+                    final Map<String, Object> result = newMap((Class<Map>) targetType.clazz());
                     Maps.bean2Map(srcObj, result);
                     return (T) result;
                 } catch (final Exception e) {
@@ -1235,7 +1238,7 @@ sealed class CommonUtil permits N {
                 if ((firstNonNullKeyOp.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
                         && (firstNonNullValueOp.isEmpty()
                                 || targetType.getParameterTypes()[1].clazz().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
-                    final Map result = N.newMap((Class<Map>) targetType.clazz(), srcMap.size());
+                    final Map result = newMap((Class<Map>) targetType.clazz(), srcMap.size());
                     result.putAll(srcMap);
                     return (T) result;
                 }
@@ -1248,17 +1251,17 @@ sealed class CommonUtil permits N {
                 final Optional<Object> op = firstNonNull(srcColl);
 
                 if (op.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(op.get().getClass())) {
-                    final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), srcColl.size());
+                    final Collection result = newCollection((Class<Collection>) targetType.clazz(), srcColl.size());
                     result.addAll(srcColl);
                     return (T) result;
                 }
             } else if (srcType.isObjectArray() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(srcType.clazz().getComponentType())) {
                 final Object[] srcArray = (Object[]) srcObj;
-                final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), srcArray.length);
+                final Collection result = newCollection((Class<Collection>) targetType.clazz(), srcArray.length);
                 result.addAll(Arrays.asList(srcArray));
                 return (T) result;
             } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
-                final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), 1);
+                final Collection result = newCollection((Class<Collection>) targetType.clazz(), 1);
                 result.add(srcObj);
                 return (T) result;
             }
@@ -1271,7 +1274,7 @@ sealed class CommonUtil permits N {
 
                 if (op.isEmpty() || targetType.clazz().getComponentType().isAssignableFrom(op.get().getClass())) {
                     try {
-                        final Object[] result = N.newArray(targetType.clazz().getComponentType(), srcColl.size());
+                        final Object[] result = newArray(targetType.clazz().getComponentType(), srcColl.size());
                         srcColl.toArray(result);
                         return (T) result;
                     } catch (final Exception e) {
@@ -1279,7 +1282,7 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
-                final Object[] result = N.newArray(targetType.clazz().getComponentType(), 1);
+                final Object[] result = newArray(targetType.clazz().getComponentType(), 1);
                 result[0] = srcObj;
                 return (T) result;
             }
@@ -1288,8 +1291,8 @@ sealed class CommonUtil permits N {
             //    } else if (srcType.isObjectArray()) {
             //        try {
             //            final Object[] srcArray = (Object[]) obj;
-            //            final Object[] result = N.newArray(targetType.clazz().getComponentType(), srcArray.length);
-            //            N.copy(srcArray, 0, result, 0, srcArray.length);
+            //            final Object[] result = newArray(targetType.clazz().getComponentType(), srcArray.length);
+            //            copy(srcArray, 0, result, 0, srcArray.length);
             //            return (T) result;
             //        } catch (Exception e) {
             //            // ignore;
@@ -1595,7 +1598,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
+        checkArgNotNull(targetType, cs.targetType);
 
         if (obj == null) {
             if (ClassUtil.isBeanClass(targetType)) {
@@ -1725,7 +1728,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
+        checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
@@ -1791,7 +1794,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
             final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
+        checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
@@ -1837,7 +1840,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
+        checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
@@ -1996,7 +1999,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
+        checkArgNotNull(targetBean, cs.targetBean);
 
         return merge(sourceBean, targetBean, selectPropNames, propNameConverter, Fn.selectFirst(), ParserUtil.getBeanInfo(targetBean.getClass()));
     }
@@ -2019,7 +2022,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
+        checkArgNotNull(targetBean, cs.targetBean);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
@@ -2174,7 +2177,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
+        checkArgNotNull(targetBean, cs.targetBean);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
@@ -2237,7 +2240,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
+        checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -2261,7 +2264,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
+        checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -2366,7 +2369,7 @@ sealed class CommonUtil permits N {
      * @return An ImmutableList containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
-        N.checkArgNotNull(enumClass, cs.enumClass);
+        checkArgNotNull(enumClass, cs.enumClass);
 
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
@@ -2390,7 +2393,7 @@ sealed class CommonUtil permits N {
      * @return An ImmutableSet containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
-        N.checkArgNotNull(enumClass, cs.enumClass);
+        checkArgNotNull(enumClass, cs.enumClass);
 
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
@@ -2414,7 +2417,7 @@ sealed class CommonUtil permits N {
      * @return An ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
-        N.checkArgNotNull(enumClass, cs.enumClass);
+        checkArgNotNull(enumClass, cs.enumClass);
 
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
 
@@ -2851,7 +2854,7 @@ sealed class CommonUtil permits N {
      * @see java.util.TreeSet#TreeSet(SortedSet)
      */
     public static <T> TreeSet<T> newTreeSet(final SortedSet<T> sortedSet) { //NOSONAR
-        N.checkArgNotNull(sortedSet, cs.sortedSet);
+        checkArgNotNull(sortedSet, cs.sortedSet);
 
         return new TreeSet<>(sortedSet);
     }
@@ -2891,7 +2894,7 @@ sealed class CommonUtil permits N {
      * @see java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)
      */
     public static <T> Set<T> newConcurrentHashSet(final Collection<? extends T> c) {
-        final int size = N.size(c);
+        final int size = size(c);
         final Set<T> ret = newSetFromMap(new ConcurrentHashMap<>(size));
 
         if (size > 0) {
@@ -3082,7 +3085,7 @@ sealed class CommonUtil permits N {
             return new HashMap<>();
         }
 
-        final Map<K, V> result = N.newHashMap(c.size());
+        final Map<K, V> result = newHashMap(c.size());
 
         for (final V v : c) {
             result.put(keyExtractor.apply(v), v);
@@ -3142,10 +3145,10 @@ sealed class CommonUtil permits N {
     public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         if (isEmpty(c)) {
-            return N.newLinkedHashMap();
+            return newLinkedHashMap();
         }
 
-        final Map<K, V> result = N.newLinkedHashMap(c.size());
+        final Map<K, V> result = newLinkedHashMap(c.size());
 
         for (final V v : c) {
             result.put(keyExtractor.apply(v), v);
@@ -3200,7 +3203,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified {@code SortedMap} is {@code null}.
      */
     public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> sortedMap) { //NOSONAR
-        N.checkArgNotNull(sortedMap, cs.sortedMap);
+        checkArgNotNull(sortedMap, cs.sortedMap);
 
         return new TreeMap<>(sortedMap);
     }
@@ -3482,7 +3485,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a ListMultimap backed by a LinkedHashMap with the specified initial capacity
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final int initialCapacity) {
-        return new ListMultimap<>(N.newLinkedHashMap(initialCapacity), ArrayList.class);
+        return new ListMultimap<>(newLinkedHashMap(initialCapacity), ArrayList.class);
     }
 
     /**
@@ -3494,7 +3497,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a ListMultimap containing the entries from the specified map
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = new ListMultimap<>(N.newLinkedHashMap(N.size(m)), ArrayList.class);
+        final ListMultimap<K, E> multiMap = new ListMultimap<>(newLinkedHashMap(size(m)), ArrayList.class);
 
         multiMap.put(m);
 
@@ -3603,7 +3606,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = newSetMultimap(N.size(m));
+        final SetMultimap<K, E> multiMap = newSetMultimap(size(m));
 
         multiMap.put(m);
 
@@ -3659,7 +3662,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity
      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final int initialCapacity) {
-        return new SetMultimap<>(N.newLinkedHashMap(initialCapacity), HashSet.class);
+        return new SetMultimap<>(newLinkedHashMap(initialCapacity), HashSet.class);
     }
 
     /**
@@ -3671,7 +3674,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = new SetMultimap<>(N.newLinkedHashMap(N.size(m)), HashSet.class);
+        final SetMultimap<K, E> multiMap = new SetMultimap<>(newLinkedHashMap(size(m)), HashSet.class);
 
         multiMap.put(m);
 
@@ -3816,7 +3819,7 @@ sealed class CommonUtil permits N {
             return newEmptyDataSet(properties);
         }
 
-        final Object firstElement = N.firstOrNullIfEmpty(rows);
+        final Object firstElement = firstOrNullIfEmpty(rows);
 
         if (firstElement == null) {
             throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
@@ -3828,7 +3831,7 @@ sealed class CommonUtil permits N {
             final List<String> columnNames = ClassUtil.getPropNameList(cls);
             return newDataSet(columnNames, rows, properties);
         } else if (firstElement instanceof Map) {
-            final List<String> columnNames = N.newArrayList(((Map<String, Object>) firstElement).keySet());
+            final List<String> columnNames = newArrayList(((Map<String, Object>) firstElement).keySet());
             return newDataSet(columnNames, rows, properties);
         } else {
             throw new IllegalArgumentException("Unsupported row type: " + cls.getName());
@@ -3877,7 +3880,7 @@ sealed class CommonUtil permits N {
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
             throws IllegalArgumentException {
-        N.checkArgNotEmpty(columnNames, cs.columnNames);
+        checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rows)) {
         //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -3891,7 +3894,7 @@ sealed class CommonUtil permits N {
         // int startRowIndex = 0;
 
         //    if (isEmpty(columnNames)) {
-        //        final Object firstElement = N.firstOrNullIfEmpty(rows);
+        //        final Object firstElement = firstOrNullIfEmpty(rows);
         //
         //        if (firstElement == null) {
         //            // return newEmptyDataSet(properties);
@@ -3911,14 +3914,14 @@ sealed class CommonUtil permits N {
         //            //        columnNames = new ArrayList<>(a.length);
         //            //
         //            //        for (final Object e : a) {
-        //            //            columnNames.add(N.stringOf(e));
+        //            //            columnNames.add(stringOf(e));
         //            //        }
         //            //    } else if (type.isCollection()) {
         //            //        final Collection<?> c = (Collection<?>) firstNonNullRow;
         //            //        columnNames = new ArrayList<>(c.size());
         //            //
         //            //        for (final Object e : c) {
-        //            //            columnNames.add(N.stringOf(e));
+        //            //            columnNames.add(stringOf(e));
         //            //        }
         //            //    } else {
         //            //        throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
@@ -4027,7 +4030,7 @@ sealed class CommonUtil permits N {
      * @see DataSet#columns(Collection, Collection)
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rowList) throws IllegalArgumentException {
-        N.checkArgNotEmpty(columnNames, cs.columnNames);
+        checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rowList)) {
         //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -4038,9 +4041,9 @@ sealed class CommonUtil permits N {
             return newEmptyDataSet(columnNames);
         }
 
-        N.checkArgument(N.size(columnNames) == N.len(rowList[0]), "length of 'columnNames' is not equals to length of 'rowList[0]'");
+        checkArgument(size(columnNames) == len(rowList[0]), "length of 'columnNames' is not equals to length of 'rowList[0]'");
 
-        return newDataSet(columnNames, N.asList(rowList));
+        return newDataSet(columnNames, asList(rowList));
     }
 
     /**
@@ -4123,11 +4126,11 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the provided columnName is empty.
      */
     public static DataSet newDataSet(final String columnName, final Collection<?> column) throws IllegalArgumentException {
-        N.checkArgNotEmpty(columnName, cs.columnName);
+        checkArgNotEmpty(columnName, cs.columnName);
 
-        final List<String> columnNameList = N.asList(columnName);
+        final List<String> columnNameList = asList(columnName);
         final List<List<Object>> columnList = new ArrayList<>(1);
-        columnList.add(N.newArrayList(column));
+        columnList.add(newArrayList(column));
 
         return new RowDataSet(columnNameList, columnList);
     }
@@ -4141,8 +4144,8 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if either <i>a</i> or <i>b</i> is {@code null}.
      */
     public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b) throws IllegalArgumentException {
-        N.checkArgNotNull(a);
-        N.checkArgNotNull(b);
+        checkArgNotNull(a);
+        checkArgNotNull(b);
 
         return a.merge(b);
     }
@@ -4157,11 +4160,11 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if either <i>a</i>, <i>b</i> or <i>c</i> is {@code null}.
      */
     public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b, @NotNull final DataSet c) throws IllegalArgumentException {
-        N.checkArgNotNull(a);
-        N.checkArgNotNull(b);
-        N.checkArgNotNull(c);
+        checkArgNotNull(a);
+        checkArgNotNull(b);
+        checkArgNotNull(c);
 
-        return merge(N.asList(a, b, c));
+        return merge(asList(a, b, c));
     }
 
     /**
@@ -4195,15 +4198,15 @@ sealed class CommonUtil permits N {
             }
         }
 
-        if (N.isEmpty(dss)) {
-            return N.newEmptyDataSet();
+        if (isEmpty(dss)) {
+            return newEmptyDataSet();
         } else if (dss.size() == 1) {
             return dss.iterator().next().copy();
         } else if (dss.size() == 2) {
             final Iterator<? extends DataSet> iter = dss.iterator();
             return iter.next().merge(iter.next());
         } else {
-            final Set<String> columnNameSet = N.newLinkedHashSet();
+            final Set<String> columnNameSet = newLinkedHashSet();
             final Map<String, Object> props = new HashMap<>();
             int totalSize = 0;
 
@@ -4211,7 +4214,7 @@ sealed class CommonUtil permits N {
                 columnNameSet.addAll(ds.columnNameList());
                 totalSize += ds.size();
 
-                if (N.notEmpty(ds.properties())) {
+                if (notEmpty(ds.properties())) {
                     props.putAll(ds.properties());
                 }
             }
@@ -4237,7 +4240,7 @@ sealed class CommonUtil permits N {
                     if (ds.containsColumn(newColumnNameList.get(i))) {
                         column.addAll(ds.getColumn(newColumnNameList.get(i)));
                     } else {
-                        N.fill(column, column.size(), column.size() + ds.size(), null);
+                        fill(column, column.size(), column.size() + ds.size(), null);
                     }
                 }
             }
@@ -6000,10 +6003,10 @@ sealed class CommonUtil permits N {
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
-            return N.newHashSet();
+            return newHashSet();
         }
 
-        final Set<T> result = N.newHashSet();
+        final Set<T> result = newHashSet();
 
         while (iter.hasNext()) {
             result.add(iter.next());
@@ -6493,7 +6496,7 @@ sealed class CommonUtil permits N {
             return new HashMap<>(0);
         }
 
-        final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+        final Map<K, T> result = newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (final T e : c) {
             result.put(keyExtractor.apply(e), e);
@@ -6519,7 +6522,7 @@ sealed class CommonUtil permits N {
             return new HashMap<>(0);
         }
 
-        final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+        final Map<K, V> result = newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (final T e : c) {
             result.put(keyExtractor.apply(e), valueExtractor.apply(e));
@@ -6779,7 +6782,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified key and value
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
-        final Map<K, V> map = N.newHashMap(1);
+        final Map<K, V> map = newHashMap(1);
         map.put(k1, v1);
         return map;
     }
@@ -6796,7 +6799,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
-        final Map<K, V> map = N.newHashMap(2);
+        final Map<K, V> map = newHashMap(2);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
@@ -6816,7 +6819,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final Map<K, V> map = N.newHashMap(3);
+        final Map<K, V> map = newHashMap(3);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -6839,7 +6842,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final Map<K, V> map = N.newHashMap(4);
+        final Map<K, V> map = newHashMap(4);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -6866,7 +6869,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        final Map<K, V> map = N.newHashMap(5);
+        final Map<K, V> map = newHashMap(5);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -6896,7 +6899,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
-        final Map<K, V> map = N.newHashMap(6);
+        final Map<K, V> map = newHashMap(6);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -6929,7 +6932,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
-        final Map<K, V> map = N.newHashMap(7);
+        final Map<K, V> map = newHashMap(7);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -6956,7 +6959,7 @@ sealed class CommonUtil permits N {
             return new HashMap<>();
         }
 
-        return newMap(N.newHashMap(a.length / 2), a);
+        return newMap(newHashMap(a.length / 2), a);
     }
 
     /**
@@ -6969,7 +6972,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
-        final Map<K, V> map = N.newLinkedHashMap(1);
+        final Map<K, V> map = newLinkedHashMap(1);
         map.put(k1, v1);
         return map;
     }
@@ -6986,7 +6989,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
-        final Map<K, V> map = N.newLinkedHashMap(2);
+        final Map<K, V> map = newLinkedHashMap(2);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
@@ -7006,7 +7009,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final Map<K, V> map = N.newLinkedHashMap(3);
+        final Map<K, V> map = newLinkedHashMap(3);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -7029,7 +7032,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final Map<K, V> map = N.newLinkedHashMap(4);
+        final Map<K, V> map = newLinkedHashMap(4);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -7056,7 +7059,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        final Map<K, V> map = N.newLinkedHashMap(5);
+        final Map<K, V> map = newLinkedHashMap(5);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -7086,7 +7089,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
-        final Map<K, V> map = N.newLinkedHashMap(6);
+        final Map<K, V> map = newLinkedHashMap(6);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -7119,7 +7122,7 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
-        final Map<K, V> map = N.newLinkedHashMap(7);
+        final Map<K, V> map = newLinkedHashMap(7);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -7143,10 +7146,10 @@ sealed class CommonUtil permits N {
     @NullSafe
     public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
         if (isEmpty(a)) {
-            return N.newLinkedHashMap();
+            return newLinkedHashMap();
         }
 
-        return newMap(N.newLinkedHashMap(a.length / 2), a);
+        return newMap(newLinkedHashMap(a.length / 2), a);
     }
 
     /**
@@ -7158,7 +7161,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static Map<String, Object> asProps(final String propName, final Object propValue) {
-        final Map<String, Object> props = N.newLinkedHashMap(1);
+        final Map<String, Object> props = newLinkedHashMap(1);
         props.put(propName, propValue);
 
         return props;
@@ -7174,7 +7177,7 @@ sealed class CommonUtil permits N {
      * @return a Map containing the specified property names and values
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
-        final Map<String, Object> props = N.newLinkedHashMap(2);
+        final Map<String, Object> props = newLinkedHashMap(2);
         props.put(propName1, propValue1);
         props.put(propName2, propValue2);
 
@@ -7194,7 +7197,7 @@ sealed class CommonUtil permits N {
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3) {
-        final Map<String, Object> props = N.newLinkedHashMap(3);
+        final Map<String, Object> props = newLinkedHashMap(3);
         props.put(propName1, propValue1);
         props.put(propName2, propValue2);
         props.put(propName3, propValue3);
@@ -7217,7 +7220,7 @@ sealed class CommonUtil permits N {
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
-        final Map<String, Object> props = N.newLinkedHashMap(4);
+        final Map<String, Object> props = newLinkedHashMap(4);
         props.put(propName1, propValue1);
         props.put(propName2, propValue2);
         props.put(propName3, propValue3);
@@ -7243,7 +7246,7 @@ sealed class CommonUtil permits N {
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
-        final Map<String, Object> props = N.newLinkedHashMap(5);
+        final Map<String, Object> props = newLinkedHashMap(5);
         props.put(propName1, propValue1);
         props.put(propName2, propValue2);
         props.put(propName3, propValue3);
@@ -7263,10 +7266,10 @@ sealed class CommonUtil permits N {
     @Deprecated
     public static Map<String, Object> asProps(final Object... a) {
         if (isEmpty(a)) {
-            return N.newLinkedHashMap();
+            return newLinkedHashMap();
         }
 
-        return newMap(N.newLinkedHashMap(a.length / 2), a);
+        return newMap(newLinkedHashMap(a.length / 2), a);
     }
 
     /**
@@ -8594,9 +8597,9 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isEmpty(c) || n == 0) {
+        if (isEmpty(c) || n == 0) {
             return new ArrayList<>();
         }
 
@@ -8634,9 +8637,9 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isEmpty(iter) || n == 0) {
+        if (isEmpty(iter) || n == 0) {
             return new ArrayList<>();
         }
 
@@ -8666,9 +8669,9 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isEmpty(c) || n == 0) {
+        if (isEmpty(c) || n == 0) {
             return new ArrayList<>();
         }
 
@@ -8705,9 +8708,9 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isEmpty(iter) || n == 0) {
+        if (isEmpty(iter) || n == 0) {
             return new ArrayList<>();
         }
 
@@ -9061,7 +9064,7 @@ sealed class CommonUtil permits N {
      */
     @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -9084,7 +9087,7 @@ sealed class CommonUtil permits N {
      * @see Strings#firstNonEmpty(Iterable)
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final Iterable<? extends T> css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return Optional.empty();
         }
 
@@ -9137,7 +9140,7 @@ sealed class CommonUtil permits N {
      */
     @SafeVarargs
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -9160,7 +9163,7 @@ sealed class CommonUtil permits N {
      * @see Strings#firstNonBlank(Iterable)
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final Iterable<? extends T> css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return Optional.empty();
         }
 
@@ -9392,7 +9395,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Nullable.empty();
         }
 
@@ -9414,7 +9417,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return Nullable.empty();
         }
 
@@ -9462,7 +9465,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Nullable.empty();
         }
 
@@ -9562,7 +9565,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -9584,7 +9587,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return Optional.empty();
         }
 
@@ -9632,7 +9635,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -10724,7 +10727,7 @@ sealed class CommonUtil permits N {
      */
     @Deprecated
     static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
+        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
     }
 
     /**
@@ -10819,16 +10822,16 @@ sealed class CommonUtil permits N {
      * <p>Checks if any of the CharSequences is empty ("") or {@code null}.</p>
      *
      * <pre>
-     * Strings.anyEmpty((String) null)    = true
-     * Strings.anyEmpty((String[]) null)  = false
-     * Strings.anyEmpty(null, "foo")      = true
-     * Strings.anyEmpty("", "bar")        = true
-     * Strings.anyEmpty("bob", "")        = true
-     * Strings.anyEmpty("  bob  ", null)  = true
-     * Strings.anyEmpty(" ", "bar")       = false
-     * Strings.anyEmpty("foo", "bar")     = false
-     * Strings.anyEmpty(new String[]{})   = false
-     * Strings.anyEmpty(new String[]{""}) = true
+     * anyEmpty((String) null)    = true
+     * anyEmpty((String[]) null)  = false
+     * anyEmpty(null, "foo")      = true
+     * anyEmpty("", "bar")        = true
+     * anyEmpty("bob", "")        = true
+     * anyEmpty("  bob  ", null)  = true
+     * anyEmpty(" ", "bar")       = false
+     * anyEmpty("foo", "bar")     = false
+     * anyEmpty(new String[]{})   = false
+     * anyEmpty(new String[]{""}) = true
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -10950,17 +10953,17 @@ sealed class CommonUtil permits N {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * Strings.anyBlank((String) null)    = true
-     * Strings.anyBlank((String[]) null)  = false
-     * Strings.anyBlank(null, "foo")      = true
-     * Strings.anyBlank(null, null)       = true
-     * Strings.anyBlank("", "bar")        = true
-     * Strings.anyBlank("bob", "")        = true
-     * Strings.anyBlank("  bob  ", null)  = true
-     * Strings.anyBlank(" ", "bar")       = true
-     * Strings.anyBlank(new String[] {})  = false
-     * Strings.anyBlank(new String[]{""}) = true
-     * Strings.anyBlank("foo", "bar")     = false
+     * anyBlank((String) null)    = true
+     * anyBlank((String[]) null)  = false
+     * anyBlank(null, "foo")      = true
+     * anyBlank(null, null)       = true
+     * anyBlank("", "bar")        = true
+     * anyBlank("bob", "")        = true
+     * anyBlank("  bob  ", null)  = true
+     * anyBlank(" ", "bar")       = true
+     * anyBlank(new String[] {})  = false
+     * anyBlank(new String[]{""}) = true
+     * anyBlank("foo", "bar")     = false
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -10968,7 +10971,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isAnyBlank(CharSequence...)
      */
     public static boolean anyBlank(final CharSequence... css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return false;
         }
 
@@ -10989,7 +10992,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isAnyBlank(Iterable)
      */
     public static boolean anyBlank(final Iterable<? extends CharSequence> css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return false;
         }
 
@@ -11094,15 +11097,15 @@ sealed class CommonUtil permits N {
      * <p>Checks if all the CharSequences are empty ("") or {@code null}.</p>
      *
      * <pre>
-     * Strings.allEmpty(null)             = true
-     * Strings.allEmpty(null, "")         = true
-     * Strings.allEmpty(new String[] {})  = true
-     * Strings.allEmpty(null, "foo")      = false
-     * Strings.allEmpty("", "bar")        = false
-     * Strings.allEmpty("bob", "")        = false
-     * Strings.allEmpty("  bob  ", null)  = false
-     * Strings.allEmpty(" ", "bar")       = false
-     * Strings.allEmpty("foo", "bar")     = false
+     * allEmpty(null)             = true
+     * allEmpty(null, "")         = true
+     * allEmpty(new String[] {})  = true
+     * allEmpty(null, "foo")      = false
+     * allEmpty("", "bar")        = false
+     * allEmpty("bob", "")        = false
+     * allEmpty("  bob  ", null)  = false
+     * allEmpty(" ", "bar")       = false
+     * allEmpty("foo", "bar")     = false
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -11110,7 +11113,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isAllEmpty(CharSequence...)
      */
     public static boolean allEmpty(final CharSequence... css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return true;
         }
 
@@ -11130,7 +11133,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Iterable<? extends CharSequence> css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return true;
         }
 
@@ -11243,15 +11246,15 @@ sealed class CommonUtil permits N {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * Strings.allBlank(null)             = true
-     * Strings.allBlank(null, "foo")      = false
-     * Strings.allBlank(null, null)       = true
-     * Strings.allBlank("", "bar")        = false
-     * Strings.allBlank("bob", "")        = false
-     * Strings.allBlank("  bob  ", null)  = false
-     * Strings.allBlank(" ", "bar")       = false
-     * Strings.allBlank("foo", "bar")     = false
-     * Strings.allBlank(new String[] {})  = true
+     * allBlank(null)             = true
+     * allBlank(null, "foo")      = false
+     * allBlank(null, null)       = true
+     * allBlank("", "bar")        = false
+     * allBlank("bob", "")        = false
+     * allBlank("  bob  ", null)  = false
+     * allBlank(" ", "bar")       = false
+     * allBlank("foo", "bar")     = false
+     * allBlank(new String[] {})  = true
      * </pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -11259,7 +11262,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isAllBlank(CharSequence...)
      */
     public static boolean allBlank(final CharSequence... css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return true;
         }
 
@@ -11280,7 +11283,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isAllBlank(Iterable)
      */
     public static boolean allBlank(final Iterable<? extends CharSequence> css) {
-        if (N.isEmpty(css)) {
+        if (isEmpty(css)) {
             return true;
         }
 
@@ -12059,7 +12062,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if a {@code null} element is found in the array
      */
     public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -12078,7 +12081,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if a {@code null} element is found in the array
      */
     public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -12100,7 +12103,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return;
         }
 
@@ -12119,7 +12122,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return;
         }
 
@@ -12141,7 +12144,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
-        if (N.isEmpty(m)) {
+        if (isEmpty(m)) {
             return;
         }
 
@@ -12160,7 +12163,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (N.isEmpty(m)) {
+        if (isEmpty(m)) {
             return;
         }
 
@@ -12182,7 +12185,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
-        if (N.isEmpty(m)) {
+        if (isEmpty(m)) {
             return;
         }
 
@@ -12201,7 +12204,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (N.isEmpty(m)) {
+        if (isEmpty(m)) {
             return;
         }
 
@@ -13963,10 +13966,10 @@ sealed class CommonUtil permits N {
            a[len - 1] = 0;
            b[len - 1] = 1;
     
-           assertEquals(-1, N.compare(a, b));
+           assertEquals(-1, compare(a, b));
            assertEquals(-1, Arrays.compare(a, b));
     
-           Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
+           Profiler.run(1, 1000, 3, "compare(...)", () -> assertEquals(-1, compare(a, b))).printResult();
            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
        }
     */
@@ -14955,12 +14958,12 @@ sealed class CommonUtil permits N {
     @Deprecated
     @SuppressWarnings("rawtypes")
     public static int compareByProps(@NotNull final Object bean1, @NotNull final Object bean2, final Collection<String> propNamesToCompare) {
-        N.checkArgNotNull(bean1);
-        N.checkArgNotNull(bean2);
-        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
+        checkArgNotNull(bean1);
+        checkArgNotNull(bean2);
+        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
-        if (N.isEmpty(propNamesToCompare)) {
+        if (isEmpty(propNamesToCompare)) {
             return 0;
         }
 
@@ -16852,15 +16855,15 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if any of the arguments are null
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
-        N.checkArgNotNull(bean1);
-        N.checkArgNotNull(bean2);
-        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
+        checkArgNotNull(bean1);
+        checkArgNotNull(bean2);
+        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
         final List<String> propNamesToCompare = new ArrayList<>(ClassUtil.getPropNameList(bean1.getClass()));
         propNamesToCompare.retainAll(ClassUtil.getPropNameList(bean2.getClass()));
 
-        if (N.isEmpty(propNamesToCompare)) {
+        if (isEmpty(propNamesToCompare)) {
             throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
         }
 
@@ -18380,7 +18383,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
-        final Set<Object> set = N.newSetFromMap(N.newIdentityHashMap(len(a)));
+        final Set<Object> set = newSetFromMap(newIdentityHashMap(len(a)));
 
         try {
             deepToString(sb, a, fromIndex, toIndex, set);
@@ -19895,6 +19898,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(boolean[], boolean)
      */
     public static void fill(final boolean[] a, final boolean val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -19910,6 +19917,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(boolean[], int, int, boolean)
      */
     public static void fill(final boolean[] a, final int fromIndex, final int toIndex, final boolean val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -19921,6 +19934,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(char[], char)
      */
     public static void fill(final char[] a, final char val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -19936,6 +19953,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(char[], int, int, char)
      */
     public static void fill(final char[] a, final int fromIndex, final int toIndex, final char val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -19947,6 +19970,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(byte[], byte)
      */
     public static void fill(final byte[] a, final byte val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -19962,6 +19989,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(byte[], int, int, byte)
      */
     public static void fill(final byte[] a, final int fromIndex, final int toIndex, final byte val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -19973,6 +20006,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(short[], short)
      */
     public static void fill(final short[] a, final short val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -19988,6 +20025,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(short[], int, int, short)
      */
     public static void fill(final short[] a, final int fromIndex, final int toIndex, final short val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -19999,6 +20042,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(int[], int)
      */
     public static void fill(final int[] a, final int val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -20014,6 +20061,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(int[], int, int, int)
      */
     public static void fill(final int[] a, final int fromIndex, final int toIndex, final int val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -20025,6 +20078,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(long[], long)
      */
     public static void fill(final long[] a, final long val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -20040,6 +20097,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(long[], int, int, long)
      */
     public static void fill(final long[] a, final int fromIndex, final int toIndex, final long val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -20051,6 +20114,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(float[], float)
      */
     public static void fill(final float[] a, final float val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -20066,6 +20133,12 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(float[], int, int, float)
      */
     public static void fill(final float[] a, final int fromIndex, final int toIndex, final float val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
@@ -20077,6 +20150,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(double[], double)
      */
     public static void fill(final double[] a, final double val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
         Arrays.fill(a, val);
     }
 
@@ -20092,8 +20169,56 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(double[], int, int, double)
      */
     public static void fill(final double[] a, final int fromIndex, final int toIndex, final double val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         Arrays.fill(a, fromIndex, toIndex, val);
     }
+
+    //    /**
+    //     * Fills the specified Object array with {@code null} values.
+    //     *
+    //     * @param a the Object array to be filled 
+    //     * @see Arrays#fill(Object[], Object)
+    //     * @see N#setAll(Object[], IntFunction)
+    //     * @see N#replaceAll(Object[], UnaryOperator) 
+    //     */
+    //    @Beta
+    //    public static void fillNulls(final Object[] a) {
+    //        if (isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        for (int i = 0, len = a.length; i < len; i++) {
+    //            a[i] = null;
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Fills the specified Object array with {@code null} values from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+    //     *
+    //     * @param a the Object array to be filled
+    //     * @param fromIndex the index to start filling (inclusive)
+    //     * @param toIndex the index to stop filling (exclusive) 
+    //     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+    //     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+    //     * @see Arrays#fill(Object[], int, int, Object)
+    //     */
+    //    @Beta
+    //    public static void fillNulls(final Object[] a, final int fromIndex, final int toIndex) {
+    //        checkFromToIndex(fromIndex, toIndex, len(a));
+    //
+    //        if (fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            a[i] = null;
+    //        }
+    //    }
 
     /**
      * Fills the specified Object array with the specified value.
@@ -20101,9 +20226,17 @@ sealed class CommonUtil permits N {
      * @param a the Object array to be filled
      * @param val the Object value to fill the array with
      * @see Arrays#fill(Object[], Object)
+     * @see N#setAll(Object[], IntFunction)
+     * @see N#replaceAll(Object[], UnaryOperator) 
      */
-    public static void fill(final Object[] a, final Object val) {
-        Arrays.fill(a, val);
+    public static <T> void fill(final T[] a, final T val) {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = val;
+        }
     }
 
     /**
@@ -20117,9 +20250,97 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      * @see Arrays#fill(Object[], int, int, Object)
      */
-    public static void fill(final Object[] a, final int fromIndex, final int toIndex, final Object val) {
-        Arrays.fill(a, fromIndex, toIndex, val);
+    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final T val) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            a[i] = val;
+        }
     }
+
+    //    /**
+    //     * Fills the specified Object array with the specified value.
+    //     *
+    //     * @param a the Object array to be filled
+    //     * @param val the Object value to fill the array with
+    //     * @see Arrays#fill(Object[], Object)
+    //     * @see N#setAll(Object[], IntFunction)
+    //     * @see N#replaceAll(Object[], UnaryOperator) 
+    //     */
+    //    public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
+    //        if (isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        for (int i = 0, len = a.length; i < len; i++) {
+    //            a[i] = supplier.get();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Fills the specified Object array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+    //     *
+    //     * @param a the Object array to be filled
+    //     * @param fromIndex the index to start filling (inclusive)
+    //     * @param toIndex the index to stop filling (exclusive)
+    //     * @param val the Object value to fill the array with
+    //     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+    //     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+    //     * @see Arrays#fill(Object[], int, int, Object)
+    //     */
+    //    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
+    //        checkFromToIndex(fromIndex, toIndex, len(a));
+    //
+    //        if (fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            a[i] = supplier.get();
+    //        }
+    //    }
+
+    //    /**
+    //     * Fills the specified list with {@code null} values.
+    //     *
+    //     * @param <T> the type of elements in the list
+    //     * @param list the list to be filled 
+    //     * @throws IllegalArgumentException if the specified list is null
+    //     * @see N#setAll(List, IntFunction)
+    //     * @see N#replaceAll(List, UnaryOperator)
+    //     * @see #fill(List, int, int, Object)
+    //     * @see #padLeft(List, int, Object)
+    //     * @see #padRight(Collection, int, Object)
+    //     */
+    //    @Beta
+    //    public static <T> void fillNulls(final List<? super T> list) {
+    //        checkArgNotNull(list, cs.list);
+    //
+    //        fill(list, 0, list.size(), (T) null);
+    //    }
+    //
+    //    /**
+    //     * Fills the specified list with {@code null} values from the specified start index to the specified end index.
+    //     * The list will be extended automatically if the size of the list is less than the specified toIndex.
+    //     *
+    //     * @param <T> the type of elements in the list
+    //     * @param list the list to be filled
+    //     * @param fromIndex the starting index (inclusive) to begin filling
+    //     * @param toIndex the ending index (exclusive) to stop filling 
+    //     * @throws IllegalArgumentException if the specified list is null
+    //     * @throws IndexOutOfBoundsException if the specified indices are out of range
+    //     * @see #fill(List, Object)
+    //     * @see #padLeft(List, int, Object)
+    //     * @see #padRight(Collection, int, Object)
+    //     */
+    //    @Beta
+    //    public static <T> void fillNulls(final List<? super T> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    //        fill(list, fromIndex, toIndex, (T) null);
+    //    }
 
     /**
      * Fills the specified list with the specified value.
@@ -20128,12 +20349,16 @@ sealed class CommonUtil permits N {
      * @param list the list to be filled
      * @param val the value to fill the list with
      * @throws IllegalArgumentException if the specified list is null
+     * @see Iterables#fill(List, Supplier)
+     * @see Iterables#fill(List, int, int, Supplier)
+     * @see N#setAll(List, IntFunction)
+     * @see N#replaceAll(List, UnaryOperator)
      * @see #fill(List, int, int, Object)
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final T val) {
-        N.checkArgNotNull(list, cs.list);
+        checkArgNotNull(list, cs.list);
 
         fill(list, 0, list.size(), val);
     }
@@ -20149,12 +20374,14 @@ sealed class CommonUtil permits N {
      * @param val the value to fill the list with
      * @throws IllegalArgumentException if the specified list is null
      * @throws IndexOutOfBoundsException if the specified indices are out of range
+     * @see Iterables#fill(List, Supplier)
+     * @see Iterables#fill(List, int, int, Supplier)
      * @see #fill(List, Object)
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) throws IndexOutOfBoundsException {
-        N.checkArgNotNull(list, cs.list);
+        checkArgNotNull(list, cs.list);
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
         final int size = list.size();
@@ -20189,6 +20416,8 @@ sealed class CommonUtil permits N {
             }
         }
     }
+
+
 
     /**
      * Fills the properties of the specified bean with random values.
@@ -20235,7 +20464,7 @@ sealed class CommonUtil permits N {
     //     */
     //    @Beta
     //    public static <T> boolean append(final Collection<T> c, final T valueToAdd, final int minSize) {
-    //        return N.padRight(c, minSize, valueToAdd);
+    //        return padRight(c, minSize, valueToAdd);
     //    }
     //
     //    /**
@@ -20249,7 +20478,7 @@ sealed class CommonUtil permits N {
     //     */
     //    @Beta
     //    public static <T> boolean append(final List<T> list, final T valueToAdd, final int fromIndex, final int minSize) {
-    //        return N.padLeft(list, minSize, valueToAdd);
+    //        return padLeft(list, minSize, valueToAdd);
     //    }
 
     /**
@@ -20264,17 +20493,17 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
-        N.checkArgNotNull(list, cs.list);
-        N.checkArgNotNegative(minSize, cs.minSize);
+        checkArgNotNull(list, cs.list);
+        checkArgNotNegative(minSize, cs.minSize);
 
-        final int size = N.size(list);
+        final int size = size(list);
 
         if (size < minSize) {
             final int elementCountToAdd = minSize - size;
             final Object[] a = new Object[elementCountToAdd];
 
             if (objToAdd != null) {
-                N.fill(a, objToAdd);
+                fill(a, objToAdd);
             }
 
             list.addAll(0, (List) Arrays.asList(a));
@@ -20300,17 +20529,17 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) throws IllegalArgumentException {
-        N.checkArgNotNull(c, cs.collection);
-        N.checkArgNotNegative(minSize, cs.minSize);
+        checkArgNotNull(c, cs.collection);
+        checkArgNotNegative(minSize, cs.minSize);
 
-        final int size = N.size(c);
+        final int size = size(c);
 
         if (size < minSize) {
             final int elementCountToAdd = minSize - size;
             final Object[] a = new Object[elementCountToAdd];
 
             if (objToAdd != null) {
-                N.fill(a, objToAdd);
+                fill(a, objToAdd);
             }
 
             c.addAll((Collection) Arrays.asList(a));
@@ -20345,7 +20574,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatElements(N.asList(1, 2, 3), 2) => [1, 1, 2, 2, 3, 3]
+     * repeatElements(asList(1, 2, 3), 2) => [1, 1, 2, 2, 3, 3]
      * </code>
      * </pre>
      *
@@ -20379,7 +20608,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatCollection(N.asList(1, 2, 3), 2) => [1, 2, 3, 1, 2, 3]
+     * repeatCollection(asList(1, 2, 3), 2) => [1, 2, 3, 1, 2, 3]
      * </code>
      * </pre>
      *
@@ -20411,7 +20640,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatElementsToSize(N.asList(1, 2, 3), 5) => [1, 1, 2, 2, 3]
+     * repeatElementsToSize(asList(1, 2, 3), 5) => [1, 1, 2, 2, 3]
      * </code>
      * </pre>
      *
@@ -20454,7 +20683,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatCollectionToSize(N.asList(1, 2, 3), 5) => [1, 2, 3, 1, 2]
+     * repeatCollectionToSize(asList(1, 2, 3), 5) => [1, 2, 3, 1, 2]
      * </code>
      * </pre>
      *
@@ -20507,7 +20736,7 @@ sealed class CommonUtil permits N {
      * @see java.util.Collections#copy(List, List)
      */
     public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
-        if (N.isEmpty(src)) {
+        if (isEmpty(src)) {
             return;
         }
 
@@ -20532,10 +20761,10 @@ sealed class CommonUtil permits N {
      */
     public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, size(src));
-        N.checkFromToIndex(destPos, destPos + length, size(dest));
+        checkFromToIndex(srcPos, srcPos + length, size(src));
+        checkFromToIndex(destPos, destPos + length, size(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20578,10 +20807,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20615,10 +20844,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20652,10 +20881,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20689,10 +20918,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20726,10 +20955,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20763,10 +20992,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20800,10 +21029,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20837,10 +21066,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20874,10 +21103,10 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, len(src));
-        N.checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromToIndex(srcPos, srcPos + length, len(src));
+        checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -20911,8 +21140,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
-        N.checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
+        checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
+        checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
 
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(src, srcPos, dest, destPos, length);
@@ -20929,7 +21158,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(boolean[], int)
      */
     public static boolean[] copyOf(final boolean[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -20955,7 +21184,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(char[], int)
      */
     public static char[] copyOf(final char[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -20981,7 +21210,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(byte[], int)
      */
     public static byte[] copyOf(final byte[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21007,7 +21236,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(short[], int)
      */
     public static short[] copyOf(final short[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21033,7 +21262,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(int[], int)
      */
     public static int[] copyOf(final int[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21059,7 +21288,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(long[], int)
      */
     public static long[] copyOf(final long[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21085,7 +21314,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(float[], int)
      */
     public static float[] copyOf(final float[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21111,7 +21340,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(double[], int)
      */
     public static double[] copyOf(final double[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21139,7 +21368,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(Object[], int)
      */
     public static <T> T[] copyOf(final T[] original, final int newLength) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         if (newLength == original.length) {
             return original.clone();
@@ -21161,7 +21390,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOf(Object[], int)
      */
     public static <T, U> T[] copyOf(final U[] original, final int newLength, final Class<? extends T[]> newType) {
-        N.checkArgNotNegative(newLength, cs.newLength);
+        checkArgNotNegative(newLength, cs.newLength);
 
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
 
@@ -21459,13 +21688,13 @@ sealed class CommonUtil permits N {
      * <pre>
      * <code>
      * int[] a = { 0, 1, 2, 3, 4, 5 };
-     * N.copyOfRange(a, 1, 5, 1)); // [1, 2, 3, 4]
-     * N.copyOfRange(a, 1, 5, 2); // [1, 3]
+     * copyOfRange(a, 1, 5, 1)); // [1, 2, 3, 4]
+     * copyOfRange(a, 1, 5, 2); // [1, 3]
      *
-     * N.copyOfRange(a, 5, 1, -1); // [5, 4, 3, 2]
-     * N.copyOfRange(a, 5, 1, -2); // [5, 3]
-     * N.copyOfRange(a, 5, -1, -1); // [5, 4, 3, 2, 1, 0]
-     * N.copyOfRange(a, 6, -1, -1); // [5, 4, 3, 2, 1, 0]
+     * copyOfRange(a, 5, 1, -1); // [5, 4, 3, 2]
+     * copyOfRange(a, 5, 1, -2); // [5, 3]
+     * copyOfRange(a, 5, -1, -1); // [5, 4, 3, 2, 1, 0]
+     * copyOfRange(a, 6, -1, -1); // [5, 4, 3, 2, 1, 0]
      * </code>
      * </pre>
      *
@@ -22534,7 +22763,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final boolean[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22561,9 +22790,9 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        final int len = N.len(a);
+        final int len = len(a);
 
-        N.checkFromToIndex(fromIndex, toIndex, len);
+        checkFromToIndex(fromIndex, toIndex, len);
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22587,7 +22816,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final char[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22614,7 +22843,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22638,7 +22867,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final byte[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22665,7 +22894,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22689,7 +22918,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final short[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22716,7 +22945,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22740,7 +22969,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final int[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22767,7 +22996,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22791,7 +23020,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final long[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22818,7 +23047,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22842,7 +23071,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final float[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22869,7 +23098,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22893,7 +23122,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final double[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -22920,7 +23149,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -22949,16 +23178,16 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
-        } else if (N.compare(a[len - 1], a[0]) < 0) {
+        } else if (compare(a[len - 1], a[0]) < 0) {
             return false;
         }
 
         for (int i = 1; i < len; i++) {
-            if (N.compare(a[i], a[i - 1]) < 0) {
+            if (compare(a[i], a[i - 1]) < 0) {
                 return false;
             }
         }
@@ -22981,16 +23210,16 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (toIndex - fromIndex < 2) {
             return true;
-        } else if (N.compare(a[toIndex - 1], a[fromIndex]) < 0) {
+        } else if (compare(a[toIndex - 1], a[fromIndex]) < 0) {
             return false;
         }
 
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            if (N.compare(a[i], a[i - 1]) < 0) {
+            if (compare(a[i], a[i - 1]) < 0) {
                 return false;
             }
         }
@@ -23013,7 +23242,7 @@ sealed class CommonUtil permits N {
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
 
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len < 2) {
             return true;
@@ -23046,7 +23275,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         cmp = checkComparator(cmp);
 
@@ -23077,7 +23306,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c) {
-        if (N.size(c) < 2) {
+        if (size(c) < 2) {
             return true;
         }
 
@@ -23088,7 +23317,7 @@ sealed class CommonUtil permits N {
         while (iter.hasNext()) {
             cur = iter.next();
 
-            if (N.compare(cur, prev) < 0) {
+            if (compare(cur, prev) < 0) {
                 return false;
             }
 
@@ -23114,7 +23343,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -23135,7 +23364,7 @@ sealed class CommonUtil permits N {
         while (cursor < toIndex) {
             cur = iter.next();
 
-            if (N.compare(cur, prev) < 0) {
+            if (compare(cur, prev) < 0) {
                 return false;
             }
 
@@ -23159,7 +23388,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final Collection<? extends T> c, Comparator<? super T> cmp) {
-        if (N.size(c) < 2) {
+        if (size(c) < 2) {
             return true;
         }
 
@@ -23199,7 +23428,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -23239,7 +23468,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final boolean[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23255,9 +23484,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23269,8 +23498,8 @@ sealed class CommonUtil permits N {
             }
         }
 
-        N.fill(a, fromIndex, numOfFalse, false);
-        N.fill(a, fromIndex + numOfFalse, toIndex, true);
+        fill(a, fromIndex, numOfFalse, false);
+        fill(a, fromIndex + numOfFalse, toIndex, true);
     }
 
     /**
@@ -23279,7 +23508,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final char[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23295,9 +23524,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23310,7 +23539,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final byte[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23326,9 +23555,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23341,7 +23570,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final short[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23357,9 +23586,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23372,7 +23601,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final int[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23388,9 +23617,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23403,7 +23632,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final long[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23419,9 +23648,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23434,7 +23663,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final float[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23450,9 +23679,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23465,7 +23694,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void sort(final double[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23481,9 +23710,9 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23504,7 +23733,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static void sort(final Object[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23545,7 +23774,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23570,9 +23799,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23593,7 +23822,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list) {
-        if (N.isEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -23617,7 +23846,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list, final int fromIndex, final int toIndex) {
-        if (N.isEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -23639,7 +23868,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -23664,7 +23893,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -23819,25 +24048,25 @@ sealed class CommonUtil permits N {
         {
             final int[] a = Array.random(arrayLength);
             Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(int[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "sort(int[])", () -> sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "parallelSort(int[])", () -> parallelSort(a.clone())).printResult();
         }
     
         {
             final long[] a = LongList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(long[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "sort(long[])", () -> sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "parallelSort(long[])", () -> parallelSort(a.clone())).printResult();
         }
     
         {
             final double[] a = DoubleList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(double[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "sort(double[])", () -> sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "parallelSort(double[])", () -> parallelSort(a.clone())).printResult();
         }
     
         {
@@ -23847,9 +24076,9 @@ sealed class CommonUtil permits N {
             }
     
             Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "sort(Object[])", () -> sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(Object[])", () -> N.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "parallelSort(Object[])", () -> parallelSort(a.clone())).printResult();
         }
     }
      */
@@ -23864,7 +24093,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(char[], int, int)
      */
     public static void parallelSort(final char[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23882,9 +24111,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(char[], int, int)
      */
     public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23903,7 +24132,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(byte[], int, int)
      */
     public static void parallelSort(final byte[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23921,9 +24150,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(byte[], int, int)
      */
     public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23942,7 +24171,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(short[], int, int)
      */
     public static void parallelSort(final short[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23960,9 +24189,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(short[], int, int)
      */
     public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -23981,7 +24210,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(int[], int, int)
      */
     public static void parallelSort(final int[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -23999,9 +24228,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(int[], int, int)
      */
     public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24020,7 +24249,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(long[], int, int)
      */
     public static void parallelSort(final long[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24038,9 +24267,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(long[], int, int)
      */
     public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24059,7 +24288,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(float[], int, int)
      */
     public static void parallelSort(final float[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24077,9 +24306,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(float[], int, int)
      */
     public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24098,7 +24327,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(double[], int, int)
      */
     public static void parallelSort(final double[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24116,9 +24345,9 @@ sealed class CommonUtil permits N {
      * @see Arrays#parallelSort(double[], int, int)
      */
     public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24143,7 +24372,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final T[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24167,9 +24396,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24191,7 +24420,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24216,9 +24445,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -24243,7 +24472,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> list) {
-        if (N.isEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -24285,7 +24514,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -24310,7 +24539,7 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -24464,7 +24693,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      */
     public static void reverseSort(final boolean[] a) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -24480,7 +24709,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static void reverseSort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (a == null || toIndex - fromIndex <= 1) {
             return;
@@ -24494,8 +24723,8 @@ sealed class CommonUtil permits N {
             }
         }
 
-        N.fill(a, fromIndex, numOfTrue, true);
-        N.fill(a, fromIndex + numOfTrue, toIndex, false);
+        fill(a, fromIndex, numOfTrue, true);
+        fill(a, fromIndex + numOfTrue, toIndex, false);
     }
 
     /**
@@ -24517,7 +24746,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final char[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24546,7 +24775,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final byte[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24575,7 +24804,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final short[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24604,7 +24833,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final int[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24633,7 +24862,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final long[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24662,7 +24891,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final float[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24691,7 +24920,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final double[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24719,7 +24948,7 @@ sealed class CommonUtil permits N {
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24749,7 +24978,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list, final int fromIndex, final int toIndex)
             throws ArrayIndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
+        checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
 
         if (toIndex - fromIndex <= 1) {
             return;
@@ -24875,7 +25104,7 @@ sealed class CommonUtil permits N {
     //     * @param a
     //     */
     //    public static void bucketSort(final int[] a) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -24889,9 +25118,9 @@ sealed class CommonUtil permits N {
     //     * @param toIndex
     //     */
     //    public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //        if (isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -24906,11 +25135,11 @@ sealed class CommonUtil permits N {
     //            multiset.add(a[i]);
     //        }
     //
-    //        final Map<Integer, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().intValue(), a1.getKey().intValue()));
+    //        final Map<Integer, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey().intValue(), a1.getKey().intValue()));
     //        int idx = fromIndex;
     //
     //        for (Map.Entry<Integer, Integer> entry : m.entrySet()) {
-    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
     //            idx += entry.getValue();
     //        }
     //    }
@@ -24920,7 +25149,7 @@ sealed class CommonUtil permits N {
     //     * @param a
     //     */
     //    public static void bucketSort(final long[] a) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -24934,9 +25163,9 @@ sealed class CommonUtil permits N {
     //     * @param toIndex
     //     */
     //    public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //        if (isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -24951,12 +25180,12 @@ sealed class CommonUtil permits N {
     //            multiset.add(a[i]);
     //        }
     //
-    //        final Map<Long, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().longValue(), a1.getKey().longValue()));
+    //        final Map<Long, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey().longValue(), a1.getKey().longValue()));
     //
     //        int idx = fromIndex;
     //
     //        for (Map.Entry<Long, Integer> entry : m.entrySet()) {
-    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
     //            idx += entry.getValue();
     //        }
     //    }
@@ -24966,7 +25195,7 @@ sealed class CommonUtil permits N {
     //     * @param a
     //     */
     //    public static void bucketSort(final float[] a) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -24980,9 +25209,9 @@ sealed class CommonUtil permits N {
     //     * @param toIndex
     //     */
     //    public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //        if (isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -24997,11 +25226,11 @@ sealed class CommonUtil permits N {
     //            multiset.add(a[i]);
     //        }
     //
-    //        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
+    //        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey(), a1.getKey()));
     //        int idx = fromIndex;
     //
     //        for (Map.Entry<Float, Integer> entry : m.entrySet()) {
-    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
     //            idx += entry.getValue();
     //        }
     //    }
@@ -25011,7 +25240,7 @@ sealed class CommonUtil permits N {
     //     * @param a
     //     */
     //    public static void bucketSort(final double[] a) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -25025,9 +25254,9 @@ sealed class CommonUtil permits N {
     //     * @param toIndex
     //     */
     //    public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //        if (isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -25042,11 +25271,11 @@ sealed class CommonUtil permits N {
     //            multiset.add(a[i]);
     //        }
     //
-    //        final Map<Double, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
+    //        final Map<Double, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey(), a1.getKey()));
     //        int idx = fromIndex;
     //
     //        for (Map.Entry<Double, Integer> entry : m.entrySet()) {
-    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
     //            idx += entry.getValue();
     //        }
     //    }
@@ -25057,7 +25286,7 @@ sealed class CommonUtil permits N {
     //     * @param a
     //     */
     //    public static void bucketSort(final Object[] a) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -25082,7 +25311,7 @@ sealed class CommonUtil permits N {
     //     * @param cmp
     //     */
     //    public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -25099,9 +25328,9 @@ sealed class CommonUtil permits N {
     //     * @param cmp
     //     */
     //    public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //        if (isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -25121,7 +25350,7 @@ sealed class CommonUtil permits N {
     //        int idx = fromIndex;
     //
     //        for (Map.Entry<T, Integer> entry : m.entrySet()) {
-    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
     //            idx += entry.getValue();
     //        }
     //    }
@@ -25133,7 +25362,7 @@ sealed class CommonUtil permits N {
     //     * @param list
     //     */
     //    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list) {
-    //        if (N.isEmpty(list)) {
+    //        if (isEmpty(list)) {
     //            return;
     //        }
     //
@@ -25160,7 +25389,7 @@ sealed class CommonUtil permits N {
     //     * @param cmp
     //     */
     //    public static <T> void bucketSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-    //        if (N.isEmpty(list)) {
+    //        if (isEmpty(list)) {
     //            return;
     //        }
     //
@@ -25177,9 +25406,9 @@ sealed class CommonUtil permits N {
     //     * @param cmp
     //     */
     //    public static <T> void bucketSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
+    //        checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
     //
-    //        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+    //        if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -25223,7 +25452,7 @@ sealed class CommonUtil permits N {
     //     * @param keyExtractor
     //     */
     //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
-    //        if (N.isEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return;
     //        }
     //
@@ -25239,7 +25468,7 @@ sealed class CommonUtil permits N {
     //     * @param keyExtractor
     //     */
     //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
-    //        if (N.isEmpty(list)) {
+    //        if (isEmpty(list)) {
     //            return;
     //        }
     //
@@ -25258,8 +25487,8 @@ sealed class CommonUtil permits N {
      *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
      */
     static int binarySearch(final boolean[] a, final boolean valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         if (a[0] == valueToFind) {
@@ -25295,8 +25524,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(char[], char)
      */
     public static int binarySearch(final char[] a, final char valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25318,10 +25547,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(char[], int, int, char)
      */
     public static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25340,8 +25569,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(byte[], byte)
      */
     public static int binarySearch(final byte[] a, final byte valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25363,10 +25592,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(byte[], int, int, byte)
      */
     public static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25385,8 +25614,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(short[], short)
      */
     public static int binarySearch(final short[] a, final short valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25408,10 +25637,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(short[], int, int, short)
      */
     public static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25430,8 +25659,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(final int[] a, final int valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25453,10 +25682,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(int[], int, int, int)
      */
     public static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25475,8 +25704,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(long[], long)
      */
     public static int binarySearch(final long[] a, final long valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25498,10 +25727,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(long[], int, int, long)
      */
     public static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25520,8 +25749,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(float[], float)
      */
     public static int binarySearch(final float[] a, final float valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25543,10 +25772,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(float[], int, int, float)
      */
     public static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25565,8 +25794,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(double[], double)
      */
     public static int binarySearch(final double[] a, final double valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25588,10 +25817,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(double[], int, int, double)
      */
     public static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25610,8 +25839,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(Object[], Object)
      */
     public static int binarySearch(final Object[] a, final Object valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind);
@@ -25633,10 +25862,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(Object[], int, int, Object)
      */
     public static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
@@ -25657,8 +25886,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(Object[], Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, valueToFind, checkComparator(cmp));
@@ -25682,10 +25911,10 @@ sealed class CommonUtil permits N {
      * @see Arrays#binarySearch(Object[], int, int, Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind, checkComparator(cmp));
@@ -25705,8 +25934,8 @@ sealed class CommonUtil permits N {
      * @see Collections#binarySearch(List, Object)
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T valueToFind) {
-        if (N.isEmpty(list)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(list)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Collections.binarySearch(list, valueToFind);
@@ -25730,10 +25959,10 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex,
             final T valueToFind) {
-        N.checkFromToIndex(fromIndex, toIndex, size(list));
+        checkFromToIndex(fromIndex, toIndex, size(list));
 
-        if (N.isEmpty(list)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(list)) {
+            return INDEX_NOT_FOUND;
         }
 
         return binarySearch(list, fromIndex, toIndex, valueToFind, NATURAL_COMPARATOR);
@@ -25754,8 +25983,8 @@ sealed class CommonUtil permits N {
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
-        if (N.isEmpty(list)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(list)) {
+            return INDEX_NOT_FOUND;
         }
 
         return Collections.binarySearch(list, valueToFind, checkComparator(cmp));
@@ -25779,8 +26008,8 @@ sealed class CommonUtil permits N {
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp) {
-        if (N.isEmpty(list)) {
-            return N.INDEX_NOT_FOUND;
+        if (isEmpty(list)) {
+            return INDEX_NOT_FOUND;
         }
 
         cmp = checkComparator(cmp);
@@ -26235,7 +26464,7 @@ sealed class CommonUtil permits N {
             }
 
             while (iter.hasNext()) {
-                if (N.equals(iter.next(), valueToFind)) {
+                if (equals(iter.next(), valueToFind)) {
                     return index;
                 }
 
@@ -26338,12 +26567,12 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = fromIndex; i < len; i++) {
-            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+            if (equalsIgnoreCase(a[i], valueToFind)) {
                 return i;
             }
         }
 
-        return N.INDEX_NOT_FOUND;
+        return INDEX_NOT_FOUND;
     }
 
     /**
@@ -26771,7 +27000,7 @@ sealed class CommonUtil permits N {
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final Collection<?> c, final Object valueToFind, final int startIndexFromBack) {
-        final int size = N.size(c);
+        final int size = size(c);
 
         if (size == 0 || startIndexFromBack < 0) {
             return INDEX_NOT_FOUND;
@@ -26781,7 +27010,7 @@ sealed class CommonUtil permits N {
             final List<Object> list = (List<Object>) c;
 
             for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
-                if (N.equals(list.get(i), valueToFind)) {
+                if (equals(list.get(i), valueToFind)) {
                     return i;
                 }
             }
@@ -26795,7 +27024,7 @@ sealed class CommonUtil permits N {
             for (int i = size - 1; descendingIterator.hasNext(); i--) {
                 if (i > startIndexFromBack) {
                     descendingIterator.next();
-                } else if (N.equals(descendingIterator.next(), valueToFind)) {
+                } else if (equals(descendingIterator.next(), valueToFind)) {
                     return i;
                 }
             }
@@ -26871,12 +27100,12 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = N.min(startIndexFromBack, len - 1); i >= 0; i--) {
-            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+            if (equalsIgnoreCase(a[i], valueToFind)) {
                 return i;
             }
         }
 
-        return N.INDEX_NOT_FOUND;
+        return INDEX_NOT_FOUND;
     }
 
     /**
@@ -26888,7 +27117,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findFirstIndex(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -26912,7 +27141,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findFirstIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -26934,7 +27163,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findFirstIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -26962,7 +27191,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -26988,7 +27217,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findLastIndex(final T[] a, final Predicate<? super T> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -27012,7 +27241,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findLastIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
-        if (N.isEmpty(a)) {
+        if (isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -27034,7 +27263,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -27086,7 +27315,7 @@ sealed class CommonUtil permits N {
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
-        if (N.isEmpty(c)) {
+        if (isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -27121,7 +27350,7 @@ sealed class CommonUtil permits N {
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
         final IntList result = new IntList();
-        final int len = N.len(a);
+        final int len = len(a);
         T candidate = a[0];
         int cp = 0;
 
@@ -27221,7 +27450,7 @@ sealed class CommonUtil permits N {
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
         final IntList result = new IntList();
-        final int len = N.len(a);
+        final int len = len(a);
         T candidate = a[0];
         int cp = 0;
 
@@ -27315,7 +27544,7 @@ sealed class CommonUtil permits N {
      * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int startIndex) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len == 0 || startIndex >= len) {
             return EMPTY_INT_ARRAY;
@@ -27324,7 +27553,7 @@ sealed class CommonUtil permits N {
         final IntList result = new IntList();
 
         for (int idx = N.max(startIndex, 0); idx < len; idx++) {
-            if (N.equals(a[idx], valueToFind)) {
+            if (equals(a[idx], valueToFind)) {
                 result.add(idx);
             }
         }
@@ -27352,7 +27581,7 @@ sealed class CommonUtil permits N {
      * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, final int startIndex) {
-        final int size = N.size(c);
+        final int size = size(c);
 
         if (size == 0 || startIndex >= size) {
             return EMPTY_INT_ARRAY;
@@ -27363,7 +27592,7 @@ sealed class CommonUtil permits N {
         if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
             for (int idx = N.max(startIndex, 0); idx < size; idx++) {
-                if (N.equals(list.get(idx), valueToFind)) {
+                if (equals(list.get(idx), valueToFind)) {
                     result.add(idx);
                 }
             }
@@ -27378,7 +27607,7 @@ sealed class CommonUtil permits N {
             }
 
             while (iter.hasNext()) {
-                if (N.equals(iter.next(), valueToFind)) {
+                if (equals(iter.next(), valueToFind)) {
                     result.add(idx);
                 }
 
@@ -27411,7 +27640,7 @@ sealed class CommonUtil permits N {
      * @return an array of indices of all elements that match the predicate. An empty array if the input array is empty.
      */
     public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int startIndex) {
-        final int len = N.len(a);
+        final int len = len(a);
 
         if (len == 0 || startIndex >= len) {
             return EMPTY_INT_ARRAY;
@@ -27450,7 +27679,7 @@ sealed class CommonUtil permits N {
      * @return an array of indices of all elements that match the predicate. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
-        final int size = N.size(c);
+        final int size = size(c);
 
         if (size == 0 || fromIndex >= size) {
             return EMPTY_INT_ARRAY;

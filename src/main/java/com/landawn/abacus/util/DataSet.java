@@ -3308,6 +3308,9 @@ public interface DataSet {
      *
      * @return A CSV string representing the entire DataSet.
      * @see #toCsv(int, int, Collection, boolean, boolean)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv();
 
@@ -3326,6 +3329,9 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @see #toCsv(int, int, Collection, boolean, boolean)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -3341,6 +3347,9 @@ public interface DataSet {
      * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
      * @return A CSV string representing the entire DataSet.
      * @see #toCsv(int, int, Collection, boolean, boolean)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv(boolean writeTitle, boolean quoteValue);
 
@@ -3360,6 +3369,9 @@ public interface DataSet {
      * @return A CSV string representing the specified range of rows and columns in the DataSet.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -3375,6 +3387,9 @@ public interface DataSet {
      * @param output The File where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, File)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(File output) throws UncheckedIOException;
 
@@ -3394,6 +3409,9 @@ public interface DataSet {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, File)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -3411,6 +3429,9 @@ public interface DataSet {
      * @param output The File where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, File)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, File output) throws UncheckedIOException;
 
@@ -3431,6 +3452,9 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, File output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -3446,6 +3470,9 @@ public interface DataSet {
      * @param output The OutputStream where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(OutputStream output) throws UncheckedIOException;
 
@@ -3465,6 +3492,9 @@ public interface DataSet {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -3482,6 +3512,9 @@ public interface DataSet {
      * @param output The OutputStream where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, OutputStream output) throws UncheckedIOException;
 
@@ -3502,6 +3535,9 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, OutputStream output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -3517,6 +3553,9 @@ public interface DataSet {
      * @param output The Writer where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(Writer output) throws UncheckedIOException;
 
@@ -3536,6 +3575,9 @@ public interface DataSet {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -3553,6 +3595,9 @@ public interface DataSet {
      * @param output The Writer where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, Writer output) throws UncheckedIOException;
 
@@ -3573,6 +3618,9 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, Writer output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;

@@ -41,6 +41,16 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
+
+    /**
      *
      * @param x
      * @return

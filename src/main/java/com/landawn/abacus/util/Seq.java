@@ -76,14 +76,9 @@ import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.parser.JSONParser;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
-import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -120,6 +115,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Fn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
+ * @see com.landawn.abacus.util.CSVUtil
  * @see java.util.stream.Stream
  *
  */
@@ -205,14 +201,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     private static final Random RAND = new SecureRandom();
 
     private static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
-
-    /**
-     *
-     * Char array with value {@code "['n', 'u', 'l', 'l']"}.
-     */
-    private static final char[] NULL_CHAR_ARRAY = Strings.NULL.toCharArray();
-
-    private static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Strings.ELEMENT_SEPARATOR.toCharArray();
 
     private static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
     private static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
@@ -15035,41 +15023,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    private static final Throwables.TriConsumer<Type<Object>, Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT_WITH_TYPE;
-    private static final Throwables.BiConsumer<Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT;
-    private static final Throwables.BiConsumer<String, BufferedJSONWriter, IOException> WRITE_CSV_STRING;
-
-    static {
-        final JSONParser jsonParser = ParserFactory.createJSONParser();
-        final Type<Object> strType = N.typeOf(String.class);
-        final JSONSerializationConfig config = JSC.create();
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
-        config.quoteMapKey(true);
-        config.quotePropName(true);
-
-        WRITE_CSV_ELEMENT_WITH_TYPE = (type, element, bw) -> {
-            if (element == null) {
-                bw.write(NULL_CHAR_ARRAY);
-            } else {
-                if (type.isSerializable()) {
-                    type.writeCharacter(bw, element, config);
-                } else {
-                    strType.writeCharacter(bw, jsonParser.serialize(element, config), config);
-                }
-            }
-        };
-
-        WRITE_CSV_ELEMENT = (element, bw) -> {
-            if (element == null) {
-                bw.write(NULL_CHAR_ARRAY);
-            } else {
-                WRITE_CSV_ELEMENT_WITH_TYPE.accept(N.typeOf(element.getClass()), element, bw);
-            }
-        };
-
-        WRITE_CSV_STRING = (str, bw) -> strType.writeCharacter(bw, str, config);
-    }
-
     /**
      * Persists the sequence with CSV format to the specified file.
      *
@@ -15085,6 +15038,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @Beta
     @TerminalOp
@@ -15111,6 +15067,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @TerminalOp
     public long persistToCSV(final Collection<String> csvHeaders, final File output) throws IllegalStateException, IOException, E {
@@ -15138,6 +15097,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @Beta
     @TerminalOp
@@ -15164,6 +15126,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @TerminalOp
     public long persistToCSV(final Collection<String> csvHeaders, final OutputStream output) throws IllegalStateException, IOException, E {
@@ -15191,6 +15156,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @Beta
     @TerminalOp
@@ -15211,6 +15179,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IOException if an I/O error occurs
      * @throws E if an exception occurs during the operation
+     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+     * @see CSVUtil#resetEscapeCharForWrite()
+     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     @TerminalOp
     public long persistToCSV(final Collection<String> csvHeaders, final Writer output) throws IllegalStateException, IllegalArgumentException, IOException, E {
@@ -15227,9 +15198,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         try {
             final List<Object> headers = N.newArrayList(csvHeaders);
-            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
-            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
+            final boolean isBufferedWriter = output instanceof BufferedCSVWriter;
+            final BufferedCSVWriter bw = isBufferedWriter ? (BufferedCSVWriter) output : Objectory.createBufferedCSVWriter(output);
 
+            final char separator = WD._COMMA;
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
@@ -15260,10 +15232,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_STRING.accept(N.stringOf(headers.get(i)), bw);
+                            CSVUtil.writeField(bw, null, headers.get(i));
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -15272,10 +15244,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                             propInfo = propInfos[i];
 
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                            CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
                         }
 
                         while (iter.hasNext()) {
@@ -15288,10 +15260,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                                 propInfo = propInfos[i];
 
                                 if (i > 0) {
-                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(separator);
                                 }
 
-                                WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                                CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
                             }
                         }
                     } else if (next instanceof Map) {
@@ -15305,20 +15277,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_STRING.accept(N.stringOf(headers.get(i)), bw);
+                            CSVUtil.writeField(bw, null, headers.get(i));
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
+                            CSVUtil.writeField(bw, null, row.get(headers.get(i)));
                         }
 
                         while (iter.hasNext()) {
@@ -15329,10 +15301,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(separator);
                                 }
 
-                                WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
+                                CSVUtil.writeField(bw, null, row.get(headers.get(i)));
                             }
                         }
                     } else if (N.notEmpty(headers) && next instanceof Collection) {
@@ -15341,10 +15313,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_STRING.accept(N.stringOf(headers.get(i)), bw);
+                            CSVUtil.writeField(bw, null, headers.get(i));
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -15353,10 +15325,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
+                            CSVUtil.writeField(bw, null, rowIter.next());
                         }
 
                         while (iter.hasNext()) {
@@ -15368,30 +15340,30 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(separator);
                                 }
 
-                                WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
+                                CSVUtil.writeField(bw, null, rowIter.next());
                             }
                         }
                     } else if (N.notEmpty(headers) && next instanceof Object[] row) {
                         final int headSize = headers.size();
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_STRING.accept(N.stringOf(headers.get(i)), bw);
+                            CSVUtil.writeField(bw, null, headers.get(i));
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(separator);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(row[i], bw);
+                            CSVUtil.writeField(bw, null, row[i]);
                         }
 
                         while (iter.hasNext()) {
@@ -15402,10 +15374,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(separator);
                                 }
 
-                                WRITE_CSV_ELEMENT.accept(row[i], bw);
+                                CSVUtil.writeField(bw, null, row[i]);
                             }
                         }
                     } else {
@@ -15417,7 +15389,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     bw.flush();
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        Objectory.recycle(bw);
                     }
                 }
             }

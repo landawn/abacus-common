@@ -45,6 +45,16 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
+
+    /**
      *
      * @param b
      * @return

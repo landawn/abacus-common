@@ -142,6 +142,16 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
         return true;
     }
 
+    /**
+     * Checks if is non quoted csv type.
+     *
+     * @return {@code true}, if is non quoted csv type
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
+    }
+
     @Override
     public Class<T> clazz() {
         return typeClass;
