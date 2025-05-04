@@ -3336,47 +3336,6 @@ public interface DataSet {
     String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Converts the entire DataSet into a CSV string with options to include column titles and quote values.
-     * <br />
-     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
-     * The resulting CSV string represents the entire DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @return A CSV string representing the entire DataSet.
-     * @see #toCsv(int, int, Collection, boolean, boolean)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    String toCsv(boolean writeTitle, boolean quoteValue);
-
-    /**
-     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns.
-     * <br />
-     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
-     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
-     * @param toRowIndex The ending index of the row range to be included in the CSV string.
-     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @return A CSV string representing the specified range of rows and columns in the DataSet.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
-            throws IndexOutOfBoundsException, IllegalArgumentException;
-
-    /**
      * Converts the entire DataSet into a CSV string and writes it to a File.
      * <br />
      * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
@@ -3414,49 +3373,6 @@ public interface DataSet {
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
-            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
-
-    /**
-     * Converts the entire DataSet into a CSV string with options to include column titles and quote values, and writes it to a File.
-     * <br />
-     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
-     * The resulting CSV string represents the entire DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The File where the CSV string will be written.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, File)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(boolean writeTitle, boolean quoteValue, File output) throws UncheckedIOException;
-
-    /**
-     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a file.
-     * <br />
-     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
-     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
-     * @param toRowIndex The ending index of the row range to be included in the CSV string.
-     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The file where the CSV string will be written.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, File output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
@@ -3500,49 +3416,6 @@ public interface DataSet {
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Converts the entire DataSet into a CSV string and writes it to an OutputStream.
-     * <br />
-     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
-     * The resulting CSV string represents the entire DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The OutputStream where the CSV string will be written.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(boolean writeTitle, boolean quoteValue, OutputStream output) throws UncheckedIOException;
-
-    /**
-     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to an OutputStream.
-     * <br />
-     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
-     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
-     * @param toRowIndex The ending index of the row range to be included in the CSV string.
-     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The OutputStream where the CSV string will be written.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, OutputStream output)
-            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
-
-    /**
      * Converts the entire DataSet into a CSV string and writes it to a Writer.
      * <br />
      * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
@@ -3580,49 +3453,6 @@ public interface DataSet {
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
-            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
-
-    /**
-     * Converts the DataSet into a CSV string and writes it to a Writer.
-     * <br />
-     * This method is typically used when you need to export the data in the DataSet to a CSV format.
-     * The resulting CSV string represents the entire DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The Writer where the CSV string will be written.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(boolean writeTitle, boolean quoteValue, Writer output) throws UncheckedIOException;
-
-    /**
-     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a Writer.
-     * <br />
-     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
-     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
-     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
-     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
-     *
-     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
-     * @param toRowIndex The ending index of the row range to be included in the CSV string.
-     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
-     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
-     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
-     * @param output The Writer where the CSV string will be written.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
-     * @throws UncheckedIOException if an I/O error occurs.
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, Writer output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**

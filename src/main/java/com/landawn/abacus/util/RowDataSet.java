@@ -3429,20 +3429,10 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public String toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        return toCsv(fromRowIndex, toRowIndex, columnNames, true, true);
-    }
-
-    @Override
-    public String toCsv(final boolean writeTitle, final boolean quoted) {
-        return toCsv(0, size(), columnNameList(), writeTitle, quoted);
-    }
-
-    @Override
-    public String toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted) {
         final BufferedWriter bw = Objectory.createBufferedCSVWriter();
 
         try {
-            toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, bw);
+            toCsv(fromRowIndex, toRowIndex, columnNames, bw);
 
             return bw.toString();
         } finally {
@@ -3457,17 +3447,6 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final File output) {
-        toCsv(fromRowIndex, toRowIndex, columnNames, true, true, output);
-    }
-
-    @Override
-    public void toCsv(final boolean writeTitle, final boolean quoted, final File output) {
-        toCsv(0, size(), _columnNameList, writeTitle, quoted, output);
-    }
-
-    @Override
-    public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
-            final File output) {
         Writer writer = null;
 
         try {
@@ -3475,7 +3454,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             writer = IOUtil.newFileWriter(output);
 
-            toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, writer);
+            toCsv(fromRowIndex, toRowIndex, columnNames, writer);
 
             writer.flush();
         } catch (final IOException e) {
@@ -3492,23 +3471,12 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final OutputStream output) {
-        toCsv(fromRowIndex, toRowIndex, columnNames, true, true, output);
-    }
-
-    @Override
-    public void toCsv(final boolean writeTitle, final boolean quoted, final OutputStream output) {
-        toCsv(0, size(), _columnNameList, writeTitle, quoted, output);
-    }
-
-    @Override
-    public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
-            final OutputStream output) throws UncheckedIOException {
         Writer writer = null;
 
         try {
             writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
 
-            toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, writer);
+            toCsv(fromRowIndex, toRowIndex, columnNames, writer);
 
             writer.flush();
         } catch (final IOException e) {
@@ -3523,28 +3491,15 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Writer output) {
-        toCsv(fromRowIndex, toRowIndex, columnNames, true, true, output);
-    }
-
-    @Override
-    public void toCsv(final boolean writeTitle, final boolean quoted, final Writer output) {
-        toCsv(0, size(), _columnNameList, writeTitle, quoted, output);
-    }
-
-    @Override
-    public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
-            final Writer output) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isEmpty(columnNames)) {
             return;
         }
 
+        final Type<Object> strType = N.typeOf(String.class);
         final int[] columnIndexes = checkColumnNames(columnNames);
         final int columnCount = columnIndexes.length;
-
-        final JSONSerializationConfig config = JSC.create();
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
         final boolean isBufferedWriter = output instanceof BufferedCSVWriter;
         final BufferedCSVWriter bw = isBufferedWriter ? (BufferedCSVWriter) output : Objectory.createBufferedCSVWriter(output);
@@ -3552,25 +3507,20 @@ public class RowDataSet implements DataSet, Cloneable {
         final char separator = WD._COMMA;
 
         try {
-            if (writeTitle) {
-                for (int i = 0; i < columnCount; i++) {
-                    if (i > 0) {
-                        bw.write(separator);
-                    }
-
-                    // bw.write(getColumnName(columnIndexes[i]));
-                    strType.writeCharacter(bw, getColumnName(columnIndexes[i]), config);
+            for (int i = 0; i < columnCount; i++) {
+                if (i > 0) {
+                    bw.write(separator);
                 }
 
-                bw.write(IOUtil.LINE_SEPARATOR);
+                // bw.write(getColumnName(columnIndexes[i])); 
+
+                CSVUtil.writeField(bw, strType, getColumnName(columnIndexes[i]));
             }
 
             Object element = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                if (rowIndex > fromRowIndex) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                }
+                bw.write(IOUtil.LINE_SEPARATOR);
 
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
