@@ -43,13 +43,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.Array;
-import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.ListMultimap;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.SetMultimap;
-import com.landawn.abacus.util.TypeReference;
+import com.landawn.abacus.util.*;
 
 /**
  *
@@ -60,6 +54,7 @@ import com.landawn.abacus.util.TypeReference;
 public interface Type<T> {
 
     /**
+     * Returns the type of the given {@code java.lang.reflect.Type} object.
      *
      * @param <T>
      * @param type
@@ -70,6 +65,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns the type of the given {@code TypeReference} object.
      *
      * @param <T>
      * @param typeRef
@@ -80,6 +76,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns the type of the given {@code Class} object.
      *
      * @param <T>
      * @param cls
@@ -90,6 +87,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns the type by the given type name.
      *
      * @param <T>
      * @param typeName
@@ -100,6 +98,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a list of types of the given classes.
      *
      * @param <T>
      * @param classes
@@ -111,6 +110,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a list of types of the given classes.
      *
      * @param <T>
      * @param classes
@@ -129,6 +129,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code List} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -139,7 +140,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of linked list.
+     * Returns a {@code LinkedList} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -150,7 +151,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of list of map.
+     * Returns a {@code List} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -163,7 +164,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of list of linked hash map.
+     * Returns a {@code List} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -176,6 +177,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code Set} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -186,7 +188,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of set of map.
+     * Returns a {@code Set} whose element type is a map with the given key and value classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -199,7 +201,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of set of linked hash map.
+     * Returns a {@code Set} whose element type is a linked hash map with the given key and value classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -212,7 +214,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of linked hash set.
+     * Returns a {@code LinkedHashSet} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -223,7 +225,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of sorted set.
+     * Returns a {@code SortedSet} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -234,7 +236,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of navigable set.
+     * Returns a {@code NavigableSet} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -245,7 +247,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of tree set.
+     * Returns a {@code TreeSet} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -256,6 +258,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code Queue} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -266,6 +269,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code Deque} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -276,7 +280,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of array deque.
+     * Returns a {@code ArrayDeque} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -287,7 +291,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of linked blocking queue.
+     * Returns a {@code LinkedBlockingQueue} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -298,7 +302,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of concurrent linked queue.
+     * Returns a {@code ConcurrentLinkedQueue} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -309,7 +313,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of priority queue.
+     * Returns a {@code PriorityQueue} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
@@ -324,6 +328,7 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code Map} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -336,7 +341,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of linked hash map.
+     * Returns a {@code LinkedHashMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -349,7 +354,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of sorted map.
+     * Returns a {@code LinkedHashMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -362,7 +367,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of navigable map.
+     * Returns a {@code NavigableMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -375,7 +380,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of tree map.
+     * Returns a {@code TreeMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -388,7 +393,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of concurrent map.
+     * Returns a {@code TreeMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -401,7 +406,7 @@ public interface Type<T> {
     }
 
     /**
-     * Of concurrent hash map.
+     * Returns a {@code ConcurrentHashMap} type whose key and value types are the given classes.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -414,19 +419,38 @@ public interface Type<T> {
     }
 
     /**
+     * Returns a {@code Multiset} type whose element type is the given class.
      *
      * @param <T>
      * @param eleClass
      * @return
      */
-    static <T> Type<Set<T>> ofMultiset(final Class<? extends T> eleClass) {
+    static <T> Type<Multiset<T>> ofMultiset(final Class<? extends T> eleClass) {
         return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
+    /**
+     * Returns a {@code ListMultimap} type whose key and value types are the given classes.
+     *
+     * @param keyClass
+     * @param eleClass
+     * @return
+     * @param <K>
+     * @param <E>
+     */
     static <K, E> Type<ListMultimap<K, E>> ofListMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass) {
         return TypeFactory.getType("ListMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
+    /**
+     * Returns a {@code SetMultimap} type whose key and value types are the given classes.
+     * 
+     * @param keyClass
+     * @param eleClass
+     * @return
+     * @param <K>
+     * @param <E>
+     */
     static <K, E> Type<SetMultimap<K, E>> ofSetMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass) {
         return TypeFactory.getType("SetMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
@@ -440,42 +464,42 @@ public interface Type<T> {
     Class<T> clazz();
 
     /**
-     * Checks if is primitive type.
+     * Checks if this is a primitive type.
      *
      * @return {@code true}, if is primitive type
      */
     boolean isPrimitiveType();
 
     /**
-     * Checks if is primitive wrapper.
+     * Checks if this is a primitive wrapper.
      *
      * @return {@code true}, if is primitive wrapper
      */
     boolean isPrimitiveWrapper();
 
     /**
-     * Checks if is primitive list.
+     * Checks if this is a primitive list.
      *
      * @return {@code true}, if is primitive list
      */
     boolean isPrimitiveList();
 
     /**
-     * Checks if is boolean.
+     * Checks if this is a boolean.
      *
      * @return {@code true}, if is boolean
      */
     boolean isBoolean();
 
     /**
-     * Checks if is number.
+     * Checks if this is a number.
      *
      * @return {@code true}, if is number
      */
     boolean isNumber();
 
     /**
-     * Checks if is string.
+     * Checks if this is a string.
      *
      * @return {@code true}, if is string
      */
@@ -484,147 +508,147 @@ public interface Type<T> {
     boolean isCharSequence();
 
     /**
-     * Checks if this is type of {@code Date}.
+     * Checks if this is a type of {@code Date}.
      *
      * @return {@code true}, if it is {@code Date} type
      */
     boolean isDate();
 
     /**
-     * Checks if this is type of {@code Calendar}.
+     * Checks if this is a type of {@code Calendar}.
      *
      * @return {@code true}, if it is {@code Calendar} type
      */
     boolean isCalendar();
 
     /**
-     * Checks if this is type of Joda {@code DateTime}.
+     * Checks if this is a type of Joda {@code DateTime}.
      *
      * @return {@code true}, if it is Joda {@code DateTime} type
      */
     boolean isJodaDateTime();
 
     /**
-     * Checks if this is type of primitive {@code array}.
+     * Checks if this is a type of primitive {@code array}.
      *
      * @return {@code true}, if it is primitive {@code array} type
      */
     boolean isPrimitiveArray();
 
     /**
-     * Checks if this is type of {@code byte[]}.
+     * Checks if this is a type of {@code byte[]}.
      *
      * @return {@code true}, if it is {@code byte[]} type
      */
     boolean isPrimitiveByteArray();
 
     /**
-     * Checks if this is type of object {@code array}.
+     * Checks if this is a type of object {@code array}.
      *
      * @return {@code true}, if it is object {@code array} type
      */
     boolean isObjectArray();
 
     /**
-     * Checks if this is type of {@code array}.
+     * Checks if this is a type of {@code array}.
      *
      * @return {@code true}, if it is {@code array} type
      */
     boolean isArray();
 
     /**
-     * Checks if this is type of {@code List}.
+     * Checks if this is a type of {@code List}.
      *
      * @return {@code true}, if it is {@code List} type
      */
     boolean isList();
 
     /**
-     * Checks if this is type of {@code Set}.
+     * Checks if this is a type of {@code Set}.
      *
      * @return {@code true}, if it is {@code Set} type
      */
     boolean isSet();
 
     /**
-     * Checks if this is type of {@code Collection}.
+     * Checks if this is a type of {@code Collection}.
      *
      * @return {@code true}, if it is {@code Collection} type
      */
     boolean isCollection();
 
     /**
-     * Checks if this is type of {@code Map}.
+     * Checks if this is a type of {@code Map}.
      *
      * @return {@code true}, if it is {@code Map} type
      */
     boolean isMap();
 
     /**
-     * Checks if this is type of {@code Bean}.
+     * Checks if this is a type of {@code Bean}.
      *
      * @return {@code true}, if it is {@code Bean} type
      */
     boolean isBean();
 
     /**
-     * Checks if this is type of {@code MapEntity}.
+     * Checks if this is a type of {@code MapEntity}.
      *
      * @return {@code true}, if it is {@code MapEntity} type
      */
     boolean isMapEntity();
 
     /**
-     * Checks if this is type of {@code EntityId}.
+     * Checks if this is a type of {@code EntityId}.
      *
      * @return {@code true}, if it is {@code EntityId} type
      */
     boolean isEntityId();
 
     /**
-     * Checks if this is type of {@code DataSet}.
+     * Checks if this is a type of {@code DataSet}.
      *
      * @return {@code true}, if it is {@code DataSet} type
      */
     boolean isDataSet();
 
     /**
-     * Checks if this is type of {@code InputStream}.
+     * Checks if this is a type of {@code InputStream}.
      *
      * @return {@code true}, if it is {@code InputStream} type
      */
     boolean isInputStream();
 
     /**
-     * Checks if this is type of {@code Reader}.
+     * Checks if this is a type of {@code Reader}.
      *
      * @return {@code true}, if it is {@code Reader} type
      */
     boolean isReader();
 
     /**
-     * Checks if this is type of {@code ByteBuffer}.
+     * Checks if this is a type of {@code ByteBuffer}.
      *
      * @return {@code true}, if it is {@code ByteBuffer} type
      */
     boolean isByteBuffer();
 
     /**
-     * Checks if this is generic type.
+     * Checks if this is a generic type.
      *
-     * @return {@code true}, if it is generic type
+     * @return {@code true}, if it is a generic type
      */
     boolean isGenericType();
 
     /**
-     * Checks if this is immutable type.
+     * Checks if this is an immutable type.
      *
      * @return {@code true}, if it is immutable
      */
     boolean isImmutable();
 
     /**
-     * Checks if this is comparable type.
+     * Checks if this is a comparable type.
      *
      * @return {@code true}, if it is comparable
      */
@@ -641,7 +665,7 @@ public interface Type<T> {
     boolean isObjectType();
 
     /**
-     * Checks if is optional or {@code nullable}.
+     * Checks if this is an optional or {@code nullable}.
      *
      * @return {@code true}, if is optional or nullable
      */
@@ -798,7 +822,7 @@ public interface Type<T> {
     void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException;
 
     /**
-     * Collection 2 array.
+     * Converts the given collection to an array of this type.
      *
      * @param c
      * @return
@@ -806,7 +830,7 @@ public interface Type<T> {
     T collection2Array(Collection<?> c);
 
     /**
-     * Array 2 collection.
+     * Converts the given array of this type to a collection of the specified type.
      *
      * @param <E>
      * @param x
@@ -816,7 +840,7 @@ public interface Type<T> {
     <E> Collection<E> array2Collection(T x, Class<?> collClass);
 
     /**
-     * Array 2 collection.
+     * Converts the given array of this type to a collection by adding the array elements to the specified output collection.
      *
      * @param <E>
      * @param x

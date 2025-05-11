@@ -223,7 +223,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

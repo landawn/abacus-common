@@ -43,7 +43,6 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     @SuppressWarnings("rawtypes")
     private final Class<Tuple1<T1>> typeClass = (Class) Tuple1.class; //NOSONAR
 
-    /** The type 1. */
     private final Type<T1> type1;
 
     private final Type<?>[] parameterTypes;

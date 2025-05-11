@@ -108,7 +108,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             /*
              * If the requested length is at least as large as the buffer, and if there is no mark/reset activity, and
              * if line feeds are not being skipped, do not bother to copy the characters into the local buffer. In this
-             * way buffered streams will cascade harmlessly.
+             *  way, buffered streams will cascade harmlessly.
              */
             if ((len >= Objectory.BUFFER_SIZE) && !skipLF) {
                 return IOUtil.read(in, cbuf, off, len);
@@ -363,7 +363,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     public boolean ready() throws IOException {
         if (str == null) {
             /*
-             * If newline needs to be skipped and the next char to be read is a newline character, then just skip it
+             * If newline needs to be skipped and the next char to be read is a newline character, then skip it
              * right away.
              */
             if (skipLF) {

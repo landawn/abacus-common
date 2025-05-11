@@ -86,8 +86,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
     /**
-     * GMT, or Greenwich Mean Time, is a time zone that is used as a reference point for time keeping around the world.
-     * It is located at the prime meridian (0 degrees longitude) and does not observe daylight saving time.
+     * GMT, or Greenwich Mean Time, is a time zone used as a reference point for time keeping around the world.
+     * It is located at the prime meridian (0 degrees longitude) and does not observe daylight-saving time.
      * GMT is often used in various contexts, including aviation, computing, and international communications.
      * In many regions, GMT is replaced by Coordinated Universal Time (UTC), which is similar but more precise.
      * When comparing other time zones, you can express them as offsets from GMT/UTC, such as GMT+2 or GMT-5
@@ -167,7 +167,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
-     * It's default date/time format.
+     * It's the default date/time format.
      */
     public static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
@@ -1981,8 +1981,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Sets the hours field to a date returning a new object.  Hours range
-     * from  0-23.
+     * Sets the hours field to a date returning a new object.
+     * Hours range from 0-23.
      * The original {@code Date} is unchanged.
      *
      * @param <T>
@@ -2485,9 +2485,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
      *
-     * <p>For a date in a timezone that handles the change to daylight
-     * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
-     * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
+     * <p>For a date in a timezone that handles the change to daylight-saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
+     * Suppose daylight-saving time begins at 02:00 on March 30. Rounding a
      * date that crosses this time would produce the following values:
      * </p>
      * <ul>
@@ -2543,9 +2542,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
      *
-     * <p>For a date in a timezone that handles the change to daylight
-     * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
-     * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
+     * <p>For a date in a timezone that handles the change to daylight-saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
+     * Suppose daylight-saving time begins at 02:00 on March 30. Rounding a
      * date that crosses this time would produce the following values:
      * </p>
      * <ul>
@@ -3267,7 +3265,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date to work with, not null
      * @param fragment the {@code Calendar} field part of date to calculate
-     * @return number of days  within the fragment of date
+     * @return number of days within the fragment of date
      * @throws IllegalArgumentException if the date is {@code null} or
      * fragment is not supported
      */
@@ -4140,7 +4138,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     //    }
 
     /**
-     * The major purpose of this class is to get rid of the milliseconds part: {@code .SSS} or nanoseconds part: {@code .SSSSSS}
+     * The major purpose of this class is to get rid of the millisecond part: {@code .SSS} or nanosecond part: {@code .SSSSSS}
      *
      * @see {@code DateTimeFormatter}
      */

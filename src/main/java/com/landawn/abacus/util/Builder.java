@@ -372,8 +372,8 @@ public class Builder<T> {
     //    /**
     //     *
     //     * @param b
-    //     * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
-    //     * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
+    //     * @param actionForTrue does nothing if it's {@code null} even {@code b} is true.
+    //     * @param actionForFalse does nothing if it's {@code null} even {@code b} is false.
     //     * @throws E1
     //     * @throws E2
     //     */
@@ -393,8 +393,8 @@ public class Builder<T> {
     //    /**
     //     *
     //     * @param predicate
-    //     * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
-    //     * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
+    //     * @param actionForTrue does nothing if it's {@code null} even {@code b} is true.
+    //     * @param actionForFalse does nothing if it's {@code null} even {@code b} is false.
     //     * @throws E0
     //     * @throws E1
     //     * @throws E2

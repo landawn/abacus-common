@@ -22,7 +22,7 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * It's tool for the conversion by between the simple name and canonical name.
+ * It's a tool for the conversion by between the simple name and canonical name.
  *
  */
 @Internal

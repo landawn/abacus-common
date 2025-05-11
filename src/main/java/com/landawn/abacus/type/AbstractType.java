@@ -658,24 +658,11 @@ public abstract class AbstractType<T> implements Type<T> {
         throw new UnsupportedOperationException(name() + " doesn't support collection2Array Operation");
     }
 
-    /**
-     *
-     * @param <E>
-     * @param array
-     * @param collClass
-     * @return
-     */
     @Override
     public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
     }
 
-    /**
-     *
-     * @param <E>
-     * @param array
-     * @param output
-     */
     @Override
     public <E> void array2Collection(final T array, final Collection<E> output) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");

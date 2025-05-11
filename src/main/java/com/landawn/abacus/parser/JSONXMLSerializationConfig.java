@@ -141,7 +141,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * Checks if is pretty format.
+     * Checks if is a pretty format.
      *
      * @return {@code true}, if is pretty format
      */

@@ -37,7 +37,7 @@ import java.util.Stack;
  * Most methods on this class are designed to work the same on both Unix and Windows.
  * Those that don't include <i>System</i>, <i>Unix</i> or <i>Windows</i> in their name.
  * <p>
- * Most methods recognise both separators (forward and back), and both
+ * Most methods recognize both separators (forward and back) and both
  * sets of prefixes. See the javadoc of each method for details.
  * <p>
  * This class defines six components within a filename
@@ -507,7 +507,6 @@ public final class FilenameUtil {
      * @param canonicalParent the file to consider as the parent.
      * @param canonicalChild the file to consider as the child.
      * @return {@code true} is the candidate leaf is under by the specified composite. False otherwise.
-     * @see FileUtils#directoryContains(File, File)
      */
     public static boolean directoryContains(final String canonicalParent, final String canonicalChild) {
 
@@ -599,7 +598,7 @@ public final class FilenameUtil {
      * </pre>
      * <p>
      * The output will be the same irrespective of the machine that the code is running on.
-     * i.e. both Unix and Windows prefixes are matched regardless.
+     * i.e., both Unix and Windows prefixes are matched regardless.
      *
      * Note that a leading // (or \\) is used to indicate a UNC name on Windows.
      * These must be followed by a server name, so double-slashes are not collapsed
@@ -734,7 +733,7 @@ public final class FilenameUtil {
      * </pre>
      * <p>
      * The output will be the same irrespective of the machine that the code is running on.
-     * i.e. both Unix and Windows prefixes are matched regardless.
+     * i.e., both Unix and Windows prefixes are matched regardless.
      *
      * @param filename the filename to query, {@code null} returns null
      * @return the prefix of the file, {@code null} if invalid. Null bytes inside string will be removed
@@ -760,7 +759,7 @@ public final class FilenameUtil {
      * Gets the path from a full filename, which excludes the prefix.
      * <p>
      * This method will handle a file in either Unix or Windows format.
-     * The method is entirely text based, and returns the text before and
+     * The method is entirely text-based, and returns the text before and
      * including the last forward or backslash.
      * <pre>
      * C:\a\b\c.txt --&gt; a\b\
@@ -788,7 +787,7 @@ public final class FilenameUtil {
      * also excluding the final directory separator.
      * <p>
      * This method will handle a file in either Unix or Windows format.
-     * The method is entirely text based, and returns the text before the
+     * The method is entirely text-based, and returns the text before the
      * last forward or backslash.
      * <pre>
      * C:\a\b\c.txt --&gt; a\b
@@ -840,7 +839,7 @@ public final class FilenameUtil {
      * Gets the full path from a full filename, which is the prefix + path.
      * <p>
      * This method will handle a file in either Unix or Windows format.
-     * The method is entirely text based, and returns the text before and
+     * The method is entirely text-based, and returns the text before and
      * including the last forward or backslash.
      * <pre>
      * C:\a\b\c.txt --&gt; C:\a\b\
@@ -870,7 +869,7 @@ public final class FilenameUtil {
      * and also excluding the final directory separator.
      * <p>
      * This method will handle a file in either Unix or Windows format.
-     * The method is entirely text based, and returns the text before the
+     * The method is entirely text-based, and returns the text before the
      * last forward or backslash.
      * <pre>
      * C:\a\b\c.txt --&gt; C:\a\b
@@ -1064,8 +1063,8 @@ public final class FilenameUtil {
      * No processing is performed on the filenames other than comparison,
      * thus this is merely a null-safe case-sensitive equals.
      *
-     * @param filename1 the first filename to query, may be null
-     * @param filename2 the second filename to query, may be null
+     * @param filename1 the first filename to query, which may be null
+     * @param filename2 the second filename to query, which may be null
      * @return {@code true} if the filenames are equal, {@code null} equals null
      * @see IOCase#SENSITIVE
      */
@@ -1079,8 +1078,8 @@ public final class FilenameUtil {
      * No processing is performed on the filenames other than comparison.
      * The check is case-sensitive on Unix and case-insensitive on Windows.
      *
-     * @param filename1 the first filename to query, may be null
-     * @param filename2 the second filename to query, may be null
+     * @param filename1 the first filename to query, which may be null
+     * @param filename2 the second filename to query, which may be null
      * @return {@code true} if the filenames are equal, {@code null} equals null
      * @see IOCase#SYSTEM
      */
@@ -1096,8 +1095,8 @@ public final class FilenameUtil {
      * Both filenames are first passed to {@link #normalize(String)}.
      * The check is then performed in a case-sensitive manner.
      *
-     * @param filename1 the first filename to query, may be null
-     * @param filename2 the second filename to query, may be null
+     * @param filename1 the first filename to query, which may be null
+     * @param filename2 the second filename to query, which may be null
      * @return {@code true} if the filenames are equal, {@code null} equals null
      * @see IOCase#SENSITIVE
      */
@@ -1113,8 +1112,8 @@ public final class FilenameUtil {
      * The check is then performed case-sensitive on Unix and
      * case-insensitive on Windows.
      *
-     * @param filename1 the first filename to query, may be null
-     * @param filename2 the second filename to query, may be null
+     * @param filename1 the first filename to query, which may be null
+     * @param filename2 the second filename to query, which may be null
      * @return {@code true} if the filenames are equal, {@code null} equals null
      * @see IOCase#SYSTEM
      */
@@ -1126,8 +1125,8 @@ public final class FilenameUtil {
      * Checks whether two filenames are equal, optionally normalizing and providing
      * control over the case-sensitivity.
      *
-     * @param filename1 the first filename to query, may be null
-     * @param filename2 the second filename to query, may be null
+     * @param filename1 the first filename to query, which may be null
+     * @param filename2 the second filename to query, which may be null
      * @param normalized whether to normalize the filenames
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
      * @return {@code true} if the filenames are equal, {@code null} equals null
@@ -1367,7 +1366,7 @@ public final class FilenameUtil {
                         }
                     }
 
-                    // matched text token, move text index to end of matched token
+                    // matched text token, move text index to the end of matched token
                     textIdx += wcs[wcsIdx].length();
                     anyChars = false;
                 }
@@ -1388,7 +1387,7 @@ public final class FilenameUtil {
     /**
      * Splits a string into a number of tokens.
      * The text is split by '?' and '*'.
-     * Where multiple '*' occur consecutively they are collapsed into a single '*'.
+     * Where multiple '*' occur consecutively, they are collapsed into a single '*'.
      *
      * @param text the text to split
      * @return the array of tokens, never null

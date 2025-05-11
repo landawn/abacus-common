@@ -355,9 +355,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     }
 
     /**
-     * Returns an iterator over the elements in this list in proper sequence.
+     * Returns an iterator over the elements in this list in a proper sequence.
      *
-     * @return an iterator over the elements in this list in proper sequence
+     * @return an iterator over the elements in this list in a proper sequence
      * @see List#iterator()
      */
     @Override
@@ -366,12 +366,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     }
 
     /**
-     * Returns a list iterator over the elements in this list (in proper sequence), starting at the specified position in the list.
+     * Returns a list iterator over the elements in this list (in a proper sequence), starting at the specified position in the list.
      * The specified index indicates the first element that would be returned by an initial call to {@code next}.
      * An initial call to {@code previous} would return the element with the specified index minus one.
      *
      * @param index index of the first element to be returned from the list iterator (by a call to {@code next})
-     * @return a list iterator over the elements in this list (in proper sequence), starting at the specified position in the list
+     * @return a list iterator over the elements in this list (in a proper sequence), starting at the specified position in the list
      * @see List#listIterator(int)
      */
     @Override

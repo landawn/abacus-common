@@ -911,7 +911,7 @@ public final class HttpUtil {
     }
 
     /**
-     * For test only. Don't use it on production.
+     * For test only. Don't use it in production.
      * @deprecated
      */
     // copied from: https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
@@ -1018,7 +1018,7 @@ public final class HttpUtil {
             final ParsePosition position = new ParsePosition(0);
             Date result = STANDARD_DATE_FORMAT.get().parse(value, position);
             if (position.getIndex() == value.length()) {
-                // STANDARD_DATE_FORMAT must match exactly; all text must be consumed, e.g. no ignored
+                // STANDARD_DATE_FORMAT must match exactly; all text must be consumed, e.g., no ignored
                 // non-standard trailing "+01:00". Those cases are covered below.
                 return result;
             }

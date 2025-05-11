@@ -464,7 +464,7 @@ public final class ExcelUtil {
         } else if (cellValue instanceof Double val) {
             cell.setCellValue(val);
         } else {
-            cell.setCellValue(String.valueOf(cellValue));
+            cell.setCellValue(cellValue == null ? Strings.NULL : N.stringOf(cellValue));
         }
     }
 

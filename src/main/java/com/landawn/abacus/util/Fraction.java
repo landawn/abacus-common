@@ -123,9 +123,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * </p>
      *
      * @param numerator
-     *            the numerator, for example the three in 'three sevenths'
+     *            the numerator, for example, the three in 'three sevenths'
      * @param denominator
-     *            the denominator, for example the seven in 'three sevenths'
+     *            the denominator, for example, the seven in 'three sevenths'
      */
     private Fraction(final int numerator, final int denominator) {
         this.numerator = numerator;
@@ -153,9 +153,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * </p>
      *
      * @param numerator
-     *            the numerator, for example the three in 'three sevenths'
+     *            the numerator, for example, the three in 'three sevenths'
      * @param denominator
-     *            the denominator, for example the seven in 'three sevenths'
+     *            the denominator, for example, the seven in 'three sevenths'
      * @param reduce
      *            if it's {@code true}, reduce {@code Fraction} instance with the 2 parts of a fraction Y/Z. For example,
      *            if the input parameters represent 2/4, then the created fraction will be 1/2.
@@ -216,9 +216,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * The negative sign must be passed in on the whole number part.
      * </p>
      *
-     * @param whole the whole number, for example the one in 'one and three sevenths'
-     * @param numerator the numerator, for example the three in 'one and three sevenths'
-     * @param denominator the denominator, for example the seven in 'one and three sevenths'
+     * @param whole the whole number, for example, the one in 'one and three sevenths'
+     * @param numerator the numerator, for example, the three in 'one and three sevenths'
+     * @param denominator the denominator, for example, the seven in 'one and three sevenths'
      * @param reduce
      * @return a new fraction instance
      * @throws ArithmeticException             if the resulting numerator exceeds {@code Integer.MAX_VALUE}
@@ -616,7 +616,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
 
     /**
      * <p>
-     * Gets a fraction that is raised to the passed in power.
+     * Gets a fraction raised to the passed in power.
      * </p>
      *
      * <p>
@@ -626,7 +626,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param power
      *            the power to raise the fraction to
      * @return {@code this} if the power is one, {@code ONE} if the power is zero (even if the fraction equals
-     *         ZERO) or a new fraction instance raised to the appropriate power
+     *         ZERO) or a new fraction instance rose to the appropriate power
      * @throws ArithmeticException
      *             if the resulting numerator or denominator exceeds {@code Integer.MAX_VALUE}
      */
@@ -676,7 +676,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
         // keep u and v negative, as negative integers range down to
         // -2^31, while positive numbers can only be as large as 2^31-1
-        // (i.e. we can't necessarily negate a negative number without
+        // (i.e., we can't necessarily negate a negative number without
         // overflow)
         if (u > 0) {
             u = -u;
@@ -731,7 +731,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *            a factor
      * @return
      * @throws ArithmeticException
-     *             if the result can not be represented as an int
+     *             if the result cannot be represented as an int
      */
     private static int mulAndCheck(final int x, final int y) {
         final long m = (long) x * (long) y;
@@ -750,7 +750,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *            a non-negative factor
      * @return
      * @throws ArithmeticException
-     *             if the result can not be represented as an int
+     *             if the result cannot be represented as an int
      */
     private static int mulPosAndCheck(final int x, final int y) {
         /* assert x>=0 && y>=0; */
@@ -770,7 +770,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *            an addend
      * @return
      * @throws ArithmeticException
-     *             if the result can not be represented as an int
+     *             if the result cannot be represented as an int
      */
     private static int addAndCheck(final int x, final int y) {
         final long s = (long) x + (long) y;
@@ -789,7 +789,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *            the subtrahend
      * @return
      * @throws ArithmeticException
-     *             if the result can not be represented as an int
+     *             if the result cannot be represented as an int
      */
     private static int subAndCheck(final int x, final int y) {
         final long s = (long) x - (long) y;
@@ -967,8 +967,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * </p>
      *
      * <p>
-     * The format used in '<i>wholeNumber</i> <i>numerator</i>/<i>denominator</i>'. If the whole number is zero it will
-     * be omitted. If the numerator is zero, only the whole number is returned.
+     * The format used in '<i>wholeNumber</i> <i>numerator</i>/<i>denominator</i>'.
+     * If the whole number is zero, it will be omitted. If the numerator is zero, only the whole number is returned.
      * </p>
      *
      * @return a {@code String} form of the fraction
@@ -984,7 +984,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             } else if ((numerator > 0 ? -numerator : numerator) < -denominator) {
                 // note that we do the magnitude comparison test above with
                 // NEGATIVE (not positive) numbers, since negative numbers
-                // have a larger range.  otherwise numerator==Integer.MIN_VALUE
+                // have a larger range.  otherwise, numerator==Integer.MIN_VALUE
                 // is handled incorrectly.
                 final int properNumerator = getProperNumerator();
                 if (properNumerator == 0) {

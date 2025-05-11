@@ -191,13 +191,6 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
         return a;
     }
 
-    /**
-     * Array 2 collection.
-     *
-     * @param <E>
-     * @param x
-     * @param output
-     */
     @Override
     public <E> void array2Collection(final int[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {

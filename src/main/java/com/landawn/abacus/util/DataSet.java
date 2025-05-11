@@ -81,11 +81,11 @@ public interface DataSet {
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>rows</i> parameter is a 2D array where each sub-array represents a row in the DataSet.
+     * The <i>rows</i> parameter is a 2D array where each subarray represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rows A 2D array representing the data in the DataSet. Each sub-array is a row.
+     * @param rows A 2D array representing the data in the DataSet. Each subarray is a row.
      * @return A new DataSet with the specified column names and rows.
      * @throws IllegalArgumentException If the provided columnNames and rows do not align properly.
      * @see N#newDataSet(Collection, Object[][])
@@ -117,11 +117,11 @@ public interface DataSet {
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>columns</i> parameter is a 2D array where each sub-array represents a column in the DataSet.
+     * The <i>columns</i> parameter is a 2D array where each subarray represents a column in the DataSet.
      * The order of elements in each column should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param columns A 2D array representing the data in the DataSet. Each sub-array is a column.
+     * @param columns A 2D array representing the data in the DataSet. Each subarray is a column.
      * @return A new DataSet with the specified column names and columns.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      */
@@ -2204,7 +2204,7 @@ public interface DataSet {
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The value of each entry is the value of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2213,14 +2213,14 @@ public interface DataSet {
      * @param <V> The type of the values in the resulting map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
     <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName) throws IllegalArgumentException;
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The value of each entry is the value of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2232,14 +2232,14 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier) throws IllegalArgumentException;
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The value of each entry is the value of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2250,7 +2250,7 @@ public interface DataSet {
      * @param toRowIndex The ending index of the row range to be included in the map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
@@ -2259,7 +2259,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The value of each entry is the value of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2273,7 +2273,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
@@ -2282,7 +2282,7 @@ public interface DataSet {
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2292,14 +2292,14 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType) throws IllegalArgumentException;
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2312,7 +2312,7 @@ public interface DataSet {
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
@@ -2320,7 +2320,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2332,7 +2332,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2341,7 +2341,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2356,7 +2356,7 @@ public interface DataSet {
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2365,7 +2365,7 @@ public interface DataSet {
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2375,14 +2375,14 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier) throws IllegalArgumentException;
 
     /**
      * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2395,7 +2395,7 @@ public interface DataSet {
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
@@ -2403,7 +2403,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2415,7 +2415,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2424,7 +2424,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
@@ -2439,7 +2439,7 @@ public interface DataSet {
      * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
      * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
-     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2448,7 +2448,7 @@ public interface DataSet {
 
     /**
      * Converts the entire DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2457,14 +2457,14 @@ public interface DataSet {
      * @param <T> The type of the values in the resulting map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
     <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, String valueColumnName) throws IllegalArgumentException;
 
     /**
      * Converts the entire DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2477,7 +2477,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier)
@@ -2485,7 +2485,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2496,7 +2496,7 @@ public interface DataSet {
      * @param toRowIndex The ending index of the row range to be included in the map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
@@ -2505,7 +2505,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2520,7 +2520,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty.
      */
@@ -2529,7 +2529,7 @@ public interface DataSet {
 
     /**
      * Converts the entire DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2539,14 +2539,14 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
      * Converts the entire DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2560,7 +2560,7 @@ public interface DataSet {
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -2568,7 +2568,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2580,7 +2580,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2589,7 +2589,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2605,7 +2605,7 @@ public interface DataSet {
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2615,7 +2615,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2625,7 +2625,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier)
@@ -2633,7 +2633,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2647,7 +2647,7 @@ public interface DataSet {
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -2655,7 +2655,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
@@ -2667,7 +2667,7 @@ public interface DataSet {
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
-     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -2676,7 +2676,7 @@ public interface DataSet {
 
     /**
      * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
-     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting Multimap does not preserve the order of the rows in the DataSet.
@@ -2692,7 +2692,7 @@ public interface DataSet {
      * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
      * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
      * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
-     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
@@ -3307,7 +3307,7 @@ public interface DataSet {
      * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
      * @return A CSV string representing the entire DataSet.
-     * @see #toCsv(int, int, Collection, boolean, boolean)
+     * @see #toCsv(int, int, Collection)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3328,7 +3328,7 @@ public interface DataSet {
      * @return A CSV string representing the specified range of rows and columns in the DataSet.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
-     * @see #toCsv(int, int, Collection, boolean, boolean)
+     * @see #toCsv(int, int, Collection)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3345,7 +3345,7 @@ public interface DataSet {
      *
      * @param output The File where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, File)
+     * @see #toCsv(int, int, Collection, File)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3367,7 +3367,7 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, File)
+     * @see #toCsv(int, int, Collection, File)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3385,7 +3385,7 @@ public interface DataSet {
      *
      * @param output The OutputStream where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
+     * @see #toCsv(int, int, Collection, OutputStream)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3407,7 +3407,7 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
+     * @see #toCsv(int, int, Collection, OutputStream)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3425,7 +3425,7 @@ public interface DataSet {
      *
      * @param output The Writer where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
+     * @see #toCsv(int, int, Collection, Writer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -3447,7 +3447,7 @@ public interface DataSet {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
+     * @see #toCsv(int, int, Collection, Writer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -5276,7 +5276,7 @@ public interface DataSet {
     //     * Duplicated rows in the returned {@code DataSet} will be eliminated.
     //     *
     //     * @param other
-    //     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection, boolean)}
+    //     * @param keyColumnNames this parameter won't be used. Adding it here to be consistent with {@code union(DataSet, Collection, boolean)}
     //     * @param requiresSameColumns
     //     * @return a new DataSet
     //     */

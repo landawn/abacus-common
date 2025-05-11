@@ -227,7 +227,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

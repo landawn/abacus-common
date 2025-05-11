@@ -343,11 +343,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         return true;
     }
 
-    /**
-     * Range check for add.
-     *
-     * @param index
-     */
     private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -1456,11 +1451,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns List of {@code FloatList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code FloatList} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
+     * @param chunkSize the desired size of each subsequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

@@ -3202,7 +3202,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a The array of Boolean objects to be converted.
      * @param valueForNull The value to be used for {@code null} values in the input array.
      * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
-     * see #unbox(Boolean[], int, int, boolean)
+     * See #unbox(Boolean[], int, int, boolean)
      */
     @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final boolean valueForNull) {

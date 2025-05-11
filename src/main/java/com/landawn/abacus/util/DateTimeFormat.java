@@ -20,7 +20,7 @@ package com.landawn.abacus.util;
  */
 public enum DateTimeFormat {
     /**
-     * It's long number.
+     * It's a long number.
      */
     LONG,
 

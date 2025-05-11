@@ -74,7 +74,7 @@ public class UncheckedException extends RuntimeException {
     //    /**
     //     * Returns the cause of this exception.
     //     *
-    //     * @return  the {@code IOException} which is the cause of this exception.
+    //     * @return the {@code IOException} which is the cause of this exception.
     //     */
     //    @SuppressWarnings("sync-override")
     //    @Override

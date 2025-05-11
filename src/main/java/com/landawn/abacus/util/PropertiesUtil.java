@@ -1431,7 +1431,7 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Sets the creates the time.
+         * Sets the creation the time.
          *
          * @param createdTime the new creates the time
          */

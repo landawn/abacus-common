@@ -702,7 +702,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Converts the current ListMultimap into an ImmutableMap.
      *
      * Each key-value pair in the ListMultimap is transformed into a key-ImmutableList pair in the ImmutableMap.
-     * The ImmutableList contains all the values that were associated with the key in the ListMultimap.
+     * The ImmutableList contains all the values associated with the key in the ListMultimap.
      *
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
      */
@@ -720,7 +720,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Converts the current ListMultimap into an ImmutableMap using a provided map supplier.
      *
      * Each key-value pair in the ListMultimap is transformed into a key-ImmutableList pair in the ImmutableMap.
-     * The ImmutableList contains all the values that were associated with the key in the ListMultimap.
+     * The ImmutableList contains all the values associated with the key in the ListMultimap.
      *
      * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map.
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap

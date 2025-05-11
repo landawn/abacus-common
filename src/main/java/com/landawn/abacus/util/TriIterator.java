@@ -1005,7 +1005,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Converts the elements in this TriIterator to an array of the specified type.
      *
-     * @param <T> the type of the array elements. It should be super type of Triple.
+     * @param <T> the type of the array elements. It should be a super type of Triple.
      * @param a the array into which the elements of this TriIterator are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return an array containing the elements of this TriIterator

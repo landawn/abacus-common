@@ -390,11 +390,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return true;
     }
 
-    /**
-     * Range check for add.
-     *
-     * @param index
-     */
     private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -1502,7 +1497,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns List of {@code ShortList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code ShortList} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex

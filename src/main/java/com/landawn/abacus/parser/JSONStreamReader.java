@@ -41,7 +41,7 @@ class JSONStreamReader extends JSONStringReader {
      * @return
      */
     public static JSONReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
-        // Warning. There is a bug in below code ---> empty value is returned if input source is InputStream/Reader.
+        // Warning. There is a bug in below code ---> empty value is returned if the input source is InputStream/Reader.
         //    int n = 0;
         //
         //    try {
@@ -215,7 +215,7 @@ class JSONStreamReader extends JSONStringReader {
                         cnt++;
                     }
                 } else {
-                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip result.
+                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
                 }
             } else if (ch == '.' && pointPosition < 0) {
                 if (cnt == 0) {
@@ -244,7 +244,7 @@ class JSONStreamReader extends JSONStringReader {
 
                 break;
             }
-            // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
+            // why need this? For example, "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
             // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
             if (nextChar > 0) {
                 // saveChar(ch);

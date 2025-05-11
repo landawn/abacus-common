@@ -136,8 +136,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <br />
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
  * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
@@ -1105,11 +1105,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input boolean array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input boolean array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input boolean array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of boolean sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of boolean subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1130,14 +1130,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input boolean array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input boolean array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input boolean array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of boolean sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of boolean subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1161,11 +1161,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input char array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input char array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input char array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of char sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of char subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<char[]> split(final char[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1186,14 +1186,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input char array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input char array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input char array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of char sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of char subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1217,11 +1217,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input byte array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input byte array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input byte array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of byte sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of byte subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<byte[]> split(final byte[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1242,14 +1242,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input byte array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input byte array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input byte array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of byte sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of byte subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1273,11 +1273,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input short array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input short array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input short array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of short sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of short subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<short[]> split(final short[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1298,14 +1298,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input short array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input short array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input short array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of short sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of short subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1329,11 +1329,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input int array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input int array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input int array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of int sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of int subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<int[]> split(final int[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1354,14 +1354,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input int array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input int array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input int array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of int sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of int subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1385,11 +1385,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input long array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input long array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input long array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of long sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of long subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<long[]> split(final long[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1410,14 +1410,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input long array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input long array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input long array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of long sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of long subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1441,11 +1441,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input float array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input float array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input float array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of float sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of float subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<float[]> split(final float[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1466,14 +1466,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input float array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input float array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input float array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of float sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of float subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1497,11 +1497,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input double array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input double array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param a The input double array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of double sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of double subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static List<double[]> split(final double[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1522,14 +1522,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input double array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input double array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input double array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of double sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of double subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -1553,12 +1553,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input array into sub-arrays of the specified size. The last sub-array may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
      *
      * @param <T> The type of the elements in the array.
      * @param a The input array to be split.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      */
     public static <T> List<T[]> split(final T[] a, final int chunkSize) throws IllegalArgumentException {
@@ -1579,14 +1579,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input array into sub-arrays of the specified size. The last sub-array may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-arrays are created from the specified range in the input array.
+     * Splits the input array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
+     * The subarrays are created from the specified range in the input array.
      *
      * @param a The input array to be split.
      * @param fromIndex The start index for the slice of the array to be split, inclusive.
      * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each sub-array.
-     * @return A list of sub-arrays, each of size chunkSize (except possibly for the last one).
+     * @param chunkSize The desired size of each subarray.
+     * @return A list of subarrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
@@ -2649,7 +2649,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional boolean array into a one-dimensional boolean array.
+     * Flattens a two-dimensional boolean array into an one-dimensional boolean array.
      *
      * @param a The two-dimensional boolean array to be flattened.
      * @return A one-dimensional boolean array containing all elements in the input array.
@@ -2680,7 +2680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional char array into a one-dimensional char array.
+     * Flattens a two-dimensional char array into an one-dimensional char array.
      *
      * @param a The two-dimensional char array to be flattened.
      * @return A one-dimensional char array containing all elements in the input array.
@@ -2711,7 +2711,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional byte array into a one-dimensional byte array.
+     * Flattens a two-dimensional byte array into an one-dimensional byte array.
      *
      * @param a The two-dimensional byte array to be flattened.
      * @return A one-dimensional byte array containing all elements in the input array.
@@ -2742,7 +2742,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional short array into a one-dimensional short array.
+     * Flattens a two-dimensional short array into an one-dimensional short array.
      *
      * @param a The two-dimensional short array to be flattened.
      * @return A one-dimensional short array containing all elements in the input array.
@@ -2773,7 +2773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional int array into a one-dimensional int array.
+     * Flattens a two-dimensional int array into an one-dimensional int array.
      *
      * @param a The two-dimensional int array to be flattened.
      * @return A one-dimensional int array containing all elements in the input array.
@@ -2804,7 +2804,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional long array into a one-dimensional long array.
+     * Flattens a two-dimensional long array into an one-dimensional long array.
      *
      * @param a The two-dimensional long array to be flattened.
      * @return A one-dimensional long array containing all elements in the input array.
@@ -2835,7 +2835,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional float array into a one-dimensional float array.
+     * Flattens a two-dimensional float array into an one-dimensional float array.
      *
      * @param a The two-dimensional float array to be flattened.
      * @return A one-dimensional float array containing all elements in the input array.
@@ -2866,7 +2866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional double array into a one-dimensional double array.
+     * Flattens a two-dimensional double array into an one-dimensional double array.
      *
      * @param a The two-dimensional double array to be flattened.
      * @return A one-dimensional double array containing all elements in the input array.
@@ -2897,7 +2897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional array into a one-dimensional array.
+     * Flattens a two-dimensional array into an one-dimensional array.
      *
      * @param <T> The type of the elements in the array.
      * @param a The two-dimensional array to be flattened.
@@ -2913,7 +2913,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional array into a one-dimensional array.
+     * Flattens a two-dimensional array into an one-dimensional array.
      *
      * @param <T> The type of the elements in the array.
      * @param a The two-dimensional array to be flattened.
@@ -2994,7 +2994,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
-     * Flattens an {@code Iterable} of {@code Iterable<T>} into a one-dimensional List.
+     * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional List.
      *
      * @param <T> The type of the elements in the {@code Iterable}.
      * @param c The two-dimensional {@code Iterable} to be flattened.
@@ -3006,7 +3006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens an {@code Iterable} of {@code Iterable<T>} into a one-dimensional Collection.
+     * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional Collection.
      *
      * @param <T> The type of the elements in the {@code Iterable}.
      * @param <C> The type of the Collection to be returned.
@@ -3045,7 +3045,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens an {@code Iterator} of {@code Iterator<T>} into a one-dimensional Iterator.
+     * Flattens an {@code Iterator} of {@code Iterator<T>} into an one-dimensional Iterator.
      *
      * @param <T> The type of the elements in the Iterator.
      * @param iters The two-dimensional Iterator to be flattened.
@@ -3088,7 +3088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result List.
-     * This method is marked as Beta and may be subject to changes or removal in future versions.
+     * This method is marked as Beta and may be subject to changes or removal in a future versions.
      *
      * @param c The {@code Iterable} to be processed. Each element is checked if it's an {@code Iterable} and flattened if so.
      * @return A List containing the flattened elements of the input {@code Iterable}. If the input {@code Iterable} is {@code null}, an empty List is returned.
@@ -3100,7 +3100,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result Collection.
-     * This method is marked as Beta and may be subject to changes or removal in future versions.
+     * This method is marked as Beta and may be subject to changes or removal in a future versions.
      *
      * @param <T> The type of the elements in the {@code Iterable}.
      * @param <C> The type of the Collection to be returned.
@@ -13811,10 +13811,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static char min(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty"); //NOSONAR
+        checkArgNotEmpty(a, "The specified array cannot be null or empty"); //NOSONAR
 
         if (isEmpty(a)) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         return min(a, 0, a.length);
@@ -13831,7 +13831,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static char min(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         char min = a[fromIndex];
@@ -13852,7 +13852,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static byte min(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13868,7 +13868,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static byte min(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         byte min = a[fromIndex];
@@ -13889,7 +13889,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static short min(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13905,7 +13905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static short min(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         short min = a[fromIndex];
@@ -13926,7 +13926,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static int min(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13942,7 +13942,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static int min(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         int min = a[fromIndex];
@@ -13963,7 +13963,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static long min(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13979,7 +13979,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static long min(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         long min = a[fromIndex];
@@ -14001,7 +14001,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IEEE754rUtil#min(float[]) that handles NaN differently
      */
     public static float min(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -14018,7 +14018,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static float min(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         float min = a[fromIndex];
@@ -14042,7 +14042,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IEEE754rUtil#min(double[]) that handles NaN differently
      */
     public static double min(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -14059,7 +14059,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double min(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         double min = a[fromIndex];
@@ -14083,7 +14083,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Comparable[])
      */
     public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -14113,7 +14113,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Object[], Comparator)
      */
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return min(a, 0, a.length, cmp);
     }
@@ -14133,7 +14133,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
@@ -14165,7 +14165,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return min(c, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -14186,7 +14186,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
-            throw new IllegalArgumentException("The size of collection can not be null or empty");
+            throw new IllegalArgumentException("The size of collection cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
@@ -14264,7 +14264,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return min(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator can not be null or empty"); //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
 
         return min(iter, cmp);
     }
@@ -14293,7 +14293,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Iterator, Comparator)
      */
     public static <T> T min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator can not be null or empty");
+        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
         final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
 
@@ -14817,7 +14817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Object[], Comparator)
      */
     public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         if (a.length == 1) {
             return Pair.of(a[0], a[0]);
@@ -14866,7 +14866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterable, Comparator)
      */
     public static <T> Pair<T, T> minMax(@NotNull final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNull(c, "The specified iterable can not be null or empty");
+        checkArgNotNull(c, "The specified iterable cannot be null or empty");
 
         return minMax(c.iterator(), cmp);
     }
@@ -14895,7 +14895,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterator, Comparator)
      */
     public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(iter != null && iter.hasNext(), "The specified iterator can not be null or empty");
+        checkArgument(iter != null && iter.hasNext(), "The specified iterator cannot be null or empty");
 
         cmp = checkComparator(cmp);
 
@@ -15154,7 +15154,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
     public static char max(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15170,7 +15170,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static char max(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         char max = a[fromIndex];
@@ -15191,7 +15191,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
     public static byte max(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15207,7 +15207,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static byte max(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         byte max = a[fromIndex];
@@ -15228,7 +15228,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
     public static short max(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15244,7 +15244,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static short max(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         short max = a[fromIndex];
@@ -15265,7 +15265,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
     public static int max(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15281,7 +15281,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static int max(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         int max = a[fromIndex];
@@ -15302,7 +15302,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      */
     public static long max(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15318,7 +15318,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static long max(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         long max = a[fromIndex];
@@ -15340,7 +15340,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IEEE754rUtil#max(float[]) that handles NaN differently
      */
     public static float max(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15357,7 +15357,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static float max(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         float max = a[fromIndex];
@@ -15381,7 +15381,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IEEE754rUtil#max(double[]) that handles NaN differently
      */
     public static double max(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15398,7 +15398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double max(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         double max = a[fromIndex];
@@ -15423,7 +15423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Comparable[])
      */
     public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -15454,7 +15454,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Object[], Comparator)
      */
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return max(a, 0, a.length, cmp);
     }
@@ -15474,7 +15474,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T max(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -15507,7 +15507,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return max(c, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -15529,7 +15529,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
-            throw new IllegalArgumentException("The size of collection can not be null or empty");
+            throw new IllegalArgumentException("The size of collection cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -15608,7 +15608,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return max(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator can not be null or empty"); //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
 
         return max(iter, cmp);
     }
@@ -15637,7 +15637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Iterator, Comparator)
      */
     public static <T> T max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator can not be null or empty");
+        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
         final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
 
@@ -16328,7 +16328,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static char median(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16346,7 +16346,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16373,7 +16373,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static byte median(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16391,7 +16391,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16418,7 +16418,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static short median(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16436,7 +16436,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16474,7 +16474,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      */
     public static int median(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16492,7 +16492,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16519,7 +16519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static long median(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16537,7 +16537,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16564,7 +16564,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static float median(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16582,7 +16582,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16609,7 +16609,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static double median(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16627,7 +16627,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16654,7 +16654,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int[])
      */
     public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -16673,7 +16673,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         return (T) median(a, fromIndex, toIndex, NATURAL_COMPARATOR);
@@ -16693,7 +16693,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Object[], int, int, Comparator)
      */
     public static <T> T median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return median(a, 0, a.length, cmp);
     }
@@ -16717,7 +16717,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -16742,7 +16742,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Object[], int, int, Comparator)
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return median(c, 0, c.size());
     }
@@ -16781,7 +16781,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Object[], int, int, Comparator)
      */
     public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return median(c, 0, c.size(), cmp);
     }
@@ -16805,7 +16805,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can not be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
         }
 
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -16827,7 +16827,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static char kthLargest(final char[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16846,7 +16846,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -16907,7 +16907,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static byte kthLargest(final byte[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16926,7 +16926,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -16987,7 +16987,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static short kthLargest(final short[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17006,7 +17006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17067,7 +17067,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static int kthLargest(final int[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17086,7 +17086,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17147,7 +17147,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static long kthLargest(final long[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17166,7 +17166,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17227,7 +17227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static float kthLargest(final float[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17246,7 +17246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17307,7 +17307,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static double kthLargest(final double[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17327,7 +17327,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17389,7 +17389,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -17409,7 +17409,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         return kthLargest(a, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -17428,7 +17428,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#kthLargest(Collection, int)
      */
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotEmpty(a, "The specified array can not be null or empty");
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
         return kthLargest(a, 0, a.length, k, cmp);
     }
@@ -17450,7 +17450,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array can not be null or empty");
+            throw new IllegalArgumentException("The specified array cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -17511,7 +17511,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return kthLargest(c, 0, c.size(), k);
     }
@@ -17532,7 +17532,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can not be null or empty");
+            throw new IllegalArgumentException("The length of collection cannot be null or empty");
         }
 
         return kthLargest(c, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -17552,7 +17552,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotEmpty(c, "The specified collection can not be null or empty");
+        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return kthLargest(c, 0, c.size(), k, cmp);
     }
@@ -17574,7 +17574,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can not be null or empty");
+            throw new IllegalArgumentException("The length of collection cannot be null or empty");
         }
 
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -18669,7 +18669,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty"); //NOSONAR
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty"); //NOSONAR
 
         final int len = sortedArray.length;
         final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
@@ -18690,7 +18690,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Byte> m = newLinkedHashMap(Percentage.values().length);
@@ -18711,7 +18711,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Short> m = newLinkedHashMap(Percentage.values().length);
@@ -18773,7 +18773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Integer> percentiles(final int[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
@@ -18794,7 +18794,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
@@ -18815,7 +18815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
@@ -18836,7 +18836,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
@@ -18858,7 +18858,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
@@ -18880,7 +18880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #percentiles(int[])
      */
     public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedList, "The specified 'sortedList' can not be null or empty");
+        checkArgNotEmpty(sortedList, "The specified 'sortedList' cannot be null or empty");
 
         final int size = sortedList.size();
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
@@ -26033,7 +26033,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26049,7 +26049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26067,7 +26067,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param defaultIfNull the default value to return if the deserialized object is null
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string, or defaultIfNull if the deserialized object is null
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26086,7 +26086,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @return an object of type T deserialized from the JSON string, or defaultIfNull if the deserialized object is null
      * @throws IllegalArgumentException if the specified target type is {@code null}.
@@ -26106,7 +26106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26123,7 +26123,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26139,7 +26139,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26155,7 +26155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26172,7 +26172,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26189,7 +26189,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26205,7 +26205,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26221,7 +26221,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26238,7 +26238,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26255,7 +26255,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26271,7 +26271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26287,7 +26287,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26304,7 +26304,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26321,7 +26321,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26339,7 +26339,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to be deserialized
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -26359,7 +26359,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to be deserialized
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -26378,7 +26378,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -26399,7 +26399,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the specified target type is {@code null}.
@@ -26417,7 +26417,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26433,7 +26433,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26450,7 +26450,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26467,7 +26467,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26483,7 +26483,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26499,7 +26499,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26516,7 +26516,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26533,7 +26533,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26549,7 +26549,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26565,7 +26565,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26582,7 +26582,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26600,7 +26600,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26618,7 +26618,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26637,7 +26637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26654,7 +26654,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26670,7 +26670,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26687,7 +26687,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26704,7 +26704,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26722,7 +26722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26741,7 +26741,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26799,7 +26799,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given JSON string to its pretty-printed JSON format with indents and line breaks for easier reading.
      *
      * @param json the JSON string to be formatted
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final Class<?> transferType) {
@@ -26810,7 +26810,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given JSON string to its pretty-printed JSON format with indents and line breaks for easier reading.
      *
      * @param json the JSON string to be formatted
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final Type<?> transferType) {
@@ -26833,7 +26833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to be formatted
      * @param config the JSON serialization configuration
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
@@ -26848,7 +26848,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to be formatted
      * @param config the JSON serialization configuration
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g. {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
@@ -27350,7 +27350,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final Throwables.Runnable<E> action)
             throws IllegalArgumentException, E {
-        checkArgument(step != 0, "The input parameter 'step' can not be zero"); //NOSONAR
+        checkArgument(step != 0, "The input parameter 'step' cannot be zero"); //NOSONAR
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
             return;
@@ -27389,7 +27389,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final Throwables.IntConsumer<E> action)
             throws E {
-        checkArgument(step != 0, "The input parameter 'step' can not be zero");
+        checkArgument(step != 0, "The input parameter 'step' cannot be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
             return;
@@ -27435,7 +27435,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
             final Throwables.IntObjConsumer<? super T, E> action) throws E {
-        checkArgument(step != 0, "The input parameter 'step' can not be zero");
+        checkArgument(step != 0, "The input parameter 'step' cannot be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
             return;
@@ -29850,7 +29850,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The first element will be the result of the command/task which is completed first.
      * <br />
      * If an error occurs in one command/task, iteration will be interrupted and the error will be thrown.
-     * However, other commands/tasks won't be impacted or cancelled.
+     * However, other commands/tasks won't be impacted or canceled.
      *
      * @param commands the collection of commands/tasks to be executed
      * @return an iterator for iterating the results of the commands/tasks
@@ -29872,7 +29872,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The first element will be the result of the command/task which is completed first.
      * <br />
      * If an error occurs in one command/task, iteration will be interrupted and the error will be thrown.
-     * However, other commands/tasks won't be impacted or cancelled.
+     * However, other commands/tasks won't be impacted or canceled.
      *
      * @param commands the collection of commands/tasks to be executed
      * @param executor the executor to use for processing
@@ -29975,7 +29975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The first element will be the result of the command/task which is completed first.
      * <br />
      * If an error occurs in one command/task, iteration will be interrupted and the error will be thrown.
-     * However, other commands/tasks won't be impacted or cancelled.
+     * However, other commands/tasks won't be impacted or canceled.
      *
      * @param commands the collection of commands/tasks to be executed
      * @return an iterator for iterating the results of the commands/tasks
@@ -29997,7 +29997,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The first element will be the result of the command/task which is completed first.
      * <br />
      * If an error occurs in one command/task, iteration will be interrupted and the error will be thrown.
-     * However, other commands/tasks won't be impacted or cancelled.
+     * However, other commands/tasks won't be impacted or canceled.
      *
      * @param commands the collection of commands/tasks to be executed
      * @param executor the executor to use for processing
@@ -30059,7 +30059,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                             try {
                                 future.get();
                             } catch (InterruptedException | ExecutionException e) {
-                                // cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
+                                // Cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
                                 //    while (iter.hasNext()) {
                                 //        iter.next().cancel(false);
                                 //    }
@@ -30107,7 +30107,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If an error occurs in one task, {@code cancel()} will be called for other unfinished tasks.
      *
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @throws Exception if an error occurs during the execution of any command
      * @see Fn#r(com.landawn.abacus.util.function.Runnable)
@@ -30140,7 +30140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @throws Exception if an error occurs during the execution of any command
@@ -30183,7 +30183,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @param command4 the fourth command to be executed in another thread.
@@ -30233,7 +30233,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @param command4 the fourth command to be executed in another thread.
@@ -30291,7 +30291,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If an error occurs in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param commands the collection of commands/tasks to be executed asynchronously, except the first one which is executed in current thread.
+     * @param commands the collection of commands/tasks to be executed asynchronously, except the first one which is executed in the current thread.
      * @throws Exception if an error occurs during the execution of any command
      * @see Fn#r(com.landawn.abacus.util.function.Runnable)
     * @see Fn#c(com.landawn.abacus.util.function.Callable)
@@ -30309,7 +30309,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param commands the collection of commands/tasks to be executed asynchronously by the specified execute, except the first one which is executed in current thread.
+     * @param commands the collection of commands/tasks to be executed asynchronously by the specified execute, except the first one which is executed in the current thread.
      * @param executor the executor to use for processing
      * @throws Exception if an error occurs during the execution of any command
      * @see Fn#r(com.landawn.abacus.util.function.Runnable)
@@ -30363,7 +30363,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <R> the returned type of the first command
      * @param <R2> the returned type of the second command
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @return a tuple containing the results of the two commands
      * @throws Exception if an error occurs during the execution of any command
@@ -30402,7 +30402,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of the result of the first command
      * @param <R2> the type of the result of the second command
      * @param <R3> the type of the result of the third command
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @return a tuple containing the results of the three commands
@@ -30451,7 +30451,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R2> the type of the result of the second command
      * @param <R3> the type of the result of the third command
      * @param <R4> the type of the result of the fourth command
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @param command4 the fourth command to be executed in another thread.
@@ -30509,7 +30509,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R3> the type of the result of the third command
      * @param <R4> the type of the result of the fourth command
      * @param <R5> the type of the result of the fifth command
-     * @param command the first command to be executed in current thread.
+     * @param command the first command to be executed in the current thread.
      * @param command2 the second command to be executed in another thread.
      * @param command3 the third command to be executed in another thread.
      * @param command4 the fourth command to be executed in another thread.
@@ -30569,7 +30569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If an error occurs in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param commands the collection of commands/tasks to be executed asynchronously, except the first one which is executed in current thread.
+     * @param commands the collection of commands/tasks to be executed asynchronously, except the first one which is executed in the current thread.
      * @return a list containing the results of all commands
      * @throws Exception if an error occurs during the execution of any command
      * @see Fn#r(com.landawn.abacus.util.function.Runnable)
@@ -30588,7 +30588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If an error occurs in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param commands the collection of commands/tasks to be executed asynchronously by the specified executor, except the first one which is executed in current thread.
+     * @param commands the collection of commands/tasks to be executed asynchronously by the specified executor, except the first one which is executed in the current thread.
      * @param executor the executor to use for processing
      * @return a list containing the results of all commands
      * @throws Exception if an error occurs during the execution of any command

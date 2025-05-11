@@ -171,7 +171,7 @@ public final class ClassUtil {
 
     private static final String HAS = "has";
 
-    // ... it has to be big enough to make it's safety to add element to
+    // ... it has to be big enough to make it's safety to add an element to
     // ArrayBlockingQueue.
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
@@ -645,7 +645,7 @@ public final class ClassUtil {
     }
 
     /**
-     * The property maybe only have get method if its type is collection or map by xml binding specification
+     * The property maybe only has get method if its type is collection or map by xml binding specification
      * Otherwise, it will be ignored if not registered as an XML binding class.
      *
      * @param cls the class to be registered for XML binding
@@ -882,7 +882,7 @@ public final class ClassUtil {
 
     /**
      * Formalizes the given property name by converting it to camel case and replacing any reserved keywords with their mapped values.
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
+     * It's designed for field/method/class/column/table names. And source and target Strings will be cached.
      *
      * @param propName the property name to be formalized
      * @return the formalized property name
@@ -1065,7 +1065,7 @@ public final class ClassUtil {
     //        }
     //
     //        // SHOULD NOT set it true here.
-    //        // if (method != null) {
+    //        // If (method != null) {
     //        // ClassUtil.setAccessible(method, true);
     //        // }
     //
@@ -1378,7 +1378,7 @@ public final class ClassUtil {
     //        }
     //
     //        // SHOULD NOT set it true here.
-    //        // if (method != null) {
+    //        // If (method != null) {
     //        // ClassUtil.setAccessible(method, true);
     //        // }
     //
@@ -1895,7 +1895,7 @@ public final class ClassUtil {
                     field = getPropField(cls, formalizePropName(propName));
                 }
 
-                // set method mask to avoid query next time.
+                // set method mask to avoid a query next time.
                 if (field == null) {
                     field = FIELD_MASK;
                 }
@@ -1986,7 +1986,7 @@ public final class ClassUtil {
      * getter/setter method for the class/bean generated/wrote by JAXB specification.
      *
      * @param cls the class from which the property get methods are to be retrieved
-     * @return an immutable map of property get methods for the specified class
+     * @return an immutable map of property getter methods for the specified class
      */
     public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
         ImmutableMap<String, Method> getterMethodList = beanDeclaredPropGetMethodPool.get(cls);
@@ -2037,7 +2037,7 @@ public final class ClassUtil {
                     method = getPropSetMethod(cls, formalizePropName(propName));
                 }
 
-                // set method mask to avoid query next time.
+                // set method mask to avoid a query next time.
                 if (method == null) {
                     method = METHOD_MASK;
                 }
@@ -2355,7 +2355,7 @@ public final class ClassUtil {
 
     /**
      * Sets the property value by invoking the getter method on the provided bean.
-     * The returned type of the get method should be {@code Collection} or {@code Map}. And the specified property value and the returned value must be same type.
+     * The returned type of the get method should be {@code Collection} or {@code Map}. And the specified property value and the returned value must be the same type.
      *
      * @param bean the object on which the property value is to be set
      * @param propGetMethod the method to be invoked to get the property value
@@ -2816,11 +2816,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is field get method.
+     * Checks if is field getter method.
      *
      * @param method
      * @param field
-     * @return {@code true}, if is field get method
+     * @return {@code true}, if is field getter method
      */
     static boolean isFieldGetMethod(final Method method, final Field field) {
         if (!isGetMethod(method) || Object.class.equals(method.getDeclaringClass()) || !method.getReturnType().isAssignableFrom(field.getType())) {
@@ -2841,7 +2841,7 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is gets the method.
+     * Checks if it's a property getter method.
      *
      * @param method
      * @return {@code true}, if is gets the method
@@ -2858,11 +2858,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is JAXB get method.
+     * Checks if is JAXB getter method.
      *
      * @param instance
      * @param method
-     * @return {@code true}, if is JAXB get method
+     * @return {@code true}, if is JAXB getter method
      */
     static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
@@ -3151,8 +3151,7 @@ public final class ClassUtil {
                 beanPropGetMethodPool.get(cls).putAll(propGetMethodMap);
             }
 
-            // for Double-Checked Locking is Broke initialize it before
-            // put it into map.
+            // for Double-Checked Locking is Broke to initialize it before put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
             //noinspection ResultOfMethodCallIgnored
             unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
@@ -3335,7 +3334,7 @@ public final class ClassUtil {
     //        }
     //
     //        // SHOULD NOT set it true here.
-    //        // if (method != null) {
+    //        // If (method != null) {
     //        // ClassUtil.setAccessible(method, true);
     //        // }
     //

@@ -35,7 +35,7 @@ import java.security.NoSuchAlgorithmException;
  * Note: copied from <a href="https://commons.apache.org/proper/commons-codec">Apache commons-codec</a>.
  * <p />
  *
- * Operations to simplify common {@link java.security.MessageDigest} tasks. This class is immutable and thread-safe. However the MessageDigest instances it
+ * Operations to simplify common {@link java.security.MessageDigest} tasks. This class is immutable and thread-safe. However, the MessageDigest instances it
  * creates generally won't be.
  * <p>
  * The {@link MessageDigestAlgorithms} class provides constants for standard digest algorithms that can be used with the {@link #getDigest(String)} method and
@@ -66,7 +66,7 @@ public class DigestUtil {
     /**
      * Reads through a byte array and returns the digest for the data. Provided for symmetry with other methods.
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @return the digest
      * @since 1.11
@@ -78,7 +78,7 @@ public class DigestUtil {
     /**
      * Reads through a ByteBuffer and returns the digest for the data
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @return the digest
      * @since 1.11
@@ -91,7 +91,7 @@ public class DigestUtil {
     /**
      * Reads through a File and returns the digest for the data
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -104,7 +104,7 @@ public class DigestUtil {
     /**
      * Reads through an InputStream and returns the digest for the data
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -117,7 +117,7 @@ public class DigestUtil {
     /**
      * Reads through a File and returns the digest for the data
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @param options       options How to open the file
      * @return the digest
@@ -131,7 +131,7 @@ public class DigestUtil {
     /**
      * Reads through a RandomAccessFile using non-blocking-io (NIO) and returns the digest for the data
      *
-     * @param messageDigest The MessageDigest to use (for example MD5)
+     * @param messageDigest The MessageDigest to use (for example, MD5)
      * @param data          Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -389,7 +389,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD2 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD2 digest as a hexadecimal string
@@ -400,7 +400,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD2 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD2 digest as a hexadecimal string
@@ -412,7 +412,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD2 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD2 digest as a hexadecimal string
@@ -455,7 +455,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD5 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD5 digest as a hexadecimal string
@@ -465,7 +465,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD5 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD5 digest as a hexadecimal string
@@ -477,7 +477,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 32 character hexadecimal string.
+     * Calculates the MD5 digest and returns the value as a 32-character hexadecimal string.
      *
      * @param data Data to digest
      * @return MD5 digest as a hexadecimal string
@@ -1270,7 +1270,7 @@ public class DigestUtil {
     /**
      * Reads through a File and updates the digest for the data
      *
-     * @param digest The MessageDigest to use (for example MD5)
+     * @param digest The MessageDigest to use (for example, MD5)
      * @param data   Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -1287,7 +1287,7 @@ public class DigestUtil {
      *
      * TODO Decide if this should be public.
      *
-     * @param digest The MessageDigest to use (for example MD5)
+     * @param digest The MessageDigest to use (for example, MD5)
      * @param data   Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -1306,7 +1306,7 @@ public class DigestUtil {
     /**
      * Reads through an InputStream and updates the digest for the data
      *
-     * @param digest      The MessageDigest to use (for example MD5)
+     * @param digest      The MessageDigest to use (for example, MD5)
      * @param inputStream Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream
@@ -1327,7 +1327,7 @@ public class DigestUtil {
     /**
      * Reads through a Path and updates the digest for the data
      *
-     * @param digest  The MessageDigest to use (for example MD5)
+     * @param digest  The MessageDigest to use (for example, MD5)
      * @param path    Data to digest
      * @param options options How to open the file
      * @return the digest
@@ -1343,7 +1343,7 @@ public class DigestUtil {
     /**
      * Reads through a RandomAccessFile and updates the digest for the data using non-blocking-io (NIO)
      *
-     * @param digest The MessageDigest to use (for example MD5)
+     * @param digest The MessageDigest to use (for example, MD5)
      * @param data   Data to digest
      * @return the digest
      * @throws IOException On error reading from the stream

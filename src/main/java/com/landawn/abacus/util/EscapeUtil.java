@@ -74,10 +74,10 @@ public final class EscapeUtil {
             new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
-     * Translator object for escaping Json.
+     * Translator object for escaping JSON.
      *
      * While {@link #escapeJson(String)} is the expected method of use, this
-     * object allows the Json escaping functionality to be used
+     * object allows the JSON escaping functionality to be used
      * as the foundation for a custom translator.
      *
      */
@@ -178,10 +178,10 @@ public final class EscapeUtil {
     public static final CharSequenceTranslator UNESCAPE_ECMASCRIPT = UNESCAPE_JAVA;
 
     /**
-     * Translator object for unescaping escaped Json.
+     * Translator object for unescaping escaped JSON.
      *
      * While {@link #unescapeJson(String)} is the expected method of use, this
-     * object allows the Json unescaping functionality to be used
+     * object allows the JSON unescaping functionality to be used
      * as the foundation for a custom translator.
      *
      */
@@ -266,7 +266,7 @@ public final class EscapeUtil {
      * output string: He didn't say, \"Stop!\"
      * </pre>
      *
-     * @param input String to escape values in, may be null
+     * @param input String to escape values in, which may be null
      * @return String with escaped values, {@code null} if {@code null} string input
      */
     public static String escapeJava(final String input) {
@@ -292,7 +292,7 @@ public final class EscapeUtil {
      * output string: He didn\'t say, \"Stop!\"
      * </pre>
      *
-     * @param input String to escape values in, may be null
+     * @param input String to escape values in, which may be null
      * @return String with escaped values, {@code null} if {@code null} string input
      *
      */
@@ -301,15 +301,15 @@ public final class EscapeUtil {
     }
 
     /**
-     * <p>Escapes the characters in a {@code String} using Json String rules.</p>
-     * <p>Escapes any values it finds into their Json String form.
+     * <p>Escapes the characters in a {@code String} using JSON String rules.</p>
+     * <p>Escapes any values it finds into their JSON String form.
      * Deals correctly with quotes and control-chars (tab, backslash, cr, ff, etc.) </p>
      *
      * <p>So a tab becomes the characters {@code '\\'} and
      * {@code 't'}.</p>
      *
-     * <p>The only difference between Java strings and Json strings
-     * is that in Json, forward-slash (/) is escaped.</p>
+     * <p>The only difference between Java strings and JSON strings
+     * is that in JSON, forward-slash (/) is escaped.</p>
      *
      * <p>See <a href="http://www.ietf.org/rfc/rfc4627.txt">rfc4627</a> for further details. </p>
      *
@@ -319,7 +319,7 @@ public final class EscapeUtil {
      * output string: He didn't say, \"Stop!\"
      * </pre>
      *
-     * @param input String to escape values in, may be null
+     * @param input String to escape values in, which may be null
      * @return String with escaped values, {@code null} if {@code null} string input
      *
      */
@@ -333,7 +333,7 @@ public final class EscapeUtil {
      * {@code 'n'} into a newline character, unless the {@code '\'}
      * is preceded by another {@code '\'}.</p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      */
     public static String unescapeJava(final String input) {
@@ -347,7 +347,7 @@ public final class EscapeUtil {
      * into a newline character, unless the {@code '\'} is preceded by another
      * {@code '\'}.</p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return A new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeJava(String)
      */
@@ -356,13 +356,13 @@ public final class EscapeUtil {
     }
 
     /**
-     * <p>Unescapes any Json literals found in the {@code String}.</p>
+     * <p>Unescapes any JSON literals found in the {@code String}.</p>
      *
      * <p>For example, it will turn a sequence of {@code '\'} and {@code 'n'}
      * into a newline character, unless the {@code '\'} is preceded by another
      * {@code '\'}.</p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return A new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeJava(String)
      */
@@ -389,7 +389,7 @@ public final class EscapeUtil {
      * Note that the commonly used apostrophe escape character (&amp;apos;)
      * is not a legal bean and so is not supported). </p>
      *
-     * @param input the {@code String} to escape, may be null
+     * @param input the {@code String} to escape, which may be null
      * @return a new escaped {@code String}, {@code null} if {@code null} string input
      *
      * @see <a href="http://hotwired.lycos.com/webmonkey/reference/special_characters/">ISO Entities</a>
@@ -407,7 +407,7 @@ public final class EscapeUtil {
      * <p>Escapes the characters in a {@code String} using HTML entities.</p>
      * <p>Supports only the HTML 3.0 entities. </p>
      *
-     * @param input the {@code String} to escape, may be null
+     * @param input the {@code String} to escape, which may be null
      * @return a new escaped {@code String}, {@code null} if {@code null} string input
      *
      */
@@ -426,10 +426,10 @@ public final class EscapeUtil {
      * will become {@code "<Français>"}</p>
      *
      * <p>If a bean is unrecognized, it is left alone, and inserted
-     * verbatim into the result string. e.g. {@code "&gt;&zzzz;x"} will
+     * verbatim into the result string. e.g., {@code "&gt;&zzzz;x"} will
      * become {@code ">&zzzz;x"}.</p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      *
      */
@@ -442,7 +442,7 @@ public final class EscapeUtil {
      * containing the actual Unicode characters corresponding to the
      * escapes. Supports only HTML 3.0 entities.</p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      *
      */
@@ -473,7 +473,7 @@ public final class EscapeUtil {
      * document. If you want to allow more non-text characters in an XML 1.1
      * document, use {@link #escapeXml11(String)}.</p>
      *
-     * @param input the {@code String} to escape, may be null
+     * @param input the {@code String} to escape, which may be null
      * @return a new escaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeXml(java.lang.String)
      */
@@ -502,7 +502,7 @@ public final class EscapeUtil {
      * <p>The returned string can be inserted into a valid XML 1.1 document. Do not
      * use it for XML 1.0 documents.</p>
      *
-     * @param input the {@code String} to escape, may be null
+     * @param input the {@code String} to escape, which may be null
      * @return a new escaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeXml(java.lang.String)
      */
@@ -523,7 +523,7 @@ public final class EscapeUtil {
      * <p>Note that numerical \\u Unicode codes are unescaped to their respective
      *    Unicode characters. This may change in future releases. </p>
      *
-     * @param input the {@code String} to unescape, may be null
+     * @param input the {@code String} to unescape, which may be null
      * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
@@ -549,7 +549,7 @@ public final class EscapeUtil {
      * see <a href="http://en.wikipedia.org/wiki/Comma-separated_values">Wikipedia</a> and
      * <a href="http://tools.ietf.org/html/rfc4180">RFC 4180</a>.
      *
-     * @param input the input CSV column String, may be null
+     * @param input the input CSV column String, which may be null
      * @return
      * newline or double quote, {@code null} if {@code null} string input
      */
@@ -573,7 +573,7 @@ public final class EscapeUtil {
      * see <a href="http://en.wikipedia.org/wiki/Comma-separated_values">Wikipedia</a> and
      * <a href="http://tools.ietf.org/html/rfc4180">RFC 4180</a>.
      *
-     * @param input the input CSV column String, may be null
+     * @param input the input CSV column String, which may be null
      * @return
      * quotes unescaped, {@code null} if {@code null} string input
      */
@@ -777,7 +777,7 @@ public final class EscapeUtil {
 
         /**
          * <p>
-         * Constructs a {@code JavaUnicodeEscaper} outside of the specified values (exclusive).
+         * Constructs a {@code JavaUnicodeEscaper} outside the specified values (exclusive).
          * </p>
          *
          * @param codepointLow
@@ -891,7 +891,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} outside of the specified values (exclusive). </p>
+         * <p>Constructs a {@code NumericBeanEscaper} outside the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
@@ -939,9 +939,8 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translates escaped Unicode values of the form \\u+\d\d\d\d back to
-     * Unicode. It supports multiple 'u' characters and will work with or
-     * without the +.
+     * Translates escaped Unicode values of the form {@code \\u+\d\d\d\d} back to Unicode.
+     * It supports multiple {@code 'u'} characters and will work with or without the {@code +}.
      *
      */
     static class UnicodeUnescaper extends CharSequenceTranslator {
@@ -1040,7 +1039,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a {@code UnicodeEscaper} outside of the specified values (exclusive). </p>
+         * <p>Constructs a {@code UnicodeEscaper} outside the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
@@ -1159,7 +1158,7 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translate XML numeric entities of the form &amp;#[xX]?\d+;? to
+     * Translates XML numeric entities of the form &amp;#[xX]?\d+;? to
      * the specific codepoint.
      *
      * Note that the semicolon is optional.
@@ -1211,7 +1210,7 @@ public final class EscapeUtil {
         /**
          * Whether the passed in option is currently set.
          *
-         * @param option to check state of
+         * @param option to check the state of
          * @return whether the option is set
          */
         public boolean isSet(final OPTION option) {
@@ -1303,9 +1302,8 @@ public final class EscapeUtil {
         /**
          * Define the lookup table to be used in translation
          *
-         * Note that, as of Lang 3.1, the key to the lookup table is converted to a
-         * java.lang.String. This is because we need the key to support hashCode and
-         * equals(Object), allowing it to be the key for a HashMap. See LANG-882.
+         * Note that, as of Lang 3.1, the key to the lookup table is converted to a java.lang.String.
+         * This is because we need the key to support hashCode and equals(Object), allowing it to be the key for a HashMap. See LANG-882.
          *
          * @param lookup CharSequence[][] table of size [*][2]
          */
@@ -1365,7 +1363,7 @@ public final class EscapeUtil {
     abstract static class CodePointTranslator extends CharSequenceTranslator {
 
         /**
-         * Implementation of translate that maps onto the abstract translate(int, Writer) method.
+         * Implementation of translate that maps onto the abstract translate (int, Writer) method.
          * {@inheritDoc}
          */
         @Override
@@ -1475,7 +1473,7 @@ public final class EscapeUtil {
             final String quoteless = input.subSequence(1, input.length() - 1).toString();
 
             if (Strings.containsAny(quoteless, CSV_SEARCH_CHARS)) {
-                // deal with escaped quotes; ie ""
+                // deal with escaped quotes; i.e., ""
                 out.write(Strings.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
             } else {
                 out.write(input.toString());
@@ -1909,7 +1907,7 @@ public final class EscapeUtil {
         private static final String[][] JAVA_CTRL_CHARS_UNESCAPE = invert(JAVA_CTRL_CHARS_ESCAPE);
 
         /**
-         * Used to invert an escape array into an unescape array.
+         * Used to invert an escape array into an unescaped array.
          *
          * @param array String[][] to be inverted
          * @return String[][] inverted array

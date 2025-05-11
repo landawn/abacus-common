@@ -331,7 +331,7 @@ public interface Logger {
      * Log a message at the DEBUG level according to the specified format and arguments.
      *
      * <p>
-     * This form avoids superfluous object creation when the logger is disabled for the      level.
+     * This form avoids superfluous object creation when the logger is disabled for the level.
      * </p>
      *
      * @param template

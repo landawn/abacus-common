@@ -45,13 +45,10 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
     @SuppressWarnings("rawtypes")
     private final Class<Tuple3<T1, T2, T3>> typeClass = (Class) Tuple3.class; //NOSONAR
 
-    /** The type 1. */
     private final Type<T1> type1;
 
-    /** The type 2. */
     private final Type<T2> type2;
 
-    /** The type 3. */
     private final Type<T3> type3;
 
     private final Type<?>[] parameterTypes;

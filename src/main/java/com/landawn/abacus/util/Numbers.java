@@ -49,9 +49,9 @@ import com.landawn.abacus.type.Type;
  * <br />
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
+ * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
  * <br />
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -110,10 +110,10 @@ public final class Numbers {
 
     private static final long ONE_BITS = doubleToRawLongBits(1.0);
 
-    /** The biggest half power of two that can fit in an unsigned int. */
+    /** The biggest half-power of two that can fit in an unsigned int. */
     static final int INT_MAX_POWER_OF_SQRT2_UNSIGNED = 0xB504F333;
 
-    /**  The biggest half power of two that fits into an unsigned long. */
+    /**  The biggest half-power of two that fits into an unsigned long. */
     static final long MAX_POWER_OF_SQRT2_UNSIGNED = 0xB504F333F9DE6484L;
 
     static final long MAX_SIGNED_POWER_OF_TWO = 1L << (Long.SIZE - 2);
@@ -1789,7 +1789,7 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1815,7 +1815,7 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1850,7 +1850,7 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1875,7 +1875,7 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1900,7 +1900,7 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1952,7 +1952,7 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a {@code String} to convert, may be null
+     * @param str a {@code String} to convert, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -1983,7 +1983,7 @@ public final class Numbers {
      * 8 - or BigInteger if there are more than 16 digits.
      * </p>
      * <p>
-     * Then, the value is examined for a type qualifier on the end, i.e. one of
+     * Then, the value is examined for a type qualifier on the end, i.e., one of
      * {@code 'f','F','d','D','l','L'}. If it is found, it starts trying to
      * create successively larger types from the type specified until one is
      * found that can represent the value.
@@ -2006,7 +2006,7 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a String containing a number, may be null
+     * @param str a String containing a number, which may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
@@ -2374,7 +2374,7 @@ public final class Numbers {
      *
      * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
      * {@code 0X} qualifier, octal numbers, scientific notation and
-     * numbers marked with a type qualifier (e.g. 123L).</p>
+     * numbers marked with a type qualifier (e.g., 123L).</p>
      *
      * <p>Non-hexadecimal strings beginning with a leading zero are
      * treated as octal values. Thus the string {@code 09} will return
@@ -2434,7 +2434,7 @@ public final class Numbers {
         // for type qualifiers
         int i = start;
         // loop to the next to last char or to the last char if we need another digit to
-        // make a valid number (e.g. chars[0..5] = "1234E")
+        // make a valid number (e.g., chars[0..5] = "1234E")
         while (i < len || i < len + 1 && allowSigns && !foundDigit) {
             if (chars[i] >= '0' && chars[i] <= '9') {
                 foundDigit = true;
@@ -3051,7 +3051,7 @@ public final class Numbers {
     }
 
     /*
-     * The maximum number of bits in a square root for which we'll precompute an explicit half power
+     * The maximum number of bits in a square root for which we'll precompute an explicit half-power
      * of two. This can be any value, but higher values incur more class load time and linearly
      * increasing memory consumption.
      */
@@ -3245,7 +3245,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException of the next-higher power of two is not representable as a
-     *         {@code long}, i.e. when {@code x > 2^62}
+     *         {@code long}, i.e., when {@code x > 2^62}
      */
     public static long ceilingPowerOfTwo(final long x) {
         checkPositive("x", x);
@@ -3381,8 +3381,7 @@ public final class Numbers {
         final long guess = (long) Math.sqrt(x);
         // Note: guess is always <= FLOOR_SQRT_MAX_LONG.
         final long guessSquared = guess * guess;
-        // Note (2013-2-26): benchmarks indicate that, inscrutably enough, using if statements is
-        // faster here than using lessThanBranchFree.
+        // Note (2013-2-26): benchmarks indicate that, inscrutably enough, using if statements are faster here than using lessThanBranchFree.
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(guessSquared == x);
@@ -4437,8 +4436,8 @@ public final class Numbers {
      *
      * <p><b>Warning:</b> the result takes <i>O(n log n)</i> space, so use cautiously.
      *
-     * <p>This uses an efficient binary recursive algorithm to compute the factorial with balanced
-     * multiplies. It also removes all the 2s from the intermediate products (shifting them back in at
+     * <p>This uses an efficient binary recursive algorithm to compute the factorial with balanced multiplies.
+     * It also removes all the 2s from the intermediate products (shifting them back in at
      * the end).
      *
      * @param n
@@ -4614,7 +4613,7 @@ public final class Numbers {
                     /*
                      * We want to do this in long math for speed, but want to avoid overflow. We adapt the
                      * technique previously used by BigIntegerMath: maintain separate numerator and
-                     * denominator accumulators, multiplying the fraction into result when near overflow.
+                     * denominator accumulators, multiplying the fraction into the result when near overflow.
                      */
                     for (int i = 2; i <= k; i++, n--) {
                         if (numeratorBits + nBits < Long.SIZE - 1) {
@@ -4624,7 +4623,7 @@ public final class Numbers {
                             numeratorBits += nBits;
                         } else {
                             // It might not be safe to multiply into numerator and denominator,
-                            // so multiply (numerator / denominator) into result.
+                            // so multiply (numerator / denominator) into the result.
                             result = multiplyFraction(result, numerator, denominator);
                             numerator = n;
                             denominator = i;
@@ -5142,7 +5141,7 @@ public final class Numbers {
     }
 
     /**
-     * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly-equal values.
+     * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly equal values.
      *
      * <p>This method is equivalent to
      * {@code fuzzyEquals(a, b, tolerance) ? 0 : Double.compare(a, b)}. In particular, like

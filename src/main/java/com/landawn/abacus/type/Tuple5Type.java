@@ -47,19 +47,14 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     @SuppressWarnings("rawtypes")
     private final Class<Tuple5<T1, T2, T3, T4, T5>> typeClass = (Class) Tuple5.class; //NOSONAR
 
-    /** The type 1. */
     private final Type<T1> type1;
 
-    /** The type 2. */
     private final Type<T2> type2;
 
-    /** The type 3. */
     private final Type<T3> type3;
 
-    /** The type 4. */
     private final Type<T4> type4;
 
-    /** The type 5. */
     private final Type<T5> type5;
 
     private final Type<?>[] parameterTypes;

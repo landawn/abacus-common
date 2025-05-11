@@ -2468,7 +2468,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> The type of the interface for the proxy class to implement.
      * @param interfaceClass The Class object of the interface for the proxy class to implement. Must not be {@code null}.
-     * @param h The invocation handler to dispatch method invocations to. It's a object that implements the InvocationHandler interface.
+     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
@@ -3822,7 +3822,7 @@ sealed class CommonUtil permits N {
         final Object firstElement = firstOrNullIfEmpty(rows);
 
         if (firstElement == null) {
-            throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
+            throw new IllegalArgumentException("Column name list cannot be obtained from row list because its first element is null");
         }
 
         final Class<?> cls = firstElement.getClass();
@@ -3883,7 +3883,7 @@ sealed class CommonUtil permits N {
         checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rows)) {
-        //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
+        //        // throw new IllegalArgumentException("Column name list and row list cannot be both null or empty");
         //        return newEmptyDataSet(properties);
         //    }
 
@@ -3898,7 +3898,7 @@ sealed class CommonUtil permits N {
         //
         //        if (firstElement == null) {
         //            // return newEmptyDataSet(properties);
-        //            throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
+        //            throw new IllegalArgumentException("Column name list cannot be obtained from row list because its first element is null");
         //        }
         //
         //        final Class<?> cls = firstElement.getClass();
@@ -3933,7 +3933,7 @@ sealed class CommonUtil permits N {
         //        }
         //
         //        if (isEmpty(columnNames)) {
-        //            throw new IllegalArgumentException("Column name list can not be obtained from row list because it's empty or null");
+        //            throw new IllegalArgumentException("Column name list cannot be obtained from row list because it's empty or null");
         //        }
         //    }
 
@@ -4017,13 +4017,13 @@ sealed class CommonUtil permits N {
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>rowList</i> parameter is a 2D array where each sub-array represents a row in the DataSet.
+     * The <i>rowList</i> parameter is a 2D array where each subarray represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rowList A 2D array of objects representing the data in the DataSet. Each sub-array is a row.
+     * @param rowList A 2D array of objects representing the data in the DataSet. Each subarray is a row.
      * @return A new DataSet with the specified column names and rows.
-     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the sub-arrays in <i>rowList</i>.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
      * @see DataSet#rows(Collection, Object[][])
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
@@ -4033,7 +4033,7 @@ sealed class CommonUtil permits N {
         checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rowList)) {
-        //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
+        //        // throw new IllegalArgumentException("Column name list and row list cannot be both null or empty");
         //        return newEmptyDataSet();
         //    }
 
@@ -10084,7 +10084,7 @@ sealed class CommonUtil permits N {
     //     * @see Strings#nullToEmpty(String[])
     //     */
     //    static String[] nullToEmptyForAll(final String[] a) { // nullToEmptyForAll is better?
-    //        if (a == null) {
+    //        If (a == null) {
     //            return EMPTY_STRING_ARRAY;
     //        }
     //
@@ -11149,8 +11149,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified object arrays are empty.
      *
-     * @param a the first object array to check, may be null
-     * @param b the second object array to check, may be null
+     * @param a the first object array to check, which may be null
+     * @param b the second object array to check, which may be null
      * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Object[] a, final Object[] b) {
@@ -11160,9 +11160,9 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified object arrays are empty.
      *
-     * @param a the first object array to check, may be null
-     * @param b the second object array to check, may be null
-     * @param c the third object array to check, may be null
+     * @param a the first object array to check, which may be null
+     * @param b the second object array to check, which may be null
+     * @param c the third object array to check, which may be null
      * @return {@code true} if all object arrays are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Object[] a, final Object[] b, final Object[] c) {
@@ -11172,8 +11172,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified collections are empty.
      *
-     * @param a the first collection to check, may be null
-     * @param b the second collection to check, may be null
+     * @param a the first collection to check, which may be null
+     * @param b the second collection to check, which may be null
      * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
@@ -11183,9 +11183,9 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified collections are empty.
      *
-     * @param a the first collection to check, may be null
-     * @param b the second collection to check, may be null
-     * @param c the third collection to check, may be null
+     * @param a the first collection to check, which may be null
+     * @param b the second collection to check, which may be null
+     * @param c the third collection to check, which may be null
      * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
@@ -11195,8 +11195,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified maps are empty.
      *
-     * @param a the first map to check, may be null
-     * @param b the second map to check, may be null
+     * @param a the first map to check, which may be null
+     * @param b the second map to check, which may be null
      * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b) {
@@ -11206,9 +11206,9 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified maps are empty.
      *
-     * @param a the first map to check, may be null
-     * @param b the second map to check, may be null
-     * @param c the third map to check, may be null
+     * @param a the first map to check, which may be null
+     * @param b the second map to check, which may be null
+     * @param c the third map to check, which may be null
      * @return {@code true} if all maps are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
@@ -11469,7 +11469,7 @@ sealed class CommonUtil permits N {
     public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
         if (obj == null) {
             if (isArgNameOnly(errorMessage)) {
-                throw new IllegalArgumentException("'" + errorMessage + "' can not be null");
+                throw new IllegalArgumentException("'" + errorMessage + "' cannot be null");
             } else {
                 throw new IllegalArgumentException(errorMessage);
             }
@@ -11782,7 +11782,7 @@ sealed class CommonUtil permits N {
 
     private static void throwIllegalArgumentExceptionForNllOrEmptyCheck(final String errorMessage) {
         if (isArgNameOnly(errorMessage)) {
-            throw new IllegalArgumentException("'" + errorMessage + "' can not be null or empty");
+            throw new IllegalArgumentException("'" + errorMessage + "' cannot be null or empty");
         } else {
             throw new IllegalArgumentException(errorMessage);
         }
@@ -11801,7 +11801,7 @@ sealed class CommonUtil permits N {
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isBlank(arg)) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty or blank");
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be null or empty or blank");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11821,7 +11821,7 @@ sealed class CommonUtil permits N {
     public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11841,7 +11841,7 @@ sealed class CommonUtil permits N {
     public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11862,7 +11862,7 @@ sealed class CommonUtil permits N {
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11883,7 +11883,7 @@ sealed class CommonUtil permits N {
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11903,7 +11903,7 @@ sealed class CommonUtil permits N {
     public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11923,7 +11923,7 @@ sealed class CommonUtil permits N {
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11943,7 +11943,7 @@ sealed class CommonUtil permits N {
     public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11963,7 +11963,7 @@ sealed class CommonUtil permits N {
     public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11984,7 +11984,7 @@ sealed class CommonUtil permits N {
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -12005,7 +12005,7 @@ sealed class CommonUtil permits N {
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -12025,7 +12025,7 @@ sealed class CommonUtil permits N {
     public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -12046,7 +12046,7 @@ sealed class CommonUtil permits N {
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -13556,7 +13556,7 @@ sealed class CommonUtil permits N {
     public static <T> T requireNonNull(final T obj, final String errorMessage) throws NullPointerException {
         if (obj == null) {
             if (isArgNameOnly(errorMessage)) {
-                throw new NullPointerException("'" + errorMessage + "' can not be null");
+                throw new NullPointerException("'" + errorMessage + "' cannot be null");
             } else {
                 throw new NullPointerException(errorMessage);
             }
@@ -13584,7 +13584,7 @@ sealed class CommonUtil permits N {
             final String errorMessage = errorMessageSupplier.get();
 
             if (isArgNameOnly(errorMessage)) {
-                throw new NullPointerException("'" + errorMessage + "' can not be null");
+                throw new NullPointerException("'" + errorMessage + "' cannot be null");
             } else {
                 throw new NullPointerException(errorMessage);
             }
@@ -14948,7 +14948,7 @@ sealed class CommonUtil permits N {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, may be null
+     * @param propNamesToCompare the collection of property names to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null
      * @deprecated call {@code getPropValue} by reflection APIs during comparing or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
@@ -16689,8 +16689,8 @@ sealed class CommonUtil permits N {
     /**
      * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.deepEquals} method will be used.
      *
-     * @param a the first object to compare, may be null
-     * @param b the second object to compare, may be null
+     * @param a the first object to compare, which may be null
+     * @param b the second object to compare, which may be null
      * @return {@code true} if the objects are deeply equal, {@code false} otherwise
      * @see Arrays#deepEquals(Object[], Object[])
      */
@@ -16794,8 +16794,8 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of Strings, ignoring case considerations.
      *
-     * @param a the first array of Strings to compare, may be null
-     * @param b the second array of Strings to compare, may be null
+     * @param a the first array of Strings to compare, which may be null
+     * @param b the second array of Strings to compare, which may be null
      * @return {@code true} if the arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
@@ -16805,9 +16805,9 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of Strings, ignoring case considerations, within the specified range.
      *
-     * @param a the first array of Strings to compare, may be null
+     * @param a the first array of Strings to compare, which may be null
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array of Strings to compare, may be null
+     * @param b the second array of Strings to compare, which may be null
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
@@ -19912,8 +19912,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the boolean value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(boolean[], int, int, boolean)
      */
     public static void fill(final boolean[] a, final int fromIndex, final int toIndex, final boolean val) {
@@ -19948,8 +19947,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the char value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(char[], int, int, char)
      */
     public static void fill(final char[] a, final int fromIndex, final int toIndex, final char val) {
@@ -19984,8 +19982,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the byte value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(byte[], int, int, byte)
      */
     public static void fill(final byte[] a, final int fromIndex, final int toIndex, final byte val) {
@@ -20020,8 +20017,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the short value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(short[], int, int, short)
      */
     public static void fill(final short[] a, final int fromIndex, final int toIndex, final short val) {
@@ -20056,8 +20052,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the int value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(int[], int, int, int)
      */
     public static void fill(final int[] a, final int fromIndex, final int toIndex, final int val) {
@@ -20092,8 +20087,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the long value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(long[], int, int, long)
      */
     public static void fill(final long[] a, final int fromIndex, final int toIndex, final long val) {
@@ -20128,7 +20122,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the float value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      * @see Arrays#fill(float[], int, int, float)
      */
@@ -20164,8 +20158,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the double value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(double[], int, int, double)
      */
     public static void fill(final double[] a, final int fromIndex, final int toIndex, final double val) {
@@ -20178,48 +20171,6 @@ sealed class CommonUtil permits N {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
-    //    /**
-    //     * Fills the specified Object array with {@code null} values.
-    //     *
-    //     * @param a the Object array to be filled 
-    //     * @see Arrays#fill(Object[], Object)
-    //     * @see N#setAll(Object[], IntFunction)
-    //     * @see N#replaceAll(Object[], UnaryOperator) 
-    //     */
-    //    @Beta
-    //    public static void fillNulls(final Object[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = null;
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Fills the specified Object array with {@code null} values from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
-    //     *
-    //     * @param a the Object array to be filled
-    //     * @param fromIndex the index to start filling (inclusive)
-    //     * @param toIndex the index to stop filling (exclusive) 
-    //     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-    //     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-    //     * @see Arrays#fill(Object[], int, int, Object)
-    //     */
-    //    @Beta
-    //    public static void fillNulls(final Object[] a, final int fromIndex, final int toIndex) {
-    //        checkFromToIndex(fromIndex, toIndex, len(a));
-    //
-    //        if (fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            a[i] = null;
-    //        }
-    //    }
-
     /**
      * Fills the specified Object array with the specified value.
      *
@@ -20228,6 +20179,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#fill(Object[], Object)
      * @see N#setAll(Object[], IntFunction)
      * @see N#replaceAll(Object[], UnaryOperator) 
+     * @see Iterables#fill(Object[], Supplier)
+     * @see Iterables#fill(Object[], int, int, Supplier)
      */
     public static <T> void fill(final T[] a, final T val) {
         if (isEmpty(a)) {
@@ -20246,9 +20199,10 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
      * @param val the Object value to fill the array with
-     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
      * @see Arrays#fill(Object[], int, int, Object)
+     * @see Iterables#fill(Object[], Supplier)
+     * @see Iterables#fill(Object[], int, int, Supplier)
      */
     public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final T val) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20261,86 +20215,6 @@ sealed class CommonUtil permits N {
             a[i] = val;
         }
     }
-
-    //    /**
-    //     * Fills the specified Object array with the specified value.
-    //     *
-    //     * @param a the Object array to be filled
-    //     * @param val the Object value to fill the array with
-    //     * @see Arrays#fill(Object[], Object)
-    //     * @see N#setAll(Object[], IntFunction)
-    //     * @see N#replaceAll(Object[], UnaryOperator) 
-    //     */
-    //    public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = supplier.get();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Fills the specified Object array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
-    //     *
-    //     * @param a the Object array to be filled
-    //     * @param fromIndex the index to start filling (inclusive)
-    //     * @param toIndex the index to stop filling (exclusive)
-    //     * @param val the Object value to fill the array with
-    //     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
-    //     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-    //     * @see Arrays#fill(Object[], int, int, Object)
-    //     */
-    //    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
-    //        checkFromToIndex(fromIndex, toIndex, len(a));
-    //
-    //        if (fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            a[i] = supplier.get();
-    //        }
-    //    }
-
-    //    /**
-    //     * Fills the specified list with {@code null} values.
-    //     *
-    //     * @param <T> the type of elements in the list
-    //     * @param list the list to be filled 
-    //     * @throws IllegalArgumentException if the specified list is null
-    //     * @see N#setAll(List, IntFunction)
-    //     * @see N#replaceAll(List, UnaryOperator)
-    //     * @see #fill(List, int, int, Object)
-    //     * @see #padLeft(List, int, Object)
-    //     * @see #padRight(Collection, int, Object)
-    //     */
-    //    @Beta
-    //    public static <T> void fillNulls(final List<? super T> list) {
-    //        checkArgNotNull(list, cs.list);
-    //
-    //        fill(list, 0, list.size(), (T) null);
-    //    }
-    //
-    //    /**
-    //     * Fills the specified list with {@code null} values from the specified start index to the specified end index.
-    //     * The list will be extended automatically if the size of the list is less than the specified toIndex.
-    //     *
-    //     * @param <T> the type of elements in the list
-    //     * @param list the list to be filled
-    //     * @param fromIndex the starting index (inclusive) to begin filling
-    //     * @param toIndex the ending index (exclusive) to stop filling 
-    //     * @throws IllegalArgumentException if the specified list is null
-    //     * @throws IndexOutOfBoundsException if the specified indices are out of range
-    //     * @see #fill(List, Object)
-    //     * @see #padLeft(List, int, Object)
-    //     * @see #padRight(Collection, int, Object)
-    //     */
-    //    @Beta
-    //    public static <T> void fillNulls(final List<? super T> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-    //        fill(list, fromIndex, toIndex, (T) null);
-    //    }
 
     /**
      * Fills the specified list with the specified value.
@@ -20357,7 +20231,7 @@ sealed class CommonUtil permits N {
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
-    public static <T> void fill(final List<? super T> list, final T val) {
+    public static <T> void fill(final List<? super T> list, final T val) throws IllegalArgumentException {
         checkArgNotNull(list, cs.list);
 
         fill(list, 0, list.size(), val);
@@ -20380,7 +20254,8 @@ sealed class CommonUtil permits N {
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
-    public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) throws IndexOutOfBoundsException {
+    public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(list, cs.list);
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
@@ -20416,8 +20291,6 @@ sealed class CommonUtil permits N {
             }
         }
     }
-
-
 
     /**
      * Fills the properties of the specified bean with random values.
@@ -20490,6 +20363,9 @@ sealed class CommonUtil permits N {
      * @param objToAdd the object to add to the list if it is smaller than the specified minimum size
      * @return {@code true} if the list was modified as a result of this operation, {@code false} otherwise
      * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative
+     * @see #padRight(Collection, int, Object)
+     * @see Strings#padStart(String, int)
+     * @see Strings#padStart(String, int, char)
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
@@ -20653,7 +20529,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
-        checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgument(size == 0 || notEmpty(c), "Collection cannot be empty or null when size > 0");
         checkArgNotNegative(size, cs.size);
 
         if (size == 0 || isEmpty(c)) {
@@ -20695,7 +20571,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatCollectionToSize(Collection, long)
      */
     public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
-        checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgument(size == 0 || notEmpty(c), "Collection cannot be empty or null when size > 0");
         checkArgNotNegative(size, cs.size);
 
         if (size == 0 || isEmpty(c)) {
@@ -21443,7 +21319,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21507,7 +21383,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21571,7 +21447,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21635,7 +21511,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21711,7 +21587,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21775,7 +21651,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21839,7 +21715,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -21903,7 +21779,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22008,7 +21884,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22069,7 +21945,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), c.size());
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22139,7 +22015,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), str.length());
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can not be zero");
+            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -25477,7 +25353,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of booleans to find the specified value.
-     * The array must be sorted (as by the {@link #sort(boolean[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(boolean[])} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25513,7 +25389,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of characters to find the specified value.
-     * The array must be sorted (as by the {@link #sort(char[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(char[])} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25533,7 +25409,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of characters to find the specified value.
-     * The range must be sorted (as by the {@link #sort(char[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(char[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25558,7 +25434,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of bytes to find the specified value.
-     * The array must be sorted (as by the {@link #sort(byte[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(byte[])} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25578,7 +25454,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of bytes to find the specified value.
-     * The range must be sorted (as by the {@link #sort(byte[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(byte[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25603,7 +25479,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of shorts to find the specified value.
-     * The array must be sorted (as by the {@link #sort(short[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(short[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25623,7 +25499,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of shorts to find the specified value.
-     * The range must be sorted (as by the {@link #sort(short[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(short[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25648,7 +25524,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of ints to find the specified value.
-     * The array must be sorted (as by the {@link #sort(int[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(int[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25693,7 +25569,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of longs to find the specified value.
-     * The array must be sorted (as by the {@link #sort(long[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(long[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25713,7 +25589,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of longs to find the specified value.
-     * The range must be sorted (as by the {@link #sort(long[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(long[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25738,7 +25614,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of floats to find the specified value.
-     * The array must be sorted (as by the {@link #sort(float[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(float[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25758,7 +25634,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of floats to find the specified value.
-     * The range must be sorted (as by the {@link #sort(float[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(float[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25783,7 +25659,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of doubles to find the specified value.
-     * The array must be sorted (as by the {@link #sort(double[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(double[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25803,7 +25679,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of doubles to find the specified value.
-     * The range must be sorted (as by the {@link #sort(double[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(double[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25828,7 +25704,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of objects to find the specified value.
-     * The array must be sorted (as by the {@link #sort(Object[])} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(Object[])} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25848,7 +25724,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of objects to find the specified value.
-     * The range must be sorted (as by the {@link #sort(Object[], int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(Object[], int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25873,7 +25749,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified array of objects to find the specified value.
-     * The array must be sorted (as by the {@link #sort(Object[], Comparator)} method) prior to making this call.
+     * The array must be sorted (as by the {@link #sort(Object[], Comparator)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25895,7 +25771,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the array of objects to find the specified value.
-     * The range must be sorted (as by the {@link #sort(Object[], int, int, Comparator)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(Object[], int, int, Comparator)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25922,7 +25798,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified list of objects to find the specified value.
-     * The list must be sorted (as by the {@link #sort(List)} method) prior to making this call.
+     * The list must be sorted (as by the {@link #sort(List)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25943,7 +25819,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the list of objects to find the specified value.
-     * The range must be sorted (as by the {@link #sort(List, int, int)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(List, int, int)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25970,7 +25846,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified list of objects to find the specified value.
-     * The list must be sorted (as by the {@link #sort(List, Comparator)} method) prior to making this call.
+     * The list must be sorted (as by the {@link #sort(List, Comparator)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -25992,7 +25868,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Performs a binary search on the specified range of the list of objects to find the specified value.
-     * The range must be sorted (as by the {@link #sort(List, int, int, Comparator)} method) prior to making this call.
+     * The range must be sorted (as by the {@link #sort(List, int, int, Comparator)} method)before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
@@ -27796,7 +27672,7 @@ sealed class CommonUtil permits N {
      *   BooleanUtils.negate(null)          = null;
      * </pre>
      *
-     * @param bool the Boolean to negate, may be null
+     * @param bool the Boolean to negate, which may be null
      * @return the negated Boolean, or {@code null} if {@code null} input
      */
     @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")

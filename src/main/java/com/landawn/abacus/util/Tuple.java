@@ -325,13 +325,13 @@ public abstract class Tuple<TP> implements Immutable {
     public static <TP extends Tuple<TP>> TP create(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
+        if (len == 0) {
+            return (TP) Tuple0.EMPTY;
+        }
+
         Tuple<?> result = null;
 
         switch (len) {
-            case 0:
-                result = Tuple0.EMPTY;
-                break;
-
             case 1:
                 result = new Tuple1<>(a[0]);
                 break;
@@ -384,15 +384,16 @@ public abstract class Tuple<TP> implements Immutable {
     @Beta
     public static <TP extends Tuple<TP>> TP create(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
-        final Iterator<?> iter = c == null ? null : c.iterator();
+
+        if (len == 0) {
+            return (TP) Tuple0.EMPTY;
+        }
+
+        final Iterator<?> iter = c.iterator();
 
         Tuple<?> result = null;
 
         switch (len) {
-            case 0:
-                result = Tuple0.EMPTY;
-                break;
-
             case 1:
                 result = new Tuple1<>(iter.next());
                 break;
@@ -629,7 +630,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple1<T1> extends Tuple<Tuple1<T1>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
         /**
@@ -759,10 +760,10 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple2<T1, T2> extends Tuple<Tuple2<T1, T2>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
         /**
@@ -934,13 +935,13 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple3<T1, T2, T3> extends Tuple<Tuple3<T1, T2, T3>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
         /**
@@ -1115,16 +1116,16 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple4<T1, T2, T3, T4> extends Tuple<Tuple4<T1, T2, T3, T4>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
         /**
@@ -1267,19 +1268,19 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple5<T1, T2, T3, T4, T5> extends Tuple<Tuple5<T1, T2, T3, T4, T5>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
-        /** The  5. */
+        /** The fifth value or parameter */
         public final T5 _5;
 
         /**
@@ -1329,8 +1330,8 @@ public abstract class Tuple<TP> implements Immutable {
          */
         @Override
         public boolean contains(final Object valueToFind) {
-            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind)
-                    || N.equals(_5, valueToFind);
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5,
+                    valueToFind);
         }
 
         @Override
@@ -1429,22 +1430,22 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
-        /** The  5. */
+        /** The fifth value or parameter */
         public final T5 _5;
 
-        /** The  6. */
+        /** The sixth value or parameter */
         public final T6 _6;
 
         /**
@@ -1602,25 +1603,25 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
-        /** The  5. */
+        /** The fifth value or parameter */
         public final T5 _5;
 
-        /** The  6. */
+        /** The sixth value or parameter */
         public final T6 _6;
 
-        /** The  7. */
+        /** The seventh value or parameter */
         public final T7 _7;
 
         /**
@@ -1784,28 +1785,28 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
-        /** The  5. */
+        /** The fifth value or parameter */
         public final T5 _5;
 
-        /** The  6. */
+        /** The sixth value or parameter */
         public final T6 _6;
 
-        /** The  7. */
+        /** The seventh value or parameter */
         public final T7 _7;
 
-        /** The  8. */
+        /** The eighth value or parameter */
         public final T8 _8;
 
         /**
@@ -1979,31 +1980,31 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
 
-        /** The  1. */
+        /** The first value or parameter */
         public final T1 _1;
 
-        /** The  2. */
+        /** The second value or parameter */
         public final T2 _2;
 
-        /** The  3. */
+        /** The third value or parameter */
         public final T3 _3;
 
-        /** The  4. */
+        /** The fourth value or parameter */
         public final T4 _4;
 
-        /** The  5. */
+        /** The fifth value or parameter */
         public final T5 _5;
 
-        /** The  6. */
+        /** The sixth value or parameter */
         public final T6 _6;
 
-        /** The  7. */
+        /** The seventh value or parameter */
         public final T7 _7;
 
-        /** The  8. */
+        /** The eighth value or parameter */
         public final T8 _8;
 
-        /** The  9. */
+        /** The ninth value or parameter */
         public final T9 _9;
 
         /**

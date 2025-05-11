@@ -107,7 +107,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Returns an ShortIterator instance that is created lazily using the provided Supplier.
+     * Returns a ShortIterator instance that is created lazily using the provided Supplier.
      * The Supplier is responsible for producing the ShortIterator instance when the first method in the returned {@code ShortIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the ShortIterator when needed.

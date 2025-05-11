@@ -215,7 +215,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns an ObjIterator instance that is created lazily using the provided Supplier.
+     * Returns an ObjIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the ObjIterator instance when the first method in the returned {@code ObjIterator} is called.
      *
      * @param <T> the type of elements returned by this iterator
@@ -654,7 +654,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns the first element in the ObjIterator, if it exists.
+     * Returns the first element in the ObjIterator if it exists.
      *
      * @return A {@code Nullable} containing the first element if it exists, otherwise an empty {@code Nullable}.
      */
@@ -686,7 +686,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns the last element in the ObjIterator, if it exists.
+     * Returns the last element in the ObjIterator if it exists.
      *
      * @return A {@code Nullable} containing the last element if it exists, otherwise an empty {@code Nullable}.
      */

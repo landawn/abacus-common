@@ -334,7 +334,7 @@ public class Seid implements EntityId {
     //    }
     //
     //    /**
-    //     * Removes the all.
+    //     * Removes all.
     //     *
     //     * @param propNames
     //     * @deprecated for internal use only

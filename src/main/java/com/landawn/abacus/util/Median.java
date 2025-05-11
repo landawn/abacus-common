@@ -234,7 +234,7 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
      * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      * <br />
-     * The input array don't need to be sorted. in other words, there is no benefit even if the array is sorted.
+     * The input array doesn't need to be sorted. In other words, there is no benefit even if the array is sorted.
      *
      * <pre>
      * <code>
@@ -696,7 +696,7 @@ public final class Median {
      */
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can not be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, c.size());

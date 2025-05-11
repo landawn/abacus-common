@@ -53,9 +53,9 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
+ * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
  *
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -538,7 +538,7 @@ public final class Iterators {
 
     /**
      * Returns an infinite iterator cycling over the provided elements.
-     * However if the provided elements are empty, an empty iterator will be returned.
+     * However, if the provided elements are empty, an empty iterator will be returned.
      *
      * @param <T> The type of elements in the array.
      * @param elements The array whose elements are to be cycled over.
@@ -575,7 +575,7 @@ public final class Iterators {
 
     /**
      * Returns an infinite iterator cycling over the elements of the provided iterable.
-     * However if the provided elements are empty, an empty iterator will be returned.
+     * However, if the provided elements are empty, an empty iterator will be returned.
      *
      * @param <T> The type of elements in the iterable.
      * @param iterable The iterable whose elements are to be cycled over.
@@ -3150,7 +3150,7 @@ public final class Iterators {
      * @param offset The starting point in the Iterator from where processing should begin.
      * @param count The maximum number of elements to process.
      * @param processThreadNum The number of threads to be used for processing.
-     * @param queueSize The size of the queue to hold the processing records. Default size is 1024.
+     * @param queueSize The size of the queue to hold the processing records. The default size is 1024.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
      * @param onComplete A Runnable action to be performed once all elements have been processed.
      * @throws E if the elementConsumer encounters an exception.
@@ -3311,7 +3311,7 @@ public final class Iterators {
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
             final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
 
         if (N.isEmpty(iterators)) {
             return;

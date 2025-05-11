@@ -2333,10 +2333,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                 case END_BRACE, EOF:
 
-                    if (isPropName && propInfo != null /*
-                                                       * check for empty json text
-                                                       * {}
-                                                       */) {
+                    if (isPropName && propInfo != null /* check for empty JSON text {} */) {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
@@ -2556,7 +2553,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                 case END_BRACE, EOF:
 
-                    if (isKey && key != null /* check for empty json text {} */) {
+                    if (isKey && key != null /* check for empty JSON text {} */) {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -3192,7 +3189,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             break;
 
                         case END_BRACE:
-                            if (isKey && key != null /* check for empty json text {} */) {
+                            if (isKey && key != null /* check for empty JSON text {} */) {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             } else {
                                 if (jr.hasText()) {

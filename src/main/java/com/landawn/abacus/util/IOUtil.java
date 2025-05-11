@@ -1590,7 +1590,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from an InputStream using the default charset  and returns them as a List of Strings.
+     * Reads a specified number of lines from an InputStream using the default charset and returns them as a List of Strings.
      * The lines to read are determined by the provided offset (0-based) and count.
      *
      * @param source The InputStream to read lines from, not {@code null}.
@@ -1604,7 +1604,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from an InputStream using the provided charset  and returns them as a List of Strings.
+     * Reads a specified number of lines from an InputStream using the provided charset and returns them as a List of Strings.
      * The lines to read are determined by the provided offset (0-based) and count.
      *
      * @param source   The InputStream to read lines from, not {@code null}.
@@ -2858,7 +2858,7 @@ public final class IOUtil {
     }
 
     /**
-     * Writes the byte array representation of a CharSequence to a OutputStream using the specified Charset.
+     * Writes the byte array representation of a CharSequence to an OutputStream using the specified Charset.
      *
      * @param cs      The CharSequence whose byte array representation is to be written.
      * @param charset The Charset to be used to encode the CharSequence into a sequence of bytes.
@@ -4352,14 +4352,13 @@ public final class IOUtil {
      * <br />
      * <p>
      * Maps a file in to memory as per
-     * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
-     * using the requested {@link MapMode}.
+     * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)} using the requested {@link MapMode}.
      *
      * <p>Files are mapped from offset 0 to {@code size}.
      *
      * <p>If the mode is {@link MapMode#READ_WRITE} and the file does not exist,
-     * it will be created with the requested {@code size}. Thus this method is
-     * useful for creating memory mapped files which do not yet exist.
+     * it will be created with the requested {@code size}.
+     * Thus, this method is useful for creating memory mapped files which do not yet exist.
      *
      * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
      *
@@ -5357,7 +5356,7 @@ public final class IOUtil {
     //    }
     //
     //    /**
-    //     * Copy the specified <code>scrFile</code> if it's a file or its sub files/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
+    //     * Copy the specified <code>scrFile</code> if it's a file or its subfiles/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
     //     *
     //     * @param <E>
     //     * @param srcFile
@@ -5531,7 +5530,7 @@ public final class IOUtil {
      * Creates all parent directories for a File object, including any necessary but non-existent parent directories. If a parent directory already exists or
      * is null, nothing happens.
      *
-     * @param file the File that may need parents, may be null.
+     * @param file the File that may need parents, which may be null.
      * @return The parent directory, or {@code null} if the given File does have a parent.
      * @since 2.9.0
      */
@@ -5542,7 +5541,7 @@ public final class IOUtil {
     /**
      * Gets the parent of the given file. The given file may be null. Note that a file's parent may be null as well.
      *
-     * @param file The file to query, may be null.
+     * @param file The file to query, which may be null.
      * @return The parent file or {@code null}. Note that a file's parent may be null as well.
      */
     private static File getParentFile(final File file) {
@@ -5550,7 +5549,7 @@ public final class IOUtil {
     }
 
     /**
-     * Sets file lastModifiedTime, lastAccessTime and creationTime to match source file
+     * Sets file lastModifiedTime, lastAccessTime and creationTime to match the source file
      *
      * @param sourceFile The source file to query.
      * @param targetFile The target file or directory to set.
@@ -5633,7 +5632,7 @@ public final class IOUtil {
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
      * holding the destination file is created if it does not exist. If the destination file exists, then this method
-     * overwrites it. A symbolic link is resolved before copying so the new file is not a link.
+     * overwrites it. A symbolic link is resolved before copying, so the new file is not a link.
      * </p>
      * <p>
      * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
@@ -5958,7 +5957,7 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file and all its sub files/directories recursively if it's a directory.
+     * Deletes the specified file and all its subfiles/directories recursively if it's a directory.
      *
      * @param file
      * @return {@code true} if the file is deleted successfully, otherwise {@code false} if the file is {@code null} or doesn't exist, or can't be deleted.
@@ -5997,9 +5996,9 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes sub files/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
+     * Deletes subfiles/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
      *
-     * @param dir The directory where sub files/directories will be deleted from.
+     * @param dir The directory where subfiles/directories will be deleted from.
      * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
      * @see File#delete()
      * @see Files#delete(Path)
@@ -6009,10 +6008,10 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes sub files/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
+     * Deletes subfiles/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
      *
      * @param <E> the type of the exception that may be thrown
-     * @param dir The directory where sub files/directories will be deleted from.
+     * @param dir The directory where subfiles/directories will be deleted from.
      * @param filter The filter to be applied when deleting files or directories.
      * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
      * @throws E if an exception of type E occurs during the operation.
@@ -6058,10 +6057,10 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the sub files/directories under the specified {@code directory}. The {@code directory} itself won't be deleted.
+     * Deletes the subfiles/directories under the specified {@code directory}. The {@code directory} itself won't be deleted.
      *
      * @param dir directory to clean
-     * @return {@code false} if some of its sub files can't be deleted.
+     * @return {@code false} if some of its subfiles can't be deleted.
      * @see #deleteFilesFromDirectory(File)
      */
     public static boolean cleanDirectory(final File dir) {
@@ -7167,7 +7166,7 @@ public final class IOUtil {
     }
 
     /**
-     * Decodes the specified URL as per RFC 3986, i.e. transforms
+     * Decodes the specified URL as per RFC 3986, i.e., transforms
      * percent-encoded octets to characters by decoding with the UTF-8 character
      * set. This function is primarily intended for usage with
      * {@link java.net.URL} which unfortunately does not enforce proper URLs. As
@@ -7214,7 +7213,7 @@ public final class IOUtil {
     }
 
     /**
-     * Converts each of an array of {@code URL} to a {@code File}.
+     * Converts each {@code URL} in the specified array to a {@code File}.
      * <p>
      * Returns an array of the same size as the input.
      * If the input is {@code null}, an empty array is returned.
@@ -7338,7 +7337,7 @@ public final class IOUtil {
     }
 
     /**
-     * Update the last modified time of the file to system current time if the specified file exists.
+     * Update the last modified time of the file to the system current time if the specified file exists.
      *
      * @param source the File to touch
      * @return {@code true} if the file exists and last modified time is updated successfully.
@@ -7356,7 +7355,7 @@ public final class IOUtil {
      *
      * @param file1 the first file
      * @param file2 the second file
-     * @return true if the content of the files are equal or they both don't exist, false otherwise
+     * @return true if the contents of the files are equal or they both don't exist, false otherwise
      * @throws IllegalArgumentException when an input is not a file.
      * @throws IOException If an I/O error occurs.
      */
@@ -7478,7 +7477,7 @@ public final class IOUtil {
      *
      * @param input1 the first stream
      * @param input2 the second stream
-     * @return {@code true} if the content of the streams are equal or they both don't
+     * @return {@code true} if the content of the streams are equal, or they both don't
      * exist, {@code false} otherwise
      * @throws IOException if an I/O error occurs.          if an I/O error occurs
      */
@@ -7548,7 +7547,7 @@ public final class IOUtil {
      *
      * @param input1 the first reader
      * @param input2 the second reader
-     * @return {@code true} if the content of the readers are equal or they both don't exist, {@code false} otherwise
+     * @return {@code true} if the content of the readers are equal, or they both don't exist, {@code false} otherwise
      * @throws IOException if an I/O error occurs. if an I/O error occurs
      */
     public static boolean contentEquals(final Reader input1, final Reader input2) throws IOException {
@@ -7775,7 +7774,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>        The type of exception that the lineAction can throw.
      * @param files      The collection of files to be parsed.
@@ -7791,7 +7790,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
@@ -7810,7 +7809,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -7828,7 +7827,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
@@ -7849,7 +7848,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -7869,7 +7868,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>        The type of exception that the lineAction can throw.
      * @param <E2>       The type of exception that the onComplete can throw.
@@ -7986,12 +7985,12 @@ public final class IOUtil {
      *
      * @param <E>
      * @param <E2>
-     * @param source           parse all the sub files recursively if the element is a directory.
+     * @param source           parse all the subfiles recursively if the element is a directory.
      * @param lineOffset
      * @param count
      * @param readThreadNum    new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param queueSize        size of queue to save the processing records/lines loaded from source data. The default size is 1024.
      * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
@@ -8008,7 +8007,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -8027,7 +8026,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
@@ -8050,7 +8049,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param files
@@ -8071,16 +8070,16 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of files line by line using the provided lineAction.
+     * Parses the given collection of file line by line using the provided lineAction.
      *
      * @param <E>
      * @param <E2>
-     * @param files            parse all the sub files recursively if the element is a directory.
+     * @param files            parse all the subfiles recursively if the element is a directory.
      * @param lineOffset
      * @param count
      * @param readThreadNum    new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param queueSize        size of queue to save the processing records/lines loaded from source data. The default size is 1024.
      * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
@@ -8226,7 +8225,7 @@ public final class IOUtil {
      * @param lineOffset
      * @param count
      * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param queueSize        size of queue to save the processing records/lines loaded from source data. The default size is 1024.
      * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.
@@ -8350,7 +8349,7 @@ public final class IOUtil {
      * @param lineOffset
      * @param count
      * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize        size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param queueSize        size of queue to save the processing records/lines loaded from source data. The default size is 1024.
      * @param lineAction
      * @param onComplete
      * @throws UncheckedIOException if an I/O error occurs.

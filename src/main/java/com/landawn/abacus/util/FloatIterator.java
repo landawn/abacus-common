@@ -107,7 +107,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns an FloatIterator instance that is created lazily using the provided Supplier.
+     * Returns a FloatIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the FloatIterator instance when the first method in the returned {@code FloatIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the FloatIterator when needed.

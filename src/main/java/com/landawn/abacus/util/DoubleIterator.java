@@ -107,7 +107,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Returns an DoubleIterator instance that is created lazily using the provided Supplier.
+     * Returns a DoubleIterator instance that is created lazily using the provided Supplier.
      * The Supplier is responsible for producing the DoubleIterator instance when the first method in the returned {@code DoubleIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the DoubleIterator when needed.

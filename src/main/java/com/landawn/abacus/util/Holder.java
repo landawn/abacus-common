@@ -155,7 +155,7 @@ public final class Holder<T> implements Mutable {
 
     /**
      * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
-     * Otherwise just return {@code false} without setting the value to new value.
+     * Otherwise, just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue

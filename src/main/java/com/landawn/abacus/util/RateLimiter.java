@@ -35,7 +35,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * <p>Rate limiters are often used to restrict the rate at which some physical or logical resource
  * is accessed. This is in contrast to {@link java.util.concurrent.Semaphore} which restricts the
  * number of concurrent accesses instead of the rate (note though that concurrency and rate are
- * closely related, e.g. see <a href="http://en.wikipedia.org/wiki/Little%27s_law">Little's
+ * closely related, e.g., see <a href="http://en.wikipedia.org/wiki/Little%27s_law">Little's
  * Law</a>).
  *
  * <p>A {@code RateLimiter} is defined primarily by the rate at which permits are issued. Absent
@@ -44,7 +44,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * permits being adjusted to ensure that the configured rate is maintained.
  *
  * <p>It is possible to configure a {@code RateLimiter} to have a warmup period during which time
- * the permits issued each second steadily increases until it hits the stable rate.
+ * the permits issued each second steadily increase until it hits the stable rate.
  *
  * <p>As an example, imagine that we have a list of tasks to execute, but we don't want to submit
  * more than 2 per second: <pre>   {@code
@@ -134,14 +134,14 @@ public abstract class RateLimiter {
      * period</i>, during which the {@code RateLimiter} smoothly ramps up its rate, until it reaches
      * its maximum rate at the end of the period (as long as there are enough requests to saturate
      * it). Similarly, if the {@code RateLimiter} is left <i>unused</i> for a duration of
-     * {@code warmupPeriod}, it will gradually return to its "cold" state, i.e. it will go through the
-     * same warming up process as when it was first created.
+     * {@code warmupPeriod}, it will gradually return to its "cold" state, i.e., it will go through the
+     * same warming-up process as when it was first created.
      *
      * <p>The returned {@code RateLimiter} is intended for cases where the resource that actually
      * fulfills the requests (e.g., a remote server) needs "warmup" time, rather than being
      * immediately accessed at the stable (maximum) rate.
      *
-     * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e. the warmup period will
+     * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e., the warmup period will
      * follow), and if it is left unused for long enough, it will return to that state.
      *
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
@@ -211,7 +211,7 @@ public abstract class RateLimiter {
      * {@code setRate} will not be affected by the new rate; it will pay the cost of the previous
      * request, which is in terms of the previous rate.
      *
-     * <p>The behavior of the {@code RateLimiter} is not modified in any other way, e.g. if the
+     * <p>The behavior of the {@code RateLimiter} is not modified in any other way, e.g., if the
      * {@code RateLimiter} was configured with a warmup period of 20 seconds, it still has a warmup
      * period of 20 seconds after this method invocation.
      *
@@ -374,7 +374,7 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Reserves next ticket and returns the wait time that the caller must wait for.
+     * Reserves the next ticket and returns the wait time that the caller must wait for.
      *
      * @param permits
      * @param nowMicros

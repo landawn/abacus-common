@@ -132,7 +132,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

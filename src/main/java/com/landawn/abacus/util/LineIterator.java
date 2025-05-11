@@ -32,7 +32,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * An Iterator over the lines in a {@code Reader}.
  * <p>
  * {@code LineIterator} holds a reference to an open {@code Reader}.
- * When you have finished with the iterator you should close the reader
+ * When you have finished with the iterator, you should close the reader
  * to free internal resources. This can be done by closing the reader directly,
  * or by calling the {@link #close()} or {@link IOUtil#closeQuietly(AutoCloseable)}
  * method on the iterator.
@@ -81,7 +81,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * Returns an Iterator for the lines in a {@code File} using the default encoding for the VM.
      * <p>
      * This method opens an {@code InputStream} for the file.
-     * When you have finished with the iterator you should close the stream
+     * When you have finished with the iterator, you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
      * {@link IOUtil#closeQuietly(AutoCloseable)} method.
@@ -115,7 +115,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * Returns an Iterator for the lines in a {@code File}.
      * <p>
      * This method opens an {@code InputStream} for the file.
-     * When you have finished with the iterator you should close the stream
+     * When you have finished with the iterator, you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
      * {@link IOUtil#closeQuietly(AutoCloseable)} method.
@@ -175,7 +175,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * <p>
      * {@code LineIterator} holds a reference to the open
      * {@code InputStream} specified here. When you have finished with
-     * the iterator you should close the stream to free internal resources.
+     * the iterator, you should close the stream to free internal resources.
      * This can be done by closing the stream directly, or by calling
      * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
      * <p>

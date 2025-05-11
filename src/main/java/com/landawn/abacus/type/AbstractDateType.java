@@ -126,7 +126,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

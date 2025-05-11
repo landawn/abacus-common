@@ -80,7 +80,7 @@ public abstract class AbstractPool implements Pool {
             final long maxMemorySize) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0 || maxMemorySize < 0) {
             throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelay + "), balance factor(" + balanceFactor
-                    + "), max memory size(" + maxMemorySize + ") can not be negative");
+                    + "), max memory size(" + maxMemorySize + ") cannot be negative");
         }
 
         this.capacity = capacity;
@@ -163,7 +163,7 @@ public abstract class AbstractPool implements Pool {
      */
     protected void assertNotClosed() {
         if (isClosed) {
-            throw new RuntimeException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
+            throw new IllegalStateException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
         }
     }
 

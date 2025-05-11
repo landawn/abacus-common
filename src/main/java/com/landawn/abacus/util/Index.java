@@ -415,11 +415,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -429,12 +429,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -444,15 +444,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -497,11 +497,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -511,12 +511,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -526,15 +526,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -579,11 +579,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -593,12 +593,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -608,15 +608,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -661,11 +661,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -675,12 +675,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -690,15 +690,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -743,11 +743,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -757,12 +757,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -772,15 +772,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -825,11 +825,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -839,12 +839,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -854,15 +854,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -907,11 +907,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -921,12 +921,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -936,15 +936,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -989,11 +989,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -1003,12 +1003,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -1018,15 +1018,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -1071,11 +1071,11 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array.
+     * Returns the index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
      */
@@ -1084,12 +1084,12 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
      * @see String#indexOf(String, int)
@@ -1099,15 +1099,15 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the specified sub-array in the given source array, starting from the specified index.
-     * The search starts at the specified <i>fromIndex</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the index of the specified subarray in the given source array, starting from the specified index.
+     * The search starts at the specified <i>fromIndex</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -1155,7 +1155,7 @@ public final class Index {
      * Returns the index of the specified sub-list in the given source list.
      *
      * @param sourceList The list to be searched.
-     * @param subListToFind The  sub-list to find in the source array.
+     * @param subListToFind The sub-list to find in the source array.
      * @return An OptionalInt containing the index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
@@ -1170,7 +1170,7 @@ public final class Index {
      *
      * @param sourceList The list to be searched.
      * @param fromIndex The index to start the search from.
-     * @param subListToFind The  sub-list to find in the source array.
+     * @param subListToFind The sub-list to find in the source array.
      * @return An OptionalInt containing the index of the sub-list in the source list, or an empty {@code OptionalInt} if the sub-list is not found.
      * @see #ofSubArray(Object[], int, Object[])
      * @see String#indexOf(String)
@@ -1598,11 +1598,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1612,12 +1612,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1627,15 +1627,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -1677,11 +1677,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1691,12 +1691,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1706,15 +1706,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -1754,11 +1754,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1768,12 +1768,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1783,15 +1783,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -1831,11 +1831,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1845,12 +1845,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1860,15 +1860,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -1908,11 +1908,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1922,12 +1922,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1937,15 +1937,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -1985,11 +1985,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -1999,12 +1999,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -2014,15 +2014,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -2062,11 +2062,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -2076,12 +2076,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -2091,15 +2091,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -2139,11 +2139,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -2153,12 +2153,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
@@ -2168,15 +2168,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see Strings#lastIndexOf(String, String)
@@ -2216,11 +2216,11 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array.
+     * Returns the last index of the specified subarray in the given source array.
      *
      * @param sourceArray The array to be searched.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
      */
@@ -2229,12 +2229,12 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)
      */
@@ -2243,15 +2243,15 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified sub-array in the given source array, starting from the specified index from the end.
-     * The search starts at the specified <i>startIndexFromBack</i> and checks for the sub-array starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
+     * Returns the last index of the specified subarray in the given source array, starting from the specified index from the end.
+     * The search starts at the specified <i>startIndexFromBack</i> and checks for the subarray starting from <i>startIndexOfSubArray</i> up to <i>sizeToMatch</i> elements.
      *
      * @param sourceArray The array to be searched.
      * @param startIndexFromBack The index to start the search from the end of the array.
-     * @param subArrayToFind The sub-array to find in the source array.
-     * @param startIndexOfSubArray The starting index of the sub-array to be found.
-     * @param sizeToMatch The number of elements to match from the sub-array.
-     * @return An OptionalInt containing the last index of the sub-array in the source array, or an empty {@code OptionalInt} if the sub-array is not found.
+     * @param subArrayToFind The subarray to find in the source array.
+     * @param startIndexOfSubArray The starting index of the subarray to be found.
+     * @param sizeToMatch The number of elements to match from the subarray.
+     * @return An OptionalInt containing the last index of the subarray in the source array, or an empty {@code OptionalInt} if the subarray is not found.
      * @throws IndexOutOfBoundsException if <i>startIndexOfSubArray</i> and <i>sizeToMatch</i> do not denote a valid range in <i>subArrayToFind</i>.
      * @see Strings#lastIndexOf(String, String)
      * @see Strings#lastIndexOf(String, String, int)

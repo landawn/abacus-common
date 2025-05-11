@@ -849,7 +849,7 @@ public abstract class Observer<T> implements Immutable {
                 final long delay = entry.getValue();
 
                 N.sleepUninterruptibly(delay - (System.currentTimeMillis() - startTime)
-                        + delay /* Extending another delay just want to make sure last schedule can be completed before the schedule task is cancelled*/);
+                        + delay /* Extending another delay just wants to make sure the last schedule can be completed before the schedule task is canceled*/);
 
                 entry.getKey().cancel(false);
             }
@@ -1016,7 +1016,7 @@ public abstract class Observer<T> implements Immutable {
         private final BlockingQueue<T> queue;
 
         /**
-         * This method is called when information about an BlockingQueue
+         * This method is called when information about a BlockingQueue
          * which was previously requested using an asynchronous
          * interface becomes available.
          *
@@ -1027,7 +1027,7 @@ public abstract class Observer<T> implements Immutable {
         }
 
         /**
-         * This method is called when information about an BlockingQueue
+         * This method is called when information about a BlockingQueue
          * which was previously requested using an asynchronous
          * interface becomes available.
          *
@@ -1230,8 +1230,7 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * This method is called when information about an Interval
-         * which was previously requested using an asynchronous
-         * interface becomes available.
+         * which was previously requested using an asynchronous interface becomes available.
          *
          * @param initialDelay
          * @param period
@@ -1245,8 +1244,7 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * This method is called when information about an Interval
-         * which was previously requested using an asynchronous
-         * interface becomes available.
+         * which was previously requested using an asynchronous interface becomes available.
          *
          * @param action
          * @param onError

@@ -525,7 +525,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <V> the type of the list
      * @param map the map to be wrapped into a SetMultimap
      * @return a new instance of SetMultimap backed by the provided map.
-     * @throws IllegalArgumentException if the provided  map is null
+     * @throws IllegalArgumentException if the provided map is null
      */
     @SuppressWarnings("rawtypes")
     @Beta
@@ -676,7 +676,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Converts the current SetMultimap into an ImmutableMap.
      *
      * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
-     * The ImmutableSet contains all the values that were associated with the key in the SetMultimap.
+     * The ImmutableSet contains all the values associated with the key in the SetMultimap.
      *
      * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
      */
@@ -694,7 +694,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Converts the current SetMultimap into an ImmutableMap using a provided map supplier.
      *
      * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
-     * The ImmutableSet contains all the values that were associated with the key in the SetMultimap.
+     * The ImmutableSet contains all the values associated with the key in the SetMultimap.
      *
      * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map.
      * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
@@ -712,7 +712,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     // It won't work.
     //    /**
     //     * Returns a synchronized {@code SetMultimap} which shares the same internal {@code Map} with this {@code SetMultimap}.
-    //     * That's to say the changes in one of the returned {@code SetMultimap} and this {@code SetMultimap} will impact another one.
+    //     * That's to say, the changes in one of the returned {@code SetMultimap} and this {@code SetMultimap} will impact another one.
     //     *
     //     * @see Collections#synchronizedMap(Map)
     //     */

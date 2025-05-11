@@ -284,8 +284,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the {@code newLeft}, the third parameter is the
-     *        {@code newMiddle}, the fourth parameter is the
-     *        {@code newRight}
+     *        {@code newMiddle}, the fourth parameter is the {@code newRight}
      * @return
      * @throws E the e
      */
@@ -302,7 +301,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     //    /**
-    //     * Swap the left and right value. they must be same type.
+    //     * Swaps the left and right values. They must be the same type.
     //     */
     //    public void reverse() {
     //        Object tmp = left;

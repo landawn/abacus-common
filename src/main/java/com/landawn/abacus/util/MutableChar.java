@@ -116,7 +116,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     /**
      * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
-     * Otherwise just return {@code false} without setting the value to new value.
+     * Otherwise, just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -135,7 +135,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     //    /**
     //     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-    //     * Otherwise just return <code>false</code> without setting the value to new value.
+    //     * Otherwise, just return <code>false</code> without setting the value to new value.
     //     *
     //     * @param <E>
     //     * @param newValue

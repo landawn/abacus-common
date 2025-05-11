@@ -731,10 +731,6 @@ public final class TypeFactory {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Collection Type can only have zero parameter.");
                     }
 
-                    if (guavaMultisetClass != null && guavaMultisetClass.isAssignableFrom(cls)) {
-
-                    }
-
                     if (typeParameters.length == 0) {
                         type = new CollectionType(cls, ObjectType.OBJECT);
                     } else {

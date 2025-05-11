@@ -764,7 +764,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Sets the accept encoding.
+     * Sets the acceptance encoding.
      *
      * @param acceptEncoding
      * @return
@@ -788,7 +788,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Sets the accept language.
+     * Sets the acceptance language.
      *
      * @param acceptLanguage
      * @return
@@ -800,7 +800,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Sets the accept ranges.
+     * Sets the acceptance ranges.
      *
      * @param acceptRanges
      * @return

@@ -107,7 +107,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns an ByteIterator instance that is created lazily using the provided Supplier.
+     * Returns an ByteIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the ByteIterator instance when the first method in the returned {@code ByteIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the ByteIterator when needed.

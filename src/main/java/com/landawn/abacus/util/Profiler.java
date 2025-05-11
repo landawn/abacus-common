@@ -198,7 +198,7 @@ public final class Profiler {
 
     /**
      * Run performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
-     * The performance test will be repeatedly execute times specified by {@code roundNum}.
+     * The performance test will be repeatedly executedd times specified by {@code roundNum}.
      *
      * @param instance
      * @param method
@@ -223,7 +223,7 @@ public final class Profiler {
 
     /**
      * Run performance test for the specified {@code methodList} with the specified {@code threadNum} and {@code loopNum} for each thread.
-     * The performance test will be repeatedly execute times specified by {@code roundNum}.
+     * The performance test will be repeatedly executed times specified by {@code roundNum}.
      *
      * @param instance it can be {@code null} if methods in the specified {@code methodList} are static methods
      * @param methodName
@@ -250,7 +250,7 @@ public final class Profiler {
             throw new IllegalArgumentException(
                     "The input args must be null or size = 1 or size = threadNum. It's the input parameter for the every loop in each thread ");
         }
-        // It takes about 250MB memory to save 1 million test result.
+        // It takes about 250MB memory to save 1 million test results.
         if (threadNum * loopNum > IOUtil.MAX_MEMORY_IN_MB * 1000) {
             if (IOUtil.MAX_MEMORY_IN_MB < 1024) {
                 logger.warn(

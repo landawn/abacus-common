@@ -111,7 +111,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * The Supplier is responsible for producing the IntIterator instance when the first method in the returned {@code IntIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the IntIterator when needed.
-     * @return A IntIterator that is initialized on the first call to hasNext() or nextByte().
+     * @return An IntIterator that is initialized on the first call to hasNext() or nextByte().
      * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {

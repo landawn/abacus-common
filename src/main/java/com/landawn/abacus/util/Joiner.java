@@ -35,7 +35,7 @@ import com.landawn.abacus.util.stream.Stream;
  * This is the Joiner class. It provides various methods to join elements into a string.
  * The class implements the Closeable interface, indicating that instances of this class can be closed to release resources.
  * The class provides methods to append different types of elements, including primitives, arrays, collections, and maps.
- * It also provides methods to control the joining behavior, such as whether to trim before append, whether to skip nulls, and whether to use a cached buffer.
+ * It also provides methods to control the joining behavior, such as whether to trim before appending, whether to skip nulls, and whether to use a cached buffer.
  * The class also includes methods for repeating a string, merging another Joiner, and converting the joined elements into a string, a map, or a stream.
  *
  * @see Splitter
@@ -1936,7 +1936,7 @@ public final class Joiner implements Closeable {
 
     public int length() {
         // Remember that we never actually append the suffix unless we return
-        // the full (present) value or some sub-string or length of it, so that
+        // the full (present) value or some substring or length of it, so that
         // we can add on more if we need to.
         return (buffer != null ? buffer.length() + suffix.length() : emptyValue.length());
     }

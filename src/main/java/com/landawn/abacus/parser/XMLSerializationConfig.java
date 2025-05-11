@@ -254,7 +254,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @param tagByPropertyName
          * @param ignoreTypeInfo
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo) {
@@ -265,7 +265,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          *
          * @param dateTimeFormat
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(final DateTimeFormat dateTimeFormat) {
@@ -277,7 +277,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
@@ -292,7 +292,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo, final DateTimeFormat dateTimeFormat,

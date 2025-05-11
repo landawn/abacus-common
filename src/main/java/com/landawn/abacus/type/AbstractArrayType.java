@@ -32,9 +32,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this is array type.
+     * Checks if this is an array type.
      *
-     * @return {@code true}, if this is array type
+     * @return {@code true}, if this is an array type
      */
     @Override
     public boolean isArray() {
@@ -51,14 +51,6 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.ARRAY;
     }
 
-    /**
-     * Array 2 collection.
-     *
-     * @param <E>
-     * @param array
-     * @param collClass
-     * @return
-     */
     @MayReturnNull
     @Override
     public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {

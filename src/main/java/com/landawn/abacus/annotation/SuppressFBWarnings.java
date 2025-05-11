@@ -20,8 +20,8 @@ import java.lang.annotation.RetentionPolicy;
 public @interface SuppressFBWarnings {
 
     /**
-     * The set of FindBugs warnings that are to be suppressed in
-     * annotated element. The value can be a bug category, kind or pattern.
+     * The set of FindBugs warnings that are to be suppressed in an annotated element.
+     * The value can be a bug category, kind or pattern.
      *
      * @return
      */

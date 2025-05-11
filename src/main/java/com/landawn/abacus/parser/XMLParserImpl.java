@@ -1000,8 +1000,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        // BufferedReader? will the target parser create the BufferedReader
-        // internally.
+        // BufferedReader? will the target parser create the BufferedReader internally?
         return read(source, config, null, targetClass);
     }
 

@@ -18,7 +18,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A table of constant Strings/chars.
+ * A dictionary of common characters and strings.
  *
  */
 @Beta
@@ -29,1025 +29,1024 @@ public final class WD {
         // singleton
     }
 
-    // ...
+    /**
+     * Represents character: {@code (char) 0}
+     */
     public static final char CHAR_ZERO = (char) 0;
 
     /**
-     * {@code} linefeed LF ('\n').
-     *
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences for
-     *      Character and String Literals</a>
+     * Represents character: {@code '\n'}
      */
     public static final char CHAR_LF = '\n';
+
     /**
-     * {@code} carriage return CR ('\r').
-     *
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences for
-     *      Character and String Literals</a>
+     * Represents character: {@code '\r'}
      */
     public static final char CHAR_CR = '\r';
 
     /**
-     * Field _SPACE.
+     * Represents character: {@code ' '}
      */
     public static final char _SPACE = ' ';
 
     /**
-     * Field SPACE (value is {@code " "})
+     * Represents string: {@code " "}
      */
     public static final String SPACE = " ";
 
     /**
-     * Field _PERIOD.
+     * Represents character: {@code '.'}
      */
     public static final char _PERIOD = '.';
 
     /**
-     * Field PERIOD (value is {@code "."})
+     * Represents string: {@code "."}
      */
     public static final String PERIOD = ".";
 
     /**
-     * Field _COMMA.
+     * Represents character: {@code ','}
      */
     public static final char _COMMA = ',';
 
     /**
-     * Field COMMA (value is {@code ","})
+     * Represents string: {@code ","}
      */
     public static final String COMMA = ",";
 
     /**
-     * Field COMMA_SPACE (value is {@code ", "})
+     * Represents string: {@code ", "}
      */
     public static final String COMMA_SPACE = ", ";
 
     /**
-     * Field _COLON.
+     * Represents character: {@code ':'}
      */
     public static final char _COLON = ':';
 
     /**
-     * Field COLON (value is {@code ":"})
+     * Represents string: {@code ":"}
      */
     public static final String COLON = ":";
 
-    /** Field COLON_SPACE. */
+    /**
+     * Represents string: {@code ": "}
+     */
     public static final String COLON_SPACE = ": ";
 
     /**
-     * Field _SEMICOLON.
+     * Represents character: {@code ';'}
      */
     public static final char _SEMICOLON = ';';
 
     /**
-     * Field SEMICOLON (value is {@code ";"})
+     * Represents string: {@code ";"}
      */
     public static final String SEMICOLON = ";";
 
     /**
-     * Field SEMICOLON_SPACE (value is {@code "; "})
+     * Represents string: {@code "; "}
      */
     public static final String SEMICOLON_SPACE = "; ";
 
     /**
-     * Field _BACKSLASH.
+     * Represents character: {@code '\\'}
      */
     public static final char _BACKSLASH = '\\';
 
     /**
-     * Field BACKSLASH (value is {@code "\\"})
+     * Represents string: {@code "\\"}
      */
     public static final String BACKSLASH = "\\";
 
     /**
-     * Field _QUOTATION_S.
+     * Represents character: {@code '\''}
      */
     public static final char _QUOTATION_S = '\'';
 
     /**
-     * Field QUOTATION_S (value is {@code "'"})
+     * Represents string: {@code "'"}
      */
     public static final String QUOTATION_S = "'";
 
     /**
-     * Field SPACE_QUOTATION_S (value is {@code " '"})
+     * Represents string: {@code " '"}
      */
     public static final String SPACE_QUOTATION_S = " '";
 
     /**
-     * Field QUOTATION_S_SPACE (value is {@code "' "})
+     * Represents string: {@code "' "}
      */
     public static final String QUOTATION_S_SPACE = "' ";
 
     /**
-     * Field _QUOTATION_D.
+     * Represents character: {@code '"'}
      */
     public static final char _QUOTATION_D = '"';
 
     /**
-     * Field QUOTATION_D (value is {@code "\""})
+     * Represents string: {@code "\""}
      */
     public static final String QUOTATION_D = "\"";
 
     /**
-     * Field SPACE_QUOTATION_D (value is {@code " \""})
+     * Represents string: {@code " \""}
      */
     public static final String SPACE_QUOTATION_D = " \"";
 
     /**
-     * Field QUOTATION_D_SPACE (value is {@code "\" "})
+     * Represents string: {@code "\" "}
      */
     public static final String QUOTATION_D_SPACE = "\" ";
 
     /**
-     * Field _AMPERSAND.
+     * Represents character: {@code '&'}
      */
     public static final char _AMPERSAND = '&';
 
     /**
-     * Field AMPERSAND (value is {@code {@code "&"}})
+     * Represents string: {@code "&"}
      */
     public static final String AMPERSAND = "&";
 
     /**
-     * Field _VERTICALBAR.
+     * Represents character: {@code '|'}
      */
     public static final char _VERTICALBAR = '|';
 
     /**
-     * Field VERTICALBAR (value is {@code "|"})
+     * Represents string: {@code "|"}
      */
     public static final String VERTICALBAR = "|";
 
     /**
-     * Field PARALLEL (value is {@code "||"})
+     * Represents string: {@code "||"}
      */
     public static final String PARALLEL = "||";
 
     /**
-     * Field _UNDERSCORE.
+     * Represents character: {@code '_'}
      */
     public static final char _UNDERSCORE = '_';
 
     /**
-     * Field UNDERSCORE (value is {@code "_"})
+     * Represents string: {@code "_"}
      */
     public static final String UNDERSCORE = "_";
 
     /**
-     * Field _LESS_THAN.
+     * Represents character: {@code '<'}
      */
     public static final char _LESS_THAN = '<';
 
     /**
-     * Field LESS_THAN (value is {@code {@code "<"}})
+     * Represents string: {@code "<"}
      */
     public static final String LESS_THAN = "<";
 
     /**
-     * Field _GREATER_THAN.
+     * Represents character: {@code '>'}
      */
     public static final char _GREATER_THAN = '>';
 
     /**
-     * Field GREATER_THAN (value is {@code "."})
+     * Represents string: {@code ">"}
      */
     public static final String GREATER_THAN = ">";
 
     /**
-     * Field _EQUAL.
+     * Represents character: {@code '='}
      */
     public static final char _EQUAL = '=';
 
     /**
-     * Field EQUAL (value is {@code "="})
+     * Represents string: {@code "="}
      */
     public static final String EQUAL = "=";
 
     /**
-     * Field _PLUS.
+     * Represents character: {@code '+'}
      */
     public static final char _PLUS = '+';
 
     /**
-     * Field PLUS (value is {@code "+"})
+     * Represents string: {@code "+"}
      */
     public static final String PLUS = "+";
 
     /**
-     * Field _MINUS.
+     * Represents character: {@code '-'}
      */
     public static final char _MINUS = '-';
 
     /**
-     * Field MINUS (value is {@code "-"})
+     * Represents string: {@code "-"}
      */
     public static final String MINUS = "-";
 
     /**
-     * Field _PERCENT.
+     * Represents character: {@code '%'}
      */
     public static final char _PERCENT = '%';
 
     /**
-     * Field PERCENT (value is {@code "%"})
+     * Represents string: {@code "%"}
      */
     public static final String PERCENT = "%";
 
     /**
-     * Field _SLASH.
+     * Represents character: {@code '/'}
      */
     public static final char _SLASH = '/';
 
     /**
-     * Field SLASH (value is {@code "/"})
+     * Represents string: {@code "/"}
      */
     public static final String SLASH = "/";
 
     /**
-     * Field _ASTERISK.
+     * Represents character: {@code '*'}
      */
     public static final char _ASTERISK = '*';
 
     /**
-     * Field ASTERISK (value is {@code "*"})
+     * Represents string: {@code "*"}
      */
     public static final String ASTERISK = "*";
 
     /**
-     * Field _QUESTION_MARK.
+     * Represents character: {@code '?'}
      */
     public static final char _QUESTION_MARK = '?';
 
     /**
-     * Field QUESTION_MARK (value is {@code "?"})
+     * Represents string: {@code "?"}
      */
     public static final String QUESTION_MARK = "?";
 
     /**
-     * Field _PARENTHESES_L.
+     * Represents character: {@code '('}
      */
     public static final char _PARENTHESES_L = '(';
 
     /**
-     * Field PARENTHESES_L (value is {@code "("})
+     * Represents string: {@code "("}
      */
     public static final String PARENTHESES_L = "(";
 
     /**
-     * Field SPACE_PARENTHESES_L (value is {@code " ("})
+     * Represents string: {@code " ("}
      */
     public static final String SPACE_PARENTHESES_L = " (";
 
     /**
-     * Field _PARENTHESES_R.
+     * Represents character: {@code ')'}
      */
     public static final char _PARENTHESES_R = ')';
 
     /**
-     * Field PARENTHESES_R (value is {@code ")"})
+     * Represents string: {@code ")"}
      */
     public static final String PARENTHESES_R = ")";
 
     /**
-     * Field PARENTHESES_R_SPACE (value is {@code ") "})
+     * Represents string: {@code ") "}
      */
     public static final String PARENTHESES_R_SPACE = ") ";
 
     /**
-     * Field _BRACKET_L.
+     * Represents character: {@code '['}
      */
     public static final char _BRACKET_L = '[';
 
     /**
-     * Field BRACKET_L (value is {@code "["})
+     * Represents string: {@code "["}
      */
     public static final String BRACKET_L = "[";
 
     /**
-     * Field _BRACKET_R.
+     * Represents character: {@code ']'}
      */
     public static final char _BRACKET_R = ']';
 
     /**
-     * Field BRACKET_R (value is {@code "]"})
+     * Represents string: {@code "]"}
      */
     public static final String BRACKET_R = "]";
 
     /**
-     * Field _BRACE_L.
+     * Represents character: {@code '{'}
      */
     public static final char _BRACE_L = '{';
 
     /**
-     * Field BRACE_L (value is {@code "{"})
+     * Represents string: {@code "{"}
      */
     public static final String BRACE_L = "{";
 
     /**
-     * Field _BRACE_R.
+     * Represents character: {@code '}'}
      */
     public static final char _BRACE_R = '}';
 
     /**
-     * Field BRACE_R (value is {@code "}"})
+     * Represents string: {@code "}"}
      */
     public static final String BRACE_R = "}";
 
     /**
-     * Field _CIRCUMFLEX.
+     * Represents character: {@code '^'}
      */
     public static final char _CIRCUMFLEX = '^';
 
     /**
-     * Field CIRCUMFLEX (value is {@code "^"})
+     * Represents string: {@code "^"}
      */
     public static final String CIRCUMFLEX = "^";
 
     /**
-     * Field _UNARYBIT.
+     * Represents character: {@code '~'}
      */
     public static final char _UNARYBIT = '~';
 
     /**
-     * Field UNARYBIT (value is {@code "~"})
+     * Represents string: {@code "~"}
      */
     public static final String UNARYBIT = "~";
 
     /**
-     * Field _DOLLAR.
+     * Represents character: {@code '$'}
      */
     public static final char _DOLLAR = '$';
 
     /**
-     * Field DOLLAR (value is {@code "$"})
+     * Represents string: {@code "$"}
      */
     public static final String DOLLAR = "$";
 
     /**
-     * Field _SHARP.
+     * Represents character: {@code '#'}
      */
     public static final char _SHARP = '#';
 
     /**
-     * Field SHARP (value is {@code "#"})
+     * Represents string: {@code "#"}
      */
     public static final String SHARP = "#";
 
     /**
-     * Field _EXCLAMATION.
+     * Represents character: {@code '!'}
      */
     public static final char _EXCLAMATION = '!';
 
     /**
-     * Field EXCLAMATION.
+     * Represents string: {@code "!"}
      */
     public static final String EXCLAMATION = "!";
 
     /**
-     * Field NOT_EQUAL.
+     * Represents string: {@code "!="}
      */
     public static final String NOT_EQUAL = "!=";
 
     /**
-     * Field NOT_EQUAL2.
+     * Represents string: {@code "<>"}
      */
     public static final String NOT_EQUAL2 = "<>";
 
     /**
-     * Field GREATER_EQUAL.
+     * Represents string: {@code ">="}
      */
     public static final String GREATER_EQUAL = ">=";
 
     /**
-     * Field LESS_EQUAL.
+     * Represents string: {@code "<="}
      */
     public static final String LESS_EQUAL = "<=";
 
     // --------------------SQL key words----------------------------
     /**
-     * Field WITH.
+     * Represents string: {@code "WITH"}
      */
     public static final String WITH = "WITH";
 
     /**
-     * Field MERGE.
+     * Represents string: {@code "MERGE"}
      */
     public static final String MERGE = "MERGE";
 
     /**
-     * Field SELECT.
+     * Represents string: {@code "SELECT"}
      */
     public static final String SELECT = "SELECT";
 
     /**
-     * Field INSERT.
+     * Represents string: {@code "INSERT"}
      */
     public static final String INSERT = "INSERT";
 
     /**
-     * Field INTO.
+     * Represents string: {@code "INTO"}
      */
     public static final String INTO = "INTO";
 
     /**
-     * Field UPDATE.
+     * Represents string: {@code "UPDATE"}
      */
     public static final String UPDATE = "UPDATE";
 
     /**
-     * Field SET.
+     * Represents string: {@code "SET"}
      */
     public static final String SET = "SET";
 
     /**
-     * Field DELETE.
+     * Represents string: {@code "DELETE"}
      */
     public static final String DELETE = "DELETE";
 
     /**
-     * Field CREATE.
+     * Represents string: {@code "CREATE"}
      */
     public static final String CREATE = "CREATE";
 
     /**
-     * Field DROP.
+     * Represents string: {@code "DROP"}
      */
     public static final String DROP = "DROP";
 
     /**
-     * Field SHOW.
+     * Represents string: {@code "SHOW"}
      */
     public static final String SHOW = "SHOW";
 
     /**
-     * Field DESCRIBE.
+     * Represents string: {@code "DESCRIBE"}
      */
     public static final String DESCRIBE = "DESCRIBE";
 
     /**
-     * Field ALTER.
+     * Represents string: {@code "ALTER"}
      */
     public static final String ALTER = "ALTER";
 
     /**
-     * Field USE.
+     * Represents string: {@code "USE"}
      */
     public static final String USE = "USE";
 
     /**
-     * Field RENAME.
+     * Represents string: {@code "RENAME"}
      */
     public static final String RENAME = "RENAME";
 
     /**
-     * Field BEGIN_TRANSACTION.
+     * Represents string: {@code "BEGIN TRANSACTION"}
      */
     public static final String BEGIN_TRANSACTION = "BEGIN TRANSACTION";
 
     /**
-     * Field START_TRANSACTION.
+     * Represents string: {@code "START TRANSACTION"}
      */
     public static final String START_TRANSACTION = "START TRANSACTION";
 
     /**
-     * Field COMMIT.
+     * Represents string: {@code "COMMIT"}
      */
     public static final String COMMIT = "COMMIT";
 
     /**
-     * Field ROLLBACK.
+     * Represents string: {@code "ROLLBACK"}
      */
     public static final String ROLLBACK = "ROLLBACK";
 
     /**
-     * Field AS.
+     * Represents string: {@code "AS"}
      */
     public static final String AS = "AS";
 
     /**
-     * Field JOIN.
+     * Represents string: {@code "JOIN"}
      */
     public static final String JOIN = "JOIN";
 
     /**
-     * Field NATURAL.
+     * Represents string: {@code "NATURAL"}
      */
     public static final String NATURAL = "NATURAL";
 
     /**
-     * Field INNER.
+     * Represents string: {@code "INNER"}
      */
     public static final String INNER = "INNER";
 
     /**
-     * Field OUTER .
+     * Represents string: {@code "OUTER "}
      */
     public static final String OUTER = "OUTER ";
 
     /**
-     * Field LEFT_JOIN.
+     * Represents string: {@code "LEFT JOIN"}
      */
     public static final String LEFT_JOIN = "LEFT JOIN";
 
     /**
-     * Field LEFT.
+     * Represents string: {@code "LEFT"}
      */
     public static final String LEFT = "LEFT";
 
     /**
-     * Field RIGHT_JOIN.
+     * Represents string: {@code "RIGHT JOIN"}
      */
     public static final String RIGHT_JOIN = "RIGHT JOIN";
 
     /**
-     * Field RIGHT.
+     * Represents string: {@code "RIGHT"}
      */
     public static final String RIGHT = "RIGHT";
 
     /**
-     * Field FULL_JOIN.
+     * Represents string: {@code "FULL JOIN"}
      */
     public static final String FULL_JOIN = "FULL JOIN";
 
     /**
-     * Field FULL.
+     * Represents string: {@code "FULL"}
      */
     public static final String FULL = "FULL";
 
     /**
-     * Field CROSS_JOIN.
+     * Represents string: {@code "CROSS JOIN"}
      */
     public static final String CROSS_JOIN = "CROSS JOIN";
 
     /**
-     * Field INNER_JOIN.
+     * Represents string: {@code "INNER JOIN"}
      */
     public static final String INNER_JOIN = "INNER JOIN";
 
     /**
-     * Field NATURAL_JOIN.
+     * Represents string: {@code "NATURAL JOIN"}
      */
     public static final String NATURAL_JOIN = "NATURAL JOIN";
 
     /**
-     * Field CROSS.
+     * Represents string: {@code "CROSS"}
      */
     public static final String CROSS = "CROSS";
 
     /**
-     * Field ON.
+     * Represents string: {@code "ON"}
      */
     public static final String ON = "ON";
 
     /**
-     * Field USING.
+     * Represents string: {@code "USING"}
      */
     public static final String USING = "USING";
 
     /**
-     * Field WHERE.
+     * Represents string: {@code "WHERE"}
      */
     public static final String WHERE = "WHERE";
 
     /**
-     * Field GROUP_BY.
+     * Represents string: {@code "GROUP BY"}
      */
     public static final String GROUP_BY = "GROUP BY";
 
     /**
-     * Field HAVING.
+     * Represents string: {@code "HAVING"}
      */
     public static final String HAVING = "HAVING";
 
     /**
-     * Field ORDER_BY.
+     * Represents string: {@code "ORDER BY"}
      */
     public static final String ORDER_BY = "ORDER BY";
 
     /**
-     * Field LIMIT.
+     * Represents string: {@code "LIMIT"}
      */
     public static final String LIMIT = "LIMIT";
 
     /**
-     * Field OFFSET.
+     * Represents string: {@code "OFFSET"}
      */
     public static final String OFFSET = "OFFSET";
 
     /**
-     * Field FOR_UPDATE.
+     * Represents string: {@code "FOR UPDATE"}
      */
     public static final String FOR_UPDATE = "FOR UPDATE";
 
     /**
-     * Field FETCH_FIRST (value is {@code "FETCH FIRST"})
+     * Represents string: {@code "FETCH FIRST"}
      */
     public static final String FETCH_FIRST = "FETCH FIRST";
 
     /**
-     * Field FETCH_NEXT (value is {@code "FETCH NEXT"})
+     * Represents string: {@code "FETCH NEXT"}
      */
     public static final String FETCH_NEXT = "FETCH NEXT";
 
     /**
-     * Field ROWS (value is {@code "ROWS"})
+     * Represents string: {@code "ROWS"}
      */
     public static final String ROWS = "ROWS";
 
     /**
-     * Field ROWS_ONLY (value is {@code "ROWS ONLY"})
+     * Represents string: {@code "ROWS ONLY"}
      */
     public static final String ROWS_ONLY = "ROWS ONLY";
 
     /**
-     * Field ROW_NEXT (value is {@code "ROW_NEXT"})
+     * Represents string: {@code "ROW_NEXT"}
      */
     public static final String ROW_NEXT = "ROW_NEXT";
 
     /**
-     * Field ROWNUM.
+     * Represents string: {@code "ROWNUM"}
      */
     public static final String ROWNUM = "ROWNUM";
 
     /**
-     * Field EXISTS.
+     * Represents string: {@code "EXISTS"}
      */
     public static final String EXISTS = "EXISTS";
 
     /**
-     * Field LIKE.
+     * Represents string: {@code "LIKE"}
      */
     public static final String LIKE = "LIKE";
 
     /**
-     * Field AND.
+     * Represents string: {@code "AND"}
      */
     public static final String AND = "AND";
 
     /**
-     * Field AND2.
+     * Represents string: {@code "&&"}
      */
     public static final String AND_OP = "&&";
 
     /**
-     * Field OR.
+     * Represents string: {@code "OR"}
      */
     public static final String OR = "OR";
 
     /**
-     * Field OR2.
+     * Represents string: {@code "||"}
      */
     public static final String OR_OP = "||";
 
     /**
-     * Field XOR.
+     * Represents string: {@code "XOR"}
      */
     public static final String XOR = "XOR";
 
     /**
-     * Field NOT.
+     * Represents string: {@code "NOT"}
      */
     public static final String NOT = "NOT";
 
     /**
-     * Field BETWEEN.
+     * Represents string: {@code "BETWEEN"}
      */
     public static final String BETWEEN = "BETWEEN";
 
     /**
-     * Field IS.
+     * Represents string: {@code "IS"}
      */
     public static final String IS = "IS";
 
     /**
-     * Field IS_NOT.
+     * Represents string: {@code "IS NOT"}
      */
     public static final String IS_NOT = "IS NOT";
 
     /**
-     * Field NULL.
+     * Represents string: {@code "NULL"}
      */
     public static final String NULL = "NULL";
 
     /**
-     * Field IS_NULL.
+     * Represents string: {@code "IS NULL"}
      */
     public static final String IS_NULL = "IS NULL";
 
     /**
-     * Field IS_NOT_NULL.
+     * Represents string: {@code "IS NOT NULL"}
      */
     public static final String IS_NOT_NULL = "IS NOT NULL";
 
     /**
-     * Field EMPTY.
+     * Represents string: {@code "EMPTY"}
      */
     public static final String EMPTY = "EMPTY";
 
     /**
-     * Field EMPTY.
+     * Represents string: {@code "IS EMPTY"}
      */
     public static final String IS_EMPTY = "IS EMPTY";
 
     /**
-     * Field IS_NOT_EMPTY.
+     * Represents string: {@code "IS NOT EMPTY"}
      */
     public static final String IS_NOT_EMPTY = "IS NOT EMPTY";
 
     /**
-     * Field BLANK.
+     * Represents string: {@code "BLANK"}
      */
     public static final String BLANK = "BLANK";
 
     /**
-     * Field IS_BLANK.
+     * Represents string: {@code "IS BLANK"}
      */
     public static final String IS_BLANK = "IS BLANK";
 
     /**
-     * Field IS_NOT_BLANK.
+     * Represents string: {@code "IS NOT BLANK"}
      */
     public static final String IS_NOT_BLANK = "IS NOT BLANK";
 
     /**
-     * Field NOT_IN.
+     * Represents string: {@code "NOT IN"}
      */
     public static final String NOT_IN = "NOT IN";
 
     /**
-     * Field NOT_EXISTS.
+     * Represents string: {@code "NOT EXISTS"}
      */
     public static final String NOT_EXISTS = "NOT EXISTS";
 
     /**
-     * Field FROM.
+     * Represents string: {@code "FROM"}
      */
     public static final String FROM = "FROM";
 
     /**
-     * Field ASC.
+     * Represents string: {@code "ASC"}
      */
     public static final String ASC = "ASC";
 
     /**
-     * Field DESC.
+     * Represents string: {@code "DESC"}
      */
     public static final String DESC = "DESC";
 
     /**
-     * Field VALUES.
+     * Represents string: {@code "VALUES"}
      */
     public static final String VALUES = "VALUES";
 
     /**
-     * Field DISTINCT.
+     * Represents string: {@code "DISTINCT"}
      */
     public static final String DISTINCT = "DISTINCT";
 
     /**
-     * Field DISTINCTROW.
+     * Represents string: {@code "DISTINCTROW"}
      */
     public static final String DISTINCTROW = "DISTINCTROW";
 
     /**
-     * Field UNIQUE.
+     * Represents string: {@code "UNIQUE"}
      */
     public static final String UNIQUE = "UNIQUE";
 
     /**
-     * Field TOP.
+     * Represents string: {@code "TOP"}
      */
     public static final String TOP = "TOP";
 
     /**
-     * Field IN.
+     * Represents string: {@code "IN"}
      */
     public static final String IN = "IN";
 
     /**
-     * Field ANY.
+     * Represents string: {@code "ANY"}
      */
     public static final String ANY = "ANY";
 
     /**
-     * Field ALL.
+     * Represents string: {@code "ALL"}
      */
     public static final String ALL = "ALL";
 
     /**
-     * Field SOME.
+     * Represents string: {@code "SOME"}
      */
     public static final String SOME = "SOME";
 
     /**
-     * Field UNION.
+     * Represents string: {@code "UNION"}
      */
     public static final String UNION = "UNION";
 
     /**
-     * Field UNION_ALL.
+     * Represents string: {@code "UNION ALL"}
      */
     public static final String UNION_ALL = "UNION ALL";
 
     /**
-     * Field INTERSECT.
+     * Represents string: {@code "INTERSECT"}
      */
     public static final String INTERSECT = "INTERSECT";
 
     /**
-     * Field EXCEPT.
+     * Represents string: {@code "EXCEPT"}
      */
     public static final String EXCEPT = "EXCEPT";
 
     /**
-     * Field EXCEPT2.
+     * Represents string: {@code "MINUS"}
      */
     public static final String EXCEPT2 = "MINUS";
 
     /**
-     * Field AVG (value is {@code "AVG"})
+     * Represents string: {@code "AVG"}
      */
     public static final String AVG = "AVG";
 
     /**
-     * Field COUNT (value is {@code "COUNT"})
+     * Represents string: {@code "COUNT"}
      */
     public static final String COUNT = "COUNT";
 
     /**
-     * Field SUM (value is {@code "SUM"})
+     * Represents string: {@code "SUM"}
      */
     public static final String SUM = "SUM";
 
     /**
-     * Field MIN (value is {@code "MIN"})
+     * Represents string: {@code "MIN"}
      */
     public static final String MIN = "MIN";
 
     /**
-     * Field MAX (value is {@code "MAX"})
+     * Represents string: {@code "MAX"}
      */
     public static final String MAX = "MAX";
 
     /**
-     * Field ABS (value is {@code "ABS"})
+     * Represents string: {@code "ABS"}
      */
     public static final String ABS = "ABS";
 
     /**
-     * Field ACOS (value is {@code "ACOS"})
+     * Represents string: {@code "ACOS"}
      */
     public static final String ACOS = "ACOS";
 
     /**
-     * Field ASIN (value is {@code "ASIN"})
+     * Represents string: {@code "ASIN"}
      */
     public static final String ASIN = "ASIN";
 
     /**
-     * Field ATAN (value is {@code "ATAN"})
+     * Represents string: {@code "ATAN"}
      */
     public static final String ATAN = "ATAN";
 
     /**
-     * Field ATAN2 (value is {@code "ATAN2"})
+     * Represents string: {@code "ATAN2"}
      */
     public static final String ATAN2 = "ATAN2";
 
     /**
-     * Field CEIL (value is {@code "CEIL"})
+     * Represents string: {@code "CEIL"}
      */
     public static final String CEIL = "CEIL";
 
     /**
-     * Field COS (value is {@code "COS"})
+     * Represents string: {@code "COS"}
      */
     public static final String COS = "COS";
 
     /**
-     * Field EXP (value is {@code "EXP"})
+     * Represents string: {@code "EXP"}
      */
     public static final String EXP = "EXP";
 
     /**
-     * Field FLOOR (value is {@code "FLOOR"})
+     * Represents string: {@code "FLOOR"}
      */
     public static final String FLOOR = "FLOOR";
 
     /**
-     * Field LOG (value is {@code "LOG"})
+     * Represents string: {@code "LOG"}
      */
     public static final String LOG = "LOG";
 
     /**
-     * Field LN (value is {@code "LN"})
+     * Represents string: {@code "LN"}
      */
     public static final String LN = "LN";
 
     /**
-     * Field MOD (value is {@code "MOD"})
+     * Represents string: {@code "MOD"}
      */
     public static final String MOD = "MOD";
 
     /**
-     * Field POWER (value is {@code "POWER"})
+     * Represents string: {@code "POWER"}
      */
     public static final String POWER = "POWER";
 
     /**
-     * Field SIGN (value is {@code "SIGN"})
+     * Represents string: {@code "SIGN"}
      */
     public static final String SIGN = "SIGN";
 
     /**
-     * Field SIN (value is {@code "SIN"})
+     * Represents string: {@code "SIN"}
      */
     public static final String SIN = "SIN";
 
     /**
-     * Field SQRT (value is {@code "SQRT"})
+     * Represents string: {@code "SQRT"}
      */
     public static final String SQRT = "SQRT";
 
     /**
-     * Field TAN (value is {@code "TAN"})
+     * Represents string: {@code "TAN"}
      */
     public static final String TAN = "TAN";
 
     /**
-     * Field LENGTH (value is {@code "LENGTH"})
+     * Represents string: {@code "LENGTH"}
      */
     public static final String LENGTH = "LENGTH";
 
     /**
-     * Field CONCAT (value is {@code "CONCAT"})
+     * Represents string: {@code "CONCAT"}
      */
     public static final String CONCAT = "CONCAT";
 
     /**
-     * Field TRIM (value is {@code "TRIM"})
+     * Represents string: {@code "TRIM"}
      */
     public static final String TRIM = "TRIM";
 
     /**
-     * Field LTRIM (value is {@code "TRIM"})
+     * Represents string: {@code "LTRIM"}
      */
     public static final String LTRIM = "LTRIM";
 
     /**
-     * Field RTRIM (value is {@code "RTRIM"})
+     * Represents string: {@code "RTRIM"}
      */
     public static final String RTRIM = "RTRIM";
 
     /**
-     * Field LPAD (value is {@code "LPAD"})
+     * Represents string: {@code "LPAD"}
      */
     public static final String LPAD = "LPAD";
 
     /**
-     * Field RPAD (value is {@code "RPAD"})
+     * Represents string: {@code "RPAD"}
      */
     public static final String RPAD = "RPAD";
 
     /**
-     * Field REPLACE (value is {@code "REPLACE"})
+     * Represents string: {@code "REPLACE"}
      */
     public static final String REPLACE = "REPLACE";
 
     /**
-     * Field SUBSTR (value is {@code "SUBSTR"})
+     * Represents string: {@code "SUBSTR"}
      */
     public static final String SUBSTR = "SUBSTR";
 
     /**
-     * Field UPPER (value is {@code "upper"})
+     * Represents string: {@code "UPPER"}
      */
     public static final String UPPER = "UPPER";
 
     /**
-     * Field LOWER (value is {@code "lower"})
+     * Represents string: {@code "LOWER"}
      */
     public static final String LOWER = "LOWER";
 
     /**
-     * Field CAST (value is {@code "CAST"})
+     * Represents string: {@code "CAST"}
      */
     public static final String CAST = "CAST";
 
     /**
-     * Field CURRENT_TIME (value is {@code "CURRENT_TIME"})
+     * Represents string: {@code "CURRENT_TIME"}
      */
     public static final String CURRENT_TIME = "CURRENT_TIME";
 
     /**
-     * Field CURRENT_DATE (value is {@code "CURRENT_DATE"})
+     * Represents string: {@code "CURRENT_DATE"}
      */
     public static final String CURRENT_DATE = "CURRENT_DATE";
 
     /**
-     * Field CURRENT_TIMESTAMP (value is {@code "CURRENT_TIMESTAMP"})
+     * Represents string: {@code "CURRENT_TIMESTAMP"}
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 

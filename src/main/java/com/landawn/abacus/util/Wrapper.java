@@ -78,7 +78,7 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
      * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
-     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example: array.
+     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example, array.
      *
      * @param <T> The type of the value to be wrapped.
      * @param value The value to be wrapped.
@@ -98,7 +98,7 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
      * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
-     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example: array.
+     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example, array.
      *
      * @param <T> The type of the value to be wrapped.
      * @param value The value to be wrapped.

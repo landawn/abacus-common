@@ -109,7 +109,7 @@ public enum JavaVersion {
     JAVA_21(21.0f, "21"),
 
     /**
-     * The most recent java version. Mainly introduced to avoid to break when a new version of Java is used.
+     * The most recent java version. Mainly introduced to avoid breaking when a new version of Java is used.
      */
     JAVA_RECENT(maxVersion(), Float.toString(maxVersion()));
 
@@ -296,7 +296,7 @@ public enum JavaVersion {
      * Parses a float value from a String.
      *
      * @param value the String to parse.
-     * @return the float value represented by the string or -1 if the given String can not be parsed.
+     * @return the float value represented by the string or -1 if the given String cannot be parsed.
      */
     private static float toFloatVersion(final String value) {
         final int defaultReturnValue = -1;

@@ -176,7 +176,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * <br />
      * The returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
-     * Usually the returned collection should not be modified outside of this Multimap directly, because it may cause unexpected behavior.
+     * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.
      *
      * @param key The key whose associated value collection is to be returned.
      * @return The value collection associated with the specified key, or {@code null} if the key is not present in the Multimap.
@@ -191,7 +191,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * <br />
      * The returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
-     * Usually the returned collection should not be modified outside of this Multimap directly, because it may cause unexpected behavior.
+     * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.
      *
      * @param key The key whose associated value collection is to be returned.
      * @param defaultValue The default value to return if no value is associated with the key.
@@ -1260,7 +1260,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Computes the value for the specified key using the given mapping function, if the key is not already associated with a value.
+     * Computes the value for the specified key using the given mapping function if the key is not already associated with a value.
      *
      * This method first checks if the Multimap contains the specified key. If it does not, it applies the mapping function to the key,
      * and associates the key with the resulting value in the Multimap. If the mapping function returns {@code null} or an empty collection,
@@ -1312,7 +1312,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Computes the value for the specified key using the given remapping function, if the key is already associated with a value.
+     * Computes the value for the specified key using the given remapping function if the key is already associated with a value.
      *
      * This method first checks if the Multimap contains the specified key. If it does, it applies the remapping function to the key and its current associated value,
      * and updates the key's associated value in the Multimap with the result. If the remapping function returns {@code null} or an empty collection,
@@ -1604,7 +1604,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * The type of the new Multimap is determined by the provided multimapSupplier function. This function should return a new Multimap of the desired type.
      * The function is provided with an integer argument, which is the size of this Multimap.
      *
-     * @param <VV> The type of the collection of values in the new Multimap. The element type of this collection is same as the key type of this Multimap.
+     * @param <VV> The type of the collection of values in the new Multimap. The element type of this collection is the same as the key type of this Multimap.
      * @param <M> The type of the new Multimap. This is a Multimap where the key type is the value type of this Multimap, and the value type is a collection of the key type of this Multimap.
      * @param multimapSupplier A function that creates a new Multimap of the desired type. The function is provided with an integer argument, which is the size of this Multimap.
      * @return The new, inverted Multimap.
@@ -1780,9 +1780,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * This method iterates over all key-value pairs in the Multimap and applies the provided BiConsumer action.
      * The action should be a function that accepts a key and a value, and performs some operation.
-     * The action is performed in the order of the iteration, if that order is specified.
+     * The action is performed in the order of the iteration if that order is specified.
      * <br />
-     * Usually the value collection should not be modified outside of this Multimap directly by the specified action, because it may cause unexpected behavior.
+     * Usually, the value collection should not be modified outside this Multimap directly by the specified action, because it may cause unexpected behavior.
      *
      * @param action The action to be performed for each key-value pair in the Multimap.
      * @throws IllegalArgumentException if the provided action is {@code null}.
@@ -1801,7 +1801,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * This method iterates over all key-value pairs in the Multimap, where each value is a collection of elements.
      * It then iterates over each element in the value collection, and applies the provided BiConsumer action to the key and the element.
      * The action should be a function that accepts a key and an element, and performs some operation.
-     * The action is performed in the order of the iteration, if that order is specified.
+     * The action is performed in the order of the iteration if that order is specified.
      *
      * @param action The action to be performed for each key-element pair in the Multimap.
      * @throws IllegalArgumentException if the provided action is {@code null}.
@@ -1845,9 +1845,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * This method iterates over all value collections in the Multimap and applies the provided Consumer action.
      * The action should be a function that accepts a collection of values and performs some operation.
-     * The action is performed in the order of the iteration, if that order is specified.
+     * The action is performed in the order of the iteration if that order is specified.
      * <br />
-     * Usually the value collection should not be modified outside of this Multimap directly by the specified action, because it may cause unexpected behavior.
+     * Usually, the value collection should not be modified outside this Multimap directly by the specified action, because it may cause unexpected behavior.
      *
      * @param action The action to be performed for each value collection in the Multimap.
      * @throws IllegalArgumentException if the provided action is {@code null}.
@@ -1866,8 +1866,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * This method iterates over all value collections in the Multimap, where each value is a collection of elements.
      * It then iterates over each element in the value collection, and applies the provided Consumer action to the element.
-     * The action should be a function that accepts an element, and performs some operation.
-     * The action is performed in the order of the iteration, if that order is specified.
+     * The action should be a function that accepts an element and performs some operation.
+     * The action is performed in the order of the iteration if that order is specified.
      *
      * @param action The action to be performed for each element in the Multimap.
      * @throws IllegalArgumentException if the provided action is {@code null}.
@@ -2217,7 +2217,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * The string representation consists of a list of key-value mappings in the Multimap, enclosed in braces ("{}").
      * Adjacent mappings are separated by the characters ", " (comma and space).
-     * Each key-value mapping is rendered as the key followed by an equals sign ("=") followed by the associated value.
+     * Each key-value mapping is rendered as the key followed by an equal sign ("=") followed by the associated value.
      *
      * @return a string representation of this Multimap.
      */

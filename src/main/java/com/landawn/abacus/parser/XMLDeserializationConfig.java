@@ -50,7 +50,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          *
          * @param elementClass
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final Class<?> elementClass) {
@@ -62,7 +62,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @param keyClass
          * @param valueClass
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final Class<?> keyClass, final Class<?> valueClass) {
@@ -74,7 +74,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final boolean ignoreUnmatchedProperty, final Map<Class<?>, Set<String>> ignoredPropNames) {
@@ -87,7 +87,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final Class<?> elementClass, final boolean ignoreUnmatchedProperty,
@@ -102,7 +102,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final Class<?> keyClass, final Class<?> valueClass, final boolean ignoreUnmatchedProperty,
@@ -121,7 +121,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public static XMLDeserializationConfig of(final Class<?> elementClass, final Class<?> keyClass, final Class<?> valueClass,

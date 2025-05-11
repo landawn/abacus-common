@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * It's designed to provide a convenient way to parameterize the generic type (e.g. {@code List.<String>class}).
+ * It's designed to provide a convenient way to parameterize the generic type (e.g., {@code List.<String>class}).
  * <br />
  * But the returned Class by all the methods doesn't have the actual parameterized type information. For example:
  * <pre>
@@ -106,10 +106,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of the specified type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param cls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<T> of(final Class<? super T> cls) {
@@ -117,9 +121,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code List} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofList() {
@@ -127,10 +135,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code List} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofList(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -138,10 +150,13 @@ public final class Clazz {
     }
 
     /**
-     * Of linked list.
+     * Returns the class of {@code LinkedList} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofLinkedList() {
@@ -149,11 +164,14 @@ public final class Clazz {
     }
 
     /**
-     * Of linked list.
+     * Returns the class of {@code LinkedList} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofLinkedList(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -161,13 +179,16 @@ public final class Clazz {
     }
 
     /**
-     * Of list of map.
+     * Returns the class of {@code List} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<List<Map<K, V>>> ofListOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -176,13 +197,16 @@ public final class Clazz {
     }
 
     /**
-     * Of set of map.
+     * Returns the class of {@code Set} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Set<Map<K, V>>> ofSetOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -191,9 +215,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Set} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofSet() {
@@ -201,10 +229,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Set} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofSet(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -212,10 +244,13 @@ public final class Clazz {
     }
 
     /**
-     * Of linked hash set.
+     * Returns the class of {@code LinkedHashSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofLinkedHashSet() {
@@ -223,11 +258,14 @@ public final class Clazz {
     }
 
     /**
-     * Of linked hash set.
+     * Returns the class of {@code LinkedHashSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofLinkedHashSet(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -235,10 +273,13 @@ public final class Clazz {
     }
 
     /**
-     * Of sorted set.
+     * Returns the class of {@code SortedSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<SortedSet<T>> ofSortedSet() {
@@ -246,11 +287,14 @@ public final class Clazz {
     }
 
     /**
-     * Of sorted set.
+     * Returns the class of {@code SortedSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<SortedSet<T>> ofSortedSet(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -258,10 +302,13 @@ public final class Clazz {
     }
 
     /**
-     * Of navigable set.
+     * Returns the class of {@code NavigableSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofNavigableSet() {
@@ -269,11 +316,14 @@ public final class Clazz {
     }
 
     /**
-     * Of navigable set.
+     * Returns the class of {@code NavigableSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofNavigableSet(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -281,10 +331,13 @@ public final class Clazz {
     }
 
     /**
-     * Of tree set.
+     * Returns the class of {@code TreeSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofTreeSet() {
@@ -292,11 +345,14 @@ public final class Clazz {
     }
 
     /**
-     * Of tree set.
+     * Returns the class of {@code TreeSet} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofTreeSet(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -304,9 +360,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Queue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofQueue() {
@@ -314,10 +374,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Queue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -325,9 +389,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Deque} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofDeque() {
@@ -335,10 +403,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Deque} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -346,10 +418,13 @@ public final class Clazz {
     }
 
     /**
-     * Of array deque.
+     * Returns the class of {@code ArrayDeque} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofArrayDeque() {
@@ -357,11 +432,14 @@ public final class Clazz {
     }
 
     /**
-     * Of array deque.
+     * Returns the class of {@code ArrayDeque} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofArrayDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -369,10 +447,13 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent linked queue.
+     * Returns the class of {@code ConcurrentLinkedQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofConcurrentLinkedQueue() {
@@ -380,11 +461,14 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent linked queue.
+     * Returns the class of {@code ConcurrentLinkedQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofConcurrentLinkedQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -392,10 +476,13 @@ public final class Clazz {
     }
 
     /**
-     * Of priority queue.
+     * Returns the class of {@code PriorityQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofPriorityQueue() {
@@ -403,11 +490,14 @@ public final class Clazz {
     }
 
     /**
-     * Of priority queue.
+     * Returns the class of {@code PriorityQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofPriorityQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -415,10 +505,13 @@ public final class Clazz {
     }
 
     /**
-     * Of linked blocking queue.
+     * Returns the class of {@code LinkedBlockingQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -426,11 +519,14 @@ public final class Clazz {
     }
 
     /**
-     * Of linked blocking queue.
+     * Returns the class of {@code LinkedBlockingQueue} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -438,9 +534,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Collection} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Collection<T>> ofCollection() {
@@ -448,10 +548,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Collection} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Collection<T>> ofCollection(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -459,10 +563,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Map} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofMap() {
@@ -470,12 +578,16 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Map} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
@@ -483,11 +595,14 @@ public final class Clazz {
     }
 
     /**
-     * Of linked hash map.
+     * Returns the class of {@code LinkedHashMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofLinkedHashMap() {
@@ -495,13 +610,16 @@ public final class Clazz {
     }
 
     /**
-     * Of linked hash map.
+     * Returns the class of {@code LinkedHashMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofLinkedHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -510,11 +628,14 @@ public final class Clazz {
     }
 
     /**
-     * Of sorted map.
+     * Returns the class of {@code SortedMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap() {
@@ -522,13 +643,16 @@ public final class Clazz {
     }
 
     /**
-     * Of sorted map.
+     * Returns the class of {@code SortedMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -537,11 +661,14 @@ public final class Clazz {
     }
 
     /**
-     * Of navigable map.
+     * Returns the class of {@code NavigableMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap() {
@@ -549,13 +676,16 @@ public final class Clazz {
     }
 
     /**
-     * Of navigable map.
+     * Returns the class of {@code NavigableMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -564,11 +694,14 @@ public final class Clazz {
     }
 
     /**
-     * Of tree map.
+     * Returns the class of {@code TreeMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofTreeMap() {
@@ -576,13 +709,16 @@ public final class Clazz {
     }
 
     /**
-     * Of tree map.
+     * Returns the class of {@code TreeMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofTreeMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -591,11 +727,14 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent map.
+     * Returns the class of {@code ConcurrentMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -603,13 +742,16 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent map.
+     * Returns the class of {@code ConcurrentMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -618,11 +760,14 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent hash map.
+     * Returns the class of {@code ConcurrentHashMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap() {
@@ -630,13 +775,16 @@ public final class Clazz {
     }
 
     /**
-     * Of concurrent hash map.
+     * Returns the class of {@code ConcurrentHashMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -645,11 +793,14 @@ public final class Clazz {
     }
 
     /**
-     * Of bi map.
+     * Returns the class of {@code BiMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<BiMap<K, V>> ofBiMap() {
@@ -657,13 +808,16 @@ public final class Clazz {
     }
 
     /**
-     * Of bi map.
+     * Returns the class of {@code BiMap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyCls
      * @param valueCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<BiMap<K, V>> ofBiMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
@@ -671,9 +825,13 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Multimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Multiset<T>> ofMultiset() {
@@ -681,10 +839,14 @@ public final class Clazz {
     }
 
     /**
+     * Returns the class of {@code Multimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <T>
      * @param eleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Multiset<T>> ofMultiset(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -692,11 +854,14 @@ public final class Clazz {
     }
 
     /**
-     * Of list multimap.
+     * Returns the class of {@code ListMultimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <E>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap() {
@@ -704,13 +869,16 @@ public final class Clazz {
     }
 
     /**
-     * Of list multimap.
+     * Returns the class of {@code ListMultimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <E>
      * @param keyCls
      * @param valueEleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap(@SuppressWarnings("unused") final Class<K> keyCls,
@@ -719,11 +887,14 @@ public final class Clazz {
     }
 
     /**
-     * Of set multimap.
+     * Returns the class of {@code SetMultimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <E>
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap() {
@@ -731,13 +902,16 @@ public final class Clazz {
     }
 
     /**
-     * Of set multimap.
+     * Returns the class of {@code SetMultimap} type. Warning: the returned class doesn't have the actual type parameters information.
      *
      * @param <K> the key type
      * @param <E>
      * @param keyCls
      * @param valueEleCls
      * @return
+     * @see TypeReference#type()
+     * @see com.landawn.abacus.type.Type#of(String)
+     * @see com.landawn.abacus.type.Type#of(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap(@SuppressWarnings("unused") final Class<K> keyCls,

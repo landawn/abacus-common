@@ -69,7 +69,6 @@ public class u { // NOSONAR
         /** The Constant EMPTY. */
         private static final Optional<?> EMPTY = new Optional<>();
 
-        /** The value. */
         private final T value;
 
         /**
@@ -722,7 +721,7 @@ public class u { // NOSONAR
         /**
          *
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public java.util.Optional<T> __() {//NOSONAR
@@ -774,13 +773,10 @@ public class u { // NOSONAR
         /** Presents {@code true}. */
         public static final OptionalBoolean FALSE = new OptionalBoolean(false);
 
-        /** The Constant EMPTY. */
         private static final OptionalBoolean EMPTY = new OptionalBoolean();
 
-        /** The value. */
         private final boolean value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -1114,7 +1110,7 @@ public class u { // NOSONAR
         //    public boolean orTrue() {
         //        return isPresent ? value : true;
         //    }
-
+        //
         //    public boolean orElseTrue() {
         //        return isPresent ? value : true;
         //    }
@@ -1399,10 +1395,8 @@ public class u { // NOSONAR
             }
         }
 
-        /** The value. */
         private final char value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -1970,10 +1964,8 @@ public class u { // NOSONAR
             }
         }
 
-        /** The value. */
         private final byte value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -2521,10 +2513,8 @@ public class u { // NOSONAR
             }
         }
 
-        /** The value. */
         private final short value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -3072,10 +3062,8 @@ public class u { // NOSONAR
             }
         }
 
-        /** The value. */
         private final int value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -3651,7 +3639,7 @@ public class u { // NOSONAR
         /**
          *
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public java.util.OptionalInt __() {//NOSONAR
@@ -3734,10 +3722,8 @@ public class u { // NOSONAR
             }
         }
 
-        /** The value. */
         private final long value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -4256,7 +4242,7 @@ public class u { // NOSONAR
         /**
          *
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public java.util.OptionalLong __() {//NOSONAR
@@ -4326,10 +4312,8 @@ public class u { // NOSONAR
 
         private static final OptionalFloat ZERO = new OptionalFloat(0f);
 
-        /** The value. */
         private final float value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -4883,10 +4867,8 @@ public class u { // NOSONAR
 
         private static final OptionalDouble ZERO = new OptionalDouble(0d);
 
-        /** The value. */
         private final double value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**
@@ -5405,7 +5387,7 @@ public class u { // NOSONAR
         /**
          *
          * @return
-         * @deprecated to be removed in future version.
+         * @deprecated to be removed in a future version.
          */
         @Deprecated
         public java.util.OptionalDouble __() {//NOSONAR
@@ -5487,10 +5469,8 @@ public class u { // NOSONAR
         /** The Constant EMPTY. */
         private static final Nullable<?> EMPTY = new Nullable<>();
 
-        /** The value. */
         private final T value;
 
-        /** The is present. */
         private final boolean isPresent;
 
         /**

@@ -40,7 +40,7 @@ import com.landawn.abacus.util.Fn.Factory;
  * @param <L> the type of the list itself, used for methods that return the list. It must extend PrimitiveList.
  *
  */
-public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both method notEmpty(java.lang.Iterable<?>)
+public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both methods notEmpty(java.lang.Iterable<?>)
 
     @Serial
     private static final long serialVersionUID = 1504784980113045443L;
@@ -334,7 +334,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Returns consecutive sub lists of this list, each of the same size (the final list may be smaller),
      * or an empty List if the specified list is {@code null} or empty.
      *
-     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
+     * @param chunkSize the desired size of each subsequence (the last may be smaller).
      * @return
      */
     public List<L> split(final int chunkSize) {
@@ -342,12 +342,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Returns List of {@code PrimitiveList 'L'} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code PrimitiveList 'L'} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
+     * @param chunkSize the desired size of each subsequence (the last may be smaller).
      * @return
      */
     public abstract List<L> split(final int fromIndex, final int toIndex, int chunkSize);

@@ -191,13 +191,6 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
         return a;
     }
 
-    /**
-     * Array 2 collection.
-     *
-     * @param <E>
-     * @param x
-     * @param output
-     */
     @Override
     public <E> void array2Collection(final float[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
@@ -209,22 +202,11 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
         }
     }
 
-    /**
-     *
-     * @param x
-     * @return
-     */
     @Override
     public int hashCode(final float[] x) {
         return N.hashCode(x);
     }
 
-    /**
-     *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
-     */
     @Override
     public boolean equals(final float[] x, final float[] y) {
         return N.equals(x, y);

@@ -26,8 +26,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
 /**
  * Design principles: <li>1, Simple (is beautiful)</li> <li>2, Fast (is powerful)</li> <li>3, Concepts (must be integral
  * and consistent)</li> <br/>
- * These principles can't be broken by any change or reason. And basically programmable is > configurable. There is no
- * extra support by configuration file or annotation.
+ * These principles can't be broken by any change or reason. And basically programmable is > configurable.
+ * There is no extra support for configuration file or annotation.
  *
  * All the implementation should be multi-thread safety.
  *

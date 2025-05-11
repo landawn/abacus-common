@@ -408,7 +408,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //    }
 
     /**
-     * Returns a sequence that is lazily populated by an input supplier.
+     * Returns a sequence lazily populated by an input supplier.
      *
      * <br />
      * @implNote
@@ -2555,7 +2555,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception
      * @param a the first array to merge
      * @param b the second array to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Object[], Object[], java.util.function.BiFunction)
@@ -2605,7 +2605,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first array to merge
      * @param b the second array to merge
      * @param c the third array to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Object[], Object[], java.util.function.BiFunction)
@@ -2624,7 +2624,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception
      * @param a the first iterable to merge
      * @param b the second iterable to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -2643,7 +2643,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first iterable to merge
      * @param b the second iterable to merge
      * @param c the third iterable to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -2661,7 +2661,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception
      * @param a the first iterator to merge
      * @param b the second iterator to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -2680,7 +2680,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first iterator to merge
      * @param b the second iterator to merge
      * @param c the third iterator to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -2699,7 +2699,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception
      * @param a the first sequence to merge
      * @param b the second sequence to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -2718,7 +2718,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first sequence to merge
      * @param b the second sequence to merge
      * @param c the third sequence to merge
-     * @param nextSelector a function to determine which element should be selected as next element.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a sequence of merged elements
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
@@ -6718,10 +6718,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     //    /**
-    //     * Returns sequence of {@code Set<T>} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
+    //     * Returns sequence of {@code Set<T>} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
     //     *
     //     *
-    //     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
+    //     * @param chunkSize the desired size of each subsequence (the last may be smaller).
     //     * @return
     //     */
     //    @IntermediateOp
@@ -6730,12 +6730,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //    }
 
     /**
-     * Splits the elements of this sequence into sub-sequences of the specified size. The last sub-sequence may be smaller than the specified size.
+     * Splits the elements of this sequence into subsequences of the specified size. The last subsequence may be smaller than the specified size.
      *
      * @param <C> the type of the collection to hold the sub-sequences
-     * @param chunkSize the desired size of each sub-sequence (the last sub-sequence may be smaller)
+     * @param chunkSize the desired size of each subsequence (the last subsequence may be smaller)
      * @param collectionSupplier a function that provides a new collection to hold each sub-sequence
-     * @return a new sequence where each element is a collection containing a sub-sequence of the original elements
+     * @return a new sequence where each element is a collection containing a subsequence of the original elements
      * @throws IllegalStateException if the sequence is in an invalid state
      */
     @IntermediateOp
@@ -7812,7 +7812,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
      * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
-     * It may cause <code>out of memory error</code> if {@code n} is big enough.
+     * It may cause <code>{@code OutOfMemoryError}</code> if {@code n} is big enough.
      *
      * <br />
      * All the elements will be loaded to get the last {@code n} elements and the sequence will be closed after that, if a terminal operation is triggered.
@@ -7834,7 +7834,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
      * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
-     * It may cause <code>out of memory error</code> if {@code n} is big enough.
+     * It may cause <code>{@code OutOfMemoryError}</code> if {@code n} is big enough.
      *
      * <br />
      * All the elements will be loaded to get the last {@code n} elements and the sequence will be closed after that, if a terminal operation is triggered.
@@ -11566,8 +11566,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     //    /**
-    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty
-    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty.
+    //     * Otherwise, an empty {@code Optional<T>} will be returned.
     //     *
     //     * @param <E2>
     //     * @param predicateForFirst
@@ -11602,8 +11602,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //    }
     //
     //    /**
-    //     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty
-    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty.
+    //     * Otherwise, an empty {@code Optional<T>} will be returned.
     //     *
     //     * @param <E2>
     //     * @param predicateForFirst
@@ -11639,7 +11639,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //
     //    /**
     //     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
-    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     * Otherwise, an empty {@code Optional<T>} will be returned.
     //     *
     //     * @param <E2>
     //     * @param <E3>

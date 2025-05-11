@@ -15,7 +15,7 @@
 package com.landawn.abacus.util;
 
 /**
- * Built on {@code StringBuilder}. Not like <code/>java.io.StringWriter</code>. it's not multi-thread safety.
+ * Built on {@code StringBuilder} for better performance. But not like <code/>java.io.StringWriter</code>. It's not multi-thread safety.
  *
  */
 public final class StringWriter extends AppendableWriter {

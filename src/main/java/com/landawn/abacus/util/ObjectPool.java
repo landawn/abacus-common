@@ -28,7 +28,7 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * It's a multiple-thread safety map with fixed size. it's designed for frequent get and few add/remove operation
+ * It's a multiple-thread safety map with fixed size. It's designed for frequent get and few add/remove operations
  * with a few limited keys.
  *
  * @param <K> the key type

@@ -79,7 +79,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     * Checks if is object array.
+     * Checks if is an object array.
      *
      * @return {@code true}, if is object array
      */
@@ -283,13 +283,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         return (T[]) a;
     }
 
-    /**
-     * Array 2 collection.
-     *
-     * @param <E>
-     * @param x
-     * @param output
-     */
     @Override
     public <E> void array2Collection(final T[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {

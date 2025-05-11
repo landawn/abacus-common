@@ -919,7 +919,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        // BufferedReader? will the target parser create the BufferedReader internally.
+        // BufferedReader? will the target parser create the BufferedReader internally?
         return read(source, config, null, targetClass);
     }
 
@@ -1404,7 +1404,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
                         case XMLStreamConstants.START_ELEMENT: {
-                            // move to key element;
+                            // move to a key element;
                             xmlReader.next();
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
@@ -1418,7 +1418,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     key = readByStreamParser(xmlReader, config, entryKeyType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                             inputClass, entryKeyType.clazz());
 
-                                    // end of key.
+                                    // end of a key.
                                     xmlReader.next();
 
                                     break;
@@ -1447,7 +1447,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     key = isNullValue ? null : entryKeyType.valueOf(text);
 
                                     if (event == XMLStreamConstants.CHARACTERS) {
-                                        // end of key.
+                                        // end of a key.
                                         xmlReader.next();
                                     }
 
@@ -1463,7 +1463,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     // continue;
                             }
 
-                            // move to value element;
+                            // move to a value element;
                             xmlReader.next();
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
@@ -1590,7 +1590,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         list.add(readByStreamParser(xmlReader, config, eleType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
                                                 inputClass, eleType.clazz()));
 
-                                        // end of element.
+                                        // end of an element.
                                         xmlReader.next();
 
                                         break;
@@ -1620,7 +1620,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         list.add(isNullValue ? null : eleType.valueOf(text));
 
                                         if (event == XMLStreamConstants.CHARACTERS) {
-                                            // end of element.
+                                            // end of an element.
                                             xmlReader.next();
                                         }
 
@@ -1742,7 +1742,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                             inputClass, eleType.clazz()));
                                     // N.println(xmlReader.getLocalName());
 
-                                    // end of element.
+                                    // end of an element.
                                     xmlReader.next();
 
                                     break;
@@ -1772,7 +1772,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     result.add(isNullValue ? null : eleType.valueOf(text));
 
                                     if (event == XMLStreamConstants.CHARACTERS) {
-                                        // end of element.
+                                        // end of an element.
                                         xmlReader.next();
                                     }
 

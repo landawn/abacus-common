@@ -51,7 +51,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     }
 
     /**
-     * Sets the ignore unknown property.
+     * Sets the ignored unknown property.
      *
      * @param ignoreUnmatchedProperty
      * @return

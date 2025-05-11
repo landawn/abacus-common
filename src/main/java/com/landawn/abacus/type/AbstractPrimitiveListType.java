@@ -27,7 +27,7 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
     }
 
     /**
-     * Checks if is primitive list.
+     * Checks if is a primitive list.
      *
      * @return {@code true}, if is primitive list
      */

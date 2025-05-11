@@ -107,7 +107,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Returns an LongIterator instance that is created lazily using the provided Supplier.
+     * Returns a LongIterator instance that is created lazily using the provided Supplier.
      * The Supplier is responsible for producing the LongIterator instance when the first method in the returned {@code LongIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the LongIterator when needed.

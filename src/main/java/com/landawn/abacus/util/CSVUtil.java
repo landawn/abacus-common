@@ -1090,7 +1090,7 @@ public final class CSVUtil {
     }
 
     //    /**
-    //     * Load the data from CSV.
+    //     * Loads the data from CSV.
     //     * <br />
     //     * The size of specified {@code columnTypeList} must be equal to the size of columns of the specified CSV
     //     * <br />
@@ -1109,7 +1109,7 @@ public final class CSVUtil {
     //    }
     //
     //    /**
-    //     * Load the data from CSV.
+    //     * Loads the data from CSV.
     //     * <br />
     //     * The size of specified {@code columnTypeList} must be equal to the size of columns of the specified CSV
     //     * <br />

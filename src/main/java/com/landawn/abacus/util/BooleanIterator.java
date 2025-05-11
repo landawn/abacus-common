@@ -106,7 +106,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Returns an BooleanIterator instance that is created lazily using the provided Supplier.
+     * Returns a BooleanIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the BooleanIterator instance when the first method in the returned {@code BooleanIterator} is called.
      *
      * @param iteratorSupplier A Supplier that provides the BooleanIterator when needed.

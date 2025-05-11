@@ -303,13 +303,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 notFull.signal();
             }
         } finally {
+            lock.unlock();
+
             if (e != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
-
-            lock.unlock();
         }
 
         return e;
@@ -365,13 +365,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 nanos = notEmpty.awaitNanos(nanos);
             }
         } finally {
+            lock.unlock();
+
             if (e != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
-
-            lock.unlock();
         }
     }
 
@@ -622,7 +622,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param is
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException the class not found exception
+     * @throws ClassNotFoundException
      */
     @Serial
     private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {

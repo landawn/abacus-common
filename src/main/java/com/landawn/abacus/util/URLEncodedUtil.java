@@ -76,7 +76,7 @@ public final class URLEncodedUtil {
     private static final String QP_SEP_PATTERN = "[" + String.valueOf(QP_SEPS) + "]";
 
     /**
-     * Unreserved characters, i.e. alphanumeric, plus: {@code _ - ! . ~ ' ( ) *}
+     * Unreserved characters, i.e., alphanumeric, plus: {@code _ - ! . ~ ' ( ) *}
      * <p>
      * This list is the same as the {@code unreserved} list in <a href="http://www.ietf.org/rfc/rfc2396.txt">RFC
      * 2396</a>
@@ -91,22 +91,22 @@ public final class URLEncodedUtil {
     private static final BitSet PUNCT = new BitSet(256);
 
     /**
-     * Characters which are safe to use in userinfo, i.e. {@link #UNRESERVED} plus {@link #PUNCT} ration
+     * Characters which are safe to use in userinfo, i.e., {@link #UNRESERVED} plus {@link #PUNCT} ration
      */
     private static final BitSet USERINFO = new BitSet(256);
 
     /**
-     * Characters which are safe to use in a path, i.e. {@link #UNRESERVED} plus {@link #PUNCT} ration plus / @
+     * Characters which are safe to use in a path, i.e., {@link #UNRESERVED} plus {@link #PUNCT} ration plus / @
      */
     private static final BitSet PATH_SAFE = new BitSet(256);
 
     /**
-     * Characters which are safe to use in a urlQuery or a fragment, i.e. {@link #RESERVED} plus {@link #UNRESERVED}
+     * Characters which are safe to use in a urlQuery or a fragment, i.e., {@link #RESERVED} plus {@link #UNRESERVED}
      */
     private static final BitSet URIC = new BitSet(256);
 
     /**
-     * Reserved characters, i.e. {@code ;/?:@&=+$,[]}
+     * Reserved characters, i.e., {@code ;/?:@&=+$,[]}
      * <p>
      * This list is the same as the {@code reserved} list in <a href="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396</a>
      * as augmented by <a href="http://www.ietf.org/rfc/rfc2732.txt">RFC 2732</a>
@@ -161,7 +161,7 @@ public final class URLEncodedUtil {
         PATH_SAFE.or(UNRESERVED);
         PATH_SAFE.set('/'); // segment separator
         PATH_SAFE.set(';'); // param separator
-        PATH_SAFE.set(':'); // rest as per list in 2396, i.e. : @ & = + $ ,
+        PATH_SAFE.set(':'); // rest as per list in 2396, i.e., : @ & = + $ ,
         PATH_SAFE.set('@');
         PATH_SAFE.set('&');
         PATH_SAFE.set('=');
@@ -626,7 +626,7 @@ public final class URLEncodedUtil {
      * @param charset
      *            the charset to use
      * @param plusAsBlank
-     *            if {@code true}, then convert '+' to space (e.g. for www-url-form-encoded content), otherwise leave as
+     *            if {@code true}, then convert '+' to space (e.g., for www-url-form-encoded content), otherwise leave as
      *            is.
      * @return encoded string
      */

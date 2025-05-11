@@ -26,7 +26,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  *
- * Copyright (c) 2017,  Jackson Authors/Contributors.
+ * Copyright (c) 2017, Jackson Authors/Contributors.
  *
  * Utilities methods for manipulating dates in iso8601 format. This is much, much faster and GC friendly than using SimpleDateFormat so
  * highly suitable if you (un)serialize lots of date objects.
@@ -54,7 +54,7 @@ final class ISO8601Util {
     /* Formatting
     
     /**
-     * Format a date into <i>yyyy-MM-ddThh:mm:ssZ</i> (default timezone, no milliseconds precision).
+     * Format a date into <i>yyyy-MM-ddThh:mm:ssZ</i> (default timezone, no millisecond precision).
      *
      * @param date the date to format
      * @return
@@ -293,12 +293,12 @@ final class ISO8601Util {
     }
 
     /**
-     * Check if the expected character exist at the given offset in the value.
+     * Check if the expected character exists at the given offset in the value.
      *
      * @param value the string to check at the specified offset
      * @param offset the offset to look for the expected character
      * @param expected the expected character
-     * @return {@code true} if the expected character exist at the given offset
+     * @return {@code true} if the expected character exists at the given offset
      */
     private static boolean checkOffset(final String value, final int offset, final char expected) {
         return (offset < value.length()) && (value.charAt(offset) == expected);
@@ -317,7 +317,7 @@ final class ISO8601Util {
         if (beginIndex < 0 || endIndex > value.length() || beginIndex > endIndex) {
             throw new NumberFormatException(value);
         }
-        // use same logic as in Integer.parseInt() but less generic we're not supporting negative values
+        // use the same logic as in Integer.parseInt() but less generic we're not supporting negative values
         int i = beginIndex;
         int result = 0;
         int digit;

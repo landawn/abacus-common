@@ -98,9 +98,9 @@ public final class InternalUtil {
     }
 
     /**
-     * Create an array list by initializing its elements data with the specified array {@code a}.
+     * Create an array list by initializing its elements with the specified array {@code a}.
      * The returned list may share the same elements with the specified array {@code a}.
-     * That's to say any change on the List/Array will affect the Array/List.
+     * That's to say, any change on the List/Array will affect the Array/List.
      *
      * @param <T>
      * @param a
@@ -152,7 +152,7 @@ public final class InternalUtil {
     //    }
 
     /**
-     * Gets the chars for read only.
+     * Gets the chars for read-only.
      *
      * @param str
      * @return
@@ -224,11 +224,14 @@ public final class InternalUtil {
     //    }
 
     //    /**
-    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     * Checks if is null or default.
+    //     * {@code null} is default value for all reference types,
+    //     * {@code false} is default value for primitive boolean, {@code 0} is the default value for a primitive number type.
     //     *
     //     * @param s
-    //     * @return true, if is null or default
-    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+    //     * @return true, if it is null or default
+    //     * @deprecated DO NOT call the methods defined in this class.
+    //     It's for internal use only.
     //     */
     //    @Deprecated
     //    static boolean isNullOrDefault(final Object value) {
@@ -236,12 +239,15 @@ public final class InternalUtil {
     //    }
 
     //    /**
-    //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     * Checks if it's not null or default.
+    //     * {@code null} is default value for all reference types,
+    //     * {@code false} is default value for primitive boolean, {@code 0} is the default value for a primitive number type.
     //     *
     //     *
     //     * @param s
     //     * @return true, if it's not null or default
-    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+    //     * @deprecated DO NOT call the methods defined in this class.
+    //     It's for internal use only.
     //     */
     //    @Deprecated
     //    static boolean notNullOrDefault(final Object value) {

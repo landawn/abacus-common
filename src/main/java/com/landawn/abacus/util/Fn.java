@@ -433,7 +433,7 @@ public final class Fn {
      * instance. The actual memoization does not happen when the underlying delegate throws an
      * exception.
      *
-     * <p>When the underlying delegate throws an exception then this memorizing supplier will keep
+     * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
      * delegating calls until it returns valid data.
      *
      * @param <T>
@@ -491,7 +491,7 @@ public final class Fn {
     //     * @param <T>
     //     * @param <R>
     //     * @param func
-    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse but it can be used in parallel stream.
+    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse, but it can be used in parallel stream.
     //     */
     //    @Beta
     //    @Stateful
@@ -886,11 +886,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param permitsPerSecond
-     * @return a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @see RateLimiter#acquire()
      * @see RateLimiter#create(double)
      */
@@ -900,11 +900,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param rateLimiter
-     * @return a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @see RateLimiter#acquire()
      */
     @Stateful
@@ -1713,7 +1713,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is file.
+     * Checks if it is a file.
      *
      * @return
      */
@@ -1722,7 +1722,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is directory.
+     * Checks if it is directory.
      *
      * @return
      */
@@ -3091,7 +3091,7 @@ public final class Fn {
      *
      * @param <T>
      * @param count
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3114,12 +3114,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param limit
      * @param predicate
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3139,13 +3139,13 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param <U>
      * @param limit
      * @param predicate
-     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3166,12 +3166,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param predicate
      * @param limit
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3191,13 +3191,13 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param <U>
      * @param predicate
      * @param limit
-     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3218,11 +3218,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param timeInMillis
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -3249,11 +3249,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T>
      * @param duration
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException
      */
     @Beta
@@ -4468,7 +4468,7 @@ public final class Fn {
      * Synchronized {@code Predicate}.
      *
      * @param <T>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param predicate
      * @return
      * @throws IllegalArgumentException
@@ -4490,7 +4490,7 @@ public final class Fn {
      *
      * @param <A>
      * @param <T>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param a
      * @param biPredicate
      * @return
@@ -4515,7 +4515,7 @@ public final class Fn {
      * @param <A>
      * @param <B>
      * @param <T>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param a
      * @param b
      * @param triPredicate
@@ -4540,7 +4540,7 @@ public final class Fn {
      *
      * @param <T>
      * @param <U>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param biPredicate
      * @return
      * @throws IllegalArgumentException
@@ -4561,7 +4561,7 @@ public final class Fn {
      * Synchronized {@code Consumer}.
      *
      * @param <T>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param consumer
      * @return
      * @throws IllegalArgumentException
@@ -4583,7 +4583,7 @@ public final class Fn {
      *
      * @param <A>
      * @param <T>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param a
      * @param biConsumer
      * @return
@@ -4606,7 +4606,7 @@ public final class Fn {
      *
      * @param <T>
      * @param <U>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param biConsumer
      * @return
      * @throws IllegalArgumentException
@@ -4628,7 +4628,7 @@ public final class Fn {
      *
      * @param <T>
      * @param <R>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param function
      * @return
      * @throws IllegalArgumentException
@@ -4651,7 +4651,7 @@ public final class Fn {
      * @param <A>
      * @param <T>
      * @param <R>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param a
      * @param biFunction
      * @return
@@ -4676,7 +4676,7 @@ public final class Fn {
      * @param <T>
      * @param <U>
      * @param <R>
-     * @param mutex to synchronized on
+     * @param mutex to synchronize on
      * @param biFunction
      * @return
      * @throws IllegalArgumentException
@@ -6744,7 +6744,7 @@ public final class Fn {
         }
 
         /**
-         * Of bi map.
+         * Of {@code BiMap}.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -7217,10 +7217,10 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
          *
          * @param <T>
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
          */
         @Beta
         @Stateful
@@ -7236,11 +7236,11 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
          *
          * @param <T>
          * @param mapper
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+         * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
          */
         @Beta
         @Stateful
@@ -9691,7 +9691,7 @@ public final class Fn {
          * instance. The actual memoization does not happen when the underlying delegate throws an
          * exception.
          *
-         * <p>When the underlying delegate throws an exception then this memorizing supplier will keep
+         * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
          * delegating calls until it returns valid data.
          *
          * @param <T>
@@ -10030,12 +10030,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
          *
          * @param <T>
          * @param <E>
          * @param permitsPerSecond
-         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
          * @see RateLimiter#acquire()
          * @see RateLimiter#create(double)
          */
@@ -10045,12 +10045,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
          *
          * @param <T>
          * @param <E>
          * @param rateLimiter
-         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse but it can be used in parallel stream.
+         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
          * @see RateLimiter#acquire()
          */
         @Stateful
@@ -10637,7 +10637,7 @@ public final class Fn {
          * @param <T>
          * @param <E>
          * @param count
-         * @return a stateful {@code Throwables.Predicate}. Don't save or cache for reuse but it can be used in parallel stream.
+         * @return a stateful {@code Throwables.Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
          * @throws IllegalArgumentException
          */
         @Beta
@@ -11426,7 +11426,7 @@ public final class Fn {
          *
          * @param <T>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param predicate
          * @return
          * @throws IllegalArgumentException
@@ -11450,7 +11450,7 @@ public final class Fn {
          * @param <A>
          * @param <T>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param a
          * @param biPredicate
          * @return
@@ -11476,7 +11476,7 @@ public final class Fn {
          * @param <B>
          * @param <T>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param a
          * @param b
          * @param triPredicate
@@ -11502,7 +11502,7 @@ public final class Fn {
          * @param <T>
          * @param <U>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param biPredicate
          * @return
          * @throws IllegalArgumentException
@@ -11525,7 +11525,7 @@ public final class Fn {
          *
          * @param <T>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param consumer
          * @return
          * @throws IllegalArgumentException
@@ -11549,7 +11549,7 @@ public final class Fn {
          * @param <A>
          * @param <T>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param a
          * @param biConsumer
          * @return
@@ -11574,7 +11574,7 @@ public final class Fn {
          * @param <T>
          * @param <U>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param biConsumer
          * @return
          * @throws IllegalArgumentException
@@ -11598,7 +11598,7 @@ public final class Fn {
          * @param <T>
          * @param <R>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param function
          * @return
          * @throws IllegalArgumentException
@@ -11623,7 +11623,7 @@ public final class Fn {
          * @param <T>
          * @param <R>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param a
          * @param biFunction
          * @return
@@ -11649,7 +11649,7 @@ public final class Fn {
          * @param <U>
          * @param <R>
          * @param <E>
-         * @param mutex to synchronized on
+         * @param mutex to synchronize on
          * @param biFunction
          * @return
          * @throws IllegalArgumentException

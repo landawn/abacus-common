@@ -912,7 +912,7 @@ public final class Throwables {
     public interface BooleanSupplier<E extends Throwable> {
 
         /**
-         * Gets the as boolean.
+         * Returns the value as boolean.
          *
          * @return
          * @throws E the e
@@ -929,7 +929,7 @@ public final class Throwables {
     public interface CharSupplier<E extends Throwable> {
 
         /**
-         * Gets the as char.
+         * Return the value as char.
          *
          * @return
          * @throws E the e
@@ -946,7 +946,7 @@ public final class Throwables {
     public interface ByteSupplier<E extends Throwable> {
 
         /**
-         * Gets the as byte.
+         * Return the value as byte.
          *
          * @return
          * @throws E the e
@@ -963,7 +963,7 @@ public final class Throwables {
     public interface ShortSupplier<E extends Throwable> {
 
         /**
-         * Gets the as short.
+         * Return the value as short.
          *
          * @return
          * @throws E the e
@@ -980,7 +980,7 @@ public final class Throwables {
     public interface IntSupplier<E extends Throwable> {
 
         /**
-         * Gets the as int.
+         * Return the value as int.
          *
          * @return
          * @throws E the e
@@ -997,7 +997,7 @@ public final class Throwables {
     public interface LongSupplier<E extends Throwable> {
 
         /**
-         * Gets the as long.
+         * Return the value as long.
          *
          * @return
          * @throws E the e
@@ -1014,7 +1014,7 @@ public final class Throwables {
     public interface FloatSupplier<E extends Throwable> {
 
         /**
-         * Gets the as float.
+         * Return the value as float.
          *
          * @return
          * @throws E the e
@@ -1031,7 +1031,7 @@ public final class Throwables {
     public interface DoubleSupplier<E extends Throwable> {
 
         /**
-         * Gets the as double.
+         * Return the value as double.
          *
          * @return
          * @throws E the e

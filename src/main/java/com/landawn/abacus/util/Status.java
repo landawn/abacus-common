@@ -20,56 +20,81 @@ package com.landawn.abacus.util;
  */
 public enum Status {
 
-    /** General account/service status. */
-    BLANK,
-    ACTIVE,
-    SUSPENDED,
-    EXPIRED,
-    RETIRED,
-    CONCLUDED,
-    REVOKED,
-    REFUNDED,
-    CANCELLED,
-    CLOSED,
-    REMOVED,
-    DELETED,
+    /** General account/service/object status. */
+    BLANK(0),
+    ACTIVE(2),
+    SUSPENDED(4),
+    EXPIRED(6),
+    CANCELED(8),
+    CLOSED(10),
+    REMOVED(12),
+    DELETED(14),
+    CONCLUDED(16),
+    REVOKED(18),
+    REFUNDED(20),
+    COMPLETED(22),
+    TERMINATED(24),
+    RETIRED(26),
 
     /** Running status. */
-    STARTED,
-    RUNNING,
-    PAUSED,
-    STOPPED,
+    STARTED(30),
+    RUNNING(32),
+    PAUSED(34),
+    STOPPED(36),
 
     /** order/process status. */
-    PREPARING,
-    PENDING,
-    PROCESSING,
-    PROCESSED,
-    APPROVED,
-    PLACED,
-    SHIPPED,
-    DELIVERED,
-    ACCEPTED,
-    RETURNED,
+    PREPARING(40),
+    PROCESSING(42),
+    PROCESSED(44),
+    PENDING(46),
+    APPROVED(48),
+    PLACED(50),
+    SHIPPED(52),
+    DELIVERED(54),
+    ACCEPTED(56),
+    RETURNED(58),
 
     /** development. */
-    DEVELOPING,
-    TESTING,
-    RELEASED,
-    DEPLOYED,
+    DEVELOPING(60),
+    TESTING(62),
+    RELEASED(64),
+    DEPLOYED(66),
 
     /** privilege. */
-    READ_ONLY,
-    UPDATABLE,
-    INSERTABLE,
-    WRITABLE,
+    READ_ONLY(70),
+    UPDATABLE(72),
+    INSERTABLE(74),
+    WRITABLE(76),
 
-    FROZEN,
-    FINALIZED,
-    LOCKED,
-    UNLOCKED,
-    AVAILABLE,
-    UNAVAILABLE,
-    DISABLED,
-    DESTROYED
+    FROZEN(80),
+    FINALIZED(82),
+    LOCKED(84),
+    UNLOCKED(86),
+    AVAILABLE(88),
+    UNAVAILABLE(90),
+    DISABLED(92),
+    DESTROYED(94);
+
+    private final int code;
+
+    Status(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    private static final int MAX_CODE = 128;
+    private static final Status[] cache = new Status[MAX_CODE];
+
+    static {
+        for (Status status : Status.values()) {
+            cache[status.code] = status;
+        }
+    }
+
+    public static Status fromCode(final int code) {
+        return code < 0 || code >= MAX_CODE ? null : cache[code];
+    }
 }

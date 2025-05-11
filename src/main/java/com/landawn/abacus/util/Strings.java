@@ -64,8 +64,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <br />
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
  * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
@@ -94,7 +94,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String with value {@code "null"}.
      */
     @Beta
-    public static final String NULL = "null";
+    public static final String NULL = "null".intern();
 
     /**
      *
@@ -105,7 +105,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * The empty String {@code ""}.
      */
-    public static final String EMPTY = "";
+    public static final String EMPTY = "".intern();
 
     //    /**
     //     * The empty String {@code ""}.
@@ -118,7 +118,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A String for a space character: {@code " "}.
      *
      */
-    public static final String SPACE = WD.SPACE;
+    public static final String SPACE = WD.SPACE.intern();
 
     /**
      * A String for linefeed LF ("\n").
@@ -126,7 +126,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
      */
-    public static final String LF = "\n";
+    public static final String LF = "\n".intern();
 
     /**
      * A String for carriage return CR ("\r").
@@ -134,12 +134,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
      */
-    public static final String CR = "\r";
+    public static final String CR = "\r".intern();
 
     /**
      * Carriage return followed by line feed. This is the line ending used on Windows.
      */
-    public static final String CR_LF = "\r\n";
+    public static final String CR_LF = "\r\n".intern();
 
     @Beta
     public static final char CHAR_ZERO = (char) 0;
@@ -153,7 +153,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Field COMMA_SPACE (value is {@code ", "})
      */
-    public static final String COMMA_SPACE = WD.COMMA_SPACE;
+    public static final String COMMA_SPACE = WD.COMMA_SPACE.intern();
 
     /**
      * Value is {@code ", "}
@@ -175,8 +175,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     static final String STR_FOR_EMPTY_ARRAY = "[]";
 
     /**
-     * A regex pattern for recognizing blocks of whitespace characters. The
-     * apparent convolutedness of the pattern serves the purpose of ignoring
+     * A regex pattern for recognizing blocks of whitespace characters.
+     * The apparent convolutedness of the pattern serves the purpose of ignoring
      * "blocks" consisting of only a single space: the pattern is used only to
      * normalize whitespace, condensing "blocks" down to a single space, thus
      * matching the same would likely cause a great many noop replacements.
@@ -1180,7 +1180,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, may be null
+     * @param str the String to check, which may be null
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String, {@code null} if {@code null} String input
@@ -1220,7 +1220,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, may be null
+     * @param str the String to check, which may be null
      * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
@@ -1258,7 +1258,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, may be null
+     * @param str the String to check, which may be null
      * @param abbrevMarker the String used as replacement marker
      * @param maxWidth maximum length of result String, must be at least {@code abbrevMarker.length + 1}
      * @return abbreviated String
@@ -1297,7 +1297,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, may be null
+     * @param str the String to check, which may be null
      * @param abbrevMarker the String used as replacement marker
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be at least 4
@@ -1373,8 +1373,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      *
-     * @param str the String to abbreviate, may be null
-     * @param middle the String to replace the middle characters with, may be null
+     * @param str the String to abbreviate, which may be null
+     * @param middle the String to replace the middle characters with, which may be null
      * @param length the length to abbreviate {@code str} to.
      * @return the abbreviated String if the above criteria is met, or the original String supplied for abbreviation.
      */
@@ -1409,7 +1409,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("a", 4)    = " a  "
      * </pre>
      *
-     * @param str the String to center, may be null
+     * @param str the String to center, which may be null
      * @param size the int size of new String
      * @return centered String
      */
@@ -1432,7 +1432,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("a", 4, 'y')    = "yayy"
      * </pre>
      *
-     * @param str the String to center, may be null
+     * @param str the String to center, which may be null
      * @param size the int size of new String.
      * @param padChar the character to pad the new String with
      * @return centered String
@@ -1472,7 +1472,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
-     * @param str the String to center, may be null
+     * @param str the String to center, which may be null
      * @param minLength the minimum size of new String.
      * @param padStr the String to pad the new String with, must not be {@code null} or empty
      * @return centered String
@@ -1870,7 +1870,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Converts a {@code CharSequence} into an array of code points.</p>
      *
      * <p>Valid pairs of surrogate code units will be converted into a single supplementary
-     * code point. Isolated surrogate code units (i.e. a high surrogate not followed by a low surrogate or
+     * code point. Isolated surrogate code units (i.e., a high surrogate not followed by a low surrogate or
      * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
      *
      * <pre>
@@ -1937,11 +1937,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * {@link String#toLowerCase()}, the result of this method is affected by
      * the current locale. For platform-independent case transformations, the
      * method {@link #toLowerCase(String, Locale)} should be used with a specific
-     * locale (e.g. {@link Locale#ENGLISH}).
+     * locale (e.g., {@link Locale#ENGLISH}).
      * </p>
      *
      * @param str
-     *            the String to lower case, may be null
+     *            the String to lower case, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str) {
@@ -1969,7 +1969,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to lower case, may be null
+     *            the String to lower case, which may be null
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
@@ -2058,10 +2058,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * {@link String#toUpperCase()}, the result of this method is affected by
      * the current locale. For platform-independent case transformations, the
      * method {@link #toLowerCase(String, Locale)} should be used with a specific
-     * locale (e.g. {@link Locale#ENGLISH}).
+     * locale (e.g., {@link Locale#ENGLISH}).
      * </p>
      *
-     * @param str the String to upper case, may be null
+     * @param str the String to upper case, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str) {
@@ -2089,7 +2089,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to upper case, may be null
+     *            the String to upper case, which may be null
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
@@ -2327,7 +2327,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * org.apache.commons.lang3.text.WordUtils.
      * </p>
      *
-     * @param str the String to swap case, may be null
+     * @param str the String to swap case, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String swapCase(final String str) {
@@ -2596,8 +2596,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Replace ''' or '"' with <i>\'</i> or <i>\"</i> if the previous char of the
-     * quotation is not '\'. original String is returned if the specified String
+     * Replaces ''' or '"' with <i>\'</i> or <i>\"</i> if the previous char of the
+     * quotation is not '\'. The original String is returned if the specified String
      * is {@code null} or empty.
      *
      * @param str
@@ -2737,7 +2737,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 32) from both ends of this String.
      * </p>
      *
-     * @param str the source String to normalize whitespaces from, may be null
+     * @param str the source String to normalize whitespaces from, which may be null
      * @return
      *         {@code null} String input
      * @see Pattern
@@ -2773,9 +2773,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.replaceAll("aba", "a", "z")   = "zbz"
      * </pre>
      *
-     * @param str text to search and replace in, may be null
-     * @param target the String to search for, may be null
-     * @param replacement the String to replace it with, may be null
+     * @param str text to search and replace in, which may be null
+     * @param target the String to search for, which may be null
+     * @param replacement the String to replace it with, which may be null
      * @return
      */
     public static String replaceAll(final String str, final String target, final String replacement) {
@@ -2812,7 +2812,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param target
-     * @param replacement the String to replace with, may be null
+     * @param replacement the String to replace with, which may be null
      * @return the text with any replacements processed,
      *  {@code null} if {@code null} String input
      */
@@ -2891,7 +2891,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param target
-     * @param replacement the String to replace with, may be null
+     * @param replacement the String to replace with, which may be null
      * @return A new string with the last occurrence of the target string replaced with the replacement string.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
@@ -3402,9 +3402,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeStr
-     *            the String to search for and remove, may be null
+     *            the String to search for and remove, which may be null
      * @return
      *         {@code null} String input
      */
@@ -3444,7 +3444,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeStr
      *            the String to search for (case insensitive) and remove, may be
      *            null
@@ -3485,9 +3485,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeStr
-     *            the String to search for and remove, may be null
+     *            the String to search for and remove, which may be null
      * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      */
     public static String removeEnd(final String str, final String removeStr) {
@@ -3527,7 +3527,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeStr
      *            the String to search for (case insensitive) and remove, may be
      *            null
@@ -3563,9 +3563,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeChar
-     *            the char to search for and remove, may be null
+     *            the char to search for and remove, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String removeAll(final String str, final char removeChar) {
@@ -3635,9 +3635,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the source String to search, may be null
+     *            the source String to search, which may be null
      * @param removeStr
-     *            the String to search for and remove, may be null
+     *            the String to search for and remove, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String removeAll(final String str, final String removeStr) {
@@ -4321,7 +4321,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to be trimmed, may be null
+     *            the String to be trimmed, which may be null
      * @return
      */
     public static String trim(final String str) {
@@ -4366,7 +4366,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to be trimmed, may be null
+     *            the String to be trimmed, which may be null
      * @return
      *         {@code null} String input
      */
@@ -4414,7 +4414,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to be trimmed, may be null
+     *            the String to be trimmed, which may be null
      * @return
      */
     public static String trimToEmpty(final String str) {
@@ -4468,7 +4468,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to remove whitespace from, may be null
+     *            the String to remove whitespace from, which may be null
      * @return
      */
     public static String strip(final String str) {
@@ -4515,7 +4515,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to be stripped, may be null
+     *            the String to be stripped, which may be null
      * @return
      *         String input
      */
@@ -4565,7 +4565,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to be stripped, may be null
+     *            the String to be stripped, which may be null
      * @return
      */
     public static String stripToEmpty(final String str) {
@@ -4619,7 +4619,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to remove characters from, may be null
+     *            the String to remove characters from, which may be null
      * @param stripChars
      *            the characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
@@ -4687,7 +4687,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to remove characters from, may be null
+     *            the String to remove characters from, which may be null
      * @param stripChars
      *            the characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
@@ -4771,7 +4771,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to remove characters from, may be null
+     *            the String to remove characters from, which may be null
      * @param stripChars
      *            the set of characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
@@ -4916,7 +4916,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to chomp a newline from, may be null
+     *            the String to chomp a newline from, which may be null
      * @return String without newline, {@code null} if {@code null} String input
      */
     public static String chomp(final String str) {
@@ -4992,7 +4992,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to chop last character from, may be null
+     *            the String to chop last character from, which may be null
      * @return String without last character, {@code null} if {@code null} String input
      */
     public static String chop(final String str) {
@@ -5058,7 +5058,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.truncate("abcdefg", -1) = throws an IllegalArgumentException
      * </pre>
      *
-     * @param str the String to truncate, may be null
+     * @param str the String to truncate, which may be null
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException If {@code maxWidth} is less than {@code 0}
@@ -5120,7 +5120,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.truncate("abcdefghij", -2, 4) = throws an IllegalArgumentException
      * </pre>
      *
-     * @param str the String to truncate, may be null
+     * @param str the String to truncate, which may be null
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
@@ -5205,7 +5205,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to delete whitespace from, may be null
+     *            the String to delete whitespace from, which may be null
      * @return the specified String if it's {@code null} or empty.
      */
     public static String deleteWhitespace(final String str) {
@@ -5536,7 +5536,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all characters in the given CharSequence are lower case.
      *
-     * @param cs the CharSequence to check, may be null
+     * @param cs the CharSequence to check, which may be null
      * @return {@code true} if all characters are lower case or the CharSequence is empty; {@code false} otherwise
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
@@ -5558,7 +5558,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all characters in the given CharSequence are upper case.
      *
-     * @param cs the CharSequence to check, may be null
+     * @param cs the CharSequence to check, which may be null
      * @return {@code true} if all characters are upper case or the CharSequence is empty; {@code false} otherwise
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
@@ -6004,7 +6004,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains letters, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      *        isAlpha(CharSequence)
      */
@@ -6045,7 +6045,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains letters and space, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      *        isAlphaSpace(CharSequence)
      */
@@ -6089,7 +6089,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains letters or digits, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      *        isAlphanumeric(CharSequence)
      */
@@ -6131,7 +6131,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains letters, digits or space, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      *        isAlphanumericSpace(CharSequence)
      */
@@ -6169,7 +6169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Note that the method does not allow for a leading sign, either positive
      * or negative. Also, if a String passes the numeric test, it may still
      * generate a NumberFormatException when parsed by Integer.parseInt or
-     * Long.parseLong, e.g. if the value is outside the range for int or long
+     * Long.parseLong, e.g., if the value is outside the range for int or long
      * respectively.
      * </p>
      *
@@ -6187,7 +6187,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains digits, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      *        isNumeric(CharSequence)
      */
@@ -6229,7 +6229,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains digits or space, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      *        isNumericSpace(CharSequence)
      */
@@ -6270,7 +6270,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     *            the CharSequence to check, may be null
+     *            the CharSequence to check, which may be null
      * @return {@code true} if only contains whitespace, and is {@code non-null}. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      *        isWhitespace(CharSequence)
      */
@@ -8194,8 +8194,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Compares two strings for equality.
      *
-     * @param a the first string to compare, may be null
-     * @param b the second string to compare, may be null
+     * @param a the first string to compare, which may be null
+     * @param b the second string to compare, which may be null
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
@@ -8205,8 +8205,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Compares two strings for equality, ignoring case considerations.
      *
-     * @param a the first string to compare, may be null
-     * @param b the second string to compare, may be null
+     * @param a the first string to compare, which may be null
+     * @param b the second string to compare, which may be null
      * @return {@code true} if the strings are equal, ignoring case considerations, {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
@@ -8216,7 +8216,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if the given string is equal to any of the specified search strings.
      *
-     * @param str the string to be checked, may be null
+     * @param str the string to be checked, which may be null
      * @param searchStrings the array of strings to compare against, may be {@code null} or empty
      * @return {@code true} if the string is equal to any of the specified search strings, {@code false} otherwise
      */
@@ -8237,7 +8237,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if the given string is equal to any of the specified search strings, ignoring case considerations.
      *
-     * @param str the string to be checked, may be null
+     * @param str the string to be checked, which may be null
      * @param searchStrs the array of strings to compare against, may be {@code null} or empty
      * @return {@code true} if the string is equal to any of the specified search strings, ignoring case considerations, {@code false} otherwise
      */
@@ -8268,8 +8268,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Compares two strings lexicographically, ignoring case considerations. Null is considered less than any string.
      *
-     * @param a the first string to compare, may be null
-     * @param b the second string to compare, may be null
+     * @param a the first string to compare, which may be null
+     * @param b the second string to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first string is less than, equal to, or greater than the second string, ignoring case considerations
      */
     public static int compareIgnoreCase(final String a, final String b) {
@@ -8299,9 +8299,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param a
-     *            the first String, may be null
+     *            the first String, which may be null
      * @param b
-     *            the second String, may be null
+     *            the second String, which may be null
      * @return
      */
     public static int indexOfDifference(final String a, final String b) {
@@ -8428,8 +8428,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the length of the common prefix between two CharSequences.
      * If either CharSequence is empty, returns 0.
      *
-     * @param a the first CharSequence to compare, may be null
-     * @param b the second CharSequence to compare, may be null
+     * @param a the first CharSequence to compare, which may be null
+     * @param b the second CharSequence to compare, which may be null
      * @return the length of the common prefix, or 0 if either CharSequence is empty
      */
     public static int lengthOfCommonPrefix(final CharSequence a, final CharSequence b) {
@@ -8455,8 +8455,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the length of the common suffix between two CharSequences.
      * If either CharSequence is empty, returns 0.
      *
-     * @param a the first CharSequence to compare, may be null
-     * @param b the second CharSequence to compare, may be null
+     * @param a the first CharSequence to compare, which may be null
+     * @param b the second CharSequence to compare, which may be null
      * @return the length of the common suffix, or 0 if either CharSequence is empty
      */
     public static int lengthOfCommonSuffix(final CharSequence a, final CharSequence b) {
@@ -13129,7 +13129,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * <p>
-     * Reverses a String that is delimited by a specific character.
+     * Reverses a String delimited by a specific character.
      * </p>
      *
      * <p>
@@ -13146,7 +13146,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to reverse, may be null
+     *            the String to reverse, which may be null
      * @param delimiter
      *            the delimiter character to use
      * @return the specified String if it's {@code null} or empty. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
@@ -13224,7 +13224,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.rotate("abcdefg", -9)  = "cdefgab"
      * </pre>
      *
-     * @param str the String to rotate, may be null
+     * @param str the String to rotate, which may be null
      * @param shift number of time to shift (positive : right shift, negative : left shift)
      * @return the rotated String,
      *          or the original String if {@code shift == 0},
@@ -13295,8 +13295,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
      * </pre>
      *
-     * @param str the String to do overlaying in, may be null
-     * @param overlay the String to overlay, may be null
+     * @param str the String to do overlaying in, which may be null
+     * @param overlay the String to overlay, which may be null
      * @param start the position to start overlaying at
      * @param end the position to stop overlaying before
      * @return overlayed String, {@code ""} if {@code null} String input

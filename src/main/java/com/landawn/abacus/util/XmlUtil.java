@@ -77,8 +77,6 @@ public final class XmlUtil {
 
     protected static final Logger logger = LoggerFactory.getLogger(XmlUtil.class);
 
-    // ... it has to be big enough to make it's safety to add element to
-    // ArrayBlockingQueue.
     static final String NAME = "name";
 
     static final String TYPE = "type";
@@ -884,7 +882,7 @@ public final class XmlUtil {
      * Gets the text content of the given XML node, optionally ignoring whitespace characters.
      *
      * @param node The XML node from which to get the text content.
-     * @param ignoreWhiteChar Whether to ignore whitespace characters in the text content. if {@code true}, all the whitespace within text content will be removed.
+     * @param ignoreWhiteChar Whether to ignore whitespace characters in the text content, if {@code true}, all the whitespace within text content will be removed.
      * @return The text content of the specified node, with all the whitespace within text content will be removed if {@code ignoreWhiteChar} is {@code true}.
      */
     public static String getTextContent(final Node node, final boolean ignoreWhiteChar) {

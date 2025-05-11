@@ -370,7 +370,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other
      *            the range to check, {@code null} returns false
-     * @return {@code true} if this range is completely before the specified range
+     * @return {@code true} if this range is complete before the specified range
      * @throws RuntimeException
      *             if ranges cannot be compared
      */
@@ -529,14 +529,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public enum BoundType {
 
-        /** The open open. */
-        OPEN_OPEN,
-        /** The open closed. */
-        OPEN_CLOSED,
-        /** The closed open. */
-        CLOSED_OPEN,
-        /** The closed closed. */
-        CLOSED_CLOSED
+        OPEN_OPEN, OPEN_CLOSED, CLOSED_OPEN, CLOSED_CLOSED
     }
 
     /**
@@ -549,10 +542,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         @Serial
         private static final long serialVersionUID = -1404748904424344410L;
 
-        /** The value. */
         final T value; //NOSONAR
 
-        /** The is closed. */
         final boolean isClosed;
 
         /**

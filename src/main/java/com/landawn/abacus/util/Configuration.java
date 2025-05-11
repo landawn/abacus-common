@@ -240,7 +240,7 @@ public abstract class Configuration {
             logger.info("start to find file " + configFileName);
         }
 
-        // find out configuration file
+        // find out the configuration file
         File configurationFile = new File(configFileName);
 
         if (configurationFile.exists()) {

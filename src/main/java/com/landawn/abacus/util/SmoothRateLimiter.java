@@ -30,7 +30,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * How is the RateLimiter designed, and why?
      *
      * The primary feature of a RateLimiter is its "stable rate", the maximum rate that should
-     * allow at normal conditions. This is enforced by "throttling" incoming requests as needed, i.e.
+     * allow at normal conditions. This is enforced by "throttling" incoming requests as needed, i.e.,
      * compute, for an incoming request, the appropriate throttle time, and make the calling thread
      * wait as much.
      *
@@ -39,7 +39,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * QPS=5 (5 tokens per second), if we ensure that a request isn't granted earlier than 200ms after
      * the last one, then we achieve the intended rate. If a request comes and the last request was
      * granted only 100ms ago, then we wait for another 100ms. At this rate, serving 15 fresh permits
-     * (i.e. for an acquire(15) request) naturally takes 3 seconds.
+     * (i.e., for an acquire(15) request) naturally takes 3 seconds.
      *
      * It is important to realize that such a RateLimiter has a very superficial memory of the past:
      * it only remembers the last request. What if the RateLimiter was unused for a long period of
@@ -53,7 +53,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * translates to "almost empty buffers", which can be filled immediately.
      *
      * On the other hand, past underutilization could mean that "the server responsible for handling
-     * the request has become less ready for future requests", i.e. its caches become stale, and
+     * the request has become less ready for future requests", i.e., its caches become stale, and
      * requests become more likely to trigger expensive operations (a more extreme case of this
      * example is when a server has just booted, and it is mostly busy with getting itself up to
      * speed).
@@ -90,7 +90,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      *
      * This role is played by storedPermitsToWaitTime(double storedPermits, double permitsToTake). The
      * underlying model is a continuous function mapping storedPermits (from 0.0 to maxStoredPermits)
-     * onto the 1/rate (i.e. intervals) that is effective at the given storedPermits. "storedPermits"
+     * onto the 1/rate (i.e., intervals) that is effective at the given storedPermits. "storedPermits"
      * essentially measure unused time; we spend unused time buying/storing permits. Rate is
      * "permits / time", thus "1 / rate = time / permits". Thus, "1/rate" (time / permits) times
      * "permits" gives time, i.e., integrals on this function (which is what storedPermitsToWaitTime()
@@ -107,7 +107,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * of the function in [7.0, 10.0] is equivalent to the sum of the integrals of [7.0, 8.0], [8.0,
      * 9.0], [9.0, 10.0] (and so on), no matter what the function is. This guarantees that we handle
      * correctly requests of varying weight (permits), /no matter/ what the actual function is - so we
-     * can tweak the latter freely. (The only requirement, obviously, is that we can compute its
+     * can tweak the latter freely. (The only requirement is that we can compute its
      * integrals).
      *
      * Note well that if, for this function, we chose a horizontal line, at height of exactly (1/QPS),
@@ -120,7 +120,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * line, then it means that the area (time) is increased, thus storedPermits are more costly than
      * fresh permits, thus the RateLimiter becomes /slower/ after a period of underutilization.
      *
-     * Last, but not least: consider a RateLimiter with rate of 1 permit per second, currently
+     * Last, but not least: consider a RateLimiter with a rate of 1 permit per second, currently
      * completely unused, and an expensive acquire(100) request comes. It would be nonsensical to just
      * wait for 100 seconds, and /then/ start the actual task. Why wait without doing anything? A much
      * better approach is to /allow/ the request right away (as if it was an acquire(1) request
@@ -469,7 +469,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
     abstract long storedPermitsToWaitTime(double storedPermits, double permitsToTake);
 
     /**
-     * Returns the number of microseconds during cool down that we have to wait to get a new permit.
+     * Returns the number of microseconds during cooldown that we have to wait to get a new permit.
      *
      * @return
      */

@@ -68,9 +68,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <br />
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a {@code null} or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
+ * exception if the contract defined by method is not broken. For example, if
+ * user tries to reverse a {@code null} or empty String. The input String will be
+ * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
  * <br />
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -1685,7 +1685,7 @@ public final class Maps {
 
     //    /**
     //     * Returns an empty {@code Optional<V>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-    //     * Otherwise returns an {@code Optional<V>} with the value mapped by the specified {@code key}.
+    //     * Otherwise, returns an {@code Optional<V>} with the value mapped by the specified {@code key}.
     //     *
     //     * <br />
     //     * Present -> key is found in the specified map with {@code non-null} value.
@@ -1746,8 +1746,8 @@ public final class Maps {
      * @param <K> the key type
      * @param <V> the value type
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
-     * @param defaultValueSupplier the supplier to provide a default value if the key is absent, may be null
+     * @param key the key to check for, which may be null
+     * @param defaultValueSupplier the supplier to provide a default value if the key is absent, which may be null
      * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent
      */
     public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
@@ -1787,7 +1787,7 @@ public final class Maps {
      * @param <K> the key type
      * @param <E> the element type of the list
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
+     * @param key the key to check for, which may be null
      * @return the value associated with the specified key, or a new {@code List} if the key is absent
      */
     public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
@@ -1826,7 +1826,7 @@ public final class Maps {
      * @param <K> the key type
      * @param <E> the element type of the set
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
+     * @param key the key to check for, which may be null
      * @return the value associated with the specified key, or a new {@code Set} if the key is absent
      */
     public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
@@ -1865,7 +1865,7 @@ public final class Maps {
      * @param <K> the key type
      * @param <E> the element type of the set
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
+     * @param key the key to check for, which may be null
      * @return the value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent
      */
     public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
@@ -1906,7 +1906,7 @@ public final class Maps {
      * @param <KK> the key type of the value map
      * @param <VV> the value type of the value map
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
+     * @param key the key to check for, which may be null
      * @return the value associated with the specified key, or a new {@code Map} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
@@ -1947,7 +1947,7 @@ public final class Maps {
      * @param <KK> the key type of the value map
      * @param <VV> the value type of the value map
      * @param map the map to check and possibly update
-     * @param key the key to check for, may be null
+     * @param key the key to check for, which may be null
      * @return the value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
@@ -2277,8 +2277,8 @@ public final class Maps {
     /**
      * Checks if the specified map contains the specified entry.
      *
-     * @param map the map to check, may be null
-     * @param entry the entry to check for, may be null
+     * @param map the map to check, which may be null
+     * @param entry the entry to check for, which may be null
      * @return {@code true} if the map contains the specified entry, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
@@ -3124,7 +3124,7 @@ public final class Maps {
 
     /**
      * Inverts the given map by mapping each value in the Collection to the corresponding key.
-     * The resulting map's keys are the values in the Collection of the input map and its values are Lists of the corresponding keys from the input map.
+     * The resulting map's keys are the values in the Collection of the input maps and its values are Lists of the corresponding keys from the input map.
      *
      * @param <K> The key type of the input map and the element type of the List values in the resulting map.
      * @param <V> The element type of the Collection values in the input map and the key type of the resulting map.
@@ -3223,7 +3223,7 @@ public final class Maps {
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
      *
-     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param <M> The type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map The map to be flattened.
      * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
      * @return A new map which is the flattened version of the input map.
@@ -3238,7 +3238,7 @@ public final class Maps {
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a provided delimiter.
      * Note: This method does not modify the original map.
      *
-     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param <M> The type of the map to be returned. It extends The Map with String keys and Object values.
      * @param map The map to be flattened.
      * @param delimiter The delimiter to be used when concatenating keys.
      * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
@@ -3300,7 +3300,7 @@ public final class Maps {
      * This method takes a flattened map where keys are concatenated with a delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
      *
-     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param <M> The type of the map to be returned. It extends The Map with String keys and Object values.
      * @param map The flattened map to be unflattened.
      * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
      * @return A new map which is the unflattened version of the input map.
@@ -3314,7 +3314,7 @@ public final class Maps {
      * This method takes a flattened map where keys are concatenated with a specified delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
      *
-     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param <M> The type of the map to be returned. It extends The Map with String keys and Object values.
      * @param map The flattened map to be unflattened.
      * @param delimiter The delimiter that was used in the flattening process to concatenate keys.
      * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
@@ -4225,7 +4225,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param bean The bean object to be converted into a flat map.
      * @return A map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
@@ -4237,7 +4237,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4251,7 +4251,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param bean
      * @param selectPropNames
@@ -4263,7 +4263,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4280,13 +4280,13 @@ public final class Maps {
     /**
      * Converts a bean object into a flat map representation with selected properties and a specified naming policy.
      * This method takes a bean object and transforms it into a map where the keys are the property names of the bean and the values are the corresponding property values.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      *
      * @implSpec
      * <code>
      *  Maps.bean2FlatMap(new User("John", new Address("New York"))) ==> {"name"="John", address.city="New York"};
      *  <br />
-     *  // with below bean classes
+     *  // with the below bean classes
      *  <br />
      *  public static class User {
      *     private String name;
@@ -4316,7 +4316,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4329,7 +4329,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4343,7 +4343,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4389,7 +4389,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
@@ -4402,7 +4402,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
@@ -4416,7 +4416,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4433,7 +4433,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
@@ -4449,7 +4449,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4478,7 +4478,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4492,7 +4492,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4508,7 +4508,7 @@ public final class Maps {
 
     /**
      * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
      *
      * @param <M>
      * @param bean

@@ -38,7 +38,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * It provides methods to execute Runnable and Callable tasks, with options for retrying tasks if they fail.
  * <br />
  * By default, the core pool size is the maximum of 8 and the number of available processors,
- * the maximum pool size is the maximum of 16 and twice the number of available processors,
+ * the maximum pool size is the maximum of 16 and twice the number of available processors.
  *
  * @see ContinuableFuture
  * @see Futures
@@ -65,21 +65,21 @@ public class AsyncExecutor {
     private volatile Executor executor; //NOSONAR
 
     /**
-     * Constructs an instance of AsyncExecutor with default core pool size, maximum pool size, keep alive time, and time unit
-     * It initializes the AsyncExecutor with the default core pool size, maximum pool size, keep alive time, and time unit.
+     * Constructs an instance of AsyncExecutor with default core pool size, maximum pool size, keep live time, and time unit
+     * It initializes the AsyncExecutor with the default core pool size, maximum pool size, keep live time, and time unit.
      * The default core pool size is the maximum of 8 and the number of available processors.
      * The default maximum pool size is the maximum of 16 and twice the number of available processors.
-     * The default keep alive time is 180 seconds.
+     * The default keep live time is 180 seconds.
      */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
     /**
-     * Constructs an instance of AsyncExecutor with the specified core pool size, maximum pool size, keep alive time, and time unit.
+     * Constructs an instance of AsyncExecutor with the specified core pool size, maximum pool size, keep live time, and time unit.
      * The core pool size is the number of threads to keep in the pool, even if they are idle.
      * The maximum pool size is the maximum number of threads to allow in the pool.
-     * The keep alive time is when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
+     * The keep live time is when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
      * The time unit is the time unit for the keepAliveTime argument.
      *
      * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle
@@ -104,7 +104,7 @@ public class AsyncExecutor {
     /**
      * Constructs an instance of AsyncExecutor with the specified Executor.
      * The Executor is used to execute tasks asynchronously.
-     * The core pool size, maximum pool size, keep alive time, and time unit of the AsyncExecutor are derived from the provided Executor.
+     * The core pool size, maximum pool size, keep live time, and time unit of the AsyncExecutor are derived from the provided Executor.
      * If the Executor is not an instance of ThreadPoolExecutor, default values are used.
      *
      * @param executor the Executor to be used for executing tasks
@@ -329,7 +329,8 @@ public class AsyncExecutor {
 
     /**
      * Retrieves the executor used by this AsyncExecutor.
-     * If the executor is not initialized, it initializes a new ThreadPoolExecutor with the specified core pool size, maximum pool size, keep alive time, and time unit.
+     * If the executor is not initialized, it initializes a new ThreadPoolExecutor with the specified core pool size, maximum pool size,
+     * keep live time, and time unit.
      * It also adds a shutdown hook to the JVM to ensure the executor is properly shutdown when the JVM exits.
      *
      * @return the Executor used by this AsyncExecutor

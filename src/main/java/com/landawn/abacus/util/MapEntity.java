@@ -28,8 +28,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * This object is used to store the properties' values of an object. So it should not set or get value for other
- * object's property.
+ * This object is used to store the properties' values of an object. So it should not set or get value for another object's property.
  *
  */
 @Internal

@@ -43,7 +43,6 @@ public final class Retry<T> {
 
     private final Predicate<? super Exception> retryCondition;
 
-    /** The retry condition 2. */
     private final BiPredicate<? super T, ? super Exception> retryCondition2;
 
     Retry(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition,
@@ -232,7 +231,6 @@ public final class Retry<T> {
 
         private final Predicate<? super RuntimeException> retryCondition;
 
-        /** The retry condition 2. */
         private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
 
         R(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super RuntimeException> retryCondition,

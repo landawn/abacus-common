@@ -944,7 +944,7 @@ public final class ParserUtil {
                     }
                 }
 
-                // set method mask to avoid query next time.
+                // set method mask to avoid querying next time.
                 if (propInfoOpt == null) {
                     propInfoOpt = Optional.empty();
                 } else {
@@ -1011,7 +1011,7 @@ public final class ParserUtil {
                 final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
 
                 if (propInfoQueue.size() == 0) {
-                    throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
+                    throw new RuntimeException("No getter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                 } else {
                     final int len = propInfoQueue.size();
                     Object propBean = obj;
@@ -1059,7 +1059,7 @@ public final class ParserUtil {
 
                 if (propInfoQueue.size() == 0) {
                     if (!ignoreUnmatchedProperty) {
-                        throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
+                        throw new RuntimeException("No setter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                     } else {
                         return false;
                     }
@@ -1143,7 +1143,7 @@ public final class ParserUtil {
 
                 if (!ignoreUnmatchedProperty) {
                     throw new RuntimeException(
-                            "No property method found with property name: " + propInfoFromOtherBean.name + " in class: " + clazz.getCanonicalName());
+                            "No setter method found with property name: " + propInfoFromOtherBean.name + " in class: " + clazz.getCanonicalName());
                 }
 
                 return false;
@@ -1785,8 +1785,8 @@ public final class ParserUtil {
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final Exception e) {
-                    // why don't check value type first before set? Because it's expected 99% chance set will success.
-                    // Checking value type first may not improve performance.
+                    // Why don't check the value type first before set? Because it's expected 99% chance set will success.
+                    // Checking the value type first may not improve performance.
 
                     if (failureCountForSetProp < 1000) {
                         //noinspection NonAtomicOperationOnVolatileField
@@ -2509,8 +2509,8 @@ public final class ParserUtil {
                 } catch (final IllegalAccessException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final Exception e) {
-                    // why don't check value type first before set? Because it's expected 99% chance set will success.
-                    // Checking value type first may not improve performance.
+                    // Why don't check the value type first before set? Because it's expected 99% chance set will success.
+                    // Checking the value type first may not improve performance.
 
                     if (failureCountForSetProp < 1000) {
                         //noinspection NonAtomicOperationOnVolatileField

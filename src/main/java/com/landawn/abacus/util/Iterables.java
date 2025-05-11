@@ -22,6 +22,7 @@ import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,11 +38,13 @@ import java.util.RandomAccess;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -2328,6 +2331,53 @@ public final class Iterables {
     }
 
     /**
+     * Fills the specified Object array with the values provided by the specified supplier.
+     *
+     * @param a the Object array to be filled
+     * @param supplier provider of the value to fill the array with
+     * @see Arrays#fill(Object[], Object)
+     * @see N#setAll(Object[], IntFunction)
+     * @see N#replaceAll(Object[], UnaryOperator) 
+     * @see N#fill(Object[], Object)
+     * @see N#fill(Object[], int, int, Object)
+     */
+    @Beta
+    public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
+        if (N.isEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = supplier.get();
+        }
+    }
+
+    /**
+     * Fills the specified Object array with the values provided by the specified supplier from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * @param a the Object array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param supplier provider of the value to fill the array with
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
+     * @see Arrays#fill(Object[], int, int, Object)
+     * @see N#fill(Object[], Object)
+     * @see N#fill(Object[], int, int, Object)
+     */
+    @Beta
+    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            a[i] = supplier.get();
+        }
+    }
+
+    /**
      * Fills the specified list with values provided by the specified supplier.
      *
      * @param <T> the type of elements in the list
@@ -2342,7 +2392,7 @@ public final class Iterables {
      * @see N#padRight(Collection, int, Object)
      */
     @Beta
-    public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) {
+    public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(list, cs.list);
 
         fill(list, 0, list.size(), supplier);
@@ -2368,7 +2418,7 @@ public final class Iterables {
      */
     @Beta
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
-            throws IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(list, cs.list);
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
@@ -3091,7 +3141,7 @@ public final class Iterables {
      * <p>Elements appear in these subsets in the same iteration order as they
      * appeared in the input set. The order in which these subsets appear in the
      * outer set is undefined. Note that the power set of the empty set is not the
-     * empty set, but a one-element set containing the empty set.
+     * empty set, but an one-element set containing the empty set.
      *
      * <p>The returned set and its constituent sets use {@code equals} to decide
      * whether two elements are identical, even if the input set uses a different
@@ -3238,7 +3288,7 @@ public final class Iterables {
      * the first permutation will be in ascending order, and the last will be in
      * descending order.
      *
-     * <p>Elements that compare equal are considered equal and no new permutations
+     * <p>Elements that compare equal are considered equal, and no new permutations
      * are created by swapping them.
      *
      * <p>An empty iterable has only one permutation, which is an empty list.
@@ -3307,8 +3357,7 @@ public final class Iterables {
      *     lists
      * @return
      *     lists
-     * @throws IllegalArgumentException if the size of the cartesian product would
-     *     be greater than {@link Integer#MAX_VALUE}
+     * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
     @SafeVarargs
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends E>... cs) {
@@ -3369,7 +3418,7 @@ public final class Iterables {
      *     lists
      * @return
      *     lists
-     * @throws IllegalArgumentException if the size of the cartesian product would be greater than {@link Integer#MAX_VALUE}
+     * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends Collection<? extends E>> cs) {
         return new CartesianList<>(N.nullToEmpty(cs));
@@ -4089,7 +4138,7 @@ public final class Iterables {
 
         if (isNullOrEmpty) {
             if (argNameOrErrorMsg.indexOf(' ') == N.INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }

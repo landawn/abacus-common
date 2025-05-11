@@ -335,7 +335,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns the immutable set of column keys in the Sheet.
      * The column keys are used to identify the columns in the Sheet.
      *
-     * @return a ImmutableSet of column keys
+     * @return an ImmutableSet of column keys
      */
     public ImmutableSet<C> columnKeySet() {
         return ImmutableSet.wrap(_columnKeySet);
@@ -454,7 +454,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Inserts or updates a value in the cell identified by the specified Point.
-     * the Point represents the row index and column index of the cell.
+     * The Point represents the row index and column index of the cell.
      * If the cell already contains a value, the existing value is replaced with the new value.
      * If the cell does not exist, a new cell is created at the specified point with the provided value.
      *
@@ -551,7 +551,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Removes the value stored in the cell identified by the specified Point.
-     * the Point represents the row index and column index of the cell.
+     * The Point represents the row index and column index of the cell.
      *
      * @param point the Point of the cell
      * @return the value that was stored in the cell
@@ -658,7 +658,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Sets the values for a specific row in the Sheet.
-     * The row is identified by the provided row key and the values are provided as a collection.
+     * The row is identified by the provided row key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the column keys in the Sheet.
      *
      * @param rowKey the key of the row to be set
@@ -693,7 +693,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Adds a new row to the Sheet.
-     * The row is identified by the provided row key and the values are provided as a collection.
+     * The row is identified by the provided row key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the column keys in the Sheet.
      *
      * @param rowKey the key of the row to be added
@@ -735,7 +735,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Inserts a new row at the specified index in the Sheet.
-     * The row is identified by the provided row key and the values are provided as a collection.
+     * The row is identified by the provided row key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the column keys in the Sheet.
      *
      * @param rowIndex the index at which the row should be inserted
@@ -743,7 +743,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param row the collection of values to be added in the row
      * @throws IllegalStateException if the Sheet is frozen
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is less than zero or bigger than row size
-     * @throws IllegalArgumentException if the row key already exists in the Sheet or the provided collection is not empty and its size does not match the number of columns in the Sheet
+     * @throws IllegalArgumentException if the row key already exists in the Sheet, or the provided collection is not empty and its size does not match the number of columns in the Sheet
      */
     public void addRow(final int rowIndex, final R rowKey, final Collection<? extends V> row)
             throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
@@ -841,7 +841,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             final int removedRowIndex = _rowKeyIndexMap.remove(rowKey);
 
             if (removedRowIndex == newRowSize) {
-                // removed last row.
+                // removed the last row.
             } else {
                 for (int i = removedRowIndex; i < newRowSize; i++) {
                     _rowKeyIndexMap.put(_rowKeyIndexMap.getByValue(i + 1), i);
@@ -863,7 +863,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key of the row to be moved
      * @param newRowIndex the new index at which the row should be positioned
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in the Sheet or the new index is out of bounds
+     * @throws IllegalArgumentException if the row key does not exist in the Sheet, or the new index is out of bounds
      * @throws IndexOutOfBoundsException if the new row index is out of bounds
      */
     public void moveRow(final R rowKey, final int newRowIndex) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
@@ -928,7 +928,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Renames a row in the Sheet.
-     * The row to be renamed is identified by the provided old row key and the new name is provided as the new row key.
+     * The row to be renamed is identified by the provided old row key, and the new name is provided as the new row key.
      *
      * @param rowKey the old key of the row to be renamed
      * @param newRowKey the new key for the row
@@ -969,7 +969,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves a map representing a row in the Sheet.
      * The row is identified by the provided row key.
-     * The map's keys are the column keys and the values are the values stored in the cells of the row.
+     * The map's keys are the column keys, and the values are the values stored in the cells of the row.
      *
      * @param rowKey the row key of the row
      * @return a Map where the keys are the column keys and the values are the values stored in the cells of the row
@@ -1000,7 +1000,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves a map representing all rows in the Sheet.
      * Each entry in the map corresponds to a row in the Sheet.
-     * The map's keys are the row keys and the values are maps where the keys are the column keys and the values are the values stored in the cells of the row.
+     * The map's keys are the row keys, and the values are maps where the keys are the column keys and the values are the values stored in the cells of the row.
      * An empty map is returned if the Sheet is empty.
      *
      * @return a Map where the keys are the row keys and the values are maps representing the rows. In these maps, the keys are the column keys and the values are the values stored in the cells of the row.
@@ -1044,13 +1044,13 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Sets the values for a specific column in the Sheet.
-     * The column is identified by the provided column key and the values are provided as a collection.
+     * The column is identified by the provided column key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the row keys in the Sheet.
      *
      * @param columnKey the key of the column to be set
      * @param column the collection of values to be set in the column
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in the Sheet or the provided collection is not empty and its size does not match the number of rows in the Sheet
+     * @throws IllegalArgumentException if the column key does not exist in the Sheet, or the provided collection is not empty and its size does not match the number of rows in the Sheet
      */
     public void setColumn(final C columnKey, final Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
@@ -1074,7 +1074,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Adds a new column to the Sheet.
-     * The column is identified by the provided column key and the values are provided as a collection.
+     * The column is identified by the provided column key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the row keys in the Sheet.
      *
      * @param columnKey the key of the column to be added
@@ -1112,7 +1112,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Inserts a new column at the specified index in the Sheet.
-     * The column is identified by the provided column key and the values are provided as a collection.
+     * The column is identified by the provided column key, and the values are provided as a collection.
      * The order of the values in the collection should match the order of the row keys in the Sheet.
      *
      * @param columnIndex the index at which the column should be inserted
@@ -1295,7 +1295,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Renames a column in the Sheet.
-     * The column to be renamed is identified by the provided old column key and the new name is provided as the new column key.
+     * The column to be renamed is identified by the provided old column key, and the new name is provided as the new column key.
      *
      * @param columnKey the old key of the column to be renamed
      * @param newColumnKey the new key for the column
@@ -1337,7 +1337,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves a map representing a column in the Sheet.
      * The column is identified by the provided column key.
-     * The map's keys are the row keys and the values are the values stored in the cells of the column.
+     * The map's keys are the row keys, and the values are the values stored in the cells of the column.
      *
      * @param columnKey the column key of the column
      * @return a Map where the keys are the row keys and the values are the values stored in the cells of the column
@@ -1369,7 +1369,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves a map representing all columns in the Sheet.
      * Each entry in the map corresponds to a column in the Sheet.
-     * The map's keys are the column keys and the values are maps where the keys are the row keys and the values are the values stored in the cells of the column.
+     * The map's keys are the column keys, and the values are maps where the keys are the row keys and the values are the values stored in the cells of the column.
      * An empty map is returned if the Sheet is empty.
      *
      * @return a Map where the keys are the column keys and the values are maps representing the columns. In these maps, the keys are the row keys and the values are the values stored in the cells of the column.
@@ -2276,7 +2276,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Transposes the current Sheet object.
      * This method creates a new Sheet object with the row keys and column keys of the current Sheet swapped.
-     * The values in the new Sheet are the same as the current Sheet but with the row and column indices swapped.
+     * The values in the new Sheet are the same as the current Sheet, but with the row and column indices swapped.
      * Changes to the transposed Sheet will not affect the current Sheet, and vice versa.
      *
      * @return A new Sheet object that is the transpose of the current Sheet.
@@ -2391,7 +2391,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         return _rowKeySet.isEmpty() || _columnKeySet.isEmpty();
     }
 
-    // This should not be a public method. It's implementation detail.
+    // This should not be a public method. It's an implementation detail.
     //    /**
     //     * Checks if the Sheet has been initialized.
     //     * A Sheet is considered initialized if it has been populated with data.

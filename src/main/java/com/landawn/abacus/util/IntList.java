@@ -61,7 +61,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Constructs a IntList with the specified initial capacity.
+     * Constructs an IntList with the specified initial capacity.
      *
      * @param initialCapacity the initial capacity of the list
      */
@@ -70,7 +70,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Constructs a IntList using the specified array as the element array for this list without copying action.
+     * Constructs an IntList using the specified array as the element array for this list without copying action.
      *
      * @param a the array to be used as the element array for this list
      */
@@ -79,7 +79,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Constructs a IntList using the specified array as the element array for this list without copying action.
+     * Constructs an IntList using the specified array as the element array for this list without copying action.
      *
      * @param a the array to be used as the element array for this list
      * @param size the number of elements in the list
@@ -93,7 +93,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList from the specified array of integers.
+     * Creates an IntList from the specified array of integers.
      *
      * @param a the array of integers to be used as the element array for this list
      * @return a new IntList containing the elements of the specified array
@@ -103,7 +103,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList from the specified array of integers and size.
+     * Creates an IntList from the specified array of integers and size.
      *
      * @param a the array of integers to be used as the element array for this list
      * @param size the number of elements in the list
@@ -117,7 +117,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList that is a copy of the specified array.
+     * Creates an IntList that is a copy of the specified array.
      *
      * @param a the array to be copied
      * @return a new IntList containing the elements copied from the specified array
@@ -127,7 +127,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList that is a copy of the specified array within the given range.
+     * Creates an IntList that is a copy of the specified array within the given range.
      *
      * @param a the array to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -140,7 +140,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with elements ranging from startInclusive to endExclusive.
+     * Creates an IntList with elements ranging from startInclusive to endExclusive.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
@@ -151,7 +151,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with elements ranging from startInclusive to endExclusive, incremented by the specified step.
+     * Creates an IntList with elements ranging from startInclusive to endExclusive, incremented by the specified step.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
@@ -163,7 +163,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with elements ranging from startInclusive to endInclusive.
+     * Creates an IntList with elements ranging from startInclusive to endInclusive.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
@@ -174,7 +174,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with elements ranging from startInclusive to endInclusive, incremented by the specified step.
+     * Creates an IntList with elements ranging from startInclusive to endInclusive, incremented by the specified step.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
@@ -186,7 +186,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with the specified element repeated a given number of times.
+     * Creates an IntList with the specified element repeated a given number of times.
      *
      * @param element the int value to be repeated
      * @param len the number of times to repeat the element
@@ -197,7 +197,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with random int elements.
+     * Creates an IntList with random int elements.
      *
      * @param len the number of random elements to generate
      * @return a new IntList containing the random elements
@@ -215,7 +215,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a IntList with random int elements within the specified range.
+     * Creates an IntList with random int elements within the specified range.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
@@ -425,11 +425,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
-    /**
-     * Range check for add.
-     *
-     * @param index
-     */
     private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -1563,11 +1558,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns List of {@code IntList} with consecutive sub-sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns List of {@code IntList} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
      *
      * @param fromIndex
      * @param toIndex
-     * @param chunkSize the desired size of each sub-sequence (the last may be smaller).
+     * @param chunkSize the desired size of each subsequence (the last may be smaller).
      * @return
      * @throws IndexOutOfBoundsException
      */

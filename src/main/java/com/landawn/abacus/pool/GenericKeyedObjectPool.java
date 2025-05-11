@@ -222,13 +222,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             return e;
         } finally {
+            lock.unlock();
+
             if (e != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
-
-            lock.unlock();
         }
     }
 
@@ -608,7 +608,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param is
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException the class not found exception
+     * @throws ClassNotFoundException
      */
     @Serial
     private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {

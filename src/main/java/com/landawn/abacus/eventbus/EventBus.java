@@ -16,7 +16,14 @@ package com.landawn.abacus.eventbus;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -777,55 +784,34 @@ public class EventBus {
         }
     }
 
-    /**
-     * The Class SubIdentifier.
-     */
-    public static final class SubIdentifier {
+    protected static final class SubIdentifier {
 
-        /** The cached classes. */
         final Map<Class<?>, Boolean> cachedClasses = new ConcurrentHashMap<>();
 
-        /** The obj. */
         final Object instance;
 
-        /** The method. */
         final Method method;
 
-        /** The parameter type. */
         final Class<?> parameterType;
 
-        /** The event id. */
         final String eventId;
 
-        /** The thread mode. */
         final ThreadMode threadMode;
 
-        /** The strict event type. */
         final boolean strictEventType;
 
-        /** The sticky. */
         final boolean sticky;
 
-        /** The interval. */
         final long intervalInMillis;
 
-        /** The deduplicate. */
         final boolean deduplicate;
 
-        /** The is possible lambda subscriber. */
         final boolean isPossibleLambdaSubscriber;
 
-        /** The last post time. */
         long lastPostTime = 0;
 
-        /** The previous event. */
         Object previousEvent = null;
 
-        /**
-         * Instantiates a new sub identifier.
-         *
-         * @param method
-         */
         SubIdentifier(final Method method) {
             final Subscribe subscribe = method.getAnnotation(Subscribe.class);
             instance = null;
@@ -845,14 +831,6 @@ public class EventBus {
             ClassUtil.setAccessible(method, true);
         }
 
-        /**
-         * Instantiates a new sub identifier.
-         *
-         * @param sub
-         * @param obj
-         * @param eventId
-         * @param threadMode
-         */
         SubIdentifier(final SubIdentifier sub, final Object obj, final String eventId, final ThreadMode threadMode) {
             instance = obj;
             method = sub.method;
@@ -866,13 +844,6 @@ public class EventBus {
             isPossibleLambdaSubscriber = sub.isPossibleLambdaSubscriber;
         }
 
-        /**
-         * Checks if is my event.
-         * @param eventId
-         * @param eventType
-         *
-         * @return {@code true}, if is my event
-         */
         boolean isMyEvent(final String eventId, final Class<?> eventType) {
             if (!N.equals(this.eventId, eventId)) {
                 return false;
@@ -896,11 +867,6 @@ public class EventBus {
             return 31 * h + N.hashCode(isPossibleLambdaSubscriber);
         }
 
-        /**
-         *
-         * @param obj
-         * @return {@code true}, if successful
-         */
         @SuppressFBWarnings
         @Override
         public boolean equals(final Object obj) {

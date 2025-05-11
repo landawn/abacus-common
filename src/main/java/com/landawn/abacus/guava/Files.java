@@ -275,7 +275,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#createTempDirectory}.
      *
-     * @return the newly-created directory
+     * @return the newly created directory
      * @throws IllegalStateException if the directory could not be created, such as if the system does
      *     not support creating temporary directories securely
      * @deprecated For Android users, see the <a
@@ -298,7 +298,7 @@ public abstract class Files { //NOSONAR
 
     /**
      * Creates any necessary but nonexistent parent directories of the specified file. Note that if
-     * this operation fails it may have succeeded in creating some (but not all) of the necessary
+     * this operation fails, it may have succeeded in creating some (but not all) of the necessary
      * parent directories.
      *
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent

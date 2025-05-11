@@ -114,7 +114,6 @@ public final class EmailUtil {
                 }
             });
 
-            // Define message
             final MimeMessage mail = new MimeMessage(session);
 
             final InternetAddress[] to = new InternetAddress[recipients.length];
@@ -132,7 +131,6 @@ public final class EmailUtil {
             final Multipart multipart = new MimeMultipart();
             BodyPart messageBodyPart = new MimeBodyPart();
 
-            // Put parts in message
             if (isHTML) {
                 messageBodyPart.setContent(content, "text/html");
             } else {
@@ -160,7 +158,6 @@ public final class EmailUtil {
             }
 
             mail.setContent(multipart);
-            // Send message
             Transport.send(mail);
         } catch (final MessagingException e) {
             throw new RuntimeException("Failed to send email to: " + Arrays.toString(recipients), e);

@@ -1046,9 +1046,6 @@ public final class HttpRequest {
         return N.asyncExecute(cmd, executor);
     }
 
-    /**
-     * Check settings.
-     */
     HttpSettings checkSettings() {
         if (settings == null) {
             settings = new HttpSettings();

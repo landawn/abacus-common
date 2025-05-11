@@ -15,7 +15,7 @@ package com.landawn.abacus.util;
 
 /**
  * The reason to design/create this class is just to be a bit more efficient than {@code java.time.Duration}.
- * It seems that nanoseconds is only used in rare case.
+ * It seems that nanoseconds are only used in rare case.
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Duration implements Comparable<Duration>, Immutable {

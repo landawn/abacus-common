@@ -190,7 +190,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

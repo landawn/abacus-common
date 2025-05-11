@@ -122,8 +122,8 @@ public final class KahanSummation { // NOSONAR
     for i = 2 to input.length do
         var y = input[i] - c    // So far, so good: c is zero at first.
         var t = sum + y         // Alas, sum is big, y small, so low-order digits of y are lost.
-        c = (t - sum) - y       // (t - sum) cancels the high-order part of y; subtracting y recovers negative (low part of y)
-        sum = t                 // Algebraically, c should always be zero. Beware overly-aggressive optimizing compilers!
+        c = (t - sum) - y       // (t - sum) cancels the high-order part of y; subtracting y recovers a negative (low part of y)
+        sum = t                 // Algebraically, c should always be zero. Beware overly aggressive optimizing compilers!
     next i                      // Next time around, the lost low part will be added to y in a fresh attempt.
     return sum
      */

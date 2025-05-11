@@ -114,7 +114,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
-     * Otherwise just return {@code false} without setting the value to new value.
+     * Otherwise, just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -133,7 +133,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     //    /**
     //     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-    //     * Otherwise just return <code>false</code> without setting the value to new value.
+    //     * Otherwise, just return <code>false</code> without setting the value to new value.
     //     *
     //     * @param <E>
     //     * @param newValue
@@ -342,7 +342,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * </blockquote>
      * <p>
-     * also has the value {@code true}. However, there are two exceptions:
+     * Also has the value {@code true}. However, there are two exceptions:
      * <ul>
      * <li>If {@code f1} and {@code f2} both represent {@code Float.NaN}, then the
      * {@code equals} method returns {@code true}, even though {@code Float.NaN==Float.NaN} has

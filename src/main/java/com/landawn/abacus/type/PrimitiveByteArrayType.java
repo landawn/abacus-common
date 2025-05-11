@@ -60,7 +60,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
-     * Checks if is primitive byte array.
+     * Checks if is a primitive byte array.
      *
      * @return {@code true}, if is primitive byte array
      */
@@ -310,13 +310,6 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         return a;
     }
 
-    /**
-     * Array 2 collection.
-     *
-     * @param <E>
-     * @param x
-     * @param output
-     */
     @Override
     public <E> void array2Collection(final byte[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {

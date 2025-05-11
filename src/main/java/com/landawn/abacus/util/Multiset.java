@@ -464,8 +464,8 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Conditionally sets the count of an element to a new value, as described in {@link
-     * #setCount(Object, int)}, provided that the element has the expected current count. If the
-     * current count is not {@code oldCount}, no change is made.
+     * #setCount(Object, int)}, provided the element has the expected current count.
+     * If the current count is not {@code oldCount}, no change is made.
      *
      * @param element the element to conditionally set the count of; may be {@code null} only if explicitly
      *     allowed by the implementation
@@ -1297,7 +1297,7 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Returns an unmodifiable iterator over the elements in this collection.
-     * There are no guarantees concerning the order in which the elements are returned(unless this collection is an instance of some class that provides a guarantee).
+     * There are no guarantees concerning the order in which the elements are returned (unless this collection is an instance of some class that provides a guarantee).
      *
      * <p>Elements that occur multiple times in the multiset will appear multiple times in this
      * iterator, though not necessarily sequentially.
@@ -1769,7 +1769,7 @@ public final class Multiset<E> implements Collection<E> {
      */
     private static int checkOccurrences(final int occurrences) {
         if (occurrences < 0) {
-            throw new IllegalArgumentException("The specified 'occurrences' can not be negative");
+            throw new IllegalArgumentException("The specified 'occurrences' cannot be negative");
         }
 
         return occurrences;
@@ -1885,7 +1885,7 @@ public final class Multiset<E> implements Collection<E> {
         /**
          * Returns a string representation of this multiset entry. The string representation consists of
          * the associated element if the associated count is one, and otherwise the associated element
-         * followed by the characters " x " (space, x and space) followed by the count. Elements and
+         * followed by the characters "x" (space, x and space) followed by the count. Elements and
          * counts are converted to strings as by {@code String.valueOf}.
          */
         @Override

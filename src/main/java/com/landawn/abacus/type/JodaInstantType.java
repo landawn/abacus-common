@@ -214,7 +214,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
                         break;
 
                     default:
-                        throw new RuntimeException("unsupported operation");
+                        throw new RuntimeException("Unsupported operation");
                 }
             }
 

@@ -32,9 +32,9 @@ import com.landawn.abacus.util.Tuple.Tuple4;
 /**
  * The ContinuableFuture class represents a computation that may be asynchronous. It implements the Future interface.
  * This class provides methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation.
- * The result can only be retrieved using method get when the computation has completed, blocking if necessary until it is ready.
- * Cancellation is performed by the cancel method. Additional methods are provided to determine if the task completed normally or was cancelled.
- * Once a computation has completed, the computation cannot be cancelled. If you would like to use a Future for the sake
+ * The result can only be retrieved using method gets when the computation has completed, blocking if necessary until it is ready.
+ * Cancellation is performed by the cancel method. Additional methods are provided to determine if the task completed normally or was canceled.
+ * Once a computation is completed, the computation cannot be canceled. If you would like to use a Future for the sake
  * of cancellability but not provide a usable result, you can declare types of the form Future<?> and return {@code null} as a result of the underlying task.
  *
  * @param <T> the result type returned by this Future's get method
@@ -168,12 +168,12 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Attempts to cancel execution of this task. This attempt will fail if the task has already completed, has already been cancelled, or could not be cancelled for some other reason.
+     * Attempts to cancel execution of this task. This attempt will fail if the task has already completed, has already been canceled, or could not be canceled for some other reason.
      * If successful, and this task has not started when cancel is called, this task should never run.
      * If the task has already started, then the mayInterruptIfRunning parameter determines whether the thread executing this task should be interrupted in an attempt to stop the task.
      *
      * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted; otherwise, in-progress tasks are allowed to complete.
-     * @return {@code false} if the task could not be cancelled, typically because it has already completed normally; {@code true} otherwise.
+     * @return {@code false} if the task could not be canceled, typically because it has already completed normally; {@code true} otherwise.
      * @see Future#cancel(boolean)
      */
     @Override
@@ -182,9 +182,9 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Checks if this task has been cancelled.
+     * Checks if this task has been canceled.
      *
-     * @return {@code true} if this task has been cancelled, {@code false} otherwise.
+     * @return {@code true} if this task has been canceled, {@code false} otherwise.
      * @see Future#isCancelled()
      */
     @Override
@@ -196,7 +196,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * Cancel this future and all the previous stage future recursively.
      *
      * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted; otherwise, in-progress tasks are allowed to complete.
-     * @return {@code true} if all tasks were cancelled successfully; {@code false} otherwise.
+     * @return {@code true} if all tasks were canceled successfully; {@code false} otherwise.
      * @see #cancel(boolean)
      * @see Future#cancel(boolean)
      */
@@ -213,9 +213,9 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Checks if this task and all the previous stage futures have been cancelled recursively.
+     * Checks if this task and all the previous stage futures have been canceled recursively.
      *
-     * @return {@code true} if all tasks have been cancelled, {@code false} otherwise.
+     * @return {@code true} if all tasks have been canceled, {@code false} otherwise.
      * @see #isCancelled()
      * @see Future#isCancelled()
      */
@@ -794,7 +794,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided function when the computation of this ContinuableFuture is complete.
-     * The function is a bi-function that takes the result of the computation and any exception that occurred during the computation as input, and returns a result.
+     * The function is a bi-function that takes the result of the computation and any exception that occurred during the computation as input and returns a result.
      * This method does not block, it simply returns a new ContinuableFuture that will complete with the result of the function.
      *
      * @param <R> The result type of the function, and of the returned ContinuableFuture
@@ -812,7 +812,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided action after both this ContinuableFuture and the other ContinuableFuture complete.
-     * If either of the ContinuableFutures is cancelled or fails, the action will not be executed.
+     * If either of the ContinuableFutures is canceled or fails, the action will not be executed.
      *
      * @param other The other ContinuableFuture that the action depends on.
      * @param action The action to be executed after both ContinuableFutures complete.
@@ -1164,7 +1164,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided action after either this ContinuableFuture or the other ContinuableFuture completes successfully.
      * If both ContinuableFutures complete at the same time, there is no guarantee which ContinuableFuture's completion triggers the action.
-     * If either of the ContinuableFutures fails, the action will take the exception of first completed computation if both fails.
+     * If either of the ContinuableFutures fails, the action will take the exception of the first completed computation if both fail.
      * This method does not block, it simply returns a new ContinuableFuture that will complete after executing the action.
      *
      * @param other The other ContinuableFuture that the action may depend on.
@@ -1264,12 +1264,14 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided function after either this ContinuableFuture or the other ContinuableFuture completes successfully.
      * If both ContinuableFutures complete at the same time, there is no guarantee which ContinuableFuture's completion triggers the function.
-     * If either of the ContinuableFutures fails, the action will take the exception of first completed computation if both fails.
+     * If either of the ContinuableFutures fails, the action will take the exception of the first completed computation if both fail.
      * This method does not block, it simply returns a new ContinuableFuture that will complete with the result of the function.
      *
      * @param <R> The result type of the function, and of the returned ContinuableFuture
      * @param other The other ContinuableFuture that the function may depend on.
-     * @param action The function to be executed after the first successful completion of either ContinuableFuture. It takes the result of the first successful computation or the exception of first completed computation if both fails as input and returns a result or throw an exception.
+     * @param action The function to be executed after the first successful completion of either ContinuableFuture.
+     *          It takes the result of the first successful computation or the exception of the first completed computation
+     * if both fails as input and returns a result or throw an exception.
      * @return A new ContinuableFuture representing pending completion of the function.
      * @throws Exception if the function throws an exception
      * @see #gett()

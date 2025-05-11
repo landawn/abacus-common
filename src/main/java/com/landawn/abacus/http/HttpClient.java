@@ -105,7 +105,7 @@ public final class HttpClient {
 
     private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
-        N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url can not be null or empty");
+        N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url cannot be null or empty");
 
         if ((maxConnection < 0) || (connectionTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
             throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis can't be less than 0: " + maxConnection + ", "

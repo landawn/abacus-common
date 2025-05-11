@@ -80,7 +80,7 @@ public final class RegExUtil {
     /**
      * <p>Removes each substring of the source string that matches the given regular expression.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @return the source string with any removes processed,  {@code null} if {@code null} String input
      * @see #replaceAll(String, String, String)
@@ -93,7 +93,7 @@ public final class RegExUtil {
     /**
      * <p>Removes each substring of the source string that matches the given regular expression pattern.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param pattern the regular expression to which this string is to be matched
      * @return the source string with any removes processed, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the pattern is {@code null}
@@ -107,7 +107,7 @@ public final class RegExUtil {
     /**
      * <p>Removes the first substring of the source string that matches the given regular expression.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @return the source string with the first replacement processed,  {@code null} if {@code null} String input
      * @see #replaceFirst(String, String, String)
@@ -121,7 +121,7 @@ public final class RegExUtil {
     /**
      * <p>Removes the first substring of the source string that matches the given regular expression pattern.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the pattern is {@code null}
@@ -136,7 +136,7 @@ public final class RegExUtil {
     /**
      * <p>Removes the last substring of the source string that matches the given regular expression.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @return the source string with the last replacement processed,  {@code null} if {@code null} String input
      * @see #replaceFirst(String, String, String)
@@ -150,7 +150,7 @@ public final class RegExUtil {
     /**
      * <p>Removes the last substring of the source string that matches the given regular expression pattern.</p>
      *
-     * @param source source string to remove from, may be null
+     * @param source source string to remove from, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @return the source string with the last replacement processed, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the pattern is {@code null}
@@ -173,7 +173,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for each match
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -198,7 +198,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -223,7 +223,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -246,7 +246,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for each match
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -274,7 +274,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -301,7 +301,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with any replacements processed, {@code null} if {@code null} String input
@@ -321,7 +321,7 @@ public final class RegExUtil {
     /**
      * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for the first match
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
@@ -338,7 +338,7 @@ public final class RegExUtil {
     /**
      * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
@@ -355,7 +355,7 @@ public final class RegExUtil {
     /**
      * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
@@ -378,7 +378,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for the first match
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
@@ -404,7 +404,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input
@@ -430,7 +430,7 @@ public final class RegExUtil {
      * </ul>
      *
      *
-     * @param source source string to search and replace in, may be null
+     * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the first replacement processed, {@code null} if {@code null} String input

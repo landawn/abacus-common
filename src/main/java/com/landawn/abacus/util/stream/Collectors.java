@@ -2145,9 +2145,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * input elements for which given mapper function returns distinct results.
      *
      * <p>
-     * For ordered source the order of collected elements is preserved. If the
+     * For ordered source, the order of collected elements is preserved. If the
      * same result is returned by mapper function for several elements, only the
-     * first element is included into the resulting list.
+     * first element is included in the resulting list.
      *
      * <p>
      * There are no guarantees on the type, mutability, serializability, or
@@ -3084,7 +3084,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * them producing the final result.
      *
      * <p>
-     * This collector produces stable result for ordered stream: if several
+     * This collector produces a stable result for ordered stream: if several
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.
      *
@@ -3095,10 +3095,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of the input elements
      * @param <R> the type of the result wrapped into {@code Optional}
-     * @param comparator comparator which is used to find minimal and maximal
-     *        element
-     * @param finisher a {@link BiFunction} which takes minimal and maximal
-     *        element and produces the final result.
+     * @param comparator comparator which is used to find the minimal and maximal elements
+     * @param finisher a {@link BiFunction} which takes the minimal and maximal elements and produces the final result.
      * @return a {@code Collector} which finds minimal and maximal elements.
      */
     public static <T, R> Collector<T, ?, Optional<R>> minMax(final Comparator<? super T> comparator,
@@ -3813,7 +3811,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Unicode high-surrogate code unit</a> only if it's not succeeded by
      * <a href="http://www.unicode.org/glossary/#low_surrogate_code_unit">
      * Unicode low-surrogate code unit</a> in any of the input sequences.
-     * Normally the ending high-surrogate code unit is removed from the prefix.
+     * Normally, the ending high-surrogate code unit is removed from the prefix.
      *
      * <p>
      * This method returns a
@@ -3885,7 +3883,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Unicode low-surrogate code unit</a> only if it's not preceded by
      * <a href="http://www.unicode.org/glossary/#high_surrogate_code_unit">
      * Unicode high-surrogate code unit</a> in any of the input sequences.
-     * Normally the starting low-surrogate code unit is removed from the suffix.
+     * Normally, the starting low-surrogate code unit is removed from the suffix.
      *
      * <p>
      * This method returns a

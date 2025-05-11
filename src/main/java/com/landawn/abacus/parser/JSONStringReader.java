@@ -335,7 +335,7 @@ class JSONStringReader extends AbstractJSONReader {
                         cnt++;
                     }
                 } else {
-                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip result.
+                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
                 }
             } else if (ch == '.' && pointPosition < 0) {
                 if (cnt == 0) {
@@ -618,7 +618,7 @@ class JSONStringReader extends AbstractJSONReader {
      *
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws NumberFormatException             if any unicode escape sequences are malformed.
+     * @throws NumberFormatException if any unicode escape sequences are malformed.
      */
     protected char readEscapeCharacter() {
         final int escaped = strValue[strBeginIndex++];

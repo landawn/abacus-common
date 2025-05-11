@@ -56,7 +56,7 @@ import okhttp3.Response;
 import okhttp3.internal.Util;
 
 /**
- * Note: This class contains the codes and docs copied from : <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2.
+ * Note: This class contains the codes and docs copied from: <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2.
  *
  * @see URLEncodedUtil
  * @see HttpHeaders

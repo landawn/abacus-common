@@ -4703,7 +4703,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet topBy(final String columnName, final int n, final Comparator<?> cmp) {
         if (n < 1) {
-            throw new IllegalArgumentException("'n' can not be less than 1");
+            throw new IllegalArgumentException("'n' cannot be less than 1");
         }
 
         final int columnIndex = checkColumnName(columnName);
@@ -4728,7 +4728,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet topBy(final Collection<String> columnNames, final int n, final Comparator<? super Object[]> cmp) {
         if (n < 1) {
-            throw new IllegalArgumentException("'n' can not be less than 1");
+            throw new IllegalArgumentException("'n' cannot be less than 1");
         }
 
         final int[] sortByColumnIndexes = checkColumnNames(columnNames);
@@ -4765,7 +4765,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet topBy(final Collection<String> columnNames, final int n, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
         if (n < 1) {
-            throw new IllegalArgumentException("'n' can not be less than 1");
+            throw new IllegalArgumentException("'n' cannot be less than 1");
         }
 
         final int[] columnIndexes = checkColumnNames(columnNames);
@@ -6003,7 +6003,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private List<String> getRightColumnNames(final DataSet right) { // NOSONAR
         // final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
 
-        // How to handle join columns with same name for full join.
+        // How to handle join columns with the same name for full join.
         //    if (onColumnEntry.getKey().equals(onColumnEntry.getValue())) {
         //        rightColumnNames.remove(onColumnEntry.getValue());
         //    }
@@ -6023,7 +6023,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         "The specified column: " + entry.getValue() + " is not included in the right DataSet: " + right.columnNameList());
             }
 
-            // How to handle join columns with same name for full join.
+            // How to handle join columns with the same name for full join.
             //    if (entry.getKey().equals(entry.getValue())) {
             //        rightColumnNames.remove(entry.getValue());
             //    }
@@ -6398,7 +6398,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         "The specified column: " + entry.getValue() + " is not included in the right DataSet: " + right.columnNameList());
             }
 
-            // How to handle join columns with same name for full join.
+            // How to handle join columns with the same name for full join.
             //    if (entry.getKey().equals(entry.getValue())) {
             //        leftColumnNames.remove(entry.getKey());
             //    }
@@ -6427,7 +6427,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private List<String> getLeftColumnNamesForRightJoin() { // NOSONAR
         // final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
 
-        // How to handle join columns with same name for full join.
+        // How to handle join columns with the same name for full join.
         //    if (this.containsColumn(joinColumnNameOnRight)) {
         //        leftColumnNames.remove(joinColumnNameOnRight);
         //    }
