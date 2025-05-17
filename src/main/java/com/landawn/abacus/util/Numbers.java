@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -58,6 +59,9 @@ import com.landawn.abacus.type.Type;
  * <br />
  *
  * @see DecimalFormat
+ * @see com.landawn.abacus.util.IEEE754rUtil
+ * @see com.landawn.abacus.util.Strings
+ * @see com.landawn.abacus.util.RegExUtil
  */
 @SuppressWarnings({ "java:S1192", "java:S2148" })
 public final class Numbers {
@@ -991,6 +995,150 @@ public final class Numbers {
         } else {
             return df.format(x);
         }
+    }
+
+    /**
+     * Extracts the first integer value from the given string. If no integer value is found, it returns 0. 
+     *
+     * @param str The string to extract the integer value from.
+     * @return The extracted integer value, or 0 if no integer value is found.
+     * @see #extractFirstInt(String, int)
+     * @see #extractFirstLong(String)
+     * @see #extractFirstDouble(String)
+     * @see #extractFirstSciDouble(String)
+     * @see Strings#extractFirstInteger(String)
+     */
+    public static int extractFirstInt(final String str) {
+        return extractFirstInt(str, 0);
+    }
+
+    /**
+     * Extracts the first integer value from the given string. If no integer value is found, it returns the specified default value.
+     *
+     * @param str The string to extract the integer value from.
+     * @param defaultValue The default value to return if no integer value is found.
+     * @return The extracted integer value, or the specified default value if no integer value is found.
+     * @see #extractFirstInt(String)
+     * @see #extractFirstLong(String)
+     * @see Strings#extractFirstInteger(String)
+     */
+    public static int extractFirstInt(final String str, final int defaultValue) {
+        if (Strings.isEmpty(str)) {
+            return defaultValue;
+        }
+
+        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Extracts the first long value from the given string. If no long value is found, it returns 0L.
+     *
+     * @param str The string to extract the long value from.
+     * @return The extracted long value, or 0L if no long value is found.
+     * @see #extractFirstLong(String, long) 
+     * @see Strings#extractFirstInteger(String) 
+     */
+    public static long extractFirstLong(final String str) {
+        return extractFirstLong(str, 0L);
+    }
+
+    /**
+     * Extracts the first long value from the given string. If no long value is found, it returns the specified default value.
+     *
+     * @param str The string to extract the long value from.
+     * @param defaultValue The default value to return if no long value is found.
+     * @return The extracted long value, or the specified default value if no long value is found.
+     * @see #extractFirstLong(String)
+     * @see Strings#extractFirstInteger(String)
+     */
+    public static long extractFirstLong(final String str, final long defaultValue) {
+        if (Strings.isEmpty(str)) {
+            return defaultValue;
+        }
+
+        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return Long.parseLong(matcher.group(1));
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Extracts the first double value from the given string. If no double value is found, it returns 0.0.
+     *
+     * @param str The string to extract the double value from.
+     * @return The extracted double value, or 0.0 if no double value is found.
+     * @see #extractFirstDouble(String, double)
+     * @see #extractFirstSciDouble(String)
+     * @see Numbers#exeractDouble(String)
+     */
+    public static double extractFirstDouble(final String str) {
+        return extractFirstDouble(str, 0.0);
+    }
+
+    /**
+     * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
+     *
+     * @param str The string to extract the double value from.
+     * @param defaultValue The default value to return if no double value is found.
+     * @return The extracted double value, or the specified default value if no double value is found.
+     * @see #extractFirstDouble(String)
+     * @see #extractFirstSciDouble(String)
+     * @see Strings#extractFirstDouble(String)
+     */
+    public static double extractFirstDouble(final String str, final double defaultValue) {
+        if (Strings.isEmpty(str)) {
+            return defaultValue;
+        }
+
+        final Matcher matcher = RegExUtil.NUMBER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group(1));
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Extracts the first double value from the given string using scientific notation. If no double value is found, it returns 0.0.
+     *
+     * @param str The string to extract the double value from.
+     * @return The extracted double value, or 0.0 if no double value is found.
+     * @see #extractFirstSciDouble(String, double)
+     * @see #extractFirstDouble(String)
+     * @see #extractSiciDouble(String, double)
+     * @see Strings#extractFirstDouble(String) 
+     */
+    public static double extractFirstSciDouble(final String str) {
+        return extractFirstSciDouble(str, 0.0);
+    }
+
+    /**
+     * Extracts the first double value from the given string using scientific notation. If no double value is found, it returns the specified default value.
+     *
+     * @param str The string to extract the double value from.
+     * @param defaultValue The default value to return if no double value is found.
+     * @return The extracted double value, or the specified default value if no double value is found.
+     * @see #extractFirstSciDouble(String)
+     * @see Strings#extractFirstSciNumber(String)
+     */
+    public static double extractFirstSciDouble(final String str, final double defaultValue) {
+        if (Strings.isEmpty(str)) {
+            return defaultValue;
+        }
+
+        final Matcher matcher = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group(1));
+        }
+
+        return defaultValue;
     }
 
     /**
@@ -4129,23 +4277,6 @@ public final class Numbers {
                     }
             }
         }
-    }
-
-    /**
-     * Returns the {@code int} value that is equal to {@code value}, if possible.
-     *
-     * @param value any value in the range of the {@code int} type
-     * @return
-     * @throws IllegalArgumentException if {@code value} is greater than {@link Integer#MAX_VALUE} or
-     *     less than {@link Integer#MIN_VALUE}
-     */
-    public static int castExact(final long value) {
-        final int result = (int) value;
-        if (result != value) {
-            // don't use checkArgument here, to avoid boxing
-            throw new IllegalArgumentException("Out of range: " + value);
-        }
-        return result;
     }
 
     /**

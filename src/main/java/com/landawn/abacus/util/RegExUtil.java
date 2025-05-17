@@ -38,38 +38,63 @@ import com.landawn.abacus.util.function.IntBiFunction;
  */
 public final class RegExUtil {
 
-    public static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$");
+    public static final Pattern INTEGER_FINDER = Pattern.compile("([+-]?\\d+)");
+    public static final Pattern NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?)");
+    public static final Pattern SCIENTIFIC_NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?)");
+
     // https://www.baeldung.com/java-email-validation-regex
     // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
     // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
-    public static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
+    public static final Pattern EMAIL_ADDRESS_RFC_5322_FINDER = Pattern.compile(
             "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+
+    public static final Pattern PHONE_NUMBER_FINDER = Pattern.compile("\\+?[\\d\\s]{3,}");
+    public static final Pattern PHONE_NUMBER_WITH_CODE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+
+    public static final Pattern BANK_CARD_NUMBER_FINDER = Pattern.compile("(?:\\d{4}[-\\s]?){3}\\d{4}");
+
     // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    public static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
-    public static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
-    // https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers
-    public static final Pattern INTEGER_PATTERN = Pattern.compile("^-?\\d+$");
-    public static final Pattern POSITIVE_INTEGER_PATTERN = Pattern.compile("^\\d+$");
-    public static final Pattern NEGATIVE_INTEGER_PATTERN = Pattern.compile("^-\\d+$");
-    public static final Pattern POSITIVE_NUMBER_PATTERN = Pattern.compile("^\\d*\\.?\\d+$");
-    public static final Pattern NEGATIVE_NUMBER_PATTERN = Pattern.compile("^-\\d*\\.?\\d+$");
-    public static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d*\\.?\\d+$");
-    public static final Pattern PHONE_NUMBER_PATTERN = Pattern.compile("^\\+?[\\d\\s]{3,}$");
-    public static final Pattern PHONE_NUMBER_WITH_CODE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern URL_FINDER = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+    public static final Pattern HTTP_URL_FINDER = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+
     /**
      * Pattern for alphanumeric string without space.
      */
-    public static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern ALPHANUMERIC_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
     /**
      * Pattern for alphanumeric string with space.
      */
-    public static final Pattern ALPHANUMERIC_WITH_SPACE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern ALPHANUMERIC_SPACE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+
+    // https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers
+    public static final Pattern JAVA_IDENTIFIER_MATCHER = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$");
+    public static final Pattern INTEGER_MATCHER = Pattern.compile("^-?\\d+$");
+    public static final Pattern POSITIVE_INTEGER_MATCHER = Pattern.compile("^\\d+$");
+    public static final Pattern NEGATIVE_INTEGER_MATCHER = Pattern.compile("^-\\d+$");
+    public static final Pattern NUMBER_MATCHER = Pattern.compile("^-?\\d*\\.?\\d+$");
+    public static final Pattern POSITIVE_NUMBER_MATCHER = Pattern.compile("^\\d*\\.?\\d+$");
+    public static final Pattern NEGATIVE_NUMBER_MATCHER = Pattern.compile("^-\\d*\\.?\\d+$");
+    public static final Pattern SCIENTIFIC_NUMBER_MATCHER = Pattern.compile("(^-\\d+(\\.\\d+)?([eE][+-]?\\d+)?)$");
+
+    public static final Pattern PHONE_NUMBER_MATCHER = Pattern.compile("^\\+?[\\d\\s]{3,}$");
+    public static final Pattern PHONE_NUMBER_WITH_CODE_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+
+    public static final Pattern BANK_CARD_NUMBER_MATCHER = Pattern.compile("^(?:\\d{4}[-\\s]?){3}\\d{4}$");
+
+    public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile(
+            "^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])$");
+
+    public static final Pattern URL_MATCHER = Pattern.compile("^[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$");
+    public static final Pattern HTTP_URL_MATCHER = Pattern.compile("^[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$");
+
     /**
      * Pattern for alphanumeric string without space.
-     * @deprecated replaced by {@link #ALPHANUMERIC_PATTERN}
      */
-    @Deprecated
-    public static final Pattern ALPHANUMERIC_WITHOUT_SPACE_PATTERN = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern ALPHANUMERIC_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    /**
+     * Pattern for alphanumeric string with space.
+     */
+    public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
 
     private static final String PATTERNS_STR = "pattern";
 
@@ -723,5 +748,37 @@ public final class RegExUtil {
         }
 
         return pattern.matcher(source).results().mapToInt(MatchResult::start);
+    }
+
+    /**
+     * Checks if the specified string matches the given regular expression.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param regex the regular expression to match
+     * @return {@code true} if the string matches the regex, {@code false} otherwise
+     * @see Pattern#matches(String, CharSequence)
+     */
+    public static boolean matches(final String source, final String regex) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return false;
+        }
+
+        return Pattern.matches(regex, source);
+    }
+
+    /**
+     * Checks if the specified string contains a substring that matches the given regular expression.
+     *
+     * @param source the string to be checked, may be {@code null} or empty
+     * @param regex the regular expression to find
+     * @return {@code true} if the string contains a match, {@code false} otherwise
+     * @see Pattern#find(CharSequence)
+     */
+    public static boolean find(final String source, final String regex) {
+        if (Strings.isEmpty(source) || Strings.isEmpty(regex)) {
+            return false;
+        }
+
+        return Pattern.compile(regex).matcher(source).find();
     }
 }

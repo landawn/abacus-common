@@ -253,6 +253,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         if (N.isEmpty(a)) {
             return empty();
         } else {
+            // return new ImmutableList<>(List.of(a), true); // Doesn't support null element
             return new ImmutableList<>(Array.asList(a), false);
         }
     }

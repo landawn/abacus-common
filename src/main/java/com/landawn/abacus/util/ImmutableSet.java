@@ -245,6 +245,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         if (N.isEmpty(a)) {
             return empty();
         } else {
+            // return new ImmutableSet<>(Set.of(a), true); // Doesn't support null element
             return new ImmutableSet<>(N.asLinkedHashSet(a), false);
         }
     }

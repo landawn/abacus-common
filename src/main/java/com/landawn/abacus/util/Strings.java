@@ -84,6 +84,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.AppendableWriter
  * @see com.landawn.abacus.util.StringWriter
  * @see com.landawn.abacus.util.RegExUtil
+ * @see com.landawn.abacus.util.IEEE754rUtil
  */
 @SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
 public abstract sealed class Strings permits Strings.StringUtil {
@@ -173,6 +174,31 @@ public abstract sealed class Strings permits Strings.StringUtil {
     static final String BACKSLASH_ASTERISK = "*";
 
     static final String STR_FOR_EMPTY_ARRAY = "[]";
+
+    // java.lang.ExceptionInInitializerError: Exception java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.util.WD [in thread "main"]
+    //    static final Set<String> CASE_INSENSITIVE_KEYWORDS = Set.of(" ", ", ", ";", ":", ":", ":", "=", "|", "&", "@", "$", "*", "+", "-", "_", "#", "!", "<", ">",
+    //            "~", "^", "%", "\"", "'", "`", "{", "}", "[", "]", "(", ")", "?", "/", "\\", ".", ",", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*");
+
+    //    static final Set<String> CASE_INSENSITIVE_KEYWORDS;
+    //
+    //    static {
+    //        final String[] strs = java.util.stream.Stream.of(WD.class.getDeclaredFields())
+    //                .filter(it -> Modifier.isPublic(it.getModifiers()) && Modifier.isStatic(it.getModifiers()) && Modifier.isFinal(it.getModifiers())
+    //                        && it.getType() == String.class)
+    //                .map(it -> {
+    //                    try {
+    //                        return (String) it.get(null);
+    //                    } catch (IllegalArgumentException | IllegalAccessException e) {
+    //                        throw new RuntimeException(e);
+    //                    }
+    //                })
+    //                .filter(it -> it.length() <= 3 && it.toUpperCase().equals(it.toLowerCase()))
+    //                .toArray(String[]::new);
+    //
+    //        CASE_INSENSITIVE_KEYWORDS = Set.of(strs);
+    //
+    //        N.println(CASE_INSENSITIVE_KEYWORDS);
+    //    }
 
     /**
      * A regex pattern for recognizing blocks of whitespace characters.
@@ -289,7 +315,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return RegExUtil.JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
+        return RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher(cs).matches();
     }
 
     /**
@@ -309,7 +335,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
+        return RegExUtil.EMAIL_ADDRESS_RFC_5322_FINDER.matcher(cs).matches();
     }
 
     /**
@@ -326,7 +352,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return RegExUtil.URL_PATTERN.matcher(cs).matches();
+        return RegExUtil.URL_FINDER.matcher(cs).matches();
     }
 
     /**
@@ -344,7 +370,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        return RegExUtil.HTTP_URL_PATTERN.matcher(cs).matches();
+        return RegExUtil.HTTP_URL_FINDER.matcher(cs).matches();
     }
 
     /**
@@ -6830,6 +6856,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.INDEX_NOT_FOUND;
         }
 
+        // performance optimization
+        if (valueToFind.length() <= 3 && valueToFind.toUpperCase().equals(valueToFind.toLowerCase())) {
+            return str.indexOf(valueToFind, fromIndex);
+        }
+
         for (int i = fromIndex, len = str.length(), substrLen = valueToFind.length(), end = len - substrLen + 1; i < end; i++) {
             if (str.regionMatches(true, i, valueToFind, 0, substrLen)) {
                 return i;
@@ -9126,6 +9157,33 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, ignoring case considerations. Otherwise return {@code null} String.
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringAfterIgnoreCase(final String str, final String delimiterOfExclusiveBeginIndex) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
+            return str;
+        }
+
+        final int index = indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex);
+
+        if (index < 0) {
+            return null;
+        }
+
+        return str.substring(index + delimiterOfExclusiveBeginIndex.length());
+    }
+
+    /**
      * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
      *
      * @param str
@@ -9193,13 +9251,42 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
+        final int lengthOfDelimiter = delimiterOfExclusiveBeginIndex.length();
 
-        if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - lengthOfDelimiter);
+
+        if (index < 0 || index + lengthOfDelimiter > exclusiveEndIndex) {
             return null;
         }
 
-        return str.substring(index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex);
+        return str.substring(index + lengthOfDelimiter, exclusiveEndIndex);
+    }
+
+    /**
+     * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, ignoring case considerations. Otherwise return {@code null} String.
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringAfterLastIgnoreCase(final String str, final String delimiterOfExclusiveBeginIndex) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveBeginIndex.isEmpty()) {
+            return EMPTY;
+        }
+
+        final int index = lastIndexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex);
+
+        if (index < 0) {
+            return null;
+        }
+
+        return str.substring(index + delimiterOfExclusiveBeginIndex.length());
     }
 
     /**
@@ -9326,13 +9413,40 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
 
-        if (index < 0) {
+        if (endIndex < 0) {
             return null;
         }
 
-        return str.substring(inclusiveBeginIndex, index);
+        return str.substring(inclusiveBeginIndex, endIndex);
+    }
+
+    /**
+     * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, ignoring case considerations. Otherwise return {@code null} String.
+     *
+     * @param str
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringBeforeIgnoreCase(final String str, final String delimiterOfExclusiveEndIndex) {
+        if (str == null || delimiterOfExclusiveEndIndex == null) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
+            return EMPTY;
+        }
+
+        final int endIndex = indexOfIgnoreCase(str, delimiterOfExclusiveEndIndex);
+
+        if (endIndex < 0) {
+            return null;
+        }
+
+        return str.substring(0, endIndex);
     }
 
     /**
@@ -9403,13 +9517,40 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+        final int endIndex = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
-        if (index < 0 || index < inclusiveBeginIndex) {
+        if (endIndex < 0 || endIndex < inclusiveBeginIndex) {
             return null;
         }
 
-        return str.substring(inclusiveBeginIndex, index);
+        return str.substring(inclusiveBeginIndex, endIndex);
+    }
+
+    /**
+     * Returns the substring before last {@code delimiterOfExclusiveBeginIndex} if it exists, ignoring case considerations. Otherwise return {@code null} String.
+     *
+     * @param str
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringBeforeLastIgnoreCase(final String str, final String delimiterOfExclusiveEndIndex) {
+        if (str == null || delimiterOfExclusiveEndIndex == null) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveEndIndex.isEmpty()) {
+            return str;
+        }
+
+        final int index = lastIndexOfIgnoreCase(str, delimiterOfExclusiveEndIndex);
+
+        if (index < 0) {
+            return null;
+        }
+
+        return str.substring(0, index);
     }
 
     /**
@@ -9469,8 +9610,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} which means it doesn't exist if {@code str == {@code null} || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()},
-     * Otherwise returns: {@code str.substring(exclusiveBeginIndex + 1, min(exclusiveEndIndex, str.length()))}.
+     * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code exclusiveEndIndex}.
+     * If {@code str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9488,6 +9629,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code delimiterOfExclusiveEndIndex}.
+     * If {@code str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9505,6 +9648,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code delimiterOfExclusiveEndIndex}.
+     * If {@code str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9522,6 +9667,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the substring between the specified {@code delimiterOfExclusiveBeginIndex} and {@code exclusiveEndIndex}.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
@@ -9539,6 +9685,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the substring between the specified {@code delimiterOfExclusiveBeginIndex} and {@code exclusiveEndIndex}.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
@@ -9568,6 +9715,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns substring between the specified {@code delimiterOfExclusiveBeginIndex} and {@code delimiterOfExclusiveEndIndex}.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
@@ -9603,7 +9751,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return str.substring(startIndex, endIndex);
     }
 
-    /**
+    /*
+     * Returns a substring from the given string that is between the two specified delimiters.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return {@code null}.
      *
      * @param str
      * @param tag
@@ -9611,8 +9762,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, String, String)
      * @see #substringBetween(String, int, int)
      */
-    public static String substringBetween(final String str, final String tag) {
-        return substringBetween(str, tag, tag);
+    @MayReturnNull
+    public static String substringBetween(final String str, final String delimiter) {
+        return substringBetween(str, delimiter, delimiter);
     }
 
     /**
@@ -9625,17 +9777,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiterOfExclusiveEndIndex The delimiter before which the substring ends.
      * @return The substring between the two delimiters. Returns {@code null} if the delimiters are not found.
      */
+    @MayReturnNull
     public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         return substringBetween(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
     }
 
     /**
+     * Returns a substring from the given string that is between the two specified delimiters.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return {@code null}.
      *
      * @param str
      * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return The substring between the two delimiters. Returns {@code null} if the delimiters are not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -9654,6 +9810,76 @@ public abstract sealed class Strings permits Strings.StringUtil {
         startIndex += delimiterOfExclusiveBeginIndex.length();
 
         final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
+            return null;
+        }
+
+        return str.substring(startIndex, endIndex);
+    }
+
+    /**
+     * Returns a substring from the given string that is between the two specified delimiters, ignoring case considerations.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return {@code null}.
+     *
+     * @param str
+     * @param delimiter
+     * @return The substring between the two delimiters. Returns {@code null} if the delimiters are not found.
+     * @see #substringBetweenIgnoreCaes(String, String, String) 
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringBetweenIgnoreCaes(final String str, final String delimiter) {
+        return substringBetweenIgnoreCaes(str, delimiter, delimiter);
+    }
+
+    /**
+     * Returns a substring from the given string that is between the two specified delimiters, ignoring case considerations.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return {@code null}.
+     *
+     * @param str The string from which to extract the substring.
+     * @param delimiterOfExclusiveBeginIndex The delimiter after which the substring starts.
+     * @param delimiterOfExclusiveEndIndex The delimiter before which the substring ends.
+     * @return The substring between the two delimiters. Returns {@code null} if the delimiters are not found.
+     * @see #substringBetweenIgnoreCaes(String, int, String, String)
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringBetweenIgnoreCaes(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
+        return substringBetweenIgnoreCaes(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    }
+
+    /**
+     * Returns a substring from the given string that is between the two specified delimiters, ignoring case considerations.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return {@code null}.
+     *
+     * @param str
+     * @param fromIndex start index for {@code delimiterOfExclusiveBeginIndex}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @return The substring between the two delimiters. Returns {@code null} if the delimiters are not found.
+     */
+    @Beta
+    @MayReturnNull
+    public static String substringBetweenIgnoreCaes(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
+            return null;
+        }
+
+        int startIndex = fromIndex == 0 ? indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex)
+                : indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex, fromIndex);
+
+        if (startIndex < 0) {
+            return null;
+        }
+
+        startIndex += delimiterOfExclusiveBeginIndex.length();
+
+        final int endIndex = indexOfIgnoreCase(str, delimiterOfExclusiveEndIndex, startIndex);
 
         if (endIndex < 0) {
             return null;
@@ -13769,7 +13995,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_FINDER.matcher(cs);
 
         // ^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
         // Matcher matcher = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(str);
@@ -13797,7 +14023,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return new ArrayList<>();
         }
 
-        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
+        final Matcher matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_FINDER.matcher(cs);
 
         final List<String> result = new ArrayList<>();
 
@@ -13925,6 +14151,124 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String formatToPercentage(final double value, final int scale) {
         return Numbers.round(value * 100, scale) + "%";
+    }
+
+    /**
+     * Extracts the first occurrence of an integer from the given string.
+     *
+     * @param str The string to extract the integer from. It can be {@code null} or empty.
+     * @return The extracted integer as a string, or an empty string {@code ""} if no integer is found.
+     * @see Numbers#extractFirstInt(String)
+     * @see Numbers#extractFirstLong(String)
+     * @see #replaceFirstInteger(String, String)
+     */
+    public static String extractFirstInteger(final String str) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return Strings.EMPTY;
+    }
+
+    /**
+     * Extracts the first occurrence of a double from the given string.
+     *
+     * @param str The string to extract the double from. It can be {@code null} or empty.
+     * @return The extracted double as a string, or an empty string {@code ""} if no double is found.
+     * @see #extractFirstInteger(String)
+     * @see #extractFirstSciNumber(String)
+     * @see Numbers#extractFirstDouble(String)
+     * @see #replaceFirstDouble(String, String)
+     */
+    public static String extractFirstDouble(final String str) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        final Matcher matcher = RegExUtil.NUMBER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return Strings.EMPTY;
+    }
+
+    /**
+     * Extracts the first occurrence of a scientific number from the given string.
+     *
+     * @param str The string to extract the scientific number from. It can be {@code null} or empty.
+     * @return The extracted scientific number as a string, or an empty string {@code ""} if no scientific number is found.
+     * @see #extractFirstInteger(String)
+     * @see #extractFirstDouble(String)
+     * @see Numbers#extractFirstSciDouble(String)
+     * @see Numbers#extractFirstSciDouble(String, double)
+     * @see #replaceFirstSciNumber(String, String)
+     * 
+     */
+    public static String extractFirstSciNumber(final String str) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        final Matcher matcher = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return Strings.EMPTY;
+    }
+
+    /**
+     * Replaces the first occurrences of integer in the given string with the specified replacement string.
+     *
+     * @param str The string to be modified. It can be {@code null} or empty.
+     * @param replacement The string to replace the integer with.
+     * @return The modified string with the first integer replaced by the specified replacement string.
+     * @see #extractFirstInteger(String)
+     */
+    public static String replaceFirstInteger(final String str, final String replacement) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        return RegExUtil.INTEGER_FINDER.matcher(str).replaceFirst(replacement);
+    }
+
+    /**
+     * Replaces the first occurrences of double in the given string with the specified replacement string.
+     *
+     * @param str The string to be modified. It can be {@code null} or empty.
+     * @param replacement The string to replace the double with.
+     * @return The modified string with the first double replaced by the specified replacement string.
+     * @see #extractFirstDouble(String)
+     */
+    public static String replaceFirstDouble(final String str, final String replacement) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        return RegExUtil.NUMBER_FINDER.matcher(str).replaceFirst(replacement);
+    }
+
+    /**
+     * Replaces the first occurrences of scientific number in the given string with the specified replacement string.
+     *
+     * @param str The string to be modified. It can be {@code null} or empty.
+     * @param replacement The string to replace the scientific number with.
+     * @return The modified string with the first scientific number replaced by the specified replacement string.
+     * @see #extractFirstSciNumber(String)
+     */
+    public static String replaceFirstSciNumber(final String str, final String replacement) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY;
+        }
+
+        return RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str).replaceFirst(replacement);
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
