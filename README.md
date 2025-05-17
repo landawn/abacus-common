@@ -196,7 +196,7 @@ compile 'com.landawn:abacus-common:5.8.5'
 
 
 ### Functional Programming:
-(It's very important to learn Lambdas and Stream APIs in Java 8 to get the best user experiences with the APIs provided in abacus-common)
+(It’s essential to learn Lambdas and Stream APIs introduced in Java 8 to fully leverage the capabilities and achieve the best experience with the APIs offered by abacus-common)
 
 [What's New in Java 8](https://leanpub.com/whatsnewinjava8/read)
 
