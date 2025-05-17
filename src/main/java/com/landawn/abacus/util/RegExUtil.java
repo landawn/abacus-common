@@ -38,20 +38,143 @@ import com.landawn.abacus.util.function.IntBiFunction;
  */
 public final class RegExUtil {
 
+    /**
+     * Pattern for a Java identifier.
+     * <p>
+     * A Java identifier is a letter, currency character, or connecting punctuation character followed by
+     * zero or more Java letters, currency characters, connecting punctuation characters, digits,
+     * or one of the following special characters: {@code $} or {@code _}.
+     * </p>
+     */
+    public static final Pattern JAVA_IDENTIFIER_FINDER = Pattern.compile("([a-zA-Z_$][a-zA-Z\\d_$]*)");
+
+    /**
+     * A regular expression {@link Pattern} that matches integers within a string.
+     * <p>
+     * This pattern captures sequences of digits that may optionally be prefixed
+     * with a plus or minus sign. It is useful for extracting signed or unsigned
+     * integer values from arbitrary text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code [+-]?} — matches an optional '+' or '-' sign</li>
+     *   <li>{@code \\d+} — matches one or more digits</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "42"}</li>
+     *   <li>{@code "-7"}</li>
+     *   <li>{@code "+1234"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern INTEGER_FINDER = Pattern.compile("([+-]?\\d+)");
+    public static final Pattern POSITIVE_INTEGER_FINDER = Pattern.compile("\\d+");
+    public static final Pattern NEGATIVE_INTEGER_FINDER = Pattern.compile("-\\d+");
+
+    /**
+     * A regular expression {@link Pattern} that matches integer and decimal numbers in a string.
+     * <p>
+     * This pattern captures numeric values that may include:
+     * <ul>
+     *   <li>An optional leading '+' or '-' sign</li>
+     *   <li>An integer part (one or more digits)</li>
+     *   <li>An optional fractional part, starting with a dot and followed by one or more digits</li>
+     * </ul>
+     * It can be used to extract signed or unsigned integers and floating-point numbers from text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code [+-]?} — optional sign</li>
+     *   <li>{@code \\d+} — one or more digits (the integer part)</li>
+     *   <li>{@code (\\.\\d+)?} — optional decimal part (a dot followed by one or more digits)</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "42"}</li>
+     *   <li>{@code "-3.14"}</li>
+     *   <li>{@code "+0.99"}</li>
+     *   <li>{@code "100."} (not matched)</li>
+     *   <li>{@code ".25"} (not matched)</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> This pattern does not match numbers like {@code .25} or {@code 100.}
+     * because a digit before the dot is required and the fractional part must have at least one digit after the dot.</p>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?)");
+    public static final Pattern POSITIVE_NUMBER_FINDER = Pattern.compile("\\d*\\.?\\d+");
+    public static final Pattern NEGATIVE_NUMBER_FINDER = Pattern.compile("-\\d*\\.?\\d+");
+
+    /**
+     * A regular expression {@link Pattern} that matches numbers in standard or scientific notation.
+     * <p>
+     * This pattern supports:
+     * <ul>
+     *   <li>Optional leading '+' or '-' sign</li>
+     *   <li>An integer or decimal part (e.g., {@code 123}, {@code 3.14})</li>
+     *   <li>An optional exponent part with 'e' or 'E', followed by an optional sign and digits (e.g., {@code e+10}, {@code E-5})</li>
+     * </ul>
+     * It can be used to extract integers, floating-point numbers, and scientific notation numbers from text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code [+-]?} — optional sign</li>
+     *   <li>{@code \\d+} — one or more digits (integer part)</li>
+     *   <li>{@code (\\.\\d+)?} — optional decimal part</li>
+     *   <li>{@code ([eE][+-]?\\d+)?} — optional exponent part (e.g., {@code e10}, {@code E-3})</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "42"}</li>
+     *   <li>{@code "-3.14"}</li>
+     *   <li>{@code "+6.022e23"}</li>
+     *   <li>{@code "1E-9"}</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> This pattern requires at least one digit before the decimal point, 
+     * so values like {@code .5} are not matched. It also allows optional exponent notation, but only 
+     * when preceded by a valid base number.</p>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern SCIENTIFIC_NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?)");
+
+    public static final Pattern PHONE_NUMBER_FINDER = Pattern.compile("\\+?[\\d\\s]{3,}");
+    public static final Pattern PHONE_NUMBER_WITH_CODE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+
+    /**
+     * Pattern for date in format yyyy-MM-dd or yyyy/MM/dd or yyyy.MM.dd or yyyy MM dd.
+     * <br /> year is from 1900 to 2099.
+     */
+    public static final Pattern DATE_FINDER = Pattern.compile("(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])");
+    /**
+     * Pattern for time in format HH:mm:ss.
+     * <br /> hour is from 00 to 23, minute and second are from 00 to 59.
+     */
+    public static final Pattern TIME_FINDER = Pattern.compile("([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)");
+    /**
+     * Pattern for date and time in format yyyy-MM-dd HH:mm:ss or yyyy/MM/dd HH:mm:ss or yyyy.MM.dd HH:mm:ss or yyyy MM dd HH:mm:ss.
+     * <br /> year is from 1900 to 2099, hour is from 00 to 23, minute and second are from 00 to 59.
+     */
+    public static final Pattern DATE_TIME_FINDER = Pattern
+            .compile("(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01]) ([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)");
+
+    public static final Pattern BANK_CARD_NUMBER_FINDER = Pattern.compile("(?:\\d{4}[-\\s]?){3}\\d{4}");
 
     // https://www.baeldung.com/java-email-validation-regex
     // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
     // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
     public static final Pattern EMAIL_ADDRESS_RFC_5322_FINDER = Pattern.compile(
             "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
-
-    public static final Pattern PHONE_NUMBER_FINDER = Pattern.compile("\\+?[\\d\\s]{3,}");
-    public static final Pattern PHONE_NUMBER_WITH_CODE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
-
-    public static final Pattern BANK_CARD_NUMBER_FINDER = Pattern.compile("(?:\\d{4}[-\\s]?){3}\\d{4}");
 
     // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
     public static final Pattern URL_FINDER = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
@@ -65,36 +188,39 @@ public final class RegExUtil {
      * Pattern for alphanumeric string with space.
      */
     public static final Pattern ALPHANUMERIC_SPACE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+    /**
+     * Pattern for duplicate words.
+     */
+    public static final Pattern DUPLICATES_FINDER = Pattern.compile("(\\b\\w+\\b)(?=.*\\b\\1\\b)");
 
     // https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers
-    public static final Pattern JAVA_IDENTIFIER_MATCHER = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$");
-    public static final Pattern INTEGER_MATCHER = Pattern.compile("^-?\\d+$");
-    public static final Pattern POSITIVE_INTEGER_MATCHER = Pattern.compile("^\\d+$");
-    public static final Pattern NEGATIVE_INTEGER_MATCHER = Pattern.compile("^-\\d+$");
-    public static final Pattern NUMBER_MATCHER = Pattern.compile("^-?\\d*\\.?\\d+$");
-    public static final Pattern POSITIVE_NUMBER_MATCHER = Pattern.compile("^\\d*\\.?\\d+$");
-    public static final Pattern NEGATIVE_NUMBER_MATCHER = Pattern.compile("^-\\d*\\.?\\d+$");
-    public static final Pattern SCIENTIFIC_NUMBER_MATCHER = Pattern.compile("(^-\\d+(\\.\\d+)?([eE][+-]?\\d+)?)$");
+    public static final Pattern JAVA_IDENTIFIER_MATCHER = Pattern.compile("^" + JAVA_IDENTIFIER_FINDER.pattern() + "$");
+    public static final Pattern INTEGER_MATCHER = Pattern.compile("^" + INTEGER_FINDER.pattern() + "$");
+    public static final Pattern POSITIVE_INTEGER_MATCHER = Pattern.compile("^" + POSITIVE_INTEGER_FINDER.pattern() + "$");
+    public static final Pattern NEGATIVE_INTEGER_MATCHER = Pattern.compile("^" + NEGATIVE_INTEGER_FINDER.pattern() + "$");
+    public static final Pattern NUMBER_MATCHER = Pattern.compile("^" + NUMBER_FINDER.pattern() + "$");
+    public static final Pattern POSITIVE_NUMBER_MATCHER = Pattern.compile("^" + POSITIVE_NUMBER_FINDER.pattern() + "$");
+    public static final Pattern NEGATIVE_NUMBER_MATCHER = Pattern.compile("^" + NEGATIVE_NUMBER_FINDER.pattern() + "$");
+    public static final Pattern SCIENTIFIC_NUMBER_MATCHER = Pattern.compile("^" + SCIENTIFIC_NUMBER_FINDER.pattern() + "$");
 
-    public static final Pattern PHONE_NUMBER_MATCHER = Pattern.compile("^\\+?[\\d\\s]{3,}$");
-    public static final Pattern PHONE_NUMBER_WITH_CODE_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern PHONE_NUMBER_MATCHER = Pattern.compile("^" + PHONE_NUMBER_FINDER.pattern() + "$");
+    public static final Pattern PHONE_NUMBER_WITH_CODE_MATCHER = Pattern.compile("^" + PHONE_NUMBER_WITH_CODE_FINDER.pattern() + "$");
 
-    public static final Pattern BANK_CARD_NUMBER_MATCHER = Pattern.compile("^(?:\\d{4}[-\\s]?){3}\\d{4}$");
+    public static final Pattern DATE_MATCHER = Pattern.compile("^" + DATE_FINDER.pattern() + "$");
+    public static final Pattern TIME_MATCHER = Pattern.compile("^" + TIME_FINDER.pattern() + "$");
+    public static final Pattern DATE_TIME_MATCHER = Pattern.compile("^" + DATE_TIME_FINDER.pattern() + "$");
 
-    public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile(
-            "^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])$");
+    public static final Pattern BANK_CARD_NUMBER_MATCHER = Pattern.compile("^" + BANK_CARD_NUMBER_FINDER.pattern() + "$");
 
-    public static final Pattern URL_MATCHER = Pattern.compile("^[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$");
-    public static final Pattern HTTP_URL_MATCHER = Pattern.compile("^[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$");
+    public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile("^" + EMAIL_ADDRESS_RFC_5322_FINDER.pattern() + "$");
 
-    /**
-     * Pattern for alphanumeric string without space.
-     */
-    public static final Pattern ALPHANUMERIC_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
-    /**
-     * Pattern for alphanumeric string with space.
-     */
-    public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^\\+?[\\d\\s]+\\(?[\\d\\s]{10,}$");
+    public static final Pattern URL_MATCHER = Pattern.compile("^" + URL_FINDER.pattern() + "$");
+    public static final Pattern HTTP_URL_MATCHER = Pattern.compile("^" + HTTP_URL_FINDER.pattern() + "$");
+
+    public static final Pattern ALPHANUMERIC_MATCHER = Pattern.compile("^" + ALPHANUMERIC_FINDER.pattern() + "$");
+    public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^" + ALPHANUMERIC_SPACE_FINDER.pattern() + "$");
+
+    public static final Pattern DUPLICATES_MATCHER = Pattern.compile("^" + DUPLICATES_FINDER.pattern() + "$");
 
     private static final String PATTERNS_STR = "pattern";
 
