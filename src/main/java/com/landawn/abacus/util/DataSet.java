@@ -2184,20 +2184,27 @@ public interface DataSet {
             throws IllegalArgumentException;
 
     /**
-     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same IDs into a single instance.
-     * <br />
-     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
-     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
-     * Rows with the same IDs are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
-     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
+     * Converts the entire DataSet into a list of instances of the specified bean class,
+     * merging rows that share the same ID properties into a single entity.
+     * <p>
+     * This method is commonly used when exporting selected columns from a DataSet into a list of typed objects (entities),
+     * especially when the DataSet contains multiple rows with the same ID values.
+     * <p>
+     * Each unique combination of ID property values results in one merged instance of the target type. 
+     * The properties of each instance represent a union of the properties from all matching rows.
+     * The order of the resulting list corresponds to the order of unique IDs in the DataSet.
      *
-     * @param <T> The target type of the row.
-     * @param idPropNames The collection of property names that are used as the IDs for merging rows. Rows with the same IDs will be merged into a single instance.
-     * @param selectPropNames The collection of property names to be included in the instance.
-     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
-     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
-     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
-     * @throws IllegalArgumentException if any of the specified ID property names does not exist in the DataSet or {@code idPropNames} is empty, or if any of the specified property names does not exist in the DataSet or {@code selectPropNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
+     * @param <T> the target bean type.
+     * @param idPropNames the collection of property names used to identify and group rows. 
+     *                    Rows with matching values for these properties will be merged into one instance.
+     * @param selectPropNames the collection of property names to include in the resulting instances.
+     * @param prefixAndFieldNameMap an optional mapping of column name prefixes to field names in the bean. 
+     *                               This supports column headers that are prefixed.
+     * @param beanClass the class representing the bean type. Must be a valid JavaBean.
+     * @return a list of merged entities of the specified type, based on the DataSet content.
+     * @throws IllegalArgumentException if {@code idPropNames} is null or empty, if any specified ID or selected property
+     *                                  name does not exist in the DataSet, if the {@code prefixAndFieldNameMap} is invalid,
+     *                                  or if {@code beanClass} is not a supported JavaBean class.
      */
     <T> List<T> toMergedEntities(Collection<String> idPropNames, Collection<String> selectPropNames, Map<String, String> prefixAndFieldNameMap,
             Class<? extends T> beanClass) throws IllegalArgumentException;

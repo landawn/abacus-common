@@ -51,7 +51,6 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
-import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -95,7 +94,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String with value {@code "null"}.
      */
     @Beta
-    public static final String NULL = "null".intern();
+    public static final String NULL = "null";
 
     /**
      *
@@ -106,7 +105,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * The empty String {@code ""}.
      */
-    public static final String EMPTY = "".intern();
+    public static final String EMPTY = "";
 
     //    /**
     //     * The empty String {@code ""}.
@@ -119,7 +118,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A String for a space character: {@code " "}.
      *
      */
-    public static final String SPACE = WD.SPACE.intern();
+    public static final String SPACE = WD.SPACE;
 
     /**
      * A String for linefeed LF ("\n").
@@ -127,7 +126,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
      */
-    public static final String LF = "\n".intern();
+    public static final String LF = "\n";
 
     /**
      * A String for carriage return CR ("\r").
@@ -135,12 +134,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
      */
-    public static final String CR = "\r".intern();
+    public static final String CR = "\r";
 
     /**
      * Carriage return followed by line feed. This is the line ending used on Windows.
      */
-    public static final String CR_LF = "\r\n".intern();
+    public static final String CR_LF = "\r\n";
 
     @Beta
     public static final char CHAR_ZERO = (char) 0;
@@ -154,7 +153,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Field COMMA_SPACE (value is {@code ", "})
      */
-    public static final String COMMA_SPACE = WD.COMMA_SPACE.intern();
+    public static final String COMMA_SPACE = WD.COMMA_SPACE;
 
     /**
      * Value is {@code ", "}
@@ -3036,36 +3035,36 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return replaceIgnoreCase(str, fromIndex, target, replacement, 1);
     }
 
-    /**
-     * Replaces the first occurrence of a target string in the input string with a replacement string, ignoring case considerations.
-     *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations.
-     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
-     * @deprecated Use {@link #replaceFirstIgnoreCase(String, String, String)} instead
-     */
-    @Deprecated
-    public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
-        return replaceFirstIgnoreCase(str, target, replacement);
-    }
-
-    /**
-     * Replaces the first occurrence of a target string in the input string with a replacement string, ignoring case considerations, starting from a specified index.
-     *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
-     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
-     * @deprecated Use {@link #replaceFirstIgnoreCase(String, int, String, String)} instead
-     */
-    @Deprecated
-    public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
-        return replaceFirstIgnoreCase(str, fromIndex, target, replacement);
-    }
+    //    /**
+    //     * Replaces the first occurrence of a target string in the input string with a replacement string, ignoring case considerations.
+    //     *
+    //     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
+    //     * @param target The string to be replaced. It can be {@code null} or empty.
+    //     * @param replacement The string to replace the target string. It can be {@code null}.
+    //     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations.
+    //     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
+    //     * @deprecated Use {@link #replaceFirstIgnoreCase(String, String, String)} instead
+    //     */
+    //    @Deprecated
+    //    public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
+    //        return replaceFirstIgnoreCase(str, target, replacement);
+    //    }
+    //
+    //    /**
+    //     * Replaces the first occurrence of a target string in the input string with a replacement string, ignoring case considerations, starting from a specified index.
+    //     *
+    //     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
+    //     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
+    //     * @param target The string to be replaced. It can be {@code null} or empty.
+    //     * @param replacement The string to replace the target string. It can be {@code null}.
+    //     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
+    //     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
+    //     * @deprecated Use {@link #replaceFirstIgnoreCase(String, int, String, String)} instead
+    //     */
+    //    @Deprecated
+    //    public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
+    //        return replaceFirstIgnoreCase(str, fromIndex, target, replacement);
+    //    }
 
     /**
      * Replaces occurrences of a target string in the input string with a replacement string, ignoring case considerations, starting from a specified index and up to a maximum number of replacements.
@@ -3158,147 +3157,156 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //    public static String replacePattern(final String source, final String regex, final String replacement) {
     //        return Pattern.compile(regex, Pattern.DOTALL).matcher(source).replaceAll(replacement);
     //    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}
-     *
-     * @param source
-     * @param regex
-     * @param replacement
-     * @return
-     * @see Matcher#replaceAll(String)
-     * @see RegExUtil#replaceAll(String, String, String)
-     * @see RegExUtil#replaceAll(String, Pattern, String)
-     */
-    @Beta
-    public static String replaceAllByPattern(final String source, final String regex, final String replacement) {
-        return RegExUtil.replaceAll(source, regex, replacement);
-    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see Matcher#replaceAll(Function)
-     * @see RegExUtil#replaceAll(String, String, Function)
-     * @see RegExUtil#replaceAll(String, Pattern, Function)
-     */
-    @Beta
-    public static String replaceAllByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        return RegExUtil.replaceAll(source, regex, replacer);
-    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()))}
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see Matcher#replaceAll(Function)
-     * @see RegExUtil#replaceAll(String, String, IntBiFunction)
-     * @see RegExUtil#replaceAll(String, Pattern, IntBiFunction)
-     */
-    @Beta
-    public static String replaceAllByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        return RegExUtil.replaceAll(source, regex, replacer);
-    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(replacement)}
-     *
-     * @param source
-     * @param regex
-     * @param replacement
-     * @return
-     * @see Matcher#replaceFirst(String)
-     * @see RegExUtil#replaceFirst(String, String, String)
-     * @see RegExUtil#replaceFirst(String, Pattern, String)
-     */
-    @Beta
-    public static String replaceFirstByPattern(final String source, final String regex, final String replacement) {
-        return RegExUtil.replaceFirst(source, regex, replacement);
-    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see Matcher#replaceFirst(Function)
-     * @see RegExUtil#replaceFirst(String, String, Function)
-     * @see RegExUtil#replaceFirst(String, Pattern, Function)
-     */
-    @Beta
-    public static String replaceFirstByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        return RegExUtil.replaceFirst(source, regex, replacer);
-    }
-
-    /**
-     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()))}
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see Matcher#replaceFirst(Function)
-     * @see RegExUtil#replaceFirst(String, String, IntBiFunction)
-     * @see RegExUtil#replaceFirst(String, Pattern, IntBiFunction)
-     */
-    @Beta
-    public static String replaceFirstByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        return RegExUtil.replaceFirst(source, regex, replacer);
-    }
-
-    /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
-     *
-     * @param source
-     * @param regex
-     * @param replacement
-     * @return
-     * @see RegExUtil#replaceLast(String, String, String)
-     * @see RegExUtil#replaceLast(String, Pattern, String)
-     */
-    @Beta
-    public static String replaceLastByPattern(final String source, final String regex, final String replacement) {
-        return RegExUtil.replaceLast(source, regex, replacement);
-    }
-
-    /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see RegExUtil#replaceLast(String, String, Function)
-     * @see RegExUtil#replaceLast(String, Pattern, Function)
-     */
-    @Beta
-    public static String replaceLastByPattern(final String source, final String regex, final Function<String, String> replacer) {
-        return RegExUtil.replaceLast(source, regex, replacer);
-    }
-
-    /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
-     *
-     * @param source
-     * @param regex
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return
-     * @see RegExUtil#replaceLast(String, String, IntBiFunction)
-     * @see RegExUtil#replaceLast(String, Pattern, IntBiFunction)
-     */
-    @Beta
-    public static String replaceLastByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
-        return RegExUtil.replaceLast(source, regex, replacer);
-    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacement
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceAll(String, String, String)}
+    //     * @see Matcher#replaceAll(String)
+    //     * @see RegExUtil#replaceAll(String, String, String)
+    //     * @see RegExUtil#replaceAll(String, Pattern, String)
+    //     */
+    //    @Beta
+    //    public static String replaceAllByPattern(final String source, final String regex, final String replacement) {
+    //        return RegExUtil.replaceAll(source, regex, replacement);
+    //    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceAll(String, String, Function)}
+    //     * @see Matcher#replaceAll(Function)
+    //     * @see RegExUtil#replaceAll(String, String, Function)
+    //     * @see RegExUtil#replaceAll(String, Pattern, Function)
+    //     */
+    //    @Beta
+    //    public static String replaceAllByPattern(final String source, final String regex, final Function<String, String> replacer) {
+    //        return RegExUtil.replaceAll(source, regex, replacer);
+    //    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()))}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceAll(String, String, IntBiFunction)}
+    //     * @see Matcher#replaceAll(Function)
+    //     * @see RegExUtil#replaceAll(String, String, IntBiFunction)
+    //     * @see RegExUtil#replaceAll(String, Pattern, IntBiFunction)
+    //     */
+    //    @Beta
+    //    public static String replaceAllByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+    //        return RegExUtil.replaceAll(source, regex, replacer);
+    //    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(replacement)}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacement
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceFirst(String, String, String)}
+    //     * @see Matcher#replaceFirst(String)
+    //     * @see RegExUtil#replaceFirst(String, String, String)
+    //     * @see RegExUtil#replaceFirst(String, Pattern, String)
+    //     */
+    //    @Beta
+    //    public static String replaceFirstByPattern(final String source, final String regex, final String replacement) {
+    //        return RegExUtil.replaceFirst(source, regex, replacement);
+    //    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())))}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceFirst(String, String, Function)}
+    //     * @see Matcher#replaceFirst(Function)
+    //     * @see RegExUtil#replaceFirst(String, String, Function)
+    //     * @see RegExUtil#replaceFirst(String, Pattern, Function)
+    //     */
+    //    @Beta
+    //    public static String replaceFirstByPattern(final String source, final String regex, final Function<String, String> replacer) {
+    //        return RegExUtil.replaceFirst(source, regex, replacer);
+    //    }
+    //
+    //    /**
+    //     * @implNote equivalent to {@code Pattern.compile(regex).matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()))}
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @see Matcher#replaceFirst(Function)
+    //     * @see RegExUtil#replaceFirst(String, String, IntBiFunction)
+    //     * @see RegExUtil#replaceFirst(String, Pattern, IntBiFunction)
+    //     * @deprecated replaced by {@link RegExUtil#replaceFirst(String, String, IntBiFunction)}
+    //     */
+    //    @Beta
+    //    public static String replaceFirstByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+    //        return RegExUtil.replaceFirst(source, regex, replacer);
+    //    }
+    //
+    //    /**
+    //     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacement
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceLast(String, String, String)}
+    //     * @see RegExUtil#replaceLast(String, String, String)
+    //     * @see RegExUtil#replaceLast(String, Pattern, String)
+    //     */
+    //    @Beta
+    //    public static String replaceLastByPattern(final String source, final String regex, final String replacement) {
+    //        return RegExUtil.replaceLast(source, regex, replacement);
+    //    }
+    //
+    //    /**
+    //     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceLast(String, String, Function)}
+    //     * @see RegExUtil#replaceLast(String, String, Function)
+    //     * @see RegExUtil#replaceLast(String, Pattern, Function)
+    //     */
+    //    @Beta
+    //    public static String replaceLastByPattern(final String source, final String regex, final Function<String, String> replacer) {
+    //        return RegExUtil.replaceLast(source, regex, replacer);
+    //    }
+    //
+    //    /**
+    //     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+    //     *
+    //     * @param source
+    //     * @param regex
+    //     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+    //     * @return
+    //     * @deprecated replaced by {@link RegExUtil#replaceLast(String, String, IntBiFunction)}
+    //     * @see RegExUtil#replaceLast(String, String, IntBiFunction)
+    //     * @see RegExUtil#replaceLast(String, Pattern, IntBiFunction)
+    //     */
+    //    @Beta
+    //    public static String replaceLastByPattern(final String source, final String regex, final IntBiFunction<String> replacer) {
+    //        return RegExUtil.replaceLast(source, regex, replacer);
+    //    }
 
     /**
      * Replace the substring specified by the start and end indices with the specified {@code replacement}
@@ -3689,21 +3697,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return replace(str, fromIndex, removeStr, EMPTY, -1);
     }
 
-    /**
-     * Removes each substring of the source String that matches the given regular expression.
-     *
-     * @param source the source string
-     * @param regex the regular expression to which this string is to be matched
-     * @return The resulting {@code String}
-     * @see String#replaceAll(String, String)
-     * @see #replaceAllByPattern(String, String, String)
-     * @see RegExUtil#removeAll(String, String)
-     */
-    @Beta
-    public static String removeAllByPattern(final String source, final String regex) {
-        return RegExUtil.removeAll(source, regex);
-    }
-
+    //    /**
+    //     * Removes each substring of the source String that matches the given regular expression.
+    //     *
+    //     * @param source the source string
+    //     * @param regex the regular expression to which this string is to be matched
+    //     * @return The resulting {@code String}
+    //     * @deprecated replaced by {@link RegExUtil#removeAll(String, String)}
+    //     * @see String#replaceAll(String, String)
+    //     * @see #replaceAllByPattern(String, String, String)
+    //     * @see RegExUtil#removeAll(String, String)
+    //     */
+    //    @Beta
+    //    public static String removeAllByPattern(final String source, final String regex) {
+    //        return RegExUtil.removeAll(source, regex);
+    //    }
+    //
     //    /**
     //     * Removes the first substring of the source string that matches the given regular expression.
     //     *
@@ -7705,19 +7714,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return occurrences;
     }
 
-    /**
-     * Counts the number of occurrences of the specified pattern in the given string.
-     *
-     * @param str the string to be checked, may be {@code null} or empty
-     * @param regexToFind the regular expression pattern to be counted
-     * @return the number of occurrences of the specified pattern in the string, or 0 if the string is {@code null} or empty
-     * @see RegExUtil#countMatches(String, String)
-     * @see RegExUtil#countMatches(String, Pattern)
-     */
-    @Beta
-    public static int countMatchesByPattern(final String str, final String regexToFind) {
-        return RegExUtil.countMatches(str, regexToFind);
-    }
+    //    /**
+    //     * Counts the number of occurrences of the specified pattern in the given string.
+    //     *
+    //     * @param str the string to be checked, may be {@code null} or empty
+    //     * @param regexToFind the regular expression pattern to be counted
+    //     * @return the number of occurrences of the specified pattern in the string, or 0 if the string is {@code null} or empty
+    //     * @deprecated replaced by {@link RegExUtil#countMatches(String, String)}
+    //     * @see RegExUtil#countMatches(String, String)
+    //     * @see RegExUtil#countMatches(String, Pattern)
+    //     */
+    //    @Beta
+    //    public static int countMatchesByPattern(final String str, final String regexToFind) {
+    //        return RegExUtil.countMatches(str, regexToFind);
+    //    }
 
     /**
      * Checks if the specified character is present in the given string.

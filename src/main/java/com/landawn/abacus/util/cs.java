@@ -296,6 +296,9 @@ public final class cs { // NOSONAR
 
     public static final String rowExtractor = "rowExtractor";
 
+    public static final String regex = "regex";
+    public static final String pattern = "pattern";
+
     private cs() {
         // Utility class for constant string values.
     }

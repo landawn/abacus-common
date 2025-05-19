@@ -1,3 +1,7 @@
+### 5.8.7
+
+* Improvements and bug fixes.
+
 ### 5.8.6
 
 * Improvements and bug fixes.
