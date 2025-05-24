@@ -16834,16 +16834,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares the specified properties of two beans to determine if they are equal.
+     * Compares two maps for equality based on the specified keys.
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be null
-     * @return {@code true} if the properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if any of the arguments are null
+     * @param map1 the first map to compare, must not be null
+     * @param map2 the second map to compare, must not be null
+     * @param keysToCompare the collection of keys to compare, must not be null
+     * @return {@code true} if the values associated with the specified keys in both maps are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the {@code keysToCompare} is empty
      */
-    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
-        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
+    public static <K> boolean equalsByKeys(final Map<? extends K, ?> map1, final Map<? extends K, ?> map2, final Collection<K> keysToCompare)
+            throws IllegalArgumentException {
+        N.checkArgNotEmpty(keysToCompare, cs.keysToCompare);
+
+        if (map1 == map2) {
+            return true;
+        } else if ((map1 == null && map2 != null) || (map1 != null && map2 == null)) {
+            return false;
+        }
+
+        for (K key : keysToCompare) {
+            if (!equals(map1.get(key), map2.get(key))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -16851,8 +16866,23 @@ sealed class CommonUtil permits N {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @return {@code true} if all the properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if any of the arguments are null
+     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
+     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
+     */
+    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
+        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
+
+        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
+    }
+
+    /**
+     * Compares the properties of two beans to determine if they are equal by common properties.
+     *
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if no common property is found
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         checkArgNotNull(bean1);

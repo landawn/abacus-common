@@ -299,6 +299,9 @@ public final class cs { // NOSONAR
     public static final String regex = "regex";
     public static final String pattern = "pattern";
 
+    public static final String keysToCompare = "keysToCompare";
+    public static final String propNamesToCompare = "propNamesToCompare";
+
     private cs() {
         // Utility class for constant string values.
     }

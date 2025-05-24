@@ -102,6 +102,7 @@ import java.util.jar.JarFile;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.Record;
@@ -2483,6 +2484,34 @@ public final class ClassUtil {
         return ((setMethod != null)
                 && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
                         : null;
+    }
+
+    private static final Map<Class<?>, ImmutableSet<String>> beanDiffIgnoredPropNamesPool = new ObjectPool<>(POOL_SIZE);
+
+    /**
+     * Retrieves a set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation for the specified class.
+     *
+     * @param cls the class for which the {@code MapDifference.of(Object, Object)} operation ignored property names are to be retrieved
+     * @return an immutable set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation
+     * @see com.landawn.abacus.util.annotation.DiffIgnore
+     * @see com.landawn.abacus.util.Difference.MapDifference
+     * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
+     */
+    public static ImmutableSet<String> getDiffIgnoredPropNames(final Class<?> cls) {
+        ImmutableSet<String> propNames = beanDiffIgnoredPropNamesPool.get(cls);
+
+        if (propNames == null) {
+            propNames = Stream.of(ParserUtil.getBeanInfo(cls).propInfoList)
+                    .filter(propInfo -> propInfo.isAnnotationPresent(DiffIgnore.class) || propInfo.annotations.values()
+                            .stream()
+                            .anyMatch(it -> Strings.equalsAnyIgnoreCase(it.getClass().getSimpleName(), "DiffIgnore", "DifferenceIgnore")))
+                    .map(it -> it.name)
+                    .toImmutableSet();
+
+            beanDiffIgnoredPropNamesPool.put(cls, propNames);
+        }
+
+        return propNames;
     }
 
     private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();

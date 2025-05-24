@@ -2352,6 +2352,9 @@ public final class Maps {
      * @param map The first map to compare.
      * @param map2 The second map to compare.
      * @return A map representing the difference between the two input maps.
+     * @see #symmetricDifference(Map, Map)
+     * @see Difference.MapDifference#of(Map, Map)
+     * @see Difference.BeanDifference#of(Object, Object, Collection)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -2359,7 +2362,6 @@ public final class Maps {
      * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
-     * @see Difference.MapDifference#of(Map, Map)
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
         if (map == null) {
@@ -2401,12 +2403,13 @@ public final class Maps {
      * @param map The first map to compare.
      * @param map2 The second map to compare.
      * @return A map representing the symmetric difference between the two input maps.
+     * @see #difference(Map, Map)
+     * @see Difference.MapDifference#of(Map, Map)
+     * @see Difference.BeanDifference#of(Object, Object, Collection)
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
      * @see N#difference(Collection, Collection)
-     * @see Difference.MapDifference#of(Map, Map)
-     * @see Difference#of(Collection, Collection)
      * @see Iterables#symmetricDifference(Set, Set)
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {

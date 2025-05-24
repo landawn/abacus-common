@@ -1330,8 +1330,8 @@ public abstract class Tuple<TP> implements Immutable {
          */
         @Override
         public boolean contains(final Object valueToFind) {
-            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5,
-                    valueToFind);
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind)
+                    || N.equals(_5, valueToFind);
         }
 
         @Override
