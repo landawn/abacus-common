@@ -44,7 +44,7 @@ public enum CalendarField {
     /**
      * it has the same int value as {@code Calendar.HOUR_OF_DAY}
      *
-     * @see Calendar#HOUR
+     * @see Calendar#HOUR_OF_DAY
      */
     HOUR(Calendar.HOUR_OF_DAY),
     /**

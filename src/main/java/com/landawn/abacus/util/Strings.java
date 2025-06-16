@@ -246,7 +246,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     private static final Decoder BASE64_DECODER = java.util.Base64.getDecoder();
 
-    private static final Encoder BASE64_URL_ENCODER = java.util.Base64.getUrlEncoder();
+    private static final Encoder BASE64_URL_ENCODER = java.util.Base64.getUrlEncoder().withoutPadding();
 
     private static final Decoder BASE64_URL_DECODER = java.util.Base64.getUrlDecoder();
 
@@ -782,174 +782,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static boolean isWrappedWith(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
-        N.checkArgNotEmpty(prefix, cs.suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         return str != null && str.length() >= prefix.length() + suffix.length() && str.startsWith(prefix) && str.endsWith(suffix);
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given two CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param a The first CharSequence to be checked. It can be {@code null} or empty.
-     * @param b The second CharSequence to be checked. It can be {@code null} or empty.
-     * @return The first non-empty CharSequence from the given two CharSequences. If both are empty, returns {@code null}.
-     * @see N#firstNonEmpty(CharSequence, CharSequence)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
-        return isEmpty(a) ? (isEmpty(b) ? null : b) : a;
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given three CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param a The first CharSequence to be checked. It can be {@code null} or empty.
-     * @param b The second CharSequence to be checked. It can be {@code null} or empty.
-     * @param c The third CharSequence to be checked. It can be {@code null} or empty.
-     * @return The first non-empty CharSequence from the given three CharSequences. If all are empty, returns {@code null}.
-     * @see N#firstNonEmpty(CharSequence, CharSequence, CharSequence)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b, final T c) {
-        return isEmpty(a) ? (isEmpty(b) ? (isEmpty(c) ? null : c) : b) : a;
-    }
-
-    /**
-     * <p>Returns the first value in the array which is not empty.</p>
-     *
-     * <p>If all values are empty or the array is {@code null} or empty then {@code null} is returned.</p>
-     *
-     * <pre>
-     * Strings.firstNonEmpty(null, {@code null}, null)   = null
-     * Strings.firstNonEmpty(null, {@code null}, "")     = null
-     * Strings.firstNonEmpty(null, "", " ")      = " "
-     * Strings.firstNonEmpty("abc")              = "abc"
-     * Strings.firstNonEmpty(null, "xyz")        = "xyz"
-     * Strings.firstNonEmpty("", "xyz")          = "xyz"
-     * Strings.firstNonEmpty(null, "xyz", "abc") = "xyz"
-     * Strings.firstNonEmpty()                   = null
-     * </pre>
-     *
-     * @param <T> the specific kind of CharSequence
-     * @param css the values to test, may be {@code null} or empty
-     * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
-     * @see N#firstNonEmpty(CharSequence...)
-     */
-    @MayReturnNull
-    @SafeVarargs
-    public static <T extends CharSequence> T firstNonEmpty(final T... css) {
-        if (N.isEmpty(css)) {
-            return null;
-        }
-
-        for (final T val : css) {
-            if (isNotEmpty(val)) {
-                return val;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given Iterable of CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
-     * @return The first non-empty CharSequence from the given Iterable. If all CharSequences are empty or the Iterable is {@code null}, returns {@code null}.
-     * @see N#firstNonEmpty(Iterable)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonEmpty(final Iterable<? extends T> css) {
-        if (N.isEmpty(css)) {
-            return null;
-        }
-
-        for (final T val : css) {
-            if (isNotEmpty(val)) {
-                return val;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given two CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param a The first CharSequence to be checked. It can be {@code null} or empty.
-     * @param b The second CharSequence to be checked. It can be {@code null} or empty.
-     * @return The first non-blank CharSequence from the given two CharSequences. If both are blank, returns {@code null}.
-     * @see N#firstNonBlank(CharSequence, CharSequence)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
-        return isBlank(a) ? (isBlank(b) ? null : b) : a;
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given three CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param a The first CharSequence to be checked. It can be {@code null} or empty.
-     * @param b The second CharSequence to be checked. It can be {@code null} or empty.
-     * @param c The third CharSequence to be checked. It can be {@code null} or empty.
-     * @return The first non-blank CharSequence from the given three CharSequences. If all are blank, returns {@code null}.
-     * @see N#firstNonBlank(CharSequence, CharSequence, CharSequence)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonBlank(final T a, final T b, final T c) {
-        return isBlank(a) ? (isBlank(b) ? (isBlank(c) ? null : c) : b) : a;
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given CharSequences.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param css The CharSequences to be checked. They can be {@code null} or empty.
-     * @return The first non-blank CharSequence from the given CharSequences. If all are blank, returns {@code null}.
-     * @see N#firstNonBlank(CharSequence...)
-     */
-    @MayReturnNull
-    @SafeVarargs
-    public static <T extends CharSequence> T firstNonBlank(final T... css) {
-        if (N.isEmpty(css)) {
-            return null;
-        }
-
-        for (final T val : css) {
-            if (isNotBlank(val)) {
-                return val;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given Iterable of CharSequences, or {@code null} if all CharSequences are blank or the Iterable is {@code null}.
-     *
-     * @param <T> The type of the CharSequence.
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
-     * @return The first non-blank CharSequence from the given Iterable. If all CharSequences are blank or the Iterable is {@code null}, returns {@code null}.
-     * @see N#firstNonBlank(Iterable)
-     */
-    @MayReturnNull
-    public static <T extends CharSequence> T firstNonBlank(final Iterable<? extends T> css) {
-        if (N.isEmpty(css)) {
-            return null;
-        }
-
-        for (final T val : css) {
-            if (isNotBlank(val)) {
-                return val;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -1000,7 +835,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException if the specified default charSequence value is empty.
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfBlank(CharSequence, CharSequence)
-     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonEmpty(String, String)
      * @see N#defaultIfEmpty(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultForEmpty) throws IllegalArgumentException {
@@ -1019,7 +854,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
-     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonEmpty(String, String)
      * @see N#defaultIfEmpty(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) {
@@ -1040,7 +875,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException if the specified default charSequence value is bank.
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfEmpty(CharSequence, CharSequence)
-     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see #firstNonBlank(String, String)
      * @see N#defaultIfBlank(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultForBlank) throws IllegalArgumentException {
@@ -1059,7 +894,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfEmpty(CharSequence, Supplier)
-     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see #firstNonBlank(String, String)
      * @see N#defaultIfBlank(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) {
@@ -1068,6 +903,153 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return str;
+    }
+
+    /**
+     * Returns the first non-empty String from the given two Strings.
+     *
+     * @param a The first String to be checked. It can be {@code null} or empty.
+     * @param b The second String to be checked. It can be {@code null} or empty.
+     * @return The first non-empty String from the given two String. If both are empty, returns an empty string {@code ""}.
+     * @see N#firstNonEmpty(CharSequence, CharSequence)
+     */
+    public static String firstNonEmpty(final String a, final String b) {
+        return isEmpty(a) ? (isEmpty(b) ? EMPTY : b) : a;
+    }
+
+    /**
+     * Returns the first non-empty String from the given three Strings.
+     *
+     * @param a The first String to be checked. It can be {@code null} or empty.
+     * @param b The second String to be checked. It can be {@code null} or empty.
+     * @param c The third String to be checked. It can be {@code null} or empty.
+     * @return The first non-empty String from the given three Strings. If all are empty, returns an empty string {@code ""}.
+     * @see N#firstNonEmpty(CharSequence, CharSequence, CharSequence)
+     */
+    public static String firstNonEmpty(final String a, final String b, final String c) {
+        return isEmpty(a) ? (isEmpty(b) ? (isEmpty(c) ? EMPTY : c) : b) : a;
+    }
+
+    /**
+     * <p>Returns the first value in the array which is not empty.</p>
+     *
+     * <p>If all values are empty or the array is {@code null} or empty then an empty string {@code ""} is returned.</p>
+     *
+     * <pre>
+     * Strings.firstNonEmpty(null, {@code null}, null)   = ""
+     * Strings.firstNonEmpty(null, {@code null}, "")     = ""
+     * Strings.firstNonEmpty(null, "", " ")      = " "
+     * Strings.firstNonEmpty("abc")              = "abc"
+     * Strings.firstNonEmpty(null, "xyz")        = "xyz"
+     * Strings.firstNonEmpty("", "xyz")          = "xyz"
+     * Strings.firstNonEmpty(null, "xyz", "abc") = "xyz"
+     * Strings.firstNonEmpty()                   = ""
+     * </pre>
+     *
+     * @param css the values to test, may be {@code null} or empty
+     * @return the first value from {@code css} which is not empty, or an empty string {@code ""} if there is no non-empty value.
+     * @see N#firstNonEmpty(CharSequence...)
+     */
+    public static String firstNonEmpty(final String... css) {
+        if (N.isEmpty(css)) {
+            return EMPTY;
+        }
+
+        for (final String val : css) {
+            if (isNotEmpty(val)) {
+                return val;
+            }
+        }
+
+        return EMPTY;
+    }
+
+    /**
+     * Returns the first non-empty String from the given Iterable of Strings.
+     *
+     * @param css The Iterable of Strings to be checked. It can be {@code null}.
+     * @return The first non-empty String from the given Iterable. If all Strings are empty or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @see N#firstNonEmpty(Iterable)
+     */
+    public static String firstNonEmpty(final Iterable<String> css) {
+        if (N.isEmpty(css)) {
+            return EMPTY;
+        }
+
+        for (final String val : css) {
+            if (isNotEmpty(val)) {
+                return val;
+            }
+        }
+
+        return EMPTY;
+    }
+
+    /**
+     * Returns the first non-blank String from the given two Strings.
+     *
+     * @param a The first String to be checked. It can be {@code null} or empty.
+     * @param b The second String to be checked. It can be {@code null} or empty.
+     * @return The first non-blank String from the given two Strings. If both are blank, returns an empty string {@code ""}.
+     * @see N#firstNonBlank(CharSequence, CharSequence)
+     */
+    public static String firstNonBlank(final String a, final String b) {
+        return isBlank(a) ? (isBlank(b) ? EMPTY : b) : a;
+    }
+
+    /**
+     * Returns the first non-blank String from the given three Strings.
+     *
+     * @param a The first String to be checked. It can be {@code null} or empty.
+     * @param b The second String to be checked. It can be {@code null} or empty.
+     * @param c The third String to be checked. It can be {@code null} or empty.
+     * @return The first non-blank String from the given three Strings. If all are blank, returns an empty string {@code ""}.
+     * @see N#firstNonBlank(CharSequence, CharSequence, CharSequence)
+     */
+    public static String firstNonBlank(final String a, final String b, final String c) {
+        return isBlank(a) ? (isBlank(b) ? (isBlank(c) ? EMPTY : c) : b) : a;
+    }
+
+    /**
+     * Returns the first non-blank String from the given Strings.
+     *
+     * @param css The Strings to be checked. They can be {@code null} or empty.
+     * @return The first non-blank String from the given Strings. If all are blank, returns an empty string {@code ""}.
+     * @see N#firstNonBlank(CharSequence...)
+     */
+    public static String firstNonBlank(final String... css) {
+        if (N.isEmpty(css)) {
+            return EMPTY;
+        }
+
+        for (final String val : css) {
+            if (isNotBlank(val)) {
+                return val;
+            }
+        }
+
+        return EMPTY;
+    }
+
+    /**
+     * Returns the first non-blank String from the given Iterable of Strings, or an empty string {@code ""} if all Strings are blank or the Iterable is {@code null}.
+     *
+     * @param css The Iterable of Strings to be checked. It can be {@code null}.
+     * @return The first non-blank String from the given Iterable. If all Strings are blank or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @see N#firstNonBlank(Iterable)
+     */
+    public static String firstNonBlank(final Iterable<String> css) {
+        if (N.isEmpty(css)) {
+            return EMPTY;
+        }
+
+        for (final String val : css) {
+            if (isNotBlank(val)) {
+                return val;
+            }
+        }
+
+        return EMPTY;
     }
 
     /**
@@ -2185,7 +2167,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str) {
-        return toCamelCase(str, WD._UNDERSCORE);
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        String[] substrs = null;
+        int idx = str.indexOf('_');
+
+        if (idx < 0) {
+            idx = str.indexOf('-');
+        }
+
+        if (idx >= 0) {
+            substrs = RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR);
+        }
+
+        return toCamelCase(str, idx, substrs);
     }
 
     /**
@@ -2206,8 +2203,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        if (str.indexOf(splitChar) >= 0) {
-            final String[] substrs = Strings.split(str, splitChar);
+        String[] substrs = null;
+        final int idx = str.indexOf(splitChar);
+
+        if (idx >= 0) {
+            substrs = Strings.split(str, splitChar);
+        }
+
+        return toCamelCase(str, idx, substrs);
+    }
+
+    private static String toCamelCase(final String str, final int firstSplitorIndex, final String[] substrs) {
+        if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
             try {
@@ -2229,23 +2236,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } finally {
                 Objectory.recycle(sb);
             }
-        }
+        } else {
+            for (int i = 0, len = str.length(); i < len; i++) {
+                if (Character.isLowerCase(str.charAt(i))) {
+                    if (i == 1) {
+                        return str.substring(0, 1).toLowerCase() + str.substring(1);
+                    } else if (i > 1) {
+                        return str.substring(0, i - 1).toLowerCase() + str.substring(i - 1);
+                    }
 
-        for (int i = 0, len = str.length(); i < len; i++) {
-            if (Character.isLowerCase(str.charAt(i))) {
-                if (i == 1) {
-                    return str.substring(0, 1).toLowerCase() + str.substring(1);
-                } else if (i > 1) {
-                    return str.substring(0, i - 1).toLowerCase() + str.substring(i - 1);
+                    break;
+                } else if ((i + 1) == str.length()) {
+                    return str.toLowerCase();
                 }
-
-                break;
-            } else if ((i + 1) == str.length()) {
-                return str.toLowerCase();
             }
-        }
 
-        return str;
+            return str;
+        }
     }
 
     /**
@@ -2492,15 +2499,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return join(words, delimiter);
     }
 
-    /**
-     * Capitalize all the words from the specified split by {@code delimiter}.
+    /**  
+     * Capitalizes all the words in the given string, split by the provided delimiter, excluding the specified words except the first word.
      *
-     * @param str
-     * @param delimiter
-     * @param excludedWords
-     * @return the specified String if it's {@code null} or empty.
-     * @throws IllegalArgumentException
-     * @see #convertWords(String, String, Collection, Function)
+     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter The delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords An array of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
+     * @return The processed string with all non-excluded words capitalized.
+     * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
@@ -2517,7 +2523,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Capitalizes all the words in the given string, split by the provided delimiter, excluding the words in the excludedWords collection.
+     * Capitalizes all the words in the given string, split by the provided delimiter, excluding the words in the excludedWords collection except the first word.
      *
      * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
      * @param delimiter The delimiter used to split the string into words. It must not be empty.
@@ -2542,7 +2548,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 : N.newHashSet(excludedWords);
 
         for (int i = 0, len = words.length; i < len; i++) {
-            words[i] = excludedWordSet.contains(words[i]) ? words[i] : capitalize(words[i]);
+            words[i] = i != 0 && excludedWordSet.contains(words[i]) ? words[i] : capitalize(words[i]);
         }
 
         return join(words, delimiter);
@@ -5414,7 +5420,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String wrapIfMissing(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
-        N.checkArgNotEmpty(prefix, cs.suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         if (isEmpty(str)) {
             return concat(prefix, suffix);
@@ -5465,7 +5471,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String wrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
-        N.checkArgNotEmpty(prefix, cs.suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         if (isEmpty(str)) {
             return concat(prefix, suffix);
@@ -5517,7 +5523,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
-        N.checkArgNotEmpty(prefix, cs.suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -7184,11 +7190,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the index within the input string of the last occurrence of any specified character.
      * If a character within the array {@code valuesToFind} occurs in the character sequence represented by the input {@code String} object,
      * then the index of the last such occurrence is returned.
+     * The returned index may not be the biggest or smallest last index of the character within the array {@code valuesToFind} occurring the specified string,
      *
      * @param str The string to be checked. May be {@code null} or empty.
      * @param valuesToFind The array of characters to be found.
      * @return The index of the last occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
+     * @see #smallestLastIndexOfAll(String, String[])
+     * @see #smallestLastIndexOfAll(String, int, String[])
+     * @see #largestLastIndexOfAll(String, String[])
+     * @see #largestLastIndexOfAll(String, int, String[])
      */
     public static int lastIndexOfAny(final String str, final char... valuesToFind) {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
@@ -7240,21 +7251,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the index within the input string of the last occurrence of any specified substring.
      * If a substring within the array {@code valuesToFind} occurs in the character sequence represented by the input {@code String} object,
      * then the index of the last such occurrence is returned.
+     * The returned index may not be the biggest last index of the substring within the array {@code valuesToFind} occurring the specified string,
      *
      * @param str The string to be checked. May be {@code null} or empty.
      * @param valuesToFind The array of substrings to be found.
      * @return The index of the last occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
+     * @see #smallestLastIndexOfAll(String, String[])
+     * @see #smallestLastIndexOfAll(String, int, String[])
+     * @see #largestLastIndexOfAll(String, String[])
+     * @see #largestLastIndexOfAll(String, int, String[])
      */
     public static int lastIndexOfAny(final String str, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
+        final int len = str.length();
         int idx = 0;
 
         for (final String substr : valuesToFind) {
-            if (substr == null) {
+            if (substr == null || substr.length() > len) {
                 continue;
             }
 
@@ -7309,31 +7326,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the smallest index of any specified substring within the input string.
-     * If a substring within the array {@code valuesToFind} occurs in the character sequence represented by the input {@code String} object,
-     * then the smallest index of such occurrences is returned.
+     * Finds the smallest index of all specified substrings within the input string.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the beginning of the string.
      *
      * @param str The string to be checked. May be {@code null} or empty.
      * @param valuesToFind The array of substrings to be found.
-     * @return The smallest index of any substring in the character sequence represented by this object,
-     *         or -1 if none of the substrings occur.
+     * @return The smallest index of all substrings within the input string or -1 if none of the substrings occur.
+     * @see #indexOfAny(String, String[])
+     * @see #indexOfAny(String, int, String[])
      */
     public static int smallestIndexOfAll(final String str, final String... valuesToFind) {
         return smallestIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
-     * <p>Find the smallest index of any substrings in {@code valuesToFind} from {@code fromIndex}.</p>
-     *
+     * Finds the smallest index of all substrings in {@code valuesToFind} within the input string from {@code fromIndex}.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the specified {@code fromIndex}.
      *
      * @param str
      * @param fromIndex
      * @param valuesToFind
-     * @return
+     * @return The smallest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
+     * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
     public static int smallestIndexOfAll(final String str, int fromIndex, final String... valuesToFind) {
-        if (str == null || N.isEmpty(valuesToFind)) {
+        if (str == null || fromIndex > str.length() || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -7343,11 +7361,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
         int result = N.INDEX_NOT_FOUND;
 
         for (final String substr : valuesToFind) {
-            if (substr == null || (fromIndex + substr.length() > len)) {
+            if (substr == null || (substr.length() > len - fromIndex)) {
                 continue;
             }
 
-            final int tmp = str.indexOf(substr, fromIndex);
+            final int tmp = indexOf(str, substr, fromIndex);
 
             result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
@@ -7360,45 +7378,51 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index of any substrings in {@code valuesToFind}.</p>
+     * Finds the largest index of all substrings in {@code valuesToFind} within the input string.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the beginning of the string.
      *
      * @param str
      * @param valuesToFind
-     * @return
-     * @see #indexOfAny(String, String...)
+     * @return The largest index of all substrings within the input string or -1 if none of the substrings occur.
+     * @see #indexOfAny(String, String[])
+     * @see #indexOfAny(String, int, String[])
      */
     public static int largestIndexOfAll(final String str, final String... valuesToFind) {
         return largestIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
-     * <p>Find the largest index of any substrings in {@code valuesToFind}.</p>
-     *
+     * Finds the largest index of all substrings in {@code valuesToFind} within the input string from {@code fromIndex}.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the specified {@code fromIndex}.
      *
      * @param str
      * @param fromIndex
      * @param valuesToFind
-     * @return
+     * @return The largest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
+     * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
     public static int largestIndexOfAll(final String str, final int fromIndex, final String... valuesToFind) {
-        if (str == null || N.isEmpty(valuesToFind)) {
+        if (str == null || fromIndex > str.length() || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int fromIndexToUse = Math.max(0, fromIndex);
 
         final int len = str.length();
-        @SuppressWarnings("resource")
-        final List<String> sortedSubstrs = Stream.of(valuesToFind) //
+        final List<String> subStringsSortedByLen = Stream.of(valuesToFind) //
                 .filter(it -> !(it == null || (fromIndexToUse + it.length() > len)))
                 .sortedByInt(N::len)
                 .toList();
 
         int result = N.INDEX_NOT_FOUND;
 
-        for (final String substr : sortedSubstrs) {
-            result = N.max(result, str.indexOf(substr, fromIndex));
+        for (final String substr : subStringsSortedByLen) {
+            if (result >= 0 && substr.length() >= len - result) {
+                continue;
+            }
+
+            result = N.max(result, indexOf(str, substr, fromIndex));
 
             if (result == len - substr.length()) {
                 break;
@@ -7409,31 +7433,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the smallest last index of any substrings in {@code valuesToFind}.</p>
-     * This method starts searching from the end of the string towards the beginning.
+     * Finds the smallest last index of all substrings in {@code valuesToFind} within the input string.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the back of the string.
      *
      * @param str The string to search within. It may be {@code null}.
      * @param valuesToFind The substrings to find within the string. These may be empty or {@code null}.
-     * @return The smallest last index where any of the provided substrings is found in the string.
-     *         If none of the substrings are found, it returns -1.
-     * @see #indexOfAny(String, String...)
+     * @return The smallest last index of all substrings within the input string or -1 if none of the substrings occur.
+     * @see #lastIndexOfAny(String, String[])
+     * @see #lastIndexOfAny(String, char[])
      */
     public static int smallestLastIndexOfAll(final String str, final String... valuesToFind) {
         return smallestLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
-     * <p>Find the smallest last index of any substrings in {@code valuesToFind} from {@code fromIndex}.</p>
-     *
+     * Finds the smallest last index of all substrings in {@code valuesToFind} within the input string from {@code startIndexFromBack}.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from {@code startIndexFromBack} from the back of the string.
      *
      * @param str
      * @param startIndexFromBack
      * @param valuesToFind
-     * @return
-     * @see #indexOfAny(String, int, String[])
+     * @return The smallest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
+     * @see #lastIndexOfAny(String, String[])
+     * @see #lastIndexOfAny(String, char[])
      */
     public static int smallestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
-        if (str == null || N.isEmpty(valuesToFind)) {
+        if (str == null || startIndexFromBack < 0 || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -7447,7 +7472,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 continue;
             }
 
-            final int tmp = str.lastIndexOf(substr, startIndexFromBack);
+            final int tmp = lastIndexOf(str, substr, startIndexFromBack);
 
             result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
@@ -7460,29 +7485,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index among the first index of any substrings in {@code valuesToFind}.</p>
+     * Finds the largest last index of all substrings in {@code valuesToFind} within the input string.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from the back of the string.
      *
      * @param str
      * @param valuesToFind
-     * @return
-     * @see #indexOfAny(String, String...)
+     * @return The largest last index of all substrings within the input string or -1 if none of the substrings occur.
+     * @see #lastIndexOfAny(String, String[])
+     * @see #lastIndexOfAny(String, char[])
      */
     public static int largestLastIndexOfAll(final String str, final String... valuesToFind) {
         return largestLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
-     * <p>Find the largest index among the first index of any substrings in {@code valuesToFind}.</p>
-     *
+     * Finds the largest last index of all substrings in {@code valuesToFind} within the input string from {@code startIndexFromBack}.
+     * Each substring in the array {@code valuesToFind} is only searched at most once from {@code startIndexFromBack} from the back of the string.
      *
      * @param str
      * @param startIndexFromBack
      * @param valuesToFind
-     * @return
-     * @see #indexOfAny(String, int, String[])
+     * @return The largest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
+     * @see #lastIndexOfAny(String, String[])
+     * @see #lastIndexOfAny(String, char[])
      */
     public static int largestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
-        if (str == null || N.isEmpty(valuesToFind)) {
+        if (str == null || startIndexFromBack < 0 || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -7670,7 +7698,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SuppressWarnings("deprecation")
     public static int countMatches(final String str, final char charValueToFind) {
-        if (str == null || str.isEmpty()) {
+        if (isEmpty(str)) {
             return 0;
         }
 
@@ -7694,7 +7722,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see N#occurrencesOf(String, String)
      */
     public static int countMatches(final String str, final String valueToFind) {
-        if (str == null || valueToFind == null) {
+        if (isEmpty(str) || isEmpty(valueToFind)) {
             return 0;
         }
 
@@ -7892,7 +7920,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be found
      * @return {@code true} if any of the characters are found in the given string, {@code false} otherwise if not or if the specified {@code valuesToFind} char array is {@code null} or empty
-     * @see #containsNone(String, char...)
+     * @see #containsNone(String, char[])
      */
     public static boolean containsAny(final String str, final char... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -7908,7 +7936,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
      * @return {@code true} if any of the substrings are found in the given string, {@code false} otherwise if not or if the specified substrings array is {@code null} or empty
-     * @see #containsNone(String, String...)
+     * @see #containsNone(String, String[])
      */
     public static boolean containsAny(final String str, final String... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -7924,7 +7952,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
      * @return {@code true} if any of the substrings are found in the given string, ignoring case considerations, {@code false} otherwise if not or if the specified substrings array is {@code null} or empty
-     * @see #containsNoneIgnoreCase(String, String...)
+     * @see #containsNoneIgnoreCase(String, String[])
      */
     public static boolean containsAnyIgnoreCase(final String str, final String... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -7959,7 +7987,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be checked
      * @return {@code true} if none of the characters are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
-     * @see #containsAny(String, char...)
+     * @see #containsAny(String, char[])
      */
     public static boolean containsNone(final String str, final char... valuesToFind) {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
@@ -8002,7 +8030,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be checked
      * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
-     * @see #containsAny(String, String...)
+     * @see #containsAny(String, String[])
      */
     public static boolean containsNone(final String str, final String... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -8019,7 +8047,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be checked
      * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
-     * @see #containsAnyIgnoreCase(String, String...)
+     * @see #containsAnyIgnoreCase(String, String[])
      */
     public static boolean containsNoneIgnoreCase(final String str, final String... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -9242,7 +9270,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+     * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} searched from the {@code exclusiveEndIndex} from the back of given string if it exists, otherwise return {@code null} String.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
@@ -9621,7 +9649,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code exclusiveEndIndex}.
-     * If {@code str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
+     * If {@code str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9630,8 +9658,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final int exclusiveBeginIndex, final int exclusiveEndIndex) {
-        if (str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex
-                || exclusiveBeginIndex >= str.length()) {
+        if (str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
@@ -9640,7 +9667,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code delimiterOfExclusiveEndIndex}.
-     * If {@code str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
+     * If {@code str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9650,16 +9677,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final int exclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
-        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
+        if (str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
-        return substringBetween(str, exclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, exclusiveBeginIndex + 1));
+        final int startIndex = exclusiveBeginIndex + 1;
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
+            return null;
+        }
+
+        return str.substring(startIndex, endIndex);
     }
 
     /**
      * Returns the substring between the two specified {@code exclusiveBeginIndex} and {@code delimiterOfExclusiveEndIndex}.
-     * If {@code str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
+     * If {@code str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()}, {@code null} is returned.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -9669,11 +9703,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final int exclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
-        return substringBetween(str, exclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, exclusiveBeginIndex + 1));
+        final int startIndex = exclusiveBeginIndex + 1;
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
+            return null;
+        }
+
+        return str.substring(startIndex, endIndex);
     }
 
     /**
@@ -9691,7 +9732,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substringBetween(str, str.indexOf(delimiterOfExclusiveBeginIndex), exclusiveEndIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+        if (startIndex < 0 || startIndex >= exclusiveEndIndex) {
+            return null;
+        }
+
+        startIndex += 1;
+
+        if (startIndex > exclusiveEndIndex) {
+            return null;
+        }
+
+        return str.substring(startIndex, exclusiveEndIndex);
     }
 
     /**
@@ -9709,19 +9762,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
 
-        if (index < 0) {
+        if (startIndex < 0 || startIndex > exclusiveEndIndex) {
             return null;
         }
 
-        final int exclusiveBeginIndex = index + delimiterOfExclusiveBeginIndex.length();
+        startIndex += delimiterOfExclusiveBeginIndex.length();
 
-        if (exclusiveBeginIndex > exclusiveEndIndex) {
+        if (startIndex > exclusiveEndIndex) {
             return null;
         }
 
-        return str.substring(exclusiveBeginIndex, exclusiveEndIndex);
+        return str.substring(startIndex, exclusiveEndIndex);
     }
 
     /**
@@ -9807,11 +9860,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     public static String substringBetween(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex > str.length()) {
             return null;
         }
 
-        int startIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+        int startIndex = fromIndex <= 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (startIndex < 0) {
             return null;
@@ -9876,11 +9929,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     public static String substringBetweenIgnoreCaes(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex > str.length()) {
             return null;
         }
 
-        int startIndex = fromIndex == 0 ? indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex)
+        int startIndex = fromIndex <= 0 ? indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex)
                 : indexOfIgnoreCase(str, delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (startIndex < 0) {
@@ -9899,94 +9952,26 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     */
-    public static List<String> substringsBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
-        return isEmpty(str) ? new ArrayList<>() : substringsBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-    }
-
-    /**
-     * Returns a list of substrings within the given string that are between the specified delimiters.
-     * The substrings are found within the range specified by the fromIndex and toIndex parameters.
-     *
-     * <pre>
-     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     * </pre>
-     *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The starting index from where to check the string.
-     * @param toIndex The ending index until where to check the string.
-     * @param delimiterOfExclusiveBeginIndex The character that marks the beginning of a substring.
-     * @param delimiterOfExclusiveEndIndex The character that marks the ending of a substring.
-     * @return A list of substrings found between the specified delimiters. Returns an empty list if no such substrings are found.
-     */
-    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
-            final char delimiterOfExclusiveEndIndex) {
-        final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-        final List<String> res = new ArrayList<>(substringIndices.size());
-
-        for (final int[] e : substringIndices) {
-            res.add(str.substring(e[0], e[1]));
-        }
-
-        return res;
-    }
-
-    /**
-     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     */
-    public static List<String> substringsBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
-        return isEmpty(str) ? new ArrayList<>() : substringsBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-    }
-
-    /**
-     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     */
-    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
-            final String delimiterOfExclusiveEndIndex) {
-        final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-
-        final List<String> res = new ArrayList<>(substringIndices.size());
-
-        for (final int[] e : substringIndices) {
-            res.add(str.substring(e[0], e[1]));
-        }
-
-        return res;
-    }
-
-    /**
      *
      * @param str
      * @param exclusiveBeginIndex
-     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex)}
      * @return
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
     public static String substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
-        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
+        if (str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
-        return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(exclusiveBeginIndex));
+        final int endIndex = N.min(funcOfExclusiveEndIndex.applyAsInt(exclusiveBeginIndex), str.length());
+
+        if (endIndex < 0 || endIndex <= exclusiveBeginIndex) {
+            return null;
+        }
+
+        return str.substring(exclusiveBeginIndex + 1, endIndex);
     }
 
     //    /**
@@ -10017,11 +10002,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex) {
-        if (str == null || exclusiveEndIndex < 0) {
+        if (str == null || exclusiveEndIndex <= 0) {
             return null;
         }
 
-        return substringBetween(str, funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
+        final int endIndex = N.min(exclusiveEndIndex, str.length());
+        int startIndex = funcOfExclusiveBeginIndex.applyAsInt(endIndex);
+
+        if (startIndex < -1 || startIndex >= endIndex) {
+            return null;
+        }
+
+        return str.substring(startIndex + 1, endIndex);
     }
 
     //    /**
@@ -10052,19 +10044,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() > str.length()) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() >= str.length()) {
             return null;
         }
 
-        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
 
-        if (index < 0) {
+        if (startIndex < 0) {
             return null;
         }
 
-        final int exclusiveBeginIndex = index + delimiterOfExclusiveBeginIndex.length();
+        startIndex += delimiterOfExclusiveBeginIndex.length();
 
-        return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(exclusiveBeginIndex));
+        final int endIndex = N.min(funcOfExclusiveEndIndex.applyAsInt(startIndex), str.length());
+
+        if (endIndex < 0 || endIndex < startIndex) {
+            return null;
+        }
+
+        return str.substring(startIndex, endIndex);
     }
 
     /**
@@ -10081,45 +10079,289 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length()) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() >= str.length()) {
             return null;
         }
 
-        final int exclusiveEndIndex = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+        final int endIndex = N.min(str.lastIndexOf(delimiterOfExclusiveEndIndex), str.length());
 
-        if (exclusiveEndIndex < 0) {
+        if (endIndex < 0) {
             return null;
         }
 
-        return substringBetween(str, funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
+        final int startIndex = funcOfExclusiveBeginIndex.applyAsInt(endIndex);
+
+        if (startIndex < -1 || startIndex >= endIndex) {
+            return null;
+        }
+
+        return str.substring(startIndex + 1, endIndex);
     }
 
     /**
-     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <p>Finds all substrings between specified delimiters.</p> 
+     * 
+     * @param str the string to search in, may be null
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     */
+    public static List<String> substringsBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
+        return substringsBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p> 
+     * 
+     * @param str the string to search in, may be null
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IllegalArgumentException if extractStrategy is null
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     */
+    public static List<String> substringsBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex,
+            final ExtractStrategy extractStrategy) {
+        return substringsBetween(str, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex), extractStrategy);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p> 
+     * 
+     * @param str the string to search in, may be null
+     * @param fromIndex the index to start the search from (inclusive)
+     * @param toIndex the index to end the search at (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     */
+    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
+            final char delimiterOfExclusiveEndIndex) {
+        return substringsBetween(str, fromIndex, toIndex, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+                ExtractStrategy.DEFAULT, Integer.MAX_VALUE);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p> 
+     * 
+     * @param str the string to search in, may be null
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     */
+    public static List<String> substringsBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
+        return substringsBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p>
+     * 
+     * <p>The {@code extractStrategy} parameter controls how nested delimiters are handled:
+     * <ul>
+     *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
+     *   <li>{@code ExtractStrategy.STACK_BASED} -  Stack-based approach strategy used to extract substring between two delimiters</li>
+     *   <li>{@code ExtractStrategy.IGNORE_NESTED} -Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored</li>
+     * </ul>
+     * </p>
      *
+     * <p>Example usage:</p>
+     * <pre>
+     * <code>
+     * // String:   3 [ a 2 [ c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"].
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["c", "a2[c]", "a"].
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c]", "a"].
+     * </code>
+     * <code>
+     * // String:   3 [ a 2 c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"].
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["a2[c", "a"].
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c", "a"].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] ] c ]
+     * // Index:    0 1 2 3 4 5 6 7 8
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT, Integer.MAX_VALUE) = ["[b[a"].
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED, Integer.MAX_VALUE) = ["a", "b[a]", "[b[a]]c"].
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED, Integer.MAX_VALUE) = ["[b[a]]c"].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] [ c ] d ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT) = ["[b[a", "c"].
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED) = ["a", "c", "b[a][c]d"].
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["b[a][c]d"].
+     * </code>
+     * </pre>
+     * 
+     * @param str the string to search in, may be null
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IllegalArgumentException if extractStrategy is null
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringsBetween(String, int, int, String, String, ExtractStrategy, int)
+     */
+    public static List<String> substringsBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex,
+            final ExtractStrategy extractStrategy) {
+        return substringsBetween(str, 0, N.len(str), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, extractStrategy, Integer.MAX_VALUE);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p> 
+     * 
+     * @param str the string to search in, may be null
+     * @param fromIndex the index to start the search from (inclusive)
+     * @param toIndex the index to end the search at (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     */
+    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        return substringsBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT,
+                Integer.MAX_VALUE);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters.</p>
+     * 
+     * <p>The {@code extractStrategy} parameter controls how nested delimiters are handled:
+     * <ul>
+     *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
+     *   <li>{@code ExtractStrategy.STACK_BASED} -  Stack-based approach strategy used to extract substring between two delimiters</li>
+     *   <li>{@code ExtractStrategy.IGNORE_NESTED} -Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored</li>
+     * </ul>
+     * </p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * <code>
+     * // String:   3 [ a 2 [ c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"].
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["c", "a2[c]", "a"].
+     * substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c]", "a"].
+     * </code>
+     * <code>
+     * // String:   3 [ a 2 c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"].
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["a2[c", "a"].
+     * substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c", "a"].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] ] c ]
+     * // Index:    0 1 2 3 4 5 6 7 8
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT, Integer.MAX_VALUE) = ["[b[a"].
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED, Integer.MAX_VALUE) = ["a", "b[a]", "[b[a]]c"].
+     * substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED, Integer.MAX_VALUE) = ["[b[a]]c"].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] [ c ] d ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT) = ["[b[a", "c"].
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED) = ["a", "c", "b[a][c]d"].
+     * substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["b[a][c]d"].
+     * </code>
+     * </pre>
+     * 
+     * @param str the string to search in, may be null
+     * @param fromIndex the index to start the search from (inclusive)
+     * @param toIndex the index to end the search at (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @param maxCount the maximum number of substrings to extract; if {@code -1}, all matching substrings will be extracted
+     * @return a list of matched substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @throws IllegalArgumentException if max is negative or extractStrategy is null
+     * @see #substringsBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
+     */
+    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex, final ExtractStrategy extractStrategy, final int maxCount) {
+
+        final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex,
+                extractStrategy, maxCount);
+
+        final List<String> res = new ArrayList<>(substringIndices.size());
+
+        for (final int[] e : substringIndices) {
+            res.add(str.substring(e[0], e[1]));
+        }
+
+        return res;
+
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p>
+     * 
      * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
      */
     public static List<int[]> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
+        return substringIndicesBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p>
+     * 
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @throws IllegalArgumentException if extractStrategy is null
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
+     */
+    public static List<int[]> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex,
+            final ExtractStrategy extractStrategy) {
         if (str == null || str.isEmpty()) {
             return new ArrayList<>();
         }
 
-        return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+        return substringIndicesBetween(str, 0, str.length(), String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+                extractStrategy, Integer.MAX_VALUE);
     }
 
     /**
-     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p> 
      *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param str the string to search in, may be null
+     * @param fromIndex the starting index to search from (inclusive)
+     * @param toIndex the ending index to search until (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive) 
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
      */
     public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
             final char delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
@@ -10129,127 +10371,277 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return new ArrayList<>();
         }
 
-        final List<int[]> res = new ArrayList<>();
-
-        final int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
-
-        if (idx < 0) {
-            return res;
-        }
-
-        final Deque<Integer> queue = new LinkedList<>();
-        char ch = 0;
-
-        for (int i = idx; i < toIndex; i++) {
-            ch = str.charAt(i);
-
-            if (ch == delimiterOfExclusiveBeginIndex) {
-                queue.push(i + 1);
-            } else if (ch == delimiterOfExclusiveEndIndex && queue.size() > 0) {
-                final int startIndex = queue.pop();
-
-                if (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
-                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
-                        res.remove(res.size() - 1);//NOSONAR
-                    }
-                }
-
-                res.add(new int[] { startIndex, i });
-            }
-        }
-
-        return res;
+        return substringIndicesBetween(str, fromIndex, toIndex, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+                ExtractStrategy.DEFAULT, Integer.MAX_VALUE);
     }
 
     /**
-     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
-     *
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p>
+     * 
      * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
      */
     public static List<int[]> substringIndicesBetween(final String str, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex) {
-        if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
-            return new ArrayList<>();
-        }
-
-        return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+        return substringIndicesBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT);
     }
 
     /**
-     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p>
      *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * <p>This method searches the input string for occurrences of text between the specified beginning
+     * and ending delimiters, and returns a list of int arrays where each array contains the start and end
+     * indices of a matched substring (exclusive of the delimiters themselves).</p>
+     *
+     *
+     * <p>The {@code extractStrategy} parameter controls how nested delimiters are handled:
+     * <ul>
+     *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
+     *   <li>{@code ExtractStrategy.STACK_BASED} -  Stack-based approach strategy used to extract substring between two delimiters</li>
+     *   <li>{@code ExtractStrategy.IGNORE_NESTED} -Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored</li>
+     * </ul>
+     * </p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * <code>
+     * // String:   3 [ a 2 [ c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = [[2, 6], [10, 11]].
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = [[5, 6], [2, 7], [10, 11]].
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[2, 7], [10, 11]].
+     * </code>
+     * <code>
+     * // String:   3 [ a 2 c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = [[2, 5], [9, 10]].
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = [[2, 5], [9, 10]].
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[2, 5], [9, 10]].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] ] c ]
+     * // Index:    0 1 2 3 4 5 6 7 8
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT) = [[1, 5]].
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED) = [[4, 5], [2, 6], [1, 8]].
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[1, 8]].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] [ c ] d ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT) = [[1, 5], [7, 8]].
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED) = [[[4, 5], [7, 8], [2, 10]]].
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[2, 10]].
+     * </code>
+     * </pre>
+     *
+     * @param str the string to search in, may be null
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @throws IllegalArgumentException if extractStrategy is null
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
      */
-    public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
-            final String delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(str));
-
+    public static List<int[]> substringIndicesBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex,
+            final ExtractStrategy extractStrategy) {
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
             return new ArrayList<>();
         }
 
-        final List<int[]> res = new ArrayList<>();
+        return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, extractStrategy, Integer.MAX_VALUE);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters and returns their indices.</p> 
+     *
+     * @param str the string to search in, may be null
+     * @param fromIndex the starting index to search from (inclusive)
+     * @param toIndex the ending index to search until (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive) 
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
+     */
+    public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
+        return substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, ExtractStrategy.DEFAULT,
+                Integer.MAX_VALUE);
+    }
+
+    /**
+     * <p>Finds all substrings between specified delimiters within a given range and returns their indices.</p>
+     *
+     * <p>This method searches the input string for occurrences of text between the specified beginning
+     * and ending delimiters, and returns a list of int arrays where each array contains the start and end
+     * indices of a matched substring (exclusive of the delimiters themselves).</p>
+     *
+     * <p>The search is performed within the specified range from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive).</p>
+     *
+     * <p>The {@code extractStrategy} parameter controls how nested delimiters are handled:
+     * <ul>
+     *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
+     *   <li>{@code ExtractStrategy.STACK_BASED} -  Stack-based approach strategy used to extract substring between two delimiters</li>
+     *   <li>{@code ExtractStrategy.IGNORE_NESTED} -Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored</li>
+     * </ul>
+     * </p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * <code>
+     * // String:   3 [ a 2 [ c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = [[2, 6], [10, 11]].
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = [[5, 6], [2, 7], [10, 11]].
+     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[2, 7], [10, 11]].
+     * </code>
+     * <code>
+     * // String:   3 [ a 2 c ] ] 2 [ a ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = [[2, 6], [9, 10]].
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = [[2, 6], [9, 10]].
+     * substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[2, 6], [9, 10]].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] ] c ]
+     * // Index:    0 1 2 3 4 5 6 7 8
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT, Integer.MAX_VALUE) = [[1, 5]].
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED, Integer.MAX_VALUE) = [[4, 5], [2, 6], [1, 8]].
+     * substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED, Integer.MAX_VALUE) = [[1, 8]].
+     * </code>
+     * <code>
+     * // String:   [ [ b [ a ] [ c ] d ]
+     * // Index:    0 1 2 3 4 5 6 7 8 9 10 11
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT) = [[1, 5], [7, 8]].
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED) = [[4, 5], [2, 6], [1, 8]].
+     * substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED) = [[1, 8]].
+     * </code>
+     * </pre>
+     *
+     * @param str the string to search in, may be null
+     * @param fromIndex the index to start the search from (inclusive)
+     * @param toIndex the index to end the search at (exclusive)
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive)
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive)
+     * @param extractStrategy the strategy to use for handling nested delimiters
+     * @param maxCount the maximum number of matches to find
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     *         matching substring, or an empty list if no match is found or the input is null
+     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @throws IllegalArgumentException if max is negative or extractStrategy is null
+     *
+     * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
+     * @see #substringsBetween(String, int, int, String, String, ExtractStrategy, int)
+     */
+    public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex, final ExtractStrategy extractStrategy, final int maxCount) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(str));
+        N.checkArgNotNegative(maxCount, cs.max);
+        N.checkArgNotNull(extractStrategy, cs.extractStrategy);
+
+        if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex) || maxCount == 0) {
+            return new ArrayList<>();
+        }
 
         int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (idx < 0) {
-            return res;
+            return new ArrayList<>();
         }
 
-        final Deque<Integer> queue = new LinkedList<>();
-        queue.add(idx + delimiterOfExclusiveBeginIndex.length());
-        int next = -1;
+        final List<int[]> res = new ArrayList<>(N.min(maxCount, 10));
 
-        for (int i = idx + delimiterOfExclusiveBeginIndex.length(); i < toIndex;) {
-            if (queue.size() == 0) {
-                idx = next >= i ? next : str.indexOf(delimiterOfExclusiveBeginIndex, i);
+        final int lengthOfDelimiterOfExclusiveBeginIndex = delimiterOfExclusiveBeginIndex.length();
+        final int lengthOfDelimiterOfExclusiveEndIndex = delimiterOfExclusiveEndIndex.length();
+
+        idx += lengthOfDelimiterOfExclusiveBeginIndex;
+
+        if (extractStrategy == ExtractStrategy.DEFAULT) {
+            int endIndex = -1;
+
+            do {
+                endIndex = indexOf(str, delimiterOfExclusiveEndIndex, idx);
+
+                if (endIndex < 0 || endIndex >= toIndex) {
+                    break;
+                }
+
+                res.add(new int[] { idx, endIndex });
+
+                if (res.size() >= maxCount) {
+                    break;
+                }
+
+                idx = indexOf(str, delimiterOfExclusiveBeginIndex, endIndex + lengthOfDelimiterOfExclusiveEndIndex);
+
+                if (idx < 0) {
+                    break;
+                }
+
+                idx += lengthOfDelimiterOfExclusiveBeginIndex;
+            } while (idx < toIndex);
+        } else {
+            final Deque<Integer> queue = new LinkedList<>();
+
+            queue.add(idx);
+            int next = -1;
+
+            for (int i = idx; i < toIndex;) {
+                if (queue.size() == 0) {
+                    idx = next >= i ? next : str.indexOf(delimiterOfExclusiveBeginIndex, i);
+
+                    if (idx < 0) {
+                        break;
+                    } else {
+                        idx += lengthOfDelimiterOfExclusiveBeginIndex;
+                        queue.add(idx);
+                        i = idx;
+                    }
+                }
+
+                idx = str.indexOf(delimiterOfExclusiveEndIndex, i);
 
                 if (idx < 0) {
                     break;
                 } else {
-                    queue.add(idx + delimiterOfExclusiveBeginIndex.length());
-                    i = idx + delimiterOfExclusiveBeginIndex.length();
-                }
-            }
+                    final int endIndex = idx;
+                    //noinspection DataFlowIssue
+                    idx = res.size() > 0 ? Math.max(res.get(res.size() - 1)[1] + lengthOfDelimiterOfExclusiveEndIndex, queue.peekLast()) : queue.peekLast();
 
-            idx = str.indexOf(delimiterOfExclusiveEndIndex, i);
-
-            if (idx < 0) {
-                break;
-            } else {
-                final int endIndex = idx;
-                //noinspection DataFlowIssue
-                idx = res.size() > 0 ? Math.max(res.get(res.size() - 1)[1] + delimiterOfExclusiveEndIndex.length(), queue.peekLast()) : queue.peekLast();
-
-                while ((idx = str.indexOf(delimiterOfExclusiveBeginIndex, idx)) >= 0 && idx < endIndex) {
-                    queue.push(idx + delimiterOfExclusiveBeginIndex.length());
-                    idx = idx + delimiterOfExclusiveBeginIndex.length();
-                }
-
-                if (idx > 0) {
-                    next = idx;
-                }
-
-                final int startIndex = queue.pop();
-
-                if (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
-                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
-                        res.remove(res.size() - 1);
+                    while ((idx = str.indexOf(delimiterOfExclusiveBeginIndex, idx)) >= 0 && idx < endIndex) {
+                        idx += lengthOfDelimiterOfExclusiveBeginIndex;
+                        queue.push(idx);
                     }
+
+                    if (idx > 0) {
+                        next = idx;
+                    }
+
+                    final int startIndex = queue.pop();
+
+                    if (extractStrategy == ExtractStrategy.IGNORE_NESTED && res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
+                        while (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
+                            res.remove(res.size() - 1);
+                        }
+                    }
+
+                    res.add(new int[] { startIndex, endIndex });
+
+                    if (res.size() >= maxCount) {
+                        break;
+                    }
+
+                    i = endIndex + lengthOfDelimiterOfExclusiveEndIndex;
                 }
-
-                res.add(new int[] { startIndex, endIndex });
-
-                i = endIndex + delimiterOfExclusiveEndIndex.length();
             }
         }
 
@@ -10288,35 +10680,38 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Returns a new string with the specified range moved to the new position.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * The original String remains unchanged.
      *
      * @param str the original string to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
      * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndex is invalid
+     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndexAfterMove is invalid
      * @see N#moveRange(String, int, int, int)
      */
     @Beta
-    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = N.len(str);
-        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
         if (N.isEmpty(str)) {
             return EMPTY;
         }
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return str;
         }
 
-        if (newPositionStartIndex < fromIndex) {
-            return Strings.concat(str.substring(0, newPositionStartIndex), str.substring(fromIndex, toIndex), str.substring(newPositionStartIndex, fromIndex),
-                    str.substring(toIndex));
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            return Strings.concat(str.substring(0, newPositionStartIndexAfterMove), str.substring(fromIndex, toIndex),
+                    str.substring(newPositionStartIndexAfterMove, fromIndex), str.substring(toIndex));
         } else {
-            final int m = toIndex + (newPositionStartIndex - fromIndex);
+            final int m = toIndex + (newPositionStartIndexAfterMove - fromIndex);
 
             return Strings.concat(str.substring(0, fromIndex), str.substring(toIndex, m), str.substring(fromIndex, toIndex), str.substring(m));
         }
@@ -11988,6 +12383,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return join(a, fromIndex, toIndex, delimiter, null, null, trim);
     }
 
+    /** 
+     * Joins the elements of the provided array into a single String.
+     * The elements are selected from the specified range of the array.
+     *
+     * @param a The array containing the elements to join together. It can be {@code null}.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
+     */
+    public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        return join(a, fromIndex, toIndex, delimiter, prefix, suffix, false);
+    }
+
     /**
      * Joins the elements of the provided array into a single String.
      * The elements are selected from the specified range of the array.
@@ -12217,6 +12627,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final boolean trim) {
         return join(c, fromIndex, toIndex, delimiter, null, null, trim);
+    }
+
+    /**
+     * Joins the elements of the provided Collection into a single String.
+     * The elements are selected from the specified range of the Collection.
+     *
+     * @param c The Collection containing the elements to join together. It can be {@code null}.
+     * @param fromIndex The start index in the Collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return The concatenated string. Returns an empty string if the specified Collection is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the Collection size.
+     */
+    public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        return join(c, fromIndex, toIndex, delimiter, prefix, suffix, false);
     }
 
     /**
@@ -12589,78 +13014,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Joins the entries of the provided map into a string, using the specified delimiters.
-     * Each entry is represented as "key + keyValueDelimiter + value".
-     * The entries are joined with the specified entryDelimiter.
-     * If the trim flag is set to {@code true}, the leading and trailing whitespace of each entry will be removed.
-     * The keys and values are transformed using the provided keyExtractor and valueExtractor functions respectively.
-     *
-     * @param m The Map containing the entries to join together. It can be empty.
-     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, leading and trailing whitespace of each entry will be removed.
-     * @param keyExtractor The function to be used to transform the keys. It should not be {@code null}.
-     * @param valueExtractor The function to be used to transform the values. It should not be {@code null}.
-     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
-     * @throws IllegalArgumentException if the map is {@code null}, either delimiter is {@code null}, or the mapper functions are {@code null}.
-     */
-    public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
-            final String suffix, final boolean trim, final Function<? super K, ?> keyExtractor, final Function<? super V, ?> valueExtractor)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
-        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
-
-        if (N.isEmpty(m)) {
-            if (isEmpty(prefix) && isEmpty(suffix)) {
-                return EMPTY;
-            } else if (isEmpty(prefix)) {
-                return suffix;
-            } else if (isEmpty(suffix)) {
-                return prefix;
-            } else {
-                return concat(prefix, suffix);
-            }
-        }
-
-        final StringBuilder sb = Objectory
-                .createStringBuilder(calculateBufferSize(m.size(), 32 + N.len(entryDelimiter) + N.len(keyValueDelimiter), N.len(prefix), N.len(suffix)));
-
-        try {
-            if (isNotEmpty(prefix)) {
-                sb.append(prefix);
-            }
-
-            int i = 0;
-
-            for (final Map.Entry<K, V> entry : m.entrySet()) {
-                if (i++ > 0) {
-                    sb.append(entryDelimiter);
-                }
-
-                if (trim) {
-                    sb.append(N.toString(keyExtractor.apply(entry.getKey())).trim());
-                    sb.append(keyValueDelimiter);
-                    sb.append(N.toString(valueExtractor.apply(entry.getValue())).trim());
-                } else {
-                    sb.append(N.toString(keyExtractor.apply(entry.getKey())));
-                    sb.append(keyValueDelimiter);
-                    sb.append(N.toString(valueExtractor.apply(entry.getValue())));
-                }
-            }
-
-            if (isNotEmpty(suffix)) {
-                sb.append(suffix);
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    /**
-     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -12792,7 +13145,42 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter) {
-        return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, null, null, false);
+        return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, false);
+    }
+
+    /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
+     * Each entry is represented as "key + keyValueDelimiter + value".
+     * The entries are joined with the specified entryDelimiter.
+     *
+     * @param m The Map containing the entries to join together. It can be empty.
+     * @param fromIndex The start index in the entry set from which to start joining entries. It should be non-negative and no larger than the size of the map.
+     * @param toIndex The end index in the entry set up to which to join entries. It should be non-negative, no larger than the size of the map, and not less than fromIndex.
+     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
+     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param trim If {@code true}, leading and trailing whitespace of each entry will be removed.
+     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
+     */
+    public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
+            final boolean trim) {
+        return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, null, null, trim);
+    }
+
+    /**     
+     * Joins the entries of the provided map into a string, using the specified delimiters.
+     * Each entry is represented as "key + keyValueDelimiter + value".
+     * The entries are joined with the specified entryDelimiter.
+     *
+     * @param m The Map containing the entries to join together. It can be empty.
+     * @param fromIndex The start index in the entry set from which to start joining entries. It should be non-negative and no larger than the size of the map.
+     * @param toIndex The end index in the entry set up to which to join entries. It should be non-negative, no larger than the size of the map, and not less than fromIndex.
+     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
+     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
+     */
+    public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
+            final String prefix, final String suffix) {
+        return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, prefix, suffix, false);
     }
 
     /**
@@ -12858,6 +13246,108 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
                 if (i >= toIndex) {
                     break;
+                }
+            }
+
+            if (isNotEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    /**
+     * Joins the entries of the provided Iterable into a single String using the specified delimiters.
+     * This method is designed to handle collections of key-value pairs or map entries.
+     *
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable whose elements are to be joined
+     * @param entryDelimiter the delimiter to use between entries
+     * @param keyValueDelimiter the delimiter to use between keys and values
+     * @param keyExtractor function to extract keys from elements
+     * @param valueExtractor function to extract values from elements
+     * @return a string representation of the iterable's elements
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public static <T> String joinEntries(final Iterable<? extends T> c, final String entryDelimiter, final String keyValueDelimiter,
+            final Function<? super T, ?> keyExtractor, final Function<? super T, ?> valueExtractor) throws IllegalArgumentException {
+        return joinEntries(c, entryDelimiter, keyValueDelimiter, EMPTY, EMPTY, false, keyExtractor, valueExtractor);
+    }
+
+    /**
+     * <p>Joins the elements of the provided {@code Iterable} into a single String using the specified delimiters.
+     * This method is designed to handle collections of key-value pairs or map entries.</p>
+     * 
+     * <p>Each element in the iterable is converted to a string. The {@code keyValueDelimiter} is used 
+     * to separate keys and values within each element (if applicable), while the {@code entryDelimiter} 
+     * is used to separate the elements themselves.</p>
+     * 
+     * <p>The resulting string is surrounded by the {@code prefix} and {@code suffix}.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>
+     * List&lt;Map.Entry&lt;String, Integer&gt;&gt; entries = ...
+     * String result = Strings.joinEntries(entries, ";", "=", "[", "]");
+     * // result could be: "[key1=1;key2=2;key3=3]"
+     * </pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable whose elements are to be joined
+     * @param entryDelimiter the delimiter to use between entries
+     * @param keyValueDelimiter the delimiter to use between keys and values
+     * @param prefix the string to place at the start of the result
+     * @param suffix the string to place at the end of the result
+     * @return a string representation of the iterable's elements
+     * @throws IllegalArgumentException if any parameter is null
+     * 
+     * @see #join(Iterable)
+     * @see #join(Iterable, String)
+     * @see #joinEntries(Map, String, String)
+     */
+    public static <T> String joinEntries(final Iterable<? extends T> c, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
+            final String suffix, final boolean trim, final Function<? super T, ?> keyExtractor, final Function<? super T, ?> valueExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
+        if (N.isEmpty(c)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
+                return EMPTY;
+            } else if (isEmpty(prefix)) {
+                return suffix;
+            } else if (isEmpty(suffix)) {
+                return prefix;
+            } else {
+                return concat(prefix, suffix);
+            }
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(c instanceof Collection coll ? coll.size() : 16,
+                32 + N.len(entryDelimiter) + N.len(keyValueDelimiter), N.len(prefix), N.len(suffix)));
+
+        try {
+            if (isNotEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            int i = 0;
+
+            for (T e : c) {
+                if (i++ > 0) {
+                    sb.append(entryDelimiter);
+                }
+
+                if (trim) {
+                    sb.append(N.toString(keyExtractor.apply(e)).trim());
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueExtractor.apply(e)).trim());
+                } else {
+                    sb.append(N.toString(keyExtractor.apply(e)));
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueExtractor.apply(e)));
                 }
             }
 
@@ -13306,7 +13796,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         // if we run out of placeholders, append the extra args in square braces
         if (i < args.length) {
-            sb.append(" [");
+            sb.append(": [");
             sb.append(args[i++]);
             while (i < args.length) {
                 sb.append(", ");
@@ -14140,37 +14630,57 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return N.copyThenReplaceAll(strs, Fn.strip());
     }
 
-    /**
-     * Formats the given value as a percentage string.
-     *
-     * @param value the value to be formatted as a percentage
-     * @return the formatted percentage string
-     * @see Numbers#format(double, String)
-     */
-    public static String formatToPercentage(final double value) {
-        return Numbers.round(value * 100, 2) + "%";
-    }
-
-    /**
-     * Formats the given value as a percentage string with the specified scale.
-     *
-     * @param value the value to be formatted as a percentage
-     * @param scale the number of decimal places to include in the formatted percentage
-     * @return the formatted percentage string
-     * @see Numbers#format(double, String)
-     */
-    public static String formatToPercentage(final double value, final int scale) {
-        return Numbers.round(value * 100, scale) + "%";
-    }
+    //    /**
+    //     * Formats the given value as a percentage string.
+    //     *
+    //     * @param value the value to be formatted as a percentage
+    //     * @return the formatted percentage string
+    //     * @see Numbers#format(double, String)
+    //     * @deprecated replaced by {@link Numbers#format(Double, String)}.
+    //     */
+    //    public static String formatToPercentage(final double value) {
+    //        return Numbers.round(value * 100, 2) + "%";
+    //    }
+    //
+    //    /**
+    //     * Formats the given value as a percentage string with the specified scale.
+    //     *
+    //     * @param value the value to be formatted as a percentage
+    //     * @param scale the number of decimal places to include in the formatted percentage
+    //     * @return the formatted percentage string
+    //     * @see Numbers#format(double, String)
+    //     * @deprecated replaced by {@link Numbers#format(Double, String)}.
+    //     */
+    //    public static String formatToPercentage(final double value, final int scale) {
+    //        N.checkArgNotNegative(scale, cs.scale);
+    //        switch (scale) {
+    //            case 0:
+    //                return Numbers.format(value, "0%");
+    //            case 1:
+    //                return Numbers.format(value, "0.0%");
+    //            case 2:
+    //                return Numbers.format(value, "0.00%");
+    //            case 3:
+    //                return Numbers.format(value, "0.000%");
+    //            case 4:
+    //                return Numbers.format(value, "0.0000%");
+    //            case 5:
+    //                return Numbers.format(value, "0.00000%");
+    //            case 6:
+    //                return Numbers.format(value, "0.000000%");
+    //            default:
+    //                return Numbers.format(value, Strings.concat("0." + Strings.repeat("0", scale)) + "%");
+    //        }
+    //    }
 
     /**
      * Extracts the first occurrence of an integer from the given string.
      *
      * @param str The string to extract the integer from. It can be {@code null} or empty.
      * @return The extracted integer as a string, or an empty string {@code ""} if no integer is found.
+     * @see #replaceFirstInteger(String, String)
      * @see Numbers#extractFirstInt(String)
      * @see Numbers#extractFirstLong(String)
-     * @see #replaceFirstInteger(String, String)
      */
     public static String extractFirstInteger(final String str) {
         if (Strings.isEmpty(str)) {
@@ -14191,41 +14701,31 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The string to extract the double from. It can be {@code null} or empty.
      * @return The extracted double as a string, or an empty string {@code ""} if no double is found.
      * @see #extractFirstInteger(String)
-     * @see #extractFirstSciNumber(String)
-     * @see Numbers#extractFirstDouble(String)
      * @see #replaceFirstDouble(String, String)
+     * @see Numbers#extractFirstDouble(String)
      */
     public static String extractFirstDouble(final String str) {
-        if (Strings.isEmpty(str)) {
-            return Strings.EMPTY;
-        }
-
-        final Matcher matcher = RegExUtil.NUMBER_FINDER.matcher(str);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-
-        return Strings.EMPTY;
+        return extractFirstDouble(str, false);
     }
 
     /**
-     * Extracts the first occurrence of a scientific number from the given string.
+     * Extracts the first occurrence of a double from the given string.
      *
-     * @param str The string to extract the scientific number from. It can be {@code null} or empty.
-     * @return The extracted scientific number as a string, or an empty string {@code ""} if no scientific number is found.
+     * @param str The string to extract the double from. It can be {@code null} or empty.
+     * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
+     * @return The extracted double as a string, or an empty string {@code ""} if no double is found.
      * @see #extractFirstInteger(String)
      * @see #extractFirstDouble(String)
-     * @see Numbers#extractFirstSciDouble(String)
-     * @see Numbers#extractFirstSciDouble(String, double)
-     * @see #replaceFirstSciNumber(String, String)
-     * 
+     * @see #replaceFirstDouble(String, String)
+     * @see Numbers#extractFirstDouble(String, boolean)
      */
-    public static String extractFirstSciNumber(final String str) {
+    public static String extractFirstDouble(final String str, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
             return Strings.EMPTY;
         }
 
-        final Matcher matcher = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str);
+        final Matcher matcher = (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+
         if (matcher.find()) {
             return matcher.group(1);
         }
@@ -14266,19 +14766,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Replaces the first occurrences of scientific number in the given string with the specified replacement string.
+     * Replaces the first occurrences of double in the given string with the specified replacement string.
      *
      * @param str The string to be modified. It can be {@code null} or empty.
-     * @param replacement The string to replace the scientific number with.
-     * @return The modified string with the first scientific number replaced by the specified replacement string.
-     * @see #extractFirstSciNumber(String)
+     * @param replacement The string to replace the double with.
+     * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
+     * @return The modified string with the first double replaced by the specified replacement string.
+     * @see #extractFirstDouble(String, boolean)
      */
-    public static String replaceFirstSciNumber(final String str, final String replacement) {
+    public static String replaceFirstDouble(final String str, final String replacement, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
             return Strings.EMPTY;
         }
 
-        return RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str).replaceFirst(replacement);
+        return (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str).replaceFirst(replacement);
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
@@ -14301,6 +14802,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
     static int calculateBufferSize(final int len, final int elementPlusDelimiterLen, final int prefixLen, final int suffixLen) {
         return len > (Integer.MAX_VALUE - prefixLen - suffixLen) / elementPlusDelimiterLen ? Integer.MAX_VALUE
                 : len * elementPlusDelimiterLen + prefixLen + suffixLen;
+    }
+
+    public enum ExtractStrategy {
+        /**
+         * Default strategy used to extract substring between two delimiters.
+         * <p>
+         * <code>substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"]</code>.
+         * </p>
+         */
+        DEFAULT,
+
+        /**
+         * Stack-based approach strategy used to extract substring between two delimiters.
+         * <p>
+         * <code>substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["c", "a2[c]", "a"]</code>.
+         * </p>
+         */
+        STACK_BASED,
+
+        /**
+         * Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored.
+         * <p>
+         * <code>substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c]", "a"]</code>.
+         * </p>
+         */
+        IGNORE_NESTED
     }
 
     /**
@@ -14923,7 +15450,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param delimitersOfExclusiveBeginIndex
          * @return
-         * @see Strings#substringAfterAny(String, char...)
+         * @see Strings#substringAfterAny(String, char[])
          */
         @Beta
         public static Optional<String> substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) {
@@ -14936,7 +15463,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param delimitersOfExclusiveBeginIndex
          * @return
-         * @see Strings#substringAfterAny(String, String...)
+         * @see Strings#substringAfterAny(String, String[])
          */
         @Beta
         public static Optional<String> substringAfterAny(final String str, final String... delimitersOfExclusiveBeginIndex) {
@@ -15029,7 +15556,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param delimitersOfExclusiveEndIndex
          * @return
-         * @see Strings#substringBeforeAny(String, char...)
+         * @see Strings#substringBeforeAny(String, char[])
          */
         @Beta
         public static Optional<String> substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) {
@@ -15042,7 +15569,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param delimitersOfExclusiveEndIndex
          * @return
-         * @see Strings#substringBeforeAny(String, String...)
+         * @see Strings#substringBeforeAny(String, String[])
          */
         @Beta
         public static Optional<String> substringBeforeAny(final String str, final String... delimitersOfExclusiveEndIndex) {

@@ -702,7 +702,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
         return (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()))
-                || (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()));
+                || (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()))
+                || (leftOnly instanceof PrimitiveList && (((PrimitiveList) leftOnly).isEmpty() && ((PrimitiveList) rightOnly).isEmpty()));
     }
 
     @Override
@@ -941,6 +942,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
             return of(map1, map2, null, (k, v1, v2) -> valueEquivalence.test(v1, v2));
         }
 
@@ -971,6 +974,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
             return of(map1, map2, null, valueEquivalence);
         }
 
@@ -1138,8 +1143,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return A MapDifference object containing the common elements, elements only in the first collection, elements only in the second collection, and elements with different values.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
-                final Collection<? extends Map<? extends CK, ? extends CV>> a, final Collection<? extends Map<? extends CK, ? extends CV>> b,
-                final Function<? super Map<? extends CK, ? extends CV>, ? extends K> idExtractor) {
+                final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b,
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) {
             return of(a, b, null, idExtractor, idExtractor);
         }
 
@@ -1156,8 +1161,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return A MapDifference object containing the common elements, elements only in the first collection, elements only in the second collection, and elements with different values.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
-                final Collection<? extends Map<? extends CK, ? extends CV>> a, final Collection<? extends Map<? extends CK, ? extends CV>> b,
-                final Collection<CK> keysToCompare, final Function<? super Map<? extends CK, ? extends CV>, ? extends K> idExtractor) {
+                final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b, final Collection<CK> keysToCompare,
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) {
             return of(a, b, keysToCompare, idExtractor, idExtractor);
         }
 
@@ -1176,9 +1181,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return A MapDifference object containing the common elements, elements only in the first collection, elements only in the second collection, and elements with different values.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
-                final Collection<? extends Map<? extends K1, ? extends V1>> a, final Collection<? extends Map<? extends K2, ? extends V2>> b,
-                final Function<? super Map<? extends K1, ? extends V1>, ? extends K> idExtractor1,
-                final Function<? super Map<? extends K2, ? extends V2>, ? extends K> idExtractor2) {
+                final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b,
+                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2) {
 
             return of(a, b, null, idExtractor1, idExtractor2);
         }
@@ -1199,9 +1203,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return A MapDifference object containing the common elements, elements only in the first collection, elements only in the second collection, and elements with different values.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
-                final Collection<? extends Map<? extends K1, ? extends V1>> a, final Collection<? extends Map<? extends K2, ? extends V2>> b,
-                final Collection<CK> keysToCompare, final Function<? super Map<? extends K1, ? extends V1>, ? extends K> idExtractor1,
-                final Function<? super Map<? extends K2, ? extends V2>, ? extends K> idExtractor2) {
+                final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b, final Collection<CK> keysToCompare,
+                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2) {
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             final boolean isEmptyPropNamesToCompare = N.isEmpty(keysToCompare);
 
@@ -1214,10 +1219,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (N.isEmpty(b)) {
                     // Do nothing. All empty.
                 } else {
-                    rightOnly.addAll((Collection<? extends Map<K2, V2>>) b);
+                    rightOnly.addAll(b);
                 }
             } else if (N.isEmpty(b)) {
-                leftOnly.addAll((Collection<? extends Map<K1, V1>>) a);
+                leftOnly.addAll(a);
             } else {
                 final Map<K, Map<? extends K1, ? extends V1>> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(),
                         Factory.ofLinkedHashMap());
@@ -1358,6 +1363,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          */
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
             final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
 
             return of(bean1, bean2, null, (k, v1, v2) -> valueEquivalenceToUse.test(v1, v2));
@@ -1416,6 +1423,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
             if (bean1 != null && !ClassUtil.isBeanClass(bean1.getClass())) {
                 throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
@@ -1654,6 +1663,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,
                 final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) {
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             final Class<T1> clsA = N.isEmpty(a) ? null : (Class<T1>) N.firstOrNullIfEmpty(a).getClass();
             final Class<T2> clsB = N.isEmpty(b) ? null : (Class<T2>) N.firstOrNullIfEmpty(b).getClass();

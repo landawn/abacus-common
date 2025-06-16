@@ -532,16 +532,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
-        N.checkArgument(N.anyNull(map.values()), "The specified map contains null value: %s", map);
+        N.checkArgument(map.values().stream().noneMatch(Fn.isEmptyC()), "The specified map contains null or empty value: %s", map);
 
-        Class<? extends List> valueType = ArrayList.class;
-
-        for (final V v : map.values()) {
-            if (v != null) {
-                valueType = v.getClass();
-                break;
-            }
-        }
+        final Class<? extends List> valueType = map.isEmpty() ? ArrayList.class : map.values().iterator().next().getClass();
 
         return new ListMultimap<>((Map<K, List<E>>) map, valueType);
     }

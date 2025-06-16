@@ -179,8 +179,9 @@ public final class RegExUtil {
             "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
     // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    public static final Pattern URL_FINDER = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
-    public static final Pattern HTTP_URL_FINDER = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+    public static final Pattern URL_FINDER = Pattern.compile("[a-zA-Z][a-zA-Z0-9+.-]*:\\/\\/(?:[^\\s@\\/]+@)?[^\\s@\\/]+(?:\\/[^\\s]*)?");
+    public static final Pattern HTTP_URL_FINDER = Pattern
+            .compile("https?:\\/\\/(?:[-\\w.])+(?:\\:[0-9]+)?(?:\\/(?:[\\w\\/_.])*(?:\\?(?:[\\w&=%.])*)?(?:\\#(?:[\\w.])*)?)?");
 
     /**
      * Pattern for alphanumeric string without space.
@@ -231,6 +232,10 @@ public final class RegExUtil {
 
     public static final Pattern WHITESPACE_MATCHER = Pattern.compile("^" + WHITESPACE_FINDER.pattern() + "$");
 
+    public static final Pattern LINE_SEPARATOR = Pattern.compile("\\R"); // Matches any line break sequence (CR, LF, CRLF, etc.));
+
+    static final Pattern CAMEL_CASE_SEPARATOR = Pattern.compile("[_-]");
+
     private RegExUtil() {
         // Singleton for utility class.
     }
@@ -242,7 +247,6 @@ public final class RegExUtil {
      * @param regex the regular expression to find
      * @return {@code true} if the string contains a match, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see Pattern#find(CharSequence)
      */
     public static boolean find(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -257,7 +261,6 @@ public final class RegExUtil {
      * @param pattern the regular expression pattern to find
      * @return {@code true} if the string contains a match, {@code false} otherwise
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see Pattern#find(CharSequence)
      */
     public static boolean find(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -962,9 +965,8 @@ public final class RegExUtil {
      * @return an array of strings computed by splitting the source string around matches of the given regular expression
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see String#split(String)
-     * @see Pattern#split(String)
      * @see Splitter#with(Pattern)
-     * @see Splitter#split(String)
+     * @see Splitter#split(CharSequence)
      */
     public static String[] split(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -988,9 +990,8 @@ public final class RegExUtil {
      * @return an array of strings computed by splitting the source string around matches of the given regular expression
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see String#split(String, int)
-     * @see Pattern#split(String, int)
      * @see Splitter#with(Pattern)
-     * @see Splitter#split(String)
+     * @see Splitter#split(CharSequence)
      */
     public static String[] split(final String source, final String regex, final int limit) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -1013,9 +1014,8 @@ public final class RegExUtil {
      * @return an array of strings computed by splitting the source string around matches of the given regular expression
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see String#split(String)
-     * @see Pattern#split(String)
      * @see Splitter#with(Pattern)
-     * @see Splitter#split(String)
+     * @see Splitter#split(CharSequence)
      */
     public static String[] split(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -1039,9 +1039,8 @@ public final class RegExUtil {
      * @return an array of strings computed by splitting the source string around matches of the given regular expression
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see String#split(String, int)
-     * @see Pattern#split(String, int)
      * @see Splitter#with(Pattern)
-     * @see Splitter#split(String)
+     * @see Splitter#split(CharSequence)
      */
     public static String[] split(final String source, final Pattern pattern, final int limit) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -1053,5 +1052,44 @@ public final class RegExUtil {
         }
 
         return pattern.split(source, limit);
+    }
+
+    /** 
+     * Splits the given string into an array of lines, using the default line separator.
+     * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     *
+     * @param source the string to be split into lines, may be {@code null} or empty
+     * @return an array of strings computed by splitting the source string into lines 
+     * @see #splitToLines(String, int)
+     * @see Pattern#split(CharSequence)
+     */
+    public static String[] splitToLines(final String source) {
+        if (source == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (source.isEmpty()) {
+            return new String[] { Strings.EMPTY };
+        }
+
+        return LINE_SEPARATOR.split(source);
+    }
+
+    /** 
+     * Splits the given string into an array of lines, with a specified limit on the number of lines.
+     * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     *
+     * @param source the string to be split into lines, may be {@code null} or empty
+     * @param limit the result threshold. A non-positive limit indicates no limit.
+     * @return an array of strings computed by splitting the source string into lines
+     * @see #splitToLines(String)
+     * @see Pattern#split(CharSequence, int)
+     */
+    public static String[] splitToLines(final String source, final int limit) {
+        if (source == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (source.isEmpty()) {
+            return new String[] { Strings.EMPTY };
+        }
+
+        return LINE_SEPARATOR.split(source, limit);
     }
 }

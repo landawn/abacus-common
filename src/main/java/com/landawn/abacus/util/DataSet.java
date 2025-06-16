@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -64,7 +63,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.N#newDataSet(Collection, Collection)
  * @see com.landawn.abacus.util.N#newDataSet(String, String, Map)
  */
-public interface DataSet {
+public sealed interface DataSet permits RowDataSet {
 
     /**
      * Returns an empty immutable {@code DataSet}.
@@ -317,9 +316,10 @@ public interface DataSet {
      *
      * @param columnName the name of the column to be moved.
      * @param newPosition the new position for the column.
-     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or the new position is out of bounds.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet
+     * @throws IndexOutOfBoundsException if the new position is out of bounds.
      */
-    void moveColumn(String columnName, int newPosition) throws IllegalArgumentException;
+    void moveColumn(String columnName, int newPosition) throws IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Moves multiple columns in the DataSet to new positions.
@@ -336,14 +336,14 @@ public interface DataSet {
      * @param columnNameB the name of the second column to be swapped.
      * @throws IllegalArgumentException if either of the specified column names does not exist in the DataSet.
      */
-    void swapColumns(String columnNameA, String columnNameB) throws IllegalArgumentException;
+    void swapColumnPosition(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
     /**
      * Moves a row in the DataSet to a new position.
      *
      * @param rowIndex the index of the row to be moved.
      * @param newRowIndex the new position for the row.
-     * @throws IllegalArgumentException if the specified row index is out of bounds or the new position is out of bounds.
+     * @throws IndexOutOfBoundsException if the specified row index is out of bounds or the new position is out of bounds.
      */
     void moveRow(int rowIndex, int newRowIndex) throws IllegalArgumentException;
 
@@ -352,9 +352,9 @@ public interface DataSet {
      *
      * @param rowIndexA the index of the first row to be swapped.
      * @param rowIndexB the index of the second row to be swapped.
-     * @throws IllegalArgumentException if either of the specified row indexes is out of bounds.
+     * @throws IndexOutOfBoundsException if either of the specified row indexes is out of bounds.
      */
-    void swapRows(int rowIndexA, int rowIndexB) throws IllegalArgumentException;
+    void swapRowPosition(int rowIndexA, int rowIndexB) throws IllegalArgumentException;
 
     /**
      * Retrieves the value at the specified row and column index in the DataSet.
@@ -880,7 +880,7 @@ public interface DataSet {
      * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
      * @param column The data for the new column. It should be a collection where each element represents a row in the column.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet,
+     * @throws IndexOutOfBoundsException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet,
      *                               or if the provided collection is not empty and its size does not match the number of rows in the DataSet, or the newColumnPosition is out of bounds.
      */
     void addColumn(int newColumnPosition, String newColumnName, Collection<?> column) throws IllegalStateException, IllegalArgumentException;
@@ -5483,198 +5483,566 @@ public interface DataSet {
     DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other}. Occurrences are considered.
+     * Returns a new DataSet containing rows that appear in both this DataSet and the specified DataSet.
+     * The intersection contains rows that exist in both DataSets based on matching column values.
+     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both DataSets.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
-     * @param other The other DataSet to compare with.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}.
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     * <p>Example:
+     * <pre>
+     * // DataSet 1 with columns "id", "name"
+     * DataSet ds1 = DataSet.rows(
+     *     Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *         {1, "Alice"},
+     *         {2, "Bob"},
+     *         {3, "Charlie"},
+     *         {2, "Bob"}  // duplicate row
+     *     }
+     * );
+     *
+     * // DataSet 2 with columns "id", "name"
+     * DataSet ds2 = DataSet.rows(
+     *     Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *         {2, "Bob"},
+     *         {3, "Charlie"},
+     *         {4, "Dave"},
+     *         {2, "Bob"},  // duplicate row
+     *         {2, "Bob"}   // another duplicate
+     *     }
+     * );
+     *
+     * // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
+     * DataSet result = ds1.intersection(ds2);
+     * </pre>
+     *
+     *
+     * @param other the DataSet to find common rows with
+     * @return a new DataSet containing rows present in both DataSets, with duplicates handled based on minimum occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or the two {@code DataSets} don't have common columns.
+     * @see #intersect(DataSet)
+     * @see #intersectAll(DataSet)
+     * @see #intersection(DataSet, boolean)
+     * @see #intersection(DataSet, Collection)
+     * @see N#intersection(int[], int[])
      */
     DataSet intersection(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other}. Occurrences are considered.
+     * Returns a new DataSet containing rows that appear in both this DataSet and the specified DataSet.
+     * The intersection contains rows that exist in both DataSets based on matching column values.
+     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both DataSets.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * 
+     * <p>Example:
+     * <pre>
+     * // DataSet 1 with columns "id", "name"
+     * DataSet ds1 = DataSet.rows(
+     *     Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *         {1, "Alice"},
+     *         {2, "Bob"},
+     *         {3, "Charlie"}
+     *     }
+     * );
+     * 
+     * // DataSet 2 with columns "id", "name", "age"
+     * DataSet ds2 = DataSet.rows(
+     *     Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *         {2, "Bob", 30},
+     *         {3, "Charlie", 25},
+     *         {4, "Dave", 35}
+     *     }
+     * );
+     * 
+     * // With requiresSameColumns=true, this would throw IllegalArgumentException
+     * // With requiresSameColumns=false, result will contain common rows based on common columns
+     * DataSet result = ds1.intersection(ds2, false);
+     * // result will contain {2, "Bob"} and {3, "Charlie"} with only the columns from ds1
+     * </pre>
      *
-     * @param other The other DataSet to compare with.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     * @param other the DataSet to find common rows with
+     * @param requiresSameColumns if true, both DataSets must have identical column structures;
+     *                           if false, the intersection is based on common columns only
+     * @return a new DataSet containing rows present in both DataSets, with duplicates handled based on minimum occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if {@code requiresSameColumns} is true
+     *                                  and the DataSets have different column structures
+     * @see #intersection(DataSet)
+     * @see #intersection(DataSet, Collection)
+     * @see #intersection(DataSet, Collection, boolean)
+     * @see N#intersection(int[], int[])
+     * @see #intersect(DataSet)
+     * @see #intersectAll(DataSet)
      */
     DataSet intersection(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other} based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that appear in both this DataSet and the specified DataSet,
+     * based on matching values in the specified key columns. The intersection considers duplicates,
+     * retaining the minimum number of occurrences present in both DataSets.
+     * <p>The method compares only the specified key columns rather than entire rows.
+     * Columns from this DataSet are preserved in the result.
      *
-     * @param other The DataSet to perform the intersection operation with.
-     * @param keyColumnNames A collection of column names to base the intersection operation on.
-     * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty.
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     * <p>Example:
+     * <pre>
+     * // DataSet 1 with columns "id", "name", "department"
+     * DataSet ds1 = DataSet.rows(
+     *     Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *         {1, "Alice", "HR"},
+     *         {2, "Bob", "Engineering"},
+     *         {3, "Charlie", "Marketing"},
+     *         {2, "Bob", "Engineering"}  // duplicate row
+     *     }
+     * );
+     *
+     * // DataSet 2 with columns "id", "name", "salary"
+     * DataSet ds2 = DataSet.rows(
+     *     Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *         {2, "Bob", 75000},
+     *         {3, "Charlie", 65000},
+     *         {4, "Dave", 70000},
+     *         {2, "Bob", 80000}  // different salary but same keys
+     *     }
+     * );
+     *
+     * // Result will contain rows matching on id and name columns
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * DataSet result = ds1.intersection(ds2, keyColumns);
+     * // result will contain {2, "Bob", "Engineering"} twice and {3, "Charlie", "Marketing"} once
+     * // with column structure matching ds1
+     * </pre>
+     *
+     *
+     * @param other the DataSet to find common rows with
+     * @param keyColumnNames the column names to use for matching rows between DataSets
+     * @return a new DataSet containing rows whose key column values appear in both DataSets,
+     *         with duplicates handled based on minimum occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if keyColumnNames is
+     *                                  {@code null} or empty, or if any specified key column doesn't
+     *                                  exist in either DataSet
+     * @see #intersection(DataSet)
+     * @see #intersection(DataSet, boolean)
+     * @see #intersection(DataSet, Collection, boolean)
+     * @see #intersect(DataSet, Collection)
+     * @see #intersectAll(DataSet, Collection)
      */
     DataSet intersection(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other} based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that appear in both this DataSet and the specified DataSet,
+     * based on matching values in the specified key columns. The intersection considers duplicates,
+     * retaining the minimum number of occurrences present in both DataSets.
      *
-     * @param other The DataSet to perform the intersection operation with.
-     * @param keyColumnNames A collection of column names to base the intersection operation on.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     * <p>Example:
+     * <pre>
+     * // DataSet 1 with columns "id", "name", "department"
+     * DataSet ds1 = DataSet.rows(
+     *     Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *         {1, "Alice", "HR"},
+     *         {2, "Bob", "Engineering"},
+     *         {3, "Charlie", "Marketing"},
+     *         {2, "Bob", "Engineering"}  // duplicate row
+     *     }
+     * );
+     *
+     * // DataSet 2 with columns "id", "name", "salary"
+     * DataSet ds2 = DataSet.rows(
+     *     Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *         {2, "Bob", 75000},
+     *         {3, "Charlie", 65000},
+     *         {4, "Dave", 70000},
+     *         {2, "Bob", 80000}  // different salary but same keys
+     *     }
+     * );
+     *
+     * // With requiresSameColumns=false, different column structures are allowed
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * DataSet result = ds1.intersection(ds2, keyColumns, false);
+     * // result will contain {2, "Bob", "Engineering"} twice and {3, "Charlie", "Marketing"} once
+     * // with column structure matching ds1
+     * </pre>
+     *
+     * <p>The method compares only the specified key columns rather than entire rows.
+     * When {@code requiresSameColumns} is false, the columns from this DataSet are preserved in the result.
+     * When {@code requiresSameColumns} is true, both DataSets must have identical column structures.
+     *
+     * @param other the DataSet to find common rows with
+     * @param keyColumnNames the column names to use for matching rows between DataSets
+     * @param requiresSameColumns if true, both DataSets must have identical column structures;
+     *                           if false, the intersection is based on common columns only
+     * @return a new DataSet containing rows whose key column values appear in both DataSets,
+     *         with duplicates handled based on minimum occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if keyColumnNames is
+     *                                  {@code null} or empty, or if any specified key column doesn't
+     *                                  exist in either DataSet, or if {@code requiresSameColumns} is true
+     *                                  and the DataSets have different column structures
+     * @see #intersection(DataSet)
+     * @see #intersection(DataSet, boolean)
+     * @see #intersection(DataSet, Collection)
+     * @see #intersect(DataSet, Collection)
+     * @see #intersectAll(DataSet, Collection)
      */
     DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other}. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet with the rows in this DataSet but not in the specified DataSet {@code other},
+     * considering the number of occurrences of each row.
+     * Duplicated rows in the returned DataSet will not be eliminated.
      *
-     * @param other The DataSet to perform the difference operation with.
-     * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}.
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {3, "Charlie"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {1, "Alice"}, {4, "David"}, {3, "Charlie"}
+     * });
+     * DataSet result = ds1.difference(ds2); 
+     * // result will contain: {2, "Bob"}, {3, "Charlie"}
+     * // One "Charlie" row remains because ds1 has two occurrences and ds2 has one
+     *
+     * DataSet ds3 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {5, "Eva"}, {6, "Frank"}
+     * });
+     * DataSet ds4 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {5, "Eva"}, {5, "Eva"}, {6, "Frank"}
+     * });
+     * DataSet result2 = ds3.difference(ds4);
+     * // result2 will be empty
+     * // No rows remain because ds4 has at least as many occurrences of each row as ds3
+     * </pre>
+     *
+     * @param other the DataSet to compare against this DataSet
+     * @return a new DataSet containing the rows that are present in this DataSet but not in the specified DataSet,
+     *         considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or the two {@code DataSets} don't have common columns.
+     * @see #difference(DataSet, boolean)
+     * @see #difference(DataSet, Collection)
+     * @see #symmetricDifference(DataSet)
+     * @see #intersection(DataSet)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see N#difference(int[], int[])
      */
     DataSet difference(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other}. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet with the rows in this DataSet but not in the specified DataSet {@code other},
+     * considering the number of occurrences of each row.
+     * Duplicated rows in the returned DataSet will not be eliminated.
      *
-     * @param other The DataSet to perform the difference operation with.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {3, "Charlie"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {1, "Alice"}, {4, "David"}, {3, "Charlie"}
+     * });
+     * 
+     * // With requiresSameColumns = true
+     * DataSet result1 = ds1.difference(ds2, true);
+     * // result1 will contain: {2, "Bob"}, {3, "Charlie"}
+     * 
+     * // With requiresSameColumns = false
+     * DataSet ds3 = DataSet.rows(Arrays.asList("id", "address"), new Object[][] {
+     *     {1, "123 Main St"}, {3, "456 Oak Ave"}
+     * });
+     * DataSet result2 = ds1.difference(ds3, false);
+     * // result2 will contain rows from ds1 that don't match in the common columns
+     * </pre>
+     *
+     *
+     * @param other the DataSet to compare against this DataSet
+     * @param requiresSameColumns whether both DataSets must have identical column names
+     * @return a new DataSet containing the rows that are present in this DataSet but not in the specified DataSet,
+     *         considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is 
+     *         {@code true} and the DataSets do not have the same columns
+     * @see #difference(DataSet)
+     * @see #difference(DataSet, Collection)
+     * @see #symmetricDifference(DataSet)
+     * @see #intersection(DataSet)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see N#difference(int[], int[])
      */
     DataSet difference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other} based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet with the rows in this DataSet but not in the specified DataSet {@code other},
+     * comparing rows based only on the values in the specified key columns and considering the number of occurrences.
+     * Duplicated rows in the returned DataSet will not be eliminated.
      *
-     * @param other The DataSet to perform the difference operation with.
-     * @param keyColumnNames A collection of column names to base the difference operation on.
-     * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty.
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
+     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}, {3, "Charlie", "IT"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name", "role"), new Object[][] {
+     *     {1, "Alice", "Manager"}, {3, "Charlie", "Analyst"}
+     * });
+     * 
+     * // Compare only by "id" column
+     * DataSet result1 = ds1.difference(ds2, Arrays.asList("id"));
+     * // result1 will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
+     * // One "Charlie" row remains since ds1 has two occurrences and ds2 has one with id=3
+     * 
+     * // Compare by both "id" and "name" columns
+     * DataSet result2 = ds1.difference(ds2, Arrays.asList("id", "name"));
+     * // result2 will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
+     * // The result is the same because both key fields match for Alice and Charlie
+     * </pre>
+     *
+     * @param other the DataSet to compare against this DataSet
+     * @param keyColumnNames the column names to use for comparison
+     * @return a new DataSet containing the rows that are present in this DataSet but not in the specified DataSet,
+     *         based on the specified key columns and considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if keyColumnNames is {@code null} or empty
+     * @see #difference(DataSet)
+     * @see #difference(DataSet, boolean)
+     * @see #symmetricDifference(DataSet, Collection)
+     * @see #intersection(DataSet, Collection)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see N#difference(int[], int[])
      */
     DataSet difference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other} based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet with the rows in this DataSet but not in the specified DataSet {@code other},
+     * comparing rows based only on the values in the specified key columns and considering the number of occurrences.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     * 
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
+     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}, {3, "Charlie", "IT"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name", "role"), new Object[][] {
+     *     {1, "Alice", "Manager"}, {3, "Charlie", "Analyst"}
+     * });
+     * 
+     * // With requiresSameColumns = true
+     * try {
+     *     DataSet result = ds1.difference(ds2, Arrays.asList("id", "name"), true);
+     *     // Will throw IllegalArgumentException as the DataSets have different columns
+     * } catch (IllegalArgumentException e) {
+     *     // Handle exception
+     * }
+     * 
+     * // With requiresSameColumns = false
+     * DataSet result = ds1.difference(ds2, Arrays.asList("id", "name"), false);
+     * // result will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
+     * // One "Charlie" row remains since ds1 has two occurrences and ds2 has one
+     * </pre>
      *
-     * @param other The DataSet to perform the difference operation with.
-     * @param keyColumnNames A collection of column names to base the difference operation on.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
-     * @see IntList#difference(IntList)
+     * @param other the DataSet to compare against this DataSet
+     * @param keyColumnNames the column names to use for comparison
+     * @param requiresSameColumns whether both DataSets must have identical column names
+     * @return a new DataSet containing the rows that are present in this DataSet but not in the specified DataSet,
+     *         based on the specified key columns and considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, if keyColumnNames is {@code null} or empty,
+     *         or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns
+     * @see #difference(DataSet)
+     * @see #difference(DataSet, boolean)
+     * @see #difference(DataSet, Collection)
+     * @see #symmetricDifference(DataSet, Collection)
+     * @see #intersection(DataSet, Collection)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see N#difference(int[], int[])
      */
     DataSet difference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param other The DataSet to perform the symmetric difference operation with.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}.
+     * <p>The order of rows is preserved, with rows from this DataSet appearing first,
+     * followed by rows from the specified DataSet that aren't in this DataSet.
+     *
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {1, "Alice"}, {2, "Bob"}, {2, "Bob"}, {3, "Charlie"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name"), new Object[][] {
+     *     {2, "Bob"}, {3, "Charlie"}, {4, "David"}, {4, "David"}
+     * });
+     * DataSet result = ds1.symmetricDifference(ds2);
+     * // result will contain:
+     * // {1, "Alice"}, {2, "Bob"}, {4, "David"}, {4, "David"}
+     * // Rows explanation:
+     * // - {1, "Alice"} appears only in ds1, so it remains
+     * // - {2, "Bob"} appears twice in ds1 and once in ds2, so one occurrence remains
+     * // - {3, "Charlie"} appears once in each DataSet, so it's removed from both
+     * // - {4, "David"} appears twice in ds2 and not in ds1, so both occurrences remain
+     * </pre>
+     *
+     * @param other the DataSet to find symmetric difference with this DataSet
+     * @return a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     *         but not in both, considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or the two {@code DataSets} don't have common columns.
+     * @see #symmetricDifference(DataSet, boolean)
+     * @see #symmetricDifference(DataSet, Collection)
+     * @see #difference(DataSet)
+     * @see #intersection(DataSet)
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
-     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param other The DataSet to perform the symmetric difference operation with.
-     * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
+     * <p>The order of rows is preserved, with rows from this DataSet appearing first,
+     * followed by rows from the specified DataSet that aren't in this DataSet.
+     *
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
+     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name", "role"), new Object[][] {
+     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
+     * });
+     * 
+     * // With requiresSameColumns = true
+     * try {
+     *     DataSet result = ds1.symmetricDifference(ds2, true);
+     *     // Will throw IllegalArgumentException as the DataSets have different columns
+     * } catch (IllegalArgumentException e) {
+     *     System.out.println("DataSets must have identical columns");
+     * }
+     * 
+     * // With requiresSameColumns = false
+     * DataSet result = ds1.symmetricDifference(ds2, false);
+     * // result will contain:
+     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
+     * // Rows explanation:
+     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
+     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
+     * // - {3, "Charlie", "Finance"} and {3, "Charlie", "Analyst"} appear once in each DataSet, so they're removed
+     * // - {4, "David", "Developer"} appears only in ds2, so it remains
+     * </pre>
+     *
+     * @param other the DataSet to find symmetric difference with this DataSet
+     * @param requiresSameColumns whether both DataSets must have identical column names
+     * @return a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     *         but not in both, considering the number of occurrences
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> 
+     *         is {@code true} and the DataSets do not have the same columns
+     * @see #symmetricDifference(DataSet)
+     * @see #symmetricDifference(DataSet, Collection)
+     * @see #difference(DataSet)
+     * @see #intersection(DataSet)
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
-     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     * but not in both, based on the specified key columns. This is the set-theoretic symmetric difference operation.
+     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param other The DataSet to perform the symmetric difference operation with.
-     * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
+     * <p>The order of rows is preserved, with rows from this DataSet appearing first,
+     * followed by rows from the specified DataSet that aren't in this DataSet.
+     *
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
+     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name", "role"), new Object[][] {
+     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
+     * });
+     * 
+     * // Using only "id" and "name" as key columns for comparison
+     * DataSet result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"));
+     * // result will contain:
+     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
+     * // Rows explanation:
+     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
+     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
+     * // - {3, "Charlie", "Finance"}/{3, "Charlie", "Analyst"} appear once in each DataSet based on key columns, so they're removed
+     * // - {4, "David", "Developer"} appears only in ds2, so it remains
+     * </pre>
+     *
+     * @param other the DataSet to find symmetric difference with this DataSet
+     * @param keyColumnNames the columns to use for comparison when determining differences
+     * @return a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     *         but not in both, considering the number of occurrences and comparing only specified key columns
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if keyColumnNames is {@code null} or empty
+     * @see #symmetricDifference(DataSet)
+     * @see #symmetricDifference(DataSet, boolean)
+     * @see #difference(DataSet, Collection)
+     * @see #intersection(DataSet, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
-     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     * Returns a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     * but not in both, based on the specified key columns. This is the set-theoretic symmetric difference operation.
+     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param other The DataSet to perform the symmetric difference operation with.
-     * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
-     * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
-     * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
+     * <p>The order of rows is preserved, with rows from this DataSet appearing first,
+     * followed by rows from the specified DataSet that aren't in this DataSet.
+     *
+     * <p>Example:
+     * <pre>
+     * DataSet ds1 = DataSet.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
+     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
+     * });
+     * DataSet ds2 = DataSet.rows(Arrays.asList("id", "name", "role"), new Object[][] {
+     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
+     * });
+     *
+     * // With requiresSameColumns = true (comparing only "id" and "name" columns)
+     * try {
+     *     DataSet result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"), true);
+     *     // Will throw IllegalArgumentException as the DataSets have different columns
+     * } catch (IllegalArgumentException e) {
+     *     System.out.println("DataSets must have identical columns");
+     * }
+     *
+     * // With requiresSameColumns = false (comparing only "id" and "name" columns)
+     * DataSet result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"), false);
+     * // result will contain:
+     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
+     * // Rows explanation:
+     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
+     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
+     * // - {3, "Charlie", "Finance"}/{3, "Charlie", "Analyst"} appear once in each DataSet based on key columns, so they're removed
+     * // - {4, "David", "Developer"} appears only in ds2, so it remains
+     * </pre>
+     *
+     * @param other the DataSet to find symmetric difference with this DataSet
+     * @param keyColumnNames the columns to use for comparison when determining differences
+     * @param requiresSameColumns whether both DataSets must have identical column names
+     * @return a new DataSet containing rows that are present in either this DataSet or the specified DataSet,
+     *         but not in both, considering the number of occurrences and comparing only specified key columns
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if keyColumnNames is {@code null} or empty,
+     *         or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns
+     * @see #symmetricDifference(DataSet)
+     * @see #symmetricDifference(DataSet, boolean)
+     * @see #symmetricDifference(DataSet, Collection)
+     * @see #difference(DataSet, Collection, boolean)
+     * @see #intersection(DataSet, Collection, boolean)
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
-     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 

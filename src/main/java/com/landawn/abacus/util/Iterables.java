@@ -107,6 +107,327 @@ public final class Iterables {
         // Utility class.
     }
 
+    // Not sure if it is needed. and also, it is not consistent with the other methods which mostly return Optional.
+    /**
+     * Returns the first non-null element from the provided two elements.
+     * If both are {@code null}, it returns {@code null}.
+     *
+     * @param a the first element to evaluate
+     * @param b the second element to evaluate
+     * @return the first non-null element, or {@code null} if both are {@code null}
+     * @see N#firstNonNull(Object, Object)
+     */
+    @Beta
+    public static <T> T firstNonNull(final T a, final T b) {
+        return a != null ? a : b;
+    }
+
+    /**
+     * Returns the first non-null element from the provided three elements.
+     * If all are {@code null}, it returns {@code null}.
+     *
+     * @param a the first element to evaluate
+     * @param b the second element to evaluate
+     * @param c the third element to evaluate
+     * @return the first non-null element, or {@code null} if all are {@code null}
+     * @see N#firstNonNull(Object, Object, Object)
+     */
+    @Beta
+    public static <T> T firstNonNull(final T a, final T b, final T c) {
+        return a != null ? a : (b != null ? b : c);
+    }
+
+    /**
+     * Returns the first non-null element from the provided array of elements.
+     * If the array is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param a the array of elements to evaluate
+     * @return the first non-null element, or {@code null} if the array is {@code null} or empty
+     * @see N#firstNonNull(Object[])
+     */
+    @Beta
+    @SafeVarargs
+    public static <T> T firstNonNull(final T... a) {
+        if (N.isEmpty(a)) {
+            return null;
+        }
+
+        for (final T e : a) {
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first non-null element from the provided iterable.
+     * If the iterable is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param c the iterable of elements to evaluate
+     * @return the first non-null element, or {@code null} if the iterable is {@code null} or empty
+     * @see N#firstNonNull(Iterable)
+     * @see Iterables#firstNonNullOrDefault(Iterable, Object)
+     */
+    @Beta
+    public static <T> T firstNonNull(final Iterable<? extends T> c) {
+        if (N.isEmpty(c)) {
+            return null;
+        }
+
+        for (final T e : c) {
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return null;
+    }
+
+    /**     
+     * Returns the first non-null element from the provided iterator.
+     * If the iterator is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param iter the iterator of elements to evaluate
+     * @return the first non-null element, or {@code null} if the iterator is {@code null} or empty
+     * @see N#firstNonNull(Iterator)
+     * @see Iterables#firstNonNullOrDefault(Iterator, Object)
+     */
+    @Beta
+    public static <T> T firstNonNull(final Iterator<? extends T> iter) {
+        if (iter == null) {
+            return null;
+        }
+
+        T e = null;
+
+        while (iter.hasNext()) {
+            if ((e = iter.next()) != null) {
+                return e;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the array to check
+     * @param defaultValue the default value to return if the iterable is empty
+     * @return the first non-null element of the given  iterable if it is not empty, otherwise the specified default value
+     * @see #firstNonNullOrDefault(Iterator, Object)
+     * @see N#firstNonNull(Iterable)
+     */
+    @Beta
+    public static <T> T firstNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
+        N.requireNonNull(defaultValue, cs.defaultValue);
+
+        if (CommonUtil.isEmpty(c)) {
+            return defaultValue;
+        }
+
+        for (final T e : c) {
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the first non-null element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValue the default value to return if the iterator is empty
+     * @return the first non-null element of the given iterator if it is not empty, otherwise the specified default value
+     * @see #firstNonNullOrDefault(Iterable, Object)
+     * @see N#firstNonNull(Iterator) 
+     */
+    @Beta
+    public static <T> T firstNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
+        N.requireNonNull(defaultValue, cs.defaultValue);
+
+        if (iter == null) {
+            return defaultValue;
+        }
+
+        while (iter.hasNext()) {
+            final T e = iter.next();
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the last non-null element from the provided two elements.
+     * If both are {@code null}, it returns {@code null}.
+     *
+     * @param a the last element to evaluate
+     * @param b the second element to evaluate
+     * @return the last non-null element, or {@code null} if both are {@code null}
+     * @see N#lastNonNull(Object, Object)
+     */
+    @Beta
+    public static <T> T lastNonNull(final T a, final T b) {
+        return b != null ? b : a;
+    }
+
+    /**
+     * Returns the last non-null element from the provided three elements.
+     * If all are {@code null}, it returns {@code null}.
+     *
+     * @param a the last element to evaluate
+     * @param b the second element to evaluate
+     * @param c the third element to evaluate
+     * @return the last non-null element, or {@code null} if all are {@code null}
+     * @see N#lastNonNull(Object, Object, Object)
+     */
+    @Beta
+    public static <T> T lastNonNull(final T a, final T b, final T c) {
+        return c != null ? c : (b != null ? b : a);
+    }
+
+    /**
+     * Returns the last non-null element from the provided array of elements.
+     * If the array is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param a the array of elements to evaluate
+     * @return the last non-null element, or {@code null} if the array is {@code null} or empty
+     * @see N#lastNonNull(Object[])
+     */
+    @Beta
+    @SafeVarargs
+    public static <T> T lastNonNull(final T... a) {
+        if (N.isEmpty(a)) {
+            return null;
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (a[i] != null) {
+                return a[i];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the last non-null element from the provided iterable.
+     * If the iterable is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param c the iterable of elements to evaluate
+     * @return the last non-null element, or {@code null} if the iterable is {@code null} or empty
+     * @see N#lastNonNull(Iterable)
+     * @see Iterables#lastNonNullOrDefault(Iterable, Object)
+     */
+    @Beta
+    public static <T> T lastNonNull(final Iterable<? extends T> c) {
+        if (N.isEmpty(c)) {
+            return null;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (list.get(i) != null) {
+                    return list.get(i);
+                }
+            }
+
+            return null;
+        }
+
+        final Iterator<T> descendingIterator = N.getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            T next = null;
+
+            while (descendingIterator.hasNext()) {
+                if ((next = descendingIterator.next()) != null) {
+                    return next;
+                }
+            }
+
+            return null;
+        }
+
+        return lastNonNull(c.iterator());
+    }
+
+    /**     
+     * Returns the last non-null element from the provided iterator.
+     * If the iterator is {@code null} or empty, or all elements are null, it returns {@code null}.
+     *
+     * @param iter the iterator of elements to evaluate
+     * @return the last non-null element, or {@code null} if the iterator is {@code null} or empty
+     * @see N#lastNonNull(Iterator)
+     * @see Iterables#lastNonNullOrDefault(Iterator, Object)
+     */
+    @Beta
+    public static <T> T lastNonNull(final Iterator<? extends T> iter) {
+        if (iter == null) {
+            return null;
+        }
+
+        T e = null;
+        T lastNonNull = null;
+
+        while (iter.hasNext()) {
+            if ((e = iter.next()) != null) {
+                lastNonNull = e;
+            }
+        }
+
+        return lastNonNull;
+    }
+
+    /**
+     * Returns the last non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the array to check
+     * @param defaultValue the default value to return if the iterable is empty
+     * @return the last non-null element of the given  iterable if it is not empty, otherwise the specified default value
+     * @see #lastNonNullOrDefault(Iterator, Object)
+     * @see N#lastNonNull(Iterable)
+     */
+    @Beta
+    public static <T> T lastNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
+        N.requireNonNull(defaultValue, cs.defaultValue);
+
+        final T ret = lastNonNull(c);
+
+        return ret == null ? defaultValue : ret;
+    }
+
+    /**
+     * Returns the last non-null element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValue the default value to return if the iterator is empty
+     * @return the last non-null element of the given iterator if it is not empty, otherwise the specified default value
+     * @see #lastNonNullOrDefault(Iterable, Object)
+     * @see N#lastNonNull(Iterator) 
+     */
+    @Beta
+    public static <T> T lastNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
+        N.requireNonNull(defaultValue, cs.defaultValue);
+
+        final T ret = lastNonNull(iter);
+
+        return ret == null ? defaultValue : ret;
+    }
+
     /**
      * Returns the minimum value from the provided array of characters.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalChar}.
@@ -274,10 +595,10 @@ public final class Iterables {
             return Nullable.empty();
         }
 
-        T candidate = null;
+        T candidate = iter.next();
         T next = null;
 
-        do {
+        while (iter.hasNext()) {
             next = iter.next();
 
             if (isNullMinComparator && next == null) { // NOSONAR
@@ -286,7 +607,7 @@ public final class Iterables {
             } else if (cmp.compare(next, candidate) < 0) {
                 candidate = next;
             }
-        } while (iter.hasNext());
+        }
 
         return Nullable.of(candidate);
     }
@@ -740,10 +1061,10 @@ public final class Iterables {
             return Nullable.empty();
         }
 
-        T candidate = null;
+        T candidate = iter.next();
         T next = null;
 
-        do {
+        while (iter.hasNext()) {
             next = iter.next();
 
             if (isNullMaxComparator && next == null) { // NOSONAR
@@ -752,7 +1073,7 @@ public final class Iterables {
             } else if (cmp.compare(next, candidate) > 0) {
                 candidate = next;
             }
-        } while (iter.hasNext());
+        }
 
         return Nullable.of(candidate);
     }
@@ -1892,13 +2213,14 @@ public final class Iterables {
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 summation.add(func.applyAsDouble(e));
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -2340,6 +2662,10 @@ public final class Iterables {
      * @see N#replaceAll(Object[], UnaryOperator) 
      * @see N#fill(Object[], Object)
      * @see N#fill(Object[], int, int, Object)
+     * @see Fn#s(com.landawn.abacus.util.function.Supplier)
+     * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
+     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
@@ -2363,6 +2689,10 @@ public final class Iterables {
      * @see Arrays#fill(Object[], int, int, Object)
      * @see N#fill(Object[], Object)
      * @see N#fill(Object[], int, int, Object)
+     * @see Fn#s(com.landawn.abacus.util.function.Supplier)
+     * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
+     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
@@ -2390,6 +2720,10 @@ public final class Iterables {
      * @see N#replaceAll(List, java.util.function.UnaryOperator) 
      * @see N#padLeft(List, int, Object)
      * @see N#padRight(Collection, int, Object)
+     * @see Fn#s(com.landawn.abacus.util.function.Supplier)
+     * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
+     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) throws IllegalArgumentException {
@@ -2415,6 +2749,10 @@ public final class Iterables {
      * @see N#replaceAll(List, java.util.function.UnaryOperator)
      * @see N#padLeft(List, int, Object)
      * @see N#padRight(Collection, int, Object)
+     * @see Fn#s(com.landawn.abacus.util.function.Supplier)
+     * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
+     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
@@ -2439,7 +2777,7 @@ public final class Iterables {
                 list.add(supplier.get());
             }
         } else {
-            if (toIndex - fromIndex < CommonUtil.FILL_THRESHOLD || list instanceof RandomAccess) {
+            if (toIndex - fromIndex < N.FILL_THRESHOLD || list instanceof RandomAccess) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     list.set(i, supplier.get());
                 }
@@ -2451,6 +2789,89 @@ public final class Iterables {
 
                     itr.set(supplier.get());
                 }
+            }
+        }
+    }
+
+    /**
+     * Copies all the elements from the source list into the destination list.
+     * After the operation, the index of each copied element in the destination list
+     * will be identical to its index in the source list. The destination list must
+     * be at least as long as the source list. If it is longer, the remaining elements
+     * in the destination list are unaffected.
+     *
+     * This method runs in linear time.
+     *
+     * @param <T> the type of elements in the lists
+     * @param src the source list from which elements are to be copied
+     * @param dest the destination list to which elements are to be copied
+     * @throws IndexOutOfBoundsException if the destination list is too small to contain the entire source list
+     * @throws UnsupportedOperationException if the destination list's list-iterator does not support the set operation
+     * @see #copy(List, int, List, int, int)
+     * @see java.util.Collections#copy(List, List)
+     * @see N#copy(Object[], int, Object[], int, int) 
+     */
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
+    public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
+        if (CommonUtil.isEmpty(src)) {
+            return;
+        }
+
+        if (src.size() > dest.size()) {
+            throw new IndexOutOfBoundsException("Source does not fit in dest");
+        }
+
+        Collections.copy(dest, src);
+    }
+
+    /**
+     * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
+     * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
+     *
+     * @param <T> the type of elements in the lists
+     * @param src the source list from which to copy elements
+     * @param srcPos the starting position in the source list
+     * @param dest the destination list into which to copy elements
+     * @param destPos the starting position in the destination list
+     * @param length the number of elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside list bounds
+     * @see #copy(List, List)
+     * @see N#copy(Object[], int, Object[], int, int) 
+     * @see Collections#copy(List, List)
+     */
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
+    public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
+            throws IndexOutOfBoundsException {
+        CommonUtil.checkFromToIndex(srcPos, srcPos + length, CommonUtil.size(src));
+        CommonUtil.checkFromToIndex(destPos, destPos + length, CommonUtil.size(dest));
+
+        if (CommonUtil.isEmpty(src) && srcPos == 0 && length == 0) {
+            return;
+        }
+
+        if (src instanceof RandomAccess && dest instanceof RandomAccess) {
+            for (int i = 0; i < length; i++) {
+                dest.set(destPos + i, src.get(srcPos + i));
+            }
+        } else {
+            final ListIterator<? extends T> srcIterator = src.listIterator();
+            final ListIterator<? super T> destIterator = dest.listIterator();
+
+            int idx = 0;
+            while (idx < srcPos) {
+                srcIterator.next();
+                idx++;
+            }
+
+            idx = 0;
+            while (idx < destPos) {
+                destIterator.next();
+                idx++;
+            }
+
+            for (int i = 0; i < length; i++) {
+                destIterator.next();
+                destIterator.set(srcIterator.next());
             }
         }
     }
@@ -2888,19 +3309,32 @@ public final class Iterables {
 
     /**
      * Returns an unmodifiable <b>view</b> of the difference of two sets. The returned set contains
-     * all elements that are contained by {@code set1} and not contained by {@code set2}. {@code set2}
-     * May also contain elements not present in {@code set1}; these are simply ignored. The iteration
-     * order of the returned set matches that of {@code set1}.
+     * all elements that are contained in {@code set1} but not in {@code set2}.
+     *
+     * <p>Example:
+     * <pre>
+     * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c", "d"));
+     * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "d", "e"));
+     * 
+     * SetView&lt;String&gt; difference = Iterables.difference(set1, set2);
+     * // difference contains: "a", "c"
+     * 
+     * // The view can be copied to a new set if needed
+     * Set&lt;String&gt; diffCopy = difference.copyInto(new HashSet&lt;&gt;());
+     * </pre>
+     *
+     * <p>The iteration order of the returned set matches that of {@code set1}.
+     * Elements in {@code set2} that are not present in {@code set1} are simply ignored.
+     * The returned view is backed by {@code set1}, so changes in {@code set1} may be reflected in the view.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
-     * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
-     * IdentityHashMap} all are).
+     * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
+     * {@code IdentityHashMap} all are).
      *
-     * @param <E>
-     * @param set1
-     * @param set2
-     * @return
-     * @throws IllegalArgumentException
+     * @param <E> the type of elements in the returned set
+     * @param set1 the base set whose elements may be included in the result
+     * @param set2 the set containing elements to be excluded from the result
+     * @return an unmodifiable view of the elements in {@code set1} but not in {@code set2}
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -2910,7 +3344,7 @@ public final class Iterables {
      * @see N#commonSet(Collection, Collection)
      * @see Difference#of(Collection, Collection)
      */
-    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
+    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -2993,19 +3427,39 @@ public final class Iterables {
     }
 
     /**
-     * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set
-     * contains all elements that are contained in either {@code set1} or {@code set2} but not in
-     * both. The iteration order of the returned set is undefined.
-     *
+     * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set contains
+     * all elements that are contained in either {@code set1} or {@code set2} but not in both.
+     * 
+     * <p>Example:
+     * <pre>
+     * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c"));
+     * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "c", "d"));
+     * 
+     * SetView&lt;String&gt; symDiff = Iterables.symmetricDifference(set1, set2);
+     * // symDiff contains: "a", "d"
+     * 
+     * // The view can be copied to a new set if needed
+     * Set&lt;String&gt; symDiffCopy = symDiff.copyInto(new HashSet&lt;&gt;());
+     * </pre>
+     * 
+     * <p>The iteration order of the returned set is undefined.
+     * The returned view is backed by the input sets, so changes in the original sets may be reflected in the view.
+     * 
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
-     * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
-     * IdentityHashMap} all are).
-     *
-     * @param <E>
-     * @param set1
-     * @param set2
-     * @return
-     * @throws IllegalArgumentException
+     * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
+     * {@code IdentityHashMap} all are).
+     * 
+     * @param <E> the type of elements in the returned set
+     * @param set1 the first set to find elements not present in the other set
+     * @param set2 the second set to find elements not present in the other set
+     * @return an unmodifiable view of elements present in either {@code set1} or {@code set2} but not in both
+     * @throws IllegalArgumentException if either input set is null
+     * @see N#symmetricDifference(Collection, Collection) 
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#difference(Collection, Collection)
+     * @see #difference(Set, Set)
+     * @see #intersection(Set, Set)
+     * @see #union(Set, Set)
      */
     public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
@@ -3212,11 +3666,13 @@ public final class Iterables {
      * @param elements the original collection whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original collection.
-     * @throws NullPointerException if the specified collection is {@code null} or has any
+     * @throws IllegalArgumentException if the specified collection is {@code null} or has any
      *     {@code null} elements.
      */
-    public static <E> Collection<List<E>> permutations(final Collection<E> elements) {
-        return new PermutationCollection<>(N.nullToEmpty(elements));
+    public static <E> Collection<List<E>> permutations(final Collection<E> elements) throws IllegalArgumentException {
+        N.checkArgNotNull(elements, cs.collection);
+
+        return new PermutationCollection<>(elements);
     }
 
     /**
@@ -3246,8 +3702,12 @@ public final class Iterables {
      * @param elements the original iterable whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or has any
+     *     {@code null} elements.
      */
-    public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) {
+    public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) throws IllegalArgumentException {
+        N.checkArgNotNull(elements, cs.collection);
+
         return orderedPermutations(N.nullToEmpty(elements), N.NATURAL_COMPARATOR);
     }
 
@@ -3298,8 +3758,13 @@ public final class Iterables {
      * @param comparator a comparator for the iterable's elements.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or has any
+     *     {@code null} elements.
      */
-    public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator) {
+    public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(elements, cs.collection);
+
         return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
     }
 
@@ -3665,7 +4130,7 @@ public final class Iterables {
          * @param input
          */
         PermutationCollection(final Collection<E> input) {
-            inputList = new ArrayList<>(input);
+            inputList = ImmutableList.copyOf(input);
         }
 
         /**
@@ -3897,8 +4362,8 @@ public final class Iterables {
          * @return the list
          */
         @Override
-        public List<E> get(final int index) throws IllegalArgumentException {
-            N.checkArgument(index < size(), "Invalid index %s. It must be less than the size %s", index, size());
+        public List<E> get(final int index) throws IndexOutOfBoundsException {
+            N.checkElementIndex(index, size());
 
             final List<E> result = new ArrayList<>(axes.length);
 

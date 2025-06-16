@@ -1850,7 +1850,7 @@ public final class ClassUtil {
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
         for (final PropInfo propInfo : beanInfo.propInfoList) {
-            if (propNameValueFilter.test(propInfo.name, propInfo.getPropValue(result))) {
+            if (propNameValueFilter.test(propInfo.name, propInfo.getPropValue(bean))) {
                 result.add(propInfo.name);
             }
         }
@@ -2112,6 +2112,8 @@ public final class ClassUtil {
      * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false
      */
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
+        // N.checkArgNotNull(bean, cs.bean);
+
         final Class<?> cls = bean.getClass();
         final PropInfo propInfo = ParserUtil.getBeanInfo(cls).getPropInfo(propName);
 
@@ -2537,7 +2539,6 @@ public final class ClassUtil {
             Method builderMethod = getBuilderMethod(cls);
 
             if (builderMethod == null) {
-                //noinspection resource
                 builderClass = Stream.of(cls.getDeclaredClasses())
                         .filter(it -> getBuilderMethod(it) != null && getBuildMethod(it, cls) != null)
                         .first()
@@ -3018,7 +3019,6 @@ public final class ClassUtil {
 
                 // sort the methods by the order of declared fields
                 for (final Field field : clazz.getDeclaredFields()) {
-                    //noinspection resource
                     Stream.of(clazz.getMethods())
                             .filter(method -> isFieldGetMethod(method, field))
                             .sortedBy(method -> method.getName().length())
@@ -3517,7 +3517,8 @@ public final class ClassUtil {
         Boolean ret = beanClassPool.get(cls);
 
         if (ret == null) {
-            ret = annotatedWithEntity(cls) || isRecordClass(cls) || (!Number.class.isAssignableFrom(cls) && N.notEmpty(ClassUtil.getPropNameList(cls)));
+            ret = annotatedWithEntity(cls) || isRecordClass(cls)
+                    || (!Number.class.isAssignableFrom(cls) && !Map.Entry.class.isAssignableFrom(cls) && N.notEmpty(ClassUtil.getPropNameList(cls)));
             beanClassPool.put(cls, ret);
         }
 

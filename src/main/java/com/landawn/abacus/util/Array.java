@@ -77,7 +77,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param componentType The Class object representing the component type of the new array.
      * @param dimensions The dimensions of the new array.
      * @return The new array.
-     * @throws IllegalArgumentException if the componentType is {@code null}.
+     * @throws NullPointerException if the componentType is {@code null}.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */

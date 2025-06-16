@@ -44,6 +44,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.InsecureRecursiveDeleteException;
 import com.google.common.io.RecursiveDeleteOption;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 
 /**
@@ -602,6 +603,7 @@ public abstract class Files { //NOSONAR
      * @throws NotDirectoryException if the file could not be opened because it is not a directory
      *     <i>(optional specific exception)</i>
      * @throws IOException if an I/O error occurs
+     * @see IOUtil#listFiles(File)
      */
     public static ImmutableList<Path> listFiles(final Path dir) throws IOException {
         return ImmutableList.wrap(com.google.common.io.MoreFiles.listFiles(dir));
@@ -698,6 +700,118 @@ public abstract class Files { //NOSONAR
      */
     public static Predicate<Path> isRegularFile(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isRegularFile(options);
+    }
+
+    /**
+     * Reads all bytes from a file into a byte array. The method ensures that the file is closed when
+     * all bytes have been read or an I/O error, or other runtime exception, is thrown.
+     *
+     * <p> This method is equivalent to: {@link readAllBytes(Path) readAllBytes(path)}.
+     *
+     * @param   file the file to read from 
+     * @return  a byte array containing the content read from the file 
+     * @throws  IOException
+     *          if an I/O error occurs reading from the file
+     * @throws  OutOfMemoryError
+     *          if the file is extremely large, for example larger than {@code 2GB}
+     * @throws  SecurityException
+     *          In the case of the default provider, and a security manager is installed, the {@link
+     *          SecurityManager#checkRead(String) checkRead} method is invoked to check read access to
+     *          the file.
+     * @see #readString(File)
+     * @see java.nio.file.Files#readAllBytes(Path)
+     * @see IOUtil#readAllBytes(File)
+     */
+    public static byte[] readAllBytes(final File file) throws IOException {
+        return java.nio.file.Files.readAllBytes(file.toPath());
+    }
+
+    /**
+     * Reads all bytes from a file into a byte array using the given character set. The method ensures
+     * that the file is closed when all bytes have been read or an I/O error, or other runtime
+     * exception, is thrown.
+     *
+     * <p>This method is equivalent to: {@link readAllBytes(Path, Charset) readAllBytes(path, cs)}.
+     *
+     * @param file the file to read from
+     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
+     *     helpful predefined constants
+     * @return a byte array containing the content read from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
+     * @throws SecurityException In the case of the default provider, and a security manager is
+     * @see #readString(File)
+     * @see java.nio.file.Files#readAllBytes(Path, Charset)
+     * @see IOUtil#readAllToString(File)
+     */
+    public static String readString(final File file) throws IOException {
+        return readString(file, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Reads all bytes from a file into a string using the given character set. The method ensures
+     * that the file is closed when all bytes have been read or an I/O error, or other runtime
+     * exception, is thrown.
+     *
+     * <p>This method is equivalent to: {@link readString(Path, Charset) readString(path, cs)}.
+     *
+     * @param file the file to read from
+     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
+     *     helpful predefined constants
+     * @return a string containing the content read from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
+     * @throws SecurityException In the case of the default provider, and a security manager is
+     * @see java.nio.file.Files#readString(Path, Charset)
+     * @see IOUtil#readAllToString(File, Charset)
+     */
+    public static String readString(final File file, Charset cs) throws IOException {
+        return java.nio.file.Files.readString(file.toPath(), cs);
+    }
+
+    /**
+     * Reads all lines from a file. The lines do not include line-termination characters, but do include
+     * other leading and trailing whitespace.
+     *
+     * <p>This method returns a mutable {@code List}. For an {@code ImmutableList}, use {@code
+     * Files.asCharSource(file, charset).readLines()}.
+     *
+     * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
+     * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * @param file the file to read from
+     * @return a mutable {@link List} containing all the lines
+     * @throws IOException if an I/O error occurs
+     * @throws SecurityException In the case of the default provider, and a security manager is
+     * @see #readAllLines(File, Charset)
+     * @see java.nio.file.Files#readAllLines(Path, Charset)
+     * @see IOUtil#readAllLines(File)
+     */
+    public static List<String> readAllLines(final File file) throws IOException {
+        return readAllLines(file, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Reads all lines from a file using the given character set. The lines do not include line-termination
+     * characters, but do include other leading and trailing whitespace.
+     *
+     * <p>This method returns a mutable {@code List}. For an {@code ImmutableList}, use {@code
+     * Files.asCharSource(file, charset).readLines()}.
+     *
+     * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
+     * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * @param file the file to read from
+     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
+     *     helpful predefined constants
+     * @return a mutable {@link List} containing all the lines
+     * @throws IOException if an I/O error occurs
+     * @throws SecurityException In the case of the default provider, and a security manager is
+     * @see java.nio.file.Files#readAllLines(Path, Charset)
+     * @see IOUtil#readAllLines(File, Charset)
+     */
+    public static List<String> readAllLines(final File file, Charset cs) throws IOException {
+        return java.nio.file.Files.readAllLines(file.toPath(), cs);
     }
 
     /**

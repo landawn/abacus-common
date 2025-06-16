@@ -130,17 +130,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
         return new TriIterator<>() {
             private final Triple<A, B, C> tmp = new Triple<>();
+            private boolean hasNextFlag = false;
 
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextFlag) {
+                    hasNextFlag = hasNext.getAsBoolean();
+                }
+
+                return hasNextFlag;
             }
 
             @Override
             public Triple<A, B, C> next() throws IllegalArgumentException {
-                if (!hasNext()) {
+                if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+
+                hasNextFlag = false; // Reset for the next call
 
                 output.accept(tmp);
 
@@ -152,9 +159,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     throws NoSuchElementException, E {
                 // N.checkArgNotNull(action);
 
-                if (!hasNext()) {
+                if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+
+                hasNextFlag = false; // Reset for the next call
 
                 output.accept(tmp);
 
@@ -189,16 +198,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
+                    private boolean hasNextFlag = false;
+
                     @Override
                     public boolean hasNext() {
-                        return hasNext.getAsBoolean();
+                        if (!hasNextFlag) {
+                            hasNextFlag = hasNext.getAsBoolean();
+                        }
+
+                        return hasNextFlag;
                     }
 
                     @Override
                     public R next() {
-                        if (!hasNext()) {
+                        if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
+
+                        hasNextFlag = false; // Reset for the next call
 
                         output.accept(tmp);
 
@@ -412,16 +429,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         return new TriIterator<>() {
+            private boolean hasNextFlag = false;
+
             @Override
             public boolean hasNext() {
-                return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+                if (!hasNextFlag) {
+                    hasNextFlag = iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+                }
+
+                return hasNextFlag;
             }
 
             @Override
             public Triple<A, B, C> next() throws IllegalArgumentException {
-                if (!hasNext()) {
+                if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+
+                hasNextFlag = false; // Reset for the next call
 
                 return Triple.of(iterA.next(), iterB.next(), iterC.next());
             }
@@ -430,6 +455,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
                     throws NoSuchElementException, E {
                 // N.checkArgNotNull(action);
+                if (!(hasNextFlag || hasNext())) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                hasNextFlag = false; // Reset for the next call
 
                 action.accept(iterA.next(), iterB.next(), iterC.next());
             }
@@ -458,16 +488,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
+                    private boolean hasNextFlag = false;
+
                     @Override
                     public boolean hasNext() {
-                        return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+                        if (!hasNextFlag) {
+                            hasNextFlag = iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+                        }
+
+                        return hasNextFlag;
                     }
 
                     @Override
                     public R next() {
-                        if (!hasNext()) {
+                        if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
+
+                        hasNextFlag = false; // Reset for the next call
 
                         return mapper.apply(iterA.next(), iterB.next(), iterC.next());
                     }
@@ -500,16 +538,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         final Iterator<C> iter3 = iterC == null ? ObjIterator.empty() : iterC;
 
         return new TriIterator<>() {
+            private boolean hasNextFlag = false;
+
             @Override
             public boolean hasNext() {
-                return iter1.hasNext() || iter2.hasNext() || iter3.hasNext();
+                if (!hasNextFlag) {
+                    hasNextFlag = iter1.hasNext() || iter2.hasNext() || iter3.hasNext();
+                }
+
+                return hasNextFlag;
             }
 
             @Override
             public Triple<A, B, C> next() throws IllegalArgumentException {
-                if (!hasNext()) {
+                if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+
+                hasNextFlag = false; // Reset for the next call
 
                 return Triple.of(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
                         iter3.hasNext() ? iter3.next() : valueForNoneC);
@@ -520,9 +566,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     throws NoSuchElementException, E {
                 // N.checkArgNotNull(action);
 
-                if (!hasNext()) {
+                if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+
+                hasNextFlag = false; // Reset for the next call
 
                 action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
                         iter3.hasNext() ? iter3.next() : valueForNoneC);
@@ -554,16 +602,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
+                    private boolean hasNextFlag = false;
+
                     @Override
                     public boolean hasNext() {
-                        return iter1.hasNext() || iter2.hasNext() || iter3.hasNext();
+                        if (!hasNextFlag) {
+                            hasNextFlag = iter1.hasNext() || iter2.hasNext() || iter3.hasNext();
+                        }
+
+                        return hasNextFlag;
                     }
 
                     @Override
                     public R next() {
-                        if (!hasNext()) {
+                        if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
+
+                        hasNextFlag = false; // Reset for the next call
 
                         return mapper.apply(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
                                 iter3.hasNext() ? iter3.next() : valueForNoneC);

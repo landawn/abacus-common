@@ -170,7 +170,6 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
         }
     }
 
-    @SuppressWarnings("hiding")
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName,
             final boolean isDeclaringName) {
         if (isDeclaringName) {

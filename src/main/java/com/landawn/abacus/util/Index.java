@@ -1449,7 +1449,7 @@ public final class Index {
      * @see N#lastIndexOf(double[], double, double, int)
      */
     public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance) {
-        return last(a, valueToFind, tolerance, 0);
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, tolerance));
     }
 
     /**

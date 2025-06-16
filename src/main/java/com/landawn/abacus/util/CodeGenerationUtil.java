@@ -268,7 +268,6 @@ public final class CodeGenerationUtil {
 
         final String interfaceName = "public interface " + propNameTableClassName;
 
-        @SuppressWarnings("resource")
         final List<Class<?>> entityClassesToUse = StreamEx.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
                 return false;
@@ -296,10 +295,8 @@ public final class CodeGenerationUtil {
             sb.append(LINE_SEPARATOR).append("import java.util.List;").append(LINE_SEPARATOR);
         }
 
-        @SuppressWarnings("resource")
         final String allClassName = StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
 
-        //noinspection resource
         if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).hasDuplicates()) {
             throw new IllegalArgumentException(
                     "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
@@ -355,7 +352,6 @@ public final class CodeGenerationUtil {
             N.sort(propNames);
 
             for (final String propName : propNames) {
-                @SuppressWarnings("resource")
                 final String clsNameList = Stream.of(propNameMap.get(propName)).sorted().join(", ", "{@code [", "]}");
 
                 sb.append(LINE_SEPARATOR)
@@ -378,7 +374,6 @@ public final class CodeGenerationUtil {
                 for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                     final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                    //noinspection resource
                     sb.append(LINE_SEPARATOR)
                             .append("    /** Unmodifiable property(field) name list for class: {@code \"")
                             .append(classPropNameListEntry.getKey())
@@ -455,7 +450,6 @@ public final class CodeGenerationUtil {
                 N.sortBy(propNameTPs, it -> it._1);
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
-                    @SuppressWarnings("resource")
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                     sb.append(LINE_SEPARATOR)
@@ -480,7 +474,6 @@ public final class CodeGenerationUtil {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                        //noinspection resource
                         sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
                                 .append("    /** Unmodifiable property(field) name list for class: {@code \"")
@@ -563,7 +556,6 @@ public final class CodeGenerationUtil {
                 N.sortBy(propNameTPs, it -> it._1);
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
-                    @SuppressWarnings("resource")
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                     sb.append(LINE_SEPARATOR)
@@ -588,7 +580,6 @@ public final class CodeGenerationUtil {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
-                        //noinspection resource
                         sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
                                 .append("    /** Unmodifiable property(field) name list for class: {@code \"")
@@ -678,7 +669,6 @@ public final class CodeGenerationUtil {
                     N.sortBy(propNameTPs, it -> it._1);
 
                     for (final Tuple2<String, String> propNameTP : propNameTPs) {
-                        @SuppressWarnings("resource")
                         final String clsNameList = Stream.of(funcPropNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                         sb.append(LINE_SEPARATOR)

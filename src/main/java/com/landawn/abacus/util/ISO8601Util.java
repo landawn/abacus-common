@@ -286,7 +286,7 @@ final class ISO8601Util {
         if (msg == null || msg.isEmpty()) {
             msg = "(" + fail.getClass().getName() + ")";
         }
-        final RuntimeException ex = new RuntimeException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
+        final IllegalArgumentException ex = new IllegalArgumentException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
         //noinspection UnnecessaryInitCause
         ex.initCause(fail);
         throw ex;

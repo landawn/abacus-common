@@ -333,6 +333,8 @@ public final class Throwables {
 
                 @Override
                 public void advance(final long n) throws E {
+                    N.checkArgNotNegative(n, cs.n);
+
                     if (n > toIndex - cursor) {
                         cursor = toIndex;
                     } else {
@@ -342,7 +344,9 @@ public final class Throwables {
 
                 @Override
                 public long count() {
-                    return toIndex - cursor; //NOSONAR
+                    final int ret = toIndex - cursor; //NOSONAR
+                    cursor = toIndex; // Mark as finished.
+                    return ret;
                 }
             };
         }

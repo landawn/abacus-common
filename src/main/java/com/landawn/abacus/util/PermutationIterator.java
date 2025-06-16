@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -56,6 +57,30 @@ public final class PermutationIterator {
      *     permutations of the original collection.
      */
     public static <T> ObjIterator<List<T>> of(final Collection<T> elements) {
+        N.checkArgNotNull(elements, cs.elements);
+
+        if (elements.isEmpty()) {
+            return new ObjIteratorEx<>() {
+                private boolean done = false;
+
+                @Override
+                public boolean hasNext() {
+                    return !done;
+                }
+
+                @Override
+                public List<T> next() {
+                    if (done) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    done = true;
+
+                    return new ArrayList<>(0);
+                }
+            };
+        }
+
         return new ObjIteratorEx<>() {
             final T[] items = (T[]) elements.toArray();
             final int[] c = Array.repeat(0, items.length);
@@ -198,6 +223,30 @@ public final class PermutationIterator {
      *     permutations of the original iterable.
      */
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
+        N.checkArgNotNull(elements, cs.elements);
+
+        if (elements.isEmpty()) {
+            return new ObjIteratorEx<>() {
+                private boolean done = false;
+
+                @Override
+                public boolean hasNext() {
+                    return !done;
+                }
+
+                @Override
+                public List<T> next() {
+                    if (done) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    done = true;
+
+                    return new ArrayList<>(0);
+                }
+            };
+        }
+
         return new ObjIteratorEx<>() {
             T[] next = (T[]) elements.toArray();
 

@@ -75,7 +75,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param a the array to be used as the element array for this list
      */
     public ByteList(final byte[] a) {
-        this(a, a.length);
+        this(N.requireNonNull(a), a.length);
     }
 
     /**
@@ -645,9 +645,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
 
         final byte[] tmp = N.deleteAllByIndices(elementData, indices);
+
         N.copy(tmp, 0, elementData, 0, tmp.length);
-        N.fill(elementData, tmp.length, size, (byte) 0);
-        size = tmp.length;
+
+        if (size > tmp.length) {
+            N.fill(elementData, tmp.length, size, (byte) 0);
+        }
+
+        size -= elementData.length - tmp.length;
     }
 
     /**
@@ -677,14 +682,20 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Moves a range of elements in this list to a new position within the list.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * <br />
+     * No elements are deleted in the process, this list maintains its size.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
     }
 
     /**
@@ -884,21 +895,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return false;
         }
 
-        final boolean isThisContainer = size() >= c.size();
-        final ByteList container = isThisContainer ? this : c;
-        final byte[] iterElements = isThisContainer ? c.array() : array();
-
         if (needToSet(size(), c.size())) {
-            final Set<Byte> set = container.toSet();
+            final Set<Byte> set = this.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (!set.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (!set.contains(c.elementData[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (!container.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (!contains(c.elementData[i])) {
                     return false;
                 }
             }
@@ -934,21 +941,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return true;
         }
 
-        final boolean isThisContainer = size() >= c.size();
-        final ByteList container = isThisContainer ? this : c;
-        final byte[] iterElements = isThisContainer ? c.array() : array();
-
         if (needToSet(size(), c.size())) {
-            final Set<Byte> set = container.toSet();
+            final Set<Byte> set = this.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (set.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (set.contains(c.elementData[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (container.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (contains(c.elementData[i])) {
                     return false;
                 }
             }
@@ -972,11 +975,31 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified list.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both lists.
      *
-     * @param b
-     * @return
-     * @see IntList#intersection(IntList)
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * ByteList list2 = ByteList.of((byte)1, (byte)2, (byte)2, (byte)4);
+     * ByteList result = list1.intersection(list2); // result will be [(byte)1, (byte)2]
+     * // One occurrence of '1' (minimum count in both lists) and one occurrence of '2'
+     *
+     * ByteList list3 = ByteList.of((byte)5, (byte)5, (byte)6);
+     * ByteList list4 = ByteList.of((byte)5, (byte)7);
+     * ByteList result2 = list3.intersection(list4); // result will be [(byte)5]
+     * // One occurrence of '5' (minimum count in both lists)
+     * </pre>
+     *
+     * @param b the list to find common elements with this list
+     * @return a new ByteList containing elements present in both this list and the specified list,
+     *         considering the minimum number of occurrences in either list.
+     *         Returns an empty list if either list is {@code null} or empty.
+     * @see #intersection(byte[])
+     * @see #difference(ByteList)
+     * @see #symmetricDifference(ByteList)
+     * @see N#intersection(byte[], byte[])
+     * @see N#intersection(int[], int[])
      */
     @Override
     public ByteList intersection(final ByteList b) {
@@ -998,11 +1021,31 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified array.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both sources.
      *
-     * @param b
-     * @return
-     * @see IntList#intersection(IntList)
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * byte[] array = new byte[]{(byte)1, (byte)2, (byte)2, (byte)4};
+     * ByteList result = list1.intersection(array); // result will be [(byte)1, (byte)2]
+     * // One occurrence of '1' (minimum count in both sources) and one occurrence of '2'
+     *
+     * ByteList list2 = ByteList.of((byte)5, (byte)5, (byte)6);
+     * byte[] array2 = new byte[]{(byte)5, (byte)7};
+     * ByteList result2 = list2.intersection(array2); // result will be [(byte)5]
+     * // One occurrence of '5' (minimum count in both sources)
+     * </pre>
+     *
+     * @param b the array to find common elements with this list
+     * @return a new ByteList containing elements present in both this list and the specified array,
+     *         considering the minimum number of occurrences in either source.
+     *         Returns an empty list if the array is {@code null} or empty.
+     * @see #intersection(ByteList)
+     * @see #difference(byte[])
+     * @see #symmetricDifference(byte[])
+     * @see N#intersection(byte[], byte[])
+     * @see N#intersection(int[], int[])
      */
     @Override
     public ByteList intersection(final byte[] b) {
@@ -1014,11 +1057,30 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified list {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param b
-     * @return
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * ByteList list2 = ByteList.of((byte)1, (byte)4);
+     * ByteList result = list1.difference(list2); // result will be [(byte)1, (byte)2, (byte)3]
+     * // One '1' remains because list1 has two occurrences and list2 has one
+     *
+     * ByteList list3 = ByteList.of((byte)5, (byte)6);
+     * ByteList list4 = ByteList.of((byte)5, (byte)5, (byte)6);
+     * ByteList result2 = list3.difference(list4); // result will be [] (empty)
+     * // No elements remain because list4 has at least as many occurrences of each value as list3
+     * </pre>
+     *
+     * @param b the list to compare against this list
+     * @return a new ByteList containing the elements that are present in this list but not in the specified list,
+     *         considering the number of occurrences.
+     * @see #difference(byte[])    
+     * @see #symmetricDifference(ByteList)
+     * @see #intersection(ByteList)
+     * @see N#difference(byte[], byte[])
+     * @see N#difference(int[], int[])
      */
     @Override
     public ByteList difference(final ByteList b) {
@@ -1040,11 +1102,31 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified array {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param b
-     * @return
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * byte[] array = new byte[]{(byte)1, (byte)4};
+     * ByteList result = list1.difference(array); // result will be [(byte)1, (byte)2, (byte)3]
+     * // One '1' remains because list1 has two occurrences and array has one
+     *
+     * ByteList list2 = ByteList.of((byte)5, (byte)6);
+     * byte[] array2 = new byte[]{(byte)5, (byte)5, (byte)6};
+     * ByteList result2 = list2.difference(array2); // result will be [] (empty)
+     * // No elements remain because array2 has at least as many occurrences of each value as list2
+     * </pre>
+     *
+     * @param b the array to compare against this list
+     * @return a new ByteList containing the elements that are present in this list but not in the specified array,
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
+     * @see #difference(ByteList)
+     * @see #symmetricDifference(byte[])
+     * @see #intersection(byte[])
+     * @see N#difference(byte[], byte[])
+     * @see N#difference(int[], int[])
      */
     @Override
     public ByteList difference(final byte[] b) {
@@ -1056,11 +1138,35 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * Returns a new ByteList containing elements that are present in either this list or the specified list,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For elements that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param b
-     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
-     * @see IntList#symmetricDifference(IntList)
+     * <p>The order of elements is preserved, with elements from this list appearing first,
+     * followed by elements from the specified list.
+     *
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * ByteList list2 = ByteList.of((byte)2, (byte)3, (byte)3, (byte)4);
+     * ByteList result = list1.symmetricDifference(list2);
+     * // result will contain: [(byte)1, (byte)1, (byte)3, (byte)4]
+     * // Elements explanation:
+     * // - (byte)1 appears twice in list1 and zero times in list2, so both occurrences remain
+     * // - (byte)2 appears once in each list, so it's removed from the result
+     * // - (byte)3 appears once in list1 and twice in list2, so one occurrence remains
+     * // - (byte)4 appears only in list2, so it remains in the result
+     * </pre>
+     *
+     * @param b the list to compare with this list for symmetric difference
+     * @return a new ByteList containing elements that are present in either this list or the specified list,
+     *         but not in both, considering the number of occurrences
+     * @see #symmetricDifference(byte[])
+     * @see #difference(ByteList)
+     * @see #intersection(ByteList)
+     * @see N#symmetricDifference(byte[], byte[])
+     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public ByteList symmetricDifference(final ByteList b) {
@@ -1093,11 +1199,35 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * Returns a new ByteList containing elements that are present in either this list or the specified array,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For elements that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param b
-     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
-     * @see IntList#symmetricDifference(IntList)
+     * <p>Example:
+     * <pre>
+     * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
+     * byte[] array = new byte[]{(byte)2, (byte)3, (byte)3, (byte)4};
+     * ByteList result = list1.symmetricDifference(array);
+     * // result will contain: [(byte)1, (byte)1, (byte)3, (byte)4]
+     * // Elements explanation:
+     * // - (byte)1 appears twice in list1 and zero times in array, so both occurrences remain
+     * // - (byte)2 appears once in each source, so it's removed from the result
+     * // - (byte)3 appears once in list1 and twice in array, so one occurrence remains
+     * // - (byte)4 appears only in array, so it remains in the result
+     * </pre>
+     *
+     * <p>The order of elements is preserved, with elements from this list appearing first,
+     * followed by elements from the specified array.
+     *
+     * @param b the array to compare with this list for symmetric difference
+     * @return a new ByteList containing elements that are present in either this list or the specified array,
+     *         but not in both, considering the number of occurrences
+     * @see #symmetricDifference(ByteList)
+     * @see #difference(byte[])
+     * @see #intersection(byte[])
+     * @see N#symmetricDifference(byte[], byte[])
+     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public ByteList symmetricDifference(final byte[] b) {
@@ -1116,7 +1246,19 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     public int occurrencesOf(final byte valueToFind) {
-        return N.occurrencesOf(elementData, valueToFind);
+        if (size == 0) {
+            return 0;
+        }
+
+        int occurrences = 0;
+
+        for (int i = 0; i < size; i++) {
+            if (elementData[i] == valueToFind) {
+                occurrences++;
+            }
+        }
+
+        return occurrences;
     }
 
     /**
@@ -1425,7 +1567,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public void rotate(final int distance) {
         if (size > 1) {
-            N.rotate(elementData, distance);
+            N.rotate(elementData, 0, size, distance);
         }
     }
 
@@ -1435,7 +1577,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public void shuffle() {
         if (size() > 1) {
-            N.shuffle(elementData);
+            N.shuffle(elementData, 0, size);
         }
     }
 
@@ -1446,7 +1588,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public void shuffle(final Random rnd) {
         if (size() > 1) {
-            N.shuffle(elementData, rnd);
+            N.shuffle(elementData, 0, size, rnd);
         }
     }
 

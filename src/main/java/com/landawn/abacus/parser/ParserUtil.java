@@ -1059,7 +1059,7 @@ public final class ParserUtil {
 
                 if (propInfoQueue.size() == 0) {
                     if (!ignoreUnmatchedProperty) {
-                        throw new RuntimeException("No setter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
+                        throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                     } else {
                         return false;
                     }

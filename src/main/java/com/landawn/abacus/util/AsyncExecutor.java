@@ -399,6 +399,10 @@ public class AsyncExecutor {
         }
     }
 
+    public boolean isTerminated() {
+        return executor == null || !(executor instanceof ExecutorService executorService) || executorService.isTerminated();
+    }
+
     @Override
     public String toString() {
         final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";

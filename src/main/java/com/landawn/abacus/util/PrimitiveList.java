@@ -136,12 +136,18 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void deleteRange(int fromIndex, int toIndex);
 
     /**
+     * Moves a range of elements in this list to a new position within the list.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * <br />
+     * No elements are deleted in the process, this list maintains its size.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
      */
-    public abstract void moveRange(int fromIndex, int toIndex, int newPositionStartIndex);
+    public abstract void moveRange(int fromIndex, int toIndex, int newPositionStartIndexAfterMove);
 
     /**
      *
@@ -202,54 +208,165 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean disjoint(A a);
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified list.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both lists.
      *
-     * @param b
-     * @return
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(0, 1, 2, 2, 3);
+     * IntList list2 = IntList.of(1, 2, 2, 4);
+     * IntList result = list1.intersection(list2); // result will be [1, 2, 2]
+     * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
+     *
+     * IntList list3 = IntList.of(5, 5, 6);
+     * IntList list4 = IntList.of(5, 7);
+     * IntList result2 = list3.intersection(list4); // result will be [5]
+     * // One occurrence of '5' (minimum count in both lists)
+     * </pre>
+     *
+     * @param b the list to find common elements with this list
+     * @return a new IntList containing elements present in both this list and the specified list,
+     *         considering the minimum number of occurrences in either list.
+     *         Returns an empty list if either list is {@code null} or empty.
      * @see IntList#intersection(IntList)
+     * @see N#intersection(int[], int[])
      */
     public abstract L intersection(final L b);
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified array.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both sources.
      *
-     * @param b
-     * @return
-     * @see IntList#intersection(IntList)
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(0, 1, 2, 2, 3);
+     * int[] array = new int[]{1, 2, 2, 4};
+     * IntList result = list1.intersection(array); // result will be [1, 2, 2]
+     * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
+     *
+     * IntList list2 = IntList.of(5, 5, 6);
+     * int[] array2 = new int[]{5, 7};
+     * IntList result2 = list2.intersection(array2); // result will be [5]
+     * // One occurrence of '5' (minimum count in both sources)
+     * </pre>
+     *
+     * @param b the array to find common elements with this list
+     * @return a new IntList containing elements present in both this list and the specified array,
+     *         considering the minimum number of occurrences in either source.
+     *         Returns an empty list if the array is {@code null} or empty.
+     * @see IntList#intersection(int[])
+     * @see N#intersection(int[], int[])
      */
     public abstract L intersection(final A b);
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified list {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param b
-     * @return
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(0, 1, 2, 2, 3);
+     * IntList list2 = IntList.of(2, 5, 1);
+     * IntList result = list1.difference(list2); // result will be [0, 2, 3]
+     * // One '2' remains because list1 has two occurrences and list2 has one
+     *
+     * IntList list3 = IntList.of(5, 6);
+     * IntList list4 = IntList.of(5, 5, 6);
+     * IntList result2 = list3.difference(list4); // result will be [] (empty)
+     * // No elements remain because list4 has at least as many occurrences of each value as list3
+     * </pre>
+     *
+     * @param b the list to compare against this list
+     * @return a new IntList containing the elements that are present in this list but not in the specified list,
+     *         considering the number of occurrences.
+     * @see IntList#difference(IntList)
+     * @see N#difference(int[], int[])
      */
     public abstract L difference(final L b);
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified array {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param a
-     * @return
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(0, 1, 2, 2, 3);
+     * int[] array = new int[]{2, 5, 1};
+     * IntList result = list1.difference(array); // result will be [0, 2, 3]
+     * // One '2' remains because list1 has two occurrences and array has one
+     *
+     * IntList list2 = IntList.of(5, 6);
+     * int[] array2 = new int[]{5, 5, 6};
+     * IntList result2 = list2.difference(array2); // result will be [] (empty)
+     * // No elements remain because array2 has at least as many occurrences of each value as list2
+     * </pre>
+     *
+     * @param a the array to compare against this list
+     * @return a new IntList containing the elements that are present in this list but not in the specified array,
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
+     * @see IntList#difference(int[])
+     * @see N#difference(int[], int[])
      */
     public abstract L difference(final A a);
 
     /**
-     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * Returns a new list containing elements that are present in either this list or the specified list,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For elements that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param b
-     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(1, 1, 2, 3);
+     * IntList list2 = IntList.of(1, 2, 2, 4);
+     * IntList result = list1.symmetricDifference(list2);
+     * // result will contain: [1, 3, 2, 4]
+     * // Elements explanation:
+     * // - 1 appears twice in list1 and once in list2, so one occurrence remains
+     * // - 3 appears only in list1, so it remains
+     * // - 2 appears once in list1 and twice in list2, so one occurrence remains
+     * // - 4 appears only in list2, so it remains
+     * </pre>
+     *
+     * <p>The order of elements is preserved, with elements from this list appearing first,
+     * followed by elements from the specified list that aren't in this list.
+     *
+     * @param b the list to compare with this list for symmetric difference
+     * @return a new list containing elements that are present in either this list or the specified list,
+     *         but not in both, considering the number of occurrences
      * @see IntList#symmetricDifference(IntList)
+     * @see N#symmetricDifference(int[], int[])
      */
     public abstract L symmetricDifference(final L b);
 
     /**
-     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * Returns a new list containing elements that are present in either this list or the specified array,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For elements that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param b
-     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
-     * @see IntList#symmetricDifference(IntList)
+     * <p>Example:
+     * <pre>
+     * IntList list1 = IntList.of(1, 1, 2, 3);
+     * int[] array = new int[]{1, 2, 2, 4};
+     * IntList result = list1.symmetricDifference(array);
+     * // result will contain: [1, 3, 2, 4]
+     * // Elements explanation:
+     * // - 1 appears twice in list1 and once in array, so one occurrence remains
+     * // - 3 appears only in list1, so it remains
+     * // - 2 appears once in list1 and twice in array, so one occurrence remains
+     * // - 4 appears only in array, so it remains
+     * </pre>
+     *
+     * <p>The order of elements is preserved, with elements from this list appearing first,
+     * followed by elements from the specified array.
+     *
+     * @param b the array to compare with this list for symmetric difference
+     * @return a new list containing elements that are present in either this list or the specified array,
+     *         but not in both, considering the number of occurrences
+     * @see IntList#symmetricDifference(int[])
+     * @see N#symmetricDifference(int[], int[])
      */
     public abstract L symmetricDifference(final A b);
 

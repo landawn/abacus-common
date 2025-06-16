@@ -75,7 +75,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param a the array to be used as the element array for this list
      */
     public BooleanList(final boolean[] a) {
-        this(a, a.length);
+        this(N.requireNonNull(a), a.length);
     }
 
     /**
@@ -588,9 +588,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
 
         final boolean[] tmp = N.deleteAllByIndices(elementData, indices);
+
         N.copy(tmp, 0, elementData, 0, tmp.length);
-        N.fill(elementData, tmp.length, size, false);
-        size = tmp.length;
+
+        if (size > tmp.length) {
+            N.fill(elementData, tmp.length, size, false);
+        }
+
+        size -= elementData.length - tmp.length;
     }
 
     /**
@@ -620,14 +625,20 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
+     * Moves a range of elements in this list to a new position within the list.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * <br />
+     * No elements are deleted in the process, this list maintains its size.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
     }
 
     /**
@@ -827,21 +838,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return false;
         }
 
-        final boolean isThisContainer = size() >= c.size();
-        final BooleanList container = isThisContainer ? this : c;
-        final boolean[] iterElements = isThisContainer ? c.array() : array();
-
         if (needToSet(size(), c.size())) {
-            final Set<Boolean> set = container.toSet();
+            final Set<Boolean> set = this.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (!set.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (!set.contains(c.elementData[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (!container.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (!contains(c.elementData[i])) {
                     return false;
                 }
             }
@@ -877,21 +884,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return true;
         }
 
-        final boolean isThisContainer = size() >= c.size();
-        final BooleanList container = isThisContainer ? this : c;
-        final boolean[] iterElements = isThisContainer ? c.array() : array();
-
         if (needToSet(size(), c.size())) {
-            final Set<Boolean> set = container.toSet();
+            final Set<Boolean> set = this.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (set.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (set.contains(c.elementData[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
-                if (container.contains(iterElements[i])) {
+            for (int i = 0, len = c.size(); i < len; i++) {
+                if (contains(c.elementData[i])) {
                     return false;
                 }
             }
@@ -915,11 +918,31 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified list.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both lists.
      *
-     * @param b
-     * @return
-     * @see IntList#intersection(IntList)
+     * <p>Example:
+     * <pre>
+     * BooleanList list1 = BooleanList.of(true, true, false, true);
+     * BooleanList list2 = BooleanList.of(true, false, false);
+     * BooleanList result = list1.intersection(list2); // result will be [true, false]
+     * // One occurrence of 'true' (minimum count in both lists) and one occurrence of 'false'
+     *
+     * BooleanList list3 = BooleanList.of(false, false);
+     * BooleanList list4 = BooleanList.of(true, true);
+     * BooleanList result2 = list3.intersection(list4); // result will be [] (empty list)
+     * // No common elements between the lists
+     * </pre>
+     *
+     * @param b the list to find common elements with this list
+     * @return a new BooleanList containing elements present in both this list and the specified list,
+     *         considering the minimum number of occurrences in either list.
+     *         Returns an empty list if either list is {@code null} or empty.
+     * @see #intersection(boolean[])
+     * @see #difference(BooleanList)
+     * @see #symmetricDifference(BooleanList)
+     * @see N#intersection(boolean[], boolean[])
+     * @see N#intersection(int[], int[])
      */
     @Override
     public BooleanList intersection(final BooleanList b) {
@@ -941,11 +964,31 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
+     * Returns a new list containing elements that are present in both this list and the specified array.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both sources.
      *
-     * @param b
-     * @return
-     * @see IntList#intersection(IntList)
+     * <p>Example:
+     * <pre>
+     * BooleanList list1 = BooleanList.of(true, true, false, true);
+     * boolean[] array = new boolean[]{true, false, false};
+     * BooleanList result = list1.intersection(array); // result will be [true, false]
+     * // One occurrence of 'true' (minimum count in both sources) and one occurrence of 'false'
+     *
+     * BooleanList list2 = BooleanList.of(false, false);
+     * boolean[] array2 = new boolean[]{true, true};
+     * BooleanList result2 = list2.intersection(array2); // result will be [] (empty list)
+     * // No common elements between the list and the array
+     * </pre>
+     *
+     * @param b the array to find common elements with this list
+     * @return a new BooleanList containing elements present in both this list and the specified array,
+     *         considering the minimum number of occurrences in either source.
+     *         Returns an empty list if the array is {@code null} or empty.
+     * @see #intersection(BooleanList)
+     * @see #difference(boolean[])
+     * @see #symmetricDifference(boolean[])
+     * @see N#intersection(boolean[], boolean[])
+     * @see N#intersection(int[], int[])
      */
     @Override
     public BooleanList intersection(final boolean[] b) {
@@ -957,11 +1000,31 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified list {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param b
-     * @return
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * BooleanList list1 = BooleanList.of(true, true, false, true);
+     * BooleanList list2 = BooleanList.of(true, false);
+     * BooleanList result = list1.difference(list2); // result will be [true, true]
+     * // Two 'true' values remain because list1 has three occurrences and list2 has one
+     *
+     * BooleanList list3 = BooleanList.of(true, false);
+     * BooleanList list4 = BooleanList.of(true, true, false);
+     * BooleanList result2 = list3.difference(list4); // result will be [] (empty)
+     * // No elements remain because list4 has at least as many occurrences of each value as list3
+     * </pre>
+     *
+     * @param b the list to compare against this list
+     * @return a new BooleanList containing the elements that are present in this list but not in the specified list,
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
+     * @see #difference(boolean[])
+     * @see #symmetricDifference(BooleanList)
+     * @see #intersection(BooleanList)
+     * @see N#difference(boolean[], boolean[])
+     * @see N#difference(int[], int[])
      */
     @Override
     public BooleanList difference(final BooleanList b) {
@@ -983,11 +1046,31 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
+     * Returns a new list with the elements in this list but not in the specified array {@code b},
+     * considering the number of occurrences of each element.
      *
-     * @param b
-     * @return
-     * @see IntList#difference(IntList)
+     * <p>Example:
+     * <pre>
+     * BooleanList list1 = BooleanList.of(true, true, false, true);
+     * boolean[] array = new boolean[]{true, false};
+     * BooleanList result = list1.difference(array); // result will be [true, true]
+     * // Two 'true' values remain because list1 has three occurrences and array has one
+     *
+     * BooleanList list2 = BooleanList.of(true, false);
+     * boolean[] array2 = new boolean[]{true, true, false};
+     * BooleanList result2 = list2.difference(array2); // result will be [] (empty)
+     * // No elements remain because array2 has at least as many occurrences of each value as list2
+     * </pre>
+     *
+     * @param b the array to compare against this list
+     * @return a new BooleanList containing the elements that are present in this list but not in the specified array,
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
+     * @see #difference(BooleanList)
+     * @see #symmetricDifference(boolean[])
+     * @see #intersection(boolean[])
+     * @see N#difference(boolean[], boolean[])
+     * @see N#difference(int[], int[])
      */
     @Override
     public BooleanList difference(final boolean[] b) {
@@ -1059,7 +1142,19 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     public int occurrencesOf(final boolean valueToFind) {
-        return N.occurrencesOf(elementData, valueToFind);
+        if (size == 0) {
+            return 0;
+        }
+
+        int occurrences = 0;
+
+        for (int i = 0; i < size; i++) {
+            if (elementData[i] == valueToFind) {
+                occurrences++;
+            }
+        }
+
+        return occurrences;
     }
 
     /**
@@ -1303,7 +1398,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Override
     public void rotate(final int distance) {
         if (size > 1) {
-            N.rotate(elementData, distance);
+            N.rotate(elementData, 0, size, distance);
         }
     }
 
@@ -1313,7 +1408,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Override
     public void shuffle() {
         if (size() > 1) {
-            N.shuffle(elementData);
+            N.shuffle(elementData, 0, size);
         }
     }
 
@@ -1324,7 +1419,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Override
     public void shuffle(final Random rnd) {
         if (size() > 1) {
-            N.shuffle(elementData, rnd);
+            N.shuffle(elementData, 0, size, rnd);
         }
     }
 

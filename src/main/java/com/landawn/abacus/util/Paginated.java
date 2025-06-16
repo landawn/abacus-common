@@ -18,18 +18,31 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 public interface Paginated<T> extends Iterable<T> {
-    /**
-     * Checks for next.
-     *
-     * @return {@code true}, if successful
-     */
-    boolean hasNext();
-
-    T nextPage();
-
-    T currentPage();
-
-    T previousPage();
+    //    /**
+    //     * Checks for next.
+    //     *
+    //     * @return {@code true}, if successful
+    //     */
+    //    boolean hasNext(); // confusing with Iterator.hasNext()
+    //
+    //    T nextPage();
+    //
+    //    T currentPage();
+    //
+    //    T previousPage();
+    //
+    //    /**
+    //     *
+    //     * @param pageNum
+    //     * @return
+    //     */
+    //    Paginated<T> absolute(int pageNum);
+    //    
+    //   /**
+    //    *
+    //    * @return int
+    //    */
+    //   int currentPageNum();
 
     /**
      * Returns the first page.
@@ -52,19 +65,6 @@ public interface Paginated<T> extends Iterable<T> {
      * @throws IllegalArgumentException the illegal argument exception
      */
     T getPage(int pageNum);
-
-    /**
-     *
-     * @param pageNum
-     * @return
-     */
-    Paginated<T> absolute(int pageNum);
-
-    /**
-     *
-     * @return int
-     */
-    int currentPageNum();
 
     /**
      *

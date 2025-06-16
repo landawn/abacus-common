@@ -14,10 +14,10 @@
 
 package com.landawn.abacus.exception;
 
+import java.io.Serial;
+
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
-
-import java.io.Serial;
 
 public class UncheckedException extends RuntimeException {
 
@@ -49,6 +49,13 @@ public class UncheckedException extends RuntimeException {
     public UncheckedException(final Throwable checkedException) {
         super(getCause(checkedException));
         // this.checkedException = checkedException;
+
+        final Throwable[] suspend = checkedException.getSuppressed();
+        if (N.notEmpty(suspend)) {
+            for (Throwable e : suspend) {
+                this.addSuppressed(e);
+            }
+        }
     }
 
     /**
@@ -60,6 +67,13 @@ public class UncheckedException extends RuntimeException {
     public UncheckedException(final String message, final Throwable checkedException) {
         super(message, getCause(checkedException));
         // this.checkedException = checkedException;
+
+        final Throwable[] suspend = checkedException.getSuppressed();
+        if (N.notEmpty(suspend)) {
+            for (Throwable e : suspend) {
+                this.addSuppressed(e);
+            }
+        }
     }
 
     private static Throwable getCause(final Throwable checkedException) {

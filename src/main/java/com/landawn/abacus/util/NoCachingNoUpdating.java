@@ -147,7 +147,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E {
             for (final T e : a) {
                 action.accept(e);
             }
@@ -350,7 +350,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.BooleanConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.BooleanConsumer<E> action) throws E {
             for (final boolean e : a) {
                 action.accept(e);
             }
@@ -512,7 +512,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.CharConsumer<E> action) throws E {
             for (final char e : a) {
                 action.accept(e);
             }
@@ -674,7 +674,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.ByteConsumer<E> action) throws E {
             for (final byte e : a) {
                 action.accept(e);
             }
@@ -836,7 +836,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.ShortConsumer<E> action) throws E {
             for (final short e : a) {
                 action.accept(e);
             }
@@ -998,7 +998,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.IntConsumer<E> action) throws E {
             for (final int e : a) {
                 action.accept(e);
             }
@@ -1160,7 +1160,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.LongConsumer<E> action) throws E {
             for (final long e : a) {
                 action.accept(e);
             }
@@ -1322,7 +1322,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.FloatConsumer<E> action) throws E {
             for (final float e : a) {
                 action.accept(e);
             }
@@ -1484,7 +1484,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.DoubleConsumer<E> action) throws E {
             for (final double e : a) {
                 action.accept(e);
             }
@@ -1645,7 +1645,7 @@ public interface NoCachingNoUpdating {
          * @param action
          * @throws E
          */
-        public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E {
             for (final T e : deque) {
                 action.accept(e);
             }

@@ -3133,9 +3133,17 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        //    public int getAsInt() throws NoSuchElementException {
-        //        return orElseThrow();
-        //    }
+        /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
+         *
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
+         * @deprecated replaced by {@link #get()}
+         * @see #get()
+         */
+        public int getAsInt() throws NoSuchElementException {
+            return orElseThrow();
+        }
 
         public boolean isPresent() {
             return isPresent;
@@ -3793,9 +3801,17 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        //    public long getAsLong() throws NoSuchElementException {
-        //        return orElseThrow();
-        //    }
+        /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
+         *
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
+         * @deprecated replaced by {@link #get()}
+         * @see #get()
+         */
+        public long getAsLong() throws NoSuchElementException {
+            return orElseThrow();
+        }
 
         public boolean isPresent() {
             return isPresent;
@@ -4938,9 +4954,17 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        //    public double getAsDouble() throws NoSuchElementException {
-        //        return orElseThrow();
-        //    }
+        /**
+         * Returns the value if present, otherwise throws {@code NoSuchElementException}.
+         *
+         * @return the value if present
+         * @throws NoSuchElementException if no value is present
+         * @deprecated replaced by {@link #get()}
+         * @see #get()
+         */
+        public double getAsDouble() throws NoSuchElementException {
+            return orElseThrow();
+        }
 
         public boolean isPresent() {
             return isPresent;

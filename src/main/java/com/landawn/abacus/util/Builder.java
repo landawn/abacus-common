@@ -1304,6 +1304,58 @@ public class Builder<T> {
             super(c);
         }
 
+        @Override
+        public ListBuilder<T, L> add(final T e) {
+            val.add(e);
+
+            return this;
+        }
+
+        @Override
+        public ListBuilder<T, L> addAll(final Collection<? extends T> c) {
+            if (N.notEmpty(c)) {
+                val.addAll(c);
+            }
+
+            return this;
+        }
+
+        @Override
+        public ListBuilder<T, L> addAll(final T... a) {
+            if (N.notEmpty(a)) {
+                val.addAll(Arrays.asList(a));
+            }
+
+            return this;
+        }
+
+        @Override
+        public ListBuilder<T, L> remove(final Object e) {
+            //noinspection SuspiciousMethodCalls
+            val.remove(e);
+
+            return this;
+        }
+
+        @Override
+        public ListBuilder<T, L> removeAll(final Collection<?> c) {
+            if (N.notEmpty(c)) {
+                //noinspection SuspiciousMethodCalls
+                val.removeAll(c);
+            }
+
+            return this;
+        }
+
+        @Override
+        public ListBuilder<T, L> removeAll(final T... a) {
+            if (N.notEmpty(a)) {
+                val.removeAll(Arrays.asList(a));
+            }
+
+            return this;
+        }
+
         /**
          *
          * @param index
@@ -1352,7 +1404,7 @@ public class Builder<T> {
      * @param <T>
      * @param <C>
      */
-    public static class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> {
+    public static sealed class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> permits ListBuilder {
 
         /**
          * Instantiates a new collection builder.
@@ -1394,8 +1446,7 @@ public class Builder<T> {
          * @param a
          * @return
          */
-        @SafeVarargs
-        public final CollectionBuilder<T, C> addAll(final T... a) {
+        public CollectionBuilder<T, C> addAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.addAll(Arrays.asList(a));
             }
@@ -1436,8 +1487,7 @@ public class Builder<T> {
          * @param a
          * @return
          */
-        @SafeVarargs
-        public final CollectionBuilder<T, C> removeAll(final T... a) {
+        public CollectionBuilder<T, C> removeAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.removeAll(Arrays.asList(a));
             }
@@ -2320,131 +2370,131 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @param columnName
-         * @return
-         */
-        public DataSetBuilder sortBy(final String columnName) {
-            val.sortBy(columnName);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param columnName
-         * @param cmp
-         * @return
-         */
-        public <T> DataSetBuilder sortBy(final String columnName, final Comparator<T> cmp) {
-            val.sortBy(columnName, cmp);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param columnNames
-         * @return
-         */
-        public DataSetBuilder sortBy(final Collection<String> columnNames) {
-            val.sortBy(columnNames);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param columnNames
-         * @param cmp
-         * @return
-         */
-        public DataSetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
-            val.sortBy(columnNames, cmp);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param columnNames
-         * @param keyExtractor
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
-            val.sortBy(columnNames, keyExtractor);
-
-            return this;
-        }
-
-        /**
-         * Parallel sort by.
-         *
-         * @param columnName
-         * @return
-         */
-        public DataSetBuilder parallelSortBy(final String columnName) {
-            val.parallelSortBy(columnName);
-
-            return this;
-        }
-
-        /**
-         * Parallel sort by.
-         *
-         * @param <T>
-         * @param columnName
-         * @param cmp
-         * @return
-         */
-        public <T> DataSetBuilder parallelSortBy(final String columnName, final Comparator<T> cmp) {
-            val.parallelSortBy(columnName, cmp);
-
-            return this;
-        }
-
-        /**
-         * Parallel sort by.
-         *
-         * @param columnNames
-         * @return
-         */
-        public DataSetBuilder parallelSortBy(final Collection<String> columnNames) {
-            val.parallelSortBy(columnNames);
-
-            return this;
-        }
-
-        /**
-         * Parallel sort by.
-         *
-         * @param columnNames
-         * @param cmp
-         * @return
-         */
-        public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
-            val.parallelSortBy(columnNames, cmp);
-
-            return this;
-        }
-
-        /**
-         * Parallel sort by.
-         *
-         * @param columnNames
-         * @param keyExtractor
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public DataSetBuilder parallelSortBy(final Collection<String> columnNames,
-                final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
-            val.parallelSortBy(columnNames, keyExtractor);
-
-            return this;
-        }
+        //    /**
+        //     *
+        //     * @param columnName
+        //     * @return
+        //     */
+        //    public DataSetBuilder sortBy(final String columnName) {
+        //        val.sortBy(columnName);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     *
+        //     * @param <T>
+        //     * @param columnName
+        //     * @param cmp
+        //     * @return
+        //     */
+        //    public DataSetBuilder sortBy(final String columnName, final Comparator<?> cmp) {
+        //        val.sortBy(columnName, cmp);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     *
+        //     * @param columnNames
+        //     * @return
+        //     */
+        //    public DataSetBuilder sortBy(final Collection<String> columnNames) {
+        //        val.sortBy(columnNames);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     *
+        //     * @param columnNames
+        //     * @param cmp
+        //     * @return
+        //     */
+        //    public DataSetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
+        //        val.sortBy(columnNames, cmp);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     *
+        //     * @param columnNames
+        //     * @param keyExtractor
+        //     * @return
+        //     */
+        //    @SuppressWarnings("rawtypes")
+        //    public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+        //        val.sortBy(columnNames, keyExtractor);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     * Parallel sort by.
+        //     *
+        //     * @param columnName
+        //     * @return
+        //     */
+        //    public DataSetBuilder parallelSortBy(final String columnName) {
+        //        val.parallelSortBy(columnName);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     * Parallel sort by.
+        //     *
+        //     * @param <T>
+        //     * @param columnName
+        //     * @param cmp
+        //     * @return
+        //     */
+        //    public DataSetBuilder parallelSortBy(final String columnName, final Comparator<?> cmp) {
+        //        val.parallelSortBy(columnName, cmp);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     * Parallel sort by.
+        //     *
+        //     * @param columnNames
+        //     * @return
+        //     */
+        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames) {
+        //        val.parallelSortBy(columnNames);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     * Parallel sort by.
+        //     *
+        //     * @param columnNames
+        //     * @param cmp
+        //     * @return
+        //     */
+        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
+        //        val.parallelSortBy(columnNames, cmp);
+        //
+        //        return this;
+        //    }
+        //
+        //    /**
+        //     * Parallel sort by.
+        //     *
+        //     * @param columnNames
+        //     * @param keyExtractor
+        //     * @return
+        //     */
+        //    @SuppressWarnings("rawtypes")
+        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames,
+        //            final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+        //        val.parallelSortBy(columnNames, keyExtractor);
+        //
+        //        return this;
+        //    }
     }
 
     /**
@@ -2975,7 +3025,7 @@ public class Builder<T> {
          */
         public ComparisonBuilder compareFalseLess(final boolean left, final boolean right) {
             if (result == 0) {
-                result = left == right ? 0 : (left ? -1 : 1);
+                result = left == right ? 0 : (left ? 1 : -1);
             }
 
             return this;
@@ -2992,7 +3042,7 @@ public class Builder<T> {
          */
         public ComparisonBuilder compareTrueLess(final boolean left, final boolean right) {
             if (result == 0) {
-                result = left == right ? 0 : (left ? 1 : -1);
+                result = left == right ? 0 : (left ? -1 : 1);
             }
 
             return this;

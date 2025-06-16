@@ -345,42 +345,44 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    /**
-     *
-     * @param element
-     * @return
-     */
-    public Joiner append(final char[] element) {
-        if (element != null || !skipNulls) {
-            if (element == null) {
-                prepareBuilder().append(nullText);
-            } else {
-                prepareBuilder().append(element);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @param element
-     * @param offset
-     * @param len
-     * @return
-     * @see StringBuilder#append(char[], int, int)
-     */
-    public Joiner append(final char[] element, final int offset, final int len) {
-        if (element != null || !skipNulls) {
-            if (element == null) {
-                prepareBuilder().append(nullText);
-            } else {
-                prepareBuilder().append(element, offset, len);
-            }
-        }
-
-        return this;
-    }
+    //    /**
+    //     *
+    //     * @param element
+    //     * @return
+    //     */
+    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
+    //    public Joiner append(final char[] element) {
+    //        if (element != null || !skipNulls) {
+    //            if (element == null) {
+    //                prepareBuilder().append(nullText);
+    //            } else {
+    //                prepareBuilder().append(element);
+    //            }
+    //        }
+    //
+    //        return this;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param element
+    //     * @param offset
+    //     * @param len
+    //     * @return
+    //     * @see StringBuilder#append(char[], int, int)
+    //     */
+    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
+    //    public Joiner append(final char[] element, final int offset, final int len) {
+    //        if (element != null || !skipNulls) {
+    //            if (element == null) {
+    //                prepareBuilder().append(nullText);
+    //            } else {
+    //                prepareBuilder().append(element, offset, len);
+    //            }
+    //        }
+    //
+    //        return this;
+    //    }
 
     /**
      *
@@ -1323,9 +1325,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final boolean value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1339,9 +1341,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final char value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1355,9 +1357,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final int value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1371,9 +1373,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final long value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1387,9 +1389,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final float value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1403,9 +1405,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final double value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value);
+            prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
         }
 
         return this;
@@ -1419,9 +1421,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final String value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value == null ? nullText : (trimBeforeAppend ? value.trim() : value));
+            prepareBuilder().append(format(key)).append(format(value));
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value == null ? nullText : (trimBeforeAppend ? value.trim() : value));
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(format(value));
         }
 
         return this;
@@ -1435,9 +1437,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final CharSequence value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(value == null ? nullText : (trimBeforeAppend ? value.toString().trim() : value));
+            prepareBuilder().append(format(key)).append(format(value));
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(value == null ? nullText : (trimBeforeAppend ? value.toString().trim() : value));
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(format(value));
         }
 
         return this;
@@ -1452,44 +1454,53 @@ public final class Joiner implements Closeable {
     public Joiner appendEntry(final String key, final StringBuilder value) {
         if (value == null) {
             if (isEmptyKeyValueSeparator) {
-                prepareBuilder().append(key).append(nullText);
+                prepareBuilder().append(format(key)).append(nullText);
             } else {
-                prepareBuilder().append(key).append(keyValueSeparator).append(nullText);
+                prepareBuilder().append(format(key)).append(keyValueSeparator).append(nullText);
             }
         } else {
             if (isEmptyKeyValueSeparator) {
-                prepareBuilder().append(key).append(value);
+                if (trimBeforeAppend) {
+                    prepareBuilder().append(format(key)).append(value.toString().trim());
+                } else {
+                    prepareBuilder().append(format(key)).append(value);
+                }
             } else {
-                prepareBuilder().append(key).append(keyValueSeparator).append(value);
+                if (trimBeforeAppend) {
+                    prepareBuilder().append(format(key)).append(keyValueSeparator).append(value.toString().trim());
+                } else {
+                    prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+                }
             }
         }
 
         return this;
     }
 
-    /**
-     *
-     * @param key
-     * @param value
-     * @return
-     */
-    public Joiner appendEntry(final String key, final char[] value) {
-        if (value == null) {
-            if (isEmptyKeyValueSeparator) {
-                prepareBuilder().append(key).append(nullText);
-            } else {
-                prepareBuilder().append(key).append(keyValueSeparator).append(nullText);
-            }
-        } else {
-            if (isEmptyKeyValueSeparator) {
-                prepareBuilder().append(key).append(value);
-            } else {
-                prepareBuilder().append(key).append(keyValueSeparator).append(value);
-            }
-        }
-
-        return this;
-    }
+    //    /**
+    //     *
+    //     * @param key
+    //     * @param value
+    //     * @return
+    //     */
+    //    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
+    //    public Joiner appendEntry(final String key, final char[] value) {
+    //        if (value == null) {
+    //            if (isEmptyKeyValueSeparator) {
+    //                prepareBuilder().append(format(key)).append(nullText);
+    //            } else {
+    //                prepareBuilder().append(format(key)).append(keyValueSeparator).append(nullText);
+    //            }
+    //        } else {
+    //            if (isEmptyKeyValueSeparator) {
+    //                prepareBuilder().append(format(key)).append(value);
+    //            } else {
+    //                prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+    //            }
+    //        }
+    //
+    //        return this;
+    //    }
 
     /**
      *
@@ -1499,9 +1510,9 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final Object value) {
         if (isEmptyKeyValueSeparator) {
-            prepareBuilder().append(key).append(toString(value));
+            prepareBuilder().append(format(key)).append(toString(value));
         } else {
-            prepareBuilder().append(key).append(keyValueSeparator).append(toString(value));
+            prepareBuilder().append(format(key)).append(keyValueSeparator).append(toString(value));
         }
 
         return this;
@@ -1725,8 +1736,8 @@ public final class Joiner implements Closeable {
      * @param bean
      * @return
      */
-    public Joiner appendEntries(final Object bean) {
-        return appendEntries(bean, (Collection<String>) null);
+    public Joiner appendBean(final Object bean) {
+        return appendBean(bean, (Collection<String>) null);
     }
 
     /**
@@ -1736,13 +1747,13 @@ public final class Joiner implements Closeable {
      * @return
      * @throws IllegalArgumentException
      */
-    public Joiner appendEntries(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
         if (bean == null) {
             return this;
         }
 
         if (N.isEmpty(selectPropNames)) {
-            return appendEntries(bean, true, null);
+            return appendBean(bean, true, null);
         }
 
         final Class<?> cls = bean.getClass();
@@ -1784,7 +1795,7 @@ public final class Joiner implements Closeable {
      * @return
      * @throws IllegalArgumentException
      */
-    public Joiner appendEntries(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) throws IllegalArgumentException {
         if (bean == null) {
             return this;
         }
@@ -1834,7 +1845,7 @@ public final class Joiner implements Closeable {
      * @return
      * @throws IllegalArgumentException
      */
-    public Joiner appendEntries(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
 
         if (bean == null) {
@@ -2091,11 +2102,14 @@ public final class Joiner implements Closeable {
         recycleBuffer();
     }
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
+    private String format(final String text) {
+        return text == null ? nullText : (trimBeforeAppend ? text.trim() : text);
+    }
+
+    private String format(final CharSequence text) {
+        return text == null ? nullText : (trimBeforeAppend ? text.toString().trim() : text.toString());
+    }
+
     private String toString(final Object obj) {
         return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
     }
@@ -2110,6 +2124,10 @@ public final class Joiner implements Closeable {
         } else {
             buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder())
                     .append(latestToStringValue == null ? prefix : latestToStringValue);
+
+            if (!isEmptySeparator && latestToStringValue != null) {
+                buffer.append(separator);
+            }
         }
 
         return buffer;

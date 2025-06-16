@@ -1230,14 +1230,16 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalStateException {
         List<K> keyToRemove = null;
         V value = null;
-        V newVal = null;
+        V newValue = null;
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             value = entry.getValue();
 
-            newVal = function.apply(entry.getKey(), value);
+            newValue = function.apply(entry.getKey(), value);
 
-            if (N.isEmpty(newVal)) {
+            if (newValue == value) {
+                // continue.
+            } else if (N.isEmpty(newValue)) {
                 if (keyToRemove == null) {
                     keyToRemove = new ArrayList<>();
                 }
@@ -1246,8 +1248,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             } else {
                 value.clear();
 
-                if (!value.addAll(newVal)) {
-                    throw new IllegalStateException("Failed to add the new value: " + newVal + " for key: " + entry.getKey() + " for replacement");
+                if (!value.addAll(newValue)) {
+                    throw new IllegalStateException("Failed to add the new value: " + newValue + " for key: " + entry.getKey() + " for replacement");
                 }
             }
         }
@@ -1364,11 +1366,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         V ret = null;
         final V newValue = remappingFunction.apply(key, oldValue);
 
-        if (N.notEmpty(newValue)) {
-            if (oldValue != newValue) {
-                oldValue.clear();
-                oldValue.addAll(newValue);
-            }
+        if (newValue == oldValue) {
+            // continue.
+        } else if (N.notEmpty(newValue)) {
+            oldValue.clear();
+            oldValue.addAll(newValue);
 
             ret = oldValue;
         } else {
@@ -1427,15 +1429,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V oldValue = get(key);
         final V newValue = remappingFunction.apply(key, oldValue);
 
-        if (N.notEmpty(newValue)) {
+        if (newValue == oldValue) {
+            // continue.
+        } else if (N.notEmpty(newValue)) {
             if (oldValue == null) {
                 putMany(key, newValue);
                 ret = get(key);
             } else {
-                if (oldValue != newValue) {
-                    oldValue.clear();
-                    oldValue.addAll(newValue);
-                }
+                oldValue.clear();
+                oldValue.addAll(newValue);
 
                 ret = oldValue;
             }
@@ -1506,11 +1508,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         V ret = null;
         final V newValue = remappingFunction.apply(oldValue, elements);
 
-        if (N.notEmpty(newValue)) {
-            if (oldValue != newValue) {
-                oldValue.clear();
-                oldValue.addAll(newValue);
-            }
+        if (newValue == oldValue) {
+            // continue.
+        } else if (N.notEmpty(newValue)) {
+            oldValue.clear();
+            oldValue.addAll(newValue);
 
             ret = oldValue;
         } else {
@@ -1579,11 +1581,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         V ret = null;
         final V newValue = remappingFunction.apply(oldValue, e);
 
-        if (N.notEmpty(newValue)) {
-            if (oldValue != newValue) {
-                oldValue.clear();
-                oldValue.addAll(newValue);
-            }
+        if (newValue == oldValue) {
+            // continue.
+        } else if (N.notEmpty(newValue)) {
+            oldValue.clear();
+            oldValue.addAll(newValue);
 
             ret = oldValue;
         } else {

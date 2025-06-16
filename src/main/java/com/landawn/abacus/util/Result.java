@@ -87,7 +87,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @throws E2 if the action throws an exception.
      */
     public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
-        ifFailureOrElse(actionOnFailure, Fn.doNothing());
+        ifFailureOrElse(actionOnFailure, Fn.emptyConsumer());
     }
 
     /**
@@ -121,7 +121,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @throws E2 if the action throws an exception.
      */
     public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
-        ifSuccessOrElse(actionOnSuccess, Fn.doNothing());
+        ifSuccessOrElse(actionOnSuccess, Fn.emptyConsumer());
     }
 
     /**

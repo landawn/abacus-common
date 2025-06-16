@@ -209,7 +209,7 @@ public final class Fn {
     };
 
     @SuppressWarnings("rawtypes")
-    private static final Consumer DO_NOTHING = value -> {
+    private static final Consumer EMPTY_CONSUMER = value -> {
         // do nothing.
     };
 
@@ -756,6 +756,11 @@ public final class Fn {
         };
     }
 
+    /**
+     * Returns an empty {@code Runnable} which does nothing.
+     *
+     * @return an empty {@code Runnable} which does nothing.
+     */
     public static Runnable emptyAction() {
         return EMPTY_ACTION;
     }
@@ -811,12 +816,25 @@ public final class Fn {
     }
 
     /**
+     * Returns an empty {@code Consumer} which does nothing.
      *
      * @param <T>
-     * @return
+     * @return an empty {@code Consumer} which does nothing.
+     * @deprecated Use {@link #emptyConsumer()} instead.
+     * @see #emptyConsumer()
      */
     public static <T> Consumer<T> doNothing() {
-        return DO_NOTHING;
+        return EMPTY_CONSUMER;
+    }
+
+    /**
+     * Returns an empty {@code Consumer} which does nothing.
+     *
+     * @param <T>
+     * @return an empty {@code Consumer} which does nothing.
+     */
+    public static <T> Consumer<T> emptyConsumer() {
+        return EMPTY_CONSUMER;
     }
 
     /**
@@ -1924,8 +1942,7 @@ public final class Fn {
      * @return
      * @throws IllegalArgumentException
      */
-    @SuppressWarnings("rawtypes")
-    public static Predicate<Class> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
+    public static Predicate<Class<?>> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
 
         return clazz::isAssignableFrom;
@@ -2654,7 +2671,7 @@ public final class Fn {
      * @return
      */
     @Beta
-    public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, Collection<R>> mapper) {
+    public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper) {
         return t -> t == null ? N.emptyList() : mapper.apply(t);
     }
 
@@ -2972,7 +2989,7 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<? super Map<K, ? extends Collection<? extends V>>, List<Map<K, V>>> flatmapValue() {
+    public static <K, V> Function<Map<K, ? extends Collection<V>>, List<Map<K, V>>> flatmapValue() {
         return (Function) FLAT_MAP_VALUE_FUNC;
     }
 
@@ -3711,11 +3728,78 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided supplier as is - a shorthand identity method for suppliers.</p>
+     * 
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
+     * and others.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * Supplier&lt;String&gt; supplier = () -&gt; "value";
+     * // You can use:
+     * var supplier = Fn.s(() -&gt; "value");
+     * </pre>
      *
-     * @param <T>
-     * @param predicate
-     * @return
-     * @see #from(java.util.function.Predicate)
+     * @param <T> the type of results supplied by the supplier
+     * @param supplier the supplier to return
+     * @return the supplier unchanged
+     * @see #s(Object, Function)
+     * @see #ss(com.landawn.abacus.util.Throwables.Supplier)
+     * @see #ss(Object, com.landawn.abacus.util.Throwables.Function)
+     * @see Suppliers#of(Supplier)
+     * @see Suppliers#of(Object, Function)
+     * @see IntFunctions#of(IntFunction)
+     */
+    @Beta
+    public static <T> Supplier<T> s(final Supplier<T> supplier) {
+        return supplier;
+    }
+
+    /**
+     * <p>Returns a supplier that applies the given function to the provided argument.</p>
+     *
+     * <p>This method is a shorthand for creating a supplier from a function and an argument.
+     * It can be useful when you want to create a supplier that computes a value based on
+     * a specific input.</p>
+     *
+     * @param <A> the type of the input argument
+     * @param <T> the type of the result
+     * @param a the input argument
+     * @param func the function to apply to the argument
+     * @return a supplier that computes the result by applying the function to the argument
+     * @see #s(Supplier)
+     * @see #ss(com.landawn.abacus.util.Throwables.Supplier)
+     * @see #ss(Object, com.landawn.abacus.util.Throwables.Function)
+     * @see Suppliers#of(Supplier)
+     * @see Suppliers#of(Object, Function)
+     * @see IntFunctions#of(IntFunction)
+     */
+    @Beta
+    public static <A, T> Supplier<T> s(final A a, final Function<? super A, ? extends T> func) {
+        return () -> func.apply(a);
+    }
+
+    /**
+     * <p>Returns the provided predicate as is - a shorthand identity method for predicates.</p>
+     *
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and others.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * Predicate&lt;String&gt; predicate = s -> s.length() > 5;
+     * // You can use:
+     * var predicate = Fn.p(s -> s.length() > 5);
+     * </pre>
+     *
+     * @param <T> the type of the input to the predicate
+     * @param predicate the predicate to return
+     * @return the predicate unchanged
+     * @see #p(Object, java.util.function.BiPredicate)
      */
     @Beta
     public static <T> Predicate<T> p(final Predicate<T> predicate) {
@@ -3723,13 +3807,29 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a predicate that tests the input against a fixed value using the provided bi-predicate.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param a
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-predicate
+     * to a fixed value, resulting in a predicate that only requires the second parameter. This is useful
+     * for creating predicates that compare an input with a specific reference value.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a predicate that checks if a string contains a specific substring
+     * String searchText = "error";
+     * Predicate&lt;String&gt; containsError = Fn.p(searchText, String::contains);
+     * 
+     * boolean result = containsError.test("runtime error occurred"); // Returns true
+     * boolean result2 = containsError.test("success"); // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the bi-predicate
+     * @param <T> the type of the input to the resulting predicate
+     * @param a the fixed value to use as the first argument to the bi-predicate
+     * @param biPredicate the bi-predicate to apply with the fixed first argument
+     * @return a predicate that applies the input as the second argument to the bi-predicate
+     * @throws IllegalArgumentException if the biPredicate is null
+     * @see #p(Predicate)
      */
     @Beta
     public static <A, T> Predicate<T> p(final A a, final java.util.function.BiPredicate<A, T> biPredicate) throws IllegalArgumentException {
@@ -3739,15 +3839,31 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a predicate that tests inputs against two fixed values using the provided tri-predicate.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param a
-     * @param b
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-predicate
+     * to fixed values, resulting in a predicate that only requires the third parameter. This is useful for
+     * creating predicates that incorporate two reference values in their comparison logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a predicate that checks if a substring appears between two indices
+     * String text = "error message";
+     * Predicate&lt;Integer&gt; containsErrorBetween = 
+     *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
+     *
+     * boolean result = containsErrorBetween.test(5);  // Returns true
+     * boolean result2 = containsErrorBetween.test(14); // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the first fixed argument to the tri-predicate
+     * @param <B> the type of the second fixed argument to the tri-predicate
+     * @param <T> the type of the input to the resulting predicate
+     * @param a the first fixed value to use as an argument to the tri-predicate
+     * @param b the second fixed value to use as an argument to the tri-predicate
+     * @param triPredicate the tri-predicate to apply with the fixed arguments
+     * @return a predicate that applies the input as the third argument to the tri-predicate
+     * @throws IllegalArgumentException if the triPredicate is null
      */
     @Beta
     public static <A, B, T> Predicate<T> p(final A a, final B b, final TriPredicate<A, B, T> triPredicate) throws IllegalArgumentException {
@@ -3757,12 +3873,26 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided bi-predicate as is - a shorthand identity method for bi-predicates.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param biPredicate
-     * @return
-     * @see #from(java.util.function.BiPredicate)
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * BiPredicate&lt;String, Integer&gt; biPredicate = (str, len) -> str.length() > len;
+     * // You can use:
+     * var biPredicate = Fn.p((String str, Integer len) -> str.length() > len);
+     * </pre>
+     *
+     * @param <T> the type of the first input to the bi-predicate
+     * @param <U> the type of the second input to the bi-predicate
+     * @param biPredicate the bi-predicate to return
+     * @return the bi-predicate unchanged
+     * @see #p(Predicate)
+     * @see #p(Object, java.util.function.BiPredicate)
      */
     @Beta
     public static <T, U> BiPredicate<T, U> p(final BiPredicate<T, U> biPredicate) {
@@ -3770,14 +3900,32 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-predicate that tests inputs against a fixed value using the provided tri-predicate.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the tri-predicate
+     * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
+     * This is useful for creating bi-predicates that incorporate a reference value in their comparison logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a bi-predicate that checks if a substring appears between two indices
+     * String text = "error message";
+     * BiPredicate&lt;Integer, Integer&gt; containsErrorBetween = 
+     *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
+     *
+     * boolean result = containsErrorBetween.test(0, 5);  // Returns true
+     * boolean result2 = containsErrorBetween.test(6, 14); // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the tri-predicate
+     * @param <T> the type of the first input to the resulting bi-predicate
+     * @param <U> the type of the second input to the resulting bi-predicate
+     * @param a the fixed value to use as the first argument to the tri-predicate
+     * @param triPredicate the tri-predicate to apply with the fixed first argument
+     * @return a bi-predicate that applies the inputs as the second and third arguments to the tri-predicate
+     * @throws IllegalArgumentException if the triPredicate is null
+     * @see #p(BiPredicate)
+     * @see #p(Object, java.util.function.BiPredicate)
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> p(final A a, final TriPredicate<A, T, U> triPredicate) throws IllegalArgumentException {
@@ -3787,12 +3935,30 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided tri-predicate as is - a shorthand identity method for tri-predicates.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param triPredicate
-     * @return
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate and BiPredicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * TriPredicate&lt;String, Integer, Boolean&gt; triPredicate = 
+     *     (str, len, flag) -> flag && str.length() > len;
+     * // You can use:
+     * var triPredicate = Fn.p((String str, Integer len, Boolean flag) -> 
+     *     flag && str.length() > len);
+     * </pre>
+     *
+     * @param <A> the type of the first input to the tri-predicate
+     * @param <B> the type of the second input to the tri-predicate
+     * @param <C> the type of the third input to the tri-predicate
+     * @param triPredicate the tri-predicate to return
+     * @return the tri-predicate unchanged
+     * @see #p(Predicate)
+     * @see #p(BiPredicate)
+     * @see #p(Object, TriPredicate)
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> p(final TriPredicate<A, B, C> triPredicate) {
@@ -3800,11 +3966,25 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided consumer as is - a shorthand identity method for consumers.</p>
      *
-     * @param <T>
-     * @param consumer
-     * @return
-     * @see #from(java.util.function.Consumer)
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * Consumer&lt;String&gt; logger = str -> System.out.println("Log: " + str);
+     * // You can use:
+     * var logger = Fn.c((String str) -> System.out.println("Log: " + str));
+     * </pre>
+     *
+     * @param <T> the type of the input to the consumer
+     * @param consumer the consumer to return
+     * @return the consumer unchanged
+     * @see #p(Predicate)
+     * @see #s(Supplier)
      */
     @Beta
     public static <T> Consumer<T> c(final Consumer<T> consumer) {
@@ -3812,13 +3992,30 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a consumer that applies inputs along with a fixed value to the provided bi-consumer.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param a
-     * @param biConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-consumer
+     * to a fixed value, resulting in a consumer that only requires the second parameter.
+     * This is useful for creating consumers that incorporate a reference value in their logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a consumer that adds elements to a specific list
+     * List&lt;String&gt; myList = new ArrayList&lt;&gt;();
+     * Consumer&lt;String&gt; addToMyList = Fn.c(myList, (list, item) -> list.add(item));
+     *
+     * addToMyList.accept("first");  // Adds "first" to myList
+     * addToMyList.accept("second"); // Adds "second" to myList
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the bi-consumer
+     * @param <T> the type of the input to the resulting consumer
+     * @param a the fixed value to use as the first argument to the bi-consumer
+     * @param biConsumer the bi-consumer to apply with the fixed first argument
+     * @return a consumer that applies the input as the second argument to the bi-consumer
+     * @throws IllegalArgumentException if the biConsumer is null
+     * @see #c(Consumer)
+     * @see #p(Object, java.util.function.BiPredicate)
      */
     @Beta
     public static <A, T> Consumer<T> c(final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
@@ -3828,15 +4025,31 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a consumer that applies inputs along with two fixed values to the provided tri-consumer.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param a
-     * @param b
-     * @param triConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-consumer
+     * to fixed values, resulting in a consumer that only requires the third parameter.
+     * This is useful for creating consumers that incorporate two reference values in their logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a consumer that logs messages with a specific prefix and suffix
+     * String prefix = "Log: ";
+     * String suffix = " [end]";
+     * Consumer&lt;String&gt; logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
+     *     System.out.println(p + msg + s));
+     *
+     * logWithPrefixAndSuffix.accept("Hello"); // Prints: Log: Hello [end]
+     * </pre>
+     *
+     * @param <A> the type of the first fixed argument to the tri-consumer
+     * @param <B> the type of the second fixed argument to the tri-consumer
+     * @param <T> the type of the input to the resulting consumer
+     * @param a the fixed value to use as the first argument to the tri-consumer
+     * @param b the fixed value to use as the second argument to the tri-consumer
+     * @param triConsumer the tri-consumer to apply with the fixed first and second arguments
+     * @return a consumer that applies the input as the third argument to the tri-consumer
+     * @throws IllegalArgumentException if the triConsumer is null
      */
     @Beta
     public static <A, B, T> Consumer<T> c(final A a, final B b, final TriConsumer<A, B, T> triConsumer) throws IllegalArgumentException {
@@ -3846,12 +4059,24 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided bi-consumer as is - a shorthand identity method for bi-consumers.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param biConsumer
-     * @return
-     * @see #from(java.util.function.BiConsumer)
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * BiConsumer&lt;String, Integer&gt; biConsumer = (str, len) -> System.out.println(str + " has length " + len);
+     * // You can use:
+     * var biConsumer = Fn.c((String str, Integer len) -> System.out.println(str + " has length " + len));
+     * </pre>
+     *
+     * @param <T> the type of the first input to the bi-consumer
+     * @param <U> the type of the second input to the bi-consumer
+     * @param biConsumer the bi-consumer to return
+     * @return the bi-consumer unchanged
      */
     @Beta
     public static <T, U> BiConsumer<T, U> c(final BiConsumer<T, U> biConsumer) {
@@ -3859,14 +4084,29 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-consumer that applies inputs along with a fixed value to the provided tri-consumer.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param triConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the tri-consumer
+     * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
+     * This is useful for creating bi-consumers that incorporate a reference value in their logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a bi-consumer that logs messages with a specific prefix
+     * String prefix = "Log: ";
+     * BiConsumer&lt;String, Integer&gt; logWithPrefix = Fn.c(prefix, (p, msg) -> 
+     *     System.out.println(p + msg));
+     *
+     * logWithPrefix.accept("Hello", 1); // Prints: Log: Hello
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the tri-consumer
+     * @param <T> the type of the first input to the resulting bi-consumer
+     * @param <U> the type of the second input to the resulting bi-consumer
+     * @param a the fixed value to use as the first argument to the tri-consumer
+     * @param triConsumer the tri-consumer to apply with the fixed first argument
+     * @return a bi-consumer that applies the inputs as the second and third arguments to the tri-consumer
+     * @throws IllegalArgumentException if the triConsumer is null
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> c(final A a, final TriConsumer<A, T, U> triConsumer) throws IllegalArgumentException {
@@ -3876,12 +4116,27 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided tri-consumer as is - a shorthand identity method for tri-consumers.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param triConsumer
-     * @return
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate and BiPredicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * TriConsumer&lt;String, Integer, Boolean&gt; triConsumer = 
+     *     (str, len, flag) -> System.out.println(flag ? str + " is long" : str + " is short");
+     * // You can use:
+     * var triConsumer = Fn.c((String str, Integer len, Boolean flag) -> 
+     *     System.out.println(flag ? str + " is long" : str + " is short"));
+     * </pre>
+     *
+     * @param <A> the type of the first input to the tri-consumer
+     * @param <B> the type of the second input to the tri-consumer
+     * @param <C> the type of the third input to the tri-consumer
+     * @param triConsumer the tri-consumer to return
+     * @return the tri-consumer unchanged
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> c(final TriConsumer<A, B, C> triConsumer) {
@@ -3889,12 +4144,24 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided function as is - a shorthand identity method for functions.</p>
      *
-     * @param <T>
-     * @param <R>
-     * @param function
-     * @return
-     * @see #from(java.util.function.Function)
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * Function&lt;String, Integer&gt; lengthFunction = String::length;
+     * // You can use:
+     * var lengthFunction = Fn.f(String::length);
+     * </pre>
+     *
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param function the function to return
+     * @return the function unchanged
      */
     @Beta
     public static <T, R> Function<T, R> f(final Function<T, R> function) {
@@ -3902,14 +4169,28 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a function that applies the given argument to the provided function.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <R>
-     * @param a
-     * @param biFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the function
+     * to a fixed value, resulting in a function that only requires the second parameter. This is useful
+     * for creating functions that incorporate a reference value in their computation logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a function that appends a fixed prefix to a string
+     * String prefix = "Hello, ";
+     * Function&lt;String, String&gt; appendPrefix = Fn.f(prefix, s -> prefix + s);
+     *
+     * String result = appendPrefix.apply("World"); // Returns "Hello, World"
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the function
+     * @param <T> the type of the input to the resulting function
+     * @param <R> the type of the result of the resulting function
+     * @param a the fixed value to use as the first argument to the function
+     * @param biFunction the bi-function to apply with the fixed first argument
+     * @return a function that applies the input as the second argument to the bi-function
+     * @throws IllegalArgumentException if the biFunction is null
      */
     @Beta
     public static <A, T, R> Function<T, R> f(final A a, final java.util.function.BiFunction<A, T, R> biFunction) throws IllegalArgumentException {
@@ -3919,16 +4200,31 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a function that applies the given arguments to the provided tri-function.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param triFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-function
+     * to fixed values, resulting in a function that only requires the third parameter. This is useful
+     * for creating functions that incorporate two reference values in their computation logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a function that formats a message with a fixed prefix and suffix
+     * String prefix = "Message: ";
+     * String suffix = " [end]";
+     * Function&lt;String, String&gt; formatMessage = Fn.f(prefix, suffix, (p, s, msg) -> p + msg + s);
+     *
+     * String result = formatMessage.apply("Hello"); // Returns "Message: Hello [end]"
+     * </pre>
+     *
+     * @param <A> the type of the first fixed argument to the tri-function
+     * @param <B> the type of the second fixed argument to the tri-function
+     * @param <T> the type of the input to the resulting function
+     * @param <R> the type of the result of the resulting function
+     * @param a the fixed value to use as the first argument to the tri-function
+     * @param b the fixed value to use as the second argument to the tri-function
+     * @param triFunction the tri-function to apply with the fixed first and second arguments
+     * @return a function that applies the input as the third argument to the tri-function
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) throws IllegalArgumentException {
@@ -3938,13 +4234,25 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided bi-function as is - a shorthand identity method for bi-functions.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param biFunction
-     * @return
-     * @see #from(java.util.function.BiFunction)
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * BiFunction&lt;String, Integer, String&gt; concatFunction = (str, len) -> str + len;
+     * // You can use:
+     * var concatFunction = Fn.f((String str, Integer len) -> str + len);
+     * </pre>
+     *
+     * @param <T> the type of the first input to the bi-function
+     * @param <U> the type of the second input to the bi-function
+     * @param <R> the type of the result of the bi-function
+     * @param biFunction the bi-function to return
+     * @return the bi-function unchanged
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> f(final BiFunction<T, U, R> biFunction) {
@@ -3952,15 +4260,29 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-function that applies the given argument to the provided bi-function.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param a
-     * @param triFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-function
+     * to a fixed value, resulting in a bi-function that only requires the second parameter. This is useful
+     * for creating bi-functions that incorporate a reference value in their computation logic.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a bi-function that appends a fixed prefix to a string
+     * String prefix = "Hello, ";
+     * BiFunction&lt;String, Integer, String&gt; appendPrefix = Fn.f(prefix, (p, s) -> p + s);
+     *
+     * String result = appendPrefix.apply("World", 1); // Returns "Hello, World"
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the bi-function
+     * @param <T> the type of the first input to the resulting bi-function
+     * @param <U> the type of the second input to the resulting bi-function
+     * @param <R> the type of the result of the resulting bi-function
+     * @param a the fixed value to use as the first argument to the bi-function
+     * @param triFunction the tri-function to apply with the fixed first argument
+     * @return a bi-function that applies the input as the second argument to the tri-function
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> f(final A a, final TriFunction<A, T, U, R> triFunction) throws IllegalArgumentException {
@@ -3970,13 +4292,28 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided tri-function as is - a shorthand identity method for tri-functions.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param triFunction
-     * @return
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate and BiPredicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Instead of explicitly typing:
+     * TriFunction&lt;String, Integer, Boolean, String&gt; triFunction = 
+     *     (str, len, flag) -> flag ? str + " is long" : str + " is short";
+     * // You can use:
+     * var triFunction = Fn.f((String str, Integer len, Boolean flag) -> 
+     *     flag ? str + " is long" : str + " is short");
+     * </pre>
+     *
+     * @param <A> the type of the first input to the tri-function
+     * @param <B> the type of the second input to the tri-function
+     * @param <C> the type of the third input to the tri-function
+     * @param <R> the type of the result of the tri-function
+     * @param triFunction the tri-function to return
+     * @return the tri-function unchanged
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> f(final TriFunction<A, B, C, R> triFunction) {
@@ -3984,11 +4321,102 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns the provided unary operator as is - a shorthand identity method for unary operators.</p>
      *
-     * @param <T>
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * @param <T> the type of the operand and result of the unary operator
+     * @param unaryOperator the unary operator to return
+     * @return the unary operator unchanged
+     */
+    @Beta
+    public static <T> UnaryOperator<T> o(final UnaryOperator<T> unaryOperator) {
+        N.checkArgNotNull(unaryOperator);
+
+        return unaryOperator;
+    }
+
+    /**
+     * <p>Returns the provided binary operator as is - a shorthand identity method for binary operators.</p>
+     *
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+     * and {@code p()} for Predicate.</p>
+     *
+     * @param <T> the type of the operands and result of the binary operator
+     * @param binaryOperator the binary operator to return
+     * @return the binary operator unchanged
+     */
+    @Beta
+    public static <T> BinaryOperator<T> o(final BinaryOperator<T> binaryOperator) {
+        N.checkArgNotNull(binaryOperator);
+
+        return binaryOperator;
+    }
+
+    /**
+     * <p>Returns a supplier that wraps a throwable supplier, converting checked exceptions to runtime exceptions.</p>
+     *
+     * <p>This method is useful for converting suppliers that throw checked exceptions into standard suppliers
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of results supplied by the supplier
+     * @param supplier the throwable supplier to wrap
+     * @return a supplier that applies the supplier and converts exceptions
+     * @throws IllegalArgumentException if the supplier is null
+     */
+    @Beta
+    public static <T> Supplier<T> ss(final Throwables.Supplier<? extends T, ? extends Exception> supplier) {
+        N.checkArgNotNull(supplier);
+
+        return () -> {
+            try {
+                return supplier.get();
+            } catch (final Exception e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
+        };
+    }
+
+    /**
+     * <p>Creates a supplier that applies the given argument to the provided throwable function.</p>
+     *
+     * <p>This method implements partial application by binding the first parameter of the function
+     * to a fixed value, resulting in a supplier that only requires the second parameter.
+     * Any checked exceptions thrown by the function will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the function
+     * @param <T> the type of the result
+     * @param a the fixed value to use as the first argument to the function
+     * @param func the throwable function to apply with the fixed first argument
+     * @return a supplier that computes the result by applying the function to the argument
+     * @throws IllegalArgumentException if the function is null
+     */
+    @Beta
+    public static <A, T> Supplier<T> ss(final A a, final Throwables.Function<? super A, ? extends T, ? extends Exception> func) {
+        N.checkArgNotNull(func);
+
+        return () -> {
+            try {
+                return func.apply(a);
+            } catch (final Exception e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
+        };
+    }
+
+    /**
+     * <p>Returns a predicate that wraps a throwable predicate, converting checked exceptions to runtime exceptions.</p>
+     *
+     * <p>This method is useful for converting predicates that throw checked exceptions into standard predicates
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of the input to the predicate
+     * @param predicate the throwable predicate to wrap
+     * @return a predicate that applies the input to the throwable predicate and converts exceptions
+     * @throws IllegalArgumentException if the predicate is null
      */
     @Beta
     public static <T> Predicate<T> pp(final Throwables.Predicate<T, ? extends Exception> predicate) throws IllegalArgumentException {
@@ -4004,13 +4432,19 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a predicate that applies the given argument to the provided throwable bi-predicate.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param a
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-predicate
+     * to a fixed value, resulting in a predicate that only requires the second parameter. 
+     * Any checked exceptions thrown by the bi-predicate will be converted to runtime exceptions.
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     * 
+     * @param <A> the type of the fixed first argument to the bi-predicate
+     * @param <T> the type of the input to the resulting predicate
+     * @param a the fixed value to use as the first argument to the bi-predicate
+     * @param biPredicate the throwable bi-predicate to apply with the fixed first argument
+     * @return a predicate that applies the input as the second argument to the bi-predicate
+     * @throws IllegalArgumentException if the biPredicate is null
      */
     @Beta
     public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, ? extends Exception> biPredicate) throws IllegalArgumentException {
@@ -4026,15 +4460,39 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a predicate that applies inputs along with two fixed values to the provided throwable tri-predicate.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param a
-     * @param b
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-predicate
+     * to fixed values, resulting in a predicate that only requires the third parameter.
+     * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a predicate that tests if a string matches a pattern with specific options
+     * Pattern pattern = Pattern.compile("\\d+");
+     * boolean ignoreCase = true;
+     * Predicate&lt;String&gt; isNumber = Fn.pp(pattern, ignoreCase, (p, ic, str) -> {
+     *     if (ic) {
+     *         return p.matcher(str.toLowerCase()).matches();
+     *     }
+     *     return p.matcher(str).matches();
+     * });
+     *
+     * isNumber.test("123");  // Returns true
+     * isNumber.test("abc");  // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the tri-predicate
+     * @param <B> the type of the fixed second argument to the tri-predicate
+     * @param <T> the type of the input to the resulting predicate
+     * @param a the fixed value to use as the first argument to the tri-predicate
+     * @param b the fixed value to use as the second argument to the tri-predicate
+     * @param triPredicate the throwable tri-predicate to apply with the fixed first and second arguments
+     * @return a predicate that applies the input as the third argument to the tri-predicate
+     * @throws IllegalArgumentException if the triPredicate is null
+     * @see #pp(Object, Throwables.BiPredicate)
+     * @see #pp(Throwables.Predicate)
      */
     @Beta
     public static <A, B, T> Predicate<T> pp(final A a, final B b, final Throwables.TriPredicate<A, B, T, ? extends Exception> triPredicate)
@@ -4051,12 +4509,50 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-predicate that safely wraps a throwable bi-predicate by converting any checked exceptions into runtime exceptions.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
+     * without explicit try-catch blocks. Any checked exception thrown by the bi-predicate will be caught and
+     * wrapped in a runtime exception.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a bi-predicate that reads and compares two files
+     * BiPredicate&lt;File, File&gt; filesHaveSameContent = Fn.pp((file1, file2) -> {
+     *     try (InputStream is1 = new FileInputStream(file1);
+     *          InputStream is2 = new FileInputStream(file2)) {
+     *         byte[] buffer1 = new byte[8192];
+     *         byte[] buffer2 = new byte[8192];
+     *         int n1, n2;
+     *         
+     *         do {
+     *             n1 = is1.read(buffer1);
+     *             n2 = is2.read(buffer2);
+     *             
+     *             if (n1 != n2) {
+     *                 return false;
+     *             }
+     *             
+     *             if (n1 > 0 && !Arrays.equals(buffer1, 0, n1, buffer2, 0, n2)) {
+     *                 return false;
+     *             }
+     *         } while (n1 > 0);
+     *         
+     *         return true;
+     *     }
+     * });
+     * 
+     * boolean result = filesHaveSameContent.test(new File("file1.txt"), new File("file2.txt"));
+     * </pre>
+     *
+     * @param <T> the type of the first input to the bi-predicate
+     * @param <U> the type of the second input to the bi-predicate
+     * @param biPredicate the throwable bi-predicate to be wrapped
+     * @return a bi-predicate that delegates to the given throwable bi-predicate, converting any checked exceptions to runtime exceptions
+     * @throws IllegalArgumentException if the biPredicate is null
+     * @see #pp(Throwables.Predicate)
+     * @see #pp(Object, Throwables.BiPredicate)
+     * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
     public static <T, U> BiPredicate<T, U> pp(final Throwables.BiPredicate<T, U, ? extends Exception> biPredicate) throws IllegalArgumentException {
@@ -4072,14 +4568,30 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-predicate that applies the given argument to the provided throwable tri-predicate.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the tri-predicate
+     * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
+     * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a bi-predicate that checks if a substring appears between two indices
+     * String text = "error message";
+     * BiPredicate&lt;Integer, Integer&gt; containsErrorBetween = 
+     *     Fn.pp(text, (str, start, end) -> str.substring(start, end).contains("error"));
+     *
+     * boolean result = containsErrorBetween.test(0, 5);  // Returns true
+     * boolean result2 = containsErrorBetween.test(6, 14); // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the fixed first argument to the tri-predicate
+     * @param <T> the type of the first input to the resulting bi-predicate
+     * @param <U> the type of the second input to the resulting bi-predicate
+     * @param a the fixed value to use as the first argument to the tri-predicate
+     * @param triPredicate the throwable tri-predicate to apply with the fixed first argument
+     * @return a bi-predicate that applies the inputs as the second and third arguments to the tri-predicate
+     * @throws IllegalArgumentException if the triPredicate is null
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, ? extends Exception> triPredicate)
@@ -4096,13 +4608,34 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a tri-predicate that safely wraps a throwable tri-predicate by converting any checked exceptions into runtime exceptions.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
+     * without explicit try-catch blocks. Any checked exception thrown by the tri-predicate will be caught and
+     * wrapped in a runtime exception.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a tri-predicate that checks if a string matches a pattern with specific options
+     * Pattern pattern = Pattern.compile("\\d+");
+     * boolean ignoreCase = true;
+     * TriPredicate&lt;String, Integer, Boolean&gt; isNumber = Fn.pp(pattern, ignoreCase, (p, ic, str) -> {
+     *     if (ic) {
+     *         return p.matcher(str.toLowerCase()).matches();
+     *     }
+     *     return p.matcher(str).matches();
+     * });
+     *
+     * boolean result = isNumber.test("123", 3, true);  // Returns true
+     * boolean result2 = isNumber.test("abc", 3, false); // Returns false
+     * </pre>
+     *
+     * @param <A> the type of the first input to the tri-predicate
+     * @param <B> the type of the second input to the tri-predicate
+     * @param <C> the type of the third input to the tri-predicate
+     * @param triPredicate the throwable tri-predicate to be wrapped
+     * @return a tri-predicate that delegates to the given throwable tri-predicate, converting any checked exceptions to runtime exceptions
+     * @throws IllegalArgumentException if the triPredicate is null
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, ? extends Exception> triPredicate) throws IllegalArgumentException {
@@ -4118,11 +4651,15 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a consumer that wraps a throwable consumer, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <T>
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting consumers that throw checked exceptions into standard consumers
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of the input to the consumer
+     * @param consumer the throwable consumer to wrap
+     * @return a consumer that applies the input to the throwable consumer and converts exceptions
+     * @throws IllegalArgumentException if the consumer is null
      */
     @Beta
     public static <T> Consumer<T> cc(final Throwables.Consumer<T, ? extends Exception> consumer) throws IllegalArgumentException {
@@ -4138,13 +4675,18 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a consumer that applies the given argument to the provided throwable bi-consumer.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param a
-     * @param biConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-consumer
+     * to a fixed value, resulting in a consumer that only requires the second parameter.
+     * Any checked exceptions thrown by the bi-consumer will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the bi-consumer
+     * @param <T> the type of the input to the resulting consumer
+     * @param a the fixed value to use as the first argument to the bi-consumer
+     * @param biConsumer the throwable bi-consumer to apply with the fixed first argument
+     * @return a consumer that applies the input as the second argument to the bi-consumer
+     * @throws IllegalArgumentException if the biConsumer is null
      */
     @Beta
     public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4160,15 +4702,20 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a consumer that applies inputs along with two fixed values to the provided throwable tri-consumer.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param a
-     * @param b
-     * @param triConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-consumer
+     * to fixed values, resulting in a consumer that only requires the third parameter.
+     * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the tri-consumer
+     * @param <B> the type of the fixed second argument to the tri-consumer
+     * @param <T> the type of the input to the resulting consumer
+     * @param a the fixed value to use as the first argument to the tri-consumer
+     * @param b the fixed value to use as the second argument to the tri-consumer
+     * @param triConsumer the throwable tri-consumer to apply with the fixed first and second arguments
+     * @return a consumer that applies the input as the third argument to the tri-consumer
+     * @throws IllegalArgumentException if the triConsumer is null
      */
     @Beta
     public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, ? extends Exception> triConsumer)
@@ -4185,12 +4732,16 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a bi-consumer that wraps a throwable bi-consumer, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param biConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting bi-consumers that throw checked exceptions into standard bi-consumers
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of the first input to the bi-consumer
+     * @param <U> the type of the second input to the bi-consumer
+     * @param biConsumer the throwable bi-consumer to wrap
+     * @return a bi-consumer that applies the inputs to the throwable bi-consumer and converts exceptions
+     * @throws IllegalArgumentException if the biConsumer is null
      */
     @Beta
     public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4206,14 +4757,19 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-consumer that applies the given argument to the provided throwable tri-consumer.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param triConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the tri-consumer
+     * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
+     * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the tri-consumer
+     * @param <T> the type of the first input to the resulting bi-consumer
+     * @param <U> the type of the second input to the resulting bi-consumer
+     * @param a the fixed value to use as the first argument to the tri-consumer
+     * @param triConsumer the throwable tri-consumer to apply with the fixed first argument
+     * @return a bi-consumer that applies the inputs as the second and third arguments to the tri-consumer
+     * @throws IllegalArgumentException if the triConsumer is null
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, ? extends Exception> triConsumer)
@@ -4230,13 +4786,17 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a tri-consumer that wraps a throwable tri-consumer, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param triConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting tri-consumers that throw checked exceptions into standard tri-consumers
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <A> the type of the first input to the tri-consumer
+     * @param <B> the type of the second input to the tri-consumer
+     * @param <C> the type of the third input to the tri-consumer
+     * @param triConsumer the throwable tri-consumer to wrap
+     * @return a tri-consumer that applies the inputs to the throwable tri-consumer and converts exceptions
+     * @throws IllegalArgumentException if the triConsumer is null
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, ? extends Exception> triConsumer) throws IllegalArgumentException {
@@ -4252,12 +4812,16 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a function that wraps a throwable function, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <T>
-     * @param <R>
-     * @param function
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting functions that throw checked exceptions into standard functions
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param function the throwable function to wrap
+     * @return a function that applies the input to the throwable function and converts exceptions
+     * @throws IllegalArgumentException if the function is null
      */
     @Beta
     public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function) throws IllegalArgumentException {
@@ -4273,13 +4837,39 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a function that safely wraps a throwable function by returning a default value if the function throws an exception.</p>
      *
-     * @param <T>
-     * @param <R>
-     * @param function
-     * @param defaultOnError
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
+     * without explicit try-catch blocks. Any checked exception thrown by the function will be caught and the provided
+     * default value will be returned instead.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a function that reads content from a file but returns an empty string on error
+     * Function&lt;File, String&gt; readFileContent = Fn.ff(file -> {
+     *     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+     *         StringBuilder content = new StringBuilder();
+     *         String line;
+     *         while ((line = reader.readLine()) != null) {
+     *             content.append(line).append("\n");
+     *         }
+     *         return content.toString();
+     *     }
+     * }, "");
+     *
+     * String content = readFileContent.apply(new File("config.txt")); 
+     * // Returns file content, or empty string if file doesn't exist or can't be read
+     * </pre>
+     *
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param function the throwable function to be wrapped
+     * @param defaultOnError the default value to return if the function throws an exception
+     * @return a function that delegates to the given throwable function, returning the default value if an exception occurs
+     * @throws IllegalArgumentException if the function is null
+     * @see #ff(Throwables.Function)
+     * @see #pp(Throwables.Predicate)
+     * @see #cc(Throwables.Consumer)
      */
     @Beta
     public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function, final R defaultOnError)
@@ -4296,14 +4886,19 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a function that applies the given argument to the provided throwable bi-function.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <R>
-     * @param a
-     * @param biFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the bi-function
+     * to a fixed value, resulting in a function that only requires the second parameter.
+     * Any checked exceptions thrown by the bi-function will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the bi-function
+     * @param <T> the type of the input to the resulting function
+     * @param <R> the type of the result of the resulting function
+     * @param a the fixed value to use as the first argument to the bi-function
+     * @param biFunction the throwable bi-function to apply with the fixed first argument
+     * @return a function that applies the input as the second argument to the bi-function
+     * @throws IllegalArgumentException if the biFunction is null
      */
     @Beta
     public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4319,16 +4914,21 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a function that applies inputs along with two fixed values to the provided throwable tri-function.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param triFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first two parameters of the tri-function
+     * to fixed values, resulting in a function that only requires the third parameter.
+     * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the tri-function
+     * @param <B> the type of the fixed second argument to the tri-function
+     * @param <T> the type of the input to the resulting function
+     * @param <R> the type of the result of the resulting function
+     * @param a the fixed value to use as the first argument to the tri-function
+     * @param b the fixed value to use as the second argument to the tri-function
+     * @param triFunction the throwable tri-function to apply with the fixed first and second arguments
+     * @return a function that applies the input as the third argument to the tri-function
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, B, T, R> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, ? extends Exception> triFunction)
@@ -4345,13 +4945,17 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a bi-function that wraps a throwable bi-function, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param biFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting bi-functions that throw checked exceptions into standard bi-functions
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <T> the type of the first input to the bi-function
+     * @param <U> the type of the second input to the bi-function
+     * @param <R> the type of the result of the bi-function
+     * @param biFunction the throwable bi-function to wrap
+     * @return a bi-function that applies the inputs to the throwable bi-function and converts exceptions
+     * @throws IllegalArgumentException if the biFunction is null
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4367,14 +4971,19 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-function that safely wraps a throwable bi-function by returning a default value if the function throws an exception.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param biFunction
-     * @param defaultOnError
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
+     * without explicit try-catch blocks. Any checked exception thrown by the bi-function will be caught and the provided
+     * default value will be returned instead.</p>
+     *
+     * @param <T> the type of the first input to the bi-function
+     * @param <U> the type of the second input to the bi-function
+     * @param <R> the type of the result of the bi-function
+     * @param biFunction the throwable bi-function to be wrapped
+     * @param defaultOnError the default value to return if the function throws an exception
+     * @return a bi-function that delegates to the given throwable bi-function, returning the default value if an exception occurs
+     * @throws IllegalArgumentException if the biFunction is null
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction, final R defaultOnError)
@@ -4391,15 +5000,20 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a bi-function that applies the given argument to the provided throwable tri-function.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param a
-     * @param triFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method implements partial application by binding the first parameter of the tri-function
+     * to a fixed value, resulting in a bi-function that only requires the second and third parameters.
+     * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
+     *
+     * @param <A> the type of the fixed first argument to the tri-function
+     * @param <T> the type of the first input to the resulting bi-function
+     * @param <U> the type of the second input to the resulting bi-function
+     * @param <R> the type of the result of the resulting bi-function
+     * @param a the fixed value to use as the first argument to the tri-function
+     * @param triFunction the throwable tri-function to apply with the fixed first argument
+     * @return a bi-function that applies the inputs as the second and third arguments to the tri-function
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, ? extends Exception> triFunction)
@@ -4416,14 +5030,18 @@ public final class Fn {
     }
 
     /**
+     * <p>Returns a tri-function that wraps a throwable tri-function, converting checked exceptions to runtime exceptions.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param triFunction
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method is useful for converting tri-functions that throw checked exceptions into standard tri-functions
+     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * @param <A> the type of the first input to the tri-function
+     * @param <B> the type of the second input to the tri-function
+     * @param <C> the type of the third input to the tri-function
+     * @param <R> the type of the result of the tri-function
+     * @param triFunction the throwable tri-function to wrap
+     * @return a tri-function that applies the inputs to the throwable tri-function and converts exceptions
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction)
@@ -4440,15 +5058,20 @@ public final class Fn {
     }
 
     /**
+     * <p>Creates a tri-function that safely wraps a throwable tri-function by returning a default value if the function throws an exception.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param triFunction
-     * @param defaultOnError
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
+     * without explicit try-catch blocks. Any checked exception thrown by the tri-function will be caught and the provided
+     * default value will be returned instead.</p>
+     *
+     * @param <A> the type of the first input to the tri-function
+     * @param <B> the type of the second input to the tri-function
+     * @param <C> the type of the third input to the tri-function
+     * @param <R> the type of the result of the tri-function
+     * @param triFunction the throwable tri-function to be wrapped
+     * @param defaultOnError the default value to return if the function throws an exception
+     * @return a tri-function that delegates to the given throwable tri-function, returning the default value if an exception occurs
+     * @throws IllegalArgumentException if the triFunction is null
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction, final R defaultOnError)
@@ -4465,13 +5088,37 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Predicate}.
+     * <p>Creates a synchronized predicate that safely wraps a standard predicate by ensuring all tests are performed within a synchronized block.</p>
      *
-     * @param <T>
-     * @param mutex to synchronize on
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This utility method provides thread safety for predicates that might be accessed concurrently. Any test operation
+     * will be performed while holding the lock on the provided mutex object, ensuring thread-safe evaluation of the predicate.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a thread-safe counter-based predicate
+     * final AtomicInteger counter = new AtomicInteger(0);
+     * final Object lock = new Object();
+     * 
+     * Predicate&lt;String&gt; limitedAcceptance = Fn.sp(lock, str -> {
+     *     if (counter.get() &lt; 5) {
+     *         counter.incrementAndGet();
+     *         return true;
+     *     }
+     *     return false;
+     * });
+     * 
+     * // Can be safely used from multiple threads
+     * boolean result1 = limitedAcceptance.test("first");  // true
+     * boolean result6 = limitedAcceptance.test("sixth");  // false (limit reached)
+     * </pre>
+     *
+     * @param <T> the type of the input to the predicate
+     * @param mutex the object to synchronize on when testing values
+     * @param predicate the predicate to be wrapped with synchronization
+     * @return a predicate that delegates to the given predicate within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or predicate is null
+     * @see #pp(Throwables.Predicate)
+     * @see #p(Predicate)
      */
     @Beta
     public static <T> Predicate<T> sp(final Object mutex, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
@@ -4509,42 +5156,6 @@ public final class Fn {
         };
     }
 
-    /**
-     * Synchronized {@code Predicate}.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param mutex to synchronize on
-     * @param a
-     * @param b
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
-     */
-    @Beta
-    public static <A, B, T> Predicate<T> sp(final Object mutex, final A a, final B b, final TriPredicate<A, B, T> triPredicate)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, cs.mutex);
-        N.checkArgNotNull(triPredicate, cs.TriPredicate);
-
-        return t -> {
-            synchronized (mutex) {
-                return triPredicate.test(a, b, t);
-            }
-        };
-    }
-
-    /**
-     * Synchronized {@code BiPredicate}.
-     *
-     * @param <T>
-     * @param <U>
-     * @param mutex to synchronize on
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
-     */
     @Beta
     public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
@@ -4553,6 +5164,18 @@ public final class Fn {
         return (t, u) -> {
             synchronized (mutex) {
                 return biPredicate.test(t, u);
+            }
+        };
+    }
+
+    @Beta
+    public static <A, B, C> TriPredicate<A, B, C> sp(final Object mutex, final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(triPredicate, cs.TriPredicate);
+
+        return (a, b, c) -> {
+            synchronized (mutex) {
+                return triPredicate.test(a, b, c);
             }
         };
     }
@@ -4619,6 +5242,18 @@ public final class Fn {
         return (t, u) -> {
             synchronized (mutex) {
                 biConsumer.accept(t, u);
+            }
+        };
+    }
+
+    @Beta
+    public static <A, B, C> TriConsumer<A, B, C> sp(final Object mutex, final TriConsumer<A, B, C> triPredicate) throws IllegalArgumentException {
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(triPredicate, cs.TriConsumer);
+
+        return (a, b, c) -> {
+            synchronized (mutex) {
+                triPredicate.accept(a, b, c);
             }
         };
     }
@@ -4690,6 +5325,18 @@ public final class Fn {
         return (t, u) -> {
             synchronized (mutex) {
                 return biFunction.apply(t, u);
+            }
+        };
+    }
+
+    @Beta
+    public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<A, B, C, R> triFunction) {
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(triFunction, cs.TriFunction);
+
+        return (a, b, c) -> {
+            synchronized (mutex) {
+                return triFunction.apply(a, b, c);
             }
         };
     }
@@ -5066,7 +5713,7 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Function<Optional<? extends T>, T> getIfPresentOrElseNull() {
+    public static <T> Function<Optional<T>, T> getIfPresentOrElseNull() {
         return (Function) GET_AS_IT;
     }
 
@@ -5079,7 +5726,7 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Function<java.util.Optional<? extends T>, T> getIfPresentOrElseNullJdk() {
+    public static <T> Function<java.util.Optional<T>, T> getIfPresentOrElseNullJdk() {
         return (Function) GET_AS_IT_JDK;
     }
 
@@ -5092,7 +5739,7 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<Optional<? extends T>> isPresent() {
+    public static <T> Predicate<Optional<T>> isPresent() {
         return (Predicate) IS_PRESENT_IT;
     }
 
@@ -5105,7 +5752,7 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<java.util.Optional<? extends T>> isPresentJdk() {
+    public static <T> Predicate<java.util.Optional<T>> isPresentJdk() {
         return (Predicate) IS_PRESENT_IT_JDK;
     }
 
@@ -5298,6 +5945,68 @@ public final class Fn {
         private static final Supplier<StringBuilder> STRING_BUILDER = StringBuilder::new;
 
         private Suppliers() {
+            // utility class
+        }
+
+        /**
+         * <p>Returns the provided supplier as is - a shorthand identity method for suppliers.</p>
+         *
+         * <p>This method serves as a shorthand convenience method that can help with type inference
+         * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
+         * and others.</p>
+         *
+         * <p>Example usage:</p>
+         * <pre>
+         * // Instead of explicitly typing:
+         * Supplier&lt;String&gt; supplier = () -&gt; "value";
+         * // You can use:
+         * var supplier = Suppliers.of(() -&gt; "value");
+         * </pre>
+         *
+         * @param <T> the type of results supplied by the supplier
+         * @param supplier the supplier to return
+         * @return the supplier unchanged
+         * @see #of(Object, Function)
+         * @see Fn#s(Supplier)
+         * @see Fn#s(Object, Function)
+         * @see Fn#ss(com.landawn.abacus.util.Throwables.Supplier)
+         * @see Fn#ss(Object, com.landawn.abacus.util.Throwables.Function)
+         * @see IntFunctions#of(IntFunction)
+         */
+        @Beta
+        public static <T> Supplier<T> of(final Supplier<T> supplier) {
+            return supplier;
+        }
+
+        /**
+         * <p>Creates a supplier that always returns the result of applying the provided function to the given value.</p>
+         *
+         * <p>This method creates a supplier that captures the provided value and function,
+         * and when the supplier is called, it applies the function to the value and returns the result.</p>
+         *
+         * <p>Example usage:</p>
+         * <pre>
+         * // Create a supplier that always returns the length of a specific string
+         * String text = "Hello, World";
+         * Supplier&lt;Integer&gt; lengthSupplier = Suppliers.of(text, String::length);
+         * Integer length = lengthSupplier.get(); // Returns 12
+         * </pre>
+         *
+         * @param <A> the type of the input value
+         * @param <T> the type of results supplied by the supplier
+         * @param a the value to be processed by the function
+         * @param func the function to apply to the value
+         * @return a supplier that will return the result of applying the function to the value
+         * @see #of(Supplier)
+         * @see Fn#s(Supplier)
+         * @see Fn#s(Object, Function)
+         * @see Fn#ss(com.landawn.abacus.util.Throwables.Supplier)
+         * @see Fn#ss(Object, com.landawn.abacus.util.Throwables.Function)
+         * @see IntFunctions#of(IntFunction)
+         */
+        @Beta
+        public static <A, T> Supplier<T> of(final A a, final Function<? super A, ? extends T> func) {
+            return () -> func.apply(a);
         }
 
         /**
@@ -6181,7 +6890,7 @@ public final class Fn {
      * The Class Factory.
      */
     @SuppressWarnings({ "java:S1694" })
-    public abstract static class Factory {
+    public abstract sealed static class IntFunctions permits Factory {
 
         /** The Constant BOOLEAN_ARRAY. */
         private static final IntFunction<boolean[]> BOOLEAN_ARRAY = boolean[]::new;
@@ -6325,8 +7034,30 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = N::newSetMultimap;
 
-        protected Factory() {
-            // for extension
+        protected IntFunctions() {
+            // utility class
+        }
+
+        /**
+         * <p>Returns the provided IntFunction as is - a shorthand identity method for IntFunction instances.</p>
+         * 
+         * <p>This method serves as a shorthand convenience method that can help with type inference
+         * in certain contexts. It's part of a family of factory methods that handle various function types.</p>
+         * 
+         * <p>Example usage:</p>
+         * <pre>
+         * // Instead of explicitly typing:
+         * IntFunction&lt;String[]&gt; arrayCreator = size -> new String[size];
+         * // You can use:
+         * var arrayCreator = Factory.of(size -> new String[size]);
+         * </pre>
+         *
+         * @param <T> the type of the result of the function
+         * @param func the IntFunction to return
+         * @return the IntFunction unchanged
+         */
+        public static <T> IntFunction<T> of(IntFunction<T> func) {
+            return func;
         }
 
         /**
@@ -7138,8 +7869,9 @@ public final class Fn {
     /**
      * The Class
      */
-    public static final class IntFunctions extends Factory {
-        private IntFunctions() {
+    public static final class Factory extends IntFunctions {
+        private Factory() {
+            // utility class
         }
     }
 
@@ -9955,7 +10687,7 @@ public final class Fn {
          * @return
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
-            return Fn.DO_NOTHING;
+            return Fn.EMPTY_CONSUMER;
         }
 
         /**
@@ -10790,6 +11522,16 @@ public final class Fn {
             return op instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) op) : op::apply;
         }
 
+        @Beta
+        public static <T, E extends Throwable> Throwables.Supplier<T, E> s(final Throwables.Supplier<T, E> supplier) {
+            return supplier;
+        }
+
+        @Beta
+        public static <A, T, E extends Throwable> Throwables.Supplier<T, E> s(final A a, final Throwables.Function<? super A, ? extends T, E> func) {
+            return () -> func.apply(a);
+        }
+
         /**
          *
          * @param <T>
@@ -11088,6 +11830,44 @@ public final class Fn {
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> f(final Throwables.TriFunction<A, B, C, R, E> triFunction) {
             return triFunction;
+        }
+
+        /**
+         * <p>Returns the provided unary operator as is - a shorthand identity method for unary operators.</p>
+         *
+         * <p>This method serves as a shorthand convenience method that can help with type inference
+         * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+         * and {@code p()} for Predicate.</p>
+         *
+         * @param <T> the type of the operand and result of the unary operator
+         * @param <E> the type of the exception that may be thrown by the operator
+         * @param unaryOperator the unary operator to return
+         * @return the unary operator unchanged
+         */
+        @Beta
+        public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> o(final Throwables.UnaryOperator<T, E> unaryOperator) {
+            N.checkArgNotNull(unaryOperator);
+
+            return unaryOperator;
+        }
+
+        /**
+         * <p>Returns the provided binary operator as is - a shorthand identity method for binary operators.</p>
+         *
+         * <p>This method serves as a shorthand convenience method that can help with type inference
+         * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
+         * and {@code p()} for Predicate.</p>
+         *
+         * @param <T> the type of the operands and result of the binary operator
+         * @param <E> the type of the exception that may be thrown by the operator
+         * @param binaryOperator the binary operator to return
+         * @return the binary operator unchanged
+         */
+        @Beta
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> o(final Throwables.BinaryOperator<T, E> binaryOperator) {
+            N.checkArgNotNull(binaryOperator);
+
+            return binaryOperator;
         }
 
         /**
@@ -11465,33 +12245,6 @@ public final class Fn {
             return t -> {
                 synchronized (mutex) {
                     return biPredicate.test(a, t);
-                }
-            };
-        }
-
-        /**
-         * Synchronized {@code Predicate}.
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param a
-         * @param b
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
-         */
-        @Beta
-        public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final B b,
-                final Throwables.TriPredicate<A, B, T, E> triPredicate) throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, cs.mutex);
-            N.checkArgNotNull(triPredicate, cs.TriPredicate);
-
-            return t -> {
-                synchronized (mutex) {
-                    return triPredicate.test(a, b, t);
                 }
             };
         }

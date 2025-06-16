@@ -142,6 +142,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     public static final String LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    /**
+     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
+     */
+    public static final String LOCAL_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     // static final String LOCAL_DATE_TIME_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss";
 
     //    /**
@@ -672,6 +677,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code java.util.Calendar} based on the time value represented by the provided {@code Calendar} object.
+     * The returned {@code Calendar} instance won't be set with the time zone of the provided {@code Calendar} object.
      *
      * @param calendar The {@code Calendar} object used to create the new {@code Calendar} object.
      * @return A new {@code Calendar} object representing the same point in time as the provided {@code Calendar} object.
@@ -685,6 +691,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code java.util.Calendar} based on the time value represented by the {@code java.util.Date} object.
+     * The returned {@code Calendar} instance won't be set with the time zone of the provided {@code Date} object.
      *
      * @param date The {@code java.util.Date} object used to create the new java.util.Calendar object.
      * @return A new java.util.Calendar object representing the same point in time as the provided {@code java.util.Date} object.
@@ -740,6 +747,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code java.util.GregorianCalendar} based on the time value represented by the provided {@code Calendar} object.
+     * The returned {@code GregorianCalendar} instance won't be set with the time zone of the provided {@code Calendar} object.
      *
      * @param calendar The {@code Calendar} object used to create the new GregorianCalendar object.
      * @return A new GregorianCalendar object representing the same point in time as the provided {@code Calendar} object.
@@ -753,6 +761,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code java.util.GregorianCalendar} based on the time value represented by the provided {@code java.util.Date} object.
+     * The returned {@code GregorianCalendar} instance won't be set with the time zone of the provided {@code Date} object.
      *
      * @param date The {@code java.util.Date} object used to create the new GregorianCalendar object.
      * @return A new GregorianCalendar object representing the same point in time as the provided {@code java.util.Date} object.
@@ -807,6 +816,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code XMLGregorianCalendar} based on the time value represented by the provided {@code Calendar} object.
+     * The returned {@code XMLGregorianCalendar} instance won't be set with the time zone of the provided {@code Calendar} object.
      *
      * @param calendar The {@code Calendar} object used to create the XMLGregorianCalendar object.
      * @return A new XMLGregorianCalendar object representing the same point in time as the provided {@code Calendar} object.
@@ -820,6 +830,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Creates a new instance of {@code XMLGregorianCalendar} based on the time value represented by the provided {@code java.util.Date} object.
+     * The returned {@code XMLGregorianCalendar} instance won't be set with the time zone of the provided {@code Date} object.
      *
      * @param date The {@code java.util.Date} object used to create the new XMLGregorianCalendar object.
      * @return A new XMLGregorianCalendar object representing the same point in time as the provided {@code java.util.Date} object.
@@ -1550,6 +1561,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static void formatTo(final java.util.Date date, final String format, final TimeZone timeZone, final Appendable appendable) {
         if (date == null) {
             formatToForNull(appendable);
+            return;
         }
 
         formatDate(appendable, date, format, timeZone);
@@ -4374,7 +4386,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return LocalDate.from(parse(text));
+            if (this.format.equals(LOCAL_DATE_FORMAT)) {
+                return LocalDate.parse(text, dateTimeFormatter);
+            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDate();
+            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDate();
+            } else {
+                // return LocalDate.from(parseToTemporalAccessor(text));;
+                final Calendar cal = parseToCalendar(text);
+                return LocalDate.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            }
         }
 
         /**
@@ -4404,7 +4426,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return LocalTime.from(parse(text));
+            if (this.format.equals(LOCAL_TIME_FORMAT)) {
+                return LocalTime.parse(text, dateTimeFormatter);
+            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalTime();
+            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalTime();
+            } else {
+                // return LocalTime.from(parseToTemporalAccessor(text));
+                final Calendar cal = parseToCalendar(text);
+                return LocalTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            }
         }
 
         /**
@@ -4434,7 +4466,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return LocalDateTime.from(parse(text));
+            if (this.format.equals(LOCAL_DATE_TIME_FORMAT)) {
+                return LocalDateTime.parse(text, dateTimeFormatter);
+            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
+            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
+            } else {
+                // return LocalDateTime.from(parseToTemporalAccessor(text));
+                final Calendar cal = parseToCalendar(text);
+                return LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            }
         }
 
         /**
@@ -4464,7 +4506,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return OffsetDateTime.from(parse(text));
+            if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter);
+            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter).toOffsetDateTime(); // Convert ZonedDateTime to OffsetDateTime
+            } else {
+                // return OffsetDateTime.from(parseToTemporalAccessor(text));
+                final Calendar cal = parseToCalendar(text);
+                return OffsetDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            }
         }
 
         /**
@@ -4494,7 +4544,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return ZonedDateTime.from(parse(text));
+            if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter);
+            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter).toZonedDateTime();
+            } else {
+                // return ZonedDateTime.from(parseToTemporalAccessor(text));
+                final Calendar cal = parseToCalendar(text);
+                return ZonedDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            }
         }
 
         /**
@@ -4523,7 +4581,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            return Instant.from(parse(text));
+            if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
+                return ZonedDateTime.parse(text, dateTimeFormatter).toInstant();
+            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
+                return OffsetDateTime.parse(text, dateTimeFormatter).toInstant();
+            } else {
+                return parseToTimestamp(text).toInstant();
+            }
         }
 
         /**
@@ -4702,27 +4766,27 @@ public abstract sealed class Dates permits Dates.DateUtil {
             return Dates.parseCalendar(text.toString(), format, tz);
         }
 
-        private TemporalAccessor parse(final CharSequence text) {
-            final int len = text.length();
-            char ch = 0;
-
-            if (len > 25 && text.charAt(len - 1) == ']') {
-                return ISO_ZONED_DATE_TIME.dateTimeFormatter.parse(text);
-            } else if (len >= 25 && ((ch = text.charAt(len - 5)) == '+' || ch == '-')) {
-                return ISO_OFFSET_DATE_TIME.dateTimeFormatter.parse(text);
-            } else if (len == 19) {
-                if (text.charAt(10) == 'T') {
-                    return ISO_LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
-                } else {
-                    return LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
-                }
-            } else if (len == 20 && text.charAt(19) == 'Z') {
-                return ISO_8601_DATE_TIME.dateTimeFormatter.parse(text);
-            } else if (len == 24 && text.charAt(23) == 'Z') {
-                return ISO_8601_TIMESTAMP.dateTimeFormatter.parse(text);
-            } else if (len == 29 && text.charAt(3) == ',') {
-                return RFC_1123_DATE_TIME.dateTimeFormatter.parse(text);
-            }
+        TemporalAccessor parseToTemporalAccessor(final CharSequence text) {
+            //    final int len = text.length();
+            //    char ch = 0;
+            //
+            //    if (len > 25 && text.charAt(len - 1) == ']') {
+            //        return ISO_ZONED_DATE_TIME.dateTimeFormatter.parse(text);
+            //    } else if (len >= 25 && ((ch = text.charAt(len - 5)) == '+' || ch == '-')) {
+            //        return ISO_OFFSET_DATE_TIME.dateTimeFormatter.parse(text);
+            //    } else if (len == 19) {
+            //        if (text.charAt(10) == 'T') {
+            //            return ISO_LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
+            //        } else {
+            //            return LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
+            //        }
+            //    } else if (len == 20 && text.charAt(19) == 'Z') {
+            //        return ISO_8601_DATE_TIME.dateTimeFormatter.parse(text);
+            //    } else if (len == 24 && text.charAt(23) == 'Z') {
+            //        return ISO_8601_TIMESTAMP.dateTimeFormatter.parse(text);
+            //    } else if (len == 29 && text.charAt(3) == ',') {
+            //        return RFC_1123_DATE_TIME.dateTimeFormatter.parse(text);
+            //    }
 
             return dateTimeFormatter.parse(text);
         }

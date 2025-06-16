@@ -342,6 +342,65 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * <p>Checks whether the cell identified by the specified row key and column key contains a null value.</p>
+     * If the cell exists and contains a non-null value, this method returns {@code false}. Otherwise, it returns {@code true}.
+     *
+     * @param rowKey the key of the row containing the cell to check
+     * @param columnKey the key of the column containing the cell to check
+     * @return {@code true} if the cell contains a null value, {@code false} otherwise
+     * @throws IllegalArgumentException if the specified row key or column key doesn't exist in the Sheet
+     * @see #isNull(int, int)
+     * @see #get(Object, Object)
+     * @see #put(Object, Object, Object)
+     */
+    public boolean isNull(final R rowKey, final C columnKey) throws IllegalArgumentException {
+        if (_isInitialized) {
+            final int rowIndex = getRowIndex(rowKey);
+            final int columnIndex = getColumnIndex(columnKey);
+
+            return _columnList.get(columnIndex).get(rowIndex) == null;
+        } else {
+            checkRowKey(rowKey);
+            checkColumnKey(columnKey);
+
+            return true;
+        }
+    }
+
+    /**
+     * Checks if the cell identified by the specified row index and column index is null.
+     * If the cell exists and contains a non-null value, this method returns {@code false}. Otherwise, it returns {@code true}.
+     *
+     * @param rowIndex the index of the row
+     * @param columnIndex the index of the column
+     * @return {@code true} if the cell is null, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     */
+    public boolean isNull(final int rowIndex, final int columnIndex) throws IllegalArgumentException {
+        checkRowIndex(rowIndex);
+        checkColumnIndex(columnIndex);
+
+        if (_isInitialized) {
+            return _columnList.get(columnIndex).get(rowIndex) == null;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Checks if the cell identified by the specified Point is null.
+     * The Point represents the row index and column index of the cell.
+     * If the cell exists and contains a non-null value, this method returns {@code false}. Otherwise, it returns {@code true}.
+     *
+     * @param point the Point of the cell
+     * @return {@code true} if the cell is null, {@code false} otherwise
+     * @throws IllegalArgumentException if the specified Point is out of bounds
+     */
+    public boolean isNull(final Point point) throws IllegalArgumentException {
+        return isNull(point.rowIndex, point.columnIndex);
+    }
+
+    /**
      * Retrieves the value stored in the cell identified by the specified row key and column key.
      *
      * @param rowKey the row key of the cell
@@ -355,7 +414,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             final int rowIndex = getRowIndex(rowKey);
             final int columnIndex = getColumnIndex(columnKey);
 
-            return get(rowIndex, columnIndex);
+            return _columnList.get(columnIndex).get(rowIndex);
         } else {
             checkRowKey(rowKey);
             checkColumnKey(columnKey);
@@ -470,14 +529,45 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Inserts or updates all values from the specified source Sheet into this Sheet.
-     * The source Sheet must have the same or a subset of the row keys and column keys as this Sheet.
-     * If a cell in this Sheet already contains a value, the existing value is replaced with the new value from the source Sheet.
-     * If a cell does not exist, a new cell is created with the keys and value from the source Sheet.
+     * <p>Copies all values from the source Sheet into this Sheet.</p>
      *
-     * @param source the source Sheet from which to get the new values
-     * @throws IllegalStateException if the Sheet is frozen
+     * <p>This method transfers data from the source Sheet into this Sheet. The source Sheet must have row keys
+     * and column keys that are contained within this Sheet. Values from the source Sheet will replace any
+     * existing values in the corresponding cells of this Sheet.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create two sheets
+     * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
+     *     List.of("row1", "row2"),
+     *     List.of("col1", "col2", "col3"),
+     *     new Integer[][] {
+     *         {1, 2, 3},
+     *         {4, 5, 6}
+     *     }
+     * );
+     *
+     * Sheet&lt;String, String, Integer&gt; sourceSheet = Sheet.rows(
+     *     List.of("row1"),
+     *     List.of("col1", "col3"),
+     *     new Integer[][] {
+     *         {10, 30}
+     *     }
+     * );
+     *
+     * // Copy values from source to target
+     * targetSheet.putAll(sourceSheet);
+     *
+     * // Now targetSheet contains:
+     * // [10, 2, 30]
+     * // [1, 2, 3]
+     * </pre>
+     *
+     * @param source the source Sheet from which to get the values
+     * @throws IllegalStateException if this Sheet is frozen and cannot be modified
      * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
+     * @see #putAll(Sheet, BiFunction)
+     * @see #put(Object, Object, Object)
      */
     public void putAll(final Sheet<? extends R, ? extends C, ? extends V> source) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
@@ -491,12 +581,87 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         final Sheet<R, C, ? extends V> tmp = (Sheet<R, C, ? extends V>) source;
+        int rowIndex = 0;
+        int columnIndex = 0;
 
         for (final R r : tmp.rowKeySet()) {
+            rowIndex = getRowIndex(r);
             for (final C c : tmp.columnKeySet()) {
                 // this.put(r, c, tmp.get(r, c));
+                columnIndex = getColumnIndex(c);
 
-                put(getRowIndex(r), getColumnIndex(c), tmp.get(r, c));
+                put(rowIndex, columnIndex, tmp.get(r, c));
+            }
+        }
+    }
+
+    /**
+     * <p>Merges all values from the source Sheet into this Sheet using the provided merge function to resolve conflicts.</p>
+     *
+     * <p>This method combines data from the source Sheet into this Sheet. When a cell in both sheets contains a value,
+     * the provided merge function determines how to combine them, taking the current value and source value as parameters.
+     * The source Sheet must have row keys and column keys that are contained within this Sheet.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create two sheets with overlapping data
+     * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
+     *     List.of("row1", "row2"),
+     *     List.of("col1", "col2"),
+     *     new Integer[][] {
+     *         {1, 2},
+     *         {3, 4}
+     *     }
+     * );
+     *
+     * Sheet&lt;String, String, Integer&gt; sourceSheet = Sheet.rows(
+     *     List.of("row1", "row2"),
+     *     List.of("col1", "col2"),
+     *     new Integer[][] {
+     *         {5, 6},
+     *         {7, 8}
+     *     }
+     * );
+     *
+     * // Merge source into target, adding values together where they overlap
+     * targetSheet.putAll(sourceSheet, (target, source) -> target + source);
+     *
+     * // Now targetSheet contains:
+     * // col1: [6, 10]
+     * // col2: [8, 12]
+     * </pre>
+     *
+     * @param source the source Sheet from which to get the values
+     * @param mergeFunction the function to resolve conflicts when both sheets have a value for the same cell;
+     *        takes the current value from this sheet and the value from the source sheet as parameters
+     * @throws IllegalStateException if this Sheet is frozen and cannot be modified
+     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
+     * @see #putAll(Sheet)
+     * @see #put(Object, Object, Object)
+     */
+    public void putAll(final Sheet<? extends R, ? extends C, ? extends V> source, final BiFunction<? super V, ? super V, ? extends V> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException {
+        checkFrozen();
+
+        if (!this.rowKeySet().containsAll(source.rowKeySet())) {
+            throw new IllegalArgumentException(source.rowKeySet() + " are not all included in this sheet with row key set: " + this.rowKeySet());
+        }
+
+        if (!this.columnKeySet().containsAll(source.columnKeySet())) {
+            throw new IllegalArgumentException(source.columnKeySet() + " are not all included in this sheet with column key set: " + this.columnKeySet());
+        }
+
+        final Sheet<R, C, ? extends V> tmp = (Sheet<R, C, ? extends V>) source;
+        int rowIndex = 0;
+        int columnIndex = 0;
+
+        for (final R r : tmp.rowKeySet()) {
+            rowIndex = getRowIndex(r);
+            for (final C c : tmp.columnKeySet()) {
+                // this.put(r, c, tmp.get(r, c));
+                columnIndex = getColumnIndex(c);
+
+                put(rowIndex, columnIndex, mergeFunction.apply(get(rowIndex, columnIndex), tmp.get(r, c)));
             }
         }
     }
@@ -752,14 +917,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
 
-        if (rowIndex == rowLength) {
-            addRow(rowKey, row);
-            return;
-        }
-
-        if (rowIndex < 0 || rowIndex > rowLength) {
-            throw new IndexOutOfBoundsException("The new row index " + rowIndex + " is out-of-bounds for row size " + (rowLength + 1));
-        }
+        N.checkPositionIndex(rowIndex, rowLength);
 
         if (_rowKeySet.contains(rowKey)) {
             throw new IllegalArgumentException("Row '" + rowKey + "' already existed");
@@ -767,6 +925,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         if (N.notEmpty(row) && row.size() != columnLength) {
             throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the size of column key set: " + columnLength);
+        }
+
+        if (rowIndex == rowLength) {
+            addRow(rowKey, row);
+            return;
         }
 
         init();
@@ -897,7 +1060,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if the Sheet is frozen
      * @throws IllegalArgumentException if the row keys do not exist in the Sheet
      */
-    public void swapRows(final R rowKeyA, final R rowKeyB) throws IllegalStateException, IllegalArgumentException {
+    public void swapRowPosition(final R rowKeyA, final R rowKeyB) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
         final int rowIndexA = this.getRowIndex(rowKeyA);
@@ -1129,14 +1292,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
 
-        if (columnIndex == columnLength) {
-            addColumn(columnKey, column);
-            return;
-        }
-
-        if (columnIndex < 0 || columnIndex > columnLength) {
-            throw new IndexOutOfBoundsException("The new column index " + columnIndex + " is out-of-bounds for column size " + (columnLength + 1));
-        }
+        N.checkPositionIndex(columnIndex, columnLength);
 
         if (_columnKeySet.contains(columnKey)) {
             throw new IllegalArgumentException("Column '" + columnKey + "' already existed");
@@ -1144,6 +1300,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         if (N.notEmpty(column) && column.size() != rowLength) {
             throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the size of row key set: " + rowLength);
+        }
+
+        if (columnIndex == columnLength) {
+            addColumn(columnKey, column);
+            return;
         }
 
         init();
@@ -1259,15 +1420,43 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Swaps the positions of two columns in the Sheet.
-     * The columns are identified by the provided column keys.
+     * <p>Swaps the positions of two columns in the Sheet.</p>
+     *
+     * <p>This method exchanges the positions of two columns identified by their column keys while maintaining
+     * all the data in those columns. The column keys remain attached to their respective column data,
+     * but their positions in the sheet's column ordering are exchanged.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Create a sheet with three columns
+     * Sheet&lt;String, String, Integer&gt; sheet = Sheet.rows(
+     *     List.of("row1", "row2", "row3"),
+     *     List.of("col1", "col2", "col3"),
+     *     new Integer[][] {
+     *         {1, 2, 3},
+     *         {4, 5, 6},
+     *         {7, 8, 9}
+     *     }
+     * );
+     *
+     * // Swap columns "col1" and "col3"
+     * sheet.swapColumnPosition("col1", "col3");
+     *
+     * // Now the sheet's columns are ordered: col3, col2, col1
+     * // with their respective data:
+     * // row1: [3, 2, 1]
+     * // row2: [6, 5, 4]
+     * // row3: [9, 8, 7]
+     * </pre>
      *
      * @param columnKeyA the key of the first column to be swapped
      * @param columnKeyB the key of the second column to be swapped
-     * @throws IllegalStateException if the Sheet is frozen
-     * @throws IllegalArgumentException if the column keys do not exist in the Sheet
+     * @throws IllegalStateException if the Sheet is frozen and can't be modified
+     * @throws IllegalArgumentException if either of the column keys doesn't exist in the Sheet
+     * @see #moveColumn(Object, int)
+     * @see #swapRowPosition(Object, Object)
      */
-    public void swapColumns(final C columnKeyA, final C columnKeyB) throws IllegalStateException, IllegalArgumentException {
+    public void swapColumnPosition(final C columnKeyA, final C columnKeyB) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
         final int columnIndexA = getColumnIndex(columnKeyA);
@@ -3563,16 +3752,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The array is ordered by rows, meaning the first row in the Sheet becomes the first row in the array, and so on.
      *
      * @param <T> The type of the elements in the array.
-     * @param cls The Class object representing the type of the elements in the array.
+     * @param componentType The Class object representing the type of the elements in the array.
      * @return A two-dimensional array of type T representing the data in the Sheet, ordered by rows.
      */
-    public <T> T[][] toArrayH(final Class<T> cls) {
+    public <T> T[][] toArrayH(final Class<T> componentType) {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
-        final T[][] copy = N.newArray(N.newArray(cls, 0).getClass(), rowLength);
+        final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), rowLength);
 
         for (int i = 0; i < rowLength; i++) {
-            copy[i] = N.newArray(cls, columnLength);
+            copy[i] = N.newArray(componentType, columnLength);
         }
 
         if (_isInitialized) {
@@ -3615,16 +3804,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The array is ordered by columns, meaning the first column in the Sheet becomes the first row in the array, and so on.
      *
      * @param <T> The type of the elements in the array.
-     * @param cls The Class object representing the type of the elements in the array.
+     * @param componentType The Class object representing the type of the elements in the array.
      * @return A two-dimensional array of type T representing the data in the Sheet, ordered by columns.
      */
-    public <T> T[][] toArrayV(final Class<T> cls) {
+    public <T> T[][] toArrayV(final Class<T> componentType) {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
-        final T[][] copy = N.newArray(N.newArray(cls, 0).getClass(), columnLength);
+        final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), columnLength);
 
         for (int i = 0; i < columnLength; i++) {
-            copy[i] = N.newArray(cls, rowLength);
+            copy[i] = N.newArray(componentType, rowLength);
         }
 
         if (_isInitialized) {
@@ -4205,8 +4394,6 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public record Point(int rowIndex, int columnIndex) {
 
-        public static final Point ZERO = new Point(0, 0);
-
         private static final int MAX_CACHE_SIZE = 128;
         private static final Point[][] CACHE = new Point[MAX_CACHE_SIZE][MAX_CACHE_SIZE];
 
@@ -4217,6 +4404,8 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
             }
         }
+
+        public static final Point ZERO = CACHE[0][0];
 
         /**
          * Creates a new Point with the specified row index and column index.

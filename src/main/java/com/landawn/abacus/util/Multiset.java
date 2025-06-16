@@ -727,6 +727,8 @@ public final class Multiset<E> implements Collection<E> {
         if (count.value() <= 0) {
             //noinspection SuspiciousMethodCalls
             backingMap.remove(element);
+
+            return 0;
         }
 
         return count.value();
@@ -753,9 +755,9 @@ public final class Multiset<E> implements Collection<E> {
 
         for (final Object e : c) {
             if (!result) {
-                result = remove(e);
+                result = backingMap.remove(e) != null;
             } else {
-                remove(e);
+                backingMap.remove(e);
             }
         }
 
@@ -1008,7 +1010,7 @@ public final class Multiset<E> implements Collection<E> {
      * if (newValue > 0) {
      *     set(e, newValue);
      * } else {
-     *     remove(e);
+     *     removeAllOccurrences(e);
      * }
      *
      * return newValue;
@@ -1033,7 +1035,7 @@ public final class Multiset<E> implements Collection<E> {
         if (newValue > 0) {
             setCount(e, newValue);
         } else {
-            remove(e);
+            backingMap.remove(e);
         }
 
         return newValue;
@@ -1056,7 +1058,7 @@ public final class Multiset<E> implements Collection<E> {
      *     set(key, newValue);
      * } else {
      *     if (oldValue > 0) {
-     *         remove(key);
+     *         removeAllOccurrences(key);
      *     }
      * }
      *
@@ -1078,7 +1080,7 @@ public final class Multiset<E> implements Collection<E> {
             setCount(key, newValue);
         } else {
             if (oldValue > 0) {
-                remove(key);
+                removeAllOccurrences(key);
             }
         }
 
@@ -1103,7 +1105,7 @@ public final class Multiset<E> implements Collection<E> {
      *     set(key, newValue);
      * } else {
      *     if (oldValue > 0) {
-     *         remove(key);
+     *         removeAllOccurrences(key);
      *     }
      * }
      *
@@ -1126,7 +1128,7 @@ public final class Multiset<E> implements Collection<E> {
             setCount(key, newValue);
         } else {
             if (oldValue > 0) {
-                remove(key);
+                backingMap.remove(key);
             }
         }
 

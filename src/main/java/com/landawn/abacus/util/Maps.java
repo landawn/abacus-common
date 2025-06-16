@@ -565,6 +565,8 @@ public final class Maps {
         return N.newImmutableEntry(key, value);
     }
 
+    private static final Set<Class<?>> UNABLE_CREATED_MAP_CLASSES = N.newConcurrentHashSet();
+
     /**
      * New target map.
      *
@@ -593,7 +595,23 @@ public final class Maps {
             return new TreeMap<>(((SortedMap) m).comparator());
         }
 
-        return N.newMap(m.getClass(), size);
+        final Class<? extends Map> cls = m.getClass();
+
+        if (UNABLE_CREATED_MAP_CLASSES.contains(cls)) {
+            return new HashMap<>(size);
+        }
+
+        try {
+            return N.newMap(cls, size);
+        } catch (final Exception e) {
+            try {
+                N.newMap(cls, 1); // Attempt to create a map with size 1 to check if the class is instantiable.
+            } catch (final Exception e1) {
+                UNABLE_CREATED_MAP_CLASSES.add(m.getClass());
+            }
+
+            return new HashMap<>(size);
+        }
     }
 
     /**
@@ -612,7 +630,24 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        return N.newMap(m.getClass(), m.size());
+        final int size = m.size();
+        final Class<? extends Map> cls = m.getClass();
+
+        if (UNABLE_CREATED_MAP_CLASSES.contains(cls)) {
+            return new LinkedHashMap<>(size);
+        }
+
+        try {
+            return N.newMap(cls, size);
+        } catch (final Exception e) {
+            try {
+                N.newMap(cls, 1); // Attempt to create a map with size 1 to check if the class is instantiable.
+            } catch (final Exception e1) {
+                UNABLE_CREATED_MAP_CLASSES.add(m.getClass());
+            }
+
+            return new LinkedHashMap<>(size);
+        }
     }
 
     /**
@@ -638,7 +673,7 @@ public final class Maps {
      */
     @Beta
     public static <V> Collection<V> values(final Map<?, ? extends V> map) {
-        return N.isEmpty(map) ? ImmutableList.empty() : (Set<V>) map.values();
+        return N.isEmpty(map) ? ImmutableList.empty() : (Collection<V>) map.values();
     }
 
     /**
@@ -1756,7 +1791,7 @@ public final class Maps {
         // if (val != null || map.containsKey(key)) {
         if (val == null) {
             val = defaultValueSupplier.get(); // Objects.requireNonNull(defaultValueSupplier.get());
-            val = map.put(key, val);
+            map.put(key, val);
         }
 
         return val;
@@ -1795,7 +1830,7 @@ public final class Maps {
 
         if (v == null) {
             v = new ArrayList<>();
-            v = map.put(key, v);
+            map.put(key, v);
         }
 
         return v;
@@ -1834,7 +1869,7 @@ public final class Maps {
 
         if (v == null) {
             v = new HashSet<>();
-            v = map.put(key, v);
+            map.put(key, v);
         }
 
         return v;
@@ -1873,7 +1908,7 @@ public final class Maps {
 
         if (v == null) {
             v = new LinkedHashSet<>();
-            v = map.put(key, v);
+            map.put(key, v);
         }
 
         return v;
@@ -1914,7 +1949,7 @@ public final class Maps {
 
         if (v == null) {
             v = new HashMap<>();
-            v = map.put(key, v);
+            map.put(key, v);
         }
 
         return v;
@@ -1955,7 +1990,7 @@ public final class Maps {
 
         if (v == null) {
             v = new LinkedHashMap<>();
-            v = map.put(key, v);
+            map.put(key, v);
         }
 
         return v;
@@ -2109,7 +2144,7 @@ public final class Maps {
      * @return {@code null} if there is no value found by the specified path.
      */
     @MayReturnNull
-    public static <T> T getByPath(final Map<?, ?> map, final String path) {
+    public static <T> T getByPath(final Map<String, ?> map, final String path) {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
@@ -2130,7 +2165,7 @@ public final class Maps {
      * @see #getByPath(Map, String)
      */
     @MayReturnNull
-    public static <T> T getByPath(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
+    public static <T> T getByPath(final Map<String, ?> map, final String path, final Class<? extends T> targetType) {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
@@ -2155,7 +2190,7 @@ public final class Maps {
      * @return {@code defaultValue} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
-    public static <T> T getByPath(final Map<?, ?> map, final String path, final T defaultValue) {
+    public static <T> T getByPath(final Map<String, ?> map, final String path, final T defaultValue) {
         // N.checkArgNotNull(defaultValue, "defaultValue");
 
         final Object val = getByPathOrDefault(map, path, defaultValue);
@@ -2176,7 +2211,7 @@ public final class Maps {
      * @return an empty {@code Nullable} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
-    public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path) {
+    public static <T> Nullable<T> getByPathIfExists(final Map<String, ?> map, final String path) {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
@@ -2196,7 +2231,7 @@ public final class Maps {
      * @return an empty {@code Nullable} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
-    public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
+    public static <T> Nullable<T> getByPathIfExists(final Map<String, ?> map, final String path, final Class<? extends T> targetType) {
         final Object val = getByPathOrDefault(map, path, NONE);
 
         if (val == NONE) {
@@ -2211,9 +2246,11 @@ public final class Maps {
     }
 
     @SuppressWarnings("rawtypes")
-    private static Object getByPathOrDefault(final Map<?, ?> map, final String path, final Object defaultValue) {
+    private static Object getByPathOrDefault(final Map<String, ?> map, final String path, final Object defaultValue) {
         if (N.isEmpty(map)) {
             return defaultValue;
+        } else if (N.isEmpty(path)) {
+            return getOrDefaultIfAbsent(map, path, defaultValue);
         }
 
         final Class<?> targetType = defaultValue == null || defaultValue == NONE ? null : defaultValue.getClass();
@@ -2304,19 +2341,46 @@ public final class Maps {
     }
 
     /**
-     * Returns the intersection of two maps.
-     * The intersection contains the entries that are present in both input maps.
-     * The returned map's keys and values are those of the first input map.
+     * Returns a new map containing entries that are present in both input maps.
+     * The intersection contains entries whose keys are present in both maps with equal values.
+     * The returned map's key-value pairs are taken from the first input map.
      *
-     * @param <K> The type of keys maintained by the returned map
-     * @param <V> The type of mapped values in the returned map
-     * @param map The first input map
-     * @param map2 The second input map
-     * @return A new map which is the intersection of the input maps
+     * <p>Example:
+     * <pre>
+     * Map&lt;String, Integer&gt; map1 = new HashMap&lt;&gt;();
+     * map1.put("a", 1);
+     * map1.put("b", 2);
+     * map1.put("c", 3);
+     *
+     * Map&lt;String, Integer&gt; map2 = new HashMap&lt;&gt;();
+     * map2.put("b", 2);
+     * map2.put("c", 4);
+     * map2.put("d", 5);
+     *
+     * Map&lt;String, Integer&gt; result = Maps.intersection(map1, map2); // result will be {"b": 2}
+     * // Only "b" is included because it has the same value in both maps
+     *
+     * Map&lt;String, String&gt; map3 = new HashMap&lt;&gt;();
+     * map3.put("x", "foo");
+     * map3.put("y", "bar");
+     *
+     * Map&lt;String, String&gt; map4 = new HashMap&lt;&gt;();
+     * map4.put("x", "foo");
+     * map4.put("z", "baz");
+     *
+     * Map&lt;String, String&gt; result2 = Maps.intersection(map3, map4); // result will be {"x": "foo"}
+     * // Only "x" is included because it has the same value in both maps
+     * </pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the first input map
+     * @param map2 the second input map to find common entries with
+     * @return a new map containing entries present in both maps with equal values
+     *         If the first map is {@code null}, returns an empty map.
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
-     * @see Collection#retainAll(Collection)
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<?, ?> map2) {
         if (map == null) {
@@ -2347,21 +2411,33 @@ public final class Maps {
      * and the entry's value is a pair consisting of the value from the first map and the value from the second map.
      * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
      *
-     * @param <K> The type of keys in the maps.
-     * @param <V> The type of values in the maps.
-     * @param map The first map to compare.
-     * @param map2 The second map to compare.
-     * @return A map representing the difference between the two input maps.
+     * <p>Example:
+     * <pre>
+     * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
+     * Map&lt;String, Integer&gt; map2 = Maps.of("a", 1, "b", 20, "d", 4);
+     * 
+     * Map&lt;String, Pair&lt;Integer, Nullable&lt;Integer&gt;&gt;&gt; diff = Maps.difference(map1, map2);
+     * // diff contains:
+     * // "b" -> Pair.of(2, Nullable.of(20))    // different values
+     * // "c" -> Pair.of(3, Nullable.empty())   // key only in map1
+     * </pre>
+     *
+     * <p>Note that this method only returns keys from the first map. Keys that exist only in the second map 
+     * are not included in the result. If you need to identify keys that are unique to each map, 
+     * use {@link #symmetricDifference(Map, Map)} instead.
+     *
+     * <p>If the first map is {@code null}, an empty map is returned. If the second map is {@code null},
+     * all values from the first map will be paired with empty {@code Nullable} objects.
+     *
+     * @param <K> The type of keys in the maps
+     * @param <V> The type of values in the maps
+     * @param map The first map to compare
+     * @param map2 The second map to compare
+     * @return A map representing the difference between the two input maps
      * @see #symmetricDifference(Map, Map)
      * @see Difference.MapDifference#of(Map, Map)
-     * @see Difference.BeanDifference#of(Object, Object, Collection)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
+     * @see #intersection(Map, Map)
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
         if (map == null) {
@@ -2392,25 +2468,42 @@ public final class Maps {
     }
 
     /**
-     * Calculates the symmetric difference between two maps.
-     * The symmetric difference is defined as a map where each entry's key exists in either the first map or the second map, but not in both. Or the key exists in both but has different values.
-     * The entry's value is a pair consisting of the value from the first map and the value from the second map.
-     * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
-     * If a key exists in the second map but not in the first, the value from the first map in the pair is an empty {@code Nullable}.
+     * Returns a new map containing the symmetric difference between two maps.
+     * The symmetric difference includes entries whose keys are present in only one of the maps
+     * or entries with the same key but different values in both maps.
      *
-     * @param <K> The type of keys in the maps.
-     * @param <V> The type of values in the maps.
-     * @param map The first map to compare.
-     * @param map2 The second map to compare.
-     * @return A map representing the symmetric difference between the two input maps.
+     * <p>For each key in the result map, the value is a pair where:
+     * <ul>
+     * <li>If the key exists only in the first map, the pair contains the value from the first map and an empty Nullable</li>
+     * <li>If the key exists only in the second map, the pair contains an empty Nullable and the value from the second map</li>
+     * <li>If the key exists in both maps with different values, the pair contains both values</li>
+     * </ul>
+     *
+     * <p>Example:
+     * <pre>
+     * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
+     * Map&lt;String, Integer&gt; map2 = Maps.of("b", 2, "c", 4, "d", 5);
+     * 
+     * Map&lt;String, Pair&lt;Nullable&lt;Integer&gt;, Nullable&lt;Integer&gt;&gt;&gt; result = Maps.symmetricDifference(map1, map2);
+     * // result contains:
+     * // "a" -> Pair.of(Nullable.of(1), Nullable.empty())   // key only in map1
+     * // "c" -> Pair.of(Nullable.of(3), Nullable.of(4))     // different values
+     * // "d" -> Pair.of(Nullable.empty(), Nullable.of(5))   // key only in map2
+     * // Note: "b" is not included because it has identical values in both maps
+     * </pre>
+     *
+     * <p>If either input map is null, it is treated as an empty map.
+     *
+     * @param <K> the type of keys in the maps
+     * @param <V> the type of values in the maps
+     * @param map the first input map
+     * @param map2 the second input map
+     * @return a new map containing the symmetric difference between the two input maps
      * @see #difference(Map, Map)
-     * @see Difference.MapDifference#of(Map, Map)
-     * @see Difference.BeanDifference#of(Object, Object, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
      * @see Iterables#symmetricDifference(Set, Set)
+     * @see #intersection(Map, Map)
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
         final boolean isIdentityHashMap = (N.notEmpty(map) && map instanceof IdentityHashMap) || (N.notEmpty(map2) && map2 instanceof IdentityHashMap);
@@ -3386,30 +3479,31 @@ public final class Maps {
     //        }
     //    }
 
-    /**
-     * Merges the given value with the existing value (if any) in the map for the given key.
-     * The merging operation is performed using the provided remapping function.
-     *
-     * @param <K> The type of keys in the map.
-     * @param <V> The type of values in the map.
-     * @param map The map where the merging operation will be performed.
-     * @param key The key whose value is to be merged with the given value.
-     * @param value The value to be merged with the existing value for the given key in the map.
-     * @param remappingFunction The function to be used for merging the existing and the given values.
-     * @throws IllegalArgumentException if the map or remappingFunction is {@code null}.
-     */
-    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-
-        final V oldValue = map.get(key);
-
-        if (oldValue == null && !map.containsKey(key)) {
-            map.put(key, value);
-        } else {
-            map.put(key, remappingFunction.apply(oldValue, value));
-        }
-    }
+    //    /**
+    //     * Merges the given value with the existing value (if any) in the map for the given key.
+    //     * The merging operation is performed using the provided remapping function.
+    //     *
+    //     * @param <K> The type of keys in the map.
+    //     * @param <V> The type of values in the map.
+    //     * @param map The map where the merging operation will be performed.
+    //     * @param key The key whose value is to be merged with the given value.
+    //     * @param value The value to be merged with the existing value for the given key in the map.
+    //     * @param remappingFunction The function to be used for merging the existing and the given values.
+    //     * @throws IllegalArgumentException if the map or remappingFunction is {@code null}.
+    //     */
+    //    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
+    //            throws IllegalArgumentException {
+    //        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
+    //
+    //        final V oldValue = map.get(key);
+    //        final V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+    //
+    //        if (newValue == null) {
+    //            map.remove(key);
+    //        } else {
+    //            map.put(key, newValue);
+    //        }
+    //    }
 
     /**
      * Converts a map into a bean object of the specified type.

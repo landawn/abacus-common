@@ -125,50 +125,6 @@ import com.landawn.abacus.util.stream.Stream;
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S4968", "java:S6539" })
 public final class Seq<T, E extends Exception> implements AutoCloseable, Immutable {
-    // There are a lot of methods commented out by purpose, because they are not necessary or not recommended to be used in Seq.
-    // Additionally, a lot of methods defined Stream but not here can be supported through methods: transformB, sps, etc.
-    // If you really need them, please use Stream instead.
-    // BE CAUTION ON UN-COMMENTING THEM.
-    // Please refer to the latest implementation/doc in Stream for any un-commended methods.
-
-    // Tested performance with below code. It seems there is no meaningful performance improvement brought by Seq, comparing with Stream.
-    // Remove the Seq for now???
-    //    @Test
-    //    public void test_try_catch_perf() {
-    //        final int len = 1000_000;
-    //        final int loopNum = 100;
-    //
-    //        Profiler.run(1, loopNum, 3, "noTryCatch", () -> {
-    //            final long count = Stream.range(0, len).map(it -> notThrowSQLException()).count();
-    //
-    //            assertEquals(len, count);
-    //        }).printResult();
-    //
-    //        Profiler.run(1, loopNum, 3, "cmdWithTryCatch", () -> {
-    //            final long count = Stream.range(0, len).map(Fn.ff(it -> maybeThrowSQLException())).count();
-    //
-    //            assertEquals(len, count);
-    //        }).printResult();
-    //
-    //        Profiler.run(1, loopNum, 3, "cmdBySeq", () -> {
-    //            try {
-    //                final long count = Seq.<SQLException> range(0, len).map(it -> maybeThrowSQLException()).count();
-    //                assertEquals(len, count);
-    //            } catch (final SQLException e) {
-    //                throw ExceptionUtil.toRuntimeException(e, true);
-    //            }
-    //        }).printResult();
-    //
-    //    }
-    //
-    //    @SuppressWarnings("unused")
-    //    String maybeThrowSQLException() throws SQLException {
-    //        return "abc"; // Strings.uuid();
-    //    }
-    //
-    //    String notThrowSQLException() {
-    //        return "abc"; // Strings.uuid();
-    //    }
     private static final Logger logger = LoggerFactory.getLogger(Seq.class);
 
     private static final int BATCH_SIZE_FOR_FLUSH = 200;
@@ -283,129 +239,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public static <T, E extends Exception> Seq<T, E> empty() {
         return new Seq<>(Throwables.Iterator.empty());
     }
-
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream where the returned Seq will load elements from.
-    //     * @return a Seq containing the elements of the provided Stream
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> from(final Stream<? extends T> stream) {
-    //        return create(stream, false);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream where the returned Seq will load elements from.
-    //     * @return a Seq containing the elements of the provided Stream
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> from(final java.util.stream.Stream<? extends T> stream) {
-    //        if (stream == null) {
-    //            return empty();
-    //        }
-    //
-    //        return Seq.<T, E> of(stream.iterator()).onClose(stream::close);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream where the returned Seq will load elements from.
-    //     * @param exceptionType the type of exception that might be thrown
-    //     * @return a Seq containing the elements of the provided Stream
-    //     */
-    //    // Should the name be from?
-    //    public static <T, E extends Exception> Seq<T, E> from(final Stream<? extends T> stream,
-    //            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-    //        return from(stream);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream where the returned Seq will load elements from.
-    //     * @param exceptionType the type of exception that might be thrown
-    //     * @return a Seq containing the elements of the provided Stream
-    //     */
-    //    // Should the name be from?
-    //    public static <T, E extends Exception> Seq<T, E> from(final java.util.stream.Stream<? extends T> stream,
-    //            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-    //        return from(stream);
-    //    }
-
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream the Stream from which the Seq will be created
-    //     * @return a Seq containing the elements of the provided Stream
-    //     * @deprecated Use {@link #from(Stream)} instead
-    //     * @see #from(Stream)
-    //     */
-    //    @Deprecated
-    //    public static <T, E extends Exception> Seq<T, E> of(final Stream<? extends T> stream) {
-    //        return from(stream);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from a given Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream the Stream from which the Seq will be created
-    //     * @return a Seq containing the elements of the provided Stream
-    //     * @deprecated Use {@link #from(java.util.stream.Stream)} instead
-    //     * @see #from(java.util.stream.Stream)
-    //     */
-    //    @Deprecated
-    //    public static <T, E extends Exception> Seq<T, E> of(final java.util.stream.Stream<? extends T> stream) {
-    //        return from(stream);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from the provided Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream the Stream from which the Seq will be created
-    //     * @param exceptionType the type of exception that might be thrown (not used)
-    //     * @return a Seq containing the elements of the provided Stream
-    //     * @deprecated Use {@link #from(Stream, Class)} instead
-    //     * @see #from(Stream, Class)
-    //     */
-    //    // Should the name be from?
-    //    @Deprecated
-    //    public static <T, E extends Exception> Seq<T, E> of(final Stream<? extends T> stream, @SuppressWarnings("unused") final Class<E> exceptionType) {
-    //        return from(stream, exceptionType);
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq from a given java.util.stream.Stream.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param stream the java.util.stream.Stream from which the Seq will be created
-    //     * @param exceptionType the type of exception that might be thrown (not used)
-    //     * @return a Seq containing the elements of the provided java.util.stream.Stream
-    //     * @deprecated Use {@link #from(java.util.stream.Stream, Class)} instead
-    //     * @see #from(java.util.stream.Stream, Class)
-    //     */
-    //    // Should the name be from?
-    //    @Deprecated
-    //    public static <T, E extends Exception> Seq<T, E> of(final java.util.stream.Stream<? extends T> stream,
-    //            @SuppressWarnings("unused") final Class<E> exceptionType) {
-    //        return from(stream, exceptionType);
-    //    }
 
     /**
      * Returns a sequence lazily populated by an input supplier.
@@ -1178,190 +1011,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         //noinspection resource
         return Seq.<E> range(0, size).map(idx -> list.get(size - idx - 1));
     }
-
-    //    /**
-    //     * Creates a Seq that iterates using the provided hasNext and next functions.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param hasNext a BooleanSupplier that determines if there are more elements
-    //     * @param next a Supplier that provides the next element
-    //     * @return a Seq that iterates using the provided hasNext and next functions
-    //     * @throws IllegalArgumentException if hasNext or next is null
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> iterate(final Throwables.BooleanSupplier<? extends E> hasNext,
-    //            final Throwables.Supplier<? extends T, E> next) throws IllegalArgumentException {
-    //        N.checkArgNotNull(hasNext, cs.hasNext);
-    //        N.checkArgNotNull(next, cs.next);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean hasNextVal = false;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                if (!hasNextVal) {
-    //                    hasNextVal = hasNext.getAsBoolean();
-    //                }
-    //
-    //                return hasNextVal;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                if (!hasNextVal && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                hasNextVal = false;
-    //                return next.get();
-    //            }
-    //        });
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq that iterates starting from the given initial value,
-    //     * using the provided hasNext function to determine if there are more elements
-    //     * and the provided function to generate the next element.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param init the initial value
-    //     * @param hasNext a BooleanSupplier that determines if there are more elements
-    //     * @param f a UnaryOperator that provides the next element
-    //     * @return a Seq that iterates using the provided hasNext and next functions
-    //     * @throws IllegalArgumentException if hasNext or f is null
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> iterate(final T init, final Throwables.BooleanSupplier<? extends E> hasNext,
-    //            final Throwables.UnaryOperator<T, ? extends E> f) throws IllegalArgumentException {
-    //        N.checkArgNotNull(hasNext, cs.hasNext);
-    //        N.checkArgNotNull(f, cs.f);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private T cur = (T) NONE;
-    //            private boolean hasNextVal = false;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                if (!hasNextVal) {
-    //                    hasNextVal = hasNext.getAsBoolean();
-    //                }
-    //
-    //                return hasNextVal;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                if (!hasNextVal && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                hasNextVal = false;
-    //                return cur = (cur == NONE ? init : f.apply(cur));
-    //            }
-    //        });
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq that iterates starting from the given initial value,
-    //     * using the provided hasNext function to determine if there are more elements
-    //     * and the provided function to generate the next element.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param init the initial value
-    //     * @param hasNext a Predicate that determines if there are more elements
-    //     * @param f a UnaryOperator that provides the next element
-    //     * @return a Seq that iterates using the provided hasNext and next functions
-    //     * @throws IllegalArgumentException if hasNext or f is null
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> iterate(final T init, final Throwables.Predicate<? super T, ? extends E> hasNext,
-    //            final Throwables.UnaryOperator<T, ? extends E> f) throws IllegalArgumentException {
-    //        N.checkArgNotNull(hasNext, cs.hasNext);
-    //        N.checkArgNotNull(f, cs.f);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private T cur = (T) NONE;
-    //            private boolean hasMore = true;
-    //            private boolean hasNextVal = false;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                if (!hasNextVal && hasMore) {
-    //                    hasNextVal = hasNext.test((cur = (cur == NONE ? init : f.apply(cur))));
-    //
-    //                    if (!hasNextVal) {
-    //                        hasMore = false;
-    //                    }
-    //                }
-    //
-    //                return hasNextVal;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                if (!hasNextVal && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                hasNextVal = false;
-    //                return cur;
-    //            }
-    //        });
-    //    }
-    //
-    //    /**
-    //     * Creates a Seq that iterates starting from the given initial value,
-    //     * using the provided function to generate the next element.
-    //     *
-    //     * @param <T> the type of elements in the stream
-    //     * @param <E> the type of exception that might be thrown
-    //     * @param init the initial value
-    //     * @param f a UnaryOperator that provides the next element
-    //     * @return a Seq that iterates using the provided function
-    //     * @throws IllegalArgumentException if f is null
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> iterate(final T init, final Throwables.UnaryOperator<T, ? extends E> f) throws IllegalArgumentException {
-    //        N.checkArgNotNull(f, cs.f);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private T cur = (T) NONE;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return true;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E { // NOSONAR
-    //                return cur = (cur == NONE ? init : f.apply(cur));
-    //            }
-    //        });
-    //    }
-    //
-    //    /**
-    //     * Generates a Seq using the provided supplier.
-    //     *
-    //     * @param <T> the type of the stream elements
-    //     * @param <E> the type of the exception that the stream can throw
-    //     * @param supplier the supplier to generate elements for the stream
-    //     * @return a Seq generated by the supplier
-    //     * @throws IllegalArgumentException if the supplier is null
-    //     */
-    //    public static <T, E extends Exception> Seq<T, E> generate(final Throwables.Supplier<T, E> supplier) throws IllegalArgumentException {
-    //        N.checkArgNotNull(supplier, cs.supplier);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return true;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                return supplier.get();
-    //            }
-    //        });
-    //    }
 
     /**
      * Creates a sequence that repeats the given element a specified number of times.
@@ -3025,28 +2674,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return distinctBy(Fnn.identity(), mergeFunction);
     }
 
-    //    /**
-    //     * Returns a stream consisting of the distinct elements of this stream.
-    //     * And only keep the elements whose occurrences are satisfied the specified predicate.
-    //     *
-    //     * @implNote Equivalent to: {@code countBy(Fnn.identity(), supplier).filter(predicate).map(Fnn.key())}.
-    //     *
-    //     * @param occurrencesFilter the predicate to apply to the count of occurrences of each element
-    //     * @return a new Seq containing distinct elements
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @IntermediateOp
-    //    @TerminalOpTriggered
-    //    public Seq<T, E> distinct(final Throwables.Predicate<? super Integer, ? extends E> occurrencesFilter) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Supplier<? extends Map<T, Integer>> supplier = Suppliers.<T, Integer> ofLinkedHashMap();
-    //
-    //        final Throwables.Predicate<Map.Entry<T, Integer>, ? extends E> predicate = e -> occurrencesFilter.test(e.getValue());
-    //
-    //        return create(countBy(Fnn.identity(), supplier).filter(predicate).map(Fnn.key()).iteratorEx(), sorted, cmp, closeHandlers);
-    //    }
-
     /**
      * Returns a sequence consisting of the distinct elements of this stream,
      * where distinct elements are determined by the provided key extractor function.
@@ -3087,54 +2714,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         //noinspection resource
         return groupBy(keyMapper, Fnn.identity(), mergeFunction, supplier).map(Fnn.value());
     }
-
-    //    /**
-    //     * Returns a stream consisting of the distinct elements of this stream,
-    //     * where distinct elements are determined by the provided key extractor function.
-    //     * Only keep the elements whose occurrences are satisfied by the specified occurrences filter.
-    //     *
-    //     * @param <K> the type of the key extracted from the elements
-    //     * @param keyMapper the function to extract the key from the elements
-    //     * @param occurrencesFilter the predicate to apply to the count of occurrences of each element
-    //     * @return a new Seq containing distinct elements
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @IntermediateOp
-    //    @TerminalOpTriggered
-    //    @SuppressWarnings("rawtypes")
-    //    public <K> Seq<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-    //            final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Integer>, ? extends E> occurrencesFilter) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Supplier<? extends Map<Keyed<K, T>, Integer>> supplier = Suppliers.<Keyed<K, T>, Integer> ofLinkedHashMap();
-    //
-    //        final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = t -> Keyed.of(keyMapper.apply(t), t);
-    //
-    //        return create(countBy(keyedMapper, supplier).filter(occurrencesFilter)
-    //                .map((Throwables.Function<Map.Entry<Keyed<K, T>, Integer>, T, E>) (Throwables.Function) KK)
-    //                .iteratorEx(), sorted, cmp, closeHandlers);
-    //    }
-
-    //    /**
-    //     * Distinct by the key extracted by {@code keyMapper} and limit the appearance of the elements with same key to the number calculated by {@code limit}
-    //     *
-    //     * @param <K>
-    //     * @param keyMapper
-    //     * @param limit
-    //     * @return
-    //     * @see #groupBy(Throwables.Function, Collector)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    @TerminalOpTriggered
-    //    public <K> Seq<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-    //            final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
-    //
-    //        final Supplier<Map<K, List<T>>> supplier = Suppliers.<K, List<T>> ofLinkedHashMap();
-    //
-    //        return groupBy(keyMapper, Fnn.identity(), supplier) //
-    //                .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
-    //    }
 
     /**
      * Transforms the elements of this sequence using the provided mapper function.
@@ -3180,11 +2759,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the first element of this sequence using the provided mapper function.
-     * The remaining elements are unchanged.
+     * Returns a sequence consisting of the elements of this sequence with the first element transformed by the given function.
      *
-     * @param mapperForFirst the function to apply to the first element
-     * @return a new sequence containing the transformed first element and the remaining elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the resulting sequence will contain [f(a), b, c, d],
+     * where f is the provided mapping function.
+     *
+     * @param mapperForFirst a non-interfering, stateless function to apply to the first element of this sequence
+     * @return a new sequence consisting of the transformed first element and the unchanged remaining elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -3212,13 +2794,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the first element of this sequence using the provided mapper function for the first element,
-     * and the remaining elements using the provided mapper function for the other elements.
+     * Returns a sequence consisting of the elements of this sequence with the first element transformed by the specified {@code mapperForFirst}
+     * and all other elements transformed by {@code mapperForElse}.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param mapperForFirst the function to apply to the first element
-     * @param mapperForElse the function to apply to the remaining elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the resulting sequence will contain [f(a), g(b), g(c), g(d)],
+     * where f is the mapperForFirst function and g is the mapperForElse function.
+     *
+     * @param <R> the type of the result elements
+     * @param mapperForFirst a non-interfering, stateless function to apply to the first element of this sequence
+     * @param mapperForElse a non-interfering, stateless function to apply to all other elements of this sequence
+     * @return a new sequence consisting of the results of applying the appropriate mapper function to each element
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -3247,11 +2833,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the last element of this sequence using the provided mapper function.
-     * Other elements are unchanged.
+     * Returns a sequence consisting of the elements of this sequence with the last element transformed by the given function.
      *
-     * @param mapperForLast the function to apply to the last element
-     * @return a new sequence containing the transformed last element and the remaining elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the resulting sequence will contain [a, b, c, f(d)],
+     * where f is the provided mapping function.
+     *
+     * @param mapperForLast a non-interfering, stateless function to apply to the last element of this sequence
+     * @return a new sequence consisting of the unchanged preceding elements and the transformed last element
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -3281,13 +2870,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the last element of this sequence using the provided mapper function for the last element,
-     * and the remaining elements using the provided mapper function for the other elements.
+     * Returns a sequence consisting of the elements of this sequence with the last element transformed by the specified {@code mapperForLast}
+     * and all other elements transformed by {@code mapperForElse}.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param mapperForLast the function to apply to the last element
-     * @param mapperForElse the function to apply to the remaining elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the resulting sequence will contain [g(a), g(b), g(c), f(d)],
+     * where f is the mapperForLast function and g is the mapperForElse function.
+     *
+     * @param <R> the type of the result elements
+     * @param mapperForLast a non-interfering, stateless function to apply to the last element of this sequence
+     * @param mapperForElse a non-interfering, stateless function to apply to all other elements of this sequence
+     * @return a new sequence consisting of the results of applying the appropriate mapper function to each element
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -3417,244 +3010,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }, closeHandlers);
     }
 
-    //    /**
-    //     * Transforms the elements of this sequence using the provided mapper function,
-    //     * which returns an array of new elements for each element. The resulting arrays
-    //     * are then flattened into a single stream.
-    //     *
-    //     * @param <R> the type of the elements in the new stream
-    //     * @param mapper the function to apply to each element, which returns an array of new elements
-    //     * @return a new sequence containing the flattened elements
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<R, E>() {
-    //            private R[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public R next() throws IllegalStateException, E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns a stream of new elements for each element. The resulting streams
-    //     * are then flattened into a single stream.
-    //     *
-    //     * @param <R> the type of the elements in the new stream
-    //     * @param mapper the function to apply to each element, which returns a stream of new elements
-    //     * @return a new sequence containing the flattened elements
-    //     * @throws IllegalStateException if the stream is already
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> flattmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) { //NOSONAR
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<>() {
-    //            private Stream<? extends R> s = null;
-    //            private Iterator<? extends R> cur = null;
-    //
-    //            public boolean hasNext() throws E {
-    //                while (cur == null || !cur.hasNext()) {
-    //                    if (elements.hasNext()) {
-    //                        if (s != null) {
-    //                            s.close();
-    //                            s = null;
-    //                        }
-    //
-    //                        s = mapper.apply(elements.next());
-    //
-    //                        if (s == null) {
-    //                            cur = null;
-    //                        } else {
-    //                            cur = s.iterator();
-    //                        }
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //            public R next() throws E {
-    //                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //
-    //            @Override
-    //            protected void closeResource() {
-    //                if (s != null) {
-    //                    s.close();
-    //                }
-    //            }
-    //        };
-    //
-    //        return create(iter, mergeCloseHandlers(iter::close, closeHandlers));
-    //    }
-
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> flatMapByStream(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
-    //        assertNotClosed();
-    //        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<R, E>() {
-    //            private Stream<? extends R> s = null;
-    //            private Iterator<? extends R> cur = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                while (cur == null || cur.hasNext() == false) {
-    //                    if (elements.hasNext()) {
-    //                        if (s != null) {
-    //                            s.close();
-    //                            s = null;
-    //                        }
-    //
-    //                        s = mapper.apply(elements.next());
-    //
-    //                        if (s == null) {
-    //                            cur = null;
-    //                        } else {
-    //                            cur = s.iterator();
-    //                        }
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //                //            public R next() throws E {
-    //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //
-    //                //            public void close()   {
-    //                if (s != null) {
-    //                    s.close();
-    //                }
-    //            }
-    //        };
-    //
-    //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-    //
-    //        if (N.notEmpty(closeHandlers)) {
-    //            newCloseHandlers.addAll(closeHandlers);
-    //        }
-    //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
-    //        return create(iter, newCloseHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> flatMapByStreamJdk(
-    //            final Throwables.Function<? super T, ? extends java.util.stream.Stream<? extends R>, ? extends E> mapper) {
-    //        assertNotClosed();
-    //        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<R, E>() {
-    //            private java.util.stream.Stream<? extends R> s = null;
-    //            private Iterator<? extends R> cur = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                while (cur == null || cur.hasNext() == false) {
-    //                    if (elements.hasNext()) {
-    //                        if (s != null) {
-    //                            s.close();
-    //                            s = null;
-    //                        }
-    //
-    //                        s = mapper.apply(elements.next());
-    //
-    //                        if (s == null) {
-    //                            cur = null;
-    //                        } else {
-    //                            cur = s.iterator();
-    //                        }
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //                //            public R next() throws E {
-    //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //
-    //                //            public void close()   {
-    //                if (s != null) {
-    //                    s.close();
-    //                }
-    //            }
-    //        };
-    //
-    //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-    //
-    //        if (N.notEmpty(closeHandlers)) {
-    //            newCloseHandlers.addAll(closeHandlers);
-    //        }
-    //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
-    //        return create(iter, newCloseHandlers);
-    //    }
-
     /**
      * Transforms the elements of this sequence using the provided mapper function,
      * which returns a collection of new elements for each {@code non-null} element.
@@ -3699,422 +3054,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2);
     }
 
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of boolean values for each element. The resulting arrays
-    //     * are then flattened into a single stream of boolean values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of boolean values
-    //     * @return a new Seq containing the flattened boolean values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Boolean, E> flatmapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Boolean, E>() {
-    //            private boolean[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Boolean next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of char values for each element. The resulting arrays
-    //     * are then flattened into a single stream of char values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of char values
-    //     * @return a new Seq containing the flattened char values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Character, E> flatmapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Character, E>() {
-    //            private char[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Character next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of byte values for each element. The resulting arrays
-    //     * are then flattened into a single stream of byte values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of byte values
-    //     * @return a new Seq containing the flattened byte values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Byte, E> flatmapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Byte, E>() {
-    //            private byte[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Byte next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of short values for each element. The resulting arrays
-    //     * are then flattened into a single stream of short values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of short values
-    //     * @return a new Seq containing the flattened short values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Short, E> flatmapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Short, E>() {
-    //            private short[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Short next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of int values for each element. The resulting arrays
-    //     * are then flattened into a single stream of int values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of int values
-    //     * @return a new Seq containing the flattened int values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Integer, E> flatmapToInt(final Throwables.Function<? super T, int[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Integer, E>() {
-    //            private int[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Integer next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of long values for each element. The resulting arrays
-    //     * are then flattened into a single stream of long values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of long values
-    //     * @return a new Seq containing the flattened long values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Long, E> flatmapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Long, E>() {
-    //            private long[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Long next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of float values for each element. The resulting arrays
-    //     * are then flattened into a single stream of float values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of float values
-    //     * @return a new Seq containing the flattened float values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Float, E> flatmapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Float, E>() {
-    //            private float[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Float next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns an array of double values for each element. The resulting arrays
-    //     * are then flattened into a single stream of double values.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns an array of double values
-    //     * @return a new Seq containing the flattened double values
-    //     * @throws IllegalStateException if the sequence is already closed
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Double, E> flatmapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<Double, E>() {
-    //            private double[] cur = null;
-    //            private int len = 0;
-    //            private int idx = 0;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                while (idx >= len) {
-    //                    if (elements.hasNext()) {
-    //                        cur = mapper.apply(elements.next());
-    //                        len = N.len(cur);
-    //                        idx = 0;
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return idx < len;
-    //            }
-    //
-    //            @Override
-    //            public Double next() throws E {
-    //                if (idx >= len && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur[idx++];
-    //            }
-    //        }, closeHandlers);
-    //    }
-
-    //    /**
-    //     *
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
-    //        final Throwables.Function<T, Seq<Integer, E>, E> mapper2 = new Throwables.Function<T, Seq<Integer, E>, E>() {
-    //                //            public Seq<Integer, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
-    //            }
-    //        };
-    //
-    //        return flatMap(mapper2);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
-    //        final Throwables.Function<T, Seq<Long, E>, E> mapper2 = new Throwables.Function<T, Seq<Long, E>, E>() {
-    //                //            public Seq<Long, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
-    //            }
-    //        };
-    //
-    //        return flatMap(mapper2);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
-    //        final Throwables.Function<T, Seq<Double, E>, E> mapper2 = new Throwables.Function<T, Seq<Double, E>, E>() {
-    //                //            public Seq<Double, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
-    //            }
-    //        };
-    //
-    //        return flatMap(mapper2);
-    //    }
-
     /**
      * <p>
      * Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a>
@@ -4132,7 +3071,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> Seq<R, E> mapPartial(final Throwables.Function<? super T, Optional<? extends R>, E> mapper) throws IllegalStateException {
+    public <R> Seq<R, E> mapPartial(final Throwables.Function<? super T, Optional<R>, E> mapper) throws IllegalStateException {
         //noinspection resource
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT).map(GET_AS_IT);
     }
@@ -4200,67 +3139,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE).map(GET_AS_DOUBLE);
     }
 
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns a java.util.Optional of new elements for each element. Only present
-    //     * values are included in the resulting stream.
-    //     *
-    //     * @param <R> the type of the elements in the new stream
-    //     * @param mapper the function to apply to each element, which returns a java.util.Optional of new elements
-    //     * @return a new Seq containing the transformed elements that are present
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> mapPartialJdk(final Throwables.Function<? super T, java.util.Optional<? extends R>, E> mapper) {
-    //        return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT_JDK).map(GET_AS_IT_JDK);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns a java.util.OptionalInt of new elements for each element. Only present
-    //     * values are included in the resulting stream.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns a java.util.OptionalInt of new elements
-    //     * @return a new Seq containing the transformed elements that are present
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Integer, E> mapPartialToIntJdk(final Throwables.Function<? super T, java.util.OptionalInt, E> mapper) {
-    //        return map(mapper).filter((Throwables.Predicate) IS_PRESENT_INT_JDK).map(GET_AS_INT_JDK);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns a java.util.OptionalLong of new elements for each element. Only present
-    //     * values are included in the resulting stream.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns a java.util.OptionalLong of new elements
-    //     * @return a new Seq containing the transformed elements that are present
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Long, E> mapPartialToLongJdk(final Throwables.Function<? super T, java.util.OptionalLong, E> mapper) {
-    //        return map(mapper).filter((Throwables.Predicate) IS_PRESENT_LONG_JDK).map(GET_AS_LONG_JDK);
-    //    }
-    //
-    //    /**
-    //     * Transforms the elements of this stream using the provided mapper function,
-    //     * which returns a java.util.OptionalDouble of new elements for each element. Only present
-    //     * values are included in the resulting stream.
-    //     *
-    //     * @param mapper the function to apply to each element, which returns a java.util.OptionalDouble of new elements
-    //     * @return a new Seq containing the transformed elements that are present
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Double, E> mapPartialToDoubleJdk(final Throwables.Function<? super T, java.util.OptionalDouble, E> mapper) {
-    //        return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE_JDK).map(GET_AS_DOUBLE_JDK);
-    //    }
-
     /**
      * Transforms the elements of this sequence using the provided mapper function,
      * which accepts an element and a consumer to add multiple elements to the resulting stream.
@@ -4269,6 +3147,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper the function to apply to each element, which accepts an element and a consumer to add multiple elements
      * @return a new sequence containing the transformed elements
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the mapper is null
      */
     public <R> Seq<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) throws IllegalStateException {
         final Deque<R> queue = new ArrayDeque<>();
@@ -4306,13 +3185,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts two consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each adjacent pair of elements in this sequence.
+     * Non paired element will be applied with {@code null} as their pair.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param mapper the function to apply to each pair of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the resulting sequence will contain [f(a,b), f(b,c), f(c,d)],
+     * where f is the provided mapping function. 
+     * If this sequence contains only one element[a], the resulting sequence will contains [f(a,null)].
+     *
+     * @param <R> the element type of the new stream
+     * @param mapper a non-interfering, stateless function to apply to each adjacent pair of this sequence's elements
+     * @return a new sequence consisting of the results of applying the mapper function to each adjacent pair of elements in this sequence
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the mapper is null
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException {
@@ -4320,15 +3205,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts two consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each pair of elements separated by the specified increment in this sequence.
+     * Non paired element will be applied with {@code null} as their pair.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param increment the number of elements to skip between each pair
-     * @param mapper the function to apply to each pair of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d] and increment=2, the resulting sequence will contain [f(a,b), f(c,d)].
+     * If this sequence contains elements [a, b, c, d, e] and increment=2, the resulting sequence will contain [f(a,b), f(c,d), f(e,null)].
+     *
+     * @param <R> the element type of the new sequence
+     * @param increment the distance between the first elements of each pair
+     * @param mapper a non-interfering, stateless function to apply to each pair of elements
+     * @return a new sequence consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is not positive
+     * @throws IllegalArgumentException if the mapper is null or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper)
@@ -4337,21 +3226,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts two consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each pair of elements separated by the specified increment in this sequence.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param increment the number of elements to skip between each pair
-     * @param ignoreNotPaired whether to ignore elements that cannot be paired
-     * @param mapper the function to apply to each pair of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e] and increment=2, ignoreNotPaired=false, the resulting sequence will contain [f(a,b), f(c,d), f(e,null)].
+     * If this sequence contains elements [a, b, c, d, e] and increment=2, ignoreNotPaired=true, the resulting sequence will contain [f(a,b), f(c,d)].
+     *
+     * @param <R> the element type of the new sequence
+     * @param increment the distance between the first elements of each pair
+     * @param ignoreNotPaired if false, unpaired elements will be processed with null as their pair;
+     *                        if true, the last element will be ignored if there is no element to pair with it.
+     * @param mapper a non-interfering, stateless function to apply to each pair of elements
+     * @return a new sequence consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is not positive
+     * @throws IllegalArgumentException if the mapper is null or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(mapper, cs.mapper);
         checkArgPositive(increment, cs.increment);
 
         final int windowSize = 2;
@@ -4360,25 +3254,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
-            private T _1 = none; //NOSONAR
+            private R ret = null;
+            private boolean toSkip = false;
 
             @Override
             public boolean hasNext() throws E {
-                if (increment > windowSize && prev != none) {
+                if (toSkip) {
                     int skipNum = increment - windowSize;
 
                     while (skipNum-- > 0 && elements.hasNext()) {
                         elements.next();
                     }
 
-                    prev = none;
+                    toSkip = false;
                 }
 
-                if (ignoreNotPaired && _1 == none && elements.hasNext()) {
-                    _1 = elements.next();
+                if (ignoreNotPaired && prev == none && elements.hasNext()) {
+                    prev = elements.next();
                 }
 
-                return elements.hasNext();
+                return elements.hasNext(); //  || (!ignoreNotPaired && prev != none);
             }
 
             @Override
@@ -4387,29 +3282,39 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                toSkip = increment > windowSize;
+
                 if (ignoreNotPaired) {
-                    final R res = mapper.apply(_1, (prev = elements.next()));
-                    _1 = increment == 1 ? prev : none;
-                    return res;
-                } else {
                     if (increment == 1) {
-                        return mapper.apply(prev == none ? elements.next() : prev, (prev = (elements.hasNext() ? elements.next() : null)));
+                        return mapper.apply(prev, ((prev = (elements.hasNext() ? elements.next() : none)) == none) ? null : prev);
                     } else {
-                        return mapper.apply(elements.next(), (prev = (elements.hasNext() ? elements.next() : null)));
+                        ret = mapper.apply(prev, elements.next());
+                        prev = none;
+                        return ret;
                     }
+                } else if (increment == 1) {
+                    return mapper.apply(prev == none ? elements.next() : prev, ((prev = (elements.hasNext() ? elements.next() : none)) == none) ? null : prev);
+                } else {
+                    return mapper.apply(elements.next(), elements.hasNext() ? elements.next() : null);
                 }
             }
         }, closeHandlers);
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts three consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each adjacent triple of elements in this sequence.
+     * Non paired elements will be applied with {@code null} as their pair.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param mapper the function to apply to each triplet of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e], the resulting sequence will contain [f(a,b,c), f(b,c,d), f(c,d,e)],
+     * where f is the provided mapping function.
+     * If this steam contains only one element[a], the resulting sequence will contains [f(a,null,null)].
+     *
+     * @param <R> the element type of the new sequence
+     * @param mapper a non-interfering, stateless function to apply to each adjacent triple of this sequence's elements
+     * @return a new sequence consisting of the results of applying the mapper function to each adjacent triple of elements in this sequence
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the mapper is null
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException {
@@ -4417,15 +3322,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts three consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each triple of elements separated by the specified increment in this sequence.
+     * Non paired elements will be applied with {@code null} as their pair.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param increment the number of elements to skip between each triplet
-     * @param mapper the function to apply to each triplet of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e, f] and increment=3, the resulting sequence will contain [f(a,b,c), f(d,e,f)].
+     * If this sequence contains elements [a, b, c, d, e, f, g, h] and increment=3, the resulting sequence will contain [f(a,b,c), f(d,e,f), f(g,h,null)].
+     *
+     * @param <R> the element type of the new sequence
+     * @param increment the distance between the first elements of each triple
+     * @param mapper a non-interfering, stateless function to apply to each triple of elements
+     * @return a new sequence consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is not positive
+     * @throws IllegalArgumentException if the mapper is null or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper)
@@ -4434,21 +3343,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the elements of this sequence using the provided mapper function,
-     * which accepts three consecutive elements and returns a new element.
+     * Returns a sequence consisting of the results of applying the given function to each triple of elements separated by the specified increment in this sequence.
      *
-     * @param <R> the type of the elements in the new stream
-     * @param increment the number of elements to skip between each triplet
-     * @param ignoreNotPaired whether to ignore elements that cannot be paired
-     * @param mapper the function to apply to each triplet of consecutive elements
-     * @return a new sequence containing the transformed elements
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e, f, g] and increment=3, ignoreNotPaired=false, the resulting sequence will contain [f(a,b,c), f(d,e,f), f(g,null,null)].
+     * If this sequence contains elements [a, b, c, d, e, f, g] and increment=3, ignoreNotPaired=true, the resulting sequence will contain [f(a,b,c), f(d,e,f)].
+     *
+     * @param <R> the element type of the new sequence
+     * @param increment the distance between the first elements of each triple
+     * @param ignoreNotPaired if false, unpaired elements will be processed with null as their pair;
+     *                        if true, the last elements will be ignored if there is no element to pair with it.
+     * @param mapper a non-interfering, stateless function to apply to each triple of elements
+     * @return a new sequence consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is not positive
+     * @throws IllegalArgumentException if the mapper is null or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(mapper, cs.mapper);
         checkArgPositive(increment, cs.increment);
 
         final int windowSize = 3;
@@ -4457,33 +3371,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
-            private T prev2 = none;
-            private T _1 = none; //NOSONAR
-            private T _2 = none; //NOSONAR
+            private T prevPrev = none;
+            private R ret = null;
+            private boolean toSkip = false;
 
             @Override
             public boolean hasNext() throws E {
-                if (increment > windowSize && prev != none) {
+                if (toSkip) {
                     int skipNum = increment - windowSize;
 
                     while (skipNum-- > 0 && elements.hasNext()) {
                         elements.next();
                     }
 
-                    prev = none;
+                    toSkip = false;
                 }
 
                 if (ignoreNotPaired) {
-                    if (_1 == none && elements.hasNext()) {
-                        _1 = elements.next();
+                    if (prevPrev == none && elements.hasNext()) {
+                        prevPrev = elements.next();
                     }
 
-                    if (_2 == none && elements.hasNext()) {
-                        _2 = elements.next();
+                    if (prev == none && elements.hasNext()) {
+                        prev = elements.next();
                     }
                 }
 
-                return elements.hasNext();
+                return elements.hasNext(); // || (!ignoreNotPaired && (prev != none));
             }
 
             @Override
@@ -4492,24 +3406,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                if (ignoreNotPaired) {
-                    final R res = mapper.apply(_1, _2, (prev = elements.next()));
-                    _1 = increment == 1 ? _2 : (increment == 2 ? prev : none);
-                    _2 = increment == 1 ? prev : none;
-                    return res;
-                } else {
-                    if (increment == 1) {
-                        return mapper.apply(prev2 == none ? elements.next() : prev2,
-                                (prev2 = (prev == none ? (elements.hasNext() ? elements.next() : null) : prev)),
-                                (prev = (elements.hasNext() ? elements.next() : null)));
+                toSkip = increment > windowSize;
 
+                if (ignoreNotPaired) {
+                    if (increment == 1) {
+                        return mapper.apply(prevPrev, (prevPrev = prev), prev = elements.next());
                     } else if (increment == 2) {
-                        return mapper.apply(prev == none ? elements.next() : prev, elements.hasNext() ? elements.next() : null,
-                                (prev = (elements.hasNext() ? elements.next() : null)));
+                        ret = mapper.apply(prevPrev, prev, prevPrev = elements.next());
+                        prev = none;
+                        return ret;
                     } else {
-                        return mapper.apply(elements.next(), elements.hasNext() ? elements.next() : null,
-                                (prev = (elements.hasNext() ? elements.next() : null)));
+                        ret = mapper.apply(prevPrev, prev, elements.next());
+                        prevPrev = none;
+                        prev = none;
+                        return ret;
                     }
+                } else if (increment == 1) {
+                    return mapper.apply(prevPrev == none ? elements.next() : prevPrev,
+                            (prevPrev = (prev == none ? (elements.hasNext() ? elements.next() : none) : prev)) == none ? null : prevPrev,
+                            ((prev = (elements.hasNext() ? elements.next() : none)) == none) ? null : prev);
+                } else if (increment == 2) {
+                    return mapper.apply(prev == none ? elements.next() : prev, elements.hasNext() ? elements.next() : null,
+                            ((prev = (elements.hasNext() ? elements.next() : none)) == none) ? null : prev);
+                } else {
+                    ret = mapper.apply(elements.next(), elements.hasNext() ? elements.next() : null, elements.hasNext() ? elements.next() : null);
+                    prevPrev = none;
+                    prev = none;
+                    return ret;
                 }
             }
         }, closeHandlers);
@@ -4882,804 +3805,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return groupBy(keyMapper, Collectors.countingToInt(), mapFactory);
     }
 
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a List.
-    //     * The predicate takes two parameters: the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element and its previous element are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a List.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the previous element when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * @param collapsible a BiPredicate that takes two parameters: the previous element and the current element in the stream.
-    //     * @return a new Stream where each element is a List of adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.BiPredicate)
-    //     */
-    //    @IntermediateOp
-    //    public Seq<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return collapse(collapsible, Suppliers.ofList());
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a Collection.
-    //     * The predicate takes two parameters: the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element and its previous element are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a Collection.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the previous element when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * @param <C> the type of the Collection into which the adjacent elements will be collapsed.
-    //     * @param collapsible a BiPredicate that takes two parameters: the previous element and the current element in the stream.
-    //     * @param supplier a Supplier that generates the Collection into which the adjacent elements will be collapsed.
-    //     * @return a new Stream where each element is a Collection of adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.BiPredicate, Supplier)
-    //     */
-    //    @IntermediateOp
-    //    public <C extends Collection<T>> Seq<C, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-    //            final Supplier<? extends C> supplier) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<C, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public C next() throws E {
-    //                final C c = supplier.get();
-    //                c.add(hasNext ? next : (next = iter.next()));
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(next, (next = iter.next()))) {
-    //                        c.add(next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return c;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate using the merger function and returns a new stream.
-    //     * The predicate takes two parameters: the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element and its previous element are considered as a series of adjacent elements.
-    //     * These elements are then merged using the provided BiFunction.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the previous element when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => []
-    //     * Stream.of(1).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [1]
-    //     * Stream.of(1, 2).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [3]
-    //     * Stream.of(1, 2, 3).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [6]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [6, 3, 2, 1]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param collapsible a BiPredicate that takes two parameters: the previous element and the current element in the stream.
-    //     * @param mergeFunction a BiFunction that takes two parameters: the result of the previous merge operation (or the first element if no merge has been performed yet) and the current element, and returns the result of the merge operation.
-    //     * @return a new Stream where each element is the result of merging adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.BiPredicate, java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public Seq<T, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-    //            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                T res = hasNext ? next : (next = iter.next());
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(next, (next = iter.next()))) {
-    //                        res = mergeFunction.apply(res, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return res;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single element using the provided operation and returns a new stream.
-    //     * The predicate takes two parameters: the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element and its previous element are considered as a series of adjacent elements.
-    //     * These elements are then merged using the provided BiFunction.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the previous element when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     * @param <U> the type of the resulting elements.
-    //     * @param collapsible a BiPredicate that takes two parameters: the previous element and the current element in the stream.
-    //     * @param init the initial value to be used in the BiFunction for the first element if the predicate returns {@code true}.
-    //     * @param mergeFunction a BiFunction that takes two parameters: the initial value or the result of the merge function from the previous step, and the current element. It returns a single element that represents the collapsed elements.
-    //     * @return a new Stream where each element is the result of merging adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.BiPredicate, java.lang.Object, java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final U init,
-    //            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> mergeFunction) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<U, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws E {
-    //                U res = mergeFunction.apply(init, hasNext ? next : (next = iter.next()));
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(next, (next = iter.next()))) {
-    //                        res = mergeFunction.apply(res, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return res;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    //    /**
-    //    //     *
-    //    //     *
-    //    //     * @param <R>
-    //    //     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
-    //    //     * @param supplier
-    //    //     * @param accumulator
-    //    //     * @return
-    //    //     * @throws IllegalStateException
-    //    //     * @deprecated use {@linkplain #collapse(com.landawn.abacus.util.Throwables.BiPredicate, Collector)} instead. 1, parameter position is inconsistent? {@code supplier} should be last parameter, 2 Too many overload methods? 3, not frequently used?
-    //    //     */
-    //    //    @Deprecated
-    //    //    @IntermediateOp
-    //    //    public <R> Seq<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final Supplier<R> supplier,
-    //    //            final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) throws IllegalStateException {
-    //    //        assertNotClosed();
-    //    //
-    //    //        final Throwables.Iterator<T, E> iter = elements;
-    //    //
-    //    //        return create(new Throwables.Iterator<R, E>() {
-    //    //            private boolean hasNext = false;
-    //    //            private T next = null;
-    //    //
-    //    //            @Override
-    //    //            public boolean hasNext() throws E {
-    //    //                return hasNext || iter.hasNext();
-    //    //            }
-    //    //
-    //    //            @Override
-    //    //            public R next() throws E {
-    //    //                final R container = supplier.get();
-    //    //                accumulator.accept(container, hasNext ? next : (next = iter.next()));
-    //    //
-    //    //                while ((hasNext = iter.hasNext())) {
-    //    //                    if (collapsible.test(next, (next = iter.next()))) {
-    //    //                        accumulator.accept(container, next);
-    //    //                    } else {
-    //    //                        break;
-    //    //                    }
-    //    //                }
-    //    //
-    //    //                return container;
-    //    //            }
-    //    //        }, closeHandlers);
-    //    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single element using the provided collector and returns a new stream.
-    //     * The predicate takes two parameters: the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element and its previous element are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single element using the provided collector.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the previous element when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).collapse((p, c) -> p &lt; c, Collectors.summingInt(Fn.unboxI())) => []
-    //     * Stream.of(1).collapse((p, c) -> p &lt; c, Collectors.summingInt(Fn.unboxI())) => [1]
-    //     * Stream.of(1, 2).collapse((p, c) -> p &lt; c, Collectors.summingInt(Fn.unboxI())) => [3]
-    //     * Stream.of(1, 2, 3).collapse((p, c) -> p &lt; c, Collectors.summingInt(Fn.unboxI())) => [6]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p &lt; c, Collectors.summingInt(Fn.unboxI())) => [6, 3, 2, 1]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param collapsible a BiPredicate that takes two parameters: the previous element and the current element in the stream.
-    //     * @param collector a Collector that collects the adjacent elements into a single element.
-    //     * @return a new Stream where each element is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.BiPredicate, Collector)
-    //     */
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final Collector<? super T, ?, R> collector)
-    //            throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-    //        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-    //        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<R, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public R next() throws E {
-    //                final Object container = supplier.get();
-    //                accumulator.accept(container, hasNext ? next : (next = iter.next()));
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(next, (next = iter.next()))) {
-    //                        accumulator.accept(container, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return finisher.apply(container);
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single list and returns a new stream.
-    //     * The predicate takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element, its previous element and the first element of the series are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single list.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the first and previous elements when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * @param collapsible a TriPredicate that takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * @return a new Stream where each element is a list that is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate)
-    //     */
-    //    @IntermediateOp
-    //    public Seq<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<List<T>, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public List<T> next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                final List<T> c = new ArrayList<>();
-    //                c.add(first);
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        c.add(next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return c;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single collection and returns a new stream.
-    //     * The predicate takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element, its previous element and the first element of the series are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single collection.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the first and previous elements when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * @param <C> the type of the Collection into which the adjacent elements will be collapsed
-    //     * @param collapsible a TriPredicate that takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * @param supplier a Supplier that generates the collection into which the adjacent elements will be collapsed.
-    //     * @return a new Stream where each element is a collection that is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate, Supplier)
-    //     */
-    //    @IntermediateOp
-    //    public <C extends Collection<T>> Seq<C, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-    //            final Supplier<? extends C> supplier) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<C, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public C next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                final C c = supplier.get();
-    //                c.add(first);
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        c.add(next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return c;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single element and returns a new stream.
-    //     * The predicate takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element, its previous element and the first element of the series are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single element using the provided merge function.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the first and previous elements when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => []
-    //     * Stream.of(1).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [1]
-    //     * Stream.of(1, 2).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [3]
-    //     * Stream.of(1, 2, 3).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [6]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [11, 1]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param collapsible a TriPredicate that takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * @param mergeFunction a BiFunction that takes two parameters: the current element and its previous element. It returns a single element that represents the collapsed elements.
-    //     * @return a new Stream where each element is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.TriPredicate, java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public Seq<T, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-    //            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                T res = first;
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        res = mergeFunction.apply(res, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return res;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single element and returns a new stream.
-    //     * The predicate takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element, its previous element and the first element of the series are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single element using the provided merge function.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the first and previous elements when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * @param collapsible a TriPredicate that takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * @param init the initial value to be used in the merge function for the first element in the series.
-    //     * @param mergeFunction a BiFunction that takes two parameters: the initial value or the result of the merge function from the previous step, and the current element. It returns a single element that represents the collapsed elements.
-    //     * @return a new Stream where each element is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(java.util.function.TriPredicate, java.lang.Object, java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final U init,
-    //            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> mergeFunction) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<U, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                U res = mergeFunction.apply(init, first);
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        res = mergeFunction.apply(res, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return res;
-    //            }
-    //        }, closeHandlers);
-    //    }
-
-    //    /**
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
-    //     * @param supplier
-    //     * @param accumulator
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws IllegalStateException
-    //     * @deprecated use {@linkplain #collapse(com.landawn.abacus.util.Throwables.TriPredicate, Collector)} instead. 1, parameter position is inconsistent? {@code supplier} should be last parameter, 2 Too many overload methods? 3, not frequently used?
-    //     */
-    //    @Deprecated
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final Supplier<R> supplier,
-    //            final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<R, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public R next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                final R container = supplier.get();
-    //                accumulator.accept(container, first);
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        accumulator.accept(container, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return container;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Merges a series of adjacent elements in the stream which satisfy the given predicate into a single element and returns a new stream.
-    //     * The predicate takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * If the predicate returns {@code true}, the current element, its previous element and the first element of the series are considered as a series of adjacent elements.
-    //     * These elements are then collapsed into a single element using the provided collector.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     * It's also a stateful operation since it needs to remember the first and previous elements when processing the current element.
-    //     *
-    //     * This operation is not parallelizable and requires the stream to be ordered.
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => []
-    //     * Stream.of(1).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [1]
-    //     * Stream.of(1, 2).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [3]
-    //     * Stream.of(1, 2, 3).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [6]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param collapsible a TriPredicate that takes three parameters: the first element of the series, the previous element and the current element in the stream.
-    //     * @param collector a Collector that collects the elements into a single result container.
-    //     * @return a new Stream where each element is the result of collapsing adjacent elements which satisfy the given predicate.
-    //     * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate, Collector)
-    //     */
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-    //            final Collector<? super T, ?, R> collector) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-    //        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-    //        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<R, E>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return hasNext || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public R next() throws E {
-    //                final T first = hasNext ? next : (next = iter.next());
-    //                final Object container = supplier.get();
-    //                accumulator.accept(container, first);
-    //
-    //                while ((hasNext = iter.hasNext())) {
-    //                    if (collapsible.test(first, next, (next = iter.next()))) {
-    //                        accumulator.accept(container, next);
-    //                    } else {
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return finisher.apply(container);
-    //            }
-    //        }, closeHandlers);
-    //    }
-
-    //    /**
-    //     * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
-    //     * The scan operation takes a binary operator (the accumulator) and applies it cumulatively on the stream elements,
-    //     * successively combining each element in order from the start to produce a stream of accumulated results.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     *
-    //     * For example, given a stream of numbers [1, 2, 3, 4], and an accumulator that performs addition, the output would be a stream of numbers [1, 3, 6, 10].
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).scan((r, c) -> r + c) => []
-    //     * Stream.of(1).scan((r, c) -> r + c) => [1]
-    //     * Stream.of(1, 2).scan((r, c) -> r + c) => [1, 3]
-    //     * Stream.of(1, 2, 3).scan((r, c) -> r + c) => [1, 3, 6]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).scan((r, c) -> r + c) => [1, 3, 6, 9, 11, 12]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param accumulator a {@code BiFunction} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
-    //     * @return a new {@code Seq} consisting of the results of the scan operation on the elements of the original stream.
-    //     * @see Stream#scan(java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public Seq<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private T res = null;
-    //            private boolean isFirst = true;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E {
-    //                if (isFirst) {
-    //                    isFirst = false;
-    //                    return (res = iter.next());
-    //                } else {
-    //                    return (res = accumulator.apply(res, iter.next()));
-    //                }
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
-    //     * The scan operation takes a binary operator (the accumulator) and applies it cumulatively on the stream elements,
-    //     * successively combining each element in order from the start to produce a stream of accumulated results.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     *
-    //     * For example, given a stream of numbers [1, 2, 3, 4], an initial value of 10, and an accumulator that performs addition, the output would be a stream of numbers [11, 13, 16, 20].
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).scan(10, (r, c) -> r + c) => []
-    //     * Stream.of(1).scan(10, (r, c) -> r + c) => [11]
-    //     * Stream.of(1, 2).scan(10, (r, c) -> r + c) => [11, 13]
-    //     * Stream.of(1, 2, 3).scan(10, (r, c) -> r + c) => [11, 13, 16]
-    //     * Stream.of(1, 2, 3, 3, 2, 1).scan(10, (r, c) -> r + c) => [11, 13, 16, 19, 21, 22]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream. It will be ignored if this stream is empty and won't be the first element of the returned stream.
-    //     * @param accumulator a {@code BiFunction} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
-    //     * @return a new {@code Seq} consisting of the results of the scan operation on the elements of the original stream.
-    //     * @see Stream#scan(java.lang.Object, java.util.function.BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> scan(final U init, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<U, E>() {
-    //            private U res = init;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws E {
-    //                return (res = accumulator.apply(res, iter.next()));
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
-    //     * The scan operation takes a binary operator (the accumulator) and applies it cumulatively on the stream elements,
-    //     * successively combining each element in order from the start to produce a stream of accumulated results.
-    //     *
-    //     * <br />
-    //     * This is an intermediate operation and will not close the sequence.
-    //     *
-    //     * <p>Example:
-    //     * <pre>
-    //     * <code>
-    //     * Stream.of(new Integer[0]).scan(10, false, (r, c) -> r + c) => []
-    //     * Stream.of(new Integer[0]).scan(10, true, (r, c) -> r + c) => [10]
-    //     * Stream.of(1, 2, 3).scan(10, false, (r, c) -> r + c) => [11, 13, 16]
-    //     * Stream.of(1, 2, 3).scan(10, true, (r, c) -> r + c) => [10, 11, 13, 16]
-    //     * </code>
-    //     * </pre>
-    //     *
-    //     *
-    //     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
-    //     * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
-    //     * @param accumulator a {@code BiFunction} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
-    //     * @return a new {@code Stream} consisting of the results of the scan operation on the elements of the original stream.
-    //     * @see Stream#scan(Object, boolean, BiFunction)
-    //     */
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> scan(final U init, final boolean initIncluded, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator)
-    //            throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        if (!initIncluded) {
-    //            return scan(init, accumulator);
-    //        }
-    //
-    //        final Throwables.Iterator<T, E> iter = elements;
-    //
-    //        return create(new Throwables.Iterator<U, E>() {
-    //            private boolean isFirst = true;
-    //            private U res = init;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E {
-    //                return isFirst || iter.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws E {
-    //                if (isFirst) {
-    //                    isFirst = false;
-    //                    return init;
-    //                }
-    //
-    //                return (res = accumulator.apply(res, iter.next()));
-    //            }
-    //        }, closeHandlers);
-    //    }
-
     /**
-     * Returns a sequence consisting of the elements of this sequence that are also present in the specified collection.
-     * Occurrences are considered. The order of the elements in the sequence is preserved.
+     * Returns a new sequence containing elements that are present in both this sequence and the specified collection.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both sources.
+     * The order of elements in the original sequence is preserved.
      *
-     * @param c the collection to be checked for intersection with this sequence
-     * @return a new Seq containing the elements that are present in both this sequence and the specified collection
+     * <p>Example:
+     * <pre>
+     * Seq&lt;Integer&gt; seq = Seq.of(1, 1, 2, 3);
+     * List&lt;Integer&gt; list = Arrays.asList(1, 2, 2, 4);
+     * Seq&lt;Integer&gt; result = seq.intersection(list); // result will be [1, 2]
+     * // One occurrence of '1' (minimum count in both sources) and one occurrence of '2'
+     *
+     * Seq&lt;String&gt; seq2 = Seq.of("a", "a", "b");
+     * Set&lt;String&gt; set = new HashSet&lt;&gt;(Arrays.asList("a", "c"));
+     * Seq&lt;String&gt; result2 = seq2.intersection(set); // result will be ["a"]
+     * // One occurrence of 'a' (minimum count in both sources)
+     * </pre>
+     *
+     * @param c the collection to find common elements with this sequence
+     * @return a new sequence containing elements present in both this sequence and the specified collection,
+     *         considering the minimum number of occurrences in either source
      * @throws IllegalStateException if the sequence is already closed
-     * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
+     * @see N#intersection(int[], int[])
      */
     @IntermediateOp
     public Seq<T, E> intersection(final Collection<?> c) throws IllegalStateException {
@@ -5691,19 +3842,34 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a sequence consisting of the elements of this sequence that are also present in the specified collection.
-     * The comparison is based on the values obtained by applying the provided function to each element of the stream.
-     * The order of the elements in the sequence is preserved.
+     * Returns a new sequence containing elements from this sequence that, when mapped by the given function,
+     * are present in the specified collection. For elements that appear multiple times, the intersection 
+     * contains the minimum number of occurrences present in both sources (after mapping).
+     * The order of elements in the original sequence is preserved.
      *
-     * @param <U> the type of the elements in the specified collection
-     * @param mapper the function to apply to each element of this sequence
-     * @param c the collection to be checked for intersection with this sequence
-     * @return a new Seq containing the elements that are present in both this sequence and the specified collection
+     * <p>Example:
+     * <pre>
+     * Seq&lt;Person&gt; seq = Seq.of(new Person("Alice", 25), new Person("Bob", 30), new Person("Alice", 35));
+     * List&lt;String&gt; names = Arrays.asList("Alice", "Charlie");
+     * Seq&lt;Person&gt; result = seq.intersection(Person::getName, names); // result will be [Person("Alice", 25)]
+     * // Only the first "Alice" person is included because the name appears in the collection only once.
+     *
+     * Seq&lt;Product&gt; products = Seq.of(new Product(1, "A"), new Product(2, "B"), new Product(3, "C"));
+     * Set&lt;Integer&gt; ids = new HashSet&lt;&gt;(Arrays.asList(1, 3, 4));
+     * Seq&lt;Product&gt; result2 = products.intersection(Product::getId, ids); // result will be [Product(1, "A"), Product(3, "C")]
+     * // Only products with IDs in the set are included
+     * </pre>
+     *
+     * @param <U> the type of the elements after mapping
+     * @param mapper the function to apply to elements of this sequence for comparison
+     * @param c the collection to find common elements with (after mapping)
+     * @return a new sequence containing elements whose mapped values are present in the specified collection,
+     *         considering the minimum number of occurrences in either source
      * @throws IllegalStateException if the sequence is already closed
-     * @see N#intersection(int[], int[])
+     * @see #intersection(Collection)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
-     * @see Collection#retainAll(Collection)
+     * @see N#intersection(int[], int[])
      */
     @IntermediateOp
     public <U> Seq<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) throws IllegalStateException {
@@ -5715,21 +3881,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a sequence consisting of the elements of this sequence that are not present in the specified collection.
-     * Occurrences are considered. The order of the elements in the sequence is preserved.
+     * Returns a new sequence with the elements in this sequence but not in the specified collection {@code c},
+     * considering the number of occurrences of each element.
      *
-     * @param c the collection to be checked for difference with this sequence
-     * @return a new Seq containing the elements that are present in this sequence but not in the specified collection
+     * <p>Example:
+     * <pre>
+     * Seq<Integer> seq1 = Seq.of(1, 1, 2, 3);
+     * List<Integer> list = Arrays.asList(1, 4);
+     * Seq<Integer> result = seq1.difference(list); // result will be [1, 2, 3]
+     * // One '1' remains because seq1 has two occurrences and list has one
+     *
+     * Seq<String> seq2 = Seq.of("apple", "orange");
+     * List<String> list2 = Arrays.asList("apple", "apple", "orange");
+     * Seq<String> result2 = seq2.difference(list2); // result will be [] (empty)
+     * // No elements remain because list2 has at least as many occurrences of each value as seq2
+     * </pre>
+     *
+     * @param c the collection to compare against this sequence
+     * @return a new sequence containing the elements that are present in this sequence but not in the specified collection,
+     *         considering the number of occurrences
      * @throws IllegalStateException if the sequence is already closed
-     * @see IntList#difference(IntList)
+     * @see #difference(Function, Collection)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see N#difference(int[], int[])
      */
     @IntermediateOp
     public Seq<T, E> difference(final Collection<?> c) throws IllegalStateException {
@@ -5741,24 +3915,30 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a new sequence that contains only the elements that are present in the original sequence but not in the provided collection.
-     * The comparison is based on the values obtained by applying the provided function to each element of the stream.
-     * Occurrences are considered.
+     * Returns a new sequence with the elements in this sequence but not in the specified collection {@code c},
+     * comparing elements using the values obtained by applying the mapper function.
      *
-     * @param <U> the type of the elements in the specified collection
-     * @param mapper the function to apply to each element of this sequence
-     * @param c the collection to be checked for difference with this sequence
-     * @return a new Seq containing the elements that are present in this sequence but not in the specified collection
+     * <p>Example:
+     * <pre>
+     * Seq<Person> seq1 = Seq.of(new Person("Alice", 25), new Person("Alice", 30), new Person("Bob", 35));
+     * List<String> names = Arrays.asList("Alice", "Charlie");
+     * Seq<Person> result = seq1.difference(Person::getName, names); // result will be [Person("Alice", 30),Person("Bob", 35)]
+     * // Only Bob remains because both Alice instances match with names in the collection
+     *
+     * Seq<Transaction> seq2 = Seq.of(new Transaction(101), new Transaction(102));
+     * List<Integer> ids = Arrays.asList(101, 101, 102);
+     * Seq<Transaction> result2 = seq2.difference(Transaction::getId, ids); // result will be [] (empty)
+     * // No elements remain because the ids list has at least as many occurrences of each mapped value
+     * </pre>
+     *
+     * @param <U> the type of the elements after mapping
+     * @param mapper the function to apply to each element of this sequence for comparison
+     * @param c the collection of mapped values to compare against
+     * @return a new sequence containing the elements that are present in this sequence but not in the specified collection,
+     *         considering the number of occurrences after mapping
      * @throws IllegalStateException if the sequence is already closed
-     * @see IntList#difference(IntList)
+     * @see #difference(Collection)
      * @see N#difference(Collection, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Iterable)
-     * @see N#intersection(Collection, Collection)
-     * @see N#commonSet(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
      */
     @IntermediateOp
     public <U> Seq<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
@@ -5770,17 +3950,35 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a sequence consisting of the elements that are present in either this sequence or the specified collection,
-     * but not in both. Occurrences are considered. The order of the elements in the sequence is preserved.
+     * Returns a new sequence containing elements that are present in either this sequence or the specified collection,
+     * but not in both. This is the set-theoretic symmetric difference operation.
+     * For elements that appear multiple times, the symmetric difference contains occurrences that remain
+     * after removing the minimum number of shared occurrences from both sources.
      *
-     * @param c the collection to be checked for symmetric difference with this sequence
-     * @return a new Seq containing the elements that are present in either this sequence or the specified collection, but not in both
+     * <p>The order of elements is preserved, with elements from this sequence appearing first,
+     * followed by elements from the specified collection (that aren't in this sequence).
+     *
+     * <p>Example:
+     * <pre>
+     * Seq&lt;Integer&gt; seq = Seq.of(1, 1, 2, 3);
+     * List&lt;Integer&gt; list = Arrays.asList(1, 2, 2, 4);
+     * Seq&lt;Integer&gt; result = seq.symmetricDifference(list);
+     * // result will contain: [1, 3, 2, 4]
+     * // Elements explanation:
+     * // - 1 appears twice in seq and once in list, so one occurrence remains
+     * // - 3 appears only in seq, so it remains
+     * // - 2 appears once in seq and twice in list, so one occurrence remains
+     * // - 4 appears only in list, so it remains
+     * </pre>
+     *
+     * @param c the collection to find symmetric difference with this sequence
+     * @return a new sequence containing elements that are present in either this sequence or the specified collection,
+     *         but not in both, considering the number of occurrences
      * @throws IllegalStateException if the sequence is already closed
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
-     * @see N#excludeAll(Collection, Collection)
-     * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see #intersection(Collection)
+     * @see #difference(Collection)
      * @see Iterables#symmetricDifference(Set, Set)
      */
     @IntermediateOp
@@ -6048,333 +4246,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }, closeHandlers).onClose(() -> close(holder));
     }
 
-    //    @SuppressWarnings("rawtypes")
-    //    private static final Throwables.Predicate NOT_NULL_MASK = new Throwables.Predicate<Object, RuntimeException>() {
-    //            //        public boolean test(final Object t) {
-    //            return t != NONE;
-    //        }
-    //    };
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> appendOnError(final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return fallbackValueAvailable && elements.hasNext();
-    //                } catch (Exception e) {
-    //                    return fallbackValueAvailable;
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return elements.next();
-    //                } catch (Exception e) {
-    //                    fallbackValueAvailable = false;
-    //                    return fallbackValue;
-    //                }
-    //            }
-    //        }, false, null, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public <XE extends Exception> Seq<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
-    //        assertNotClosed();
-    //        this.checkArgNotNull(type, "type");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return fallbackValueAvailable && elements.hasNext();
-    //                } catch (Exception e) {
-    //                    if (ExceptionUtil.hasCause(e, type)) {
-    //                        return fallbackValueAvailable;
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return elements.next();
-    //                } catch (Exception e) {
-    //                    if (ExceptionUtil.hasCause(e, type)) {
-    //                        fallbackValueAvailable = false;
-    //                        return fallbackValue;
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //        }, false, null, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
-    //        assertNotClosed();
-    //        this.checkArgNotNull(predicate, s.Predicate);
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return fallbackValueAvailable && elements.hasNext();
-    //                } catch (Exception e) {
-    //                    if (predicate.test(e)) {
-    //                        return fallbackValueAvailable;
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return elements.next();
-    //                } catch (Exception e) {
-    //                    if (predicate.test(e)) {
-    //                        fallbackValueAvailable = false;
-    //                        return fallbackValue;
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //        }, false, null, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> appendOnError(final Supplier<Seq<T, E>> fallbackStreamSupplier) {
-    //        assertNotClosed();
-    //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
-    //
-    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
-    //            private Seq<T, E> s = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return iter.hasNext();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        return iter.hasNext();
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return iter.next();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        if (iter.hasNext()) {
-    //                            return iter.next();
-    //                        } else {
-    //                            return (T) NONE;
-    //                        }
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
-    //                    try {
-    //                        if (s != null) {
-    //                            s.close();
-    //                        }
-    //                    } finally {
-    //                        Seq.this.close();
-    //                    }
-    //                }
-    //            }
-    //
-    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvailable = false;
-    //                s = fallbackStream.get();
-    //                iter = s.elements;
-    //            }
-    //        };
-    //
-    //        return create(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public <XE extends Exception> Seq<T, E> appendOnError(final Class<XE> type, final Supplier<Seq<T, E>> fallbackStreamSupplier) {
-    //        assertNotClosed();
-    //        this.checkArgNotNull(type, "type");
-    //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
-    //
-    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
-    //            private Seq<T, E> s = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return iter.hasNext();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable && ExceptionUtil.hasCause(e, type)) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        return iter.hasNext();
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return iter.next();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable && ExceptionUtil.hasCause(e, type)) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        if (iter.hasNext()) {
-    //                            return iter.next();
-    //                        } else {
-    //                            return (T) NONE;
-    //                        }
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
-    //                    try {
-    //                        if (s != null) {
-    //                            s.close();
-    //                        }
-    //                    } finally {
-    //                        Seq.this.close();
-    //                    }
-    //                }
-    //            }
-    //
-    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvailable = false;
-    //                s = fallbackStream.get();
-    //                iter = s.elements;
-    //            }
-    //        };
-    //
-    //        return create(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<Seq<T, E>> fallbackStreamSupplier) {
-    //        assertNotClosed();
-    //        this.checkArgNotNull(predicate, s.Predicate);
-    //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
-    //
-    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
-    //            private boolean fallbackValueAvailable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
-    //            private Seq<T, E> s = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                try {
-    //                    return iter.hasNext();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable && predicate.test(e)) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        return iter.hasNext();
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                try {
-    //                    return iter.next();
-    //                } catch (Exception e) {
-    //                    if (fallbackValueAvailable && predicate.test(e)) {
-    //                        useFallbackStream(fallbackStreamSupplier);
-    //
-    //                        if (iter.hasNext()) {
-    //                            return iter.next();
-    //                        } else {
-    //                            return (T) NONE;
-    //                        }
-    //                    } else {
-    //                        throw (E) e;
-    //                    }
-    //                }
-    //            }
-    //
-    //                //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
-    //                    try {
-    //                        if (s != null) {
-    //                            s.close();
-    //                        }
-    //                    } finally {
-    //                        Seq.this.close();
-    //                    }
-    //                }
-    //            }
-    //
-    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
-    //                fallbackValueAvailable = false;
-    //                s = fallbackStream.get();
-    //                iter = s.elements;
-    //            }
-    //        };
-    //
-    //        return create(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
-    //    }
-
     /**
      * Returns a new Seq that contains the specified default value if this Seq is empty.
      *
@@ -6388,28 +4259,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<T, E> defaultIfEmpty(final T defaultValue) throws IllegalStateException {
         return appendIfEmpty(defaultValue);
     }
-
-    //    /**
-    //     *
-    //     * @param defaultValues
-    //     * @return
-    //     * @see #appendIfEmpty(Object...)
-    //     */
-    //    @IntermediateOp
-    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
-    //        return appendIfEmpty(defaultValues);
-    //    }
-
-    //    /**
-    //     *
-    //     * @param defaultValues
-    //     * @return
-    //     * @see #appendIfEmpty(Object...)
-    //     */
-    //    @IntermediateOp
-    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
-    //        return appendIfEmpty(defaultValues);
-    //    }
 
     /**
      * Returns a new Seq that contains the elements from the Seq provided by the supplier if this Seq is empty.
@@ -6691,19 +4540,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         });
     }
 
-    //    /**
-    //     *
-    //     * @param chunkSize
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Stream<T>, E> split(final int chunkSize) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return splitToList(chunkSize).map(Stream::of);
-    //    }
-
     /**
      * Returns a sequence of Lists, where each List contains a chunk of elements from the original stream.
      * The size of each chunk is specified by the chunkSize parameter. The final chunk may be smaller if there are not enough elements.
@@ -6716,18 +4552,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<List<T>, E> split(final int chunkSize) throws IllegalStateException {
         return split(chunkSize, Factory.ofList());
     }
-
-    //    /**
-    //     * Returns sequence of {@code Set<T>} with consecutive subsequences of the elements, each of the same size (the final sequence may be smaller).
-    //     *
-    //     *
-    //     * @param chunkSize the desired size of each subsequence (the last may be smaller).
-    //     * @return
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Set<T>, E> splitToSet(final int chunkSize) {
-    //        return split(chunkSize, Factory.<T> ofSet());
-    //    }
 
     /**
      * Splits the elements of this sequence into subsequences of the specified size. The last subsequence may be smaller than the specified size.
@@ -6841,19 +4665,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }, closeHandlers);
     }
 
-    //    /**
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Stream<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return splitToList(predicate).map(Stream::of);
-    //    }
-
     /**
      * Splits the sequence into subsequences based on the given predicate.
      * Each subsequence is collected into a List.
@@ -6871,19 +4682,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         return split(predicate, Suppliers.ofList());
     }
-
-    //    /**
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Set<T>, E> splitToSet(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return split(predicate, Suppliers.<T> ofSet());
-    //    }
 
     /**
      * Splits the sequence into subsequences based on the given predicate.
@@ -7354,7 +5152,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                return elements.hasNext();
+                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
+                // Why? we need to check if the queue is not empty?
+                // Not really, because elements.hasNext() is used to check if there are more elements to process.
+                // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
+                // In second case, elements.hasNext() will return true before processing the first element,
+                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -7386,9 +5190,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 T next = null;
 
-                while (cnt++ < windowSize && elements.hasNext()) {
+                while (cnt < windowSize && elements.hasNext()) {
                     next = elements.next();
                     result.add(next);
+                    cnt++;
 
                     if (cnt > increment) {
                         queue.add(next);
@@ -7427,36 +5232,34 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     //noinspection DuplicateExpressions
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
-                    if (N.isEmpty(queue)) {
-                        final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
-                        elements.advance(m);
+                    @SuppressWarnings("DuplicateExpressions")
+                    final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
+
+                    if (m < prevSize) {
+                        for (int i = 0; i < m; i++) {
+                            queue.removeFirst();
+                        }
                     } else {
-                        @SuppressWarnings("DuplicateExpressions")
-                        final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = queue.size(); //NOSONAR
+                        if (N.notEmpty(queue)) {
+                            queue.clear();
+                        }
 
-                        if (m < prevSize) {
-                            for (int i = 0; i < m; i++) {
-                                queue.removeFirst();
-                            }
-                        } else {
-                            if (!queue.isEmpty()) {
-                                queue.clear();
-                            }
-
+                        if (m - prevSize > 0) {
                             elements.advance(m - prevSize);
                         }
                     }
+                }
 
-                    if (queue == null) {
-                        queue = new ArrayDeque<>(windowSize);
-                    }
+                if (queue == null) {
+                    queue = new ArrayDeque<>(windowSize);
+                }
 
-                    int cnt = queue.size();
+                final int countToKeepInQueue = windowSize - increment;
+                int cnt = queue.size();
 
-                    while (cnt++ < windowSize && elements.hasNext()) {
-                        queue.add(elements.next());
-                    }
+                while (cnt++ < countToKeepInQueue && elements.hasNext()) {
+                    queue.add(elements.next());
                 }
             }
         }, closeHandlers);
@@ -7504,7 +5307,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                return elements.hasNext();
+                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
+                // Why? we need to check if the queue is not empty?
+                // Not really, because elements.hasNext() is used to check if there are more elements to process.
+                // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
+                // In second case, elements.hasNext() will return true before processing the first element,
+                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -7538,9 +5347,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 T next = null;
 
-                while (cnt++ < windowSize && elements.hasNext()) {
+                while (cnt < windowSize && elements.hasNext()) {
                     next = elements.next();
                     accumulator.accept(container, next);
+                    cnt++;
 
                     if (cnt > increment) {
                         queue.add(next);
@@ -7579,36 +5389,34 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     //noinspection DuplicateExpressions
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
-                    if (N.isEmpty(queue)) {
-                        final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
-                        elements.advance(m);
+                    @SuppressWarnings("DuplicateExpressions")
+                    final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
+
+                    if (m < prevSize) {
+                        for (int i = 0; i < m; i++) {
+                            queue.removeFirst();
+                        }
                     } else {
-                        @SuppressWarnings("DuplicateExpressions")
-                        final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = queue.size(); //NOSONAR
+                        if (N.notEmpty(queue)) {
+                            queue.clear();
+                        }
 
-                        if (m < prevSize) {
-                            for (int i = 0; i < m; i++) {
-                                queue.removeFirst();
-                            }
-                        } else {
-                            if (!queue.isEmpty()) {
-                                queue.clear();
-                            }
-
+                        if (m - prevSize > 0) {
                             elements.advance(m - prevSize);
                         }
                     }
+                }
 
-                    if (queue == null) {
-                        queue = new ArrayDeque<>(windowSize);
-                    }
+                if (queue == null) {
+                    queue = new ArrayDeque<>(windowSize);
+                }
 
-                    int cnt = queue.size();
+                final int countToKeepInQueue = windowSize - increment;
+                int cnt = queue.size();
 
-                    while (cnt++ < windowSize && elements.hasNext()) {
-                        queue.add(elements.next());
-                    }
+                while (cnt++ < countToKeepInQueue && elements.hasNext()) {
+                    queue.add(elements.next());
                 }
             }
         }, closeHandlers);
@@ -8101,9 +5909,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Rotates the elements in this sequence by the specified distance.
-     * All elements will be loaded to rotate the elements when a terminal operation is triggered
+     * 
+     * <p>This operation creates a new sequence with the elements rotated by the 
+     * specified distance. If the distance is positive, the elements are rotated 
+     * to the right. If the distance is negative, the elements are rotated to the left.
+     * If the distance is zero, the sequence is not modified.</p>
+     * 
+     * <p>For example, rotating the sequence [1, 2, 3, 4, 5] by distance 2 results in 
+     * [4, 5, 1, 2, 3]. Rotating by -1 results in [2, 3, 4, 5, 1].</p>
+     * 
+     * <p><strong>Note:</strong> This is an intermediate operation that triggers terminal 
+     * evaluation. All elements will be loaded into memory to perform the rotation when 
+     * a terminal operation is triggered.</p>
      *
-     * @param distance the distance to rotate the elements. Positive values rotate to the right, negative values rotate to the left.
+     * @param distance the distance to rotate the elements. Positive values rotate to the 
+     *                 right, negative values rotate to the left
      * @return a new {@code Seq} with the elements rotated by the specified distance
      * @throws IllegalStateException if the sequence is already closed
      */
@@ -8671,18 +6491,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return onEach(action);
     }
 
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<Timed<T>, E> timed() {
-    //        return map(Timed::of);
-    //    }
-
     /**
      * Intersperses the specified delimiter between each element of this {@code Seq}.
      *
@@ -9053,1117 +6861,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
-    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
-    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
-    //    // So, remove them.
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                            errorConsumer.accept(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (type.isAssignableFrom(e.getClass())) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorPredicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorCounter.decrementAndGet() >= 0) {
-    //                                if (errorPredicate.test(e)) {
-    //                                    logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                    errorConsumer.accept(e);
-    //                                } else {
-    //                                    throwThrowable(e);
-    //                                }
-    //                            } else {
-    //                                break;
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                        next = fallbackValue;
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (type.isAssignableFrom(e.getClass())) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param supplierForFallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = supplierForFallbackValue.get();
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param mapperForFallbackValue
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (errorCounter.decrementAndGet() >= 0) {
-    //                            if (predicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                                next = mapperForFallbackValue.apply(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        } else {
-    //                            // break;
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorStop() {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorStop", e);
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    private void throwThrowable(Throwable e) throws E {
-    //        if (e instanceof Error) {
-    //            throw (Error) e;
-    //        } else {
-    //            throw (E) e;
-    //        }
-    //    }
-
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param threadNum
-    //     * @param action
-    //     * @throws IllegalArgumentException
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action)
-    //            throws IllegalArgumentException, E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(action, cs.action);
-    //
-    //        try {
-    //            unchecked().parallel(threadNum).forEach(action);
-    //        } catch (final Exception e) {
-    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param threadNum
-    //     * @param action
-    //     * @param executor
-    //     * @throws IllegalArgumentException
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action, final Executor executor)
-    //            throws IllegalArgumentException, E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(action, cs.action);
-    //
-    //        try {
-    //            unchecked().parallel(threadNum, executor).forEach(action);
-    //        } catch (final Exception e) {
-    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-    //        }
-    //    }
-
-    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
-    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
-    //    // So, remove them.
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                            errorConsumer.accept(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (type.isAssignableFrom(e.getClass())) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorPredicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorCounter.decrementAndGet() >= 0) {
-    //                                if (errorPredicate.test(e)) {
-    //                                    logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                    errorConsumer.accept(e);
-    //                                } else {
-    //                                    throwThrowable(e);
-    //                                }
-    //                            } else {
-    //                                break;
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                        next = fallbackValue;
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (type.isAssignableFrom(e.getClass())) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param supplierForFallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = supplierForFallbackValue.get();
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param mapperForFallbackValue
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (errorCounter.decrementAndGet() >= 0) {
-    //                            if (predicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                                next = mapperForFallbackValue.apply(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        } else {
-    //                            // break;
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorStop() {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorStop", e);
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    private void throwThrowable(Throwable e) throws E {
-    //        if (e instanceof Error) {
-    //            throw (Error) e;
-    //        } else {
-    //            throw (E) e;
-    //        }
-    //    }
-
     /**
      *
      * @param action
@@ -10439,20 +7136,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Iterates over the elements of this sequence in pairs and applies the given action to each pair.
-     * The pairs are formed by taking two consecutive elements from the sequence.
+     * Performs the given action on each adjacent pair of elements in this sequence.
      *
-     * <br />
-     * This is a terminal operation and will close the sequence.
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d], the action will be performed on pairs (a,b), (b,c), and (c,d).
      *
-     * @param <E2> the type of exception that the action may throw
-     * @param action a {@code Throwables.BiConsumer} that takes two elements of this sequence and performs an action
+     * @param <E2> type of exception that might be thrown from the action
+     * @param action a non-interfering action to perform on each adjacent pair of elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the action is null
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
-     * @see #forEachPair(int, Throwables.BiConsumer)
-     * @see N#forEachPair(Iterable, Throwables.BiConsumer)
      */
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E2> action)
@@ -10461,21 +7155,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Iterates over the elements of this sequence in pairs with a specified increment and applies the given action to each pair.
-     * The pairs are formed by taking two elements from the sequence separated by the specified increment.
+     * Performs the given action on pairs of elements in this sequence with the specified increment between the first elements of each pair.
      *
-     * <br />
-     * This is a terminal operation and will close the sequence.
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e] and increment=2, the action will be performed on pairs (a,b), (c,d).
+     * If this sequence contains elements [a, b, c, d, e, f] and increment=2, the action will be performed on pairs (a,b), (c,d), (e,f).
      *
-     * @param <E2> the type of exception that the action may throw
-     * @param increment the number of elements to skip between pairs
-     * @param action a {@code Throwables.BiConsumer} that takes two elements of this sequence and performs an action
+     * @param <E2> type of exception that might be thrown from the action
+     * @param increment the distance between the first elements of each pair
+     * @param action a non-interfering action to perform on each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is less than 1 or the action is null
+     * @throws IllegalArgumentException if the action is null or increment is not positive
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
-     * @see #forEachPair(Throwables.BiConsumer)
-     * @see N#forEachPair(Iterable, int, Throwables.BiConsumer)
      */
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E2> action)
@@ -10516,20 +7208,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Iterates over the elements of this sequence in triples and applies the given action to each triple.
-     * The triples are formed by taking three consecutive elements from the sequence.
+     * Performs the given action on each adjacent triple of elements in this sequence.
      *
-     * <br />
-     * This is a terminal operation and will close the sequence.
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e], the action will be performed on triples (a,b,c), (b,c,d), and (c,d,e).
      *
-     * @param <E2> the type of exception that the action may throw
-     * @param action a {@code Throwables.TriConsumer} that takes three elements of this sequence and performs an action
+     * @param <E2> type of exception that might be thrown from the action
+     * @param action a non-interfering action to perform on each adjacent triple of elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the action is null
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
-     * @see #forEachTriple(int, Throwables.TriConsumer)
-     * @see N#forEachTriple(Iterable, Throwables.TriConsumer)
      */
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
@@ -10538,21 +7227,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Iterates over the elements of this sequence in triples with a specified increment and applies the given action to each triple.
-     * The triples are formed by taking three elements from the sequence separated by the specified increment.
+     * Performs the given action on triples of elements in this sequence with the specified increment between the first elements of each triple.
      *
-     * <br />
-     * This is a terminal operation and will close the sequence.
+     * @implSpec
+     * For example, if this sequence contains elements [a, b, c, d, e, f, g, h] and increment=3, the action will be performed on triples (a,b,c), (d,e,f).
+     * If this sequence contains elements [a, b, c, d, e, f, g, h, i] and increment=3, the action will be performed on triples (a,b,c), (d,e,f), (g,h,i).
      *
-     * @param <E2> the type of exception that the action may throw
-     * @param increment the number of elements to skip between triples
-     * @param action a {@code Throwables.TriConsumer} that takes three elements of this sequence and performs an action
+     * @param <E2> type of exception that might be thrown from the action
+     * @param increment the distance between the first elements of each triple
+     * @param action a non-interfering action to perform on each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the increment is less than 1 or the action is null
+     * @throws IllegalArgumentException if the action is null or increment is not positive
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
-     * @see #forEachTriple(Throwables.TriConsumer)
-     * @see N#forEachTriple(Iterable, int, Throwables.TriConsumer)
      */
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
@@ -10597,585 +7284,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             close();
         }
     }
-
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param threadNum
-    //     * @param action
-    //     * @throws IllegalArgumentException
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action)
-    //            throws IllegalArgumentException, E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(action, cs.action);
-    //
-    //        try {
-    //            unchecked().parallel(threadNum).forEach(action);
-    //        } catch (final Exception e) {
-    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param threadNum
-    //     * @param action
-    //     * @param executor
-    //     * @throws IllegalArgumentException
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action, final Executor executor)
-    //            throws IllegalArgumentException, E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(action, cs.action);
-    //
-    //        try {
-    //            unchecked().parallel(threadNum, executor).forEach(action);
-    //        } catch (final Exception e) {
-    //            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-    //        }
-    //    }
-
-    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
-    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
-    //    // So, remove them.
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                            errorConsumer.accept(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (type.isAssignableFrom(e.getClass())) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorPredicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                errorConsumer.accept(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param errorPredicate
-    //     * @param errorConsumer
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    while (true) {
-    //                        try {
-    //                            if (iter.hasNext()) {
-    //                                next = iter.next();
-    //                            }
-    //
-    //                            break;
-    //                        } catch (Throwable e) {
-    //                            if (errorCounter.decrementAndGet() >= 0) {
-    //                                if (errorPredicate.test(e)) {
-    //                                    logger.warn("ignoring error in onErrorContinue", e);
-    //
-    //                                    errorConsumer.accept(e);
-    //                                } else {
-    //                                    throwThrowable(e);
-    //                                }
-    //                            } else {
-    //                                break;
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                        next = fallbackValue;
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param type
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (type.isAssignableFrom(e.getClass())) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param fallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = fallbackValue;
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param supplierForFallbackValue
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (predicate.test(e)) {
-    //                            logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                            next = supplierForFallbackValue.get();
-    //                        } else {
-    //                            throwThrowable(e);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    /**
-    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-    //     *
-    //     * @param predicate
-    //     * @param mapperForFallbackValue
-    //     * @param maxErrorCountToStop
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
-    //        assertNotClosed();
-    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() throws E {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        if (errorCounter.decrementAndGet() >= 0) {
-    //                            if (predicate.test(e)) {
-    //                                logger.warn("ignoring error in onErrorReturn", e);
-    //
-    //                                next = mapperForFallbackValue.apply(e);
-    //                            } else {
-    //                                throwThrowable(e);
-    //                            }
-    //                        } else {
-    //                            // break;
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() throws E {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, closeHandlers);
-    //    }
-    //
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> onErrorStop() {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, E>() {
-    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
-    //            private final T none = (T) NONE;
-    //            private T next = none;
-    //            private T ret = null;
-    //
-    //                //            public boolean hasNext() {
-    //                if (next == none) {
-    //                    try {
-    //                        if (iter.hasNext()) {
-    //                            next = iter.next();
-    //                        }
-    //                    } catch (Throwable e) {
-    //                        logger.warn("ignoring error in onErrorStop", e);
-    //                    }
-    //                }
-    //
-    //                return next != none;
-    //            }
-    //
-    //                //            public T next() {
-    //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                ret = next;
-    //                next = none;
-    //                return ret;
-    //            }
-    //        }, sorted, cmp, closeHandlers);
-    //    }
-    //
-    //    private void throwThrowable(Throwable e) throws E {
-    //        if (e instanceof Error) {
-    //            throw (Error) e;
-    //        } else {
-    //            throw (E) e;
-    //        }
-    //    }
 
     /**
      * Returns an {@code Optional} containing the minimum value of this sequence according to the provided comparator.
@@ -11516,8 +7624,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
      * @throws E2 if the predicate throws an exception
-     * @see #findFirst(Throwables.Predicate)
      * @deprecated replaced by {@link #findFirst(Throwables.Predicate)}
+     * @see #findFirst(Throwables.Predicate)
      */
     @Deprecated
     @TerminalOp
@@ -11564,117 +7672,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             close();
         }
     }
-
-    //    /**
-    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty.
-    //     * Otherwise, an empty {@code Optional<T>} will be returned.
-    //     *
-    //     * @param <E2>
-    //     * @param predicateForFirst
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws E
-    //     * @throws E2
-    //     */
-    //    @TerminalOp
-    //    public <E2 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst)
-    //            throws IllegalStateException, E, E2 {
-    //        assertNotClosed();
-    //
-    //        try {
-    //            T ret = (T) NONE;
-    //            T next = null;
-    //
-    //            while (elements.hasNext()) {
-    //                next = elements.next();
-    //
-    //                if (predicateForFirst.test(next)) {
-    //                    return Optional.of(next);
-    //                } else if (ret == NONE) {
-    //                    ret = next;
-    //                }
-    //            }
-    //
-    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-    //        } finally {
-    //            close();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty.
-    //     * Otherwise, an empty {@code Optional<T>} will be returned.
-    //     *
-    //     * @param <E2>
-    //     * @param predicateForFirst
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws E
-    //     * @throws E2
-    //     */
-    //    @TerminalOp
-    //    public <E2 extends Exception> Optional<T> findFirstOrElseLast(final Throwables.Predicate<? super T, E2> predicateForFirst)
-    //            throws IllegalStateException, E, E2 {
-    //        assertNotClosed();
-    //
-    //        try {
-    //            T ret = (T) NONE;
-    //            T next = null;
-    //
-    //            while (elements.hasNext()) {
-    //                next = elements.next();
-    //
-    //                if (predicateForFirst.test(next)) {
-    //                    return Optional.of(next);
-    //                } else {
-    //                    ret = next;
-    //                }
-    //            }
-    //
-    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-    //        } finally {
-    //            close();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
-    //     * Otherwise, an empty {@code Optional<T>} will be returned.
-    //     *
-    //     * @param <E2>
-    //     * @param <E3>
-    //     * @param predicateForFirst
-    //     * @param predicateForAny
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws E
-    //     * @throws E2
-    //     * @throws E3
-    //     */
-    //    @TerminalOp
-    //    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
-    //            final Throwables.Predicate<? super T, E3> predicateForAny) throws IllegalStateException, E, E2, E3 {
-    //        assertNotClosed();
-    //
-    //        try {
-    //            T ret = (T) NONE;
-    //            T next = null;
-    //
-    //            while (elements.hasNext()) {
-    //                next = elements.next();
-    //
-    //                if (predicateForFirst.test(next)) {
-    //                    return Optional.of(next);
-    //                } else if (ret == NONE && predicateForAny.test(next)) {
-    //                    ret = next;
-    //                }
-    //            }
-    //
-    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-    //        } finally {
-    //            close();
-    //        }
-    //    }
 
     /**
      * Checks if this sequence contains all the specified elements.
@@ -12048,8 +8045,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
+    //    /**
+    //     * Returns the first element of this sequence.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @return an {@code Optional} containing the first element, or an empty {@code Optional} if the sequence is empty
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws E if an exception occurs during iteration
+    //     * @deprecated replaced by {@link #first() findFirst()}
+    //     * @see #first()
+    //     */
+    //    @TerminalOp
+    //    public Optional<T> findAny() throws IllegalStateException, E {
+    //        return first();
+    //    }
+
     /**
      * Returns the last element of this sequence.
+     * Consider using: {@code seq.reversed().findFirst(predicate)} for better performance when possible.
      *
      * <br />
      * This is a terminal operation and will close the sequence.
@@ -12607,71 +8622,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             close();
         }
     }
-
-    //    /**
-    //     *
-    //     * @param keyMapper
-    //     * @param downstream
-    //     * @return
-    //     * @see #groupTo(Throwables.Function, Collector)
-    //     * @deprecated replaced by {@code groupTo}
-    //     */
-    //    @Deprecated
-    //    @TerminalOp
-    //    public final <K, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Collector<? super T, ?, D> downstream) throws E, E2 {
-    //        return groupTo(keyMapper, downstream);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param keyMapper
-    //     * @param downstream
-    //     * @param mapFactory
-    //     * @return
-    //     * @see #groupTo(Throwables.Function, Collector, Supplier)
-    //     * @deprecated replaced by {@code groupTo}
-    //     */
-    //    @Deprecated
-    //    @TerminalOp
-    //    public final <K, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
-    //        return groupTo(keyMapper, downstream, mapFactory);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param keyMapper
-    //     * @param valueMapper
-    //     * @param downstream
-    //     * @return
-    //     * @see #groupTo(Throwables.Function, Throwables.Function, Collector)
-    //     * @deprecated replaced by {@code groupTo}
-    //     */
-    //    @Deprecated
-    //    @TerminalOp
-    //    public final <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
-    //        return groupTo(keyMapper, valueMapper, downstream);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param keyMapper
-    //     * @param valueMapper
-    //     * @param downstream
-    //     * @param mapFactory
-    //     * @return
-    //     * @see #groupTo(Throwables.Function, Throwables.Function, Collector, Supplier)
-    //     * @deprecated replaced by {@code groupTo}
-    //     */
-    //    @Deprecated
-    //    @TerminalOp
-    //    public final <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
-    //            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-    //            final Collector<? super V, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
-    //        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
-    //    }
 
     /**
      * Converts the elements in this sequence to an ImmutableMap using the provided key and value extractors.
@@ -13451,78 +9401,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param accumulator
-    //     * @param conditionToBreak the input parameter is the return value of {@code accumulator}, not the element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
-    //     * @return
-    //     * @throws E
-    //     * @throws E2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <E2 extends Exception> Optional<T> reduceUntil(final Throwables.BinaryOperator<T, E2> accumulator,
-    //            final Throwables.Predicate<? super T, E2> conditionToBreak) throws E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(accumulator, cs.accumulator);
-    //        checkArgNotNull(conditionToBreak, cs.conditionToBreak);
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final Throwables.BinaryOperator<T, E2> newAccumulator = (t, u) -> {
-    //            final T ret = accumulator.apply(t, u);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        return takeWhile(value -> flagToBreak.isFalse()).reduce(newAccumulator);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <U>
-    //     * @param <E2>
-    //     * @param identity
-    //     * @param accumulator
-    //     * @param conditionToBreak the input parameter is the return value of {@code accumulator}, not the element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws IllegalArgumentException
-    //     * @throws E
-    //     * @throws E2
-    //     */
-    //    @Beta
-    //    @TerminalOp
-    //    public <U, E2 extends Exception> U reduceUntil(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator,
-    //            final Throwables.Predicate<? super U, E2> conditionToBreak) throws IllegalStateException, IllegalArgumentException, E, E2 {
-    //        assertNotClosed();
-    //        checkArgNotNull(accumulator, cs.accumulator);
-    //        checkArgNotNull(conditionToBreak, cs.conditionToBreak);
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final Throwables.BiFunction<U, T, U, E2> newAccumulator = (u, t) -> {
-    //            final U ret = accumulator.apply(u, t);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        return takeWhile(value -> flagToBreak.isFalse()).reduce(identity, newAccumulator);
-    //    }
-
     /**
      * Collects the elements of this sequence into a result container provided by the supplier.
      *
@@ -13785,6 +9663,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputFile);
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
@@ -13868,6 +9747,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputStream);
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
@@ -13943,6 +9823,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputWriter);
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
@@ -14020,6 +9901,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputFile);
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
@@ -14103,6 +9985,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputWriter);
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
@@ -14597,6 +10480,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final File output)
             throws IllegalStateException, IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputFile);
 
         final Writer writer = IOUtil.newFileWriter(output);
 
@@ -14624,6 +10508,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public long persist(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputStream);
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
@@ -14654,6 +10539,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final OutputStream output)
             throws IllegalStateException, IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputStream);
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
@@ -14705,6 +10591,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final Writer output)
             throws IllegalStateException, IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputWriter);
 
         try {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
@@ -14789,6 +10676,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output)
             throws IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputFile);
 
         final Writer writer = IOUtil.newFileWriter(output);
 
@@ -14839,6 +10727,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output)
             throws IOException, E {
         assertNotClosed();
+        checkArgNotNull(output, cs.outputWriter);
 
         try {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
@@ -14916,10 +10805,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             while (iter.hasNext()) {
                 stmtSetter.accept(iter.next(), stmt);
+                cnt++;
 
                 if (isBatchUsed) {
                     stmt.addBatch();
-                    cnt++;
 
                     if (cnt % batchSize == 0) {
                         DataSourceUtil.executeBatch(stmt);
@@ -15211,8 +11100,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 final Throwables.Iterator<T, E> iter = iteratorEx();
 
                 if (iter.hasNext()) {
-                    next = iter.next();
                     cnt++;
+                    next = iter.next();
                     cls = next.getClass();
 
                     if (ClassUtil.isBeanClass(cls)) {
@@ -15252,8 +11141,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         while (iter.hasNext()) {
                             next = iter.next();
-                            cnt++;
-
                             bw.write(IOUtil.LINE_SEPARATOR);
 
                             for (int i = 0; i < headSize; i++) {
@@ -15264,6 +11151,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                                 }
 
                                 CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
+                            }
+
+                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                                bw.flush();
                             }
                         }
                     } else if (next instanceof Map) {
@@ -15295,7 +11186,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         while (iter.hasNext()) {
                             row = (Map<Object, Object>) iter.next();
-                            cnt++;
 
                             bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -15305,6 +11195,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                                 }
 
                                 CSVUtil.writeField(bw, null, row.get(headers.get(i)));
+                            }
+
+                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                                bw.flush();
                             }
                         }
                     } else if (N.notEmpty(headers) && next instanceof Collection) {
@@ -15334,7 +11228,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         while (iter.hasNext()) {
                             row = (Collection<Object>) iter.next();
                             rowIter = row.iterator();
-                            cnt++;
 
                             bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -15344,6 +11237,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                                 }
 
                                 CSVUtil.writeField(bw, null, rowIter.next());
+                            }
+
+                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                                bw.flush();
                             }
                         }
                     } else if (N.notEmpty(headers) && next instanceof Object[] row) {
@@ -15368,7 +11265,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                         while (iter.hasNext()) {
                             row = (Object[]) iter.next();
-                            cnt++;
 
                             bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -15379,9 +11275,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                                 CSVUtil.writeField(bw, null, row[i]);
                             }
+
+                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                                bw.flush();
+                            }
                         }
                     } else {
                         throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
+                    }
+                } else if (N.notEmpty(headers)) {
+                    final int headSize = headers.size();
+
+                    for (int i = 0; i < headSize; i++) {
+                        if (i > 0) {
+                            bw.write(separator);
+                        }
+
+                        CSVUtil.writeField(bw, null, headers.get(i));
                     }
                 }
             } finally {
@@ -15471,18 +11381,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             try {
                 @SuppressWarnings("resource")
                 final Throwables.Iterator<T, E> iter = iteratorEx();
-
                 bw.write("[");
-                bw.write(IOUtil.LINE_SEPARATOR);
 
                 while (iter.hasNext()) {
+                    if (cnt > 0) {
+                        bw.write(WD._COMMA);
+                    }
+
+                    bw.write(IOUtil.LINE_SEPARATOR);
                     N.toJson(iter.next(), bw);
-                    cnt++;
+
+                    if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                        bw.flush();
+                    }
                 }
 
                 bw.write(IOUtil.LINE_SEPARATOR);
                 bw.write("]");
-                bw.write(IOUtil.LINE_SEPARATOR);
             } finally {
                 try {
                     bw.flush();
@@ -15733,670 +11648,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return create(ops.apply(this.stream().parallel(maxThreadNum)), true);
     }
 
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param withVirtualThread
-    //     * @param ops
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
-    //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
-    //        assertNotClosed();
-    //
-    //        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, withVirtualThread))), true);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param executorNumForVirtualThread
-    //     * @param ops
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
-    //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
-    //        assertNotClosed();
-    //
-    //        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, executorNumForVirtualThread))), true);
-    //    }
-
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param maxThreadNum
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(int, Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param maxThreadNum
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(int, Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-    //        return create(stream().spsFilterE(predicate), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <U>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-    //        return create(stream().<U> spsMapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatMapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatmapE( //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatmapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
-    //        return create(stream().spsOnEachE(action), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param maxThreadNum
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-    //        return create(stream().spsFilterE(maxThreadNum, predicate), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <U>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-    //        return create(stream().<U> spsMapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatMapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatmapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param maxThreadNum
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
-    //        return create(stream().spsOnEachE(maxThreadNum, action), true);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public Seq<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, Exception>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                if (!hasNext) {
-    //                    while (elements.hasNext()) {
-    //                        next = elements.next();
-    //
-    //                        if (predicate.test(next)) {
-    //                            hasNext = true;
-    //                            break;
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return hasNext;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws Exception {
-    //                if (!hasNext && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                hasNext = false;
-    //
-    //                return next;
-    //            }
-    //        }, sorted, cmp, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <U>
-    //     * @param mapper
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<U, Exception>() {
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                return elements.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws Exception {
-    //                return mapper.apply(elements.next());
-    //            }
-    //        }, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> flatMapE(final Throwables.Function<? super T, ? extends Seq<? extends R, ? extends Exception>, ? extends Exception> mapper)
-    //            throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<R, Exception> iter = new Throwables.Iterator<>() {
-    //            private Throwables.Iterator<? extends R, ? extends Exception> cur = null;
-    //            private Seq<? extends R, ? extends Exception> s = null;
-    //            private Deque<LocalRunnable> closeHandle = null;
-    //
-    //            public boolean hasNext() throws Exception {
-    //                while (cur == null || !cur.hasNext()) {
-    //                    if (elements.hasNext()) {
-    //                        if (closeHandle != null) {
-    //                            final Deque<LocalRunnable> tmp = closeHandle;
-    //                            closeHandle = null;
-    //                            Seq.close(tmp);
-    //                        }
-    //
-    //                        s = mapper.apply(elements.next());
-    //
-    //                        if (s == null) {
-    //                            cur = null;
-    //                        } else {
-    //                            if (N.notEmpty(s.closeHandlers)) {
-    //                                closeHandle = s.closeHandlers;
-    //                            }
-    //
-    //                            cur = s.elements;
-    //                        }
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //            public R next() throws Exception {
-    //                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //
-    //            @Override
-    //            protected void closeResource() {
-    //                if (closeHandle != null) {
-    //                    Seq.close(closeHandle);
-    //                }
-    //            }
-    //        };
-    //
-    //        final Deque<LocalRunnable> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-    //
-    //        if (N.notEmpty(closeHandlers)) {
-    //            newCloseHandlers.addAll(closeHandlers);
-    //        }
-    //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
-    //        return create(iter, newCloseHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<R, Exception>() {
-    //            private Iterator<? extends R> cur = null;
-    //            private Collection<? extends R> c = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-    //                    c = mapper.apply(elements.next());
-    //                    cur = N.isEmpty(c) ? null : c.iterator();
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public R next() throws Exception {
-    //                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //        }, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public Seq<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, Exception>() {
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                return elements.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public T next() throws Exception {
-    //                final T next = elements.next();
-    //                action.accept(next);
-    //                return next;
-    //            }
-    //        }, sorted, cmp, (Deque) closeHandlers);
-    //    }
-
-    // #######################################9X9#######################################
-    // #######################################9X9#######################################
-
     /**
      * Executes the provided terminal operation asynchronously on this sequence using the default Executor.
      * The terminal operation is a function that consumes this sequence and may throw an exception.
@@ -16558,667 +11809,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         return OrElse.FALSE;
     }
-
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param withVirtualThread
-    //     * @param ops
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
-    //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
-    //        assertNotClosed();
-    //
-    //        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, withVirtualThread))), true);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param executorNumForVirtualThread
-    //     * @param ops
-    //     * @return
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
-    //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
-    //        assertNotClosed();
-    //
-    //        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, executorNumForVirtualThread))), true);
-    //    }
-
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
-    //
-    //        return sps(ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param maxThreadNum
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(int, Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(int, Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
-    //        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param maxThreadNum
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(int, Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
-    //        final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
-    //
-    //        return sps(maxThreadNum, ops);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-    //        return create(stream().spsFilterE(predicate), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <U>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-    //        return create(stream().<U> spsMapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatMapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatmapE( //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatmapE(mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
-    //        return create(stream().spsOnEachE(action), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param maxThreadNum
-    //     * @param predicate
-    //     * @return
-    //     * @see Stream#spsFilter(Predicate)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-    //        return create(stream().spsFilterE(maxThreadNum, predicate), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     * @param <U>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-    //        return create(stream().<U> spsMapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatMap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatMapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param <R>
-    //     * @param maxThreadNum
-    //     * @param mapper
-    //     * @return
-    //     * @see Stream#spsFlatmap(Function)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-    //        return create(stream().<R> spsFlatmapE(maxThreadNum, mapper), true);
-    //    }
-    //
-    //    /**
-    //     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-    //     * <br />
-    //     *
-    //     *
-    //     * @param maxThreadNum
-    //     * @param action
-    //     * @return
-    //     * @see Stream#onEach(Consumer)
-    //     * @see ExceptionUtil#toRuntimeException(Throwable)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     * @see ExceptionUtil#hasCause(Throwable, Predicate)
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public Seq<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
-    //        return create(stream().spsOnEachE(maxThreadNum, action), true);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param predicate
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public Seq<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, Exception>() {
-    //            private boolean hasNext = false;
-    //            private T next = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                if (!hasNext) {
-    //                    while (elements.hasNext()) {
-    //                        next = elements.next();
-    //
-    //                        if (predicate.test(next)) {
-    //                            hasNext = true;
-    //                            break;
-    //                        }
-    //                    }
-    //                }
-    //
-    //                return hasNext;
-    //            }
-    //
-    //            @Override
-    //            public T next() throws Exception {
-    //                if (!hasNext && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                hasNext = false;
-    //
-    //                return next;
-    //            }
-    //        }, sorted, cmp, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <U>
-    //     * @param mapper
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public <U> Seq<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<U, Exception>() {
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                return elements.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public U next() throws Exception {
-    //                return mapper.apply(elements.next());
-    //            }
-    //        }, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> flatMapE(final Throwables.Function<? super T, ? extends Seq<? extends R, ? extends Exception>, ? extends Exception> mapper)
-    //            throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final Throwables.Iterator<R, Exception> iter = new Throwables.Iterator<>() {
-    //            private Throwables.Iterator<? extends R, ? extends Exception> cur = null;
-    //            private Seq<? extends R, ? extends Exception> s = null;
-    //            private Deque<LocalRunnable> closeHandle = null;
-    //
-    //            public boolean hasNext() throws Exception {
-    //                while (cur == null || !cur.hasNext()) {
-    //                    if (elements.hasNext()) {
-    //                        if (closeHandle != null) {
-    //                            final Deque<LocalRunnable> tmp = closeHandle;
-    //                            closeHandle = null;
-    //                            Seq.close(tmp);
-    //                        }
-    //
-    //                        s = mapper.apply(elements.next());
-    //
-    //                        if (s == null) {
-    //                            cur = null;
-    //                        } else {
-    //                            if (N.notEmpty(s.closeHandlers)) {
-    //                                closeHandle = s.closeHandlers;
-    //                            }
-    //
-    //                            cur = s.elements;
-    //                        }
-    //                    } else {
-    //                        cur = null;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //            public R next() throws Exception {
-    //                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //
-    //            @Override
-    //            protected void closeResource() {
-    //                if (closeHandle != null) {
-    //                    Seq.close(closeHandle);
-    //                }
-    //            }
-    //        };
-    //
-    //        final Deque<LocalRunnable> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-    //
-    //        if (N.notEmpty(closeHandlers)) {
-    //            newCloseHandlers.addAll(closeHandlers);
-    //        }
-    //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
-    //        return create(iter, newCloseHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public <R> Seq<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<R, Exception>() {
-    //            private Iterator<? extends R> cur = null;
-    //            private Collection<? extends R> c = null;
-    //
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-    //                    c = mapper.apply(elements.next());
-    //                    cur = N.isEmpty(c) ? null : c.iterator();
-    //                }
-    //
-    //                return cur != null && cur.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public R next() throws Exception {
-    //                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return cur.next();
-    //            }
-    //        }, (Deque) closeHandlers);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param action
-    //     * @return
-    //     * @throws IllegalStateException
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    @IntermediateOp
-    //    public Seq<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        return create(new Throwables.Iterator<T, Exception>() {
-    //            @Override
-    //            public boolean hasNext() throws Exception {
-    //                return elements.hasNext();
-    //            }
-    //
-    //            @Override
-    //            public T next() throws Exception {
-    //                final T next = elements.next();
-    //                action.accept(next);
-    //                return next;
-    //            }
-    //        }, sorted, cmp, (Deque) closeHandlers);
-    //    }
 
     /**
      * Registers a close handler to be invoked when the sequence is closed.
@@ -17970,324 +12560,4 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             super(c);
         }
     }
-
-    // CheckedException -> Maybe makes sense. Checked exception...
-    // But what does Seq mean? Checked stream ???
-    //    public static final class Seq<T, E extends Exception> extends Seq<T, E> {
-    //
-    //        Seq(Throwables.Iterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-    //            super(iter, sorted, comparator, closeHandlers);
-    //        }
-    //    }
-
-    ///**
-    // *
-    // * @param <T>
-    // * @param <E>
-    // */
-    //public static final class Seq<T> extends Seq<T, RuntimeException> {
-    //
-    //    Seq(Throwables.Iterator<T, RuntimeException> iter, boolean sorted, Comparator<? super T> comparator,
-    //            Deque<Throwables.Runnable<? extends RuntimeException>> closeHandlers) {
-    //        super(iter, sorted, comparator, closeHandlers);
-    //    }
-    //}
-
-    //    /**
-    //     * Mostly it's for android.
-    //     *
-    //     * @see {@code Seq<T, RuntimeException>}
-    //     *
-    //     * @deprecated Mostly it's for android.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static final class StreamR extends Seq {
-    //        private StreamR() {
-    //            // singleton for utility class.
-    //        }
-    //    }
-
-    //    /**
-    //     * Mostly it's for android.
-    //     *
-    //     * @see {@code Seq<T, RuntimeException>}
-    //     *
-    //     * @deprecated Mostly it's for android.
-    //     */
-    //    @Beta
-    //    @Deprecated
-    //    public static final class Seq {
-    //        private Seq() {
-    //            // singleton for utility class.
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> empty() {
-    //            return Seq.<T, RuntimeException> empty();
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> just(final T e) {
-    //            return Seq.<T, RuntimeException> just(e);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> ofNullable(final T e) {
-    //            return Seq.<T, RuntimeException> ofNullable(e);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final T... a) {
-    //            return Seq.<T, RuntimeException> of(a);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final Collection<? extends T> c) {
-    //            return Seq.<T, RuntimeException> of(c);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final Iterator<? extends T> iter) {
-    //            return Seq.<T, RuntimeException> of(iter);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final Iterable<? extends T> iterable) {
-    //            return Seq.<T, RuntimeException> of(iterable);
-    //        }
-    //
-    //        public static <K, V> Seq<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
-    //            return Seq.<K, V, RuntimeException> of(m);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final Stream<? extends T> stream) {
-    //            return Seq.<T, RuntimeException> of(stream);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
-    //            return Seq.<T, RuntimeException> of(stream);
-    //        }
-    //
-    //        public static Seq<Boolean, RuntimeException> of(final boolean[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Character, RuntimeException> of(final char[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Byte, RuntimeException> of(final byte[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Short, RuntimeException> of(final short[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Integer, RuntimeException> of(final int[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Long, RuntimeException> of(final long[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Float, RuntimeException> of(final float[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static Seq<Double, RuntimeException> of(final double[] a) {
-    //            return Seq.<RuntimeException> of(a);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final Optional<T> op) {
-    //            return Seq.<T, RuntimeException> of(op);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> of(final java.util.Optional<T> op) {
-    //            return Seq.<T, RuntimeException> of(op);
-    //        }
-    //
-    //        public static <K> Seq<K, RuntimeException> ofKeys(final Map<K, ?> map) {
-    //            return Seq.<K, RuntimeException> ofKeys(map);
-    //        }
-    //
-    //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
-    //                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
-    //            return Seq.<K, V, RuntimeException> ofKeys(map, valueFilter);
-    //        }
-    //
-    //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
-    //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return Seq.ofKeys(map, filter);
-    //        }
-    //
-    //        public static <V> Seq<V, RuntimeException> ofValues(final Map<?, V> map) {
-    //            return Seq.<V, RuntimeException> ofValues(map);
-    //        }
-    //
-    //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
-    //                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
-    //            return Seq.<K, V, RuntimeException> ofValues(map, keyFilter);
-    //        }
-    //
-    //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
-    //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return Seq.ofValues(map, filter);
-    //        }
-    //
-    //        //    @Beta
-    //        //    public static <T> Seq<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-    //        //        return Seq.<T, RuntimeException> from(supplier);
-    //        //    }
-    //
-    //        public static <T> Seq<T, RuntimeException> defer(
-    //                final Throwables.Supplier<Seq<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
-    //            return Seq.<T, RuntimeException> defer(supplier);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
-    //                final Throwables.Supplier<? extends T, RuntimeException> next) {
-    //            return Seq.<T, RuntimeException> iterate(hasNext, next);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
-    //                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
-    //                final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, f);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
-    //            return Seq.<T, RuntimeException> generate(supplier);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> repeat(final T element, final long n) {
-    //            return Seq.<T, RuntimeException> repeat(element, n);
-    //        }
-    //
-    //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
-    //            return Seq.<RuntimeException> range(startInclusive, endExclusive);
-    //        }
-    //
-    //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
-    //            return Seq.<RuntimeException> range(startInclusive, endExclusive, by);
-    //        }
-    //
-    //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
-    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive);
-    //        }
-    //
-    //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
-    //        }
-    //
-    //        @SafeVarargs
-    //        public static <T> Seq<T, RuntimeException> concat(final T[]... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
-    //        }
-    //
-    //        @SafeVarargs
-    //        public static <T> Seq<T, RuntimeException> concat(final Iterable<? extends T>... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
-    //        }
-    //
-    //        @SafeVarargs
-    //        public static <T> Seq<T, RuntimeException> concat(final Iterator<? extends T>... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b,
-    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
-    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-    //                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-    //                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
-    //                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
-    //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-    //                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
-    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-    //        }
-    //
-    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
-    //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-    //        }
-    //
-    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-    //                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
-    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b,
-    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
-    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
-    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
-    //                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
-    //        }
-    //
-    //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-    //                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
-    //        }
-    //    }
 }

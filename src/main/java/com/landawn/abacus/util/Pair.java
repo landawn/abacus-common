@@ -482,7 +482,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     @Deprecated
     @Override
     public R setValue(final R value) {
-        return right;
+        return getAndSetRight(value);
     }
 
     @Override
@@ -515,6 +515,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     @Override
     public String toString() {
-        return "[" + N.toString(left) + ", " + N.toString(right) + "]";
+        return "(" + N.toString(left) + ", " + N.toString(right) + ")"; // To align with Pair.toString() in Apache Commons Lang
     }
 }

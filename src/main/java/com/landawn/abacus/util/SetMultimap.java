@@ -531,16 +531,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
-        N.checkArgument(N.anyNull(map.values()), "The specified map contains null value: %s", map);
+        N.checkArgument(map.values().stream().noneMatch(Fn.isEmptyC()), "The specified map contains null or empty value: %s", map);
 
-        Class<? extends Set> valueType = HashSet.class;
-
-        for (final V v : map.values()) {
-            if (v != null) {
-                valueType = v.getClass();
-                break;
-            }
-        }
+        final Class<? extends Set> valueType = map.isEmpty() ? HashSet.class : map.values().iterator().next().getClass();
 
         return new SetMultimap<>((Map<K, Set<E>>) map, valueType);
     }

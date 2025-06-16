@@ -52,9 +52,11 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -4462,12 +4464,12 @@ public final class IOUtil {
      * Returns the file extension of the specified file. Empty string is returned if the file has no extension.
      *
      * @param file The file whose extension is to be retrieved.
-     * @return The file extension, or {@code null} if the file does not exist.
+     * @return The file extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#getExtension(String) 
      */
     @MayReturnNull
     public static String getFileExtension(final File file) {
-        if (file == null || !file.exists()) {
+        if (file == null) {
             return null;
         }
 
@@ -4490,12 +4492,12 @@ public final class IOUtil {
      * Returns the file name without its extension.
      *
      * @param file The file whose name without extension is to be retrieved.
-     * @return The file name without extension, or {@code null} if the file does not exist.
+     * @return The file name without extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#removeExtension(String)
      */
     @MayReturnNull
     public static String getNameWithoutExtension(final File file) {
-        if (file == null || !file.exists()) {
+        if (file == null) {
             return null;
         }
 
@@ -5268,7 +5270,9 @@ public final class IOUtil {
 
         for (final AutoCloseable closeable : c) {
             try {
-                close(closeable);
+                if (closeable != null) {
+                    closeable.close();
+                }
             } catch (final Exception e) {
                 if (ex == null) {
                     ex = e;
@@ -5411,23 +5415,10 @@ public final class IOUtil {
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
-        if (!srcFile.exists()) {
-            throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
-        }
+        N.checkArgNotNull(filter, cs.filter);
 
-        if (destDir.exists()) {
-            if (destDir.isFile()) {
-                throw new IllegalArgumentException("The destination file must be directory: " + destDir.getAbsolutePath());
-            }
-        } else {
-            if (!destDir.mkdirs()) {
-                throw new IOException("Failed to create destination directory: " + destDir.getAbsolutePath());
-            }
-        }
-
-        if (!destDir.canWrite()) {
-            throw new IOException("Destination '" + destDir + "' cannot be written to"); //NOSONAR
-        }
+        checkFileExists(srcFile, true);
+        checkDestDir(destDir);
 
         srcFile = srcFile.getCanonicalFile();
         destDir = destDir.getCanonicalFile();
@@ -5442,7 +5433,9 @@ public final class IOUtil {
                         "Failed to copy due to the target directory: " + destCanonicalPath + " is in or same as the source directory: " + srcCanonicalPath);
             }
 
-            doCopyDirectory(srcFile, destDir, preserveFileDate, filter);
+            final File targetDir = new File(destDir, srcFile.getName());
+
+            doCopyDirectory(srcFile, targetDir, preserveFileDate, filter);
         } else {
             File destFile = null;
 
@@ -5470,15 +5463,9 @@ public final class IOUtil {
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static <E extends Exception> void doCopyDirectory(final File srcDir, final File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
-        if (destDir.exists()) {
-            if (destDir.isFile()) {
-                throw new IllegalArgumentException("Destination '" + destDir + "' exists but is not a directory");
-            }
-        } else {
-            if (!destDir.mkdirs()) {
-                throw new IOException("Destination '" + destDir + "' directory cannot be created");
-            }
-        }
+        N.checkArgNotNull(filter, cs.filter);
+
+        checkDestDir(destDir);
 
         final File[] subFiles = srcDir.listFiles();
 
@@ -5491,7 +5478,7 @@ public final class IOUtil {
                 continue;
             }
 
-            if (filter == null || filter.test(srcDir, subFile)) {
+            if (filter.test(srcDir, subFile)) {
                 final File dest = new File(destDir, subFile.getName());
 
                 if (subFile.isDirectory()) {
@@ -5736,13 +5723,13 @@ public final class IOUtil {
      */
     public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate, final CopyOption... copyOptions) throws IOException {
         Objects.requireNonNull(destFile, "destination");
-        checkFileExists(srcFile, "srcFile");
+        checkFileExists(srcFile);
 
         requireCanonicalPathsNotEquals(srcFile, destFile);
         createParentDirectories(destFile);
 
         if (destFile.exists()) {
-            checkFileExists(destFile, "destFile");
+            checkFileExists(destFile);
         }
 
         final Path srcPath = srcFile.toPath();
@@ -5871,32 +5858,51 @@ public final class IOUtil {
     }
 
     /**
-     * Moves a file from the source path to the target directory.
+     * <p>Moves a file from the source location to the destination directory, creating the destination directory if it doesn't exist.</p>
+     *
+     * <p>This method automatically uses {@code StandardCopyOption.REPLACE_EXISTING} as the copy option,
+     * which means it will replace any existing file with the same name at the destination.
+     * If the source is a directory, the entire directory and its contents will be moved.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>
+     * // Move a file to another directory
+     * File sourceFile = new File("/path/to/source/file.txt");
+     * File targetDir = new File("/path/to/destination");
+     * IOUtil.move(sourceFile, targetDir);
+     * 
+     * // The file is now at /path/to/destination/file.txt
+     * // and has been removed from the original location
+     * </pre>
+     *
+     * @param srcFile The source file or directory to be moved
+     * @param destDir The destination directory where the file or directory will be moved to
+     * @throws IOException if an I/O error occurs during the move operation, such as if the source doesn't exist
+     *         or the destination cannot be written to
+     * @see #move(File, File, CopyOption...)
+     * @see java.nio.file.Files#move(Path, Path, CopyOption...)
+     */
+    public static void move(final File srcFile, final File destDir) throws IOException {
+        move(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Moves a file from the source file to the target directory.
+     * If the destination directory does not exist, it will be created.
      *
      * @param srcFile The source file to be moved.
      * @param destDir The target directory where the file will be moved to.
-     * @throws IOException if an I/O error occurs..
+     * @param options Optional arguments that specify how the move should be done.
+     * @throws IOException if an I/O error occurs.
      */
-    public static void move(final File srcFile, final File destDir) throws IOException {
+    public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
         if (!srcFile.exists()) {
             throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
         }
 
-        if (destDir.exists()) {
-            if (destDir.isFile()) {
-                throw new IllegalArgumentException("The destination file must be directory: " + destDir.getAbsolutePath());
-            }
-        } else {
-            if (!destDir.mkdirs()) {
-                throw new IOException("Failed to create destination directory: " + destDir.getAbsolutePath());
-            }
-        }
+        checkDestDir(destDir);
 
-        final File destFile = new File(destDir, srcFile.getName());
-
-        if (!srcFile.renameTo(destFile)) {
-            throw new IOException("Failed to move file from: " + srcFile.getAbsolutePath() + " to: " + destDir.getAbsolutePath());
-        }
+        move(srcFile.toPath(), destDir.toPath().resolve(srcFile.getName()), options);
     }
 
     /**
@@ -5910,7 +5916,7 @@ public final class IOUtil {
      * @see Files#move(Path, Path, CopyOption...)
      */
     public static Path move(final Path source, final Path target, final CopyOption... options) throws IOException {
-        return Files.copy(source, target, options);
+        return Files.move(source, target, options);
     }
 
     /**
@@ -6021,6 +6027,8 @@ public final class IOUtil {
      */
     public static <E extends Exception> boolean deleteFilesFromDirectory(final File dir, final Throwables.BiPredicate<? super File, ? super File, E> filter)
             throws E {
+        N.checkArgNotNull(filter, cs.filter);
+
         if ((dir == null) || !dir.exists() || dir.isFile()) {
             return false;
         }
@@ -6036,7 +6044,7 @@ public final class IOUtil {
                 continue;
             }
 
-            if (filter == null || filter.test(dir, subFile)) {
+            if (filter.test(dir, subFile)) {
                 if (subFile.isFile()) {
                     if (!subFile.delete()) { //NOSONAR
                         return false;
@@ -6282,10 +6290,10 @@ public final class IOUtil {
      * @param file the regular file or directory to return the size
      *             of (must not be {@code null}).
      * @return the length of the file, or recursive size of the directory, provided (in bytes).
-     * @throws IllegalArgumentException if the file is {@code null} or the file does not exist.
+     * @throws FileNotFoundException if the file is {@code null} or the file does not exist.
      * @see #sizeOfAsBigInteger(File)
      */
-    public static long sizeOf(final File file) throws IllegalArgumentException {
+    public static long sizeOf(final File file) throws FileNotFoundException {
         return sizeOf(file, false);
     }
 
@@ -6293,20 +6301,15 @@ public final class IOUtil {
      * Returns the size of the specified file or directory.
      * @param file
      * @param considerNonExistingFileAsEmpty if {@code true}, the size of non-existing file is considered as 0.
-     * @return
-     * @throws IllegalArgumentException
+     * @return 
+     * @throws FileNotFoundException 
      */
-    public static long sizeOf(final File file, final boolean considerNonExistingFileAsEmpty) throws IllegalArgumentException {
-        N.checkArgNotNull(file, cs.file);
-
-        if (!file.exists()) {
-            if (considerNonExistingFileAsEmpty) {
-                return 0;
-            }
-
-            final String message = file + " does not exist";
-            throw new IllegalArgumentException(message);
+    public static long sizeOf(final File file, final boolean considerNonExistingFileAsEmpty) throws FileNotFoundException {
+        if ((file == null || !file.exists()) && considerNonExistingFileAsEmpty) {
+            return 0;
         }
+
+        checkFileExists(file, true);
 
         if (file.isDirectory()) {
             return sizeOfDirectory0(file, considerNonExistingFileAsEmpty); // private method; expects directory
@@ -6325,10 +6328,10 @@ public final class IOUtil {
      *
      * @param directory directory to inspect, must not be {@code null}
      * @return size of directory in bytes, 0 if directory is security restricted, a negative number when the real total is greater than {@link Long#MAX_VALUE}.
-     * @throws IllegalArgumentException if the directory is {@code null} or it's not existed directory.
+     * @throws FileNotFoundException if the directory is {@code null} or it's not existed directory.
      * @see #sizeOfDirectoryAsBigInteger(File)
      */
-    public static long sizeOfDirectory(final File directory) throws IllegalArgumentException {
+    public static long sizeOfDirectory(final File directory) throws FileNotFoundException {
         return sizeOfDirectory(directory, false);
     }
 
@@ -6338,16 +6341,14 @@ public final class IOUtil {
      * @param directory
      * @param considerNonExistingDirectoryAsEmpty if {@code true}, the size of non-existing directory is considered as 0.
      * @return
-     * @throws IllegalArgumentException
+     * @throws FileNotFoundException
      */
-    public static long sizeOfDirectory(final File directory, final boolean considerNonExistingDirectoryAsEmpty) throws IllegalArgumentException {
-        N.checkArgNotNull(directory, cs.directory);
-
-        if (!directory.exists() && considerNonExistingDirectoryAsEmpty) {
+    public static long sizeOfDirectory(final File directory, final boolean considerNonExistingDirectoryAsEmpty) throws FileNotFoundException {
+        if ((directory == null || !directory.exists()) && considerNonExistingDirectoryAsEmpty) {
             return 0;
         }
 
-        checkDirectory(directory);
+        checkDirectoryExists(directory);
 
         return sizeOfDirectory0(directory, considerNonExistingDirectoryAsEmpty);
     }
@@ -6386,16 +6387,12 @@ public final class IOUtil {
      * 
      * @param file
      * @return
+     * @throws FileNotFoundException 
      * @see #sizeOf(File)
      * @see #sizeOfDirectoryAsBigInteger(File)
      */
-    public static BigInteger sizeOfAsBigInteger(final File file) {
-        N.checkArgNotNull(file, cs.file);
-
-        if (!file.exists()) {
-            final String message = file + " does not exist";
-            throw new IllegalArgumentException(message);
-        }
+    public static BigInteger sizeOfAsBigInteger(final File file) throws FileNotFoundException {
+        checkFileExists(file, true);
 
         if (file.isDirectory()) {
             return sizeOfDirectoryAsBigInteger(file); // private method; expects directory
@@ -6409,13 +6406,12 @@ public final class IOUtil {
      * 
      * @param directory
      * @return
+     * @throws FileNotFoundException 
      * @see #sizeOfDirectory(File)
      * @see #sizeOfAsBigInteger(File)
      */
-    public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) {
+    public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) throws FileNotFoundException {
         N.checkArgNotNull(directory, cs.directory);
-
-        checkDirectory(directory);
 
         return sizeOfDirectoryAsBigInteger0(directory);
     }
@@ -6446,18 +6442,55 @@ public final class IOUtil {
         return size;
     }
 
-    /**
-     * Checks that the given {@code File} exists and is a directory.
-     *
-     * @param directory The {@code File} to check.
-     * @throws IllegalArgumentException if the given {@code File} does not exist or is not a directory.
-     */
-    private static void checkDirectory(final File directory) {
-        if (!directory.exists()) {
-            throw new IllegalArgumentException(directory + " does not exist");
+    static File checkFileExists(final File file) throws FileNotFoundException {
+        return checkFileExists(file, false);
+    }
+
+    static File checkFileExists(final File file, final boolean canBeDirectory) throws FileNotFoundException {
+        if (file == null || !file.exists() || !file.canRead()) {
+            throw new FileNotFoundException("'" + file + "' does not exist or is not readable");
         }
+
+        if (!file.isFile()) {
+            if (file.isDirectory()) {
+                if (!canBeDirectory) {
+                    throw new IllegalArgumentException("'" + file.getAbsolutePath() + "' is not a file");
+                }
+            } else if (!Files.isSymbolicLink(file.toPath())) {
+                throw new FileNotFoundException("'" + file + "' does not exist");
+            }
+        }
+
+        return file;
+    }
+
+    static void checkDirectoryExists(final File directory) throws FileNotFoundException {
+        if (directory == null || !directory.exists()) {
+            throw new FileNotFoundException("'" + directory + "' does not exist");
+        }
+
         if (!directory.isDirectory()) {
-            throw new IllegalArgumentException(directory + " is not a directory");
+            throw new IllegalArgumentException("'" + directory.getAbsolutePath() + "' is not a directory");
+        }
+    }
+
+    static void checkDestDir(final File destDir) throws IOException {
+        if (destDir == null) {
+            throw new IllegalArgumentException("The specified destination directory is null.");
+        }
+
+        if (destDir.exists()) {
+            if (destDir.isFile()) {
+                throw new IllegalArgumentException("Destination '" + destDir.getAbsolutePath() + "' is not a directory");
+            }
+        } else {
+            if (!destDir.mkdirs()) {
+                throw new IOException("Failed to create destination directory: " + destDir.getAbsolutePath());
+            }
+        }
+
+        if (!destDir.canWrite()) {
+            throw new IOException("Destination '" + destDir + "' cannot be written to"); //NOSONAR
         }
     }
 
@@ -6517,12 +6550,30 @@ public final class IOUtil {
         if (sourceFile.isFile()) {
             zipFile(sourceFile, null, zos, targetFile);
         } else {
-            final List<File> subFileList = listFiles(sourceFile, true, true);
+            Path sourcePath = sourceFile.toPath();
+            Path parentPath = sourcePath.getParent();
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    // Relativize from parent to include source directory name
+                    String zipEntryName = parentPath.relativize(file).toString();
+                    zipEntryName = zipEntryName.replace('\\', '/');
 
-            // subFileList.add(sourceFile);
-            for (final File subFile : subFileList) {
-                zipFile(subFile, sourceFile, zos, targetFile);
-            }
+                    zos.putNextEntry(new ZipEntry(zipEntryName));
+                    Files.copy(file, zos);
+                    zos.closeEntry();
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    String zipEntryName = parentPath.relativize(dir).toString() + "/";
+                    zipEntryName = zipEntryName.replace('\\', '/');
+                    zos.putNextEntry(new ZipEntry(zipEntryName));
+                    zos.closeEntry();
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         }
     }
 
@@ -6577,24 +6628,30 @@ public final class IOUtil {
      * @param srcZipFile The source ZIP file to be unzipped. This must be a valid ZIP file.
      * @param targetDir  The directory to which the contents of the ZIP file will be extracted. This must be a valid directory.
      */
-    public static void unzip(final File srcZipFile, final File targetDir) {
+    public static void unzip(final File srcZipFile, final File targetDir) throws IOException {
+        checkFileExists(srcZipFile);
+        checkDestDir(targetDir);
+
         ZipFile zip = null;
         ZipEntry ze = null;
         OutputStream os = null;
         InputStream is = null;
+
+        final Path outputPath = targetDir.toPath();
 
         final byte[] buf = Objectory.createByteArrayBuffer();
         final int bufLength = buf.length;
 
         try { //NOSONAR
             zip = new ZipFile(srcZipFile);
-
             final Enumeration<? extends ZipEntry> entryEnum = zip.entries();
 
             while (entryEnum.hasMoreElements()) {
                 ze = entryEnum.nextElement();
 
                 if (ze.isDirectory()) {
+                    Path entryPath = outputPath.resolve(ze.getName());
+                    Files.createDirectories(entryPath);
                     continue;
                 }
 
@@ -6631,9 +6688,9 @@ public final class IOUtil {
      *
      * @param file         The file to be split. This must be a valid file.
      * @param countOfParts The number of parts the file should be split into.
-     * @throws UncheckedIOException if an I/O error occurs during the process.
+     * @throws  IOException if an I/O error occurs during the process.
      */
-    public static void split(final File file, final int countOfParts) throws UncheckedIOException {
+    public static void split(final File file, final int countOfParts) throws IOException {
         split(file, countOfParts, file.getParentFile());
     }
 
@@ -6643,9 +6700,9 @@ public final class IOUtil {
      * @param file         The file to be split. This must be a valid file.
      * @param countOfParts The number of parts the file should be split into.
      * @param destDir      The directory where the split parts should be stored.
-     * @throws UncheckedIOException if an I/O error occurs during the process.
+     * @throws  IOException if an I/O error occurs during the process.
      */
-    public static void split(final File file, final int countOfParts, final File destDir) throws UncheckedIOException {
+    public static void split(final File file, final int countOfParts, final File destDir) throws IOException {
         final long sizeOfPart = (file.length() % countOfParts) == 0 ? (file.length() / countOfParts) : (file.length() / countOfParts) + 1;
 
         splitBySize(file, sizeOfPart, destDir);
@@ -6656,9 +6713,9 @@ public final class IOUtil {
      *
      * @param file       The file to be split. This must be a valid file.
      * @param sizeOfPart The size of each part after the split.
-     * @throws UncheckedIOException if an I/O error occurs during the process.
+     * @throws IOException if an I/O error occurs during the process.
      */
-    public static void splitBySize(final File file, final long sizeOfPart) throws UncheckedIOException {
+    public static void splitBySize(final File file, final long sizeOfPart) throws IOException {
         splitBySize(file, sizeOfPart, file.getParentFile());
     }
 
@@ -6668,9 +6725,12 @@ public final class IOUtil {
      * @param file       The file to be split. This must be a valid file.
      * @param sizeOfPart The size of each part after the split.
      * @param destDir    The directory where the split parts will be stored.
-     * @throws UncheckedIOException if an I/O error occurs during the process.
+     * @throws  IOException if an I/O error occurs during the process.
      */
-    public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws UncheckedIOException {
+    public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws IOException {
+        checkFileExists(file);
+        checkDestDir(destDir);
+
         final int numOfParts = (int) ((file.length() % sizeOfPart) == 0 ? (file.length() / sizeOfPart) : (file.length() / sizeOfPart) + 1);
 
         final String fileName = file.getName();
@@ -6887,6 +6947,7 @@ public final class IOUtil {
             for (final File file : sourceFiles) {
                 if (idx++ > 0 && N.notEmpty(delimiter)) {
                     output.write(delimiter);
+                    totalCount += delimiter.length;
                 }
 
                 try {
@@ -6953,95 +7014,6 @@ public final class IOUtil {
     }
 
     /**
-     * Gets the relative path.
-     *
-     * @param parentDir
-     * @param file
-     * @return
-     */
-    private static String getRelativePath(final File parentDir, final File file) {
-        if (file.equals(parentDir)) {
-            return file.getName();
-        } else {
-            return file.getAbsolutePath().substring(parentDir.getAbsolutePath().length() + 1);
-        }
-    }
-
-    /**
-     * Lists the names of all files and directories in the specified parent directory.
-     *
-     * @param parentPath The parent directory from which to list files and directories.
-     * @return A list of strings representing the names of all files and directories in the parent directory.
-     * @see Stream#listFiles(File)
-     * @see Fn#isFile()
-     * @see Fn#isDirectory()
-     */
-    public static List<String> list(final File parentPath) {
-        return list(parentPath, false, false);
-    }
-
-    /**
-     * Lists the names of all files and directories in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     * If the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
-     *
-     * @param parentPath       The parent directory from which to list files and directories.
-     * @param recursively      A boolean indicating whether to list files in all subdirectories.
-     * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
-     * @return A list of strings representing the names of all files and directories in the parent directory.
-     * @see Stream#listFiles(File, boolean, boolean)
-     * @see Fn#isFile()
-     * @see Fn#isDirectory()
-     */
-    public static List<String> list(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
-        return list(parentPath, recursively, excludeDirectory ? directories_excluded_filter : all_files_filter);
-    }
-
-    /**
-     * Lists the names of files in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     *
-     * @param <E>         The type of the exception that may be thrown by the filter.
-     * @param parentPath  The parent directory where the listing will start. It must not be {@code null}.
-     * @param recursively If {@code true}, files in all subdirectories of the parent directory will be listed.
-     * @param filter      A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
-     * @return A list of file names in the specified directory and possibly its subdirectories.
-     * @throws E If the filter throws an exception.
-     * @see Stream#listFiles(File, boolean, boolean)
-     * @see Fn#isFile()
-     * @see Fn#isDirectory()
-     */
-    public static <E extends Exception> List<String> list(File parentPath, final boolean recursively,
-            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
-        final List<String> files = new ArrayList<>();
-
-        if (!parentPath.exists()) {
-            return files;
-        }
-
-        parentPath = new File(parentPath.getAbsolutePath().replace(".\\", "\\").replace("./", "/"));
-
-        final File[] subFiles = parentPath.listFiles();
-
-        if (N.isEmpty(subFiles)) {
-            return files;
-        }
-
-        for (final File file : subFiles) {
-            if (filter.test(parentPath, file)) {
-                files.add(file.getAbsolutePath());
-            }
-
-            if (recursively && file.isDirectory()) {
-                //noinspection ConstantValue
-                files.addAll(list(file, recursively, filter));
-            }
-        }
-
-        return files;
-    }
-
-    /**
      * Lists all files in the specified parent directory.
      *
      * @param parentPath The parent directory from which to list files.
@@ -7087,6 +7059,8 @@ public final class IOUtil {
      */
     public static <E extends Exception> List<File> listFiles(final File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
+        N.checkArgNotNull(filter, cs.filter);
+
         final List<File> files = new ArrayList<>();
 
         if (!parentPath.exists()) {
@@ -7137,6 +7111,51 @@ public final class IOUtil {
      */
     public static List<File> listDirectories(final File parentPath, final boolean recursively) {
         return listFiles(parentPath, recursively, directories_only_filter);
+    }
+
+    /**
+     * Gets the relative path.
+     *
+     * @param parentDir
+     * @param file
+     * @return
+     */
+    private static String getRelativePath(final File parentDir, final File file) {
+        if (file.equals(parentDir)) {
+            return file.getName();
+        } else {
+            return file.getAbsolutePath().substring(parentDir.getAbsolutePath().length() + 1);
+        }
+    }
+
+    /**
+     * Lists the names of all files and directories in the specified parent directory.
+     *
+     * @param parentPath The parent directory from which to list files and directories.
+     * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @see Stream#listFiles(File)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
+     */
+    public static Stream<File> walk(final File parentPath) {
+        return walk(parentPath, false, false);
+    }
+
+    /**
+     * Lists the names of all files and directories in the specified parent directory.
+     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * If the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
+     *
+     * @param parentPath       The parent directory from which to list files and directories.
+     * @param recursively      A boolean indicating whether to list files in all subdirectories.
+     * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
+     * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @see Stream#listFiles(File, boolean, boolean)
+     * @see Fn#isFile()
+     * @see Fn#isDirectory()
+     */
+    public static Stream<File> walk(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
+        return Stream.listFiles(parentPath, recursively, excludeDirectory);
     }
 
     //-----------------------------------------------------------------------
@@ -7377,8 +7396,8 @@ public final class IOUtil {
             return true;
         }
 
-        checkIsFile(file1, "file1");
-        checkIsFile(file2, "file2");
+        checkFileExists(file1);
+        checkFileExists(file2);
 
         if (file1.length() != file2.length()) {
             // lengths differ, cannot be equal
@@ -7394,14 +7413,6 @@ public final class IOUtil {
                 final InputStream input2 = IOUtil.newFileInputStream(file2)) {
             return contentEquals(input1, input2);
         }
-    }
-
-    private static File checkIsFile(final File file, final String name) {
-        if (file.isFile()) {
-            return file;
-        }
-
-        throw new IllegalArgumentException(String.format("Parameter '%s' is not a file: %s", name, file));
     }
 
     /**
@@ -7441,29 +7452,18 @@ public final class IOUtil {
             return true;
         }
 
-        checkFileExists(file1, "file1");
-        checkFileExists(file2, "file2");
+        checkFileExists(file1);
+        checkFileExists(file2);
 
         if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
             // same file
             return true;
         }
 
-        final Charset charset = Charsets.get(charsetName);
+        final Charset charset = Strings.isEmpty(charsetName) ? DEFAULT_CHARSET : Charsets.get(charsetName);
         try (Reader input1 = new InputStreamReader(Files.newInputStream(file1.toPath()), charset);
                 Reader input2 = new InputStreamReader(Files.newInputStream(file2.toPath()), charset)) {
             return contentEqualsIgnoreEOL(input1, input2);
-        }
-    }
-
-    private static void checkFileExists(final File file, final String name) throws FileNotFoundException {
-        if (!file.isFile()) {
-            if (file.exists()) {
-                throw new IllegalArgumentException("Parameter '" + name + "' is not a file: " + file);
-            }
-            if (!Files.isSymbolicLink(file.toPath())) {
-                throw new FileNotFoundException("Source '" + file + "' does not exist");
-            }
         }
     }
 

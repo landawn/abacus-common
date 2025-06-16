@@ -49,9 +49,11 @@ public final class cs { // NOSONAR
     public static final String beanClass = "beanClass";
     public static final String beanClassForColumnType = "beanClassForColumnType";
     public static final String BiConsumer = "BiConsumer";
+    public static final String TriConsumer = "TriConsumer";
     // public static final String Function = "Function";
     public static final String BiFunction = "BiFunction";
     public static final String BiPredicate = "BiPredicate";
+    public static final String TriFunction = "TriFunction";
 
     public static final String bufferSize = "bufferSize";
 
@@ -301,6 +303,17 @@ public final class cs { // NOSONAR
 
     public static final String keysToCompare = "keysToCompare";
     public static final String propNamesToCompare = "propNamesToCompare";
+
+    public static final String elements = "elements";
+
+    public static final String extractStrategy = "extractStrategy";
+
+    public static final String outputFile = "outputFile";
+
+    public static final String outputStream = "outputStream";
+
+    public static final String idExtractor1 = "idExtractor1";
+    public static final String idExtractor2 = "idExtractor2";
 
     private cs() {
         // Utility class for constant string values.

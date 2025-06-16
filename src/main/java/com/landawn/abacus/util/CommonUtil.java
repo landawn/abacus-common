@@ -499,60 +499,6435 @@ sealed class CommonUtil permits N {
         // Utility class.
     }
 
+    // ================================ Checks argument/parameter, index, state... ====================================
+
     /**
-     * Gets a Type by the given type name.
+     * Checks if the specified range starting from {@code fromIndex} and ending with {@code toIndex} are within the bounds of the specified length.
      *
-     * @param typeName the name of the type to be retrieved.
-     * @return the Type corresponding to the given type name.
-     * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
+     * @param fromIndex the starting index to check, inclusive
+     * @param toIndex the ending index to check, exclusive
+     * @param length the length of the array or collection
+     * @throws IndexOutOfBoundsException if the range is out of bounds
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
-        checkArgNotNull(typeName, cs.typeName);
-
-        Type<?> type = nameTypePool.get(typeName);
-
-        if (type == null) {
-            type = TypeFactory.getType(typeName);
-
-            nameTypePool.put(typeName, type);
+    public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
+        if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
+            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds for length " + length);
         }
-
-        return (Type<T>) type;
     }
 
     /**
-     * Gets a Type by the given {@code Class}.
+     * Checks if the specified range starting from {@code fromIndex} with the specified {@code size} is within the bounds of the specified length.
      *
-     * @param cls the name of the type to be retrieved.
-     * @return the Type corresponding to the given type name.
-     * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+     * @param fromIndex the starting index to check, inclusive
+     * @param size the size of the range to check
+     * @param length the length of the array or collection
+     * @throws IndexOutOfBoundsException if the range is out of bounds
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
-        checkArgNotNull(cls, cs.cls);
-
-        Type<?> type = clsTypePool.get(cls);
-
-        if (type == null) {
-            type = TypeFactory.getType(cls);
-            clsTypePool.put(cls, type);
+    public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
+        if ((fromIndex < 0 || size < 0 || length < 0) || size > length - fromIndex) {
+            throw new IndexOutOfBoundsException("Start Index " + fromIndex + " with size " + size + " is out-of-bounds for length " + length);
         }
-
-        return (Type<T>) type;
     }
 
     /**
-     * Returns the default value of the given class type.
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
      *
-     * @param <T>
-     * @param cls the class type for which the default value is to be returned.
-     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
-     * @throws IllegalArgumentException if the specified class type is {@code null}.
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @deprecated Use {@link #checkElementIndex(int, int)} instead
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T defaultValueOf(final Class<T> cls) {
-        return (T) typeOf(cls).defaultValue();
+    @Deprecated
+    public static int checkIndex(final int index, final int size) {
+        return checkElementIndex(index, size);
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
+     *
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     */
+    public static int checkElementIndex(final int index, final int size) {
+        return checkElementIndex(index, size, "index");
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
+     *
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @param desc the text to use to describe this index in an error message
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     */
+    public static int checkElementIndex(final int index, final int size, final String desc) {
+        // Carefully optimized for execution by hotspot (explanatory comment above)
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(badElementIndex(index, size, desc));
+        }
+
+        return index;
+    }
+
+    private static String badElementIndex(final int index, final int size, final String desc) {
+        if (index < 0) {
+            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
+        } else if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        } else { // index >= size
+            return Strings.lenientFormat("%s (%s) must be less than size (%s)", desc, index, size);
+        }
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
+     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
+     *
+     * @param index a user-supplied index identifying a position in an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static int checkPositionIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        return checkPositionIndex(index, size, "index");
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
+     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
+     *
+     * @param index a user-supplied index identifying a position in an array, list or string
+     * @param size the size of that array, list or string
+     * @param desc the text to use to describe this index in an error message
+     * @return the value of {@code index}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
+     */
+    public static int checkPositionIndex(final int index, final int size, final String desc) throws IllegalArgumentException, IndexOutOfBoundsException {
+        // Carefully optimized for execution by hotspot (explanatory comment above)
+        if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        }
+
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
+        }
+
+        return index;
+    }
+
+    private static String badPositionIndex(final int index, final int size, final String desc) {
+        if (index < 0) {
+            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
+        } else if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        } else { // index > size
+            return Strings.lenientFormat("%s (%s) must not be greater than size (%s)", desc, index, size);
+        }
+    }
+
+    /**
+     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param obj the argument to check
+     * @return the {@code non-null} argument
+     * @throws IllegalArgumentException if the argument is null
+     */
+    public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
+        if (obj == null) {
+            throw new IllegalArgumentException();
+        }
+
+        return obj;
+    }
+
+    /**
+     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param obj the argument to check
+     * @param errorMessage the error message to use in the exception
+     * @return the {@code non-null} argument
+     * @throws IllegalArgumentException if the argument is null
+     */
+    public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
+        if (obj == null) {
+            if (isArgNameOnly(errorMessage)) {
+                throw new IllegalArgumentException("'" + errorMessage + "' cannot be null");
+            } else {
+                throw new IllegalArgumentException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
+        // shortest message: "it is null"
+        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
+    }
+
+    /**
+     * Checks if the specified charSequence argument is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument, which extends CharSequence
+     * @param arg the argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (Strings.isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified boolean array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the boolean array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty boolean array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified char array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the char array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty char array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified byte array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the byte array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty byte array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified short array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the short array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty short array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified int array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the int array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty int array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified long array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the long array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty long array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified float array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the float array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty float array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified double array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the double array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty double array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Object array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the Object array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Object array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified collection argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the boolean collection argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty boolean collection argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Iterable argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the Iterable argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Iterable argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    @Beta
+    public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Iterator argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the Iterator argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Iterator argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    @Beta
+    public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Map argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the Map argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Map argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified PrimitiveList argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the PrimitiveList argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty PrimitiveList argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Multiset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the Multiset argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Multiset argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified Multimap argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the Multimap argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Multimap argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified DataSet argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param arg the DataSet argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty DataSet argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     */
+    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    private static void throwIllegalArgumentExceptionForNullOrEmptyCheck(final String errorMessage) {
+        if (isArgNameOnly(errorMessage)) {
+            throw new IllegalArgumentException("'" + errorMessage + "' cannot be null or empty");
+        } else {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Checks if the specified charSequence argument is not {@code null} or empty or blank, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument, which extends CharSequence
+     * @param arg the argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty and non-blank argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty or blank
+     */
+    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
+    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (Strings.isBlank(arg)) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be null or empty or blank");
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified byte argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the byte argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative byte argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified short argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the short argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative short argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified int argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the int argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative int argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified long argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the long argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative long argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified float argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the float argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative float argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified double argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg the double argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative double argument
+     * @throws IllegalArgumentException if the specified arg is negative
+     */
+    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified byte argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the byte argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive byte argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified short argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the short argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive short argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified int argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the int argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive int argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified long argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the long argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive long argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified float argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the float argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive float argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified double argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg the double argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive double argument
+     * @throws IllegalArgumentException if the specified arg is not positive
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param a the array to check
+     * @throws IllegalArgumentException if a {@code null} element is found in the array
+     */
+    public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        for (final Object e : a) {
+            if (e == null) {
+                throw new IllegalArgumentException("null element is found in collection");
+            }
+        }
+    }
+
+    /**
+     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param a the array to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if a {@code null} element is found in the array
+     */
+    public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        for (final Object e : a) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param c the collection to check
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
+        if (isEmpty(c)) {
+            return;
+        }
+
+        for (final Object e : c) {
+            if (e == null) {
+                throw new IllegalArgumentException("null element is found in collection");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param c the collection to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(c)) {
+            return;
+        }
+
+        for (final Object e : c) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param m the map to check
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
+        if (isEmpty(m)) {
+            return;
+        }
+
+        for (final Object e : m.keySet()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null key is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param m the map to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(m)) {
+            return;
+        }
+
+        for (final Object e : m.keySet()) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null key is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param m the map to check
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
+        if (isEmpty(m)) {
+            return;
+        }
+
+        for (final Object e : m.values()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null value is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
+     *
+     * @param m the map to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
+        if (isEmpty(m)) {
+            return;
+        }
+
+        for (final Object e : m.values()) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null value is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final Object argNameOrErrorMsg) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(String.valueOf(argNameOrErrorMsg));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+            throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @param p4 the third parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+            throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3, p4));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(errorMessageSupplier.get());
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg
+     * @return
+     */
+    static String format(String template, final Object arg) {
+        template = String.valueOf(template); // null -> "null"
+        final String stringArg = toString(arg);
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + stringArg.length() + 4);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        if (placeholderStart >= 0) {
+            sb.append(template, 0, placeholderStart).append(stringArg).append(template, placeholderStart + 2, template.length());
+        } else {
+            sb.append(template).append(": [").append(stringArg).append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @return
+     */
+    static String format(String template, final Object arg1, final Object arg2) {
+        template = String.valueOf(template); // null -> "null"
+        final String stringArg1 = toString(arg1);
+        final String stringArg2 = toString(arg2);
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + (stringArg1.length() + stringArg2.length()) + 8);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(stringArg1);
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(stringArg2);
+                templateStart = placeholderStart + 2;
+            }
+
+            sb.append(template, templateStart, template.length());
+        } else {
+            sb.append(template);
+        }
+
+        if (cnt == 0) {
+            sb.append(": [");
+            sb.append(stringArg1);
+            sb.append(", ");
+            sb.append(stringArg2);
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(": [");
+            sb.append(stringArg2);
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @return
+     */
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
+        template = String.valueOf(template); // null -> "null"
+        String stringArg1 = toString(arg1);
+        String stringArg2 = toString(arg2);
+        String stringArg3 = toString(arg3);
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + (stringArg1.length() + stringArg2.length() + stringArg3.length()) + 12);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(stringArg1);
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(stringArg2);
+                templateStart = placeholderStart + 2;
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    cnt++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(stringArg3);
+                    templateStart = placeholderStart + 2;
+                }
+            }
+
+            sb.append(template, templateStart, template.length());
+        } else {
+            sb.append(template);
+        }
+
+        if (cnt == 0) {
+            sb.append(": [");
+            sb.append(stringArg1);
+            sb.append(", ");
+            sb.append(stringArg2);
+            sb.append(", ");
+            sb.append(stringArg3);
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(": [");
+            sb.append(stringArg2);
+            sb.append(", ");
+            sb.append(stringArg3);
+            sb.append(']');
+        } else if (cnt == 2) {
+            sb.append(": [");
+            sb.append(stringArg3);
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     * Substitutes each {@code %s} in {@code template} with an argument. These are matched by
+     * position: the first {@code %s} gets {@code args[0]}, etc. If there are more arguments than
+     * placeholders, the unmatched arguments will be appended to the end of the formatted message in
+     * square braces.
+     *
+     * @param template a {@code non-null} string containing 0 or more {@code %s} placeholders.
+     * @param args the arguments to be substituted into the message template. Arguments are converted
+     *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
+     * @return
+     */
+    // Note that this is somewhat-improperly used from Verify.java as well.
+    static String format(String template, final Object... args) {
+        template = String.valueOf(template); // null -> "null"
+
+        if (isEmpty(args)) {
+            return template;
+        }
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * args.length);
+        int templateStart = 0;
+        int i = 0;
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        while (placeholderStart >= 0 && i < args.length) {
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(toString(args[i++]));
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+        }
+
+        sb.append(template, templateStart, template.length());
+
+        // if we run out of placeholders, append the extra args in square braces
+        if (i < args.length) {
+            sb.append(" [");
+            sb.append(toString(args[i++]));
+            while (i < args.length) {
+                sb.append(", ");
+                sb.append(toString(args[i++]));
+            }
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessage the name of the argument or an error message to be used in the exception
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final Object errorMessage) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(String.valueOf(errorMessage));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+            throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @param p4 the third parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+            throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3, p4));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param b a boolean expression
+     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(errorMessageSupplier.get());
+        }
+    }
+
+    /**
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
+     *
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj) throws NullPointerException {
+        if (obj == null) {
+            throw new NullPointerException();
+        }
+
+        return obj;
+    }
+
+    /**
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
+     *
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
+     * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object, String)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj, final String errorMessage) throws NullPointerException {
+        if (obj == null) {
+            if (isArgNameOnly(errorMessage)) {
+                throw new NullPointerException("'" + errorMessage + "' cannot be null");
+            } else {
+                throw new NullPointerException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    /**
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
+     *
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
+     * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object, String)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj, final Supplier<String> errorMessageSupplier) throws NullPointerException {
+        if (obj == null) {
+            final String errorMessage = errorMessageSupplier.get();
+
+            if (isArgNameOnly(errorMessage)) {
+                throw new NullPointerException("'" + errorMessage + "' cannot be null");
+            } else {
+                throw new NullPointerException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    // ================================ Checks argument/parameter, index, state... ====================================
+
+    // ================================ equals/hashCode/toString... ===================================================
+
+    /**
+     * Compares two boolean values for equality.
+     *
+     * @param a the first boolean value
+     * @param b the second boolean value
+     * @return {@code true} if the boolean values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final boolean a, final boolean b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two char values for equality.
+     *
+     * @param a the first char value
+     * @param b the second char value
+     * @return {@code true} if the char values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final char a, final char b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two byte values for equality.
+     *
+     * @param a the first byte value
+     * @param b the second byte value
+     * @return {@code true} if the byte values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final byte a, final byte b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two short values for equality.
+     *
+     * @param a the first short value
+     * @param b the second short value
+     * @return {@code true} if the short values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final short a, final short b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two int values for equality.
+     *
+     * @param a the first int value
+     * @param b the second int value
+     * @return {@code true} if the int values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final int a, final int b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two long values for equality.
+     *
+     * @param a the first long value
+     * @param b the second long value
+     * @return {@code true} if the long values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final long a, final long b) {
+        return a == b;
+    }
+
+    /**
+     * Compares two float values for equality.
+     *
+     * @param a the first float value
+     * @param b the second float value
+     * @return {@code true} if the float values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final float a, final float b) {
+        return Float.compare(a, b) == 0;
+    }
+
+    /**
+     * Compares two double values for equality.
+     *
+     * @param a the first double value
+     * @param b the second double value
+     * @return {@code true} if the double values are equal, {@code false} otherwise
+     */
+    public static boolean equals(final double a, final double b) {
+        return Double.compare(a, b) == 0;
+    }
+
+    /**
+     * Compares two strings for equality.
+     *
+     * @param a the first string
+     * @param b the second string
+     * @return {@code true} if the strings are equal, {@code false} otherwise
+     */
+    public static boolean equals(final String a, final String b) {
+        return (a == null) ? b == null : (b != null && a.length() == b.length() && a.equals(b));
+    }
+
+    /**
+     * Compares two strings for equality, ignoring case.
+     *
+     * @param a the first string
+     * @param b the second string
+     * @return {@code true} if the strings are equal, {@code false} otherwise
+     */
+    public static boolean equalsIgnoreCase(final String a, final String b) {
+        return (a == null) ? b == null : (a.equalsIgnoreCase(b));
+    }
+
+    /**
+     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.equals} method will be used.
+     *
+     * @param a the first object
+     * @param b the second object
+     * @return {@code true} if the objects are equal, {@code false} otherwise
+     */
+    public static boolean equals(final Object a, final Object b) {
+        if (Objects.equals(a, b)) {
+            return true;
+        }
+
+        if ((a != null) && (b != null)) {
+            final Type<Object> typeA = typeOf(a.getClass());
+
+            if (typeA.isPrimitiveArray()) {
+                final Type<Object> typeB = typeOf(b.getClass());
+
+                return typeA.clazz().equals(typeB.clazz()) && typeA.equals(a, b);
+            } else if (typeA.isObjectArray()) {
+                final Type<Object> typeB = typeOf(b.getClass());
+
+                return typeB.isObjectArray() && typeA.equals(a, b);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(boolean[], boolean[])
+     */
+    public static boolean equals(final boolean[] a, final boolean[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two boolean arrays for equality within the specified range.
+     *
+     * @param a the first boolean array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second boolean array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(boolean[], boolean[])
+     */
+    public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(char[], char[])
+     */
+    public static boolean equals(final char[] a, final char[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two char arrays for equality within the specified range.
+     *
+     * @param a the first char array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second char array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(char[], char[])
+     */
+    public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(byte[], byte[])
+     */
+    public static boolean equals(final byte[] a, final byte[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two byte arrays for equality within the specified range.
+     *
+     * @param a the first byte array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second byte array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(byte[], byte[])
+     */
+    public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(short[], short[])
+     */
+    public static boolean equals(final short[] a, final short[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two short arrays for equality within the specified range.
+     *
+     * @param a the first short array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second short array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(short[], short[])
+     */
+    public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(int[], int[])
+     */
+    public static boolean equals(final int[] a, final int[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two int arrays for equality within the specified range.
+     *
+     * @param a the first int array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second int array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(int[], int[])
+     */
+    public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(long[], long[])
+     */
+    public static boolean equals(final long[] a, final long[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two long arrays for equality within the specified range.
+     *
+     * @param a the first long array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second long array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(long[], long[])
+     */
+    public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(float[], float[])
+     */
+    public static boolean equals(final float[] a, final float[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two float arrays for equality within the specified range.
+     *
+     * @param a the first float array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second float array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(float[], float[])
+     */
+    public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (Float.compare(a[i], b[j]) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(double[], double[])
+     */
+    public static boolean equals(final double[] a, final double[] b) {
+        return Arrays.equals(a, b);
+    }
+
+    /**
+     * Compares two double arrays for equality within the specified range.
+     *
+     * @param a the first double array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second double array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(double[], double[])
+     */
+    public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (Double.compare(a[i], b[j]) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays for equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#equals(Object[], Object[])
+     */
+    public static boolean equals(final Object[] a, final Object[] b) {
+        return a == b || (a != null && b != null && a.length == b.length && equals(a, 0, b, 0, a.length));
+    }
+
+    /**
+     * Compares two arrays for equality within the specified range.
+     *
+     * @param a the first array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(Object[], Object[])
+     */
+    public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        } else if (!a.getClass().equals(b.getClass())) {
+            return false;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (!equals(a[i], b[j])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.deepEquals} method will be used.
+     *
+     * @param a the first object to compare, which may be null
+     * @param b the second object to compare, which may be null
+     * @return {@code true} if the objects are deeply equal, {@code false} otherwise
+     * @see Arrays#deepEquals(Object[], Object[])
+     */
+    public static boolean deepEquals(final Object a, final Object b) {
+        if (Objects.equals(a, b)) {
+            return true;
+        }
+
+        final Class<?> cls = a == null ? null : a.getClass();
+
+        if ((a != null) && (b != null) && cls.isArray() && cls.equals(b.getClass())) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepEquals((Object[]) a, (Object[]) b);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return equals((boolean[]) a, (boolean[]) b);
+
+                case 12:
+                    return equals((char[]) a, (char[]) b);
+
+                case 13:
+                    return equals((byte[]) a, (byte[]) b);
+
+                case 14:
+                    return equals((short[]) a, (short[]) b);
+
+                case 15:
+                    return equals((int[]) a, (int[]) b);
+
+                case 16:
+                    return equals((long[]) a, (long[]) b);
+
+                case 17:
+                    return equals((float[]) a, (float[]) b);
+
+                case 18:
+                    return equals((double[]) a, (double[]) b);
+
+                case 19:
+                    return equals((String[]) a, (String[]) b);
+
+                default:
+                    return deepEquals((Object[]) a, (Object[]) b);
+            }
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Compares two arrays for deep equality.
+     *
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     * @see Arrays#deepEquals(Object[], Object[])
+     */
+    public static boolean deepEquals(final Object[] a, final Object[] b) {
+        return a == b || (a != null && b != null && a.length == b.length && deepEquals(a, 0, b, 0, a.length));
+    }
+
+    /**
+     * Compares two arrays for deep equality within the specified range.
+     *
+     * @param a the first array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#deepEquals(Object[], Object[])
+     */
+    public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        } else if (!a.getClass().equals(b.getClass())) {
+            return false;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (!deepEquals(a[i], b[j])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two arrays of Strings, ignoring case considerations.
+     *
+     * @param a the first array of Strings to compare, which may be null
+     * @param b the second array of Strings to compare, which may be null
+     * @return {@code true} if the arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
+     */
+    public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
+        return (a == null || b == null) ? a == b : (a.length == b.length && equalsIgnoreCase(a, 0, b, 0, a.length));
+    }
+
+    /**
+     * Compares two arrays of Strings, ignoring case considerations, within the specified range.
+     *
+     * @param a the first array of Strings to compare, which may be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array of Strings to compare, which may be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     */
+    public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return true;
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (((a[i] == null || b[j] == null) ? (a[i] != b[j]) : !a[i].equalsIgnoreCase(b[j]))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two maps for equality based on the specified keys.
+     *
+     * @param map1 the first map to compare, it can be null
+     * @param map2 the second map to compare, it can be null
+     * @param keysToCompare the collection of keys to compare, it must not be null
+     * @return {@code true} if the values associated with the specified keys in both maps are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the {@code keysToCompare} is empty
+     */
+    public static <K> boolean equalsByKeys(final Map<? extends K, ?> map1, final Map<? extends K, ?> map2, final Collection<K> keysToCompare)
+            throws IllegalArgumentException {
+        N.checkArgNotEmpty(keysToCompare, cs.keysToCompare);
+
+        if (map1 == map2) {
+            return true;
+        } else if ((map1 == null || map2 == null)) {
+            return false;
+        }
+
+        Object value1 = null;
+        Object value2 = null;
+
+        for (K key : keysToCompare) {
+            value1 = map1.get(key);
+            value2 = map2.get(key);
+
+            if (!equals(value1, value2) || (value1 == null && value2 == null && (map1.containsKey(key) != map2.containsKey(key)))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares the properties of two beans to determine if they are equal.
+     *
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
+     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
+     */
+    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
+        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
+
+        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
+    }
+
+    /**
+     * Compares the properties of two beans to determine if they are equal by common properties.
+     *
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if no common property is found
+     */
+    public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
+        checkArgNotNull(bean1);
+        checkArgNotNull(bean2);
+        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
+
+        final List<String> propNamesToCompare = new ArrayList<>(ClassUtil.getPropNameList(bean1.getClass()));
+        propNamesToCompare.retainAll(ClassUtil.getPropNameList(bean2.getClass()));
+
+        if (isEmpty(propNamesToCompare)) {
+            throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
+        }
+
+        return equalsByProps(bean1, bean2, propNamesToCompare);
+    }
+
+    /** 
+     * Returns {@code true} if the given {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
+     *
+     * @param a the first collection to compare, which may be null
+     * @param b the second collection to compare, which may be null
+     * @return {@code true} if the collections are equal, {@code false} otherwise
+     * @throws UnsupportedOperationException if this method is called
+     * @deprecated Use {@link N#isEqualCollection(Collection, Collection)} instead.
+     * @see N#isEqualCollection(Collection, Collection)
+     */
+    @SuppressWarnings("unused")
+    public static boolean equalsCollection(final Collection<?> a, final Collection<?> b) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Please use N.isEqualCollection(Collection, Collection)");
+    }
+
+    /**
+     * Returns the hash code for a boolean value.
+     *
+     * @param value the boolean value
+     * @return the hash code.
+     */
+    public static int hashCode(final boolean value) {
+        return value ? 1231 : 1237;
+    }
+
+    /**
+     * Returns the hash code for a char value.
+     *
+     * @param value the char value
+     * @return the hash code
+     */
+    public static int hashCode(final char value) {
+        return value;
+    }
+
+    /**
+     * Returns the hash code for a byte value.
+     *
+     * @param value the byte value
+     * @return the hash code
+     */
+    public static int hashCode(final byte value) {
+        return value;
+    }
+
+    /**
+     * Returns the hash code for a short value.
+     *
+     * @param value the short value
+     * @return the hash code
+     */
+    public static int hashCode(final short value) {
+        return value;
+    }
+
+    /**
+     * Returns the hash code for an int value.
+     *
+     * @param value the int value
+     * @return the hash code
+     */
+    public static int hashCode(final int value) {
+        return value;
+    }
+
+    /**
+     * Returns the hash code for a long value.
+     *
+     * @param value the long value
+     * @return the hash code
+     */
+    public static int hashCode(final long value) {
+        return Long.hashCode(value);
+    }
+
+    /**
+     * Returns the hash code for a float value.
+     *
+     * @param value the float value
+     * @return the hash code
+     */
+    public static int hashCode(final float value) {
+        return Float.floatToIntBits(value);
+    }
+
+    /**
+     * Returns the hash code for a double value.
+     *
+     * @param value the double value
+     * @return the hash code
+     */
+    public static int hashCode(final double value) {
+
+        return Double.hashCode(value);
+    }
+
+    /**
+     * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used
+     *
+     * @param obj the object for which the hash code is to be calculated
+     * @return the hash code of the object, or 0 if the object is null
+     */
+    public static int hashCode(final Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+
+        if (obj.getClass().isArray()) {
+            return typeOf(obj.getClass()).hashCode(obj);
+        }
+
+        return obj.hashCode();
+    }
+
+    /**
+     * Returns the hash code for an array of booleans.
+     *
+     * @param a the array of booleans
+     * @return the hash code of the array
+     * @see Arrays#hashCode(boolean[])
+     */
+    public static int hashCode(final boolean[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a boolean array.
+     *
+     * @param a the array of booleans
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + (a[i] ? 1231 : 1237);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of chars.
+     *
+     * @param a the array of chars
+     * @return the hash code of the array
+     * @see Arrays#hashCode(char[])
+     */
+    public static int hashCode(final char[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a char array.
+     *
+     * @param a the array of chars
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + a[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of bytes.
+     *
+     * @param a the array of bytes
+     * @return the hash code of the array
+     * @see Arrays#hashCode(byte[])
+     */
+    public static int hashCode(final byte[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a byte array.
+     *
+     * @param a the array of bytes
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + a[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of shorts.
+     *
+     * @param a the array of shorts
+     * @return the hash code of the array
+     * @see Arrays#hashCode(short[])
+     */
+    public static int hashCode(final short[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a short array.
+     *
+     * @param a the array of shorts
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + a[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of ints.
+     *
+     * @param a the array of ints
+     * @return the hash code of the array
+     * @see Arrays#hashCode(int[])
+     */
+    public static int hashCode(final int[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in an int array.
+     *
+     * @param a the array of ints
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + a[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of longs.
+     *
+     * @param a the array of longs
+     * @return the hash code of the array
+     * @see Arrays#hashCode(long[])
+     */
+    public static int hashCode(final long[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a long array.
+     *
+     * @param a the array of longs
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + Long.hashCode(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of floats.
+     *
+     * @param a the array of floats
+     * @return the hash code of the array
+     * @see Arrays#hashCode(float[])
+     */
+    public static int hashCode(final float[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a float array.
+     *
+     * @param a the array of floats
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + Float.floatToIntBits(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of doubles.
+     *
+     * @param a the array of doubles
+     * @return the hash code of the array
+     * @see Arrays#hashCode(double[])
+     */
+    public static int hashCode(final double[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in a double array.
+     *
+     * @param a the array of doubles
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + Double.hashCode(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for an array of Objects.
+     *
+     * @param a the array of Objects
+     * @return the hash code of the array
+     * @see Arrays#hashCode(Object[])
+     */
+    public static int hashCode(final Object[] a) {
+        return a == null ? 0 : hashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in an Object array.
+     *
+     * @param a the array of Objects
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + (a[i] == null ? 0 : a[i].hashCode());
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the hash code for the specified object. If the object is an array, the appropriate {@code Arrays.deepHashCode} method will be used.
+     *
+     * @param obj the object for which the hash code is to be calculated
+     * @return the hash code of the object, or 0 if the object is null
+     * @see Arrays#deepHashCode(Object[])
+     */
+    public static int deepHashCode(final Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+
+        final Class<?> cls = obj.getClass();
+
+        if (cls.isArray()) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepHashCode((Object[]) obj);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return hashCode((boolean[]) obj);
+
+                case 12:
+                    return hashCode((char[]) obj);
+
+                case 13:
+                    return hashCode((byte[]) obj);
+
+                case 14:
+                    return hashCode((short[]) obj);
+
+                case 15:
+                    return hashCode((int[]) obj);
+
+                case 16:
+                    return hashCode((long[]) obj);
+
+                case 17:
+                    return hashCode((float[]) obj);
+
+                case 18:
+                    return hashCode((double[]) obj);
+
+                case 19:
+                    return hashCode((String[]) obj);
+
+                default:
+                    return deepHashCode((Object[]) obj);
+            }
+        }
+
+        return obj.hashCode();
+    }
+
+    /**
+     * Returns the hash code for an array of Objects.
+     *
+     * @param a the array of Objects
+     * @return the hash code of the array
+     * @see Arrays#deepHashCode(Object[])
+     */
+    public static int deepHashCode(final Object[] a) {
+        return a == null ? 0 : deepHashCode(a, 0, a.length);
+    }
+
+    /**
+     * Returns the hash code for a range of elements in an Object array.
+     *
+     * @param a the array of Objects
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @see Arrays#deepHashCode(Object[])
+     */
+    public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result = 31 * result + (a[i] == null ? 0 : deepHashCode(a[i]));
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a string representation of the specified boolean value.
+     *
+     * @param value the boolean value to be represented as a string
+     * @return the String representation of the boolean value
+     */
+    public static String toString(final boolean value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified char value.
+     *
+     * @param value the char value to be represented as a string
+     * @return the String representation of the char value
+     */
+    public static String toString(final char value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified byte value.
+     *
+     * @param value the byte value to be represented as a string
+     * @return the String representation of the byte value
+     */
+    public static String toString(final byte value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified short value.
+     *
+     * @param value the short value to be represented as a string
+     * @return the String representation of the short value
+     */
+    public static String toString(final short value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified int value.
+     *
+     * @param value the int value to be represented as a string
+     * @return the String representation of the int value
+     */
+    public static String toString(final int value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified long value.
+     *
+     * @param value the long value to be represented as a string
+     * @return the String representation of the long value
+     */
+    public static String toString(final long value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified float value.
+     *
+     * @param value the float value to be represented as a string
+     * @return the String representation of the float value
+     */
+    public static String toString(final float value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified double value.
+     *
+     * @param value the double value to be represented as a string
+     * @return the String representation of the double value
+     */
+    public static String toString(final double value) {
+        return stringOf(value);
+    }
+
+    /**
+     * Returns a string representation of the specified object.
+     *
+     * @param obj the object to be represented as a string
+     * @return the String representation of the object. If the object is {@code null}, the string {@code "null"} is returned.
+     */
+    public static String toString(final Object obj) {
+        if (obj == null) {
+            return Strings.NULL;
+        } else if (obj instanceof CharSequence) {
+            return obj.toString();
+        }
+
+        if (obj.getClass().isArray()) {
+            return typeOf(obj.getClass()).toString(obj);
+        }
+        if (obj instanceof final Iterator<?> iter) { // NOSONAR
+            return Strings.join(iter, ", ", "[", "]");
+        }
+        if (obj instanceof final Iterable<?> iter) { // NOSONAR
+            return Strings.join(iter, ", ", "[", "]");
+        }
+
+        final Integer typeIdx = CLASS_TYPE_ENUM.get(obj.getClass());
+
+        if (typeIdx == null) {
+            return obj.toString();
+        }
+
+        switch (typeIdx) {
+            case 21:
+                return toString(((Boolean) obj).booleanValue());
+
+            case 22:
+                return toString(((Character) obj).charValue());
+
+            case 23:
+                return toString(((Byte) obj).byteValue());
+
+            case 24:
+                return toString(((Short) obj).shortValue());
+
+            case 25:
+                return toString(((Integer) obj).intValue());
+
+            case 26:
+                return toString(((Long) obj).longValue());
+
+            //    case 27:
+            //        return toString(((Float) obj).floatValue());
+            //
+            //    case 28:
+            //        return toString(((Double) obj).doubleValue());
+
+            default:
+                return obj.toString();
+        }
+    }
+
+    /**
+     * Returns a string representation of the specified object. If the object is {@code null}, the specified default value is returned.
+     *
+     * @param obj the object to be represented as a string
+     * @param defaultIfNull the default value to be returned if the object is null
+     * @return the String representation of the object, or the default value if the object is null
+     */
+    public static String toString(final Object obj, final String defaultIfNull) {
+        return obj == null ? defaultIfNull : toString(obj);
+    }
+
+    /**
+     * Returns a string representation of the specified boolean array.
+     *
+     * @param a the boolean array to be represented as a string
+     * @return the String representation of the boolean array
+     * @see Arrays#toString(boolean[])
+     */
+    public static String toString(final boolean[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a boolean array.
+     *
+     * @param a the boolean array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the boolean array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final boolean[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
+     */
+    static void toString(final StringBuilder sb, final boolean[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified char array.
+     *
+     * @param a the char array to be represented as a string
+     * @return the String representation of the char array
+     * @see Arrays#toString(char[])
+     */
+    public static String toString(final char[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a char array.
+     *
+     * @param a the char array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the char array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+
+        // return String.valueOf(a, fromIndex, toIndex - fromIndex); // NOSONAR)
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final char[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final char[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified byte array.
+     *
+     * @param a the byte array to be represented as a string
+     * @return the String representation of the byte array
+     * @see Arrays#toString(byte[])
+     */
+    public static String toString(final byte[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a byte array.
+     *
+     * @param a the byte array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the byte array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final byte[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final byte[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified short array.
+     *
+     * @param a the short array to be represented as a string
+     * @return the String representation of the short array
+     * @see Arrays#toString(short[])
+     */
+    public static String toString(final short[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a short array.
+     *
+     * @param a the short array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the short array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final short[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final short[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified int array.
+     *
+     * @param a the int array to be represented as a string
+     * @return the String representation of the int array
+     * @see Arrays#toString(int[])
+     */
+    public static String toString(final int[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in an int array.
+     *
+     * @param a the int array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the int array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final int[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final int[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified long array.
+     *
+     * @param a the long array to be represented as a string
+     * @return the String representation of the long array
+     * @see Arrays#toString(long[])
+     */
+    public static String toString(final long[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a long array.
+     *
+     * @param a the long array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the long array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final long[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final long[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified float array.
+     *
+     * @param a the float array to be represented as a string
+     * @return the String representation of the float array
+     * @see Arrays#toString(float[])
+     */
+    public static String toString(final float[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a float array.
+     *
+     * @param a the float array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the float array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final float[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final float[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified double array.
+     *
+     * @param a the double array to be represented as a string
+     * @return the String representation of the double array
+     * @see Arrays#toString(double[])
+     */
+    public static String toString(final double[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in a double array.
+     *
+     * @param a the double array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the double array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final double[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final double[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(a[i]);
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the specified Object array.
+     *
+     * @param a the Object array to be represented as a string
+     * @return the String representation of the Object array
+     * @see Arrays#toString(Object[])
+     */
+    public static String toString(final Object[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return toString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the specified range of elements in an Object array.
+     *
+     * @param a the Object array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the Object array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     */
+    public static String toString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R, false);
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     */
+    static void toString(final StringBuilder sb, final Object[] a) {
+        if (a == null) {
+            sb.append(Strings.NULL);
+        } else if (a.length == 0) {
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
+        } else {
+            toString(sb, a, 0, a.length);
+        }
+    }
+
+    /**
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    static void toString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex) {
+        sb.append(WD._BRACKET_L);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            sb.append(toString(a[i]));
+        }
+
+        sb.append(WD._BRACKET_R);
+    }
+
+    /**
+     * Returns a string representation of the "deep contents" of the specified object. If the object is an array, the appropriate {@code Arrays.toString(array)} method will be used.
+     * This method recursively converts the object and its nested objects to a string.
+     *
+     * @param obj the object to be represented as a string
+     * @return the string representation of the object
+     */
+    public static String deepToString(final Object obj) {
+        if (obj == null) {
+            return Strings.NULL;
+        }
+
+        final Class<?> cls = obj.getClass();
+
+        if (cls.isArray()) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepToString((Object[]) obj);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return toString((boolean[]) obj);
+
+                case 12:
+                    return toString((char[]) obj);
+
+                case 13:
+                    return toString((byte[]) obj);
+
+                case 14:
+                    return toString((short[]) obj);
+
+                case 15:
+                    return toString((int[]) obj);
+
+                case 16:
+                    return toString((long[]) obj);
+
+                case 17:
+                    return toString((float[]) obj);
+
+                case 18:
+                    return toString((double[]) obj);
+
+                case 19:
+                    return toString((String[]) obj);
+
+                default:
+                    return deepToString((Object[]) obj);
+            }
+        }
+
+        return obj.toString();
+    }
+
+    /**
+     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
+     *
+     * @param a the object array to be represented as a string
+     * @return the String representation of the object, or the default value if the object is null
+     * @see Arrays#deepToString(Object[])
+     */
+    public static String deepToString(final Object[] a) {
+        if (a == null) {
+            return Strings.NULL;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
+        }
+
+        return deepToString(a, 0, a.length);
+    }
+
+    /**
+     * Returns a string representation of the "deep contents" of the specified range of elements in an Object array.
+     * This method recursively converts the object and its nested objects to a string.
+     *
+     * @param a the Object array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the Object array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @see Arrays#deepToString(Object[])
+     */
+    public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
+        final Set<Object> set = newSetFromMap(newIdentityHashMap(len(a)));
+
+        try {
+            deepToString(sb, a, fromIndex, toIndex, set);
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
+    }
+
+    /**
+     * Deep to string.
+     *
+     * @param sb
+     * @param a
+     * @param processedElements
+     */
+    static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object> processedElements) {
+        deepToString(sb, a, 0, a.length, processedElements);
+    }
+
+    /**
+     * Deep to string.
+     *
+     * @param sb
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param processedElements
+     */
+    static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object> processedElements) {
+        processedElements.add(a);
+
+        sb.append(WD._BRACKET_L);
+
+        Object element = null;
+        Class<?> eClass = null;
+        for (int i = fromIndex; i < toIndex; i++) {
+            element = a[i];
+
+            if (i > fromIndex) {
+                sb.append(Strings.ELEMENT_SEPARATOR);
+            }
+
+            if (element == null) {
+                sb.append(Strings.NULL_CHAR_ARRAY);
+
+                continue;
+            }
+
+            eClass = element.getClass();
+
+            if (eClass.isArray()) {
+                final Integer enumInt = CLASS_TYPE_ENUM.get(eClass);
+
+                final int num = enumInt == null ? 0 : enumInt;
+
+                switch (num) {
+                    case 11:
+                        toString(sb, (boolean[]) element);
+                        break;
+
+                    case 12:
+                        toString(sb, (char[]) element);
+                        break;
+
+                    case 13:
+                        toString(sb, (byte[]) element);
+                        break;
+
+                    case 14:
+                        toString(sb, (short[]) element);
+                        break;
+
+                    case 15:
+                        toString(sb, (int[]) element);
+                        break;
+
+                    case 16:
+                        toString(sb, (long[]) element);
+                        break;
+
+                    case 17:
+                        toString(sb, (float[]) element);
+                        break;
+
+                    case 18:
+                        toString(sb, (double[]) element);
+                        break;
+
+                    case 19:
+                        toString(sb, (String[]) element);
+                        break;
+
+                    default:
+                        if (processedElements.contains(element)) {
+                            sb.append("[...]");
+                        } else {
+                            deepToString(sb, (Object[]) element, processedElements);
+                        }
+                }
+            } else { // element is non-null and not an array
+                //noinspection UnnecessaryToStringCall
+                sb.append(element.toString());
+            }
+        }
+
+        sb.append(WD._BRACKET_R);
+
+        processedElements.remove(a);
+    }
+
+    /**
+     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
+     *
+     * @param a the Object array to be represented as a string
+     * @param defaultIfNull the default value to be returned if the object is null
+     * @return the String representation of the object, or the default value if the object is null
+     * @see Arrays#deepToString(Object[])
+     */
+    public static String deepToString(final Object[] a, final String defaultIfNull) {
+        return a == null ? defaultIfNull : deepToString(a);
+    }
+
+    // ================================ equals/hashCode/toString... ===================================================
+
+    // ================================ length/size, isNull/Empty/Blank... ============================================
+
+    /**
+     * Returns the length of the specified {@code CharSequence}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param s the CharSequence to check
+     * @return the length of the CharSequence, or 0 if the CharSequence is null
+     */
+    public static int len(final CharSequence s) {
+        return s == null ? 0 : s.length();
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final boolean[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final char[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final byte[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final short[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final int[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final long[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final float[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final double[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
+     */
+    public static int len(final Object[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param c the collection to check
+     * @return the size of the specified collection, or 0 if the collection is null
+     */
+    public static int size(final Collection<?> c) {
+        return c == null ? 0 : c.size();
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param m the map to check
+     * @return the size of the specified map, or 0 if the map is null
+     */
+    public static int size(final Map<?, ?> m) {
+        return m == null ? 0 : m.size();
+    }
+
+    /**
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param c the PrimitiveList to check
+     * @return the size of the specified PrimitiveList, or 0 if the PrimitiveList is null
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static int size(final PrimitiveList c) {
+        return c == null ? 0 : c.size();
+    }
+
+    //    /**
+    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     * @param s
+    //     * @return true, if is null or default
+    //     * @deprecated internal only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    @Beta
+    //    static boolean isNullOrDefault(final Object value) {
+    //        return (value == null) || equals(value, defaultValueOf(value.getClass()));
+    //    }
+
+    /**
+     * Checks if the specified {@code CharSequence} is {@code null} or empty.
+     *
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return (cs == null) || (cs.isEmpty());
+    }
+
+    /**
+     * Checks if the specified boolean array is {@code null} or empty.
+     *
+     * @param a the boolean array to check
+     * @return {@code true} if the boolean array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final boolean[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified char array is {@code null} or empty.
+     *
+     * @param a the char array to check
+     * @return {@code true} if the char array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final char[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified byte array is {@code null} or empty.
+     *
+     * @param a the byte array to check
+     * @return {@code true} if the byte array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final byte[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified short array is {@code null} or empty.
+     *
+     * @param a the short array to check
+     * @return {@code true} if the short array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final short[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified int array is {@code null} or empty.
+     *
+     * @param a the int array to check
+     * @return {@code true} if the int array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final int[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified long array is {@code null} or empty.
+     *
+     * @param a the long array to check
+     * @return {@code true} if the long array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final long[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified float array is {@code null} or empty.
+     *
+     * @param a the float array to check
+     * @return {@code true} if the float array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final float[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified double array is {@code null} or empty.
+     *
+     * @param a the double array to check
+     * @return {@code true} if the double array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final double[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified object array is {@code null} or empty.
+     *
+     * @param a the object array to check
+     * @return {@code true} if the object array is {@code null} or empty, otherwise false
+     */
+    public static boolean isEmpty(final Object[] a) {
+        return (a == null) || (a.length == 0);
+    }
+
+    /**
+     * Checks if the specified {@code Collection} is {@code null} or empty.
+     *
+     * @param c the Collection to check
+     * @return {@code true} if the Collection is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final Collection<?> c) {
+        return (c == null) || (c.isEmpty());
+    }
+
+    /**
+     * Checks if the specified iterable is {@code null} or empty.
+     *
+     * @param c the Iterable to check
+     * @return {@code true} if the Iterable is {@code null} or empty, otherwise {@code false}
+     */
+    @Beta
+    public static boolean isEmpty(final Iterable<?> c) {
+        if (c == null) {
+            return true;
+        }
+
+        if (c instanceof Collection<?> coll) {
+            return coll.isEmpty();
+        } else {
+            return isEmpty(c.iterator());
+        }
+    }
+
+    /**
+     * Checks if the specified iterable is a {@code null} or empty collection.
+     *
+     * @param c the iterable to check
+     * @return {@code true} if the specified iterable is a {@code null} or empty collection, otherwise {@code false}
+     */
+    static boolean isEmptyCollection(final Iterable<?> c) {
+        if (c == null) {
+            return true;
+        }
+
+        if (c instanceof Collection) {
+            return isEmpty((Collection<?>) c);
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the specified iterator is {@code null} or empty.
+     *
+     * @param iter the Iterator to check
+     * @return {@code true} if the Iterator is {@code null} or empty, otherwise {@code false}
+     */
+    @Beta
+    public static boolean isEmpty(final Iterator<?> iter) {
+        return iter == null || (!iter.hasNext());
+    }
+
+    /**
+     * Checks if the specified {@code Map} is {@code null} or empty.
+     *
+     * @param m the Map to check
+     * @return {@code true} if the Map is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final Map<?, ?> m) {
+        return (m == null) || (m.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code PrimitiveList} is {@code null} or empty.
+     *
+     * @param list the PrimitiveList to check
+     * @return {@code true} if the PrimitiveList is {@code null} or empty, otherwise {@code false}
+     */
+    @SuppressWarnings("rawtypes")
+    public static boolean isEmpty(final PrimitiveList list) {
+        return (list == null) || (list.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code Multiset} is {@code null} or empty.
+     *
+     * @param s the Multiset to check
+     * @return {@code true} if the Multiset is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final Multiset<?> s) {
+        return (s == null) || (s.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code Multimap} is {@code null} or empty.
+     *
+     * @param m the Multimap to check
+     * @return {@code true} if the Multimap is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final Multimap<?, ?, ?> m) {
+        return (m == null) || (m.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code DataSet} is {@code null} or empty.
+     *
+     * @param ds the DataSet to check
+     * @return {@code true} if the DataSet is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean isEmpty(final DataSet ds) {
+        return (ds == null) || (ds.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code CharSequence} is {@code null}, empty, or contains only whitespace characters.
+     *
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace characters, otherwise {@code false}
+     * @see Strings#isBlank(CharSequence)
+     */
+    public static boolean isBlank(final CharSequence cs) {
+        if (isEmpty(cs)) {
+            return true;
+        }
+
+        for (int i = 0, len = cs.length(); i < len; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    //    @Beta
+    //    public static boolean isNullOrFalse(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.FALSE.equals(bool);
+    //    }
+    //
+    //    @Beta
+    //    public static boolean isNullOrTrue(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.TRUE.equals(bool);
+    //    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code Boolean.TRUE}, {@code false} otherwise
+     */
+    @Beta
+    public static boolean isTrue(final Boolean bool) {
+        return Boolean.TRUE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.FALSE}, {@code false} otherwise
+     */
+    @Beta
+    public static boolean isNotTrue(final Boolean bool) {
+        return bool == null || !bool;
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
+     *
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code Boolean.FALSE}, {@code false} otherwise
+     */
+    @Beta
+    public static boolean isFalse(final Boolean bool) {
+        return Boolean.FALSE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
+     *
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.TRUE}, {@code false} otherwise
+     */
+    @Beta
+    public static boolean isNotFalse(final Boolean bool) {
+        return bool == null || bool;
+    }
+
+    /**
+     * Checks if the specified {@code CharSequence} is not {@code null} and not empty.
+     *
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is not {@code null} and not empty, otherwise {@code false}
+     * @see Strings#isNotEmpty(CharSequence)
+     */
+    public static boolean notEmpty(final CharSequence cs) {
+        return (cs != null) && (!cs.isEmpty());
+    }
+
+    /**
+     * Checks if the specified boolean array is not {@code null} and not empty.
+     *
+     * @param a the boolean array to check
+     * @return {@code true} if the boolean array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final boolean[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified char array is not {@code null} and not empty.
+     *
+     * @param a the char array to check
+     * @return {@code true} if the char array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final char[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified byte array is not {@code null} and not empty.
+     *
+     * @param a the byte array to check
+     * @return {@code true} if the byte array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final byte[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified short array is not {@code null} and not empty.
+     *
+     * @param a the short array to check
+     * @return {@code true} if the short array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final short[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified int array is not {@code null} and not empty.
+     *
+     * @param a the int array to check
+     * @return {@code true} if the int array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final int[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified long array is not {@code null} and not empty.
+     *
+     * @param a the long array to check
+     * @return {@code true} if the long array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final long[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified float array is not {@code null} and not empty.
+     *
+     * @param a the float array to check
+     * @return {@code true} if the float array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final float[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified double array is not {@code null} and not empty.
+     *
+     * @param a the double array to check
+     * @return {@code true} if the double array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final double[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified object array is not {@code null} and not empty.
+     *
+     * @param a the object array to check
+     * @return {@code true} if the object array is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final Object[] a) {
+        return (a != null) && (a.length > 0);
+    }
+
+    /**
+     * Checks if the specified {@code Collection} is not {@code null} and not empty.
+     *
+     * @param c the Collection to check
+     * @return {@code true} if the Collection is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final Collection<?> c) {
+        return (c != null) && (c.size() > 0);
+    }
+
+    /**
+     * Checks if the specified iterable is not {@code null} and not empty.
+     *
+     * @param iter the Iterable to check
+     * @return {@code true} if the Iterable is not {@code null} and not empty, otherwise {@code false}
+     */
+    @Beta
+    public static boolean notEmpty(final Iterable<?> iter) {
+        if (iter == null) {
+            return false;
+        }
+
+        if (iter instanceof Collection) {
+            return notEmpty((Collection<?>) iter);
+        } else {
+            return notEmpty(iter.iterator());
+        }
+    }
+
+    /**
+     * Checks if the specified iterator is not {@code null} and not empty.
+     *
+     * @param iter the Iterator to check
+     * @return {@code true} if the Iterator is not {@code null} and not empty, otherwise {@code false}
+     */
+    @Beta
+    public static boolean notEmpty(final Iterator<?> iter) {
+        return (iter != null) && (iter.hasNext());
+    }
+
+    /**
+     * Checks if the specified {@code Map} is not {@code null} and not empty.
+     *
+     * @param m the Map to check
+     * @return {@code true} if the Map is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final Map<?, ?> m) {
+        return (m != null) && (!m.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code PrimitiveList} is not {@code null} and not empty.
+     *
+     * @param list the PrimitiveList to check
+     * @return {@code true} if the PrimitiveList is not {@code null} and not empty, otherwise {@code false}
+     */
+    @SuppressWarnings("rawtypes")
+    public static boolean notEmpty(final PrimitiveList list) {
+        return (list != null) && (!list.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code Multiset} is not {@code null} and not empty.
+     *
+     * @param s the Multiset to check
+     * @return {@code true} if the Multiset is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final Multiset<?> s) {
+        return (s != null) && (s.size() > 0);
+    }
+
+    /**
+     * Checks if the specified {@code Multimap} is not {@code null} and not empty.
+     *
+     * @param m the Multimap to check
+     * @return {@code true} if the Multimap is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final Multimap<?, ?, ?> m) {
+        return (m != null) && (!m.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code DataSet} is not {@code null} and not empty.
+     *
+     * @param dataSet the DataSet to check
+     * @return {@code true} if the DataSet is not {@code null} and not empty, otherwise {@code false}
+     */
+    public static boolean notEmpty(final DataSet dataSet) {
+        return (dataSet != null) && (!dataSet.isEmpty());
+    }
+
+    /**
+     * Checks if the specified {@code CharSequence} is not {@code null} and not empty and not contains only whitespace characters.
+     *
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is not {@code null} and not empty and not contains only whitespace characters, otherwise {@code false}
+     * @see Strings#isNotBlank(CharSequence)
+     */
+    public static boolean notBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     *
+     * @param value
+     * @return {@code true}, if it's not {@code null} or default
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     */
+    @Deprecated
+    static boolean notNullOrDefault(final Object value) {
+        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
+    }
+
+    /**
+     * Checks if any of the specified objects is {@code null}.
+     *
+     * @param a the first object to check
+     * @param b the second object to check
+     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
+     */
+    public static boolean anyNull(final Object a, final Object b) {
+        return a == null || b == null;
+    }
+
+    /**
+     * Checks if any of the specified objects is {@code null}.
+     *
+     * @param a the first object to check
+     * @param b the second object to check
+     * @param c the third object to check
+     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
+     */
+    public static boolean anyNull(final Object a, final Object b, final Object c) {
+        return a == null || b == null || c == null;
+    }
+
+    /**
+     * Checks if any element in the specified array is {@code null}.
+     *
+     * @param a the array of objects to check
+     * @return {@code true} if any element in the specified array is {@code null}, otherwise {@code false}
+     */
+    public static boolean anyNull(final Object... a) {
+        if (isEmpty(a)) {
+            return false;
+        }
+
+        for (final Object e : a) {
+            if (e == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if any element in the specified collection is {@code null}.
+     *
+     * @param c the collection of objects to check
+     * @return {@code true} if any element in the specified collection is {@code null}, otherwise {@code false}
+     */
+    public static boolean anyNull(final Iterable<?> c) {
+        if (isEmpty(c)) {
+            return false;
+        }
+
+        for (final Object e : c) {
+            if (e == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(CharSequence, CharSequence)
+     */
+    public static boolean anyEmpty(final CharSequence a, final CharSequence b) {
+        return isEmpty(a) || isEmpty(b);
+    }
+
+    /**
+     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(CharSequence, CharSequence, CharSequence)
+     */
+    public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isEmpty(a) || isEmpty(b) || isEmpty(c);
+    }
+
+    /**
+     * <p>Checks if any of the CharSequences is empty ("") or {@code null}.</p>
+     *
+     * <pre>
+     * anyEmpty((String) null)    = true
+     * anyEmpty((String[]) null)  = false
+     * anyEmpty(null, "foo")      = true
+     * anyEmpty("", "bar")        = true
+     * anyEmpty("bob", "")        = true
+     * anyEmpty("  bob  ", null)  = true
+     * anyEmpty(" ", "bar")       = false
+     * anyEmpty("foo", "bar")     = false
+     * anyEmpty(new String[]{})   = false
+     * anyEmpty(new String[]{""}) = true
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if any of the CharSequences are empty or null
+     * @see Strings#isAnyEmpty(CharSequence...)
+     */
+    public static boolean anyEmpty(final CharSequence... css) {
+        return Strings.isAnyEmpty(css);
+    }
+
+    /**
+     * Checks if any of the specified CharSequence objects in the collection is empty.
+     *
+     * @param css the collection of CharSequence objects to check
+     * @return {@code true} if any of the CharSequence objects is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(Iterable)
+     */
+    public static boolean anyEmpty(final Iterable<? extends CharSequence> css) {
+        return Strings.isAnyEmpty(css);
+    }
+
+    /**
+     * Checks if any of the specified arrays is empty.
+     *
+     * @param a the first array to check
+     * @param b the second array to check
+     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Object[] a, final Object[] b) {
+        return a == null || a.length == 0 || b == null || b.length == 0;
+    }
+
+    /**
+     * Checks if any of the specified arrays is empty.
+     *
+     * @param a the first array to check
+     * @param b the second array to check
+     * @param c the third array to check
+     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Object[] a, final Object[] b, final Object[] c) {
+        return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
+    }
+
+    /**
+     * Checks if any of the specified collections is empty.
+     *
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @return {@code true} if any of the collections is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0;
+    }
+
+    /**
+     * Checks if any of the specified collections is empty.
+     *
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @param c the third collection to check
+     * @return {@code true} if any of the collections is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
+    }
+
+    /**
+     * Checks if any of the specified maps is empty.
+     *
+     * @param a the first map to check
+     * @param b the second map to check
+     * @return {@code true} if any of the maps is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b) {
+        return a == null || a.isEmpty() || b == null || b.isEmpty();
+    }
+
+    /**
+     * Checks if any of the specified maps is empty.
+     *
+     * @param a the first map to check
+     * @param b the second map to check
+     * @param c the third map to check
+     * @return {@code true} if any of the maps is empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
+        return a == null || a.isEmpty() || b == null || b.isEmpty() || c == null || c.isEmpty();
+    }
+
+    /**
+     * Checks if any of the specified CharSequences is blank.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
+     * @see Strings#isAnyBlank(CharSequence, CharSequence)
+     */
+    public static boolean anyBlank(final CharSequence a, final CharSequence b) {
+        return isBlank(a) || isBlank(b);
+    }
+
+    /**
+     * Checks if any of the specified CharSequences is blank.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
+     * @see Strings#isAnyBlank(CharSequence, CharSequence, CharSequence)
+     */
+    public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isBlank(a) || isBlank(b) || isBlank(c);
+    }
+
+    /**
+     * <p>Checks if any of the CharSequences are empty ("") or {@code null} or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * anyBlank((String) null)    = true
+     * anyBlank((String[]) null)  = false
+     * anyBlank(null, "foo")      = true
+     * anyBlank(null, null)       = true
+     * anyBlank("", "bar")        = true
+     * anyBlank("bob", "")        = true
+     * anyBlank("  bob  ", null)  = true
+     * anyBlank(" ", "bar")       = true
+     * anyBlank(new String[] {})  = false
+     * anyBlank(new String[]{""}) = true
+     * anyBlank("foo", "bar")     = false
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if any of the CharSequences are empty or {@code null} or whitespace only
+     * @see Strings#isAnyBlank(CharSequence...)
+     */
+    public static boolean anyBlank(final CharSequence... css) {
+        if (isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if any of the specified CharSequences in the collection is blank.
+     *
+     * @param css the collection of CharSequences to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
+     * @see Strings#isAnyBlank(Iterable)
+     */
+    public static boolean anyBlank(final Iterable<? extends CharSequence> css) {
+        if (isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if both specified objects are {@code null}.
+     *
+     * @param a the first object to check
+     * @param b the second object to check
+     * @return {@code true} if both objects are {@code null}, otherwise {@code false}
+     */
+    public static boolean allNull(final Object a, final Object b) {
+        return a == null && b == null;
+    }
+
+    /**
+     * Checks if all specified objects are {@code null}.
+     *
+     * @param a the first object to check
+     * @param b the second object to check
+     * @param c the third object to check
+     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
+     */
+    public static boolean allNull(final Object a, final Object b, final Object c) {
+        return a == null && b == null && c == null;
+    }
+
+    /**
+     * Checks if all specified objects are {@code null}.
+     *
+     * @param a the objects to check
+     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
+     */
+    public static boolean allNull(final Object... a) {
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (final Object e : a) {
+            if (e != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all elements in the specified collection are {@code null}.
+     *
+     * @param c the collection of objects to check
+     * @return {@code true} if all elements in the specified collection are {@code null}, otherwise {@code false}
+     */
+    public static boolean allNull(final Iterable<?> c) {
+        if (isEmpty(c)) {
+            return true;
+        }
+
+        for (final Object e : c) {
+            if (e != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if both specified CharSequences are empty ("") or {@code null}.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if both CharSequences are empty, otherwise {@code false}
+     * @see Strings#isAllEmpty(CharSequence, CharSequence)
+     */
+    public static boolean allEmpty(final CharSequence a, final CharSequence b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * Checks if all the specified CharSequences are empty ("") or {@code null}.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if all the CharSequences are empty, otherwise {@code false}
+     * @see Strings#isAllEmpty(CharSequence, CharSequence, CharSequence)
+     */
+    public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * <p>Checks if all the CharSequences are empty ("") or {@code null}.</p>
+     *
+     * <pre>
+     * allEmpty(null)             = true
+     * allEmpty(null, "")         = true
+     * allEmpty(new String[] {})  = true
+     * allEmpty(null, "foo")      = false
+     * allEmpty("", "bar")        = false
+     * allEmpty("bob", "")        = false
+     * allEmpty("  bob  ", null)  = false
+     * allEmpty(" ", "bar")       = false
+     * allEmpty("foo", "bar")     = false
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all the CharSequences are empty or null
+     * @see Strings#isAllEmpty(CharSequence...)
+     */
+    public static boolean allEmpty(final CharSequence... css) {
+        if (isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notEmpty(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all specified CharSequences in the collection are empty or {@code null}.
+     *
+     * @param css the collection of CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Iterable<? extends CharSequence> css) {
+        if (isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notEmpty(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all specified object arrays are empty.
+     *
+     * @param a the first object array to check, which may be null
+     * @param b the second object array to check, which may be null
+     * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Object[] a, final Object[] b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * Checks if all specified object arrays are empty.
+     *
+     * @param a the first object array to check, which may be null
+     * @param b the second object array to check, which may be null
+     * @param c the third object array to check, which may be null
+     * @return {@code true} if all object arrays are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Object[] a, final Object[] b, final Object[] c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * Checks if all specified collections are empty.
+     *
+     * @param a the first collection to check, which may be null
+     * @param b the second collection to check, which may be null
+     * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * Checks if all specified collections are empty.
+     *
+     * @param a the first collection to check, which may be null
+     * @param b the second collection to check, which may be null
+     * @param c the third collection to check, which may be null
+     * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * Checks if all specified maps are empty.
+     *
+     * @param a the first map to check, which may be null
+     * @param b the second map to check, which may be null
+     * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * Checks if all specified maps are empty.
+     *
+     * @param a the first map to check, which may be null
+     * @param b the second map to check, which may be null
+     * @param c the third map to check, which may be null
+     * @return {@code true} if all maps are empty or {@code null}, otherwise {@code false}
+     */
+    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * Checks if both specified CharSequences are blank.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if both CharSequences are blank, otherwise {@code false}
+     * @see Strings#isAllBlank(CharSequence, CharSequence)
+     */
+    public static boolean allBlank(final CharSequence a, final CharSequence b) {
+        return isBlank(a) && isBlank(b);
+    }
+
+    /**
+     * Checks if all the specified CharSequences are blank.
+     *
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if all the CharSequences are blank, otherwise {@code false}
+     * @see Strings#isAllBlank(CharSequence, CharSequence, CharSequence)
+     */
+    public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isBlank(a) && isBlank(b) && isBlank(c);
+    }
+
+    /**
+     * <p>Checks if all the CharSequences are empty (""), {@code null} or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * allBlank(null)             = true
+     * allBlank(null, "foo")      = false
+     * allBlank(null, null)       = true
+     * allBlank("", "bar")        = false
+     * allBlank("bob", "")        = false
+     * allBlank("  bob  ", null)  = false
+     * allBlank(" ", "bar")       = false
+     * allBlank("foo", "bar")     = false
+     * allBlank(new String[] {})  = true
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all the CharSequences are empty or {@code null} or whitespace only
+     * @see Strings#isAllBlank(CharSequence...)
+     */
+    public static boolean allBlank(final CharSequence... css) {
+        if (isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notBlank(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all specified CharSequences in the collection are blank.
+     *
+     * @param css the collection of CharSequences to check
+     * @return {@code true} if all CharSequences in the collection are blank, otherwise {@code false}
+     * @see Strings#isAllBlank(Iterable)
+     */
+    public static boolean allBlank(final Iterable<? extends CharSequence> css) {
+        if (isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notBlank(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ================================ length/size, isNull/Empty/Blank... ============================================
+
+    // ================================ nullToEmpty, defaultIfNull/Empty/Blank... =====================================
+
+    /**
+     * Converts a {@code null} string to an empty string.
+     *
+     * @param str the string to check
+     * @return the original string if it is not {@code null}, otherwise an empty string
+     * @see Strings#nullToEmpty(String)
+     * @see Strings#blankToEmpty(String)
+     */
+    @Beta
+    public static String nullToEmpty(final String str) {
+        return str == null ? Strings.EMPTY : str;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty list if the specified list is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list to check
+     * @return an empty list if the specified list is {@code null}, otherwise the original list
+     * @see #emptyList()
+     */
+    public static <T> List<T> nullToEmpty(final List<T> list) {
+        return list == null ? emptyList() : list;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty set if the specified Set is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty set if the specified set is {@code null}, otherwise the original set
+     * @see #emptySet()
+     */
+    public static <T> Set<T> nullToEmpty(final Set<T> set) {
+        return set == null ? emptySet() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty {@code SortedSet} if the specified set is {@code null}, otherwise the original set
+     * @see #emptySortedSet()
+     */
+    public static <T> SortedSet<T> nullToEmpty(final SortedSet<T> set) {
+        return set == null ? emptySortedSet() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty {@code NavigableSet} if the specified set is {@code null}, otherwise the original set
+     * @see #emptyNavigableSet()
+     */
+    public static <T> NavigableSet<T> nullToEmpty(final NavigableSet<T> set) {
+        return set == null ? emptyNavigableSet() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the list
+     * @param c the collection to check
+     * @return an empty {@code List} if the specified list is {@code null}, otherwise the original list
+     * @see #emptyList()
+     */
+    public static <T> Collection<T> nullToEmpty(final Collection<T> c) {
+        return c == null ? emptyList() : c;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty map if the specified Map is {@code null}, otherwise itself is returned.
+     * This method can be also used to get keySet, values, entrySet, etc. from a map
+     * <p>{@code nullToEmpty(map).keySet()}</p>
+     * <p>{@code nullToEmpty(map).values()}</p>
+     * <p>{@code nullToEmpty(map).entrySet()}</p>
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map the map to check
+     * @return an empty map if the specified map is {@code null}, otherwise the original map
+     * @see #emptyMap()
+     */
+    public static <K, V> Map<K, V> nullToEmpty(final Map<K, V> map) {
+        return map == null ? emptyMap() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map the SortedMap to check
+     * @return an empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise the original SortedMap
+     * @see #emptySortedMap()
+     */
+    public static <K, V> SortedMap<K, V> nullToEmpty(final SortedMap<K, V> map) {
+        return map == null ? emptySortedMap() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map the NavigableMap to check
+     * @return an empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise the original NavigableMap
+     * @see #emptyNavigableMap()
+     */
+    public static <K, V> NavigableMap<K, V> nullToEmpty(final NavigableMap<K, V> map) {
+        return map == null ? emptyNavigableMap() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty iterator if the specified Iterator is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements returned by this iterator
+     * @param iter the iterator to check
+     * @return an empty iterator if the specified Iterator is {@code null}, otherwise the original Iterator
+     * @see #emptyIterator()
+     */
+    public static <T> Iterator<T> nullToEmpty(final Iterator<T> iter) {
+        return iter == null ? emptyIterator() : iter;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements returned by this list iterator
+     * @param iter the list iterator to check
+     * @return an empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise the original ListIterator
+     * @see #emptyListIterator()
+     */
+    public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
+        return iter == null ? emptyListIterator() : iter;
+    }
+
+    /**
+     * Returns an empty boolean array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the boolean array to check
+     * @return an empty boolean array if the specified array is {@code null}, otherwise the original array
+     */
+    public static boolean[] nullToEmpty(final boolean[] a) {
+        return a == null ? EMPTY_BOOLEAN_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty char array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the char array to check
+     * @return an empty char array if the specified array is {@code null}, otherwise the original array
+     */
+    public static char[] nullToEmpty(final char[] a) {
+        return a == null ? EMPTY_CHAR_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty byte array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the byte array to check
+     * @return an empty byte array if the specified array is {@code null}, otherwise the original array
+     */
+    public static byte[] nullToEmpty(final byte[] a) {
+        return a == null ? EMPTY_BYTE_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty short array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the short array to check
+     * @return an empty short array if the specified array is {@code null}, otherwise the original array
+     */
+    public static short[] nullToEmpty(final short[] a) {
+        return a == null ? EMPTY_SHORT_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty int array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the int array to check
+     * @return an empty int array if the specified array is {@code null}, otherwise the original array
+     */
+    public static int[] nullToEmpty(final int[] a) {
+        return a == null ? EMPTY_INT_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty long array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the long array to check
+     * @return an empty long array if the specified array is {@code null}, otherwise the original array
+     */
+    public static long[] nullToEmpty(final long[] a) {
+        return a == null ? EMPTY_LONG_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty float array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the float array to check
+     * @return an empty float array if the specified array is {@code null}, otherwise the original array
+     */
+    public static float[] nullToEmpty(final float[] a) {
+        return a == null ? EMPTY_FLOAT_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty double array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the double array to check
+     * @return an empty double array if the specified array is {@code null}, otherwise the original array
+     */
+    public static double[] nullToEmpty(final double[] a) {
+        return a == null ? EMPTY_DOUBLE_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty BigInteger array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the BigInteger array to check
+     * @return an empty BigInteger array if the specified array is {@code null}, otherwise the original array
+     */
+    public static BigInteger[] nullToEmpty(final BigInteger[] a) {
+        return a == null ? EMPTY_BIG_INTEGER_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty BigDecimal array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the BigDecimal array to check
+     * @return an empty BigDecimal array if the specified array is {@code null}, otherwise the original array
+     */
+    public static BigDecimal[] nullToEmpty(final BigDecimal[] a) {
+        return a == null ? EMPTY_BIG_DECIMAL_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty String array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the String array to check
+     * @return an empty String array if the specified array is {@code null}, otherwise the original array
+     * @see Strings#nullToEmpty(String)
+     * @see Strings#nullToEmpty(String[])
+     */
+    public static String[] nullToEmpty(final String[] a) {
+        //    if (a == null) {
+        //        return EMPTY_STRING_ARRAY;
+        //    }
+        //
+        //    for (int i = 0, len = a.length; i < len; i++) {
+        //        a[i] = a[i] == null ? Strings.EMPTY : a[i];
+        //    }
+        //
+        //    return a;
+
+        return a == null ? EMPTY_STRING_ARRAY : a;
+    }
+
+    /**
+     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
+     *
+     * @param a the String array to check
+     * @return an empty String array if the specified array is {@code null}, otherwise the original array with each {@code null} element replaced by an empty string
+     * @see Strings#nullToEmpty(String)
+     * @see Strings#nullToEmpty(String[])
+     */
+    @Beta
+    public static String[] nullToEmptyForEach(final String[] a) { // nullToEmptyForAll is better?
+        if (a == null) {
+            return EMPTY_STRING_ARRAY;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = a[i] == null ? Strings.EMPTY : a[i];
+        }
+
+        return a;
+    }
+
+    //    /**
+    //     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
+    //     *
+    //     * @param a
+    //     * @return
+    //     * @see Strings#nullToEmpty(String)
+    //     * @see Strings#nullToEmpty(String[])
+    //     */
+    //    static String[] nullToEmptyForAll(final String[] a) { // nullToEmptyForAll is better?
+    //        If (a == null) {
+    //            return EMPTY_STRING_ARRAY;
+    //        }
+    //
+    //        for (int i = 0, len = a.length; i < len; i++) {
+    //            a[i] = a[i] == null ? Strings.EMPTY : a[i];
+    //        }
+    //
+    //        return a;
+    //    }
+
+    /**
+     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Date array to check
+     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
+     */
+    public static java.util.Date[] nullToEmpty(final java.util.Date[] a) {
+        return a == null ? EMPTY_JU_DATE_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Date array to check
+     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
+     */
+    public static java.sql.Date[] nullToEmpty(final java.sql.Date[] a) {
+        return a == null ? EMPTY_DATE_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty Time array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Time array to check
+     * @return an empty Time array if the specified array is {@code null}, otherwise the original array
+     */
+    public static java.sql.Time[] nullToEmpty(final java.sql.Time[] a) {
+        return a == null ? EMPTY_TIME_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty Timestamp array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Timestamp array to check
+     * @return an empty Timestamp array if the specified array is {@code null}, otherwise the original array
+     */
+    public static java.sql.Timestamp[] nullToEmpty(final java.sql.Timestamp[] a) {
+        return a == null ? EMPTY_TIMESTAMP_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty Calendar array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Calendar array to check
+     * @return an empty Calendar array if the specified array is {@code null}, otherwise the original array
+     */
+    public static Calendar[] nullToEmpty(final Calendar[] a) {
+        return a == null ? EMPTY_CALENDAR_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty Object array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * @param a the Object array to check
+     * @return an empty Object array if the specified array is {@code null}, otherwise the original array
+     */
+    public static Object[] nullToEmpty(final Object[] a) {
+        return a == null ? EMPTY_OBJECT_ARRAY : a;
+    }
+
+    /**
+     * Returns an empty array of the specified type if the given array is {@code null}, otherwise returns the original array.
+     *
+     * @param <T> the component type of the array
+     * @param a the array to check
+     * @param arrayType the class of the array type
+     * @return an empty array of the specified type if the given array is {@code null}, otherwise the original array
+     */
+    public static <T> T[] nullToEmpty(final T[] a, final Class<T[]> arrayType) {
+        return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the ImmutableCollection to check
+     * @return an empty ImmutableCollection if the specified collection is {@code null}, otherwise the original collection
+     */
+    public static <T> ImmutableCollection<T> nullToEmpty(final ImmutableCollection<T> c) {
+        return c == null ? ImmutableList.empty() : c;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty list if the specified ImmutableList is {@code null}, otherwise returns the original list.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the ImmutableList to check
+     * @return an empty ImmutableList if the specified list is {@code null}, otherwise the original list
+     */
+    public static <T> ImmutableList<T> nullToEmpty(final ImmutableList<T> list) {
+        return list == null ? ImmutableList.empty() : list;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty set if the specified ImmutableSet is {@code null}, otherwise returns the original set.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableSet to check
+     * @return an empty ImmutableSet if the specified set is {@code null}, otherwise the original set
+     */
+    public static <T> ImmutableSet<T> nullToEmpty(final ImmutableSet<T> set) {
+        return set == null ? ImmutableSet.empty() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty sorted set if the specified ImmutableSortedSet is {@code null}, otherwise returns the original set.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableSortedSet to check
+     * @return an empty ImmutableSortedSet if the specified set is {@code null}, otherwise the original set
+     */
+    public static <T> ImmutableSortedSet<T> nullToEmpty(final ImmutableSortedSet<T> set) {
+        return set == null ? ImmutableSortedSet.empty() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty navigable set if the specified ImmutableNavigableSet is {@code null}, otherwise returns the original set.
+     *
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableNavigableSet to check
+     * @return an empty ImmutableNavigableSet if the specified set is {@code null}, otherwise the original set
+     */
+    public static <T> ImmutableNavigableSet<T> nullToEmpty(final ImmutableNavigableSet<T> set) {
+        return set == null ? ImmutableNavigableSet.empty() : set;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty map if the specified ImmutableMap is {@code null}, otherwise returns the original map.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableMap to check
+     * @return an empty ImmutableMap if the specified map is {@code null}, otherwise the original map
+     */
+    public static <K, V> ImmutableMap<K, V> nullToEmpty(final ImmutableMap<K, V> map) {
+        return map == null ? ImmutableMap.empty() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty sorted map if the specified ImmutableSortedMap is {@code null}, otherwise returns the original map.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableSortedMap to check
+     * @return an empty ImmutableSortedMap if the specified map is {@code null}, otherwise the original map
+     */
+    public static <K, V> ImmutableSortedMap<K, V> nullToEmpty(final ImmutableSortedMap<K, V> map) {
+        return map == null ? ImmutableSortedMap.empty() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty navigable map if the specified ImmutableNavigableMap is {@code null}, otherwise returns the original map.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableNavigableMap to check
+     * @return an empty ImmutableNavigableMap if the specified map is {@code null}, otherwise the original map
+     */
+    public static <K, V> ImmutableNavigableMap<K, V> nullToEmpty(final ImmutableNavigableMap<K, V> map) {
+        return map == null ? ImmutableNavigableMap.empty() : map;
+    }
+
+    /**
+     * Returns an immutable/unmodifiable empty bi-map if the specified ImmutableBiMap is {@code null}, otherwise returns the original bi-map.
+     *
+     * @param <K> the type of keys in the bi-map
+     * @param <V> the type of values in the bi-map
+     * @param map the ImmutableBiMap to check
+     * @return an empty ImmutableBiMap if the specified bi-map is {@code null}, otherwise the original bi-map
+     */
+    public static <K, V> ImmutableBiMap<K, V> nullToEmpty(final ImmutableBiMap<K, V> map) {
+        return map == null ? ImmutableBiMap.empty() : map;
     }
 
     /**
@@ -917,6 +7292,84 @@ sealed class CommonUtil permits N {
         checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
 
         return isEmpty(m) ? defaultForEmpty : m;
+    }
+
+    /**
+     * Returns the default value of the given class type.
+     *
+     * @param <T>
+     * @param cls the class type for which the default value is to be returned.
+     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
+     * @throws IllegalArgumentException if the specified class type is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T defaultValueOf(final Class<T> cls) throws IllegalArgumentException {
+        return (T) typeOf(cls).defaultValue();
+    }
+
+    /**
+     * Returns the default value of the given class type.
+     *
+     * @param <T>
+     * @param cls the class type for which the default value is to be returned.
+     * @param nonNullForPrimitiveWrapper if {@code true}, it will return non-null value for primitive wrapper types, otherwise it will return {@code null}.
+     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
+     * @throws IllegalArgumentException if the specified class type is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T defaultValueOf(final Class<T> cls, final boolean nonNullForPrimitiveWrapper) throws IllegalArgumentException {
+        if (nonNullForPrimitiveWrapper) {
+            return (T) typeOf(ClassUtil.unwrap(cls)).defaultValue();
+        } else {
+            return (T) typeOf(cls).defaultValue();
+        }
+    }
+
+    // ================================ nullToEmpty, defaultIfNull/Empty/Blank... =====================================
+
+    // ================================ creation/conversion/get/set... ================================================
+
+    /**
+     * Gets a Type by the given type name.
+     *
+     * @param typeName the name of the type to be retrieved.
+     * @return the Type corresponding to the given type name.
+     * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
+        checkArgNotNull(typeName, cs.typeName);
+
+        Type<?> type = nameTypePool.get(typeName);
+
+        if (type == null) {
+            type = TypeFactory.getType(typeName);
+
+            nameTypePool.put(typeName, type);
+        }
+
+        return (Type<T>) type;
+    }
+
+    /**
+     * Gets a Type by the given {@code Class}.
+     *
+     * @param cls the name of the type to be retrieved.
+     * @return the Type corresponding to the given type name.
+     * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
+        checkArgNotNull(cls, cs.cls);
+
+        Type<?> type = clsTypePool.get(cls);
+
+        if (type == null) {
+            type = TypeFactory.getType(cls);
+            clsTypePool.put(cls, type);
+        }
+
+        return (Type<T>) type;
     }
 
     /**
@@ -1458,118 +7911,6 @@ sealed class CommonUtil permits N {
     private static final Set<Class<?>> notKryoCompatible = newConcurrentHashSet();
 
     /**
-     * Retrieves the property names of the given bean class.
-     *
-     * @param beanClass the class of the bean whose property names are to be retrieved.
-     * @return an ImmutableList of strings representing the property names of the given bean class.
-     * @throws IllegalArgumentException if the specified bean class is {@code null}.
-     * @see ClassUtil#getPropNameList(Class)
-     */
-    public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
-        return ClassUtil.getPropNameList(beanClass);
-    }
-
-    /**
-     * Retrieves the property names of the given bean class excluding the specified property names.
-     *
-     * @param beanClass the class of the bean whose property names are to be retrieved.
-     * @param propNameToExclude a set of property names to be excluded from the returned list.
-     * @return a List of strings representing the property names of the given bean class excluding the specified property names.
-     * @throws IllegalArgumentException if the specified bean class is {@code null}.
-     * @see ClassUtil#getPropNames(Class, Set)
-     * @see ClassUtil#getPropNames(Class, Collection)
-     */
-    public static List<String> getPropNames(final Class<?> beanClass, final Set<String> propNameToExclude) {
-        return ClassUtil.getPropNames(beanClass, propNameToExclude);
-    }
-
-    /**
-     * Retrieves the property names of the given bean object.
-     *
-     * @param bean The bean object whose property names are to be retrieved.
-     * @return A list of strings representing the property names of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#getPropNameList(Class)
-     * @see ClassUtil#getPropNames(Object, Predicate)
-     * @see ClassUtil#getPropNames(Object, BiPredicate)
-     */
-    public static List<String> getPropNames(final Object bean) {
-        checkArgNotNull(bean, cs.bean);
-
-        return getPropNames(bean.getClass());
-    }
-
-    static final BiPredicate<String, Object> NON_PROP_VALUE = (propName, propValue) -> propValue != null;
-
-    /**
-     * Retrieves the property names of the given bean object.
-     *
-     * @param bean The bean object whose property names are to be retrieved.
-     * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
-     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#getPropNameList(Class)
-     * @see ClassUtil#getPropNames(Object, Predicate)
-     * @see ClassUtil#getPropNames(Object, BiPredicate)
-     */
-    public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
-        if (ignoreNullValue) {
-            return ClassUtil.getPropNames(bean, NON_PROP_VALUE);
-        } else {
-            return getPropNames(bean);
-        }
-    }
-
-    /**
-     * Retrieves the value of the specified property from the given bean object.
-     *
-     * @param <T> The type of the property value.
-     * @param bean The bean object from which the property value is to be retrieved.
-     * @param propName The name of the property whose value is to be retrieved.
-     * @return The value of the specified property of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#getPropValue(Object, String)
-     * @see BeanInfo#getPropValue(Object, String)
-     */
-    public static <T> T getPropValue(final Object bean, final String propName) {
-        return ClassUtil.getPropValue(bean, propName);
-    }
-
-    /**
-     * Retrieves the value of the specified property from the given bean object.
-     *
-     * @param <T> The type of the property value.
-     * @param bean The bean object from which the property value is to be retrieved.
-     * @param propName The name of the property whose value is to be retrieved.
-     * @param ignoreUnmatchedProperty If {@code true}, the method will not throw an exception if the property does not exist in the bean object.
-     * @return The value of the specified property of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is {@code false}.
-     * @see ClassUtil#getPropValue(Object, String, boolean)
-     * @see BeanInfo#getPropValue(Object, String)
-     */
-    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
-        return ClassUtil.getPropValue(bean, propName, ignoreUnmatchedProperty);
-    }
-
-    /**
-     * Sets the value of the specified property in the given bean object.
-     * <br />
-     * Refer to setPropValue(Method, Object, Object).
-     *
-     * @param bean The bean object in which the property value is to be set.
-     * @param propName The name of the property whose value is to be set. The property name is case-insensitive.
-     * @param propValue The new value to be set for the specified property in the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
-     * @see ClassUtil#setPropValue(Object, String, Object)
-     * @see BeanInfo#setPropValue(Object, String, Object)
-     * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
-     */
-    @Deprecated
-    public static void setPropValue(final Object bean, final String propName, final Object propValue) {
-        ClassUtil.setPropValue(bean, propName, propValue, false);
-    }
-
-    /**
      * Clones the given object.
      * The object must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      *
@@ -1895,6 +8236,8 @@ sealed class CommonUtil permits N {
         return targetBean;
     }
 
+    private static final BinaryOperator<?> DEFAULT_MERGE_FUNC = (a, b) -> a == null ? b : a;
+
     /**
      * Merges the properties from the source object into the target object.
      * The source object's properties will overwrite the same properties in the target object.
@@ -2001,7 +8344,7 @@ sealed class CommonUtil permits N {
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
         checkArgNotNull(targetBean, cs.targetBean);
 
-        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, Fn.selectFirst(), ParserUtil.getBeanInfo(targetBean.getClass()));
+        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, DEFAULT_MERGE_FUNC, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
     /**
@@ -2116,7 +8459,7 @@ sealed class CommonUtil permits N {
      * @see Fn#selectFirst()
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
+        return merge(sourceBean, targetBean, propFilter, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -2156,7 +8499,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, propNameConverter, Fn.selectFirst());
+        return merge(sourceBean, targetBean, propFilter, propNameConverter, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -2240,13 +8583,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
-        checkArgNotNull(targetBean, cs.targetBean);
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
+        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -2337,6 +8674,53 @@ sealed class CommonUtil permits N {
         }
     }
 
+    //    /**
+    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static int toIntOneZero(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 0;
+    //        }
+    //
+    //        return bool.booleanValue() ? 1 : 0;
+    //    }
+    //
+    //    /**
+    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static char toCharYN(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 'N';
+    //        }
+    //
+    //        return bool.booleanValue() ? 'Y' : 'N';
+    //    }
+    //
+    //    /**
+    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static String toStringYesNo(final Boolean bool) {
+    //        if (bool == null) {
+    //            return "no";
+    //        }
+    //
+    //        return bool.booleanValue() ? "yes" : "no";
+    //    }
+
     /**
      * Erases all the properties of the given bean object.
      *
@@ -2357,6 +8741,229 @@ sealed class CommonUtil permits N {
             propInfo.setPropValue(bean, null);
         }
     }
+
+    /**
+     * Retrieves the property names of the given bean class.
+     *
+     * @param beanClass the class of the bean whose property names are to be retrieved.
+     * @return an ImmutableList of strings representing the property names of the given bean class.
+     * @throws IllegalArgumentException if the specified bean class is {@code null}.
+     * @see ClassUtil#getPropNameList(Class)
+     */
+    public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
+        return ClassUtil.getPropNameList(beanClass);
+    }
+
+    /**
+     * Retrieves the property names of the given bean class excluding the specified property names.
+     *
+     * @param beanClass the class of the bean whose property names are to be retrieved.
+     * @param propNameToExclude a set of property names to be excluded from the returned list.
+     * @return a List of strings representing the property names of the given bean class excluding the specified property names.
+     * @throws IllegalArgumentException if the specified bean class is {@code null}.
+     * @see ClassUtil#getPropNames(Class, Set)
+     * @see ClassUtil#getPropNames(Class, Collection)
+     */
+    public static List<String> getPropNames(final Class<?> beanClass, final Set<String> propNameToExclude) {
+        return ClassUtil.getPropNames(beanClass, propNameToExclude);
+    }
+
+    /**
+     * Retrieves the property names of the given bean object.
+     *
+     * @param bean The bean object whose property names are to be retrieved.
+     * @return A list of strings representing the property names of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#getPropNameList(Class)
+     * @see ClassUtil#getPropNames(Object, Predicate)
+     * @see ClassUtil#getPropNames(Object, BiPredicate)
+     */
+    public static List<String> getPropNames(final Object bean) {
+        checkArgNotNull(bean, cs.bean);
+
+        return getPropNames(bean.getClass());
+    }
+
+    static final BiPredicate<String, Object> NON_PROP_VALUE = (propName, propValue) -> propValue != null;
+
+    /**
+     * Retrieves the property names of the given bean object.
+     *
+     * @param bean The bean object whose property names are to be retrieved.
+     * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
+     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#getPropNameList(Class)
+     * @see ClassUtil#getPropNames(Object, Predicate)
+     * @see ClassUtil#getPropNames(Object, BiPredicate)
+     */
+    public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
+        if (ignoreNullValue) {
+            return ClassUtil.getPropNames(bean, NON_PROP_VALUE);
+        } else {
+            return getPropNames(bean);
+        }
+    }
+
+    /**
+     * Retrieves the value of the specified property from the given bean object.
+     *
+     * @param <T> The type of the property value.
+     * @param bean The bean object from which the property value is to be retrieved.
+     * @param propName The name of the property whose value is to be retrieved.
+     * @return The value of the specified property of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#getPropValue(Object, String)
+     * @see BeanInfo#getPropValue(Object, String)
+     */
+    public static <T> T getPropValue(final Object bean, final String propName) {
+        return ClassUtil.getPropValue(bean, propName);
+    }
+
+    /**
+     * Retrieves the value of the specified property from the given bean object.
+     *
+     * @param <T> The type of the property value.
+     * @param bean The bean object from which the property value is to be retrieved.
+     * @param propName The name of the property whose value is to be retrieved.
+     * @param ignoreUnmatchedProperty If {@code true}, the method will not throw an exception if the property does not exist in the bean object.
+     * @return The value of the specified property of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is {@code false}.
+     * @see ClassUtil#getPropValue(Object, String, boolean)
+     * @see BeanInfo#getPropValue(Object, String)
+     */
+    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
+        return ClassUtil.getPropValue(bean, propName, ignoreUnmatchedProperty);
+    }
+
+    /**
+     * Sets the value of the specified property in the given bean object.
+     * <br />
+     * Refer to setPropValue(Method, Object, Object).
+     *
+     * @param bean The bean object in which the property value is to be set.
+     * @param propName The name of the property whose value is to be set. The property name is case-insensitive.
+     * @param propValue The new value to be set for the specified property in the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#setPropValue(Object, String, Object)
+     * @see BeanInfo#setPropValue(Object, String, Object)
+     * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
+     */
+    @Deprecated
+    public static void setPropValue(final Object bean, final String propName, final Object propValue) {
+        ClassUtil.setPropValue(bean, propName, propValue, false);
+    }
+
+    /**
+     * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
+     *
+     * <p>Negates the specified boolean.</p>
+     *
+     * <p>If {@code null} is passed in, {@code null} will be returned.</p>
+     *
+     * <p>NOTE: This returns {@code null} and will throw a NullPointerException if outboxed to a boolean. </p>
+     *
+     * <pre>
+     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
+     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
+     *   BooleanUtils.negate(null)          = null;
+     * </pre>
+     *
+     * @param bool the Boolean to negate, which may be null
+     * @return the negated Boolean, or {@code null} if {@code null} input
+     */
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
+    @MayReturnNull
+    @Beta
+    public static Boolean negate(final Boolean bool) {
+        if (bool == null) {
+            return null; //NOSONAR
+        }
+
+        return bool ? Boolean.FALSE : Boolean.TRUE;
+    }
+
+    /**
+     * Negates all elements in the specified boolean array.
+     *
+     * @param a the boolean array to negate
+     */
+    @Beta
+    public static void negate(final boolean[] a) {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        negate(a, 0, a.length);
+    }
+
+    /**
+     * Negates all elements in the specified range of the boolean array.
+     *
+     * @param a the boolean array to negate
+     * @param fromIndex the starting index (inclusive) of the range to negate
+     * @param toIndex the ending index (exclusive) of the range to negate
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     */
+    @Beta
+    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            a[i] = !a[i];
+        }
+    }
+
+    //    /**
+    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static int toIntOneZero(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 0;
+    //        }
+    //
+    //        return bool.booleanValue() ? 1 : 0;
+    //    }
+    //
+    //    /**
+    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static char toCharYN(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 'N';
+    //        }
+    //
+    //        return bool.booleanValue() ? 'Y' : 'N';
+    //    }
+    //
+    //    /**
+    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static String toStringYesNo(final Boolean bool) {
+    //        if (bool == null) {
+    //            return "no";
+    //        }
+    //
+    //        return bool.booleanValue() ? "yes" : "no";
+    //    }
 
     /**
      * Returns an immutable/unmodifiable list of all the enum constants in the specified enum class.
@@ -2436,6 +9043,129 @@ sealed class CommonUtil permits N {
         }
 
         return enumMap;
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is {@code null}.
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the collection for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is null
+     */
+    public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
+        if (c == null) {
+            return emptyList();
+        }
+
+        return Collections.unmodifiableCollection(c);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is {@code null}.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is null
+     */
+    public static <T> List<T> unmodifiableList(final List<? extends T> list) {
+        if (list == null) {
+            return emptyList();
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is {@code null}.
+     *
+     * @param <T> the type of elements in the set
+     * @param s the set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is null
+     */
+    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
+        if (s == null) {
+            return emptySet();
+        }
+
+        return Collections.unmodifiableSet(s);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is {@code null}.
+     *
+     * @param <T> the type of elements in the set
+     * @param s the sorted set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is null
+     */
+    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
+        if (s == null) {
+            return emptySortedSet();
+        }
+
+        return Collections.unmodifiableSortedSet(s);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is {@code null}.
+     *
+     * @param <T> the type of elements in the set
+     * @param s the navigable set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is null
+     */
+    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
+        if (s == null) {
+            return emptyNavigableSet();
+        }
+
+        return Collections.unmodifiableNavigableSet(s);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is {@code null}.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is null
+     */
+    public static <K, V> Map<K, V> unmodifiableMap(final Map<? extends K, ? extends V> m) {
+        if (m == null) {
+            return emptyMap();
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is {@code null}.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the sorted map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is null
+     */
+    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(final SortedMap<K, ? extends V> m) {
+        if (m == null) {
+            return emptySortedMap();
+        }
+
+        return Collections.unmodifiableSortedMap(m);
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is {@code null}.
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the navigable map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is null
+     */
+    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(final NavigableMap<K, ? extends V> m) {
+        if (m == null) {
+            return emptyNavigableMap();
+        }
+
+        return Collections.unmodifiableNavigableMap(m);
     }
 
     /**
@@ -4388,7 +11118,7 @@ sealed class CommonUtil permits N {
             return arraySupplier.apply(0);
         }
 
-        return toArray(c, arraySupplier);
+        return toArray(c, 0, c.size(), arraySupplier);
     }
 
     /**
@@ -6571,6 +13301,9 @@ sealed class CommonUtil permits N {
      * @param valueExtractor a function that extracts values from the elements of the Iterable
      * @param mapSupplier a function that provides a new instance of the desired Map type
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @see Fn#throwingMerger()
+     * @see Fn#replacingMerger()
+     * @see Fn#ignoringMerger()
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
@@ -6693,6 +13426,9 @@ sealed class CommonUtil permits N {
      * @param mergeFunction a function that merges values if the same key is encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type
      * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @see Fn#throwingMerger()
+     * @see Fn#replacingMerger()
+     * @see Fn#ignoringMerger()
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
@@ -8411,5187 +15147,9 @@ sealed class CommonUtil permits N {
         return DataSet.empty();
     }
 
-    /**
-     * Retrieves the element at the specified position in the given Iterable.
-     *
-     * @param <T> the type of elements in the iterable
-     * @param c the iterable from which to retrieve the element
-     * @param index the position of the element to retrieve
-     * @return the element at the specified position in the iterable
-     * @throws IllegalArgumentException if the iterable is null
-     * @throws IndexOutOfBoundsException if the index is out of range
-     */
-    public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(c, cs.c);
+    // ================================ creation/conversion... =======================================================
 
-        if (c instanceof Collection) {
-            checkElementIndex(index, ((Collection<T>) c).size());
-        }
-
-        if (c instanceof List) {
-            return ((List<T>) c).get(index);
-        }
-
-        return getElement(c.iterator(), index);
-    }
-
-    /**
-     * Retrieves the element at the specified position in the given Iterator.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
-     * @param index the index of the element to retrieve. Must be a non-negative integer.
-     * @return the element at the specified index in the Iterator
-     * @throws IllegalArgumentException if the Iterator is null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterator)
-     */
-    public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(iter, cs.iter);
-
-        while (index-- > 0 && iter.hasNext()) {
-            iter.next();
-        }
-
-        if (iter.hasNext()) {
-            return iter.next();
-        } else {
-            throw new IndexOutOfBoundsException("Index: " + index + " is bigger than the maximum index of the specified Iterable or Iterator");
-        }
-    }
-
-    /**
-     * Returns the only element in the given Iterable.
-     *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to get the element from
-     * @return a {@code Nullable} containing the only element in the Iterable if it exists, otherwise an empty Nullable
-     * @throws TooManyElementsException if the Iterable contains more than one element
-     */
-    public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
-        if (isEmptyCollection(c)) {
-            return Nullable.empty();
-        }
-
-        if (c instanceof Collection && ((Collection<T>) c).size() > 1) {
-            final Iterator<? extends T> iter = c.iterator();
-
-            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(iter.next(), ", ", iter.next(), "...]"));
-        }
-
-        return getOnlyElement(c.iterator());
-    }
-
-    /**
-     * Returns the only element in the given Iterator.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to get the element from
-     * @return a {@code Nullable} containing the only element in the Iterator if it exists, otherwise an empty Nullable
-     * @throws TooManyElementsException if the Iterator contains more than one element
-     */
-    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
-        if (iter == null) {
-            return Nullable.empty();
-        }
-
-        final T first = iter.next();
-
-        if (iter.hasNext()) {
-            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
-        }
-
-        return Nullable.of(first);
-    }
-
-    /**
-     * Returns the first element in the given Iterable wrapped in a {@code Nullable}.
-     * If the Iterable is empty, an empty {@code Nullable} is returned.
-     *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to get the first element from
-     * @return a {@code Nullable} containing the first element in the Iterable if it exists, otherwise an empty Nullable
-     */
-    public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
-        if (isEmpty(c)) {
-            return Nullable.empty();
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            return Nullable.of(((List<T>) c).get(0));
-        } else {
-            return Nullable.of(c.iterator().next());
-        }
-    }
-
-    /**
-     * Returns the first element in the given Iterator wrapped in a {@code Nullable}.
-     * If the Iterator is empty, an empty {@code Nullable} is returned.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to get the first element from
-     * @return a {@code Nullable} containing the first element in the Iterator if it exists, otherwise an empty Nullable
-     */
-    public static <T> Nullable<T> firstElement(final Iterator<? extends T> iter) {
-        return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.empty();
-    }
-
-    /**
-     * Returns the last element in the given Iterable wrapped in a {@code Nullable}.
-     * If the Iterable is empty, an empty {@code Nullable} is returned.
-     *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to get the last element from
-     * @return a {@code Nullable} containing the last element in the Iterable if it exists, otherwise an empty Nullable
-     */
-    public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
-        if (isEmpty(c)) {
-            return Nullable.empty();
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            return Nullable.of(list.get(list.size() - 1));
-        }
-
-        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
-
-        if (descendingIterator != null) {
-            return Nullable.of(descendingIterator.next());
-        }
-
-        return lastElement(c.iterator());
-    }
-
-    /**
-     * Returns the last element in the given Iterator wrapped in a {@code Nullable}.
-     * If the Iterator is empty, an empty {@code Nullable} is returned.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to get the last element from
-     * @return a {@code Nullable} containing the last element in the Iterator if it exists, otherwise an empty Nullable
-     */
-    public static <T> Nullable<T> lastElement(final Iterator<? extends T> iter) {
-        if (iter == null || !iter.hasNext()) {
-            return Nullable.empty();
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-        }
-
-        return Nullable.of(e);
-    }
-
-    /**
-     * Returns a list containing the first <i>n</i> elements from the given Iterable.
-     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
-     *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to get the elements from
-     * @param n the number of elements to retrieve from the Iterable
-     * @return a list containing the first <i>n</i> elements from the Iterable
-     * @throws IllegalArgumentException if <i>n</i> is negative
-     */
-    @Beta
-    public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (isEmpty(c) || n == 0) {
-            return new ArrayList<>();
-        }
-
-        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
-            if (coll.size() <= n) {
-                return new ArrayList<>(coll);
-            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
-                return new ArrayList<>((list).subList(0, n));
-            }
-        }
-
-        final List<T> result = new ArrayList<>(Math.min(1024, n));
-        int cnt = 0;
-
-        for (final T e : c) {
-            result.add(e);
-
-            if (++cnt == n) {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a list containing the first <i>n</i> elements from the given Iterator.
-     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to get the elements from
-     * @param n the number of elements to retrieve from the Iterator
-     * @return a list containing the first <i>n</i> elements from the Iterator
-     * @throws IllegalArgumentException if <i>n</i> is negative
-     */
-    @Beta
-    public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (isEmpty(iter) || n == 0) {
-            return new ArrayList<>();
-        }
-
-        final List<T> result = new ArrayList<>(Math.min(1024, n));
-        int cnt = 0;
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-
-            if (++cnt == n) {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a list containing the last <i>n</i> elements from the given Iterable.
-     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
-     *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to get the elements from
-     * @param n the number of elements to retrieve from the end of the Iterable
-     * @return a list containing the last <i>n</i> elements from the Iterable
-     * @throws IllegalArgumentException if <i>n</i> is negative
-     */
-    @Beta
-    public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (isEmpty(c) || n == 0) {
-            return new ArrayList<>();
-        }
-
-        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
-            if (coll.size() <= n) {
-                return new ArrayList<>(coll);
-            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
-                return new ArrayList<>(list.subList(list.size() - n, list.size()));
-            }
-        }
-
-        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
-
-        for (final T e : c) {
-            if (deque.size() >= n) {
-                deque.pollFirst();
-            }
-
-            deque.offerLast(e);
-        }
-
-        return new ArrayList<>(deque);
-    }
-
-    /**
-     * Returns a list containing the last <i>n</i> elements from the given Iterator.
-     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
-     *
-     * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to get the elements from
-     * @param n the number of elements to retrieve from the Iterator
-     * @return a list containing the last <i>n</i> elements from the Iterator
-     * @throws IllegalArgumentException if <i>n</i> is negative
-     */
-    @Beta
-    public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (isEmpty(iter) || n == 0) {
-            return new ArrayList<>();
-        }
-
-        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
-
-        while (iter.hasNext()) {
-            if (deque.size() >= n) {
-                deque.pollFirst();
-            }
-
-            deque.offerLast(iter.next());
-        }
-
-        return new ArrayList<>(deque);
-    }
-
-    /**
-     * Returns the first {@code non-null} value among the two provided values.
-     * If both values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the first value to check
-     * @param b the second value to check
-     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> firstNonNull(final T a, final T b) {
-        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first {@code non-null} value among the three provided values.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the first value to check
-     * @param b the second value to check
-     * @param c the third value to check
-     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
-        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first {@code non-null} value among the provided values.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the array of values to check
-     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    @SafeVarargs
-    public static <T> Optional<T> firstNonNull(final T... a) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (final T e : a) {
-            if (e != null) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first {@code non-null} value from the provided iterable.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param c the iterable of values to check
-     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
-        if (isEmpty(c)) {
-            return Optional.empty();
-        }
-
-        for (final T e : c) {
-            if (e != null) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first {@code non-null} value from the provided iterator.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param iter the iterator of values to check
-     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> firstNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return Optional.empty();
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the last {@code non-null} value from the provided values.
-     * If both values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the first value to check
-     * @param b the second value to check
-     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> lastNonNull(final T a, final T b) {
-        return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty());
-    }
-
-    /**
-     * Returns the last {@code non-null} value from the provided values.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the first value to check
-     * @param b the second value to check
-     * @param c the third value to check
-     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
-        return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty()));
-    }
-
-    /**
-     * Returns the last {@code non-null} value from the provided array of values.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param a the array of values to check
-     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    @SafeVarargs
-    public static <T> Optional<T> lastNonNull(final T... a) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if (a[i] != null) {
-                return Optional.of(a[i]);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the last {@code non-null} value from the provided iterable.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param c the iterable to check
-     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
-        if (isEmpty(c)) {
-            return Optional.empty();
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = list.size() - 1; i >= 0; i--) {
-                if (list.get(i) != null) {
-                    return Optional.of(list.get(i));
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
-
-        if (descendingIterator != null) {
-            T next = null;
-
-            while (descendingIterator.hasNext()) {
-                if ((next = descendingIterator.next()) != null) {
-                    return Optional.of(next);
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        return lastNonNull(c.iterator());
-    }
-
-    /**
-     * Returns the last {@code non-null} value from the provided iterator.
-     * If all values are {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the values
-     * @param iter the iterator to check
-     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
-     */
-    public static <T> Optional<T> lastNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return Optional.empty();
-        }
-
-        T e = null;
-        T lastNonNull = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                lastNonNull = e;
-            }
-        }
-
-        return Optional.ofNullable(lastNonNull);
-    }
-
-    /**
-     * Returns the first non-empty array from the given arrays.
-     * If both arrays are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of elements in the arrays
-     * @param a the first array to check
-     * @param b the second array to check
-     * @return an Optional containing the first non-empty array, or an empty Optional if both arrays are empty or null
-     */
-    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b) {
-        return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first non-empty array from the given arrays.
-     * If all arrays are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of elements in the arrays
-     * @param a the first array to check
-     * @param b the second array to check
-     * @param c the third array to check
-     * @return an Optional containing the first non-empty array, or an empty Optional if all arrays are empty or null
-     */
-    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b, final T[] c) {
-        return a != null && a.length > 0 ? Optional.of(a)
-                : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first non-empty collection from the given collections.
-     * If both collections are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the collections
-     * @param a the first collection to check
-     * @param b the second collection to check
-     * @return an Optional containing the first non-empty collection, or an empty Optional if both collections are empty or null
-     */
-    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
-        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first non-empty collection from the given collections.
-     * If all collections are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the collections
-     * @param a the first collection to check
-     * @param b the second collection to check
-     * @param c the third collection to check
-     * @return an Optional containing the first non-empty collection, or an empty Optional if all collections are empty or null
-     */
-    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return a != null && a.size() > 0 ? Optional.of(a)
-                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first non-empty map from the given maps.
-     * If both maps are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the maps
-     * @param a the first map to check
-     * @param b the second map to check
-     * @return an Optional containing the first non-empty map, or an empty Optional if both maps are empty or null
-     */
-    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b) {
-        return a != null && !a.isEmpty() ? Optional.of(a) : (b != null && !b.isEmpty() ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first non-empty map from the given maps.
-     * If all maps are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the maps
-     * @param a the first map to check
-     * @param b the second map to check
-     * @param c the third map to check
-     * @return an Optional containing the first non-empty map, or an empty Optional if all maps are empty or null
-     */
-    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return a != null && !a.isEmpty() ? Optional.of(a)
-                : (b != null && !b.isEmpty() ? Optional.of(b) : (c != null && !c.isEmpty() ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given CharSequences.
-     * If both CharSequences are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both CharSequences are empty or null
-     * @see Strings#firstNonEmpty(CharSequence, CharSequence)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
-        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given CharSequences.
-     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
-     * @see Strings#firstNonEmpty(CharSequence, CharSequence, CharSequence)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first non-empty CharSequence from the given CharSequences.
-     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the array of CharSequences to check
-     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
-     * @see Strings#firstNonEmpty(CharSequence...)
-     */
-    @SafeVarargs
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (final T e : a) {
-            if (Strings.isNotEmpty(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns an Optional containing the first non-empty CharSequence from the given Iterable of CharSequences.
-     * If all CharSequences are empty or the Iterable is empty, returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequence
-     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
-     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the Iterable is empty
-     * @see Strings#firstNonEmpty(Iterable)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final Iterable<? extends T> css) {
-        if (isEmpty(css)) {
-            return Optional.empty();
-        }
-
-        for (final T e : css) {
-            if (Strings.isNotEmpty(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given CharSequences.
-     * If both CharSequences are blank or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both CharSequences are blank or null
-     * @see Strings#firstNonBlank(CharSequence, CharSequence)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
-        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.empty());
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given CharSequences.
-     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
-     * @see Strings#firstNonBlank(CharSequence, CharSequence, CharSequence)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
-        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.empty()));
-    }
-
-    /**
-     * Returns the first non-blank CharSequence from the given CharSequences.
-     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequences
-     * @param a the array of CharSequences to check
-     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
-     * @see Strings#firstNonBlank(CharSequence...)
-     */
-    @SafeVarargs
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (final T e : a) {
-            if (Strings.isNotBlank(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns an Optional containing the first non-blank CharSequence from the given Iterable of CharSequences.
-     * If all CharSequences are blank or the Iterable is empty, returns an empty Optional.
-     *
-     * @param <T> the type of the CharSequence
-     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
-     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the Iterable is empty
-     * @see Strings#firstNonBlank(Iterable)
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final Iterable<? extends T> css) {
-        if (isEmpty(css)) {
-            return Optional.empty();
-        }
-
-        for (final T e : css) {
-            if (Strings.isNotBlank(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first entry from the given map.
-     * If the map is {@code null} or empty, it returns an empty Optional.
-     *
-     * @param <K> the type of keys maintained by the map
-     * @param <V> the type of mapped values
-     * @param map the map from which to retrieve the first entry
-     * @return an Optional containing the first entry of the map, or an empty Optional if the map is {@code null} or empty
-     */
-    public static <K, V> Optional<Map.Entry<K, V>> firstEntry(final Map<K, V> map) {
-        if (map == null || map.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(map.entrySet().iterator().next());
-    }
-
-    /**
-     * Returns the last entry from the given map.
-     * If the map is {@code null} or empty, it returns an empty Optional.
-     *
-     * @param <K> the type of keys maintained by the map
-     * @param <V> the type of mapped values
-     * @param map the map from which to retrieve the last entry
-     * @return an Optional containing the last entry of the map, or an empty Optional if the map is {@code null} or empty
-     */
-    public static <K, V> Optional<Map.Entry<K, V>> lastEntry(final Map<K, V> map) {
-        if (map == null || map.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return lastNonNull(map.entrySet().iterator());
-    }
-
-    /**
-     * Returns the first element of the given array if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @return the first element of the array if it is not empty, otherwise null
-     */
-    public static <T> T firstOrNullIfEmpty(final T[] a) {
-        return a == null || a.length == 0 ? null : a[0];
-    }
-
-    /**
-     * Returns the first element of the given iterable if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to check
-     * @return the first element of the iterable if it is not empty, otherwise null
-     */
-    public static <T> T firstOrNullIfEmpty(final Iterable<? extends T> c) {
-        return firstOrDefaultIfEmpty(c, null);
-    }
-
-    /**
-     * Returns the first element of the given iterator if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @return the first element of the iterator if it is not empty, otherwise null
-     */
-    public static <T> T firstOrNullIfEmpty(final Iterator<? extends T> iter) {
-        return firstOrDefaultIfEmpty(iter, null);
-    }
-
-    /**
-     * Returns the first element of the given array if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @param defaultValueForEmpty the default value to return if the array is empty
-     * @return the first element of the array if it is not empty, otherwise the specified default value
-     */
-    public static <T> T firstOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
-        return a == null || a.length == 0 ? defaultValueForEmpty : a[0];
-    }
-
-    /**
-     * Returns the first element of the given iterable if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to check
-     * @param defaultValueForEmpty the default value to return if the iterable is empty
-     * @return the first element of the iterable if it is not empty, otherwise the specified default value
-     */
-    public static <T> T firstOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
-        if (isEmpty(c)) {
-            return defaultValueForEmpty;
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            return ((List<T>) c).get(0);
-        } else {
-            return c.iterator().next();
-        }
-    }
-
-    /**
-     * Returns the first element of the given iterator if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @param defaultValueForEmpty the default value to return if the iterator is empty
-     * @return the first element of the iterator if it is not empty, otherwise the specified default value
-     */
-    public static <T> T firstOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
-        if (iter == null || !iter.hasNext()) {
-            return defaultValueForEmpty;
-        }
-
-        return iter.next();
-    }
-
-    /**
-     * Returns the last element of the given array if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @return the last element of the array if it is not empty, otherwise null
-     */
-    public static <T> T lastOrNullIfEmpty(final T[] a) {
-        return a == null || a.length == 0 ? null : a[a.length - 1];
-    }
-
-    /**
-     * Returns the last element of the given iterable if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to check
-     * @return the last element of the iterable if it is not empty, otherwise null
-     */
-    public static <T> T lastOrNullIfEmpty(final Iterable<? extends T> c) {
-        return lastOrDefaultIfEmpty(c, null);
-    }
-
-    /**
-     * Returns the last element of the given iterator if it is not empty, otherwise returns {@code null}.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @return the last element of the iterator if it is not empty, otherwise null
-     */
-    public static <T> T lastOrNullIfEmpty(final Iterator<? extends T> iter) {
-        return lastOrDefaultIfEmpty(iter, null);
-    }
-
-    /**
-     * Returns the last element of the given array if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @param defaultValueForEmpty the default value to return if the array is empty
-     * @return the last element of the array if it is not empty, otherwise the specified default value
-     */
-    public static <T> T lastOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
-        return a == null || a.length == 0 ? defaultValueForEmpty : a[a.length - 1];
-    }
-
-    /**
-     * Returns the last element of the given iterable if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to check
-     * @param defaultValueForEmpty the default value to return if the iterable is empty
-     * @return the last element of the iterable if it is not empty, otherwise the specified default value
-     */
-    public static <T> T lastOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
-        if (isEmpty(c)) {
-            return defaultValueForEmpty;
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            return list.get(list.size() - 1);
-        }
-
-        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
-
-        if (descendingIterator != null) {
-            return descendingIterator.next();
-        }
-
-        return lastOrDefaultIfEmpty(c.iterator(), defaultValueForEmpty);
-    }
-
-    /**
-     * Returns the last element of the given iterator if it is not empty, otherwise returns the specified default value.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @param defaultValueForEmpty the default value to return if the iterator is empty
-     * @return the last element of the iterator if it is not empty, otherwise the specified default value
-     */
-    public static <T> T lastOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
-        if (iter == null || !iter.hasNext()) {
-            return defaultValueForEmpty;
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-        }
-
-        return e;
-    }
-
-    /**
-     * Returns the first element in the given array that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to search
-     * @param predicate the predicate to apply to elements of the array
-     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
-        if (isEmpty(a)) {
-            return Nullable.empty();
-        }
-
-        for (final T element : a) {
-            if (predicate.test(element)) {
-                return Nullable.of(element);
-            }
-        }
-
-        return Nullable.empty();
-    }
-
-    /**
-     * Returns the first element in the given iterable that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterable
-     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        if (isEmpty(c)) {
-            return Nullable.empty();
-        }
-
-        for (final T e : c) {
-            if (predicate.test(e)) {
-                return Nullable.of(e);
-            }
-        }
-
-        return Nullable.empty();
-    }
-
-    /**
-     * Returns the first element in the given iterator that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to search
-     * @param predicate the predicate to apply to elements of the iterator
-     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
-        if (iter == null) {
-            return Nullable.empty();
-        }
-
-        T next = null;
-
-        while (iter.hasNext()) {
-            next = iter.next();
-
-            if (predicate.test(next)) {
-                return Nullable.of(next);
-            }
-        }
-
-        return Nullable.empty();
-    }
-
-    /**
-     * Returns the last element in the given array that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to search
-     * @param predicate the predicate to apply to elements of the array
-     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
-        if (isEmpty(a)) {
-            return Nullable.empty();
-        }
-
-        for (int len = a.length, i = len - 1; i >= 0; i--) {
-            if (predicate.test(a[i])) {
-                return Nullable.of(a[i]);
-            }
-        }
-
-        return Nullable.empty();
-    }
-
-    /**
-     * Returns the last element in the given iterable that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterable
-     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        return (Nullable<T>) findLast(c, predicate, false);
-    }
-
-    /**
-     * Returns the last element in the given iterator that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterator
-     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
-     */
-    private static <T> Object findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate, final boolean isForNonNull) {
-        if (isEmptyCollection(c)) {
-            return isForNonNull ? Optional.empty() : Nullable.empty();
-        }
-
-        T e = null;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = list.size() - 1; i >= 0; i--) {
-                e = list.get(i);
-
-                if ((!isForNonNull || e != null) && predicate.test(e)) {
-                    return isForNonNull ? Optional.of(e) : Nullable.of(e);
-                }
-            }
-
-            return isForNonNull ? Optional.empty() : Nullable.empty();
-        }
-
-        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
-
-        if (descendingIterator != null) {
-            while (descendingIterator.hasNext()) {
-                e = descendingIterator.next();
-
-                if ((!isForNonNull || e != null) && predicate.test(e)) {
-                    return isForNonNull ? Optional.of(e) : Nullable.of(e);
-                }
-            }
-
-            return isForNonNull ? Optional.empty() : Nullable.empty();
-        }
-
-        T[] a = null;
-
-        if (c instanceof Collection) {
-            a = (T[]) ((Collection<T>) c).toArray();
-        } else {
-            final List<T> tmp = new ArrayList<>();
-
-            for (final T t : c) {
-                tmp.add(t);
-            }
-
-            a = (T[]) tmp.toArray();
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if ((!isForNonNull || a[i] != null) && predicate.test(a[i])) {
-                return isForNonNull ? Optional.of(a[i]) : Nullable.of(a[i]);
-            }
-        }
-
-        return isForNonNull ? Optional.empty() : Nullable.empty();
-    }
-
-    /**
-     * Returns the first {@code non-null} element in the given array that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to search
-     * @param predicate the predicate to apply to elements of the array
-     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (final T element : a) {
-            if (element != null && predicate.test(element)) {
-                return Optional.of(element);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first {@code non-null} element in the given iterable that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterable
-     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        if (isEmpty(c)) {
-            return Optional.empty();
-        }
-
-        for (final T e : c) {
-            if (e != null && predicate.test(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the first {@code non-null} element in the given iterator that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to search
-     * @param predicate the predicate to apply to elements of the iterator
-     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
-        if (iter == null) {
-            return Optional.empty();
-        }
-
-        T next = null;
-
-        while (iter.hasNext()) {
-            next = iter.next();
-
-            if (next != null && predicate.test(next)) {
-                return Optional.of(next);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the last {@code non-null} element in the given array that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the array
-     * @param a the array to search
-     * @param predicate the predicate to apply to elements of the array
-     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
-        if (isEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (int len = a.length, i = len - 1; i >= 0; i--) {
-            if (a[i] != null && predicate.test(a[i])) {
-                return Optional.of(a[i]);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the last {@code non-null} element in the given iterable that matches the specified predicate.
-     *
-     * @param <T> the type of the elements in the iterable
-     * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterable
-     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
-     */
-    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
-        return (Optional<T>) findLast(c, predicate, true);
-    }
-
-    /**
-     * Returns the length of the specified {@code CharSequence}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param s the CharSequence to check
-     * @return the length of the CharSequence, or 0 if the CharSequence is null
-     */
-    public static int len(final CharSequence s) {
-        return s == null ? 0 : s.length();
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final boolean[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final char[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final byte[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final short[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final int[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final long[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final float[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final double[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param a the array to check
-     * @return the length of the array, or 0 if the array is null
-     */
-    public static int len(final Object[] a) {
-        return a == null ? 0 : a.length;
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param c the collection to check
-     * @return the size of the specified collection, or 0 if the collection is null
-     */
-    public static int size(final Collection<?> c) {
-        return c == null ? 0 : c.size();
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param m the map to check
-     * @return the size of the specified map, or 0 if the map is null
-     */
-    public static int size(final Map<?, ?> m) {
-        return m == null ? 0 : m.size();
-    }
-
-    /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
-     *
-     * @param c the PrimitiveList to check
-     * @return the size of the specified PrimitiveList, or 0 if the PrimitiveList is null
-     */
-    @Beta
-    @SuppressWarnings("rawtypes")
-    public static int size(final PrimitiveList c) {
-        return c == null ? 0 : c.size();
-    }
-
-    /**
-     * Converts a {@code null} string to an empty string.
-     *
-     * @param str the string to check
-     * @return the original string if it is not {@code null}, otherwise an empty string
-     * @see Strings#nullToEmpty(String)
-     * @see Strings#blankToEmpty(String)
-     */
-    @Beta
-    public static String nullToEmpty(final String str) {
-        return str == null ? Strings.EMPTY : str;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty list if the specified list is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the list
-     * @param list the list to check
-     * @return an empty list if the specified list is {@code null}, otherwise the original list
-     * @see #emptyList()
-     */
-    public static <T> List<T> nullToEmpty(final List<T> list) {
-        return list == null ? emptyList() : list;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty set if the specified Set is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the set to check
-     * @return an empty set if the specified set is {@code null}, otherwise the original set
-     * @see #emptySet()
-     */
-    public static <T> Set<T> nullToEmpty(final Set<T> set) {
-        return set == null ? emptySet() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the set to check
-     * @return an empty {@code SortedSet} if the specified set is {@code null}, otherwise the original set
-     * @see #emptySortedSet()
-     */
-    public static <T> SortedSet<T> nullToEmpty(final SortedSet<T> set) {
-        return set == null ? emptySortedSet() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the set to check
-     * @return an empty {@code NavigableSet} if the specified set is {@code null}, otherwise the original set
-     * @see #emptyNavigableSet()
-     */
-    public static <T> NavigableSet<T> nullToEmpty(final NavigableSet<T> set) {
-        return set == null ? emptyNavigableSet() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the list
-     * @param c the collection to check
-     * @return an empty {@code List} if the specified list is {@code null}, otherwise the original list
-     * @see #emptyList()
-     */
-    public static <T> Collection<T> nullToEmpty(final Collection<T> c) {
-        return c == null ? emptyList() : c;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty map if the specified Map is {@code null}, otherwise itself is returned.
-     * This method can be also used to get keySet, values, entrySet, etc. from a map
-     * <p>{@code nullToEmpty(map).keySet()}</p>
-     * <p>{@code nullToEmpty(map).values()}</p>
-     * <p>{@code nullToEmpty(map).entrySet()}</p>
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the map to check
-     * @return an empty map if the specified map is {@code null}, otherwise the original map
-     * @see #emptyMap()
-     */
-    public static <K, V> Map<K, V> nullToEmpty(final Map<K, V> map) {
-        return map == null ? emptyMap() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the SortedMap to check
-     * @return an empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise the original SortedMap
-     * @see #emptySortedMap()
-     */
-    public static <K, V> SortedMap<K, V> nullToEmpty(final SortedMap<K, V> map) {
-        return map == null ? emptySortedMap() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the NavigableMap to check
-     * @return an empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise the original NavigableMap
-     * @see #emptyNavigableMap()
-     */
-    public static <K, V> NavigableMap<K, V> nullToEmpty(final NavigableMap<K, V> map) {
-        return map == null ? emptyNavigableMap() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty iterator if the specified Iterator is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements returned by this iterator
-     * @param iter the iterator to check
-     * @return an empty iterator if the specified Iterator is {@code null}, otherwise the original Iterator
-     * @see #emptyIterator()
-     */
-    public static <T> Iterator<T> nullToEmpty(final Iterator<T> iter) {
-        return iter == null ? emptyIterator() : iter;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements returned by this list iterator
-     * @param iter the list iterator to check
-     * @return an empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise the original ListIterator
-     * @see #emptyListIterator()
-     */
-    public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
-        return iter == null ? emptyListIterator() : iter;
-    }
-
-    /**
-     * Returns an empty boolean array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the boolean array to check
-     * @return an empty boolean array if the specified array is {@code null}, otherwise the original array
-     */
-    public static boolean[] nullToEmpty(final boolean[] a) {
-        return a == null ? EMPTY_BOOLEAN_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty char array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the char array to check
-     * @return an empty char array if the specified array is {@code null}, otherwise the original array
-     */
-    public static char[] nullToEmpty(final char[] a) {
-        return a == null ? EMPTY_CHAR_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty byte array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the byte array to check
-     * @return an empty byte array if the specified array is {@code null}, otherwise the original array
-     */
-    public static byte[] nullToEmpty(final byte[] a) {
-        return a == null ? EMPTY_BYTE_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty short array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the short array to check
-     * @return an empty short array if the specified array is {@code null}, otherwise the original array
-     */
-    public static short[] nullToEmpty(final short[] a) {
-        return a == null ? EMPTY_SHORT_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty int array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the int array to check
-     * @return an empty int array if the specified array is {@code null}, otherwise the original array
-     */
-    public static int[] nullToEmpty(final int[] a) {
-        return a == null ? EMPTY_INT_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty long array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the long array to check
-     * @return an empty long array if the specified array is {@code null}, otherwise the original array
-     */
-    public static long[] nullToEmpty(final long[] a) {
-        return a == null ? EMPTY_LONG_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty float array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the float array to check
-     * @return an empty float array if the specified array is {@code null}, otherwise the original array
-     */
-    public static float[] nullToEmpty(final float[] a) {
-        return a == null ? EMPTY_FLOAT_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty double array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the double array to check
-     * @return an empty double array if the specified array is {@code null}, otherwise the original array
-     */
-    public static double[] nullToEmpty(final double[] a) {
-        return a == null ? EMPTY_DOUBLE_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty BigInteger array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the BigInteger array to check
-     * @return an empty BigInteger array if the specified array is {@code null}, otherwise the original array
-     */
-    public static BigInteger[] nullToEmpty(final BigInteger[] a) {
-        return a == null ? EMPTY_BIG_INTEGER_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty BigDecimal array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the BigDecimal array to check
-     * @return an empty BigDecimal array if the specified array is {@code null}, otherwise the original array
-     */
-    public static BigDecimal[] nullToEmpty(final BigDecimal[] a) {
-        return a == null ? EMPTY_BIG_DECIMAL_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty String array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the String array to check
-     * @return an empty String array if the specified array is {@code null}, otherwise the original array
-     * @see Strings#nullToEmpty(String)
-     * @see Strings#nullToEmpty(String[])
-     */
-    public static String[] nullToEmpty(final String[] a) {
-        //    if (a == null) {
-        //        return EMPTY_STRING_ARRAY;
-        //    }
-        //
-        //    for (int i = 0, len = a.length; i < len; i++) {
-        //        a[i] = a[i] == null ? Strings.EMPTY : a[i];
-        //    }
-        //
-        //    return a;
-
-        return a == null ? EMPTY_STRING_ARRAY : a;
-    }
-
-    /**
-     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
-     *
-     * @param a the String array to check
-     * @return an empty String array if the specified array is {@code null}, otherwise the original array with each {@code null} element replaced by an empty string
-     * @see Strings#nullToEmpty(String)
-     * @see Strings#nullToEmpty(String[])
-     */
-    @Beta
-    public static String[] nullToEmptyForEach(final String[] a) { // nullToEmptyForAll is better?
-        if (a == null) {
-            return EMPTY_STRING_ARRAY;
-        }
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            a[i] = a[i] == null ? Strings.EMPTY : a[i];
-        }
-
-        return a;
-    }
-
-    //    /**
-    //     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
-    //     *
-    //     * @param a
-    //     * @return
-    //     * @see Strings#nullToEmpty(String)
-    //     * @see Strings#nullToEmpty(String[])
-    //     */
-    //    static String[] nullToEmptyForAll(final String[] a) { // nullToEmptyForAll is better?
-    //        If (a == null) {
-    //            return EMPTY_STRING_ARRAY;
-    //        }
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = a[i] == null ? Strings.EMPTY : a[i];
-    //        }
-    //
-    //        return a;
-    //    }
-
-    /**
-     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Date array to check
-     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
-     */
-    public static java.util.Date[] nullToEmpty(final java.util.Date[] a) {
-        return a == null ? EMPTY_JU_DATE_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Date array to check
-     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
-     */
-    public static java.sql.Date[] nullToEmpty(final java.sql.Date[] a) {
-        return a == null ? EMPTY_DATE_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty Time array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Time array to check
-     * @return an empty Time array if the specified array is {@code null}, otherwise the original array
-     */
-    public static java.sql.Time[] nullToEmpty(final java.sql.Time[] a) {
-        return a == null ? EMPTY_TIME_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty Timestamp array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Timestamp array to check
-     * @return an empty Timestamp array if the specified array is {@code null}, otherwise the original array
-     */
-    public static java.sql.Timestamp[] nullToEmpty(final java.sql.Timestamp[] a) {
-        return a == null ? EMPTY_TIMESTAMP_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty Calendar array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Calendar array to check
-     * @return an empty Calendar array if the specified array is {@code null}, otherwise the original array
-     */
-    public static Calendar[] nullToEmpty(final Calendar[] a) {
-        return a == null ? EMPTY_CALENDAR_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty Object array if the specified array is {@code null}, otherwise returns the original array.
-     *
-     * @param a the Object array to check
-     * @return an empty Object array if the specified array is {@code null}, otherwise the original array
-     */
-    public static Object[] nullToEmpty(final Object[] a) {
-        return a == null ? EMPTY_OBJECT_ARRAY : a;
-    }
-
-    /**
-     * Returns an empty array of the specified type if the given array is {@code null}, otherwise returns the original array.
-     *
-     * @param <T> the component type of the array
-     * @param a the array to check
-     * @param arrayType the class of the array type
-     * @return an empty array of the specified type if the given array is {@code null}, otherwise the original array
-     */
-    public static <T> T[] nullToEmpty(final T[] a, final Class<T[]> arrayType) {
-        return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
-     *
-     * @param <T> the type of elements in the collection
-     * @param c the ImmutableCollection to check
-     * @return an empty ImmutableCollection if the specified collection is {@code null}, otherwise the original collection
-     */
-    public static <T> ImmutableCollection<T> nullToEmpty(final ImmutableCollection<T> c) {
-        return c == null ? ImmutableList.empty() : c;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty list if the specified ImmutableList is {@code null}, otherwise returns the original list.
-     *
-     * @param <T> the type of elements in the list
-     * @param list the ImmutableList to check
-     * @return an empty ImmutableList if the specified list is {@code null}, otherwise the original list
-     */
-    public static <T> ImmutableList<T> nullToEmpty(final ImmutableList<T> list) {
-        return list == null ? ImmutableList.empty() : list;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty set if the specified ImmutableSet is {@code null}, otherwise returns the original set.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the ImmutableSet to check
-     * @return an empty ImmutableSet if the specified set is {@code null}, otherwise the original set
-     */
-    public static <T> ImmutableSet<T> nullToEmpty(final ImmutableSet<T> set) {
-        return set == null ? ImmutableSet.empty() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty sorted set if the specified ImmutableSortedSet is {@code null}, otherwise returns the original set.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the ImmutableSortedSet to check
-     * @return an empty ImmutableSortedSet if the specified set is {@code null}, otherwise the original set
-     */
-    public static <T> ImmutableSortedSet<T> nullToEmpty(final ImmutableSortedSet<T> set) {
-        return set == null ? ImmutableSortedSet.empty() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty navigable set if the specified ImmutableNavigableSet is {@code null}, otherwise returns the original set.
-     *
-     * @param <T> the type of elements in the set
-     * @param set the ImmutableNavigableSet to check
-     * @return an empty ImmutableNavigableSet if the specified set is {@code null}, otherwise the original set
-     */
-    public static <T> ImmutableNavigableSet<T> nullToEmpty(final ImmutableNavigableSet<T> set) {
-        return set == null ? ImmutableNavigableSet.empty() : set;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty map if the specified ImmutableMap is {@code null}, otherwise returns the original map.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param map the ImmutableMap to check
-     * @return an empty ImmutableMap if the specified map is {@code null}, otherwise the original map
-     */
-    public static <K, V> ImmutableMap<K, V> nullToEmpty(final ImmutableMap<K, V> map) {
-        return map == null ? ImmutableMap.empty() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty sorted map if the specified ImmutableSortedMap is {@code null}, otherwise returns the original map.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param map the ImmutableSortedMap to check
-     * @return an empty ImmutableSortedMap if the specified map is {@code null}, otherwise the original map
-     */
-    public static <K, V> ImmutableSortedMap<K, V> nullToEmpty(final ImmutableSortedMap<K, V> map) {
-        return map == null ? ImmutableSortedMap.empty() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty navigable map if the specified ImmutableNavigableMap is {@code null}, otherwise returns the original map.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param map the ImmutableNavigableMap to check
-     * @return an empty ImmutableNavigableMap if the specified map is {@code null}, otherwise the original map
-     */
-    public static <K, V> ImmutableNavigableMap<K, V> nullToEmpty(final ImmutableNavigableMap<K, V> map) {
-        return map == null ? ImmutableNavigableMap.empty() : map;
-    }
-
-    /**
-     * Returns an immutable/unmodifiable empty bi-map if the specified ImmutableBiMap is {@code null}, otherwise returns the original bi-map.
-     *
-     * @param <K> the type of keys in the bi-map
-     * @param <V> the type of values in the bi-map
-     * @param map the ImmutableBiMap to check
-     * @return an empty ImmutableBiMap if the specified bi-map is {@code null}, otherwise the original bi-map
-     */
-    public static <K, V> ImmutableBiMap<K, V> nullToEmpty(final ImmutableBiMap<K, V> map) {
-        return map == null ? ImmutableBiMap.empty() : map;
-    }
-
-    //    /**
-    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-    //     *
-    //     * @param s
-    //     * @return true, if is null or default
-    //     * @deprecated internal only
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    @Beta
-    //    static boolean isNullOrDefault(final Object value) {
-    //        return (value == null) || equals(value, defaultValueOf(value.getClass()));
-    //    }
-
-    /**
-     * Checks if the specified {@code CharSequence} is {@code null} or empty.
-     *
-     * @param cs the CharSequence to check
-     * @return {@code true} if the CharSequence is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final CharSequence cs) {
-        return (cs == null) || (cs.isEmpty());
-    }
-
-    /**
-     * Checks if the specified boolean array is {@code null} or empty.
-     *
-     * @param a the boolean array to check
-     * @return {@code true} if the boolean array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final boolean[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified char array is {@code null} or empty.
-     *
-     * @param a the char array to check
-     * @return {@code true} if the char array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final char[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified byte array is {@code null} or empty.
-     *
-     * @param a the byte array to check
-     * @return {@code true} if the byte array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final byte[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified short array is {@code null} or empty.
-     *
-     * @param a the short array to check
-     * @return {@code true} if the short array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final short[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified int array is {@code null} or empty.
-     *
-     * @param a the int array to check
-     * @return {@code true} if the int array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final int[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified long array is {@code null} or empty.
-     *
-     * @param a the long array to check
-     * @return {@code true} if the long array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final long[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified float array is {@code null} or empty.
-     *
-     * @param a the float array to check
-     * @return {@code true} if the float array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final float[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified double array is {@code null} or empty.
-     *
-     * @param a the double array to check
-     * @return {@code true} if the double array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final double[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified object array is {@code null} or empty.
-     *
-     * @param a the object array to check
-     * @return {@code true} if the object array is {@code null} or empty, otherwise false
-     */
-    public static boolean isEmpty(final Object[] a) {
-        return (a == null) || (a.length == 0);
-    }
-
-    /**
-     * Checks if the specified {@code Collection} is {@code null} or empty.
-     *
-     * @param c the Collection to check
-     * @return {@code true} if the Collection is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final Collection<?> c) {
-        return (c == null) || (c.isEmpty());
-    }
-
-    /**
-     * Checks if the specified iterable is {@code null} or empty.
-     *
-     * @param c the Iterable to check
-     * @return {@code true} if the Iterable is {@code null} or empty, otherwise {@code false}
-     */
-    @Beta
-    public static boolean isEmpty(final Iterable<?> c) {
-        if (c == null) {
-            return true;
-        }
-
-        if (c instanceof Collection<?> coll) {
-            return coll.isEmpty();
-        } else {
-            return isEmpty(c.iterator());
-        }
-    }
-
-    /**
-     * Checks if the specified iterable is a {@code null} or empty collection.
-     *
-     * @param c the iterable to check
-     * @return {@code true} if the specified iterable is a {@code null} or empty collection, otherwise {@code false}
-     */
-    static boolean isEmptyCollection(final Iterable<?> c) {
-        if (c == null) {
-            return true;
-        }
-
-        if (c instanceof Collection) {
-            return isEmpty((Collection<?>) c);
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if the specified iterator is {@code null} or empty.
-     *
-     * @param iter the Iterator to check
-     * @return {@code true} if the Iterator is {@code null} or empty, otherwise {@code false}
-     */
-    @Beta
-    public static boolean isEmpty(final Iterator<?> iter) {
-        return iter == null || (!iter.hasNext());
-    }
-
-    /**
-     * Checks if the specified {@code Map} is {@code null} or empty.
-     *
-     * @param m the Map to check
-     * @return {@code true} if the Map is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final Map<?, ?> m) {
-        return (m == null) || (m.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code PrimitiveList} is {@code null} or empty.
-     *
-     * @param list the PrimitiveList to check
-     * @return {@code true} if the PrimitiveList is {@code null} or empty, otherwise {@code false}
-     */
-    @SuppressWarnings("rawtypes")
-    public static boolean isEmpty(final PrimitiveList list) {
-        return (list == null) || (list.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code Multiset} is {@code null} or empty.
-     *
-     * @param s the Multiset to check
-     * @return {@code true} if the Multiset is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final Multiset<?> s) {
-        return (s == null) || (s.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code Multimap} is {@code null} or empty.
-     *
-     * @param m the Multimap to check
-     * @return {@code true} if the Multimap is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final Multimap<?, ?, ?> m) {
-        return (m == null) || (m.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code DataSet} is {@code null} or empty.
-     *
-     * @param ds the DataSet to check
-     * @return {@code true} if the DataSet is {@code null} or empty, otherwise {@code false}
-     */
-    public static boolean isEmpty(final DataSet ds) {
-        return (ds == null) || (ds.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code CharSequence} is {@code null}, empty, or contains only whitespace characters.
-     *
-     * @param cs the CharSequence to check
-     * @return {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace characters, otherwise {@code false}
-     * @see Strings#isBlank(CharSequence)
-     */
-    public static boolean isBlank(final CharSequence cs) {
-        if (isEmpty(cs)) {
-            return true;
-        }
-
-        for (int i = 0, len = cs.length(); i < len; i++) {
-            if (!Character.isWhitespace(cs.charAt(i))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if the specified {@code CharSequence} is not {@code null} and not empty.
-     *
-     * @param cs the CharSequence to check
-     * @return {@code true} if the CharSequence is not {@code null} and not empty, otherwise {@code false}
-     * @see Strings#isNotEmpty(CharSequence)
-     */
-    public static boolean notEmpty(final CharSequence cs) {
-        return (cs != null) && (!cs.isEmpty());
-    }
-
-    /**
-     * Checks if the specified boolean array is not {@code null} and not empty.
-     *
-     * @param a the boolean array to check
-     * @return {@code true} if the boolean array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final boolean[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified char array is not {@code null} and not empty.
-     *
-     * @param a the char array to check
-     * @return {@code true} if the char array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final char[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified byte array is not {@code null} and not empty.
-     *
-     * @param a the byte array to check
-     * @return {@code true} if the byte array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final byte[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified short array is not {@code null} and not empty.
-     *
-     * @param a the short array to check
-     * @return {@code true} if the short array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final short[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified int array is not {@code null} and not empty.
-     *
-     * @param a the int array to check
-     * @return {@code true} if the int array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final int[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified long array is not {@code null} and not empty.
-     *
-     * @param a the long array to check
-     * @return {@code true} if the long array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final long[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified float array is not {@code null} and not empty.
-     *
-     * @param a the float array to check
-     * @return {@code true} if the float array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final float[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified double array is not {@code null} and not empty.
-     *
-     * @param a the double array to check
-     * @return {@code true} if the double array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final double[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified object array is not {@code null} and not empty.
-     *
-     * @param a the object array to check
-     * @return {@code true} if the object array is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final Object[] a) {
-        return (a != null) && (a.length > 0);
-    }
-
-    /**
-     * Checks if the specified {@code Collection} is not {@code null} and not empty.
-     *
-     * @param c the Collection to check
-     * @return {@code true} if the Collection is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final Collection<?> c) {
-        return (c != null) && (c.size() > 0);
-    }
-
-    /**
-     * Checks if the specified iterable is not {@code null} and not empty.
-     *
-     * @param iter the Iterable to check
-     * @return {@code true} if the Iterable is not {@code null} and not empty, otherwise {@code false}
-     */
-    @Beta
-    public static boolean notEmpty(final Iterable<?> iter) {
-        if (iter == null) {
-            return false;
-        }
-
-        if (iter instanceof Collection) {
-            return notEmpty((Collection<?>) iter);
-        } else {
-            return notEmpty(iter.iterator());
-        }
-    }
-
-    /**
-     * Checks if the specified iterator is not {@code null} and not empty.
-     *
-     * @param iter the Iterator to check
-     * @return {@code true} if the Iterator is not {@code null} and not empty, otherwise {@code false}
-     */
-    @Beta
-    public static boolean notEmpty(final Iterator<?> iter) {
-        return (iter != null) && (iter.hasNext());
-    }
-
-    /**
-     * Checks if the specified {@code Map} is not {@code null} and not empty.
-     *
-     * @param m the Map to check
-     * @return {@code true} if the Map is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final Map<?, ?> m) {
-        return (m != null) && (!m.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code PrimitiveList} is not {@code null} and not empty.
-     *
-     * @param list the PrimitiveList to check
-     * @return {@code true} if the PrimitiveList is not {@code null} and not empty, otherwise {@code false}
-     */
-    @SuppressWarnings("rawtypes")
-    public static boolean notEmpty(final PrimitiveList list) {
-        return (list != null) && (!list.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code Multiset} is not {@code null} and not empty.
-     *
-     * @param s the Multiset to check
-     * @return {@code true} if the Multiset is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final Multiset<?> s) {
-        return (s != null) && (s.size() > 0);
-    }
-
-    /**
-     * Checks if the specified {@code Multimap} is not {@code null} and not empty.
-     *
-     * @param m the Multimap to check
-     * @return {@code true} if the Multimap is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final Multimap<?, ?, ?> m) {
-        return (m != null) && (!m.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code DataSet} is not {@code null} and not empty.
-     *
-     * @param dataSet the DataSet to check
-     * @return {@code true} if the DataSet is not {@code null} and not empty, otherwise {@code false}
-     */
-    public static boolean notEmpty(final DataSet dataSet) {
-        return (dataSet != null) && (!dataSet.isEmpty());
-    }
-
-    /**
-     * Checks if the specified {@code CharSequence} is not {@code null} and not empty and not contains only whitespace characters.
-     *
-     * @param cs the CharSequence to check
-     * @return {@code true} if the CharSequence is not {@code null} and not empty and not contains only whitespace characters, otherwise {@code false}
-     * @see Strings#isNotBlank(CharSequence)
-     */
-    public static boolean notBlank(final CharSequence cs) {
-        return !isBlank(cs);
-    }
-
-    /**
-     * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     *
-     * @param value
-     * @return {@code true}, if it's not {@code null} or default
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
-     */
-    @Deprecated
-    static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
-    }
-
-    /**
-     * Checks if any of the specified objects is {@code null}.
-     *
-     * @param a the first object to check
-     * @param b the second object to check
-     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
-     */
-    public static boolean anyNull(final Object a, final Object b) {
-        return a == null || b == null;
-    }
-
-    /**
-     * Checks if any of the specified objects is {@code null}.
-     *
-     * @param a the first object to check
-     * @param b the second object to check
-     * @param c the third object to check
-     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
-     */
-    public static boolean anyNull(final Object a, final Object b, final Object c) {
-        return a == null || b == null || c == null;
-    }
-
-    /**
-     * Checks if any element in the specified array is {@code null}.
-     *
-     * @param a the array of objects to check
-     * @return {@code true} if any element in the specified array is {@code null}, otherwise {@code false}
-     */
-    public static boolean anyNull(final Object... a) {
-        if (isEmpty(a)) {
-            return false;
-        }
-
-        for (final Object e : a) {
-            if (e == null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if any element in the specified collection is {@code null}.
-     *
-     * @param c the collection of objects to check
-     * @return {@code true} if any element in the specified collection is {@code null}, otherwise {@code false}
-     */
-    public static boolean anyNull(final Iterable<?> c) {
-        if (isEmpty(c)) {
-            return false;
-        }
-
-        for (final Object e : c) {
-            if (e == null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
-     * @see Strings#isAnyEmpty(CharSequence, CharSequence)
-     */
-    public static boolean anyEmpty(final CharSequence a, final CharSequence b) {
-        return isEmpty(a) || isEmpty(b);
-    }
-
-    /**
-     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
-     * @see Strings#isAnyEmpty(CharSequence, CharSequence, CharSequence)
-     */
-    public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isEmpty(a) || isEmpty(b) || isEmpty(c);
-    }
-
-    /**
-     * <p>Checks if any of the CharSequences is empty ("") or {@code null}.</p>
-     *
-     * <pre>
-     * anyEmpty((String) null)    = true
-     * anyEmpty((String[]) null)  = false
-     * anyEmpty(null, "foo")      = true
-     * anyEmpty("", "bar")        = true
-     * anyEmpty("bob", "")        = true
-     * anyEmpty("  bob  ", null)  = true
-     * anyEmpty(" ", "bar")       = false
-     * anyEmpty("foo", "bar")     = false
-     * anyEmpty(new String[]{})   = false
-     * anyEmpty(new String[]{""}) = true
-     * </pre>
-     *
-     * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if any of the CharSequences are empty or null
-     * @see Strings#isAnyEmpty(CharSequence...)
-     */
-    public static boolean anyEmpty(final CharSequence... css) {
-        return Strings.isAnyEmpty(css);
-    }
-
-    /**
-     * Checks if any of the specified CharSequence objects in the collection is empty.
-     *
-     * @param css the collection of CharSequence objects to check
-     * @return {@code true} if any of the CharSequence objects is empty, otherwise {@code false}
-     * @see Strings#isAnyEmpty(Iterable)
-     */
-    public static boolean anyEmpty(final Iterable<? extends CharSequence> css) {
-        return Strings.isAnyEmpty(css);
-    }
-
-    /**
-     * Checks if any of the specified arrays is empty.
-     *
-     * @param a the first array to check
-     * @param b the second array to check
-     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Object[] a, final Object[] b) {
-        return a == null || a.length == 0 || b == null || b.length == 0;
-    }
-
-    /**
-     * Checks if any of the specified arrays is empty.
-     *
-     * @param a the first array to check
-     * @param b the second array to check
-     * @param c the third array to check
-     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Object[] a, final Object[] b, final Object[] c) {
-        return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
-    }
-
-    /**
-     * Checks if any of the specified collections is empty.
-     *
-     * @param a the first collection to check
-     * @param b the second collection to check
-     * @return {@code true} if any of the collections is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b) {
-        return a == null || a.size() == 0 || b == null || b.size() == 0;
-    }
-
-    /**
-     * Checks if any of the specified collections is empty.
-     *
-     * @param a the first collection to check
-     * @param b the second collection to check
-     * @param c the third collection to check
-     * @return {@code true} if any of the collections is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
-        return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
-    }
-
-    /**
-     * Checks if any of the specified maps is empty.
-     *
-     * @param a the first map to check
-     * @param b the second map to check
-     * @return {@code true} if any of the maps is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b) {
-        return a == null || a.isEmpty() || b == null || b.isEmpty();
-    }
-
-    /**
-     * Checks if any of the specified maps is empty.
-     *
-     * @param a the first map to check
-     * @param b the second map to check
-     * @param c the third map to check
-     * @return {@code true} if any of the maps is empty, otherwise {@code false}
-     */
-    public static boolean anyEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
-        return a == null || a.isEmpty() || b == null || b.isEmpty() || c == null || c.isEmpty();
-    }
-
-    /**
-     * Checks if any of the specified CharSequences is blank.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
-     * @see Strings#isAnyBlank(CharSequence, CharSequence)
-     */
-    public static boolean anyBlank(final CharSequence a, final CharSequence b) {
-        return isBlank(a) || isBlank(b);
-    }
-
-    /**
-     * Checks if any of the specified CharSequences is blank.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
-     * @see Strings#isAnyBlank(CharSequence, CharSequence, CharSequence)
-     */
-    public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isBlank(a) || isBlank(b) || isBlank(c);
-    }
-
-    /**
-     * <p>Checks if any of the CharSequences are empty ("") or {@code null} or whitespace only.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * <pre>
-     * anyBlank((String) null)    = true
-     * anyBlank((String[]) null)  = false
-     * anyBlank(null, "foo")      = true
-     * anyBlank(null, null)       = true
-     * anyBlank("", "bar")        = true
-     * anyBlank("bob", "")        = true
-     * anyBlank("  bob  ", null)  = true
-     * anyBlank(" ", "bar")       = true
-     * anyBlank(new String[] {})  = false
-     * anyBlank(new String[]{""}) = true
-     * anyBlank("foo", "bar")     = false
-     * </pre>
-     *
-     * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if any of the CharSequences are empty or {@code null} or whitespace only
-     * @see Strings#isAnyBlank(CharSequence...)
-     */
-    public static boolean anyBlank(final CharSequence... css) {
-        if (isEmpty(css)) {
-            return false;
-        }
-
-        for (final CharSequence cs : css) {
-            if (isBlank(cs)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if any of the specified CharSequences in the collection is blank.
-     *
-     * @param css the collection of CharSequences to check
-     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
-     * @see Strings#isAnyBlank(Iterable)
-     */
-    public static boolean anyBlank(final Iterable<? extends CharSequence> css) {
-        if (isEmpty(css)) {
-            return false;
-        }
-
-        for (final CharSequence cs : css) {
-            if (isBlank(cs)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if both specified objects are {@code null}.
-     *
-     * @param a the first object to check
-     * @param b the second object to check
-     * @return {@code true} if both objects are {@code null}, otherwise {@code false}
-     */
-    public static boolean allNull(final Object a, final Object b) {
-        return a == null && b == null;
-    }
-
-    /**
-     * Checks if all specified objects are {@code null}.
-     *
-     * @param a the first object to check
-     * @param b the second object to check
-     * @param c the third object to check
-     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
-     */
-    public static boolean allNull(final Object a, final Object b, final Object c) {
-        return a == null && b == null && c == null;
-    }
-
-    /**
-     * Checks if all specified objects are {@code null}.
-     *
-     * @param a the objects to check
-     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
-     */
-    public static boolean allNull(final Object... a) {
-        if (isEmpty(a)) {
-            return true;
-        }
-
-        for (final Object e : a) {
-            if (e != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all elements in the specified collection are {@code null}.
-     *
-     * @param c the collection of objects to check
-     * @return {@code true} if all elements in the specified collection are {@code null}, otherwise {@code false}
-     */
-    public static boolean allNull(final Iterable<?> c) {
-        if (isEmpty(c)) {
-            return true;
-        }
-
-        for (final Object e : c) {
-            if (e != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if both specified CharSequences are empty ("") or {@code null}.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return {@code true} if both CharSequences are empty, otherwise {@code false}
-     * @see Strings#isAllEmpty(CharSequence, CharSequence)
-     */
-    public static boolean allEmpty(final CharSequence a, final CharSequence b) {
-        return isEmpty(a) && isEmpty(b);
-    }
-
-    /**
-     * Checks if all the specified CharSequences are empty ("") or {@code null}.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return {@code true} if all the CharSequences are empty, otherwise {@code false}
-     * @see Strings#isAllEmpty(CharSequence, CharSequence, CharSequence)
-     */
-    public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isEmpty(a) && isEmpty(b) && isEmpty(c);
-    }
-
-    /**
-     * <p>Checks if all the CharSequences are empty ("") or {@code null}.</p>
-     *
-     * <pre>
-     * allEmpty(null)             = true
-     * allEmpty(null, "")         = true
-     * allEmpty(new String[] {})  = true
-     * allEmpty(null, "foo")      = false
-     * allEmpty("", "bar")        = false
-     * allEmpty("bob", "")        = false
-     * allEmpty("  bob  ", null)  = false
-     * allEmpty(" ", "bar")       = false
-     * allEmpty("foo", "bar")     = false
-     * </pre>
-     *
-     * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all the CharSequences are empty or null
-     * @see Strings#isAllEmpty(CharSequence...)
-     */
-    public static boolean allEmpty(final CharSequence... css) {
-        if (isEmpty(css)) {
-            return true;
-        }
-
-        for (final CharSequence cs : css) {
-            if (notEmpty(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all specified CharSequences in the collection are empty or {@code null}.
-     *
-     * @param css the collection of CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Iterable<? extends CharSequence> css) {
-        if (isEmpty(css)) {
-            return true;
-        }
-
-        for (final CharSequence cs : css) {
-            if (notEmpty(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all specified object arrays are empty.
-     *
-     * @param a the first object array to check, which may be null
-     * @param b the second object array to check, which may be null
-     * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Object[] a, final Object[] b) {
-        return isEmpty(a) && isEmpty(b);
-    }
-
-    /**
-     * Checks if all specified object arrays are empty.
-     *
-     * @param a the first object array to check, which may be null
-     * @param b the second object array to check, which may be null
-     * @param c the third object array to check, which may be null
-     * @return {@code true} if all object arrays are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Object[] a, final Object[] b, final Object[] c) {
-        return isEmpty(a) && isEmpty(b) && isEmpty(c);
-    }
-
-    /**
-     * Checks if all specified collections are empty.
-     *
-     * @param a the first collection to check, which may be null
-     * @param b the second collection to check, which may be null
-     * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
-        return isEmpty(a) && isEmpty(b);
-    }
-
-    /**
-     * Checks if all specified collections are empty.
-     *
-     * @param a the first collection to check, which may be null
-     * @param b the second collection to check, which may be null
-     * @param c the third collection to check, which may be null
-     * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
-        return isEmpty(a) && isEmpty(b) && isEmpty(c);
-    }
-
-    /**
-     * Checks if all specified maps are empty.
-     *
-     * @param a the first map to check, which may be null
-     * @param b the second map to check, which may be null
-     * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b) {
-        return isEmpty(a) && isEmpty(b);
-    }
-
-    /**
-     * Checks if all specified maps are empty.
-     *
-     * @param a the first map to check, which may be null
-     * @param b the second map to check, which may be null
-     * @param c the third map to check, which may be null
-     * @return {@code true} if all maps are empty or {@code null}, otherwise {@code false}
-     */
-    public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
-        return isEmpty(a) && isEmpty(b) && isEmpty(c);
-    }
-
-    /**
-     * Checks if both specified CharSequences are blank.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @return {@code true} if both CharSequences are blank, otherwise {@code false}
-     * @see Strings#isAllBlank(CharSequence, CharSequence)
-     */
-    public static boolean allBlank(final CharSequence a, final CharSequence b) {
-        return isBlank(a) && isBlank(b);
-    }
-
-    /**
-     * Checks if all the specified CharSequences are blank.
-     *
-     * @param a the first CharSequence to check
-     * @param b the second CharSequence to check
-     * @param c the third CharSequence to check
-     * @return {@code true} if all the CharSequences are blank, otherwise {@code false}
-     * @see Strings#isAllBlank(CharSequence, CharSequence, CharSequence)
-     */
-    public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isBlank(a) && isBlank(b) && isBlank(c);
-    }
-
-    /**
-     * <p>Checks if all the CharSequences are empty (""), {@code null} or whitespace only.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * <pre>
-     * allBlank(null)             = true
-     * allBlank(null, "foo")      = false
-     * allBlank(null, null)       = true
-     * allBlank("", "bar")        = false
-     * allBlank("bob", "")        = false
-     * allBlank("  bob  ", null)  = false
-     * allBlank(" ", "bar")       = false
-     * allBlank("foo", "bar")     = false
-     * allBlank(new String[] {})  = true
-     * </pre>
-     *
-     * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all the CharSequences are empty or {@code null} or whitespace only
-     * @see Strings#isAllBlank(CharSequence...)
-     */
-    public static boolean allBlank(final CharSequence... css) {
-        if (isEmpty(css)) {
-            return true;
-        }
-
-        for (final CharSequence cs : css) {
-            if (notBlank(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all specified CharSequences in the collection are blank.
-     *
-     * @param css the collection of CharSequences to check
-     * @return {@code true} if all CharSequences in the collection are blank, otherwise {@code false}
-     * @see Strings#isAllBlank(Iterable)
-     */
-    public static boolean allBlank(final Iterable<? extends CharSequence> css) {
-        if (isEmpty(css)) {
-            return true;
-        }
-
-        for (final CharSequence cs : css) {
-            if (notBlank(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if the specified range starting from {@code fromIndex} and ending with {@code toIndex} are within the bounds of the specified length.
-     *
-     * @param fromIndex the starting index to check, inclusive
-     * @param toIndex the ending index to check, exclusive
-     * @param length the length of the array or collection
-     * @throws IndexOutOfBoundsException if the range is out of bounds
-     */
-    public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
-        if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
-            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds for length " + length);
-        }
-    }
-
-    /**
-     * Checks if the specified range starting from {@code fromIndex} with the specified {@code size} is within the bounds of the specified length.
-     *
-     * @param fromIndex the starting index to check, inclusive
-     * @param size the size of the range to check
-     * @param length the length of the array or collection
-     * @throws IndexOutOfBoundsException if the range is out of bounds
-     */
-    public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
-        if ((fromIndex < 0 || size < 0 || length < 0) || size > length - fromIndex) {
-            throw new IndexOutOfBoundsException("Start Index " + fromIndex + " with size " + size + " is out-of-bounds for length " + length);
-        }
-    }
-
-    /**
-     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
-     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
-     *
-     * @param index a user-supplied index identifying an element of an array, list or string
-     * @param size the size of that array, list or string
-     * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
-     * @throws IllegalArgumentException if {@code size} is negative
-     * @deprecated Use {@link #checkElementIndex(int, int)} instead
-     */
-    @Deprecated
-    public static int checkIndex(final int index, final int size) {
-        return checkElementIndex(index, size);
-    }
-
-    /**
-     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
-     *
-     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
-     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
-     *
-     * @param index a user-supplied index identifying an element of an array, list or string
-     * @param size the size of that array, list or string
-     * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
-     * @throws IllegalArgumentException if {@code size} is negative
-     */
-    public static int checkElementIndex(final int index, final int size) {
-        return checkElementIndex(index, size, "index");
-    }
-
-    /**
-     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
-     *
-     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
-     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
-     *
-     * @param index a user-supplied index identifying an element of an array, list or string
-     * @param size the size of that array, list or string
-     * @param desc the text to use to describe this index in an error message
-     * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
-     * @throws IllegalArgumentException if {@code size} is negative
-     */
-    public static int checkElementIndex(final int index, final int size, final String desc) {
-        // Carefully optimized for execution by hotspot (explanatory comment above)
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException(badElementIndex(index, size, desc));
-        }
-
-        return index;
-    }
-
-    private static String badElementIndex(final int index, final int size, final String desc) {
-        if (index < 0) {
-            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
-        } else if (size < 0) {
-            throw new IllegalArgumentException("negative size: " + size);
-        } else { // index >= size
-            return Strings.lenientFormat("%s (%s) must be less than size (%s)", desc, index, size);
-        }
-    }
-
-    /**
-     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
-     *
-     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
-     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
-     *
-     * @param index a user-supplied index identifying a position in an array, list or string
-     * @param size the size of that array, list or string
-     * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static int checkPositionIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
-        return checkPositionIndex(index, size, "index");
-    }
-
-    /**
-     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
-     *
-     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
-     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
-     *
-     * @param index a user-supplied index identifying a position in an array, list or string
-     * @param size the size of that array, list or string
-     * @param desc the text to use to describe this index in an error message
-     * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
-     */
-    public static int checkPositionIndex(final int index, final int size, final String desc) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // Carefully optimized for execution by hotspot (explanatory comment above)
-        if (size < 0) {
-            throw new IllegalArgumentException("negative size: " + size);
-        }
-
-        if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
-        }
-
-        return index;
-    }
-
-    private static String badPositionIndex(final int index, final int size, final String desc) {
-        if (index < 0) {
-            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
-        } else if (size < 0) {
-            throw new IllegalArgumentException("negative size: " + size);
-        } else { // index > size
-            return Strings.lenientFormat("%s (%s) must not be greater than size (%s)", desc, index, size);
-        }
-    }
-
-    /**
-     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param obj the argument to check
-     * @return the {@code non-null} argument
-     * @throws IllegalArgumentException if the argument is null
-     */
-    public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
-        if (obj == null) {
-            throw new IllegalArgumentException();
-        }
-
-        return obj;
-    }
-
-    /**
-     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param obj the argument to check
-     * @param errorMessage the error message to use in the exception
-     * @return the {@code non-null} argument
-     * @throws IllegalArgumentException if the argument is null
-     */
-    public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
-        if (obj == null) {
-            if (isArgNameOnly(errorMessage)) {
-                throw new IllegalArgumentException("'" + errorMessage + "' cannot be null");
-            } else {
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
-
-        return obj;
-    }
-
-    private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
-        // shortest message: "it is null"
-        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
-    }
-
-    /**
-     * Checks if the specified charSequence argument is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument, which extends CharSequence
-     * @param arg the argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (Strings.isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified boolean array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the boolean array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty boolean array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified char array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the char array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty char array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified byte array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the byte array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty byte array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified short array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the short array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty short array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified int array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the int array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty int array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified long array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the long array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty long array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified float array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the float array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty float array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified double array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the double array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty double array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Object array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the Object array argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Object array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified collection argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the boolean collection argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty boolean collection argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Iterable argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the Iterable argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Iterable argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    @Beta
-    public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Iterator argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the Iterator argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Iterator argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    @Beta
-    public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Map argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the Map argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Map argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified PrimitiveList argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the PrimitiveList argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty PrimitiveList argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Multiset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the Multiset argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Multiset argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified Multimap argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the Multimap argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty Multimap argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified DataSet argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument
-     * @param arg the DataSet argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty DataSet argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
-     */
-    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    private static void throwIllegalArgumentExceptionForNllOrEmptyCheck(final String errorMessage) {
-        if (isArgNameOnly(errorMessage)) {
-            throw new IllegalArgumentException("'" + errorMessage + "' cannot be null or empty");
-        } else {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    /**
-     * Checks if the specified charSequence argument is not {@code null} or empty or blank, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T> the type of the argument, which extends CharSequence
-     * @param arg the argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty and non-blank argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty or blank
-     */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (Strings.isBlank(arg)) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be null or empty or blank");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified byte argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the byte argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative byte argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified short argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the short argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative short argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified int argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the int argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative int argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg); //NOSONAR
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified long argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the long argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative long argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified float argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the float argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative float argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified double argument is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg the double argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the non-negative double argument
-     * @throws IllegalArgumentException if the specified arg is negative
-     */
-    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified byte argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the byte argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive byte argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified short argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the short argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive short argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified int argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the int argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive int argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified long argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the long argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive long argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified float argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the float argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive float argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified double argument is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg the double argument to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the positive double argument
-     * @throws IllegalArgumentException if the specified arg is not positive
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' cannot be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param a the array to check
-     * @throws IllegalArgumentException if a {@code null} element is found in the array
-     */
-    public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
-        if (isEmpty(a)) {
-            return;
-        }
-
-        for (final Object e : a) {
-            if (e == null) {
-                throw new IllegalArgumentException("null element is found in collection");
-            }
-        }
-    }
-
-    /**
-     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param a the array to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if a {@code null} element is found in the array
-     */
-    public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(a)) {
-            return;
-        }
-
-        for (final Object e : a) {
-            if (e == null) {
-                if (isArgNameOnly(argNameOrErrorMsg)) {
-                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
-                } else {
-                    throw new IllegalArgumentException(argNameOrErrorMsg);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param c the collection to check
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
-     */
-    public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
-        if (isEmpty(c)) {
-            return;
-        }
-
-        for (final Object e : c) {
-            if (e == null) {
-                throw new IllegalArgumentException("null element is found in collection");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param c the collection to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
-     */
-    public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(c)) {
-            return;
-        }
-
-        for (final Object e : c) {
-            if (e == null) {
-                if (isArgNameOnly(argNameOrErrorMsg)) {
-                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
-                } else {
-                    throw new IllegalArgumentException(argNameOrErrorMsg);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param m the map to check
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
-     */
-    public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
-        if (isEmpty(m)) {
-            return;
-        }
-
-        for (final Object e : m.keySet()) {
-            if (e == null) {
-                throw new IllegalArgumentException("null key is found in Map");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param m the map to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
-     */
-    public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(m)) {
-            return;
-        }
-
-        for (final Object e : m.keySet()) {
-            if (e == null) {
-                if (isArgNameOnly(argNameOrErrorMsg)) {
-                    throw new IllegalArgumentException("null key is found in " + argNameOrErrorMsg);
-                } else {
-                    throw new IllegalArgumentException(argNameOrErrorMsg);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param m the map to check
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
-     */
-    public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
-        if (isEmpty(m)) {
-            return;
-        }
-
-        for (final Object e : m.values()) {
-            if (e == null) {
-                throw new IllegalArgumentException("null value is found in Map");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
-     *
-     * @param m the map to check
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
-     */
-    public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
-        if (isEmpty(m)) {
-            return;
-        }
-
-        for (final Object e : m.values()) {
-            if (e == null) {
-                if (isArgNameOnly(argNameOrErrorMsg)) {
-                    throw new IllegalArgumentException("null value is found in " + argNameOrErrorMsg);
-                } else {
-                    throw new IllegalArgumentException(argNameOrErrorMsg);
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final Object argNameOrErrorMsg) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(String.valueOf(argNameOrErrorMsg));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @param p4 the third parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3, p4));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(errorMessageSupplier.get());
-        }
-    }
-
-    /**
-     *
-     * @param template
-     * @param arg
-     * @return
-     */
-    static String format(String template, final Object arg) {
-        template = String.valueOf(template); // null -> "null"
-
-        // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16);
-
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
-
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
-
-        if (placeholderStart >= 0) {
-            sb.append(template, 0, placeholderStart);
-            sb.append(toString(arg));
-            sb.append(template, placeholderStart + 2, template.length());
-        } else {
-            sb.append(" [");
-            sb.append(toString(arg));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
-    }
-
-    /**
-     *
-     * @param template
-     * @param arg1
-     * @param arg2
-     * @return
-     */
-    static String format(String template, final Object arg1, final Object arg2) {
-        template = String.valueOf(template); // null -> "null"
-
-        // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 32);
-
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
-
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
-
-        int templateStart = 0;
-        int cnt = 0;
-
-        if (placeholderStart >= 0) {
-            cnt++;
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(toString(arg1));
-            templateStart = placeholderStart + 2;
-            placeholderStart = template.indexOf(placeholder, templateStart);
-
-            if (placeholderStart >= 0) {
-                cnt++;
-                sb.append(template, templateStart, placeholderStart);
-                sb.append(toString(arg2));
-                templateStart = placeholderStart + 2;
-            }
-
-            sb.append(template, templateStart, template.length());
-        }
-
-        if (cnt == 0) {
-            sb.append(" [");
-            sb.append(toString(arg1));
-            sb.append(", ");
-            sb.append(toString(arg2));
-            sb.append(']');
-        } else if (cnt == 1) {
-            sb.append(" [");
-            sb.append(toString(arg2));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
-    }
-
-    /**
-     *
-     * @param template
-     * @param arg1
-     * @param arg2
-     * @param arg3
-     * @return
-     */
-    static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
-        template = String.valueOf(template); // null -> "null"
-
-        // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 48);
-
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
-
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
-
-        int templateStart = 0;
-        int cnt = 0;
-
-        if (placeholderStart >= 0) {
-            cnt++;
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(toString(arg1));
-            templateStart = placeholderStart + 2;
-            placeholderStart = template.indexOf(placeholder, templateStart);
-
-            if (placeholderStart >= 0) {
-                cnt++;
-                sb.append(template, templateStart, placeholderStart);
-                sb.append(toString(arg2));
-                templateStart = placeholderStart + 2;
-                placeholderStart = template.indexOf(placeholder, templateStart);
-
-                if (placeholderStart >= 0) {
-                    cnt++;
-                    sb.append(template, templateStart, placeholderStart);
-                    sb.append(toString(arg3));
-                    templateStart = placeholderStart + 2;
-                }
-            }
-
-            sb.append(template, templateStart, template.length());
-        }
-
-        if (cnt == 0) {
-            sb.append(" [");
-            sb.append(toString(arg1));
-            sb.append(", ");
-            sb.append(toString(arg2));
-            sb.append(", ");
-            sb.append(toString(arg3));
-            sb.append(']');
-        } else if (cnt == 1) {
-            sb.append(" [");
-            sb.append(toString(arg2));
-            sb.append(", ");
-            sb.append(toString(arg3));
-            sb.append(']');
-        } else if (cnt == 2) {
-            sb.append(" [");
-            sb.append(toString(arg3));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
-    }
-
-    /**
-     * Substitutes each {@code %s} in {@code template} with an argument. These are matched by
-     * position: the first {@code %s} gets {@code args[0]}, etc. If there are more arguments than
-     * placeholders, the unmatched arguments will be appended to the end of the formatted message in
-     * square braces.
-     *
-     * @param template a {@code non-null} string containing 0 or more {@code %s} placeholders.
-     * @param args the arguments to be substituted into the message template. Arguments are converted
-     *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
-     * @return
-     */
-    // Note that this is somewhat-improperly used from Verify.java as well.
-    static String format(String template, final Object... args) {
-        template = String.valueOf(template); // null -> "null"
-
-        if (isEmpty(args)) {
-            return template;
-        }
-
-        // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * args.length);
-        int templateStart = 0;
-        int i = 0;
-
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
-
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
-
-        while (placeholderStart >= 0 && i < args.length) {
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(toString(args[i++]));
-            templateStart = placeholderStart + 2;
-            placeholderStart = template.indexOf(placeholder, templateStart);
-        }
-
-        sb.append(template, templateStart, template.length());
-
-        // if we run out of placeholders, append the extra args in square braces
-        if (i < args.length) {
-            sb.append(" [");
-            sb.append(toString(args[i++]));
-            while (i < args.length) {
-                sb.append(", ");
-                sb.append(toString(args[i++]));
-            }
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
-    }
-
-    /**
-     *
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessage the name of the argument or an error message to be used in the exception
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final Object errorMessage) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(String.valueOf(errorMessage));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p the parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
-            throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @param p4 the third parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
-            throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3, p4));
-        }
-    }
-
-    /**
-     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(errorMessageSupplier.get());
-        }
-    }
-
-    /**
-     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
-     *
-     * @param <T> the type of the object
-     * @param obj the object reference to check for nullity
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
-     * @see Objects#requireNonNull(Object)
-     * @see Objects#requireNonNull(Object, Supplier)
-     * @see Objects#requireNonNullElse(Object, Object)
-     * @see Objects#requireNonNullElseGet(Object, Supplier)
-     */
-    @Beta
-    public static <T> T requireNonNull(final T obj) throws NullPointerException {
-        if (obj == null) {
-            throw new NullPointerException();
-        }
-
-        return obj;
-    }
-
-    /**
-     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
-     *
-     * @param <T> the type of the object
-     * @param obj the object reference to check for nullity
-     * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
-     * @see Objects#requireNonNull(Object, String)
-     * @see Objects#requireNonNull(Object, Supplier)
-     * @see Objects#requireNonNullElse(Object, Object)
-     * @see Objects#requireNonNullElseGet(Object, Supplier)
-     */
-    @Beta
-    public static <T> T requireNonNull(final T obj, final String errorMessage) throws NullPointerException {
-        if (obj == null) {
-            if (isArgNameOnly(errorMessage)) {
-                throw new NullPointerException("'" + errorMessage + "' cannot be null");
-            } else {
-                throw new NullPointerException(errorMessage);
-            }
-        }
-
-        return obj;
-    }
-
-    /**
-     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
-     *
-     * @param <T> the type of the object
-     * @param obj the object reference to check for nullity
-     * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
-     * @see Objects#requireNonNull(Object, String)
-     * @see Objects#requireNonNull(Object, Supplier)
-     * @see Objects#requireNonNullElse(Object, Object)
-     * @see Objects#requireNonNullElseGet(Object, Supplier)
-     */
-    @Beta
-    public static <T> T requireNonNull(final T obj, final Supplier<String> errorMessageSupplier) throws NullPointerException {
-        if (obj == null) {
-            final String errorMessage = errorMessageSupplier.get();
-
-            if (isArgNameOnly(errorMessage)) {
-                throw new NullPointerException("'" + errorMessage + "' cannot be null");
-            } else {
-                throw new NullPointerException(errorMessage);
-            }
-        }
-
-        return obj;
-    }
+    // ================================ compare... ====================================================================
 
     /**
      * Compares two boolean values.
@@ -15004,6 +16562,1568 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is {@code null}. Otherwise returns {@code cmp}.
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     */
+    static <T> Comparator<T> checkComparator(final Comparator<T> cmp) {
+        return cmp == null ? NATURAL_COMPARATOR : cmp;
+    }
+
+    /**
+     * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is less than the second, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean lessThan(final T a, final T b) {
+        return compare(a, b) < 0;
+    }
+
+    /**
+     * Compares two objects using the specified comparator to determine if the first is less than the second.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is less than the second, {@code false} otherwise
+     */
+    public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) < 0;
+    }
+
+    /**
+     * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
+        return compare(a, b) <= 0;
+    }
+
+    /**
+     * Compares two objects using the specified comparator to determine if the first is less than or equal to the second.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     */
+    public static <T> boolean lessEqual(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) <= 0;
+    }
+
+    /**
+     * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean greaterThan(final T a, final T b) {
+        return compare(a, b) > 0;
+    }
+
+    /**
+     * Compares two objects using the specified comparator to determine if the first is greater than the second.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
+     */
+    public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) > 0;
+    }
+
+    /**
+     * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
+        return compare(a, b) >= 0;
+    }
+
+    /**
+     * Compares two objects using the specified comparator to determine if the first is greater than or equal to the second.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     */
+    public static <T> boolean greaterEqual(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) >= 0;
+    }
+
+    /**
+     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean gtAndLt(final T value, final T min, final T max) {
+        if (compare(value, min) <= 0) {
+            return false;
+        }
+
+        return compare(value, max) < 0;
+    }
+
+    /**
+     * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
+     */
+    public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) <= 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) < 0;
+    }
+
+    /**
+     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean geAndLt(final T value, final T min, final T max) {
+        if (compare(value, min) < 0) {
+            return false;
+        }
+
+        return compare(value, max) < 0;
+    }
+
+    /**
+     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value using the specified comparator.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
+     */
+    public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) < 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) < 0;
+    }
+
+    /**
+     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean geAndLe(final T value, final T min, final T max) {
+        if (compare(value, min) < 0) {
+            return false;
+        }
+
+        return compare(value, max) <= 0;
+    }
+
+    /**
+     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value using the specified comparator.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
+     */
+    public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) < 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) <= 0;
+    }
+
+    /**
+     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean gtAndLe(final T value, final T min, final T max) {
+        if (compare(value, min) <= 0) {
+            return false;
+        }
+
+        return compare(value, max) <= 0;
+    }
+
+    /**
+     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value using the specified comparator.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
+     */
+    public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) <= 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) <= 0;
+    }
+
+    /**
+     * Checks if the given value is between the specified minimum and maximum values, inclusive.
+     * It means {@code min <= value <= max}.
+     * {@code null} is considered as the smallest value in nature order.
+     * @implNote it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
+     * @deprecated Use {@link #geAndLe(Comparable, Comparable, Comparable)} instead.
+     */
+    @Deprecated
+    public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
+        return geAndLe(value, min, max);
+    }
+
+    /**
+     * Checks if the given value is between the specified minimum and maximum values, inclusive. 
+     * It means {@code min <= value <= max}.
+     * @implNote it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.
+     *
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to compare the values, must not be null
+     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
+     * @deprecated Use {@link #geAndLe(Object, Object, Object, Comparator)} instead.
+     */
+    @Deprecated
+    public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
+        return geAndLe(value, min, max, cmp);
+    }
+
+    // ================================ compare... ====================================================================
+
+    // ================================ get/find matched/mismatch element... ===========================================
+    /**
+     * Retrieves the element at the specified position in the given Iterable.
+     *
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable from which to retrieve the element
+     * @param index the position of the element to retrieve
+     * @return the element at the specified position in the iterable
+     * @throws IllegalArgumentException if the iterable is null
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
+    public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(c, cs.c);
+
+        if (c instanceof Collection) {
+            checkElementIndex(index, ((Collection<T>) c).size());
+        }
+
+        if (c instanceof List) {
+            return ((List<T>) c).get(index);
+        }
+
+        return getElement(c.iterator(), index);
+    }
+
+    /**
+     * Retrieves the element at the specified position in the given Iterator.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
+     * @param index the index of the element to retrieve. Must be a non-negative integer.
+     * @return the element at the specified index in the Iterator
+     * @throws IllegalArgumentException if the Iterator is null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterator)
+     */
+    public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(iter, cs.iter);
+
+        while (index-- > 0 && iter.hasNext()) {
+            iter.next();
+        }
+
+        if (iter.hasNext()) {
+            return iter.next();
+        } else {
+            throw new IndexOutOfBoundsException("Index: " + index + " is bigger than the maximum index of the specified Iterable or Iterator");
+        }
+    }
+
+    /**
+     * Returns the only element in the given Iterable.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the element from
+     * @return a {@code Nullable} containing the only element in the Iterable if it exists, otherwise an empty Nullable
+     * @throws TooManyElementsException if the Iterable contains more than one element
+     */
+    public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
+        if (isEmptyCollection(c)) {
+            return Nullable.empty();
+        }
+
+        if (c instanceof Collection && ((Collection<T>) c).size() > 1) {
+            final Iterator<? extends T> iter = c.iterator();
+
+            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(iter.next(), ", ", iter.next(), "...]"));
+        }
+
+        return getOnlyElement(c.iterator());
+    }
+
+    /**
+     * Returns the only element in the given Iterator.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the element from
+     * @return a {@code Nullable} containing the only element in the Iterator if it exists, otherwise an empty Nullable
+     * @throws TooManyElementsException if the Iterator contains more than one element
+     */
+    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
+        if (iter == null || !iter.hasNext()) {
+            return Nullable.empty();
+        }
+
+        final T first = iter.next();
+
+        if (iter.hasNext()) {
+            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
+        }
+
+        return Nullable.of(first);
+    }
+
+    /**
+     * Returns the first element in the given Iterable wrapped in a {@code Nullable}.
+     * If the Iterable is empty, an empty {@code Nullable} is returned.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the first element from
+     * @return a {@code Nullable} containing the first element in the Iterable if it exists, otherwise an empty Nullable
+     */
+    public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
+        if (isEmpty(c)) {
+            return Nullable.empty();
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            return Nullable.of(((List<T>) c).get(0));
+        } else {
+            return Nullable.of(c.iterator().next());
+        }
+    }
+
+    /**
+     * Returns the first element in the given Iterator wrapped in a {@code Nullable}.
+     * If the Iterator is empty, an empty {@code Nullable} is returned.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the first element from
+     * @return a {@code Nullable} containing the first element in the Iterator if it exists, otherwise an empty Nullable
+     */
+    public static <T> Nullable<T> firstElement(final Iterator<? extends T> iter) {
+        return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.empty();
+    }
+
+    /**
+     * Returns the last element in the given Iterable wrapped in a {@code Nullable}.
+     * If the Iterable is empty, an empty {@code Nullable} is returned.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the last element from
+     * @return a {@code Nullable} containing the last element in the Iterable if it exists, otherwise an empty Nullable
+     */
+    public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
+        if (isEmpty(c)) {
+            return Nullable.empty();
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            return Nullable.of(list.get(list.size() - 1));
+        }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            return Nullable.of(descendingIterator.next());
+        }
+
+        return lastElement(c.iterator());
+    }
+
+    /**
+     * Returns the last element in the given Iterator wrapped in a {@code Nullable}.
+     * If the Iterator is empty, an empty {@code Nullable} is returned.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the last element from
+     * @return a {@code Nullable} containing the last element in the Iterator if it exists, otherwise an empty Nullable
+     */
+    public static <T> Nullable<T> lastElement(final Iterator<? extends T> iter) {
+        if (iter == null || !iter.hasNext()) {
+            return Nullable.empty();
+        }
+
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+        }
+
+        return Nullable.of(e);
+    }
+
+    /**
+     * Returns a list containing the first <i>n</i> elements from the given Iterable.
+     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the elements from
+     * @param n the number of elements to retrieve from the Iterable
+     * @return a list containing the first <i>n</i> elements from the Iterable
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
+            if (coll.size() <= n) {
+                return new ArrayList<>(coll);
+            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
+                return new ArrayList<>((list).subList(0, n));
+            }
+        }
+
+        final List<T> result = new ArrayList<>(Math.min(1024, n));
+        int cnt = 0;
+
+        for (final T e : c) {
+            result.add(e);
+
+            if (++cnt == n) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a list containing the first <i>n</i> elements from the given Iterator.
+     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the elements from
+     * @param n the number of elements to retrieve from the Iterator
+     * @return a list containing the first <i>n</i> elements from the Iterator
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(iter) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(Math.min(1024, n));
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+
+            if (++cnt == n) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a list containing the last <i>n</i> elements from the given Iterable.
+     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the elements from
+     * @param n the number of elements to retrieve from the end of the Iterable
+     * @return a list containing the last <i>n</i> elements from the Iterable
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        if (c instanceof final Collection<? extends T> coll) { // NOSONAR
+            if (coll.size() <= n) {
+                return new ArrayList<>(coll);
+            } else if (coll instanceof final List<? extends T> list) { // NOSONAR
+                return new ArrayList<>(list.subList(list.size() - n, list.size()));
+            }
+        }
+
+        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+
+        for (final T e : c) {
+            if (deque.size() >= n) {
+                deque.pollFirst();
+            }
+
+            deque.offerLast(e);
+        }
+
+        return new ArrayList<>(deque);
+    }
+
+    /**
+     * Returns a list containing the last <i>n</i> elements from the given Iterator.
+     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the elements from
+     * @param n the number of elements to retrieve from the Iterator
+     * @return a list containing the last <i>n</i> elements from the Iterator
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(iter) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+
+        while (iter.hasNext()) {
+            if (deque.size() >= n) {
+                deque.pollFirst();
+            }
+
+            deque.offerLast(iter.next());
+        }
+
+        return new ArrayList<>(deque);
+    }
+
+    /**
+     * Returns the first {@code non-null} value among the two provided values.
+     * If both values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
+     * @see Iterables#firstNonNull(Object, Object)
+     */
+    public static <T> Optional<T> firstNonNull(final T a, final T b) {
+        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first {@code non-null} value among the three provided values.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @param c the third value to check
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
+     * @see Iterables#firstNonNull(Object, Object, Object)
+     */
+    public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
+        return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first {@code non-null} value among the provided values.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the array of values to check
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
+     * @see Iterables#firstNonNull(Object[])
+     */
+    @SafeVarargs
+    public static <T> Optional<T> firstNonNull(final T... a) {
+        if (isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (final T e : a) {
+            if (e != null) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first {@code non-null} value from the provided iterable.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param c the iterable of values to check
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
+     * @see Iterables#firstNonNull(Iterable)
+     * @see Iterables#firstNonNullOrDefault(Iterable, Object)
+     */
+    public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
+        if (isEmpty(c)) {
+            return Optional.empty();
+        }
+
+        for (final T e : c) {
+            if (e != null) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first {@code non-null} value from the provided iterator.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param iter the iterator of values to check
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
+     * @see Iterables#firstNonNull(Iterator)
+     * @see Iterables#firstNonNullOrDefault(Iterator, Object)
+     */
+    public static <T> Optional<T> firstNonNull(final Iterator<? extends T> iter) {
+        if (iter == null) {
+            return Optional.empty();
+        }
+
+        T e = null;
+
+        while (iter.hasNext()) {
+            if ((e = iter.next()) != null) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the last {@code non-null} value from the provided values.
+     * If both values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
+     */
+    public static <T> Optional<T> lastNonNull(final T a, final T b) {
+        return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty());
+    }
+
+    /**
+     * Returns the last {@code non-null} value from the provided values.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @param c the third value to check
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
+     */
+    public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
+        return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.empty()));
+    }
+
+    /**
+     * Returns the last {@code non-null} value from the provided array of values.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param a the array of values to check
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
+     */
+    @SafeVarargs
+    public static <T> Optional<T> lastNonNull(final T... a) {
+        if (N.isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (a[i] != null) {
+                return Optional.of(a[i]);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the last {@code non-null} value from the provided iterable.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param c the iterable to check
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
+     */
+    public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
+        if (N.isEmpty(c)) {
+            return Optional.empty();
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (list.get(i) != null) {
+                    return Optional.of(list.get(i));
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        final Iterator<T> descendingIterator = N.getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            T next = null;
+
+            while (descendingIterator.hasNext()) {
+                if ((next = descendingIterator.next()) != null) {
+                    return Optional.of(next);
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        return lastNonNull(c.iterator());
+    }
+
+    /**
+     * Returns the last {@code non-null} value from the provided iterator.
+     * If all values are {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the values
+     * @param iter the iterator to check
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
+     */
+    public static <T> Optional<T> lastNonNull(final Iterator<? extends T> iter) {
+        if (iter == null) {
+            return Optional.empty();
+        }
+
+        T e = null;
+        T lastNonNull = null;
+
+        while (iter.hasNext()) {
+            if ((e = iter.next()) != null) {
+                lastNonNull = e;
+            }
+        }
+
+        return Optional.ofNullable(lastNonNull);
+    }
+
+    /**
+     * Returns the first non-empty array from the given arrays.
+     * If both arrays are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of elements in the arrays
+     * @param a the first array to check
+     * @param b the second array to check
+     * @return an Optional containing the first non-empty array, or an empty Optional if both arrays are empty or null
+     */
+    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b) {
+        return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-empty array from the given arrays.
+     * If all arrays are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of elements in the arrays
+     * @param a the first array to check
+     * @param b the second array to check
+     * @param c the third array to check
+     * @return an Optional containing the first non-empty array, or an empty Optional if all arrays are empty or null
+     */
+    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b, final T[] c) {
+        return a != null && a.length > 0 ? Optional.of(a)
+                : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first non-empty collection from the given collections.
+     * If both collections are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the collections
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @return an Optional containing the first non-empty collection, or an empty Optional if both collections are empty or null
+     */
+    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-empty collection from the given collections.
+     * If all collections are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the collections
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @param c the third collection to check
+     * @return an Optional containing the first non-empty collection, or an empty Optional if all collections are empty or null
+     */
+    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && a.size() > 0 ? Optional.of(a)
+                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first non-empty map from the given maps.
+     * If both maps are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the maps
+     * @param a the first map to check
+     * @param b the second map to check
+     * @return an Optional containing the first non-empty map, or an empty Optional if both maps are empty or null
+     */
+    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && !a.isEmpty() ? Optional.of(a) : (b != null && !b.isEmpty() ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-empty map from the given maps.
+     * If all maps are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the maps
+     * @param a the first map to check
+     * @param b the second map to check
+     * @param c the third map to check
+     * @return an Optional containing the first non-empty map, or an empty Optional if all maps are empty or null
+     */
+    public static <T extends Map<?, ?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && !a.isEmpty() ? Optional.of(a)
+                : (b != null && !b.isEmpty() ? Optional.of(b) : (c != null && !c.isEmpty() ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If both CharSequences are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both CharSequences are empty or null
+     * @see Strings#firstNonEmpty(String, String)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
+        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
+     * @see Strings#firstNonEmpty(String, String, String)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the array of CharSequences to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
+     * @see Strings#firstNonEmpty(String...)
+     */
+    @SafeVarargs
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
+        if (isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (final T e : a) {
+            if (Strings.isNotEmpty(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns an Optional containing the first non-empty CharSequence from the given Iterable of CharSequences.
+     * If all CharSequences are empty or the Iterable is empty, returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequence
+     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the Iterable is empty
+     * @see Strings#firstNonEmpty(Iterable)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final Iterable<? extends T> css) {
+        if (isEmpty(css)) {
+            return Optional.empty();
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotEmpty(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If both CharSequences are blank or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both CharSequences are blank or null
+     * @see Strings#firstNonBlank(String, String)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
+        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.empty());
+    }
+
+    /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
+     * @see Strings#firstNonBlank(String, String, String)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
+        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.empty()));
+    }
+
+    /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequences
+     * @param a the array of CharSequences to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
+     * @see Strings#firstNonBlank(String...)
+     */
+    @SafeVarargs
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
+        if (isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (final T e : a) {
+            if (Strings.isNotBlank(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns an Optional containing the first non-blank CharSequence from the given Iterable of CharSequences.
+     * If all CharSequences are blank or the Iterable is empty, returns an empty Optional.
+     *
+     * @param <T> the type of the CharSequence
+     * @param css the Iterable of CharSequences to check, may be {@code null} or empty
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the Iterable is empty
+     * @see Strings#firstNonBlank(Iterable)
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final Iterable<? extends T> css) {
+        if (isEmpty(css)) {
+            return Optional.empty();
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotBlank(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first entry from the given map.
+     * If the map is {@code null} or empty, it returns an empty Optional.
+     *
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the first entry
+     * @return an Optional containing the first entry of the map, or an empty Optional if the map is {@code null} or empty
+     */
+    public static <K, V> Optional<Map.Entry<K, V>> firstEntry(final Map<K, V> map) {
+        if (map == null || map.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(map.entrySet().iterator().next());
+    }
+
+    /**
+     * Returns the last entry from the given map.
+     * If the map is {@code null} or empty, it returns an empty Optional.
+     *
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the last entry
+     * @return an Optional containing the last entry of the map, or an empty Optional if the map is {@code null} or empty
+     */
+    public static <K, V> Optional<Map.Entry<K, V>> lastEntry(final Map<K, V> map) {
+        if (map == null || map.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return lastNonNull(map.entrySet().iterator());
+    }
+
+    /**
+     * Returns the first element of the given array if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @return the first element of the array if it is not empty, otherwise null
+     */
+    public static <T> T firstOrNullIfEmpty(final T[] a) {
+        return a == null || a.length == 0 ? null : a[0];
+    }
+
+    /**
+     * Returns the first element of the given iterable if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @return the first element of the iterable if it is not empty, otherwise null
+     */
+    public static <T> T firstOrNullIfEmpty(final Iterable<? extends T> c) {
+        return firstOrDefaultIfEmpty(c, null);
+    }
+
+    /**
+     * Returns the first element of the given iterator if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @return the first element of the iterator if it is not empty, otherwise null
+     */
+    public static <T> T firstOrNullIfEmpty(final Iterator<? extends T> iter) {
+        return firstOrDefaultIfEmpty(iter, null);
+    }
+
+    /**
+     * Returns the first element of the given array if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @param defaultValueForEmpty the default value to return if the array is empty
+     * @return the first element of the array if it is not empty, otherwise the specified default value
+     */
+    public static <T> T firstOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
+        return a == null || a.length == 0 ? defaultValueForEmpty : a[0];
+    }
+
+    /**
+     * Returns the first element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @param defaultValueForEmpty the default value to return if the iterable is empty
+     * @return the first element of the iterable if it is not empty, otherwise the specified default value
+     */
+    public static <T> T firstOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
+        if (isEmpty(c)) {
+            return defaultValueForEmpty;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            return ((List<T>) c).get(0);
+        } else {
+            return c.iterator().next();
+        }
+    }
+
+    /**
+     * Returns the first element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValueForEmpty the default value to return if the iterator is empty
+     * @return the first element of the iterator if it is not empty, otherwise the specified default value
+     */
+    public static <T> T firstOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
+        if (iter == null || !iter.hasNext()) {
+            return defaultValueForEmpty;
+        }
+
+        return iter.next();
+    }
+
+    /**
+     * Returns the last element of the given array if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @return the last element of the array if it is not empty, otherwise null
+     */
+    public static <T> T lastOrNullIfEmpty(final T[] a) {
+        return a == null || a.length == 0 ? null : a[a.length - 1];
+    }
+
+    /**
+     * Returns the last element of the given iterable if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @return the last element of the iterable if it is not empty, otherwise null
+     */
+    public static <T> T lastOrNullIfEmpty(final Iterable<? extends T> c) {
+        return lastOrDefaultIfEmpty(c, null);
+    }
+
+    /**
+     * Returns the last element of the given iterator if it is not empty, otherwise returns {@code null}.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @return the last element of the iterator if it is not empty, otherwise null
+     */
+    public static <T> T lastOrNullIfEmpty(final Iterator<? extends T> iter) {
+        return lastOrDefaultIfEmpty(iter, null);
+    }
+
+    /**
+     * Returns the last element of the given array if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @param defaultValueForEmpty the default value to return if the array is empty
+     * @return the last element of the array if it is not empty, otherwise the specified default value
+     */
+    public static <T> T lastOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
+        return a == null || a.length == 0 ? defaultValueForEmpty : a[a.length - 1];
+    }
+
+    /**
+     * Returns the last element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @param defaultValueForEmpty the default value to return if the iterable is empty
+     * @return the last element of the iterable if it is not empty, otherwise the specified default value
+     */
+    public static <T> T lastOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
+        if (isEmpty(c)) {
+            return defaultValueForEmpty;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            return list.get(list.size() - 1);
+        }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            return descendingIterator.next();
+        }
+
+        return lastOrDefaultIfEmpty(c.iterator(), defaultValueForEmpty);
+    }
+
+    /**
+     * Returns the last element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValueForEmpty the default value to return if the iterator is empty
+     * @return the last element of the iterator if it is not empty, otherwise the specified default value
+     */
+    public static <T> T lastOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
+        if (iter == null || !iter.hasNext()) {
+            return defaultValueForEmpty;
+        }
+
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+        }
+
+        return e;
+    }
+
+    /**
+     * Returns the first element in the given array that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
+        if (isEmpty(a)) {
+            return Nullable.empty();
+        }
+
+        for (final T element : a) {
+            if (predicate.test(element)) {
+                return Nullable.of(element);
+            }
+        }
+
+        return Nullable.empty();
+    }
+
+    /**
+     * Returns the first element in the given iterable that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        if (isEmpty(c)) {
+            return Nullable.empty();
+        }
+
+        for (final T e : c) {
+            if (predicate.test(e)) {
+                return Nullable.of(e);
+            }
+        }
+
+        return Nullable.empty();
+    }
+
+    /**
+     * Returns the first element in the given iterator that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        if (iter == null) {
+            return Nullable.empty();
+        }
+
+        T next = null;
+
+        while (iter.hasNext()) {
+            next = iter.next();
+
+            if (predicate.test(next)) {
+                return Nullable.of(next);
+            }
+        }
+
+        return Nullable.empty();
+    }
+
+    /**
+     * Returns the last element in the given array that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
+        if (isEmpty(a)) {
+            return Nullable.empty();
+        }
+
+        for (int len = a.length, i = len - 1; i >= 0; i--) {
+            if (predicate.test(a[i])) {
+                return Nullable.of(a[i]);
+            }
+        }
+
+        return Nullable.empty();
+    }
+
+    /**
+     * Returns the last element in the given iterable that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        return (Nullable<T>) findLast(c, predicate, false);
+    }
+
+    /**
+     * Returns the last element in the given iterator that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
+     */
+    private static <T> Object findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate, final boolean isForNonNull) {
+        if (isEmptyCollection(c)) {
+            return isForNonNull ? Optional.empty() : Nullable.empty();
+        }
+
+        T e = null;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = list.size() - 1; i >= 0; i--) {
+                e = list.get(i);
+
+                if ((!isForNonNull || e != null) && predicate.test(e)) {
+                    return isForNonNull ? Optional.of(e) : Nullable.of(e);
+                }
+            }
+
+            return isForNonNull ? Optional.empty() : Nullable.empty();
+        }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            while (descendingIterator.hasNext()) {
+                e = descendingIterator.next();
+
+                if ((!isForNonNull || e != null) && predicate.test(e)) {
+                    return isForNonNull ? Optional.of(e) : Nullable.of(e);
+                }
+            }
+
+            return isForNonNull ? Optional.empty() : Nullable.empty();
+        }
+
+        T[] a = null;
+
+        if (c instanceof Collection) {
+            a = (T[]) ((Collection<T>) c).toArray();
+        } else {
+            final List<T> tmp = new ArrayList<>();
+
+            for (final T t : c) {
+                tmp.add(t);
+            }
+
+            a = (T[]) tmp.toArray();
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if ((!isForNonNull || a[i] != null) && predicate.test(a[i])) {
+                return isForNonNull ? Optional.of(a[i]) : Nullable.of(a[i]);
+            }
+        }
+
+        return isForNonNull ? Optional.empty() : Nullable.empty();
+    }
+
+    /**
+     * Returns the first {@code non-null} element in the given array that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
+        if (isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (final T element : a) {
+            if (element != null && predicate.test(element)) {
+                return Optional.of(element);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first {@code non-null} element in the given iterable that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        if (isEmpty(c)) {
+            return Optional.empty();
+        }
+
+        for (final T e : c) {
+            if (e != null && predicate.test(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the first {@code non-null} element in the given iterator that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        if (iter == null) {
+            return Optional.empty();
+        }
+
+        T next = null;
+
+        while (iter.hasNext()) {
+            next = iter.next();
+
+            if (next != null && predicate.test(next)) {
+                return Optional.of(next);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the last {@code non-null} element in the given array that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
+        if (isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (int len = a.length, i = len - 1; i >= 0; i--) {
+            if (a[i] != null && predicate.test(a[i])) {
+                return Optional.of(a[i]);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the last {@code non-null} element in the given iterable that matches the specified predicate.
+     *
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     */
+    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        return (Optional<T>) findLast(c, predicate, true);
+    }
+
+    /**
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
@@ -15846,2703 +18966,19 @@ sealed class CommonUtil permits N {
         return a.hasNext() || b.hasNext() ? idx : -1;
     }
 
-    /**
-     * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is {@code null}. Otherwise returns {@code cmp}.
-     *
-     * @param <T>
-     * @param cmp
-     * @return
-     */
-    static <T> Comparator<T> checkComparator(final Comparator<T> cmp) {
-        return cmp == null ? NATURAL_COMPARATOR : cmp;
-    }
-
-    /**
-     * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @return {@code true} if the first object is less than the second, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean lessThan(final T a, final T b) {
-        return compare(a, b) < 0;
-    }
-
-    /**
-     * Compares two objects using the specified comparator to determine if the first is less than the second.
-     *
-     * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the first object is less than the second, {@code false} otherwise
-     */
-    public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        return cmp.compare(a, b) < 0;
-    }
-
-    /**
-     * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
-        return compare(a, b) <= 0;
-    }
-
-    /**
-     * Compares two objects using the specified comparator to determine if the first is less than or equal to the second.
-     *
-     * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
-     */
-    public static <T> boolean lessEqual(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        return cmp.compare(a, b) <= 0;
-    }
-
-    /**
-     * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean greaterThan(final T a, final T b) {
-        return compare(a, b) > 0;
-    }
-
-    /**
-     * Compares two objects using the specified comparator to determine if the first is greater than the second.
-     *
-     * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
-     */
-    public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        return cmp.compare(a, b) > 0;
-    }
-
-    /**
-     * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
-        return compare(a, b) >= 0;
-    }
-
-    /**
-     * Compares two objects using the specified comparator to determine if the first is greater than or equal to the second.
-     *
-     * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
-     */
-    public static <T> boolean greaterEqual(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        return cmp.compare(a, b) >= 0;
-    }
-
-    /**
-     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean gtAndLt(final T value, final T min, final T max) {
-        if (compare(value, min) <= 0) {
-            return false;
-        }
-
-        return compare(value, max) < 0;
-    }
-
-    /**
-     * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
-     */
-    public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        if (cmp.compare(value, min) <= 0) {
-            return false;
-        }
-
-        return cmp.compare(value, max) < 0;
-    }
-
-    /**
-     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean geAndLt(final T value, final T min, final T max) {
-        if (compare(value, min) < 0) {
-            return false;
-        }
-
-        return compare(value, max) < 0;
-    }
-
-    /**
-     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value using the specified comparator.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
-     */
-    public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        if (cmp.compare(value, min) < 0) {
-            return false;
-        }
-
-        return cmp.compare(value, max) < 0;
-    }
-
-    /**
-     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean geAndLe(final T value, final T min, final T max) {
-        if (compare(value, min) < 0) {
-            return false;
-        }
-
-        return compare(value, max) <= 0;
-    }
-
-    /**
-     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value using the specified comparator.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
-     */
-    public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        if (cmp.compare(value, min) < 0) {
-            return false;
-        }
-
-        return cmp.compare(value, max) <= 0;
-    }
-
-    /**
-     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
-     *
-     * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
-     */
-    public static <T extends Comparable<? super T>> boolean gtAndLe(final T value, final T min, final T max) {
-        if (compare(value, min) <= 0) {
-            return false;
-        }
-
-        return compare(value, max) <= 0;
-    }
-
-    /**
-     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value using the specified comparator.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
-     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
-     */
-    public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
-
-        if (cmp.compare(value, min) <= 0) {
-            return false;
-        }
-
-        return cmp.compare(value, max) <= 0;
-    }
-
-    /**
-     * Checks if the given value is between the specified minimum and maximum values, inclusive.
-     * It means {@code min <= value <= max}.
-     * {@code null} is considered as the smallest value in nature order.
-     * @implNote it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
-     * @deprecated Use {@link #geAndLe(Comparable, Comparable, Comparable)} instead.
-     */
-    @Deprecated
-    public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
-        return geAndLe(value, min, max);
-    }
-
-    /**
-     * Checks if the given value is between the specified minimum and maximum values, inclusive. 
-     * It means {@code min <= value <= max}.
-     * @implNote it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.
-     *
-     * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
-     * @param cmp the comparator to compare the values, must not be null
-     * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
-     * @deprecated Use {@link #geAndLe(Object, Object, Object, Comparator)} instead.
-     */
-    @Deprecated
-    public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
-        return geAndLe(value, min, max, cmp);
-    }
-
-    /**
-     * Compares two boolean values for equality.
-     *
-     * @param a the first boolean value
-     * @param b the second boolean value
-     * @return {@code true} if the boolean values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final boolean a, final boolean b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two char values for equality.
-     *
-     * @param a the first char value
-     * @param b the second char value
-     * @return {@code true} if the char values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final char a, final char b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two byte values for equality.
-     *
-     * @param a the first byte value
-     * @param b the second byte value
-     * @return {@code true} if the byte values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final byte a, final byte b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two short values for equality.
-     *
-     * @param a the first short value
-     * @param b the second short value
-     * @return {@code true} if the short values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final short a, final short b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two int values for equality.
-     *
-     * @param a the first int value
-     * @param b the second int value
-     * @return {@code true} if the int values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final int a, final int b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two long values for equality.
-     *
-     * @param a the first long value
-     * @param b the second long value
-     * @return {@code true} if the long values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final long a, final long b) {
-        return a == b;
-    }
-
-    /**
-     * Compares two float values for equality.
-     *
-     * @param a the first float value
-     * @param b the second float value
-     * @return {@code true} if the float values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final float a, final float b) {
-        return Float.compare(a, b) == 0;
-    }
-
-    /**
-     * Compares two double values for equality.
-     *
-     * @param a the first double value
-     * @param b the second double value
-     * @return {@code true} if the double values are equal, {@code false} otherwise
-     */
-    public static boolean equals(final double a, final double b) {
-        return Double.compare(a, b) == 0;
-    }
-
-    /**
-     * Compares two strings for equality.
-     *
-     * @param a the first string
-     * @param b the second string
-     * @return {@code true} if the strings are equal, {@code false} otherwise
-     */
-    public static boolean equals(final String a, final String b) {
-        return (a == null) ? b == null : (b != null && a.length() == b.length() && a.equals(b));
-    }
-
-    /**
-     * Compares two strings for equality, ignoring case.
-     *
-     * @param a the first string
-     * @param b the second string
-     * @return {@code true} if the strings are equal, {@code false} otherwise
-     */
-    public static boolean equalsIgnoreCase(final String a, final String b) {
-        return (a == null) ? b == null : (a.equalsIgnoreCase(b));
-    }
-
-    /**
-     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.equals} method will be used.
-     *
-     * @param a the first object
-     * @param b the second object
-     * @return {@code true} if the objects are equal, {@code false} otherwise
-     */
-    public static boolean equals(final Object a, final Object b) {
-        if (Objects.equals(a, b)) {
-            return true;
-        }
-
-        if ((a != null) && (b != null)) {
-            final Type<Object> typeA = typeOf(a.getClass());
-
-            if (typeA.isPrimitiveArray()) {
-                final Type<Object> typeB = typeOf(b.getClass());
-
-                return typeA.clazz().equals(typeB.clazz()) && typeA.equals(a, b);
-            } else if (typeA.isObjectArray()) {
-                final Type<Object> typeB = typeOf(b.getClass());
-
-                return typeB.isObjectArray() && typeA.equals(a, b);
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(boolean[], boolean[])
-     */
-    public static boolean equals(final boolean[] a, final boolean[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two boolean arrays for equality within the specified range.
-     *
-     * @param a the first boolean array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second boolean array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(boolean[], boolean[])
-     */
-    public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(char[], char[])
-     */
-    public static boolean equals(final char[] a, final char[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two char arrays for equality within the specified range.
-     *
-     * @param a the first char array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second char array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(char[], char[])
-     */
-    public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(byte[], byte[])
-     */
-    public static boolean equals(final byte[] a, final byte[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two byte arrays for equality within the specified range.
-     *
-     * @param a the first byte array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second byte array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(byte[], byte[])
-     */
-    public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(short[], short[])
-     */
-    public static boolean equals(final short[] a, final short[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two short arrays for equality within the specified range.
-     *
-     * @param a the first short array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second short array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(short[], short[])
-     */
-    public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(int[], int[])
-     */
-    public static boolean equals(final int[] a, final int[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two int arrays for equality within the specified range.
-     *
-     * @param a the first int array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second int array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(int[], int[])
-     */
-    public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(long[], long[])
-     */
-    public static boolean equals(final long[] a, final long[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two long arrays for equality within the specified range.
-     *
-     * @param a the first long array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second long array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(long[], long[])
-     */
-    public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (a[i] != b[j]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(float[], float[])
-     */
-    public static boolean equals(final float[] a, final float[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two float arrays for equality within the specified range.
-     *
-     * @param a the first float array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second float array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(float[], float[])
-     */
-    public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (Float.compare(a[i], b[j]) != 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(double[], double[])
-     */
-    public static boolean equals(final double[] a, final double[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    /**
-     * Compares two double arrays for equality within the specified range.
-     *
-     * @param a the first double array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second double array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(double[], double[])
-     */
-    public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (Double.compare(a[i], b[j]) != 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays for equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#equals(Object[], Object[])
-     */
-    public static boolean equals(final Object[] a, final Object[] b) {
-        return a == b || (a != null && b != null && a.length == b.length && equals(a, 0, b, 0, a.length));
-    }
-
-    /**
-     * Compares two arrays for equality within the specified range.
-     *
-     * @param a the first array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#equals(Object[], Object[])
-     */
-    public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        } else if (!a.getClass().equals(b.getClass())) {
-            return false;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (!equals(a[i], b[j])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.deepEquals} method will be used.
-     *
-     * @param a the first object to compare, which may be null
-     * @param b the second object to compare, which may be null
-     * @return {@code true} if the objects are deeply equal, {@code false} otherwise
-     * @see Arrays#deepEquals(Object[], Object[])
-     */
-    public static boolean deepEquals(final Object a, final Object b) {
-        if (Objects.equals(a, b)) {
-            return true;
-        }
-
-        final Class<?> cls = a == null ? null : a.getClass();
-
-        if ((a != null) && (b != null) && cls.isArray() && cls.equals(b.getClass())) {
-            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
-
-            if (enumInt == null) {
-                return deepEquals((Object[]) a, (Object[]) b);
-            }
-
-            switch (enumInt) {
-                case 11:
-                    return equals((boolean[]) a, (boolean[]) b);
-
-                case 12:
-                    return equals((char[]) a, (char[]) b);
-
-                case 13:
-                    return equals((byte[]) a, (byte[]) b);
-
-                case 14:
-                    return equals((short[]) a, (short[]) b);
-
-                case 15:
-                    return equals((int[]) a, (int[]) b);
-
-                case 16:
-                    return equals((long[]) a, (long[]) b);
-
-                case 17:
-                    return equals((float[]) a, (float[]) b);
-
-                case 18:
-                    return equals((double[]) a, (double[]) b);
-
-                case 19:
-                    return equals((String[]) a, (String[]) b);
-
-                default:
-                    return deepEquals((Object[]) a, (Object[]) b);
-            }
-
-        }
-
-        return false;
-    }
-
-    /**
-     * Compares two arrays for deep equality.
-     *
-     * @param a the first array
-     * @param b the second array
-     * @return {@code true} if the arrays are equal, {@code false} otherwise
-     * @see Arrays#deepEquals(Object[], Object[])
-     */
-    public static boolean deepEquals(final Object[] a, final Object[] b) {
-        return a == b || (a != null && b != null && a.length == b.length && deepEquals(a, 0, b, 0, a.length));
-    }
-
-    /**
-     * Compares two arrays for deep equality within the specified range.
-     *
-     * @param a the first array, must not be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array, must not be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @see Arrays#deepEquals(Object[], Object[])
-     */
-    public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        } else if (!a.getClass().equals(b.getClass())) {
-            return false;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (!deepEquals(a[i], b[j])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two arrays of Strings, ignoring case considerations.
-     *
-     * @param a the first array of Strings to compare, which may be null
-     * @param b the second array of Strings to compare, which may be null
-     * @return {@code true} if the arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
-     */
-    public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
-        return (a == null || b == null) ? a == b : (a.length == b.length && equalsIgnoreCase(a, 0, b, 0, a.length));
-    }
-
-    /**
-     * Compares two arrays of Strings, ignoring case considerations, within the specified range.
-     *
-     * @param a the first array of Strings to compare, which may be null
-     * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array of Strings to compare, which may be null
-     * @param fromIndexB the starting index in the second array, inclusive
-     * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
-        checkFromIndexSize(fromIndexB, len, len(b));
-
-        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
-            return true;
-        }
-
-        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if (((a[i] == null || b[j] == null) ? (a != b) : !a[i].equalsIgnoreCase(b[j]))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares two maps for equality based on the specified keys.
-     *
-     * @param map1 the first map to compare, must not be null
-     * @param map2 the second map to compare, must not be null
-     * @param keysToCompare the collection of keys to compare, must not be null
-     * @return {@code true} if the values associated with the specified keys in both maps are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code keysToCompare} is empty
-     */
-    public static <K> boolean equalsByKeys(final Map<? extends K, ?> map1, final Map<? extends K, ?> map2, final Collection<K> keysToCompare)
-            throws IllegalArgumentException {
-        N.checkArgNotEmpty(keysToCompare, cs.keysToCompare);
-
-        if (map1 == map2) {
-            return true;
-        } else if ((map1 == null && map2 != null) || (map1 != null && map2 == null)) {
-            return false;
-        }
-
-        for (K key : keysToCompare) {
-            if (!equals(map1.get(key), map2.get(key))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Compares the properties of two beans to determine if they are equal.
-     *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
-     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
-     */
-    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
-        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
-
-        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
-    }
-
-    /**
-     * Compares the properties of two beans to determine if they are equal by common properties.
-     *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
-     * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if no common property is found
-     */
-    public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
-        checkArgNotNull(bean1);
-        checkArgNotNull(bean2);
-        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
-
-        final List<String> propNamesToCompare = new ArrayList<>(ClassUtil.getPropNameList(bean1.getClass()));
-        propNamesToCompare.retainAll(ClassUtil.getPropNameList(bean2.getClass()));
-
-        if (isEmpty(propNamesToCompare)) {
-            throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
-        }
-
-        return equalsByProps(bean1, bean2, propNamesToCompare);
-    }
-
-    /**
-     * Returns the hash code for a boolean value.
-     *
-     * @param value the boolean value
-     * @return the hash code.
-     */
-    public static int hashCode(final boolean value) {
-        return value ? 1231 : 1237;
-    }
-
-    /**
-     * Returns the hash code for a char value.
-     *
-     * @param value the char value
-     * @return the hash code
-     */
-    public static int hashCode(final char value) {
-        return value;
-    }
-
-    /**
-     * Returns the hash code for a byte value.
-     *
-     * @param value the byte value
-     * @return the hash code
-     */
-    public static int hashCode(final byte value) {
-        return value;
-    }
-
-    /**
-     * Returns the hash code for a short value.
-     *
-     * @param value the short value
-     * @return the hash code
-     */
-    public static int hashCode(final short value) {
-        return value;
-    }
-
-    /**
-     * Returns the hash code for an int value.
-     *
-     * @param value the int value
-     * @return the hash code
-     */
-    public static int hashCode(final int value) {
-        return value;
-    }
-
-    /**
-     * Returns the hash code for a long value.
-     *
-     * @param value the long value
-     * @return the hash code
-     */
-    public static int hashCode(final long value) {
-        return Long.hashCode(value);
-    }
-
-    /**
-     * Returns the hash code for a float value.
-     *
-     * @param value the float value
-     * @return the hash code
-     */
-    public static int hashCode(final float value) {
-        return Float.floatToIntBits(value);
-    }
-
-    /**
-     * Returns the hash code for a double value.
-     *
-     * @param value the double value
-     * @return the hash code
-     */
-    public static int hashCode(final double value) {
-
-        return Double.hashCode(value);
-    }
-
-    /**
-     * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used
-     *
-     * @param obj the object for which the hash code is to be calculated
-     * @return the hash code of the object, or 0 if the object is null
-     */
-    public static int hashCode(final Object obj) {
-        if (obj == null) {
-            return 0;
-        }
-
-        if (obj.getClass().isArray()) {
-            return typeOf(obj.getClass()).hashCode(obj);
-        }
-
-        return obj.hashCode();
-    }
-
-    /**
-     * Returns the hash code for an array of booleans.
-     *
-     * @param a the array of booleans
-     * @return the hash code of the array
-     * @see Arrays#hashCode(boolean[])
-     */
-    public static int hashCode(final boolean[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a boolean array.
-     *
-     * @param a the array of booleans
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + (a[i] ? 1231 : 1237);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of chars.
-     *
-     * @param a the array of chars
-     * @return the hash code of the array
-     * @see Arrays#hashCode(char[])
-     */
-    public static int hashCode(final char[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a char array.
-     *
-     * @param a the array of chars
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + a[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of bytes.
-     *
-     * @param a the array of bytes
-     * @return the hash code of the array
-     * @see Arrays#hashCode(byte[])
-     */
-    public static int hashCode(final byte[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a byte array.
-     *
-     * @param a the array of bytes
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + a[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of shorts.
-     *
-     * @param a the array of shorts
-     * @return the hash code of the array
-     * @see Arrays#hashCode(short[])
-     */
-    public static int hashCode(final short[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a short array.
-     *
-     * @param a the array of shorts
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + a[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of ints.
-     *
-     * @param a the array of ints
-     * @return the hash code of the array
-     * @see Arrays#hashCode(int[])
-     */
-    public static int hashCode(final int[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in an int array.
-     *
-     * @param a the array of ints
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + a[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of longs.
-     *
-     * @param a the array of longs
-     * @return the hash code of the array
-     * @see Arrays#hashCode(long[])
-     */
-    public static int hashCode(final long[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a long array.
-     *
-     * @param a the array of longs
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + Long.hashCode(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of floats.
-     *
-     * @param a the array of floats
-     * @return the hash code of the array
-     * @see Arrays#hashCode(float[])
-     */
-    public static int hashCode(final float[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a float array.
-     *
-     * @param a the array of floats
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + Float.floatToIntBits(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of doubles.
-     *
-     * @param a the array of doubles
-     * @return the hash code of the array
-     * @see Arrays#hashCode(double[])
-     */
-    public static int hashCode(final double[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in a double array.
-     *
-     * @param a the array of doubles
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + Double.hashCode(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for an array of Objects.
-     *
-     * @param a the array of Objects
-     * @return the hash code of the array
-     * @see Arrays#hashCode(Object[])
-     */
-    public static int hashCode(final Object[] a) {
-        return a == null ? 0 : hashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in an Object array.
-     *
-     * @param a the array of Objects
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + (a[i] == null ? 0 : a[i].hashCode());
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the hash code for the specified object. If the object is an array, the appropriate {@code Arrays.deepHashCode} method will be used.
-     *
-     * @param obj the object for which the hash code is to be calculated
-     * @return the hash code of the object, or 0 if the object is null
-     * @see Arrays#deepHashCode(Object[])
-     */
-    public static int deepHashCode(final Object obj) {
-        if (obj == null) {
-            return 0;
-        }
-
-        final Class<?> cls = obj.getClass();
-
-        if (cls.isArray()) {
-            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
-
-            if (enumInt == null) {
-                return deepHashCode((Object[]) obj);
-            }
-
-            switch (enumInt) {
-                case 11:
-                    return hashCode((boolean[]) obj);
-
-                case 12:
-                    return hashCode((char[]) obj);
-
-                case 13:
-                    return hashCode((byte[]) obj);
-
-                case 14:
-                    return hashCode((short[]) obj);
-
-                case 15:
-                    return hashCode((int[]) obj);
-
-                case 16:
-                    return hashCode((long[]) obj);
-
-                case 17:
-                    return hashCode((float[]) obj);
-
-                case 18:
-                    return hashCode((double[]) obj);
-
-                case 19:
-                    return hashCode((String[]) obj);
-
-                default:
-                    return deepHashCode((Object[]) obj);
-            }
-        }
-
-        return obj.hashCode();
-    }
-
-    /**
-     * Returns the hash code for an array of Objects.
-     *
-     * @param a the array of Objects
-     * @return the hash code of the array
-     * @see Arrays#deepHashCode(Object[])
-     */
-    public static int deepHashCode(final Object[] a) {
-        return a == null ? 0 : deepHashCode(a, 0, a.length);
-    }
-
-    /**
-     * Returns the hash code for a range of elements in an Object array.
-     *
-     * @param a the array of Objects
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the hash code for the specified range of the array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     * @see Arrays#deepHashCode(Object[])
-     */
-    public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 1;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result = 31 * result + (a[i] == null ? 0 : deepHashCode(a[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a string representation of the specified boolean value.
-     *
-     * @param value the boolean value to be represented as a string
-     * @return the String representation of the boolean value
-     */
-    public static String toString(final boolean value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified char value.
-     *
-     * @param value the char value to be represented as a string
-     * @return the String representation of the char value
-     */
-    public static String toString(final char value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified byte value.
-     *
-     * @param value the byte value to be represented as a string
-     * @return the String representation of the byte value
-     */
-    public static String toString(final byte value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified short value.
-     *
-     * @param value the short value to be represented as a string
-     * @return the String representation of the short value
-     */
-    public static String toString(final short value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified int value.
-     *
-     * @param value the int value to be represented as a string
-     * @return the String representation of the int value
-     */
-    public static String toString(final int value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified long value.
-     *
-     * @param value the long value to be represented as a string
-     * @return the String representation of the long value
-     */
-    public static String toString(final long value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified float value.
-     *
-     * @param value the float value to be represented as a string
-     * @return the String representation of the float value
-     */
-    public static String toString(final float value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified double value.
-     *
-     * @param value the double value to be represented as a string
-     * @return the String representation of the double value
-     */
-    public static String toString(final double value) {
-        return stringOf(value);
-    }
-
-    /**
-     * Returns a string representation of the specified object.
-     *
-     * @param obj the object to be represented as a string
-     * @return the String representation of the object. If the object is {@code null}, the string {@code "null"} is returned.
-     */
-    public static String toString(final Object obj) {
-        if (obj == null) {
-            return Strings.NULL;
-        } else if (obj instanceof CharSequence) {
-            return obj.toString();
-        }
-
-        if (obj.getClass().isArray()) {
-            return typeOf(obj.getClass()).toString(obj);
-        }
-        if (obj instanceof final Iterator<?> iter) { // NOSONAR
-            return Strings.join(iter, ", ", "[", "]");
-        }
-        if (obj instanceof final Iterable<?> iter) { // NOSONAR
-            return Strings.join(iter, ", ", "[", "]");
-        }
-
-        final Integer typeIdx = CLASS_TYPE_ENUM.get(obj.getClass());
-
-        if (typeIdx == null) {
-            return obj.toString();
-        }
-
-        switch (typeIdx) {
-            case 21:
-                return toString(((Boolean) obj).booleanValue());
-
-            case 22:
-                return toString(((Character) obj).charValue());
-
-            case 23:
-                return toString(((Byte) obj).byteValue());
-
-            case 24:
-                return toString(((Short) obj).shortValue());
-
-            case 25:
-                return toString(((Integer) obj).intValue());
-
-            case 26:
-                return toString(((Long) obj).longValue());
-
-            //    case 27:
-            //        return toString(((Float) obj).floatValue());
-            //
-            //    case 28:
-            //        return toString(((Double) obj).doubleValue());
-
-            default:
-                return obj.toString();
-        }
-    }
-
-    /**
-     * Returns a string representation of the specified object. If the object is {@code null}, the specified default value is returned.
-     *
-     * @param obj the object to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is null
-     * @return the String representation of the object, or the default value if the object is null
-     */
-    public static String toString(final Object obj, final String defaultIfNull) {
-        return obj == null ? defaultIfNull : toString(obj);
-    }
-
-    /**
-     * Returns a string representation of the specified boolean array.
-     *
-     * @param a the boolean array to be represented as a string
-     * @return the String representation of the boolean array
-     * @see Arrays#toString(boolean[])
-     */
-    public static String toString(final boolean[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a boolean array.
-     *
-     * @param a the boolean array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the boolean array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final boolean[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
-     */
-    static void toString(final StringBuilder sb, final boolean[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified char array.
-     *
-     * @param a the char array to be represented as a string
-     * @return the String representation of the char array
-     * @see Arrays#toString(char[])
-     */
-    public static String toString(final char[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a char array.
-     *
-     * @param a the char array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the char array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final char[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final char[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified byte array.
-     *
-     * @param a the byte array to be represented as a string
-     * @return the String representation of the byte array
-     * @see Arrays#toString(byte[])
-     */
-    public static String toString(final byte[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a byte array.
-     *
-     * @param a the byte array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the byte array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final byte[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final byte[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified short array.
-     *
-     * @param a the short array to be represented as a string
-     * @return the String representation of the short array
-     * @see Arrays#toString(short[])
-     */
-    public static String toString(final short[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a short array.
-     *
-     * @param a the short array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the short array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final short[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final short[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified int array.
-     *
-     * @param a the int array to be represented as a string
-     * @return the String representation of the int array
-     * @see Arrays#toString(int[])
-     */
-    public static String toString(final int[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in an int array.
-     *
-     * @param a the int array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the int array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final int[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final int[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified long array.
-     *
-     * @param a the long array to be represented as a string
-     * @return the String representation of the long array
-     * @see Arrays#toString(long[])
-     */
-    public static String toString(final long[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a long array.
-     *
-     * @param a the long array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the long array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final long[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final long[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified float array.
-     *
-     * @param a the float array to be represented as a string
-     * @return the String representation of the float array
-     * @see Arrays#toString(float[])
-     */
-    public static String toString(final float[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a float array.
-     *
-     * @param a the float array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the float array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final float[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final float[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified double array.
-     *
-     * @param a the double array to be represented as a string
-     * @return the String representation of the double array
-     * @see Arrays#toString(double[])
-     */
-    public static String toString(final double[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in a double array.
-     *
-     * @param a the double array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the double array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
-        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final double[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final double[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(a[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the specified Object array.
-     *
-     * @param a the Object array to be represented as a string
-     * @return the String representation of the Object array
-     * @see Arrays#toString(Object[])
-     */
-    public static String toString(final Object[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return toString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the specified range of elements in an Object array.
-     *
-     * @param a the Object array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the Object array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     */
-    public static String toString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
+    // ================================ get/find matched/mismatch element... ===========================================
 
-        return Strings.join(a, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     */
-    static void toString(final StringBuilder sb, final Object[] a) {
-        if (a == null) {
-            sb.append(Strings.NULL);
-        } else if (a.length == 0) {
-            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
-        } else {
-            toString(sb, a, 0, a.length);
-        }
-    }
-
-    /**
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    static void toString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            sb.append(toString(a[i]));
-        }
-
-        sb.append(WD._BRACKET_R);
-    }
-
-    /**
-     * Returns a string representation of the "deep contents" of the specified object. If the object is an array, the appropriate {@code Arrays.toString(array)} method will be used.
-     * This method recursively converts the object and its nested objects to a string.
-     *
-     * @param obj the object to be represented as a string
-     * @return the string representation of the object
-     */
-    public static String deepToString(final Object obj) {
-        if (obj == null) {
-            return Strings.NULL;
-        }
-
-        final Class<?> cls = obj.getClass();
-
-        if (cls.isArray()) {
-            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
-
-            if (enumInt == null) {
-                return deepToString((Object[]) obj);
-            }
-
-            switch (enumInt) {
-                case 11:
-                    return toString((boolean[]) obj);
-
-                case 12:
-                    return toString((char[]) obj);
-
-                case 13:
-                    return toString((byte[]) obj);
-
-                case 14:
-                    return toString((short[]) obj);
-
-                case 15:
-                    return toString((int[]) obj);
-
-                case 16:
-                    return toString((long[]) obj);
-
-                case 17:
-                    return toString((float[]) obj);
-
-                case 18:
-                    return toString((double[]) obj);
-
-                case 19:
-                    return toString((String[]) obj);
-
-                default:
-                    return deepToString((Object[]) obj);
-            }
-        }
-
-        return obj.toString();
-    }
-
-    /**
-     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
-     *
-     * @param a the object array to be represented as a string
-     * @return the String representation of the object, or the default value if the object is null
-     * @see Arrays#deepToString(Object[])
-     */
-    public static String deepToString(final Object[] a) {
-        if (a == null) {
-            return Strings.NULL;
-        } else if (a.length == 0) {
-            return Strings.STR_FOR_EMPTY_ARRAY;
-        }
-
-        return deepToString(a, 0, a.length);
-    }
-
-    /**
-     * Returns a string representation of the "deep contents" of the specified range of elements in an Object array.
-     * This method recursively converts the object and its nested objects to a string.
-     *
-     * @param a the Object array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the String representation of the specified range of the Object array
-     * @throws IndexOutOfBoundsException if the indices are out of range
-     * @see Arrays#deepToString(Object[])
-     */
-    public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
-        final Set<Object> set = newSetFromMap(newIdentityHashMap(len(a)));
-
-        try {
-            deepToString(sb, a, fromIndex, toIndex, set);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    /**
-     * Deep to string.
-     *
-     * @param sb
-     * @param a
-     * @param processedElements
-     */
-    static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object> processedElements) {
-        deepToString(sb, a, 0, a.length, processedElements);
-    }
-
-    /**
-     * Deep to string.
-     *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param processedElements
-     */
-    static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object> processedElements) {
-        processedElements.add(a);
-
-        sb.append(WD._BRACKET_L);
-
-        Object element = null;
-        Class<?> eClass = null;
-        for (int i = fromIndex; i < toIndex; i++) {
-            element = a[i];
-
-            if (i > fromIndex) {
-                sb.append(Strings.ELEMENT_SEPARATOR);
-            }
-
-            if (element == null) {
-                sb.append(Strings.NULL_CHAR_ARRAY);
-
-                continue;
-            }
-
-            eClass = element.getClass();
-
-            if (eClass.isArray()) {
-                final Integer enumInt = CLASS_TYPE_ENUM.get(eClass);
-
-                final int num = enumInt == null ? 0 : enumInt;
-
-                switch (num) {
-                    case 11:
-                        toString(sb, (boolean[]) element);
-                        break;
-
-                    case 12:
-                        toString(sb, (char[]) element);
-                        break;
-
-                    case 13:
-                        toString(sb, (byte[]) element);
-                        break;
-
-                    case 14:
-                        toString(sb, (short[]) element);
-                        break;
-
-                    case 15:
-                        toString(sb, (int[]) element);
-                        break;
-
-                    case 16:
-                        toString(sb, (long[]) element);
-                        break;
-
-                    case 17:
-                        toString(sb, (float[]) element);
-                        break;
-
-                    case 18:
-                        toString(sb, (double[]) element);
-                        break;
-
-                    case 19:
-                        toString(sb, (String[]) element);
-                        break;
-
-                    default:
-                        if (processedElements.contains(element)) {
-                            sb.append("[...]");
-                        } else {
-                            deepToString(sb, (Object[]) element, processedElements);
-                        }
-                }
-            } else { // element is non-null and not an array
-                //noinspection UnnecessaryToStringCall
-                sb.append(element.toString());
-            }
-        }
-
-        sb.append(WD._BRACKET_R);
-
-        processedElements.remove(a);
-    }
-
-    /**
-     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
-     *
-     * @param a the Object array to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is null
-     * @return the String representation of the object, or the default value if the object is null
-     * @see Arrays#deepToString(Object[])
-     */
-    public static String deepToString(final Object[] a, final String defaultIfNull) {
-        return a == null ? defaultIfNull : deepToString(a);
-    }
+    // ================================ reverse/rotate/shuffle/swap/fill/pad/repeat... ================================== 
 
     /**
-     * Reverses the order of the elements in the specified boolean array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified boolean array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [true, false]} becomes {@code [false, true]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the boolean array to be reversed
+     * @param a the boolean array to be reversed. May be {@code null}.
+     * @see #reverse(boolean[], int, int)
      */
     public static void reverse(final boolean[] a) {
         if (isEmpty(a)) {
@@ -18553,13 +18989,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified boolean array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a boolean array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [true, false, false, true, true]}
+     * results in {@code [true, true, false, false, true]}.</p>
      *
-     * @param a the boolean array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the boolean array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(boolean[])
      */
     public static void reverse(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18578,10 +19021,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified char array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified char array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code ['a', 'b', 'c']} becomes {@code ['c', 'b', 'a']}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the char array to be reversed
+     * @param a the char array to be reversed. May be {@code null}.
+     * @see #reverse(char[], int, int)
      */
     public static void reverse(final char[] a) {
         if (isEmpty(a)) {
@@ -18592,13 +19039,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified char array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a char array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code ['a', 'b', 'c', 'd', 'e']}
+     * results in {@code ['a', 'd', 'c', 'b', 'e']}.</p>
      *
-     * @param a the char array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the char array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(char[])
      */
     public static void reverse(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18617,10 +19071,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified byte array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified byte array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the byte array to be reversed
+     * @param a the byte array to be reversed. May be {@code null}.
+     * @see #reverse(byte[], int, int)
      */
     public static void reverse(final byte[] a) {
         if (isEmpty(a)) {
@@ -18631,13 +19089,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified byte array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a byte array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
+     * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
-     * @param a the byte array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the byte array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(byte[])
      */
     public static void reverse(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18656,10 +19121,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified short array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified short array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the short array to be reversed
+     * @param a the short array to be reversed. May be {@code null}.
+     * @see #reverse(short[], int, int)
      */
     public static void reverse(final short[] a) {
         if (isEmpty(a)) {
@@ -18670,13 +19139,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified short array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a short array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
+     * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
-     * @param a the short array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the short array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(short[])
      */
     public static void reverse(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18695,10 +19171,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified int array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified int array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the int array to be reversed
+     * @param a the int array to be reversed. May be {@code null}.
+     * @see #reverse(int[], int, int)
      */
     public static void reverse(final int[] a) {
         if (isEmpty(a)) {
@@ -18709,13 +19189,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified int array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within an int array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
+     * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
-     * @param a the int array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the int array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(int[])
      */
     public static void reverse(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18734,10 +19221,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified long array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified long array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1L, 2L, 3L]} becomes {@code [3L, 2L, 1L]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the long array to be reversed
+     * @param a the long array to be reversed. May be {@code null}.
+     * @see #reverse(long[], int, int)
      */
     public static void reverse(final long[] a) {
         if (isEmpty(a)) {
@@ -18748,13 +19239,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified long array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a long array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1L, 2L, 3L, 4L, 5L]}
+     * results in {@code [1L, 4L, 3L, 2L, 5L]}.</p>
      *
-     * @param a the long array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the long array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(long[])
      */
     public static void reverse(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18773,10 +19271,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified float array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified float array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1.0f, 2.0f, 3.0f]} becomes {@code [3.0f, 2.0f, 1.0f]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the float array to be reversed
+     * @param a the float array to be reversed. May be {@code null}.
+     * @see #reverse(float[], int, int)
      */
     public static void reverse(final float[] a) {
         if (isEmpty(a)) {
@@ -18787,13 +19289,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified float array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a float array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]}
+     * results in {@code [1.0f, 4.0f, 3.0f, 2.0f, 5.0f]}.</p>
      *
-     * @param a the float array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the float array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(float[])
      */
     public static void reverse(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18812,10 +19321,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified double array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified double array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code [1.0, 2.0, 3.0]} becomes {@code [3.0, 2.0, 1.0]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the double array to be reversed
+     * @param a the double array to be reversed. May be {@code null}.
+     * @see #reverse(double[], int, int)
      */
     public static void reverse(final double[] a) {
         if (isEmpty(a)) {
@@ -18826,13 +19339,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified double array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within a double array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code [1.0, 2.0, 3.0, 4.0, 5.0]}
+     * results in {@code [1.0, 4.0, 3.0, 2.0, 5.0]}.</p>
      *
-     * @param a the double array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the double array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(double[])
      */
     public static void reverse(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18851,10 +19371,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified object array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified object array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of all elements.
+     * For example, the array {@code ["a", "b", "c"]} becomes {@code ["c", "b", "a"]}.
+     * If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the object array to be reversed
+     * @param a the object array to be reversed. May be {@code null}.
+     * @see #reverse(Object[], int, int)
      */
     public static void reverse(final Object[] a) {
         if (isEmpty(a)) {
@@ -18865,13 +19389,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified object array.
-     * The reversing is performed in-place, meaning the original array is modified.
+     * Reverses the order of elements in the specified range within an object array in-place.
+     * 
+     * <p>This method modifies the original array by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the array {@code ["a", "b", "c", "d", "e"]}
+     * results in {@code ["a", "d", "c", "b", "e"]}.</p>
      *
-     * @param a the object array to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param a the object array containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #reverse(Object[])
      */
     public static void reverse(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18890,13 +19421,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified list.
-     * The reversing is performed in-place, meaning the original list is modified.
+     * Reverses the order of elements in the specified list in-place.
+     * 
+     * <p>This method modifies the original list by reversing the order of all elements.
+     * For {@link RandomAccess} lists, elements are swapped directly using index access.
+     * For non-RandomAccess lists, {@link ListIterator}s are used for efficient reversal.</p>
+     * 
+     * For example, the list {@code ["a", "b", "c"]} becomes {@code ["c", "b", "a"]}.
+     * 
+     * <p>If the list is {@code null} or empty, this method does nothing.</p>
      *
-     * @param list the list to be reversed
+     * @param list the list to be reversed. May be {@code null}.
+     * @see #reverse(List, int, int)
      * @see #reverse(Collection)
      * @see #reverseToList(Collection)
-     * @see Iterables#reverse(List)
+     * @see Collections#reverse(List)
      */
     public static void reverse(final List<?> list) {
         if (isEmpty(list)) {
@@ -18907,16 +19446,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Reverses the order of the elements in the specified range of the specified list.
-     * The reversing is performed in-place, meaning the original list is modified.
+     * Reverses the order of elements in the specified range within a list in-place.
+     * 
+     * <p>This method modifies the original list by reversing the order of elements
+     * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
+     * Elements outside this range remain unchanged.</p>
+     * 
+     * <p>For {@link RandomAccess} lists or small ranges, elements are swapped directly using index access.
+     * For non-RandomAccess lists with larger ranges, {@link ListIterator}s are used for efficient reversal.</p>
+     * 
+     * <p>For example, reversing the range [1, 4) in the list {@code ["a", "b", "c", "d", "e"]}
+     * results in {@code ["a", "d", "c", "b", "e"]}.</p>
      *
-     * @param list the list to be reversed
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param list the list containing the range to be reversed
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > list.size()} or {@code fromIndex > toIndex}
+     * @see #reverse(List)
      * @see #reverse(Collection)
      * @see #reverseToList(Collection)
-     * @see Iterables#reverse(List)
      */
     public static void reverse(final List<?> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(list));
@@ -18946,13 +19494,22 @@ sealed class CommonUtil permits N {
     // replaced by SequencedCollection in JDK 21?
 
     /**
-     * Reverses the order of the elements in the specified collection that has a well-defined encounter order.
-     * The reversing is performed in-place, meaning the original collection is modified.
+     * Reverses the order of elements in the specified collection in-place.
+     * 
+     * <p>This method is designed for collections with a well-defined encounter order.
+     * For {@link List} implementations, it delegates to {@link #reverse(List)}.
+     * For other collections, it converts the collection to an array, reverses the array,
+     * and then repopulates the collection with the reversed elements.</p>
+     * 
+     * <p>If the collection is {@code null}, empty, or contains only one element,
+     * this method does nothing.</p>
+     * 
+     * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
+     * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
-     * @param c the collection to be reversed. It should be a collection that has a well-defined encounter order.
+     * @param c the collection to be reversed. Should have a well-defined encounter order.
      * @see #reverse(List)
      * @see #reverseToList(Collection)
-     * @see Iterables#reverse(List)
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -18974,15 +19531,23 @@ sealed class CommonUtil permits N {
     // replaced by SequencedCollection in JDK 21?
 
     /**
-     * Returns a new list with the elements from the specified collection in reverse order.
-     * The specified collection doesn't need to have a well-defined encounter order and won't be modified.
+     * Creates a new list containing the elements from the specified collection in reversed order.
+     * 
+     * <p>This method does not modify the original collection. Instead, it creates a new
+     * {@link ArrayList} containing all elements from the collection, then reverses the
+     * order of elements in the new list.</p>
+     * 
+     * <p>The input collection does not need to have a well-defined encounter order.
+     * If the collection is {@code null} or empty, an empty list is returned.</p>
+     * 
+     * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
+     * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
      * @param <T> the type of elements in the collection
-     * @param c the collection whose elements will be added to the returned list in reverse order.
-     * @return a new list with the elements from the specified collection in reverse order.
+     * @param c the collection whose elements will be added to the returned list in reverse order. May be {@code null}.
+     * @return a new list containing the elements from the collection in reversed order
      * @see #reverse(List)
      * @see #reverse(Collection)
-     * @see Iterables#reverse(List)
      */
     @Beta
     public static <T> List<T> reverseToList(final Collection<? extends T> c) {
@@ -18999,29 +19564,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified boolean array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [true, false, true, false]}
+     * by distance 1 results in {@code [false, true, false, true]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the boolean array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the boolean array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(boolean[], int, int, int)
      */
     public static void rotate(final boolean[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a boolean array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the boolean array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(boolean[], int)
+     */
+    public static void rotate(final boolean[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final boolean tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19040,29 +19632,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified char array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code ['a', 'b', 'c', 'd']}
+     * by distance 1 results in {@code ['d', 'a', 'b', 'c']}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the char array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the char array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(char[], int, int, int)
      */
     public static void rotate(final char[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a char array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the char array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(char[], int)
+     */
+    public static void rotate(final char[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final char tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19081,29 +19700,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified byte array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
+     * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the byte array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the byte array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(byte[], int, int, int)
      */
     public static void rotate(final byte[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a byte array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the byte array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(byte[], int)
+     */
+    public static void rotate(final byte[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final byte tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19122,29 +19768,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified short array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
+     * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the short array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the short array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(short[], int, int, int)
      */
     public static void rotate(final short[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a short array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the short array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(short[], int)
+     */
+    public static void rotate(final short[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final short tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19163,29 +19836,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified int array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
+     * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the int array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the int array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(int[], int, int, int)
      */
     public static void rotate(final int[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of an int array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the int array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(int[], int)
+     */
+    public static void rotate(final int[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final int tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19204,29 +19904,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified long array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1L, 2L, 3L, 4L]}
+     * by distance 1 results in {@code [4L, 1L, 2L, 3L]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the long array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the long array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(long[], int, int, int)
      */
     public static void rotate(final long[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a long array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the long array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(long[], int)
+     */
+    public static void rotate(final long[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final long tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19245,29 +19972,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified float array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1.0f, 2.0f, 3.0f, 4.0f]}
+     * by distance 1 results in {@code [4.0f, 1.0f, 2.0f, 3.0f]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the float array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the float array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(float[], int, int, int)
      */
     public static void rotate(final float[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a float array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the float array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(float[], int)
+     */
+    public static void rotate(final float[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final float tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19286,29 +20040,56 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified double array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [1.0, 2.0, 3.0, 4.0]}
+     * by distance 1 results in {@code [4.0, 1.0, 2.0, 3.0]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the double array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the double array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(double[], int, int, int)
      */
     public static void rotate(final double[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of a double array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the double array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(double[], int)
+     */
+    public static void rotate(final double[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final double tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19326,30 +20107,57 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Rotates the elements of the specified Object array by the specified distance.
-     * The rotation is performed in-place, meaning the original array is modified.
+     * Rotates the elements of the specified object array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code ["a", "b", "c", "d"]}
+     * by distance 1 results in {@code ["d", "a", "b", "c"]}.</p>
+     * 
+     * <p>The rotation is performed in-place, modifying the original array.
+     * If the array is {@code null}, empty, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param a the Object array to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param a the object array to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see #rotate(Object[], int, int, int)
      */
     public static void rotate(final Object[] a, int distance) {
-        if (a == null || a.length <= 1 || distance % a.length == 0) {
+        rotate(a, 0, len(a), distance);
+    }
+
+    /**
+     * Rotates the elements in the specified range of an object array by the specified distance.
+     * 
+     * <p>Rotation shifts elements circularly within the specified range. A positive distance
+     * rotates elements to the right, while a negative distance rotates to the left.
+     * Elements outside the specified range remain unchanged.</p>
+     * 
+     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
+     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * @param a the object array containing the range to be rotated
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #rotate(Object[], int)
+     */
+    public static void rotate(final Object[] a, int fromIndex, int toIndex, int distance) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final int len = toIndex - fromIndex;
+
+        if (len <= 1 || distance % len == 0) {
             return;
         }
 
-        final int len = a.length;
         distance = distance % len;
 
         if (distance < 0) {
             distance += len;
         }
 
-        if (distance == 0) {
-            return;
-        }
-
-        for (int i = 0, count = 0; count < len; i++) {
+        for (int i = fromIndex, count = 0; count < len; i++) {
             final Object tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
@@ -19368,12 +20176,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified list by the specified distance.
-     * The rotation is performed in-place, meaning the original list is modified.
+     * 
+     * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
+     * while a negative distance rotates to the left. For example, rotating {@code [a, b, c, d]}
+     * by distance 1 results in {@code [d, a, b, c]}.</p>
+     * 
+     * <p>This method delegates to {@link Collections#rotate(List, int)} for the actual rotation.
+     * If the list is {@code null}, has size 1 or less, or the effective rotation distance is 0,
+     * this method does nothing.</p>
      *
-     * @param list the list to be rotated
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
-     * @see java.util.Collections#rotate(List, int)
+     * @param list the list to be rotated. May be {@code null}.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
+     * @see Collections#rotate(List, int)
      */
     public static void rotate(final List<?> list, final int distance) {
         if (list == null || list.size() <= 1 || distance % list.size() == 0) {
@@ -19384,14 +20198,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Rotates the elements of the specified collection that has a well-defined encounter order by the specified distance.
-     * The rotation is performed in-place, meaning the original collection is modified.
+     * Rotates the elements of the specified collection by the specified distance.
+     * 
+     * <p>This method is designed for collections with a well-defined encounter order.
+     * For {@link List} implementations, it delegates to {@link #rotate(List, int)}.
+     * For other collections, it converts the collection to an array, rotates the array,
+     * and then repopulates the collection with the rotated elements.</p>
+     * 
+     * <p>If the collection is {@code null} or has fewer than 2 elements,
+     * this method does nothing.</p>
+     * 
+     * <p><b>Note:</b> This method is marked as {@link Beta} and its behavior may change
+     * in future versions.</p>
      *
-     * @param c the collection to be rotated. It should be a collection that has a well-defined encounter order.
-     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
-     *                 and negative values rotate the array to the left.
+     * @param c the collection to be rotated. Should have a well-defined encounter order.
+     * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(List, int)
-     * @see java.util.Collections#rotate(List, int)
+     * @see Collections#rotate(List, int)
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -19411,266 +20234,654 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Shuffles the elements of the specified boolean array.
+     * Shuffles the elements of the specified boolean array randomly.
+     * 
+     * <p>This method uses a default {@link Random} instance to perform the shuffle.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * 
+     * <p>If the array is {@code null} or empty, this method does nothing.</p>
      *
-     * @param a the boolean array to be shuffled
+     * @param a the boolean array to be shuffled. May be {@code null}.
+     * @see #shuffle(boolean[], Random)
+     * @see #shuffle(boolean[], int, int)
      */
     public static void shuffle(final boolean[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified boolean array using the specified random number generator.
-     * The shuffling is performed in-place, meaning the original array is modified.
+     * Shuffles the elements in the specified range of a boolean array randomly.
+     * 
+     * <p>This method uses a default {@link Random} instance to perform the shuffle.
+     * Only elements within the specified range are shuffled; elements outside
+     * this range remain in their original positions.</p>
+     * 
+     * <p>The shuffle is performed in-place using the Fisher-Yates algorithm.</p>
      *
-     * @param a the boolean array to be shuffled
-     * @param rnd the random number generator to use
+     * @param a the boolean array containing the range to be shuffled
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #shuffle(boolean[], int, int, Random)
+     */
+    public static void shuffle(final boolean[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified boolean array using the provided random number generator.
+     * 
+     * <p>The shuffle is performed in-place using the Fisher-Yates algorithm,
+     * which ensures each permutation has equal probability when using a proper
+     * random number generator.</p>
+     * 
+     * <p>If the array is {@code null} or empty, this method does nothing.</p>
+     *
+     * @param a the boolean array to be shuffled. May be {@code null}.
+     * @param rnd the random number generator to use for shuffling
+     * @see #shuffle(boolean[])
+     * @see #shuffle(boolean[], int, int, Random)
      */
     public static void shuffle(final boolean[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements in the specified range of a boolean array using the provided random number generator.
+     * 
+     * <p>Only elements within the specified range are shuffled; elements outside
+     * this range remain in their original positions. The shuffle is performed
+     * in-place using the Fisher-Yates algorithm.</p>
+     * 
+     * <p>If the array is {@code null}, empty, or the range contains 1 or fewer elements,
+     * this method does nothing.</p>
+     *
+     * @param a the boolean array containing the range to be shuffled
+     * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
+     * @param toIndex the ending index of the range (exclusive). Must be greater than or equal to {@code fromIndex}.
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #shuffle(boolean[], Random)
+     */
+    public static void shuffle(final boolean[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified char array.
+     * Shuffles the elements of the specified char array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the char array to be shuffled
+     * @param a the char array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(char[], Random)
      */
     public static void shuffle(final char[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified char array using the specified random number generator.
+     * Shuffles the elements of the specified char array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the char array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(char[], int, int, Random)
+     */
+    public static void shuffle(final char[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified char array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the char array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final char[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified char array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the char array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final char[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified byte array.
+     * Shuffles the elements of the specified byte array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the byte array to be shuffled
+     * @param a the byte array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(byte[], Random)
      */
     public static void shuffle(final byte[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified byte array using the specified random number generator.
+     * Shuffles the elements of the specified byte array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the byte array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(byte[], int, int, Random)
+     */
+    public static void shuffle(final byte[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified byte array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the byte array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final byte[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified byte array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the byte array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final byte[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified short array.
+     * Shuffles the elements of the specified short array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the short array to be shuffled
+     * @param a the short array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(short[], Random)
      */
     public static void shuffle(final short[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified short array using the specified random number generator.
+     * Shuffles the elements of the specified short array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the short array to be shuffled
-     * @param rnd the random number generator
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(short[], int, int, Random)
+     */
+    public static void shuffle(final short[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified short array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the short array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final short[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified short array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the short array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final short[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified int array.
+     * Shuffles the elements of the specified int array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the int array to be shuffled
+     * @param a the int array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(int[], Random)
      */
     public static void shuffle(final int[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified int array using the specified random number generator.
+     * Shuffles the elements of the specified int array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the int array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(int[], int, int, Random)
+     */
+    public static void shuffle(final int[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified int array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the int array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final int[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified int array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the int array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final int[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified long array.
+     * Shuffles the elements of the specified long array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the long array to be shuffled
+     * @param a the long array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(long[], Random)
      */
     public static void shuffle(final long[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified long array using the specified random number generator.
+     * Shuffles the elements of the specified long array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the long array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(long[], int, int, Random)
+     */
+    public static void shuffle(final long[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified long array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the long array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final long[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified long array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the long array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final long[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified float array.
+     * Shuffles the elements of the specified float array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the float array to be shuffled
+     * @param a the float array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(float[], Random)
      */
     public static void shuffle(final float[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified float array using the specified random number generator.
+     * Shuffles the elements of the specified float array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the float array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(float[], int, int, Random)
+     */
+    public static void shuffle(final float[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified float array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the float array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final float[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified float array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the float array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final float[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified double array.
+     * Shuffles the elements of the specified double array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the double array to be shuffled
+     * @param a the double array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(double[], Random)
      */
     public static void shuffle(final double[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified double array using the specified random number generator.
+     * Shuffles the elements of the specified double array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the double array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(double[], int, int, Random)
+     */
+    public static void shuffle(final double[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified double array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the double array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final double[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified double array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the double array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final double[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified object array.
+     * Shuffles the elements of the specified object array using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * This method uses the default random number generator.
      *
-     * @param a the object array to be shuffled
+     * @param a the object array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @see #shuffle(Object[], Random)
      */
     public static void shuffle(final Object[] a) {
         shuffle(a, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified object array using the specified random number generator.
+     * Shuffles the elements of the specified object array within a specified range using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     * This method uses the default random number generator.
      *
      * @param a the object array to be shuffled
-     * @param rnd the random number generator to use
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @see #shuffle(Object[], int, int, Random)
+     */
+    public static void shuffle(final Object[] a, final int fromIndex, final int toIndex) {
+        shuffle(a, fromIndex, toIndex, RAND);
+    }
+
+    /**
+     * Shuffles the elements of the specified object array using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     *
+     * @param a the object array to be shuffled. If {@code null} or empty, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @see Random
      */
     public static void shuffle(final Object[] a, final Random rnd) {
-        if (isEmpty(a) || a.length == 1) {
+        shuffle(a, 0, len(a), rnd);
+    }
+
+    /**     
+     * Shuffles the elements of the specified object array within a specified range using the Fisher-Yates algorithm
+     * with the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
+     * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * @param a the object array to be shuffled
+     * @param fromIndex the starting index (inclusive) of the range to shuffle
+     * @param toIndex the ending index (exclusive) of the range to shuffle
+     * @param rnd the random number generator to use for shuffling
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws NullPointerException if {@code rnd} is {@code null}
+     */
+    public static void shuffle(final Object[] a, final int fromIndex, final int toIndex, final Random rnd) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex <= 1) {
             return;
         }
 
-        for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, rnd.nextInt(i));
+        for (int i = toIndex; i > fromIndex; i--) {
+            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
         }
     }
 
     /**
-     * Shuffles the elements of the specified list.
+     * Shuffles the elements of the specified list using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original list is modified.
+     * This method uses the default random number generator.
+     * 
+     * <p>This method runs in linear time for lists that implement {@link RandomAccess},
+     * and may have degraded performance for lists that do not support constant-time
+     * positional access.</p>
      *
-     * @param list the list to be shuffled
+     * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
      * @see java.util.Collections#shuffle(List)
+     * @see #shuffle(List, Random)
      */
     public static void shuffle(final List<?> list) {
         shuffle(list, RAND);
     }
 
     /**
-     * Shuffles the elements of the specified list using the specified random number generator.
+     * Shuffles the elements of the specified list using the Fisher-Yates algorithm
+     * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original list is modified.
+     * 
+     * <p>This method runs in linear time for lists that implement {@link RandomAccess},
+     * and may have degraded performance for lists that do not support constant-time
+     * positional access.</p>
      *
-     * @param list the list to be shuffled
-     * @param rnd the random number generator to use
+     * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null} (unless the list is {@code null} or has size <= 1)
      * @see java.util.Collections#shuffle(List, Random)
+     * @see Random
      */
     public static void shuffle(final List<?> list, final Random rnd) {
         if (isEmpty(list) || list.size() == 1) {
@@ -19683,10 +20894,19 @@ sealed class CommonUtil permits N {
     /**
      * Shuffles the elements of the specified collection that has a well-defined encounter order.
      * The shuffling is performed in-place, meaning the original collection is modified.
+     * This method uses the default random number generator.
+     * 
+     * <p>For {@link List} implementations, this method delegates to {@link #shuffle(List)}.
+     * For other collection types, the collection is converted to an array, shuffled, and then
+     * the collection is cleared and repopulated with the shuffled elements.</p>
+     * 
+     * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
-     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order.
+     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
+     *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
+     *          no operation is performed.
      * @see #shuffle(List)
-     * @see #shuffle(List, Random)
+     * @see #shuffle(Collection, Random)
      * @see java.util.Collections#shuffle(List)
      */
     @Beta
@@ -19707,14 +20927,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Shuffles the elements of the specified collection that has a well-defined encounter order using the specified random number generator.
+     * Shuffles the elements of the specified collection that has a well-defined encounter order
+     * using the specified random number generator.
      * The shuffling is performed in-place, meaning the original collection is modified.
+     * 
+     * <p>For {@link List} implementations, this method delegates to {@link #shuffle(List, Random)}.
+     * For other collection types, the collection is converted to an array, shuffled, and then
+     * the collection is cleared and repopulated with the shuffled elements.</p>
+     * 
+     * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
-     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order.
-     * @param rnd the random number generator to use
-     * @see #shuffle(List)
+     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
+     *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
+     *          no operation is performed.
+     * @param rnd the random number generator to use for shuffling
+     * @throws NullPointerException if {@code rnd} is {@code null} (unless the collection is {@code null} or has size < 2)
      * @see #shuffle(List, Random)
+     * @see #shuffle(Collection)
      * @see java.util.Collections#shuffle(List, Random)
+     * @see Random
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -20625,81 +21856,9 @@ sealed class CommonUtil permits N {
         return result;
     }
 
-    /**
-     * Copies all the elements from the source list into the destination list.
-     * After the operation, the index of each copied element in the destination list
-     * will be identical to its index in the source list. The destination list must
-     * be at least as long as the source list. If it is longer, the remaining elements
-     * in the destination list are unaffected.
-     *
-     * This method runs in linear time.
-     *
-     * @param <T> the type of elements in the lists
-     * @param src the source list from which elements are to be copied
-     * @param dest the destination list to which elements are to be copied
-     * @throws IndexOutOfBoundsException if the destination list is too small to contain the entire source list
-     * @throws UnsupportedOperationException if the destination list's list-iterator does not support the set operation
-     * @see java.util.Collections#copy(List, List)
-     */
-    public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
-        if (isEmpty(src)) {
-            return;
-        }
+    // ================================ reverse/rotate/shuffle/swap/fill/pad/repeat... ==================================
 
-        if (src.size() > dest.size()) {
-            throw new IndexOutOfBoundsException("Source does not fit in dest");
-        }
-
-        Collections.copy(dest, src);
-    }
-
-    /**
-     * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
-     * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
-     *
-     * @param <T> the type of elements in the lists
-     * @param src the source list from which to copy elements
-     * @param srcPos the starting position in the source list
-     * @param dest the destination list into which to copy elements
-     * @param destPos the starting position in the destination list
-     * @param length the number of elements to be copied
-     * @throws IndexOutOfBoundsException if copying would cause access of data outside list bounds
-     */
-    public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, size(src));
-        checkFromToIndex(destPos, destPos + length, size(dest));
-
-        if (isEmpty(src) && srcPos == 0 && length == 0) {
-            return;
-        }
-
-        if (src instanceof RandomAccess && dest instanceof RandomAccess) {
-            for (int i = 0; i < length; i++) {
-                dest.set(destPos + i, src.get(srcPos + i));
-            }
-        } else {
-            final ListIterator<? extends T> srcIterator = src.listIterator();
-            final ListIterator<? super T> destIterator = dest.listIterator();
-
-            int idx = 0;
-            while (idx < srcPos) {
-                srcIterator.next();
-                idx++;
-            }
-
-            idx = 0;
-            while (idx < destPos) {
-                destIterator.next();
-                idx++;
-            }
-
-            for (int i = 0; i < length; i++) {
-                destIterator.next();
-                destIterator.set(srcIterator.next());
-            }
-        }
-    }
+    // ================================ copy/copyOf/copyOfRange/clone... ================================================
 
     /**
      * Copies elements from the source boolean array to the destination boolean array.
@@ -22021,7 +23180,7 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndex, toIndex, len);
 
         if (fromIndex == 0 && toIndex == len) {
-            return Strings.EMPTY;
+            return str;
         }
 
         return str.substring(fromIndex, toIndex);
@@ -22661,6 +23820,10 @@ sealed class CommonUtil permits N {
     //
     //        return result;
     //    }
+
+    // ================================ copy/copyOf/copyOfRange/clone... ================================================
+
+    // ================================ isSorted/sort/sortBy/parallelSort/reverseSort/binarySearch/Index... =============
 
     /**
      * Checks if the specified boolean array is sorted in ascending order.
@@ -23404,7 +24567,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        fill(a, fromIndex, numOfFalse, false);
+        fill(a, fromIndex, fromIndex + numOfFalse, false);
         fill(a, fromIndex + numOfFalse, toIndex, true);
     }
 
@@ -24629,7 +25792,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        fill(a, fromIndex, numOfTrue, true);
+        fill(a, fromIndex, fromIndex + numOfTrue, true);
         fill(a, fromIndex + numOfTrue, toIndex, false);
     }
 
@@ -25004,6 +26167,22 @@ sealed class CommonUtil permits N {
     public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IndexOutOfBoundsException {
         sort(list, Comparators.reversedComparingDouble(keyExtractor));
     }
+
+    //    /**
+    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
+    //     *
+    //     * @param <T>
+    //     * @param cmp
+    //     * @return
+    //     * @see Collections#reverseOrder(Comparator)
+    //     * @see Comparators#reverseOrder(Comparator)
+    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
+    //        return Comparators.reverseOrder(cmp);
+    //    }
 
     //    /**
     //     *
@@ -26273,11 +27452,8 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        final double min = valueToFind - tolerance;
-        final double max = valueToFind + tolerance;
-
         for (int i = fromIndex; i < len; i++) {
-            if (a[i] >= min && a[i] <= max) {
+            if (Numbers.fuzzyEquals(a[i], valueToFind, tolerance)) {
                 return i;
             }
         }
@@ -26489,6 +27665,10 @@ sealed class CommonUtil permits N {
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind) {
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
+        }
+
         return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
@@ -26804,7 +27984,11 @@ sealed class CommonUtil permits N {
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
     public static int lastIndexOf(final double[] a, final double valueToFind, final double tolerance) {
-        return lastIndexOf(a, valueToFind, tolerance, 0);
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
+        }
+
+        return lastIndexOf(a, valueToFind, tolerance, a.length - 1);
     }
 
     /**
@@ -26831,11 +28015,8 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        final double min = valueToFind - tolerance;
-        final double max = valueToFind + tolerance;
-
         for (int i = N.min(startIndexFromBack, len - 1); i >= 0; i--) {
-            if (a[i] >= min && a[i] <= max) {
+            if (Numbers.fuzzyEquals(a[i], valueToFind, tolerance)) {
                 return i;
             }
         }
@@ -27622,321 +28803,6 @@ sealed class CommonUtil permits N {
         return result.toArray();
     }
 
-    // Boolean utilities
-    //--------------------------------------------------------------------------
-
-    //    @Beta
-    //    public static boolean isNullOrFalse(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.FALSE.equals(bool);
-    //    }
-    //
-    //    @Beta
-    //    public static boolean isNullOrTrue(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.TRUE.equals(bool);
-    //    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
-     *
-     * @param bool the Boolean to check
-     * @return {@code true} if the Boolean is {@code Boolean.TRUE}, {@code false} otherwise
-     */
-    @Beta
-    public static boolean isTrue(final Boolean bool) {
-        return Boolean.TRUE.equals(bool);
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
-     *
-     * @param bool the Boolean to check
-     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.FALSE}, {@code false} otherwise
-     */
-    @Beta
-    public static boolean isNotTrue(final Boolean bool) {
-        return bool == null || !bool;
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
-     *
-     * @param bool the Boolean to check
-     * @return {@code true} if the Boolean is {@code Boolean.FALSE}, {@code false} otherwise
-     */
-    @Beta
-    public static boolean isFalse(final Boolean bool) {
-        return Boolean.FALSE.equals(bool);
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
-     *
-     * @param bool the Boolean to check
-     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.TRUE}, {@code false} otherwise
-     */
-    @Beta
-    public static boolean isNotFalse(final Boolean bool) {
-        return bool == null || bool;
-    }
-
-    /**
-     * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
-     *
-     * <p>Negates the specified boolean.</p>
-     *
-     * <p>If {@code null} is passed in, {@code null} will be returned.</p>
-     *
-     * <p>NOTE: This returns {@code null} and will throw a NullPointerException if outboxed to a boolean. </p>
-     *
-     * <pre>
-     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
-     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
-     *   BooleanUtils.negate(null)          = null;
-     * </pre>
-     *
-     * @param bool the Boolean to negate, which may be null
-     * @return the negated Boolean, or {@code null} if {@code null} input
-     */
-    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
-    @MayReturnNull
-    @Beta
-    public static Boolean negate(final Boolean bool) {
-        if (bool == null) {
-            return null; //NOSONAR
-        }
-
-        return bool ? Boolean.FALSE : Boolean.TRUE;
-    }
-
-    /**
-     * Negates all elements in the specified boolean array.
-     *
-     * @param a the boolean array to negate
-     */
-    @Beta
-    public static void negate(final boolean[] a) {
-        if (isEmpty(a)) {
-            return;
-        }
-
-        negate(a, 0, a.length);
-    }
-
-    /**
-     * Negates all elements in the specified range of the boolean array.
-     *
-     * @param a the boolean array to negate
-     * @param fromIndex the starting index (inclusive) of the range to negate
-     * @param toIndex the ending index (exclusive) of the range to negate
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    @Beta
-    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (fromIndex == toIndex) {
-            return;
-        }
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            a[i] = !a[i];
-        }
-    }
-
-    //    /**
-    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static int toIntOneZero(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 0;
-    //        }
-    //
-    //        return bool.booleanValue() ? 1 : 0;
-    //    }
-    //
-    //    /**
-    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static char toCharYN(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 'N';
-    //        }
-    //
-    //        return bool.booleanValue() ? 'Y' : 'N';
-    //    }
-    //
-    //    /**
-    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static String toStringYesNo(final Boolean bool) {
-    //        if (bool == null) {
-    //            return "no";
-    //        }
-    //
-    //        return bool.booleanValue() ? "yes" : "no";
-    //    }
-
-    //    /**
-    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
-    //     *
-    //     * @param <T>
-    //     * @param cmp
-    //     * @return
-    //     * @see Collections#reverseOrder(Comparator)
-    //     * @see Comparators#reverseOrder(Comparator)
-    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-    //        return Comparators.reverseOrder(cmp);
-    //    }
-
-    /**
-     * Returns an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is {@code null}.
-     *
-     * @param <T> the type of elements in the collection
-     * @param c the collection for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is null
-     */
-    public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
-        if (c == null) {
-            return emptyList();
-        }
-
-        return Collections.unmodifiableCollection(c);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is {@code null}.
-     *
-     * @param <T> the type of elements in the list
-     * @param list the list for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is null
-     */
-    public static <T> List<T> unmodifiableList(final List<? extends T> list) {
-        if (list == null) {
-            return emptyList();
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is {@code null}.
-     *
-     * @param <T> the type of elements in the set
-     * @param s the set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is null
-     */
-    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
-        if (s == null) {
-            return emptySet();
-        }
-
-        return Collections.unmodifiableSet(s);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is {@code null}.
-     *
-     * @param <T> the type of elements in the set
-     * @param s the sorted set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is null
-     */
-    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
-        if (s == null) {
-            return emptySortedSet();
-        }
-
-        return Collections.unmodifiableSortedSet(s);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is {@code null}.
-     *
-     * @param <T> the type of elements in the set
-     * @param s the navigable set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is null
-     */
-    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
-        if (s == null) {
-            return emptyNavigableSet();
-        }
-
-        return Collections.unmodifiableNavigableSet(s);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is {@code null}.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is null
-     */
-    public static <K, V> Map<K, V> unmodifiableMap(final Map<? extends K, ? extends V> m) {
-        if (m == null) {
-            return emptyMap();
-        }
-
-        return Collections.unmodifiableMap(m);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is {@code null}.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the sorted map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is null
-     */
-    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(final SortedMap<K, ? extends V> m) {
-        if (m == null) {
-            return emptySortedMap();
-        }
-
-        return Collections.unmodifiableSortedMap(m);
-    }
-
-    /**
-     * Returns an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is {@code null}.
-     *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the navigable map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is null
-     */
-    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(final NavigableMap<K, ? extends V> m) {
-        if (m == null) {
-            return emptyNavigableMap();
-        }
-
-        return Collections.unmodifiableNavigableMap(m);
-    }
-
     static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
         if (c instanceof Deque) {
             return ((Deque<T>) c).descendingIterator();
@@ -27957,9 +28823,7 @@ sealed class CommonUtil permits N {
         return null; // NOSONAR
     }
 
-    static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
-        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
-    }
+    // ================================ isSorted/sort/sortBy/parallelSort/reverseSort/binarySearch/Index... =============
 
     /**
      * Creates the mask.

@@ -146,10 +146,9 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static String sendRequestByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        final Map map = N.fromJson(har, Map.class);
+        final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
-        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
                 // .peek(m -> N.println(m.get("url")))
@@ -184,10 +183,9 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static List<String> sendMultiRequestsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        final Map map = N.fromJson(har, Map.class);
+        final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
-        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 // .peek(m -> N.println(m.get("url")))
@@ -223,10 +221,9 @@ public final class HARUtil {
     @SuppressWarnings("rawtypes")
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequestsByHAR(final String har,
             final Predicate<? super String> filterForTargetUrl) {
-        final Map map = N.fromJson(har, Map.class);
+        final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
-        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 // .peek(m -> N.println(m.get("url")))
@@ -282,10 +279,9 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        final Map map = N.fromJson(har, Map.class);
+        final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
-        //noinspection resource
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))

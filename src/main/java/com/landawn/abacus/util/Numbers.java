@@ -106,7 +106,10 @@ public final class Numbers {
     public static final Double DOUBLE_MINUS_ONE = -1.0d;
 
     /** Positive zero. */
-    private static final double POSITIVE_ZERO = 0d;
+    private static final double DOUBLE_POSITIVE_ZERO = 0d;
+
+    /** Positive zero. */
+    private static final float FLOAT_POSITIVE_ZERO = 0f;
 
     private Numbers() {
         // utility class.
@@ -933,7 +936,9 @@ public final class Numbers {
      * <code>
      * Numbers.format(12.105, "0.00"); // returns "12.10"
      * Numbers.format(12.105, "#.##"); // returns "12.1"
+     * Numbers.format(0.121, "0.00%"); // returns "12.10%"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
+     * Numbers.format(0.12156, "0.00%"); // returns "12.16%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
      * </code>
      * </pre>
@@ -1005,7 +1010,7 @@ public final class Numbers {
      * @see #extractFirstInt(String, int)
      * @see #extractFirstLong(String)
      * @see #extractFirstDouble(String)
-     * @see #extractFirstSciDouble(String)
+     * @see #extractFirstDouble(String, boolean)
      * @see Strings#extractFirstInteger(String)
      */
     public static int extractFirstInt(final String str) {
@@ -1075,11 +1080,35 @@ public final class Numbers {
      * @param str The string to extract the double value from.
      * @return The extracted double value, or 0.0 if no double value is found.
      * @see #extractFirstDouble(String, double)
-     * @see #extractFirstSciDouble(String)
-     * @see Numbers#exeractDouble(String)
+     * @see #extractFirstDouble(String, double, boolean) 
+     * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
+     * @see Strings#replaceFirstDouble(String, String)
+     * @see Strings#replaceFirstDouble(String, String, boolean)
      */
     public static double extractFirstDouble(final String str) {
-        return extractFirstDouble(str, 0.0);
+        return extractFirstDouble(str, 0.0, false);
+    }
+
+    /**
+     * Extracts the first double value from the given string. If no double value is found, it returns 0.0.
+     *
+     * <p>This method is a convenience method that allows you to specify whether to include scientific notation in the search.
+     * If {@code includingCientificNumber} is {@code true}, it will search for both regular and scientific notation numbers.
+     * Otherwise, it will only search for regular numbers.</p>
+     *
+     * @param str The string to extract the double value from.
+     * @param includingCientificNumber Whether to include scientific notation in the search.
+     * @return The extracted double value, or 0.0 if no double value is found.
+     * @see #extractFirstDouble(String, double)
+     * @see #extractFirstDouble(String, double, boolean) 
+     * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
+     * @see Strings#replaceFirstDouble(String, String)
+     * @see Strings#replaceFirstDouble(String, String, boolean)
+     */
+    public static double extractFirstDouble(final String str, final boolean includingCientificNumber) {
+        return extractFirstDouble(str, 0.0, includingCientificNumber);
     }
 
     /**
@@ -1087,53 +1116,40 @@ public final class Numbers {
      *
      * @param str The string to extract the double value from.
      * @param defaultValue The default value to return if no double value is found.
-     * @return The extracted double value, or the specified default value if no double value is found.
-     * @see #extractFirstDouble(String)
-     * @see #extractFirstSciDouble(String)
+     * @return The extracted double value, or the specified default value if no double value is found. 
+     * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
+     * @see Strings#replaceFirstDouble(String, String)
+     * @see Strings#replaceFirstDouble(String, String, boolean)
      */
     public static double extractFirstDouble(final String str, final double defaultValue) {
-        if (Strings.isEmpty(str)) {
-            return defaultValue;
-        }
-
-        final Matcher matcher = RegExUtil.NUMBER_FINDER.matcher(str);
-        if (matcher.find()) {
-            return Double.parseDouble(matcher.group(1));
-        }
-
-        return defaultValue;
+        return extractFirstDouble(str, defaultValue, false);
     }
 
     /**
-     * Extracts the first double value from the given string using scientific notation. If no double value is found, it returns 0.0.
+     * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
      *
-     * @param str The string to extract the double value from.
-     * @return The extracted double value, or 0.0 if no double value is found.
-     * @see #extractFirstSciDouble(String, double)
-     * @see #extractFirstDouble(String)
-     * @see #extractSiciDouble(String, double)
-     * @see Strings#extractFirstDouble(String) 
-     */
-    public static double extractFirstSciDouble(final String str) {
-        return extractFirstSciDouble(str, 0.0);
-    }
-
-    /**
-     * Extracts the first double value from the given string using scientific notation. If no double value is found, it returns the specified default value.
+     * <p>This method allows you to specify whether to include scientific notation in the search for double values.
+     * If {@code includingCientificNumber} is {@code true}, it will search for both regular and scientific notation numbers.
+     * Otherwise, it will only search for regular numbers.</p>
      *
      * @param str The string to extract the double value from.
      * @param defaultValue The default value to return if no double value is found.
+     * @param includingCientificNumber Whether to include scientific notation in the search.
      * @return The extracted double value, or the specified default value if no double value is found.
-     * @see #extractFirstSciDouble(String)
-     * @see Strings#extractFirstSciNumber(String)
+     * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
+     * @see Strings#replaceFirstDouble(String, String)
+     * @see Strings#replaceFirstDouble(String, String, boolean)
      */
-    public static double extractFirstSciDouble(final String str, final double defaultValue) {
+    public static double extractFirstDouble(final String str, final double defaultValue, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
 
-        final Matcher matcher = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(str);
+        final Matcher matcher = (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+
         if (matcher.find()) {
             return Double.parseDouble(matcher.group(1));
         }
@@ -2388,7 +2404,7 @@ public final class Numbers {
         final char firstChar = str.charAt(0);
         final boolean hasSign = firstChar == '-' || firstChar == '+';
 
-        return hasSign ? str.substring(1, stopPos) : str.substring(0, stopPos);
+        return hasSign ? str.length() == 1 ? Strings.EMPTY : str.substring(1, stopPos) : str.substring(0, stopPos);
     }
 
     /**
@@ -2483,25 +2499,36 @@ public final class Numbers {
 
         //noinspection OverwrittenKey
         alphanumerics['e'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['E'] = true;
 
         alphanumerics['a'] = true;
+        alphanumerics['A'] = true;
         alphanumerics['b'] = true;
+        alphanumerics['B'] = true;
         alphanumerics['c'] = true;
+        alphanumerics['C'] = true;
         //noinspection OverwrittenKey
         alphanumerics['d'] = true;
+        alphanumerics['D'] = true;
         //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['e'] = true;
         //noinspection OverwrittenKey
+        alphanumerics['E'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['f'] = true;
+        //noinspection OverwrittenKey
+        alphanumerics['F'] = true;
 
         alphanumerics['l'] = true;
         alphanumerics['L'] = true;
         //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['f'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['F'] = true;
         //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['d'] = true;
+        //noinspection OverwrittenKey
         alphanumerics['D'] = true;
     }
 
@@ -2689,21 +2716,6 @@ public final class Numbers {
         return withDecimalsParsing(str, 0);
     }
 
-    //-----------------------------------------------------------------------
-    //    /**
-    //     * <p>Checks whether the {@code String} contains only
-    //     * digit characters.</p>
-    //     *
-    //     * <p>{@code Null} and empty String will return
-    //     * {@code false}.</p>
-    //     *
-    //     * @param str the {@code String} to check
-    //     * @return {@code true} if str contains only Unicode numeric
-    //     */
-    //    public static boolean isDigits(final String str) {
-    //        return Strings.isNumeric(str);
-    //    }
-
     private static boolean withDecimalsParsing(final String str, final int beginIdx) {
         int decimalPoints = 0;
         boolean isDecimalPoint = false;
@@ -2724,6 +2736,21 @@ public final class Numbers {
 
         return true;
     }
+
+    //-----------------------------------------------------------------------
+    //    /**
+    //     * <p>Checks whether the {@code String} contains only
+    //     * digit characters.</p>
+    //     *
+    //     * <p>{@code Null} and empty String will return
+    //     * {@code false}.</p>
+    //     *
+    //     * @param str the {@code String} to check
+    //     * @return {@code true} if str contains only Unicode numeric
+    //     */
+    //    public static boolean isDigits(final String str) {
+    //        return Strings.isNumeric(str);
+    //    }
 
     //    /**
     //     * Primality test: tells if the argument is a (provable) prime or not.
@@ -3908,22 +3935,29 @@ public final class Numbers {
     }
 
     /**
-     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if
-     * {@code a == 0 && b == 0}.
+     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if  {@code a == 0 && b == 0}.
      *
      * @param a
      * @param b
      * @return
-     * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
+     * @throws ArithmeticException if {@code (a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)}
      */
-    public static int gcd(int a, int b) {
-        /*
-         * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
-         * gcd(0, Integer.MIN_VALUE)? BigInteger.gcd would return positive 2^31, but positive 2^31
-         * isn't an int.
-         */
-        checkNonNegative("a", a);
-        checkNonNegative("b", b);
+    public static int gcd(int a, int b) throws ArithmeticException {
+        //    /*
+        //     * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
+        //     * gcd(0, Integer.MIN_VALUE)? BigInteger.gcd would return positive 2^31, but positive 2^31
+        //     * isn't an int.
+        //     */
+        //    checkNonNegative("a", a);
+        //    checkNonNegative("b", b);
+
+        if ((a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)) {
+            throw new ArithmeticException("overflow by 2^31");
+        }
+
+        a = abs(a);
+        b = abs(b);
+
         if (a == 0) {
             // 0 % b == 0, so b divides a, but the converse doesn't hold.
             // BigInteger.gcd is consistent with this decision.
@@ -3962,22 +3996,29 @@ public final class Numbers {
     }
 
     /**
-     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if
-     * {@code a == 0 && b == 0}.
+     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if {@code a == 0 && b == 0}.
      *
      * @param a
      * @param b
      * @return
-     * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
+     * @throws ArithmeticException if {@code (a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)}
      */
-    public static long gcd(long a, long b) {
-        /*
-         * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
-         * gcd(0, Long.MIN_VALUE)? BigInteger.gcd would return positive 2^63, but positive 2^63 isn't an
-         * int.
-         */
-        checkNonNegative("a", a);
-        checkNonNegative("b", b);
+    public static long gcd(long a, long b) throws ArithmeticException {
+        //    /*
+        //     * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
+        //     * gcd(0, Long.MIN_VALUE)? BigInteger.gcd would return positive 2^63, but positive 2^63 isn't an
+        //     * int.
+        //     */
+        //    checkNonNegative("a", a);
+        //    checkNonNegative("b", b);
+
+        if ((a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)) {
+            throw new ArithmeticException("overflow by 2^63");
+        }
+
+        a = abs(a);
+        b = abs(b);
+
         if (a == 0) {
             // 0 % b == 0, so b divides a, but the converse doesn't hold.
             // BigInteger.gcd is consistent with this decision.
@@ -4040,10 +4081,13 @@ public final class Numbers {
         if (a == 0 || b == 0) {
             return 0;
         }
-        final int lcm = Math.abs(addExact(a / gcd(a, b), b));
+
+        final int lcm = abs(multiplyExact(a / gcd(a, b), b));
+
         if (lcm == Integer.MIN_VALUE) {
             throw new ArithmeticException();
         }
+
         return lcm;
     }
 
@@ -4072,11 +4116,13 @@ public final class Numbers {
         if (a == 0 || b == 0) {
             return 0;
         }
-        final long lcm = Math.abs(addExact(a / gcd(a, b), b));
-        //noinspection ConstantValue
-        if (lcm == Integer.MIN_VALUE) {
+
+        final long lcm = abs(multiplyExact(a / gcd(a, b), b));
+
+        if (lcm == Long.MIN_VALUE) {
             throw new ArithmeticException();
         }
+
         return lcm;
     }
 
@@ -4822,11 +4868,23 @@ public final class Numbers {
 
     /**
      * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards
-     * negative infinity. This method is overflow resilient.
-     *
-     * @param x
-     * @param y
-     * @return
+     * negative infinity. This method is resilient to integer overflow.
+     * 
+     * <p>This implementation uses bitwise operations to compute the mean safely:
+     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with 
+     * the traditional {@code (x + y) / 2} approach.
+     * 
+     * <p>The method correctly handles:
+     * <ul>
+     *   <li>Large values where {@code (x + y)} would overflow</li>
+     *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
+     * </ul>
+     * 
+     * @param x first value
+     * @param y second value
+     * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
+     * 
+     * @see #mean(long, long)
      */
     public static int mean(final int x, final int y) {
         // Efficient method for computing the arithmetic mean.
@@ -4857,7 +4915,7 @@ public final class Numbers {
      * @return
      */
     public static double mean(final double x, final double y) {
-        return checkFinite(x) + (checkFinite(y) - x) / 2;
+        return checkFinite(x) / 2 + checkFinite(y) / 2;
     }
 
     /**
@@ -5012,7 +5070,16 @@ public final class Numbers {
      * @see Math#round(double)
      */
     public static float round(final float x, final int scale) {
-        return (float) round((double) x, scale);
+        N.checkArgNotNegative(scale, cs.scale);
+
+        if (scale == 0) {
+            return (long) x;
+        } else if (scale <= 6) {
+            final long factor = pow(10, scale);
+            return ((float) Math.round(x * factor)) / factor; //NOSONAR
+        } else {
+            return round(x, scale, RoundingMode.HALF_UP);
+        }
     }
 
     /**
@@ -5032,7 +5099,7 @@ public final class Numbers {
             return (long) x;
         } else if (scale <= 6) {
             final long factor = pow(10, scale);
-            return Math.round(x * factor) / (double) factor; //NOSONAR
+            return ((double) Math.round(x * factor)) / factor; //NOSONAR
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
         }
@@ -5051,7 +5118,9 @@ public final class Numbers {
      * @see BigDecimal#doubleValue()
      */
     public static float round(final float x, final int scale, final RoundingMode roundingMode) {
-        return (float) (round((double) x, scale, roundingMode));
+        final BigDecimal bd = new BigDecimal(Float.toString(x)).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
+        final float rounded = bd.floatValue();
+        return N.equals(rounded, FLOAT_POSITIVE_ZERO) ? FLOAT_POSITIVE_ZERO * x : rounded;
     }
 
     /**
@@ -5068,7 +5137,7 @@ public final class Numbers {
     public static double round(final double x, final int scale, final RoundingMode roundingMode) {
         final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
         final double rounded = bd.doubleValue();
-        return N.equals(rounded, POSITIVE_ZERO) ? POSITIVE_ZERO * x : rounded;
+        return N.equals(rounded, DOUBLE_POSITIVE_ZERO) ? DOUBLE_POSITIVE_ZERO * x : rounded;
     }
 
     static final Map<String, DecimalFormat> decimalFormatPool = ImmutableMap.<String, DecimalFormat> builder()
@@ -5264,8 +5333,12 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      */
     public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
-        checkNonNegative("tolerance", tolerance);
-        return Math.copySign(a - b, 1.0) <= tolerance
+        // Check that tolerance is valid (non-negative and not NaN)
+        if (tolerance < 0.0 || Double.isNaN(tolerance)) {
+            throw new IllegalArgumentException("tolerance must be non-negative and not NaN");
+        }
+
+        return Math.copySign(a - b, 1.0) <= tolerance // branch-free version of abs(a - b)
                 // copySign(x, 1.0) is a branch-free version of abs(x), but with different NaN semantics
                 || (N.equals(a, b)) // needed to ensure that infinities equal themselves
                 || (Double.isNaN(a) && Double.isNaN(b));
@@ -5310,7 +5383,8 @@ public final class Numbers {
      * @return {@code true}, if is mathematical integer
      */
     public static boolean isMathematicalInteger(final double x) {
-        return isFinite(x) && (N.equals(x, 0.0) || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
+        // return isFinite(x) && (N.equals(x, 0.0) || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
+        return !Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x);
     }
 
     /**

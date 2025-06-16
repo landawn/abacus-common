@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -30,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -3132,31 +3129,57 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified boolean arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified boolean arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first boolean array.
-     * @param b The second boolean array.
-     * @return A new boolean array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * boolean[] a = {true, false, false, true};
+     * boolean[] b = {false, false, true};
+     * boolean[] result = intersection(a, b); // result will be {false, false, true}
+     *
+     * boolean[] c = {true, true};
+     * boolean[] d = {false, false};
+     * boolean[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first boolean array
+     * @param b the second boolean array
+     * @return a new boolean array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see BooleanList#intersection(BooleanList)
      * @see #intersection(int[], int[])
      */
     public static boolean[] intersection(final boolean[] a, final boolean[] b) {
         if (isEmpty(a) || isEmpty(b)) {
-            return isEmpty(a) ? a : EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         return BooleanList.of(a).intersection(BooleanList.of(b)).trimToSize().array();
     }
 
     /**
-     * Returns the elements in the specified char arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified char arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first char array.
-     * @param b The second char array.
-     * @return A new char array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * char[] a = {'a', 'b', 'b', 'c'};
+     * char[] b = {'a', 'b', 'b', 'b', 'd'};
+     * char[] result = intersection(a, b); // result will be {'a', 'b', 'b'}
+     *
+     * char[] c = {'x', 'y'};
+     * char[] d = {'z', 'w'};
+     * char[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first char array
+     * @param b the second char array
+     * @return a new char array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see CharList#intersection(CharList)
      * @see #intersection(int[], int[])
      */
     public static char[] intersection(final char[] a, final char[] b) {
@@ -3168,13 +3191,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified byte arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified byte arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first byte array.
-     * @param b The second byte array.
-     * @return A new byte array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * byte[] a = {1, 2, 2, 3, 4};
+     * byte[] b = {1, 2, 2, 2, 5, 6};
+     * byte[] result = intersection(a, b); // result will be {1, 2, 2}
+     *
+     * byte[] c = {1, 2, 3};
+     * byte[] d = {4, 5, 6};
+     * byte[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first byte array
+     * @param b the second byte array
+     * @return a new byte array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see ByteList#intersection(ByteList)
      * @see #intersection(int[], int[])
      */
     public static byte[] intersection(final byte[] a, final byte[] b) {
@@ -3186,13 +3222,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified short arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified short arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first short array.
-     * @param b The second short array.
-     * @return A new short array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * short[] a = {1, 2, 2, 3, 4};
+     * short[] b = {1, 2, 2, 2, 5, 6};
+     * short[] result = intersection(a, b); // result will be {1, 2, 2}
+     *
+     * short[] c = {1, 2, 3};
+     * short[] d = {4, 5, 6};
+     * short[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first short array
+     * @param b the second short array
+     * @return a new short array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see ShortList#intersection(ShortList)
      * @see #intersection(int[], int[])
      */
     public static short[] intersection(final short[] a, final short[] b) {
@@ -3204,23 +3253,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified int arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified int arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
+     * <p>Example:
      * <pre>
-     * int[] a = {0, 1, 2, 2, 3};
-     * int[] b = {2, 5, 1};
-     * int[] c = retainAll(a, b); // The elements c in a will b: [1, 2, 2].
-     *
-     * int[] a = {0, 1, 2, 2, 3};
-     * int[] b = {2, 5, 1};
-     * int[] c = intersection(a, b); // The elements c in a will b: [1, 2].
+     * int[] a = {1, 2, 2, 3, 4};
+     * int[] b = {1, 2, 2, 2, 5, 6};
+     * int[] result = intersection(a, b); // result will be {1, 2, 2}
+     * 
+     * int[] c = {1, 2, 3};
+     * int[] d = {4, 5, 6};
+     * int[] result2 = intersection(c, d); // result will be {} (empty array)
      * </pre>
      *
-     * @param a The first int array.
-     * @param b The second int array.
-     * @return A new int array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * @param a the first int array
+     * @param b the second int array
+     * @return a new int array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see IntList#intersection(IntList)
      */
     public static int[] intersection(final int[] a, final int[] b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -3231,13 +3283,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified long arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified long arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first long array.
-     * @param b The second long array.
-     * @return A new long array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * long[] a = {1, 2, 2, 3, 4};
+     * long[] b = {1, 2, 2, 2, 5, 6};
+     * long[] result = intersection(a, b); // result will be {1, 2, 2}
+     *
+     * long[] c = {1, 2, 3};
+     * long[] d = {4, 5, 6};
+     * long[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first long array
+     * @param b the second long array
+     * @return a new long array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see LongList#intersection(LongList)
      * @see #intersection(int[], int[])
      */
     public static long[] intersection(final long[] a, final long[] b) {
@@ -3249,13 +3314,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified float arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified float arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first float array.
-     * @param b The second float array.
-     * @return A new float array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
+     * float[] b = {1.0f, 2.0f, 2.0f, 2.0f, 5.0f, 6.0f};
+     * float[] result = intersection(a, b); // result will be {1.0f, 2.0f, 2.0f}
+     *
+     * float[] c = {1.0f, 2.0f, 3.0f};
+     * float[] d = {4.0f, 5.0f, 6.0f};
+     * float[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first float array
+     * @param b the second float array
+     * @return a new float array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see FloatList#intersection(FloatList)
      * @see #intersection(int[], int[])
      */
     public static float[] intersection(final float[] a, final float[] b) {
@@ -3267,13 +3345,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified double arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified double arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param a The first double array.
-     * @param b The second double array.
-     * @return A new double array containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty array is returned.
+     * <p>Example:
+     * <pre>
+     * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
+     * double[] b = {1.0, 2.0, 2.0, 2.0, 5.0, 6.0};
+     * double[] result = intersection(a, b); // result will be {1.0, 2.0, 2.0}
+     *
+     * double[] c = {1.0, 2.0, 3.0};
+     * double[] d = {4.0, 5.0, 6.0};
+     * double[] result2 = intersection(c, d); // result will be {} (empty array)
+     * </pre>
+     *
+     * @param a the first double array
+     * @param b the second double array
+     * @return a new double array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
+     * @see DoubleList#intersection(DoubleList)
      * @see #intersection(int[], int[])
      */
     public static double[] intersection(final double[] a, final double[] b) {
@@ -3285,19 +3376,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified arrays <i>a</i> and <i>b</i> that are present in both arrays.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified arrays.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param <T> The type of the elements in the input array.
-     * @param a The first array.
-     * @param b The second array.
-     * @return A new list containing the elements that are present in both <i>a</i> and <i>b</i>.
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty list is returned.
-     * @see #intersection(int[], int[])
-     * @see #intersection(Collection, Collection, boolean)
+     * <p>Example:
+     * <pre>
+     * String[] a = {"A", "B", "B", "C", "D"};
+     * String[] b = {"A", "B", "B", "B", "E", "F"};
+     * List<String> result = intersection(a, b); // result will be ["A", "B", "B"]
+     *
+     * Integer[] c = {1, 2, 3};
+     * Integer[] d = {4, 5, 6};
+     * List<Integer> result2 = intersection(c, d); // result will be [] (empty list)
+     * </pre>
+     *
+     * @param <T> the type of the elements in the first array
+     * @param a the first array
+     * @param b the second array
+     * @return a new list containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty list if either input array is {@code null} or empty.
      * @see #commonSet(Collection, Collection)
-     * @see Collection#retainAll(Collection)
-     * @see Iterables#intersection(Set, Set)
+     * @see #intersection(int[], int[])
      */
     public static <T> List<T> intersection(final T[] a, final Object[] b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -3317,19 +3417,30 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified collections <i>a</i> and <i>b</i> that are present in both collections.
-     * Occurrences are considered.
+     * Returns the elements that are present in both of the specified collections.
+     * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
      *
-     * @param <T> the type of elements in the input collections
+     * <p>Example:
+     * <pre>
+     * List<String> a = Arrays.asList("A", "B", "B", "C", "D");
+     * List<String> b = Arrays.asList("A", "B", "B", "B", "E", "F");
+     * List<String> result = intersection(a, b); // result will be ["A", "B", "B"]
+     *
+     * List<Integer> c = Arrays.asList(1, 2, 3);
+     * List<Integer> d = Arrays.asList(4, 5, 6);
+     * List<Integer> result2 = intersection(c, d); // result will be [] (empty list)
+     * </pre>
+     *
+     * @param <T> the type of elements in the first collection
      * @param a the first collection
      * @param b the second collection
-     * @return a list containing the elements that are present in both collections
-     *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty list is returned.
-     * @see #intersection(int[], int[])
-     * @see #intersection(Collection, Collection, boolean)
+     * @return a new list containing the elements present in both collections,
+     *         considering the minimum number of occurrences in either collection.
+     *         Returns an empty list if either input collection is {@code null} or empty.
+     * @see #retainAll(Collection, Collection)
      * @see #commonSet(Collection, Collection)
-     * @see Collection#retainAll(Collection)
-     * @see Iterables#intersection(Set, Set)
+     * @see #intersection(Object[], Object[])
+     * @see #intersection(int[], int[])
      */
     public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -3350,19 +3461,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in all collections within the specified collection of collections.
-     * Occurrences are considered.
+     * Returns the elements that are present in all of the specified collections.
+     * For elements that appear multiple times, the intersection contains the minimum number of occurrences across all collections.
      *
-     * @param <T> The type of the elements in the collections.
-     * @param c The collection of collections to find the intersection of.
-     * @return A list containing the elements that are present in all collections within <i>c</i>.
-     *         If <i>c</i> is empty or {@code null}, an empty list is returned.
-     *         If <i>c</i> contains only one collection, a list containing the elements of this collection is returned.
-     * @see #intersection(int[], int[])
-     * @see #intersection(Collection, Collection, boolean)
+     * <p>Example:
+     * <pre>
+     * List<String> a = Arrays.asList("A", "B", "B", "C");
+     * List<String> b = Arrays.asList("A", "B", "B", "B", "D");
+     * List<String> c = Arrays.asList("A", "B", "E");
+     * List<List<String>> collections = Arrays.asList(a, b, c);
+     * List<String> result = intersection(collections); // result will be ["A", "B"]
+     *
+     * List<Integer> x = Arrays.asList(1, 2, 2, 3);
+     * List<Integer> y = Arrays.asList(2, 2, 4);
+     * List<Integer> z = Arrays.asList(1, 2, 5);
+     * List<List<Integer>> numbers = Arrays.asList(x, y, z);
+     * List<Integer> result2 = intersection(numbers); // result will be [2]
+     * </pre>
+     *
+     * @param <T> the type of elements in the collections
+     * @param c the collection of collections to find the intersection of
+     * @return a new list containing the elements present in all collections in c,
+     *         considering the minimum number of occurrences across all collections.
+     *         Returns an empty list if c is {@code null}, empty, or any collection in c is empty.
+     *         If c contains only one collection, returns a list with all elements from that collection.
+     * @see #intersection(Collection, Collection)
+     * @see #intersection(Object[], Object[])
      * @see #commonSet(Collection, Collection)
-     * @see Collection#retainAll(Collection)
-     * @see Iterables#intersection(Set, Set)
+     * @see #retainAll(Collection, Collection)
+     * @see #intersection(int[], int[])
      */
     public static <T> List<T> intersection(final Collection<? extends Collection<? extends T>> c) {
         if (isEmpty(c)) {
@@ -3392,59 +3519,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return only the elements in the first collection that are contained in the specified second collection.
-     * <br />
-     * If {@code ignoreOccurrences} is {@code true}, Occurrences are not considered.
-     * <br />
-     * Duplicated elements in the returned List will not be eliminated.
+     * Returns the elements in the first boolean array that are not present in the second boolean array,
+     * considering the number of occurrences of each element.
+     *
+     * <p>Example:
      * <pre>
-     * List<Integer> a = N.asList(0, 1, 2, 2, 3);
-     * List<Integer> b = N.asList(2, 5, 1);
-     * List<Integer> c = N.intersection(a, b, false); // The elements c in a will b: [1, 2]. same as N.intersection(a, b).
-     * List<Integer> d = N.intersection(a, b, true); // The elements c in a will b: [1, 2, 2].
+     * boolean[] a = {true, true, false, true};
+     * boolean[] b = {true, false};
+     * boolean[] result = difference(a, b); // result will be {true, true}
+     * // Only one 'true' and one 'false' are removed from a
+     *
+     * boolean[] c = {true, false, false};
+     * boolean[] d = {false, false, false};
+     * boolean[] result2 = difference(c, d); // result will be {true}
+     * // All occurrences of 'false' are removed from c
      * </pre>
      *
-     * @param <T> the type of elements in the input collections
-     * @param a the first collection, elements from this collection will be retained
-     * @param b the second collection, elements in this collection are to be retained in the first collection
-     * @param ignoreOccurrences if {@code true}, the method does not consider the number of occurrences of an element.
-     * @return a List the elements in the first collection that are contained in the specified second collection.
-     * @see #intersection(Collection, Collection)
-     * @see #commonSet(Collection, Collection)
-     * @see Iterables#intersection(Set, Set)
-     * @see Collection#retainAll(Collection)
-     */
-    @Beta
-    public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b, final boolean ignoreOccurrences) {
-        if (isEmpty(a) || isEmpty(b)) {
-            return newArrayList();
-        }
-
-        if (!ignoreOccurrences) {
-            return intersection(a, b);
-        }
-
-        final Set<Object> set = b instanceof Set ? (Set<Object>) b : (Set<Object>) newHashSet(b);
-        final List<T> result = new ArrayList<>(max(0, a.size() - b.size()));
-
-        for (final T e : a) {
-            if (set.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the elements in the specified boolean array <i>a</i> but not present in the boolean array <i>b</i>.
-     * Occurrences are considered.
+     * <p>Unlike {@link #removeAll(boolean[], boolean[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
      *
-     * @param a The first boolean array.
-     * @param b The second boolean array.
-     * @return A new boolean array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * @param a the first boolean array, elements from this array will be in the result if they don't appear in b
+     * @param b the second boolean array, elements from this array will be removed from a
+     * @return a new boolean array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(boolean[], boolean[])
+     * @see BooleanList#difference(BooleanList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(boolean[], boolean[])
      * @see #difference(int[], int[])
      */
     public static boolean[] difference(final boolean[] a, final boolean[] b) {
@@ -3458,14 +3562,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified char array <i>a</i> but not present in the char array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first char array that are not present in the second char array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first char array.
-     * @param b The second char array.
-     * @return A new char array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * char[] a = {'a', 'b', 'b', 'c', 'd'};
+     * char[] b = {'a', 'b', 'e'};
+     * char[] result = difference(a, b); // result will be {'b', 'c', 'd'}
+     * // Only one 'a' and one 'b' are removed from a
+     *
+     * char[] c = {'a', 'b', 'b'};
+     * char[] d = {'b', 'b', 'b'};
+     * char[] result2 = difference(c, d); // result will be {'a'}
+     * // All occurrences of 'b' are removed from c
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(char[], char[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first char array, elements from this array will be in the result if they don't appear in b
+     * @param b the second char array, elements from this array will be removed from a
+     * @return a new char array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(char[], char[])
+     * @see CharList#difference(CharList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(char[], char[])
      * @see #difference(int[], int[])
      */
     public static char[] difference(final char[] a, final char[] b) {
@@ -3479,14 +3605,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified byte array <i>a</i> but not present in the byte array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first byte array that are not present in the second byte array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first byte array.
-     * @param b The second byte array.
-     * @return A new byte array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * byte[] a = {1, 2, 2, 3, 4};
+     * byte[] b = {2, 5};
+     * byte[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * // Only one '2' is removed from a because b contains only one '2'
+     *
+     * byte[] c = {1, 2, 2};
+     * byte[] d = {2, 2, 2};
+     * byte[] result2 = difference(c, d); // result will be {1}
+     * // All occurrences of '2' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(byte[], byte[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first byte array, elements from this array will be in the result if they don't appear in b
+     * @param b the second byte array, elements from this array will be removed from a
+     * @return a new byte array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(byte[], byte[])
+     * @see ByteList#difference(ByteList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(byte[], byte[])
      * @see #difference(int[], int[])
      */
     public static byte[] difference(final byte[] a, final byte[] b) {
@@ -3500,14 +3648,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified short array <i>a</i> but not present in the short array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first short array that are not present in the second short array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first short array.
-     * @param b The second short array.
-     * @return A new short array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * short[] a = {1, 2, 2, 3, 4};
+     * short[] b = {2, 5};
+     * short[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * // Only one '2' is removed from a because b contains only one '2'
+     *
+     * short[] c = {1, 2, 2};
+     * short[] d = {2, 2, 2};
+     * short[] result2 = difference(c, d); // result will be {1}
+     * // All occurrences of '2' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(short[], short[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first short array, elements from this array will be in the result if they don't appear in b
+     * @param b the second short array, elements from this array will be removed from a
+     * @return a new short array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(short[], short[])
+     * @see ShortList#difference(ShortList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(short[], short[])
      * @see #difference(int[], int[])
      */
     public static short[] difference(final short[] a, final short[] b) {
@@ -3521,24 +3691,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified int array <i>a</i> but not present in the int array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the specified int array <i>a</i> but not present in the int array <i>b</i>,
+     * considering the number of occurrences of each element.
      *
+     * <p>Example:
      * <pre>
-     * int[] a = {0, 1, 2, 2, 3};
-     * int[] b = {2, 5, 1};
-     * int[] c = removeAll(a, b); // The elements c in a will b: [0, 3].
+     * int[] a = {1, 2, 2, 3, 4};
+     * int[] b = {2, 5};
+     * int[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * // Only one '2' is removed from a because b contains only one '2'
      *
-     * int[] a = {0, 1, 2, 2, 3};
-     * int[] b = {2, 5, 1};
-     * int[] c = difference(a, b); // The elements c in a will b: [0, 2, 3].
+     * int[] c = {1, 2, 2};
+     * int[] d = {2, 2, 2};
+     * int[] result2 = difference(c, d); // result will be {1}
+     * // All occurrences of '2' are removed from c because d contains at least as many
      * </pre>
      *
-     * @param a The first int array.
-     * @param b The second int array.
-     * @return A new int array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Unlike {@link #removeAll(int[], int[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first int array, elements from this array will be in the result if they don't appear in b
+     * @param b the second int array, elements from this array will be removed from a
+     * @return a new int array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(int[], int[])
+     * @see IntList#difference(IntList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(int[], int[])
      */
     public static int[] difference(final int[] a, final int[] b) {
         if (isEmpty(a)) {
@@ -3551,14 +3733,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified long array <i>a</i> but not present in the long array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first long array that are not present in the second long array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first long array.
-     * @param b The second long array.
-     * @return A new long array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * long[] a = {1, 2, 2, 3, 4};
+     * long[] b = {2, 5};
+     * long[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * // Only one '2' is removed from a because b contains only one '2'
+     *
+     * long[] c = {1, 2, 2};
+     * long[] d = {2, 2, 2};
+     * long[] result2 = difference(c, d); // result will be {1}
+     * // All occurrences of '2' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(long[], long[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first long array, elements from this array will be in the result if they don't appear in b
+     * @param b the second long array, elements from this array will be removed from a
+     * @return a new long array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(long[], long[])
+     * @see LongList#difference(LongList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(long[], long[])
      * @see #difference(int[], int[])
      */
     public static long[] difference(final long[] a, final long[] b) {
@@ -3572,14 +3776,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified float array <i>a</i> but not present in the float array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first float array that are not present in the second float array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first float array.
-     * @param b The second float array.
-     * @return A new float array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
+     * float[] b = {2.0f, 5.0f};
+     * float[] result = difference(a, b); // result will be {1.0f, 2.0f, 3.0f, 4.0f}
+     * // Only one '2.0f' is removed from a because b contains only one '2.0f'
+     *
+     * float[] c = {1.0f, 2.0f, 2.0f};
+     * float[] d = {2.0f, 2.0f, 2.0f};
+     * float[] result2 = difference(c, d); // result will be {1.0f}
+     * // All occurrences of '2.0f' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(float[], float[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first float array, elements from this array will be in the result if they don't appear in b
+     * @param b the second float array, elements from this array will be removed from a
+     * @return a new float array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(float[], float[])
+     * @see FloatList#difference(FloatList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(float[], float[])
      * @see #difference(int[], int[])
      */
     public static float[] difference(final float[] a, final float[] b) {
@@ -3593,14 +3819,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified double array <i>a</i> but not present in the double array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first double array that are not present in the second double array,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first double array.
-     * @param b The second double array.
-     * @return A new double array containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty array is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
+     * double[] b = {2.0, 5.0};
+     * double[] result = difference(a, b); // result will be {1.0, 2.0, 3.0, 4.0}
+     * // Only one '2.0' is removed from a because b contains only one '2.0'
+     *
+     * double[] c = {1.0, 2.0, 2.0};
+     * double[] d = {2.0, 2.0, 2.0};
+     * double[] result2 = difference(c, d); // result will be {1.0}
+     * // All occurrences of '2.0' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(double[], double[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param a the first double array, elements from this array will be in the result if they don't appear in b
+     * @param b the second double array, elements from this array will be removed from a
+     * @return a new double array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(double[], double[])
+     * @see DoubleList#difference(DoubleList)
+     * @see #difference(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(double[], double[])
      * @see #difference(int[], int[])
      */
     public static double[] difference(final double[] a, final double[] b) {
@@ -3614,21 +3862,40 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified arrays <i>a</i> but not present in the specified array <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first array that are not present in the second array,
+     * considering the number of occurrences of each element.
      *
-     * @param <T> The type of the elements in the input array.
-     * @param a The first array.
-     * @param b The second array.
-     * @return A new list containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty list is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned
+     * <p>Example:
+     * <pre>
+     * String[] a = {"A", "B", "B", "C", "D"};
+     * String[] b = {"A", "B", "E"};
+     * List<String> result = difference(a, b); // result will be ["B", "C", "D"]
+     * // Only one 'A' and one 'B' are removed from a because b contains one of each
+     *
+     * Integer[] c = {1, 2, 2, 3};
+     * Integer[] d = {2, 2, 2, 4};
+     * List<Integer> result2 = difference(c, d); // result will be [1, 3]
+     * // All occurrences of '2' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(Object[], Object[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, removing only as many as found in the second array.
+     *
+     * @param <T> the type of the elements in the first array
+     * @param a the first array, elements from this array will be in the result if they don't appear in b
+     * @param b the second array, elements from this array will be removed from a
+     * @return a new list containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty list if <i>a</i> is {@code null} or empty.
+     *         Returns a list with all elements from <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #removeAll(Object[], Object[])
+     * @see #difference(Collection, Collection)
+     * @see #symmetricDifference(Object[], Object[])
      * @see #difference(int[], int[])
      * @see #excludeAll(Collection, Collection)
      * @see #excludeAllToSet(Collection, Collection)
      * @see #removeAll(Collection, Iterable)
      * @see Iterables#difference(Set, Set)
-     * @see Difference#of(Collection, Collection
      */
     public static <T> List<T> difference(final T[] a, final Object[] b) {
         if (isEmpty(a)) {
@@ -3650,21 +3917,38 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements in the specified collections <i>a</i> but not present in the specified collection <i>b</i>.
-     * Occurrences are considered.
+     * Returns the elements in the first collection that are not present in the second collection,
+     * considering the number of occurrences of each element.
      *
-     * @param <T> The type of the elements in the collections.
-     * @param a The first collection.
-     * @param b The second collection.
-     * @return A new list containing the elements that are present in <i>a</i> but not in <i>b</i>.
-     *         If <i>a</i> is empty or {@code null}, an empty list is returned.
-     *         If <i>b</i> is empty or {@code null}, a new list with all element from <i>a</i> is returned
-     * @see #difference(int[], int[])
+     * <p>Example:
+     * <pre>
+     * List<String> a = Arrays.asList("A", "B", "B", "C", "D");
+     * List<String> b = Arrays.asList("A", "B", "E");
+     * List<String> result = difference(a, b); // result will be ["B", "C", "D"]
+     * // Only one 'A' and one 'B' are removed from a because b contains one of each
+     *
+     * List<Integer> c = Arrays.asList(1, 2, 2, 3);
+     * List<Integer> d = Arrays.asList(2, 2, 2, 4);
+     * List<Integer> result2 = difference(c, d); // result will be [1, 3]
+     * // All occurrences of '2' are removed from c because d contains at least as many
+     * </pre>
+     *
+     * <p>Unlike {@link #removeAll(Collection, Collection)} which removes all occurrences of elements found in the second collection,
+     * this method considers the count of occurrences, removing only as many as found in the second collection.
+     *
+     * @param <T> the type of elements in the first collection
+     * @param a the first collection, elements from this collection will be in the result if they don't appear in b
+     * @param b the second collection, elements from this collection will be removed from a
+     * @return a new list containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty list if <i>a</i> is {@code null} or empty.
+     *         Returns a list with all elements from <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(Object[], Object[])
+     * @see #symmetricDifference(Collection, Collection)
      * @see #excludeAll(Collection, Collection)
      * @see #excludeAllToSet(Collection, Collection)
-     * @see #removeAll(Collection, Iterable)
-     * @see Iterables#difference(Set, Set)
-     * @see Difference#of(Collection, Collection
+     * @see #intersection(Collection, Collection)
+     * @see #difference(int[], int[])
      */
     public static <T> List<T> difference(final Collection<? extends T> a, final Collection<?> b) {
         if (isEmpty(a)) {
@@ -3687,15 +3971,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second boolean array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first boolean array.
-     * @param b The second boolean array.
-     * @return A new boolean array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * boolean[] a = {true, true, false};
+     * boolean[] b = {true, false, false};
+     * boolean[] result = symmetricDifference(a, b); // result will be {true, false}
+     * // One 'true' remains because 'a' has one more occurrence than 'b'
+     * // One 'false' remains because 'b' has one more occurrence than 'a'
+     *
+     * boolean[] c = {true, false};
+     * boolean[] d = {true, true, false};
+     * boolean[] result2 = symmetricDifference(c, d); // result will be {true}
+     * // One 'true' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first boolean array
+     * @param b the second boolean array
+     * @return a new boolean array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(boolean[], boolean[])
+     * @see #intersection(boolean[], boolean[])
      * @see #symmetricDifference(int[], int[])
      */
     public static boolean[] symmetricDifference(final boolean[] a, final boolean[] b) {
@@ -3709,15 +4013,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second char array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first char array.
-     * @param b The second char array.
-     * @return A new char array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * char[] a = {'a', 'b', 'b', 'c'};
+     * char[] b = {'b', 'd', 'a'};
+     * char[] result = symmetricDifference(a, b); // result will be {'b', 'c', 'd'}
+     * // One 'b' remains because 'a' has one more occurrence than 'b'
+     *
+     * char[] c = {'a', 'b', 'b'};
+     * char[] d = {'b', 'b', 'b'};
+     * char[] result2 = symmetricDifference(c, d); // result will be {'a', 'b'}
+     * // One 'b' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first char array
+     * @param b the second char array
+     * @return a new char array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(char[], char[])
+     * @see #intersection(char[], char[])
      * @see #symmetricDifference(int[], int[])
      */
     public static char[] symmetricDifference(final char[] a, final char[] b) {
@@ -3731,15 +4054,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second byte array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first byte array.
-     * @param b The second byte array.
-     * @return A new byte array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * byte[] a = {0, 1, 2, 2, 3};
+     * byte[] b = {2, 5, 1};
+     * byte[] result = symmetricDifference(a, b); // result will be [0, 2, 3, 5]
+     * // One '2' remains because 'a' has one more occurrence than 'b'
+     *
+     * byte[] c = {1, 2, 2};
+     * byte[] d = {2, 2, 2};
+     * byte[] result2 = symmetricDifference(c, d); // result will be [1, 2]
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first byte array
+     * @param b the second byte array
+     * @return a new byte array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(byte[], byte[])
+     * @see #intersection(byte[], byte[])
      * @see #symmetricDifference(int[], int[])
      */
     public static byte[] symmetricDifference(final byte[] a, final byte[] b) {
@@ -3753,15 +4095,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second short array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first short array.
-     * @param b The second short array.
-     * @return A new short array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * short[] a = {1, 2, 2, 3, 4};
+     * short[] b = {2, 5, 1};
+     * short[] result = symmetricDifference(a, b); // result will be {2, 3, 4, 5}
+     * // One '2' remains because 'a' has one more occurrence than 'b'
+     *
+     * short[] c = {1, 2, 2};
+     * short[] d = {2, 2, 2};
+     * short[] result2 = symmetricDifference(c, d); // result will be {1, 2}
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first short array
+     * @param b the second short array
+     * @return a new short array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty. 
+     * @see #difference(short[], short[])
+     * @see #intersection(short[], short[])
      * @see #symmetricDifference(int[], int[])
      */
     public static short[] symmetricDifference(final short[] a, final short[] b) {
@@ -3775,22 +4136,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second int array but not in both,
+     * considering the number of occurrences of each element.
      *
+     * <p>Example:
      * <pre>
      * int[] a = {0, 1, 2, 2, 3};
      * int[] b = {2, 5, 1};
-     * int[] c = symmetricDifference(a, b); // The elements c in a will b: [0, 2, 3, 5].
+     * int[] result = symmetricDifference(a, b); // result will be [0, 2, 3, 5]
+     * // One '2' remains because 'a' has one more occurrence than 'b'
+     *
+     * int[] c = {1, 2, 2};
+     * int[] d = {2, 2, 2};
+     * int[] result2 = symmetricDifference(c, d); // result will be [1, 2]
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
      * </pre>
      *
-     * @param a The first int array.
-     * @param b The second int array.
-     * @return A new int array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
-     * @see #symmetricDifference(int[], int[])
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first int array
+     * @param b the second int array
+     * @return a new int array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(int[], int[])
+     * @see #intersection(int[], int[])
      */
     public static int[] symmetricDifference(final int[] a, final int[] b) {
         if (isEmpty(a)) {
@@ -3803,15 +4176,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second long array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first long array.
-     * @param b The second long array.
-     * @return A new long array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * long[] a = {1, 2, 2, 3, 4};
+     * long[] b = {2, 5, 1};
+     * long[] result = symmetricDifference(a, b); // result will be {2, 3, 4, 5}
+     * // One '2' remains because 'a' has one more occurrence than 'b'
+     *
+     * long[] c = {1, 2, 2};
+     * long[] d = {2, 2, 2};
+     * long[] result2 = symmetricDifference(c, d); // result will be {1, 2}
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first long array
+     * @param b the second long array
+     * @return a new long array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(long[], long[])
+     * @see #intersection(long[], long[])
      * @see #symmetricDifference(int[], int[])
      */
     public static long[] symmetricDifference(final long[] a, final long[] b) {
@@ -3825,15 +4217,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second float array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first float array.
-     * @param b The second float array.
-     * @return A new float array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
+     * float[] b = {2.0f, 5.0f, 1.0f};
+     * float[] result = symmetricDifference(a, b); // result will be {2.0f, 3.0f, 4.0f, 5.0f}
+     * // One '2.0f' remains because 'a' has one more occurrence than 'b'
+     *
+     * float[] c = {1.0f, 2.0f, 2.0f};
+     * float[] d = {2.0f, 2.0f, 2.0f};
+     * float[] result2 = symmetricDifference(c, d); // result will be {1.0f, 2.0f}
+     * // One '2.0f' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first float array
+     * @param b the second float array
+     * @return a new float array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(float[], float[])
+     * @see #intersection(float[], float[])
      * @see #symmetricDifference(int[], int[])
      */
     public static float[] symmetricDifference(final float[] a, final float[] b) {
@@ -3847,15 +4258,34 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second double array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param a The first double array.
-     * @param b The second double array.
-     * @return A new double array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
+     * double[] b = {2.0, 5.0, 1.0};
+     * double[] result = symmetricDifference(a, b); // result will be {2.0, 3.0, 4.0, 5.0}
+     * // One '2.0' remains because 'a' has one more occurrence than 'b'
+     *
+     * double[] c = {1.0, 2.0, 2.0};
+     * double[] d = {2.0, 2.0, 2.0};
+     * double[] result2 = symmetricDifference(c, d); // result will be {1.0, 2.0}
+     * // One '2.0' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param a the first double array
+     * @param b the second double array
+     * @return a new double array containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty array if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a clone of <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #difference(double[], double[])
+     * @see #intersection(double[], double[])
      * @see #symmetricDifference(int[], int[])
      */
     public static double[] symmetricDifference(final double[] a, final double[] b) {
@@ -3869,22 +4299,38 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second array but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param <T> The type of the elements in the arrays.
-     * @param a The first array.
-     * @param b The second array.
-     * @return A new list containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty list is returned.
-     *         If <i>a</i> is empty or {@code null}, a list containing the elements of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a list containing the elements of <i>a</i> is returned.
+     * <p>Example:
+     * <pre>
+     * String[] a = {"A", "B", "B", "C", "D"};
+     * String[] b = {"B", "E", "A"};
+     * List<String> result = symmetricDifference(a, b); // result will be ["B", "C", "D", "E"]
+     * // One 'B' remains because 'a' has one more occurrence than 'b'
+     *
+     * Integer[] c = {1, 2, 2};
+     * Integer[] d = {2, 2, 2};
+     * List<Integer> result2 = symmetricDifference(c, d); // result will be [1, 2]
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both arrays in both directions,
+     * returning elements with different numbers of occurrences in each array.
+     *
+     * @param <T> the type of elements in the arrays
+     * @param a the first array
+     * @param b the second array
+     * @return a new list containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty list if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a list with all elements from <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a list with all elements from <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #symmetricDifference(Object[], Object[])
+     * @see #symmetricDifference(Collection, Collection)
+     * @see #difference(Object[], Object[])
      * @see #symmetricDifference(int[], int[])
-     * @see #excludeAll(Collection, Collection)
-     * @see #excludeAllToSet(Collection, Collection)
-     * @see #difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
-     * @see Iterables#symmetricDifference(Set, Set)
+     * @see #intersection(Object[], Object[])
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
         if (isEmpty(a)) {
@@ -3917,22 +4363,40 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     * Occurrences are considered.
+     * Returns the elements that are present in either the first or second collection but not in both,
+     * considering the number of occurrences of each element.
      *
-     * @param <T> The type of the elements in the collections.
-     * @param a The first collection.
-     * @param b The second collection.
-     * @return A new list containing the elements that are present in either <i>a</i> or <i>b</i> but not in both.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty list is returned.
-     *         If <i>a</i> is empty or {@code null}, a list containing the elements of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a list containing the elements of <i>a</i> is returned.
-     * @see #symmetricDifference(int[], int[])
-     * @see #excludeAll(Collection, Collection)
-     * @see #excludeAllToSet(Collection, Collection)
+     * <p>Example:
+     * <pre>
+     * List&lt;String&gt; a = Arrays.asList("A", "B", "B", "C", "D");
+     * List&lt;String&gt; b = Arrays.asList("B", "E", "A");
+     * List&lt;String&gt; result = symmetricDifference(a, b); // result will be ["B", "C", "D", "E"]
+     * // One 'B' remains because 'a' has one more occurrence than 'b'
+     *
+     * List&lt;Integer&gt; c = Arrays.asList(1, 2, 2);
+     * List&lt;Integer&gt; d = Arrays.asList(2, 2, 2);
+     * List&lt;Integer&gt; result2 = symmetricDifference(c, d); // result will be [1, 2]
+     * // One '2' appears in the result because 'd' has one more occurrence than 'c'
+     * </pre>
+     *
+     * <p>This method effectively combines the differences between both collections in both directions,
+     * returning elements with different numbers of occurrences in each collection.
+     *
+     * @param <T> the type of elements in the collections
+     * @param a the first collection
+     * @param b the second collection
+     * @return a new list containing the elements that are present in either <i>a</i> or <i>b</i> but not in both,
+     *         considering the number of occurrences.
+     *         Returns an empty list if both <i>a</i> and <i>b</i> are {@code null} or empty.
+     *         Returns a list with all elements from <i>b</i> if <i>a</i> is {@code null} or empty.
+     *         Returns a list with all elements from <i>a</i> if <i>b</i> is {@code null} or empty.
+     * @see #symmetricDifference(Object[], Object[])
      * @see #difference(Collection, Collection)
-     * @see Difference#of(Collection, Collection)
+     * @see #intersection(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #symmetricDifference(int[], int[])
      * @see Iterables#symmetricDifference(Set, Set)
+     * @see #symmetricDifference(int[], int[])
      */
     public static <T> List<T> symmetricDifference(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (isEmpty(a)) {
@@ -4042,7 +4506,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A set containing the elements that are present in both <i>a</i> and <i>b</i>.
      *         If either <i>a</i> or <i>b</i> is empty or {@code null}, an empty set is returned.
      * @see #intersection(Collection, Collection)
-     * @see #intersection(Collection, Collection, boolean)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
      */
@@ -4063,7 +4526,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         If <i>c</i> is empty or {@code null}, an empty set is returned.
      *         If <i>c</i> contains only one collection, a set containing the elements of this collection is returned.
      * @see #intersection(Collection, Collection)
-     * @see #intersection(Collection, Collection, boolean)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
      */
@@ -4318,8 +4780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns {@code true} if the given {@link Collection}s contain
-     * exactly the same elements with exactly the same cardinalities.
+     * Returns {@code true} if the given {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
      * <p>
      * That is, if the cardinality of <i>e</i> in <i>a</i> is
      * equal to the cardinality of <i>e</i> in <i>b</i>,
@@ -5558,7 +6019,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             copy[i] = operator.apply(copy[i]);
         }
 
-        return a;
+        return copy;
     }
 
     /**
@@ -5590,7 +6051,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             copy[i] = operator.apply(copy[i]);
         }
 
-        return a;
+        return copy;
     }
 
     /**
@@ -5829,6 +6290,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean[] addAll(final boolean[] a, final boolean... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_BOOLEAN_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final boolean[] newArray = new boolean[a.length + elementsToAdd.length];
@@ -5851,6 +6314,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char[] addAll(final char[] a, final char... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_CHAR_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final char[] newArray = new char[a.length + elementsToAdd.length];
@@ -5873,6 +6338,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static byte[] addAll(final byte[] a, final byte... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_BYTE_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final byte[] newArray = new byte[a.length + elementsToAdd.length];
@@ -5895,6 +6362,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static short[] addAll(final short[] a, final short... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_SHORT_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final short[] newArray = new short[a.length + elementsToAdd.length];
@@ -5917,6 +6386,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int[] addAll(final int[] a, final int... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_INT_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final int[] newArray = new int[a.length + elementsToAdd.length];
@@ -5939,6 +6410,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long[] addAll(final long[] a, final long... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_LONG_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final long[] newArray = new long[a.length + elementsToAdd.length];
@@ -5961,6 +6434,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static float[] addAll(final float[] a, final float... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_FLOAT_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final float[] newArray = new float[a.length + elementsToAdd.length];
@@ -5983,6 +6458,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double[] addAll(final double[] a, final double... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_DOUBLE_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final double[] newArray = new double[a.length + elementsToAdd.length];
@@ -6005,6 +6482,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static String[] addAll(final String[] a, final String... elementsToAdd) {
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? EMPTY_STRING_ARRAY : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final String[] newArray = new String[a.length + elementsToAdd.length];
@@ -6032,6 +6511,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a)) {
             return elementsToAdd == null ? a.clone() : elementsToAdd.clone();
+        } else if (isEmpty(elementsToAdd)) {
+            return a.clone();
         }
 
         final T[] newArray = Array.newInstance(a.getClass().getComponentType(), a.length + elementsToAdd.length);
@@ -6471,11 +6952,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Strings.nullToEmpty(str);
         } else if (Strings.isEmpty(str)) {
             return Strings.nullToEmpty(strToInsert);
+        } else if (index == 0) {
+            return Strings.concat(strToInsert + str);
         } else if (index == str.length()) {
             return Strings.concat(str + strToInsert);
+        } else {
+            return Strings.concat(str.substring(0, index), strToInsert, str.substring(index));
         }
-
-        return str;
     }
 
     /**
@@ -6494,6 +6977,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final boolean[] newArray = new boolean[a.length + elementsToInsert.length];
@@ -6527,6 +7012,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final char[] newArray = new char[a.length + elementsToInsert.length];
@@ -6560,6 +7047,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final byte[] newArray = new byte[a.length + elementsToInsert.length];
@@ -6593,6 +7082,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final short[] newArray = new short[a.length + elementsToInsert.length];
@@ -6626,6 +7117,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final int[] newArray = new int[a.length + elementsToInsert.length];
@@ -6659,6 +7152,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final long[] newArray = new long[a.length + elementsToInsert.length];
@@ -6692,6 +7187,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final float[] newArray = new float[a.length + elementsToInsert.length];
@@ -6725,6 +7222,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final double[] newArray = new double[a.length + elementsToInsert.length];
@@ -6758,6 +7257,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
         }
 
         final String[] newArray = new String[a.length + elementsToInsert.length];
@@ -6792,6 +7293,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
         checkPositionIndex(index, len(a));
+
+        if (isEmpty(a) && index == 0) {
+            return elementsToInsert.clone();
+        } else if (isEmpty(elementsToInsert)) {
+            return a.clone();
+        }
 
         final T[] newArray = Array.newInstance(a.getClass().getComponentType(), a.length + elementsToInsert.length);
 
@@ -10261,11 +10768,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the collection to replace the specified range in the original list
      * @return a boolean indicating whether the list was modified
+     * @throws IllegalArgumentException if the replacement collection is {@code null}
      * @throws IndexOutOfBoundsException if the range is out of the list bounds
      */
     public static <T> boolean replaceRange(@NotNull final List<T> c, final int fromIndex, final int toIndex, final Collection<? extends T> replacement)
             throws IllegalArgumentException {
-        // checkArgNotNull(c, cs.c);
+        checkArgNotNull(c, cs.list);
 
         final int size = size(c);
 
@@ -10313,285 +10821,313 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final boolean[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final char[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final byte[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final short[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final int[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final long[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final float[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final double[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndex is invalid
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
+    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return;
         }
 
         final T[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        if (newPositionStartIndexAfterMove < fromIndex) {
+            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given list to a new position within the list.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original list maintains its size.
      *
@@ -10599,22 +11135,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the original list to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, list.size() - (toIndex - fromIndex)]
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
      * @return {@code true} if the list was modified as a result of this operation
-     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndex is invalid
+     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
      */
-    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndex)
+    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
             throws IndexOutOfBoundsException {
         final int size = size(c);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, size);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, size);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
             return false;
         }
 
         final T[] tmp = (T[]) c.toArray();
 
-        moveRange(tmp, fromIndex, toIndex, newPositionStartIndex);
+        moveRange(tmp, fromIndex, toIndex, newPositionStartIndexAfterMove);
         c.clear();
         c.addAll(Arrays.asList(tmp));
 
@@ -10622,28 +11159,31 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new string with the specified range moved to the new position.
+     * Moves a range of elements in the given array to a new position within the array.
+     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * The original String remains unchanged.
      *
      * @param str the original string to be modified
      * @param fromIndex the initial index of the range to be moved, inclusive
      * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
+     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
      * @return a new string with the specified range moved to the new position
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndex is invalid
+     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndexAfterMove is invalid
      * @see Strings#moveRange(String, int, int, int)
      */
-    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) throws IndexOutOfBoundsException {
-        return Strings.moveRange(str, fromIndex, toIndex, newPositionStartIndex);
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+            throws IndexOutOfBoundsException {
+        return Strings.moveRange(str, fromIndex, toIndex, newPositionStartIndexAfterMove);
     }
 
-    static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
+    static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove, final int len) {
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (newPositionStartIndex < 0 || newPositionStartIndex > (len - (toIndex - fromIndex))) {
-            throw new IndexOutOfBoundsException("newPositionStartIndex " + newPositionStartIndex + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
-                    + "=(array.length - (toIndex - fromIndex))]");
+        if (newPositionStartIndexAfterMove < 0 || newPositionStartIndexAfterMove > (len - (toIndex - fromIndex))) {
+            throw new IndexOutOfBoundsException("newPositionStartIndexAfterMove " + newPositionStartIndexAfterMove + " is out-of-bounds: [0, "
+                    + (len - (toIndex - fromIndex)) + "=(array.length - (toIndex - fromIndex))]");
         }
     }
 
@@ -10653,15 +11193,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10672,15 +11213,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10691,15 +11233,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10710,15 +11253,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10729,15 +11273,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10748,15 +11293,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10767,15 +11313,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10786,15 +11333,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10805,15 +11353,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10824,15 +11373,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10843,15 +11393,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10862,15 +11413,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10881,15 +11433,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10900,15 +11453,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10919,15 +11473,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10938,15 +11493,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10957,15 +11513,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10976,15 +11533,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -10995,15 +11553,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -11014,15 +11573,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -11033,15 +11593,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -11052,15 +11613,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -11071,15 +11633,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -11090,15 +11653,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @param a
     //     * @param fromIndex
     //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
+    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
     //     * @return a new array.
     //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
     //
     //        return copy;
     //    }
@@ -12028,7 +12592,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             sum += a[i];
         }
 
-        return Numbers.toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -12555,13 +13119,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 sum += func.applyAsInt(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -12749,13 +13314,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 sum += func.applyAsLong(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -12919,13 +13485,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 summation.add(func.applyAsDouble(e));
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -13170,13 +13737,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 sum += func.applyAsInt(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -14022,11 +14590,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         float min = a[fromIndex];
-        for (int i = fromIndex + 1; i < toIndex; i++) {
-            min = Math.min(min, a[i]);
 
-            if (Float.isNaN(min)) {
-                return min;
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            if (Float.isNaN(a[i])) {
+                continue;
+            } else if (Float.isNaN(min)) {
+                min = a[i];
+            } else {
+                min = Math.min(min, a[i]);
             }
         }
 
@@ -14064,10 +14635,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         double min = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            min = Math.min(min, a[i]);
-
-            if (Double.isNaN(min)) {
-                return min;
+            if (Double.isNaN(a[i])) {
+                continue;
+            } else if (Double.isNaN(min)) {
+                min = a[i];
+            } else {
+                min = Math.min(min, a[i]);
             }
         }
 
@@ -14446,7 +15019,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list containing the smallest elements in the iterator. If the iterator is {@code null} or empty, an empty list is returned.
      */
     public static <T extends Comparable<? super T>> List<T> minAll(final Iterator<? extends T> iter) {
-        return maxAll(iter, NULL_MAX_COMPARATOR);
+        return minAll(iter, NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -15361,11 +15934,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         float max = a[fromIndex];
-        for (int i = fromIndex + 1; i < toIndex; i++) {
-            max = Math.max(max, a[i]);
 
-            if (Float.isNaN(max)) {
-                return max;
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            if (Float.isNaN(a[i])) {
+                continue;
+            } else if (Float.isNaN(max)) {
+                max = a[i];
+            } else {
+                max = Math.max(max, a[i]);
             }
         }
 
@@ -15402,11 +15978,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         double max = a[fromIndex];
-        for (int i = fromIndex + 1; i < toIndex; i++) {
-            max = Math.max(max, a[i]);
 
-            if (Double.isNaN(max)) {
-                return max;
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            if (Double.isNaN(a[i])) {
+                continue;
+            } else if (Double.isNaN(max)) {
+                max = a[i];
+            } else {
+                max = Math.max(max, a[i]);
             }
         }
 
@@ -15559,7 +16138,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
             for (int i = 0; i < toIndex; i++) {
                 if (i < fromIndex) {
                     it.next();
-                    continue;
                 } else if (i == fromIndex) {
                     candidate = it.next();
                 } else {
@@ -15568,10 +16146,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     if (cmp.compare(e, candidate) > 0) {
                         candidate = e;
                     }
-                }
 
-                if (isNullMaxComparator && candidate == null) { // NOSONAR
-                    return null;
+                    if (isNullMaxComparator && candidate == null) { // NOSONAR
+                        return null;
+                    }
                 }
             }
         }
@@ -16326,6 +16904,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(char[])
      */
     public static char median(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16343,6 +16922,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(char[], int, int)
      */
     public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16371,6 +16951,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(byte[])
      */
     public static byte median(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16388,6 +16969,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(byte[], int, int)
      */
     public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16416,6 +16998,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(short[])
      */
     public static short median(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16433,6 +17016,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(short[], int, int)
      */
     public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16472,6 +17056,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of values to find the median of
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(int[])
      */
     public static int median(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16489,6 +17074,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(int[], int, int)
      */
     public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16517,6 +17103,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(long[])
      */
     public static long median(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16534,6 +17121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(long[], int, int)
      */
     public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16562,6 +17150,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(float[])
      */
     public static float median(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16579,6 +17168,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(float[], int, int)
      */
     public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16607,6 +17197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(double[])
      */
     public static double median(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16624,6 +17215,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(double[], int, int)
      */
     public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16652,6 +17244,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
+     * @see Median#of(Comparable[])
      */
     public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -16669,6 +17262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
+     * @see Median#of(Comparable[], int, int)
      */
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -16689,7 +17283,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
+     * @see Median#of(Comparable[])
      * @see Median#of(Comparable[], int, int)
+     * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
     public static <T> T median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
@@ -16710,8 +17306,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
+     * @see Median#of(Comparable[])
      * @see Median#of(Comparable[], int, int)
+     * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
     public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
@@ -16737,9 +17334,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the median in the specified collection
      * @throws IllegalArgumentException if the collection is {@code null} or empty
      * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
-     * @see Median#of(Comparable[], int, int)
-     * @see Median#of(Object[], int, int, Comparator)
+     * @see Median#of(Collection)
+     * @see Median#of(Collection, int, int)
+     * @see Median#of(Collection, Comparator)
+     * @see Median#of(Collection, int, int, Comparator)
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
@@ -16758,9 +17356,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
-     * @see Median#of(Comparable[], int, int)
-     * @see Median#of(Object[], int, int, Comparator)
+     * @see Median#of(Collection)
+     * @see Median#of(Collection, int, int)
+     * @see Median#of(Collection, Comparator)
+     * @see Median#of(Collection, int, int, Comparator)
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -16777,8 +17376,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the collection is {@code null} or empty
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
-     * @see Median#of(Comparable[], int, int)
-     * @see Median#of(Object[], int, int, Comparator)
+     * @see Median#of(Collection)
+     * @see Median#of(Collection, int, int)
+     * @see Median#of(Collection, Comparator)
+     * @see Median#of(Collection, int, int, Comparator)
      */
     public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
@@ -16799,8 +17400,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
-     * @see Median#of(Comparable[], int, int)
-     * @see Median#of(Object[], int, int, Comparator
+     * @see Median#of(Collection)
+     * @see Median#of(Collection, int, int)
+     * @see Median#of(Collection, Comparator)
+     * @see Median#of(Collection, int, int, Comparator)
      */
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -17456,48 +18059,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
-        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
-        final int len = toIndex - fromIndex;
-
-        if (k == 1) {
-            return max(a, fromIndex, toIndex, comparator);
-        } else if (k == len) {
-            return min(a, fromIndex, toIndex, comparator);
-        }
-
-        Queue<T> queue = null;
-
-        if (k <= len / 2) {
-            queue = new PriorityQueue<>(k, comparator);
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (queue.size() < k) {
-                    queue.add(a[i]);
-                } else {
-                    if (comparator.compare(a[i], queue.peek()) > 0) {
-                        queue.remove();
-                        queue.add(a[i]);
-                    }
-                }
-            }
-        } else {
-            k = len - k + 1;
-
-            queue = new PriorityQueue<>(k, (o1, o2) -> comparator.compare(o2, o1));
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (queue.size() < k) {
-                    queue.add(a[i]);
-                } else {
-                    if (comparator.compare(a[i], queue.peek()) < 0) {
-                        queue.remove();
-                        queue.add(a[i]);
-                    }
-                }
-            }
-        }
-
-        return queue.peek();
+        return kthLargest(Arrays.asList(a), fromIndex, toIndex, k, cmp);
     }
 
     /**
@@ -17571,7 +18133,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      * @see Iterables#kthLargest(Collection, int, Comparator)
      */
-    public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
+    public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection cannot be null or empty");
@@ -17593,7 +18155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Queue<T> queue = null;
 
         if (k <= len / 2) {
-            queue = new PriorityQueue<>(k);
+            queue = new PriorityQueue<>(k, cmp);
             int cursor = 0;
 
             while (cursor < fromIndex && iter.hasNext()) {
@@ -17604,6 +18166,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             T e = null;
             while (cursor < toIndex && iter.hasNext()) {
                 e = iter.next();
+
+                if (e == null) {
+                    final Object[] tmp = N.toArray(c, fromIndex, toIndex);
+                    N.sort((T[]) tmp, comparator);
+                    return (T) tmp[tmp.length - k];
+                }
 
                 if (queue.size() < k) {
                     queue.add(e);
@@ -17617,9 +18185,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 cursor++;
             }
         } else {
-            k = len - k + 1;
+            final int n = len - k + 1;
 
-            queue = new PriorityQueue<>(k, (o1, o2) -> comparator.compare(o2, o1));
+            queue = new PriorityQueue<>(n, Comparators.reverseOrder(comparator));
 
             int cursor = 0;
 
@@ -17632,7 +18200,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             while (cursor < toIndex && iter.hasNext()) {
                 e = iter.next();
 
-                if (queue.size() < k) {
+                if (e == null) {
+                    final Object[] tmp = N.toArray(c, fromIndex, toIndex);
+                    N.sort((T[]) tmp, comparator);
+                    return (T) tmp[tmp.length - k];
+                }
+
+                if (queue.size() < n) {
                     queue.add(e);
                 } else {
                     if (comparator.compare(e, queue.peek()) < 0) {
@@ -18192,7 +18766,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of the array's bounds.
      * @see #top(int[], int)
      */
-    @SuppressWarnings("deprecation")
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(n, cs.n);
@@ -18204,21 +18777,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return toList(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
-        final Queue<T> heap = new PriorityQueue<>(n, comparator);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (heap.size() >= n) {
-                if (comparator.compare(heap.peek(), a[i]) < 0) {
-                    heap.poll();
-                    heap.add(a[i]);
-                }
-            } else {
-                heap.offer(a[i]);
-            }
-        }
-
-        return InternalUtil.createList((T[]) heap.toArray(EMPTY_OBJECT_ARRAY));
+        return top(Arrays.asList(a), fromIndex, toIndex, n, cmp);
     }
 
     /**
@@ -18326,6 +18885,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             for (int i = fromIndex; i < toIndex; i++) {
                 e = list.get(i);
 
+                if (e == null) {
+                    final Object[] tmp = N.toArray(c, fromIndex, toIndex);
+                    N.sort((T[]) tmp, comparator);
+                    return N.toList((T[]) tmp, tmp.length - n, tmp.length);
+                }
+
                 if (heap.size() >= n) {
                     if (comparator.compare(heap.peek(), e) < 0) {
                         heap.poll();
@@ -18344,6 +18909,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 if (i < fromIndex) {
                     continue;
+                }
+
+                if (e == null) {
+                    final Object[] tmp = N.toArray(c, fromIndex, toIndex);
+                    N.sort((T[]) tmp, comparator);
+                    return N.toList((T[]) tmp, tmp.length - n, tmp.length);
                 }
 
                 if (heap.size() >= n) {
@@ -19472,7 +20043,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
@@ -19481,7 +20053,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 }
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -19688,13 +20260,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsBoolean(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -19814,13 +20387,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsChar(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -19940,13 +20514,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsByte(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20066,13 +20641,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsShort(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20191,13 +20767,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsInt(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20370,13 +20947,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsLong(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20549,13 +21127,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsFloat(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20674,13 +21253,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result[idx - fromIndex] = mapper.applyAsDouble(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -20907,13 +21487,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
                 result.add(mapper.apply(e));
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -21195,7 +21776,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
@@ -21203,7 +21785,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     result.addAll(mr);
                 }
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -21675,7 +22257,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //            int idx = 0;
     //
     //            for (final T e : c) {
-    //                if (idx++ < fromIndex) {
+    //                if (idx < fromIndex) {
+    //                    idx++;
     //                    continue;
     //                }
     //
@@ -22201,7 +22784,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //            int idx = 0;
     //
     //            for (final T e : c) {
-    //                if (idx++ < fromIndex) {
+    //                if (idx < fromIndex) {
+    //                    idx++;
     //                    continue;
     //                }
     //
@@ -23868,15 +24452,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
-
                 if (filter.test(e)) {
                     count++;
                 }
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -25311,7 +25895,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
 
             for (final T e : c) {
-                if (idx++ < fromIndex) {
+                if (idx < fromIndex) {
+                    idx++;
                     continue;
                 }
 
@@ -25320,7 +25905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 val.add(e);
 
-                if (idx >= toIndex) {
+                if (++idx >= toIndex) {
                     break;
                 }
             }
@@ -30679,7 +31264,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.Consumer<? super List<T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (iter == null) {
+        if (N.isEmpty(iter)) {
             return;
         }
 
@@ -30775,7 +31360,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
-        if (iter == null) {
+        if (N.isEmpty(iter)) {
             return;
         }
 
@@ -30863,7 +31448,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (iter == null) {
+        if (N.isEmpty(iter)) {
             return new ArrayList<>();
         }
 
@@ -30972,7 +31557,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
             throws IllegalArgumentException, E, E2 {
-        if (iter == null) {
+        if (N.isEmpty(iter)) {
             return new ArrayList<>();
         }
 
@@ -31224,126 +31809,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
             while (true) {
                 try {
                     return cmd.apply(remainingNanos, TimeUnit.NANOSECONDS);
-                } catch (final InterruptedException e) {
-                    interrupted = true;
-                    remainingNanos = end - System.nanoTime();
-                }
-            }
-        } finally {
-            if (interrupted) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    /**
-     * Pauses the execution of the current thread for a specified time.
-     *
-     * @param timeoutInMillis The time, in milliseconds, to pause the thread.
-     */
-    public static void sleep(final long timeoutInMillis) {
-        if (timeoutInMillis <= 0) {
-            return;
-        }
-
-        try {
-            TimeUnit.MILLISECONDS.sleep(timeoutInMillis);
-        } catch (final InterruptedException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-    }
-
-    /**
-     * Pauses the execution of the current thread for a specified time.
-     *
-     * @param timeout The time to pause the thread. The unit of time is determined by the <i>unit</i> parameter.
-     * @param unit The unit of time for the <i>timeout</i> parameter. This should be a valid TimeUnit enumeration value.
-     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
-     */
-    public static void sleep(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {
-        checkArgNotNull(unit, cs.unit);
-
-        if (timeout <= 0) {
-            return;
-        }
-
-        try {
-            unit.sleep(timeout);
-        } catch (final InterruptedException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-    }
-
-    /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
-     *
-     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
-     * timeout elapses, and only then re-interrupts the thread.
-     *
-     * @param timeoutInMillis
-     */
-    public static void sleepUninterruptibly(final long timeoutInMillis) {
-        if (timeoutInMillis <= 0) {
-            return;
-        }
-
-        boolean interrupted = false;
-
-        try {
-            long remainingNanos = TimeUnit.MILLISECONDS.toNanos(timeoutInMillis);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
-
-            while (true) {
-                try {
-                    // TimeUnit.sleep() treats negative timeouts just like zero.
-                    TimeUnit.NANOSECONDS.sleep(remainingNanos);
-                    return;
-                } catch (final InterruptedException e) {
-                    interrupted = true;
-                    remainingNanos = end - System.nanoTime();
-                }
-            }
-        } finally {
-            if (interrupted) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
-     *
-     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
-     * timeout elapses, and only then re-interrupts the thread.
-     *
-     * @param timeout
-     * @param unit
-     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
-     */
-    public static void sleepUninterruptibly(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {
-        checkArgNotNull(unit, cs.unit);
-
-        if (timeout <= 0) {
-            return;
-        }
-
-        boolean interrupted = false;
-
-        try {
-            long remainingNanos = unit.toNanos(timeout);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
-
-            while (true) {
-                try {
-                    // TimeUnit.sleep() treats negative timeouts just like zero.
-                    TimeUnit.NANOSECONDS.sleep(remainingNanos);
-                    return;
                 } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingNanos = end - System.nanoTime();
@@ -31821,6 +32286,126 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
+     * Pauses the execution of the current thread for a specified time.
+     *
+     * @param timeoutInMillis The time, in milliseconds, to pause the thread.
+     */
+    public static void sleep(final long timeoutInMillis) {
+        if (timeoutInMillis <= 0) {
+            return;
+        }
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(timeoutInMillis);
+        } catch (final InterruptedException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+    }
+
+    /**
+     * Pauses the execution of the current thread for a specified time.
+     *
+     * @param timeout The time to pause the thread. The unit of time is determined by the <i>unit</i> parameter.
+     * @param unit The unit of time for the <i>timeout</i> parameter. This should be a valid TimeUnit enumeration value.
+     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
+     */
+    public static void sleep(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {
+        checkArgNotNull(unit, cs.unit);
+
+        if (timeout <= 0) {
+            return;
+        }
+
+        try {
+            unit.sleep(timeout);
+        } catch (final InterruptedException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+    }
+
+    /**
+     * Note: Copied from Google Guava under Apache License v2.0
+     * <br />
+     * <br />
+     *
+     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
+     * timeout elapses, and only then re-interrupts the thread.
+     *
+     * @param timeoutInMillis
+     */
+    public static void sleepUninterruptibly(final long timeoutInMillis) {
+        if (timeoutInMillis <= 0) {
+            return;
+        }
+
+        boolean interrupted = false;
+
+        try {
+            long remainingNanos = TimeUnit.MILLISECONDS.toNanos(timeoutInMillis);
+            final long sysNanos = System.nanoTime();
+            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+
+            while (true) {
+                try {
+                    // TimeUnit.sleep() treats negative timeouts just like zero.
+                    TimeUnit.NANOSECONDS.sleep(remainingNanos);
+                    return;
+                } catch (final InterruptedException e) {
+                    interrupted = true;
+                    remainingNanos = end - System.nanoTime();
+                }
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    /**
+     * Note: Copied from Google Guava under Apache License v2.0
+     * <br />
+     * <br />
+     *
+     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
+     * timeout elapses, and only then re-interrupts the thread.
+     *
+     * @param timeout
+     * @param unit
+     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
+     */
+    public static void sleepUninterruptibly(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {
+        checkArgNotNull(unit, cs.unit);
+
+        if (timeout <= 0) {
+            return;
+        }
+
+        boolean interrupted = false;
+
+        try {
+            long remainingNanos = unit.toNanos(timeout);
+            final long sysNanos = System.nanoTime();
+            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+
+            while (true) {
+                try {
+                    // TimeUnit.sleep() treats negative timeouts just like zero.
+                    TimeUnit.NANOSECONDS.sleep(remainingNanos);
+                    return;
+                } catch (final InterruptedException e) {
+                    interrupted = true;
+                    remainingNanos = end - System.nanoTime();
+                }
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    /**
      * Creates a lazy-initialized supplier from the provided supplier.
      * The supplier's get() method will not be called until necessary and only be called only because the returned value will be cached.
      *
@@ -31844,26 +32429,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
         return Throwables.LazyInitializer.of(supplier);
-    }
-
-    static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
-        if (c instanceof Deque) {
-            return ((Deque<T>) c).descendingIterator();
-        } else {
-            try {
-                Method m = null;
-
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
-
-                    return ClassUtil.invokeMethod(c, m);
-                }
-            } catch (final Exception e) {
-                // continue
-            }
-        }
-
-        return null; // NOSONAR
     }
 
     /**

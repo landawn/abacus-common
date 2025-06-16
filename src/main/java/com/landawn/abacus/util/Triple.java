@@ -499,6 +499,6 @@ public final class Triple<L, M, R> implements Mutable {
 
     @Override
     public String toString() {
-        return "[" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + "]";
+        return "(" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + ")"; // To align with Pair.toString() in Apache Commons Lang
     }
 }

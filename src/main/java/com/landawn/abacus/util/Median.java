@@ -31,9 +31,50 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * The Median class is a utility class that provides methods for calculating the median of various types of data.
- * It includes methods for calculating the median of arrays and collections of various types, including integers, longs, doubles, and objects.
- * This class is final and cannot be instantiated.
+ * <p>A utility class that provides methods to find the median value(s) of arrays and collections.</p>
+ * 
+ * <p>The median represents the middle value in a sorted sequence. For sequences with an odd number of elements, 
+ * there's exactly one median value. For sequences with an even number of elements, there are two median values
+ * (the two middle elements of the sorted sequence).</p>
+ * 
+ * <p>All methods in this class return the median as a {@code Pair} object:</p>
+ * <ul>
+ *   <li>For sequences with an odd number of elements, the {@code left} component of the pair contains the 
+ *       median value, and the {@code right} component is empty.</li>
+ *   <li>For sequences with an even number of elements, the {@code left} component contains the smaller of 
+ *       the two median values, and the {@code right} component contains the larger one.</li>
+ * </ul>
+ * 
+ * <p>For primitive arrays, specialized Optional classes ({@code OptionalInt}, {@code OptionalLong}, etc.) 
+ * are used to represent the second median value. For object arrays and collections, {@code Nullable<T>} is used.</p>
+ * 
+ * <p>The input arrays or collections do not need to be sorted beforehand. The implementation efficiently
+ * finds the median without fully sorting the input data.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>
+ * // With array of odd length
+ * Pair&lt;Integer, OptionalInt&gt; result1 = Median.of(1, 3, 5);
+ * // result1: [3, OptionalInt.empty()]
+ * 
+ * // With array of even length
+ * Pair&lt;Integer, OptionalInt&gt; result2 = Median.of(1, 3, 5, 7);
+ * // result2: [3, OptionalInt.of(5)]
+ * 
+ * // With repeated values
+ * Pair&lt;Integer, OptionalInt&gt; result3 = Median.of(1, 1, 3, 5);
+ * // result3: [1, OptionalInt.of(3)]
+ * </pre>
+ * 
+ * @see Pair
+ * @see OptionalInt
+ * @see OptionalLong
+ * @see OptionalDouble
+ * @see OptionalChar
+ * @see OptionalByte
+ * @see OptionalShort
+ * @see OptionalFloat
+ * @see Nullable
  */
 public final class Median {
 

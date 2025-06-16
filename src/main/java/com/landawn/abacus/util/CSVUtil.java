@@ -78,7 +78,7 @@ public final class CSVUtil {
             subStrLen = N.len(strs[i]);
 
             if (subStrLen > 1 && strs[i].charAt(0) == '"' && strs[i].charAt(subStrLen - 1) == '"') {
-                strs[i] = strs[i].substring(0, subStrLen - 1);
+                strs[i] = strs[i].substring(1, subStrLen - 1);
             }
         }
 
@@ -93,7 +93,7 @@ public final class CSVUtil {
             subStrLen = N.len(output[i]);
 
             if (subStrLen > 1 && output[i].charAt(0) == '"' && output[i].charAt(subStrLen - 1) == '"') {
-                output[i] = output[i].substring(0, subStrLen - 1);
+                output[i] = output[i].substring(1, subStrLen - 1);
             }
         }
     };

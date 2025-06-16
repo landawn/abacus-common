@@ -619,7 +619,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return Strings.STR_FOR_EMPTY_ARRAY;
+            return "()";
         }
     }
 
@@ -748,7 +748,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + "]";
+            return "(" + N.toString(_1) + ")";
         }
     }
 
@@ -922,7 +922,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ")";
         }
     }
 
@@ -1102,7 +1102,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ")";
         }
     }
 
@@ -1253,7 +1253,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ")";
         }
     }
 
@@ -1414,7 +1414,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ")";
         }
     }
 
@@ -1585,8 +1585,8 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ")";
         }
     }
 
@@ -1766,8 +1766,8 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + ")";
         }
     }
 
@@ -1960,8 +1960,8 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + ", " + N.toString(_8) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + ", " + N.toString(_8) + ")";
         }
     }
 
@@ -2164,8 +2164,8 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + ", " + N.toString(_8) + ", " + N.toString(_9) + "]";
+            return "(" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + ", " + N.toString(_8) + ", " + N.toString(_9) + ")";
         }
     }
 }

@@ -3203,7 +3203,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 }
                             }
 
-                            @SuppressWarnings("resource")
                             final int maxValueSize = Stream.of(result.values()).mapToInt(List::size).max().orElse(0);
 
                             for (final List<Object> vc : result.values()) {

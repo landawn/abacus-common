@@ -63,6 +63,7 @@ import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
+import com.landawn.abacus.util.RegExUtil;
 import com.landawn.abacus.util.Strings;
 
 @Internal
@@ -223,7 +224,7 @@ public final class HttpUtil {
      * @return
      */
     public static boolean isValidHttpHeader(final String key, final String value) {
-        if (Strings.isEmpty(key) || key.indexOf(HttpHeaders.LF) >= 0 || key.indexOf(':') >= 0) {
+        if (Strings.isEmpty(key) || RegExUtil.LINE_SEPARATOR.matcher(key).find() || key.indexOf(':') >= 0) {
             return false;
         }
 
