@@ -17,6 +17,11 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.Fraction;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Fraction objects.
+ * This class provides serialization and deserialization capabilities for Fraction instances,
+ * which represent rational numbers as a ratio of two integers.
+ */
 public class FractionType extends AbstractType<Fraction> {
 
     public static final String FRACTION = Fraction.class.getSimpleName();
@@ -25,15 +30,21 @@ public class FractionType extends AbstractType<Fraction> {
         super(FRACTION);
     }
 
+    /**
+     * Returns the Class object representing the Fraction type.
+     *
+     * @return Fraction.class
+     */
     @Override
     public Class<Fraction> clazz() {
         return Fraction.class;
     }
 
     /**
-     * Checks if is number.
+     * Indicates whether this type represents a numeric value.
+     * Fractions are mathematical representations of rational numbers, so this returns true.
      *
-     * @return {@code true}, if is number
+     * @return true, as Fraction represents numeric values
      */
     @Override
     public boolean isNumber() {
@@ -41,9 +52,10 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Checks if is immutable.
+     * Indicates whether instances of this type are immutable.
+     * Fraction objects are immutable once created, so this returns true.
      *
-     * @return {@code true}, if is immutable
+     * @return true, as Fraction instances are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -51,9 +63,10 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether instances of this type implement the Comparable interface.
+     * Fraction implements Comparable<Fraction>, allowing fractions to be compared and sorted.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as Fraction implements Comparable
      */
     @Override
     public boolean isComparable() {
@@ -61,9 +74,10 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether this type should be written without quotes in CSV format.
+     * Numeric types like Fraction are typically not quoted in CSV files.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating that Fraction values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -71,9 +85,12 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
+     * Converts a Fraction object to its string representation.
+     * The string format is determined by the Fraction's toString() method,
+     * typically in the form "numerator/denominator".
      *
-     * @param x
-     * @return
+     * @param x the Fraction to convert to string
+     * @return the string representation of the fraction, or null if the input is null
      */
     @Override
     public String stringOf(final Fraction x) {
@@ -81,9 +98,12 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
+     * Parses a string representation into a Fraction object.
+     * The string should be in a format that can be parsed by Fraction.of(),
+     * typically "numerator/denominator" or a decimal number.
      *
-     * @param str
-     * @return
+     * @param str the string to parse into a Fraction
+     * @return the parsed Fraction object, or null if the input string is null or empty
      */
     @Override
     public Fraction valueOf(final String str) {

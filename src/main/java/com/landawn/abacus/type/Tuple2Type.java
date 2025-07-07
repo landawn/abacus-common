@@ -32,9 +32,12 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Tuple2} objects.
+ * This class provides serialization and deserialization support for tuple instances
+ * containing two elements of potentially different types.
  *
- * @param <T1>
- * @param <T2>
+ * @param <T1> the type of the first element in the tuple
+ * @param <T2> the type of the second element in the tuple
  */
 @SuppressWarnings("java:S2160")
 public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
@@ -59,20 +62,32 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
         parameterTypes = new Type[] { type1, type2 };
     }
 
+    /**
+     * Returns the declaring name of this type, which includes simple class names.
+     * For example: "Tuple2<String, Integer>" instead of the fully qualified name.
+     *
+     * @return the declaring name of this Tuple2 type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Java class that this type handler manages.
+     *
+     * @return {@code Tuple2.class}
+     */
     @Override
     public Class<Tuple2<T1, T2>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the parameter types of this tuple type.
+     * The returned array contains the types of the first and second elements in order.
      *
-     * @return
+     * @return an array containing the types of the tuple elements
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -80,9 +95,10 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this is a generic type.
+     * Tuple2Type is always a generic type as it has type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return {@code true} always, as Tuple2 is a parameterized type
      */
     @Override
     public boolean isGenericType() {
@@ -90,9 +106,11 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
+     * Converts the given Tuple2 object to its string representation.
+     * The tuple is serialized as a JSON array containing its two elements.
      *
-     * @param x
-     * @return
+     * @param x the Tuple2 object to convert
+     * @return a JSON string representation of the tuple, or null if x is null
      */
     @Override
     public String stringOf(final Tuple2<T1, T2> x) {
@@ -100,9 +118,12 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
+     * Parses the given string into a Tuple2 object.
+     * The string should be a JSON array representation with exactly two elements.
+     * Each element will be converted to the appropriate type based on the tuple's type parameters.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return a Tuple2 object parsed from the string, or null if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -121,10 +142,13 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
+     * Appends the string representation of the Tuple2 to the given Appendable.
+     * The output format is: [element1, element2]
+     * Special handling is provided for Writer instances to improve performance.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Tuple2 object to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Tuple2<T1, T2> x) throws IOException {
@@ -167,11 +191,14 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
+     * Writes the character representation of the Tuple2 to the given CharacterWriter.
+     * The output format is: [element1, element2]
+     * This method is optimized for character-based output streams.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Tuple2 object to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Tuple2<T1, T2> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -194,12 +221,13 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param t1TypeName
-     * @param t2TypeName
-     * @param isDeclaringName
-     * @return
+     * Generates the type name for a Tuple2 with the specified element type names.
+     * 
+     * @param t1TypeName the type name of the first element
+     * @param t2TypeName the type name of the second element
+     * @param isDeclaringName if true, returns the declaring name (simple class names); 
+     *                        if false, returns the full canonical name
+     * @return the formatted type name string
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

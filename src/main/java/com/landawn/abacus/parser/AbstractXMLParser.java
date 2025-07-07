@@ -40,7 +40,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractXMLParser.class);
 
-    protected static final int TEXT_SIZE_TO_READ_MORE = 256;
+    // protected static final int TEXT_SIZE_TO_READ_MORE = 256;
 
     protected static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
@@ -130,40 +130,14 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
         }
     }
 
-    /**
-     *
-     * @param config
-     * @return
-     */
     protected XMLSerializationConfig check(XMLSerializationConfig config) {
-        if (config == null) {
-            config = defaultXMLSerializationConfig;
-        }
-
-        return config;
+        return config == null ? defaultXMLSerializationConfig : config;
     }
 
-    /**
-     *
-     * @param config
-     * @return
-     */
     protected XMLDeserializationConfig check(XMLDeserializationConfig config) {
-        if (config == null) {
-            config = defaultXMLDeserializationConfig;
-        }
-
-        return config;
+        return config == null ? defaultXMLDeserializationConfig : config;
     }
 
-    /**
-     * New prop instance.
-     *
-     * @param <T>
-     * @param propClass
-     * @param node
-     * @return
-     */
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Node node) {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {

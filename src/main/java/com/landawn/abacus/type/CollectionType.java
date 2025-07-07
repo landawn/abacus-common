@@ -33,12 +33,15 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Collection implementations including List, Set, Queue and their concrete implementations.
+ * This class provides serialization and deserialization capabilities for collection types with generic element types.
  *
- * @param <E>
- * @param <T>
+ * @param <E> the element type of the collection
+ * @param <T> the collection type (must extend Collection<E>)
  */
 @SuppressWarnings("java:S2160")
 public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
@@ -98,20 +101,43 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         isSet = Set.class.isAssignableFrom(this.typeClass);
     }
 
+    /**
+     * Returns the declaring name of this collection type.
+     * The declaring name represents the type in a simplified format suitable for type declarations,
+     * using simple class names rather than fully qualified names.
+     *
+     * @return the declaring name of this type (e.g., "List<String>" instead of "java.util.List<java.lang.String>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the collection type handled by this type handler.
+     *
+     * @return the Class object for the collection type
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the type handler for the elements contained in this collection.
      *
-     * @return
+     * @return the Type instance representing the element type of this collection
+     */
+    @Override
+    public Type<E> getElementType() {
+        return elementType;
+    }
+
+    /**
+     * Returns an array containing the parameter types of this generic collection type.
+     * For collection types, this array contains a single element representing the element type.
+     *
+     * @return an array containing the element type as the only parameter type
      */
     @Override
     public Type<E>[] getParameterTypes() {
@@ -119,34 +145,39 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Gets the element type.
+     * Checks whether this collection type represents a List or its subtype.
      *
-     * @return
+     * @return true if this type represents a List, false otherwise
      */
-    @Override
-    public Type<E> getElementType() {
-        return elementType;
-    }
-
     @Override
     public boolean isList() {
         return isList;
     }
 
+    /**
+     * Checks whether this collection type represents a Set or its subtype.
+     *
+     * @return true if this type represents a Set, false otherwise
+     */
     @Override
     public boolean isSet() {
         return isSet;
     }
 
+    /**
+     * Always returns true as this type handler specifically handles Collection types.
+     *
+     * @return true
+     */
     @Override
     public boolean isCollection() {
         return true;
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as collection types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -154,9 +185,10 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Checks if is serializable.
+     * Checks whether the elements of this collection type are serializable.
+     * The collection itself is considered serializable if its element type is serializable.
      *
-     * @return {@code true}, if is serializable
+     * @return true if the element type is serializable, false otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -164,9 +196,10 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Gets the serialization type.
+     * Returns the serialization type category for this collection.
+     * If the element type is serializable, returns SERIALIZABLE; otherwise returns COLLECTION.
      *
-     * @return
+     * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
      */
     @Override
     public SerializationType getSerializationType() {
@@ -174,9 +207,13 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
+     * Converts a collection to its string representation.
+     * If the collection is null, returns null.
+     * If the collection is empty, returns "[]".
+     * Otherwise, serializes the collection to a JSON array string where each element is serialized according to its type.
      *
-     * @param x
-     * @return
+     * @param x the collection to convert to string
+     * @return the string representation of the collection, or null if the input is null
      */
     @MayReturnNull
     @Override
@@ -220,16 +257,19 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
+     * Converts a string representation back to a collection instance.
+     * Handles null and empty strings by returning null or an empty collection respectively.
+     * The string should be in JSON array format.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a new collection instance containing the parsed elements, or null if the input is null
      */
     @MayReturnNull
     @Override
     public T valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return (T) N.newCollection(typeClass);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
@@ -237,10 +277,13 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
+     * Appends the string representation of a collection to an Appendable.
+     * The output format is a JSON array with elements separated by commas.
+     * Handles Writer instances specially for better performance with buffering.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the collection to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -301,11 +344,14 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
+     * Writes the character representation of a collection to a CharacterWriter.
+     * This method is optimized for performance when writing to character-based outputs.
+     * The collection is serialized as a JSON array.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the collection to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -337,12 +383,13 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Gets the type name.
+     * Generates a type name string for a collection type with the specified element type.
+     * The format depends on whether a declaring name (simplified) or full name is requested.
      *
-     * @param typeClass
-     * @param parameterTypeName
-     * @param isDeclaringName
-     * @return
+     * @param typeClass the collection class
+     * @param parameterTypeName the name of the element type
+     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @return the formatted type name (e.g., "List<String>" or "java.util.List<java.lang.String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

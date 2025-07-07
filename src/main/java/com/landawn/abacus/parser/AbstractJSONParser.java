@@ -200,24 +200,24 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      *
      * @param <T>
      * @param source
-     * @param elementClass
+     * @param elementType
      * @return
      */
     @Override
-    public <T> Stream<T> stream(final String source, final Class<? extends T> elementClass) {
-        return stream(source, null, elementClass);
+    public <T> Stream<T> stream(final String source, final Type<? extends T> elementType) {
+        return stream(source, null, elementType);
     }
 
     /**
      *
      * @param <T>
      * @param source
-     * @param elementClass
+     * @param elementType
      * @return
      */
     @Override
-    public <T> Stream<T> stream(final File source, final Class<? extends T> elementClass) {
-        return stream(source, null, elementClass);
+    public <T> Stream<T> stream(final File source, final Type<? extends T> elementType) {
+        return stream(source, null, elementType);
     }
 
     /**
@@ -225,12 +225,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param <T>
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
-     * @param elementClass
+     * @param elementType
      * @return
      */
     @Override
-    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Class<? extends T> elementClass) {
-        return stream(source, null, closeInputStreamWhenStreamIsClosed, elementClass);
+    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
+        return stream(source, null, closeInputStreamWhenStreamIsClosed, elementType);
     }
 
     /**
@@ -238,37 +238,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param <T>
      * @param reader
      * @param closeReaderWhenStreamIsClosed
-     * @param elementClass
+     * @param elementType
      * @return
      */
     @Override
-    public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementClass) {
-        return stream(reader, null, closeReaderWhenStreamIsClosed, elementClass);
+    public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType) {
+        return stream(reader, null, closeReaderWhenStreamIsClosed, elementType);
     }
 
-    /**
-     *
-     * @param config
-     * @return
-     */
     protected JSONSerializationConfig check(JSONSerializationConfig config) {
-        if (config == null) {
-            config = defaultJSONSerializationConfig;
-        }
-
-        return config;
+        return config == null ? defaultJSONSerializationConfig : config;
     }
 
-    /**
-     *
-     * @param config
-     * @return
-     */
     protected JSONDeserializationConfig check(JSONDeserializationConfig config) {
-        if (config == null) {
-            config = defaultJSONDeserializationConfig;
-        }
-
-        return config;
+        return config == null ? defaultJSONDeserializationConfig : config;
     }
 }

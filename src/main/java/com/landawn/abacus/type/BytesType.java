@@ -21,6 +21,11 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for byte array (byte[]) values.
+ * This class provides serialization, deserialization, and database operations for byte arrays.
+ * Byte arrays are encoded/decoded using Base64 encoding for string representation.
+ */
 public class BytesType extends AbstractType<byte[]> {
 
     public static final String BYTES = "Bytes";
@@ -29,15 +34,22 @@ public class BytesType extends AbstractType<byte[]> {
         super(BYTES);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing byte[].class
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;
     }
 
     /**
+     * Converts a byte array to its string representation using Base64 encoding.
+     * This method is used for serialization purposes.
      *
-     * @param x
-     * @return
+     * @param x the byte array to convert. Can be null.
+     * @return A Base64 encoded string representation of the byte array, or null if the input is null
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -45,9 +57,11 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
+     * Converts a Base64 encoded string back to a byte array.
+     * This method is used for deserialization purposes.
      *
-     * @param str
-     * @return
+     * @param str the Base64 encoded string to convert. Can be null.
+     * @return The decoded byte array, or null if the input string is null
      */
     @Override
     public byte[] valueOf(final String str) {
@@ -55,11 +69,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
+     * Retrieves a byte array value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the byte array value
+     * @return The byte array value at the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -67,11 +82,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
+     * Retrieves a byte array value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the byte array value
+     * @return The byte array value in the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -79,11 +95,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
+     * Sets a byte array value as a parameter in a PreparedStatement.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement in which to set the parameter
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the byte array value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
@@ -91,11 +108,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
+     * Sets a byte array value as a named parameter in a CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement in which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the byte array value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {

@@ -16,22 +16,98 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that accepts a variable number of {@code long}-valued
+ * arguments and produces a result. This is the N-arity specialization of
+ * {@link java.util.function.Function} for {@code long} values.
+ *
+ * <p>This interface extends {@link Throwables.LongNFunction} with
+ * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * exception handling capabilities.
+ *
+ * <p>This interface is particularly useful when you need to compute a result
+ * from an arbitrary number of long values, without knowing the exact count
+ * at compile time.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #apply(long...)}.
+ *
+ * @param <R> the type of the result of the function
+ *
+ * @see java.util.function.Function
+ * @see LongFunction
+ * @see LongBiFunction
+ * @since 1.8
+ */
 @FunctionalInterface
 public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeException> { //NOSONAR
 
     /**
+     * Applies this function to the given arguments.
      *
-     * @param args
-     * @return
+     * <p>The function processes a variable number of long values and produces
+     * a result of type R. The varargs parameter allows for flexible argument
+     * counts, from zero to many values.
+     *
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Aggregating multiple long values into a single result (sum, average, etc.)</li>
+     *   <li>Creating objects from arrays of long values</li>
+     *   <li>Computing statistics from groups of long values</li>
+     *   <li>Transforming arrays of long values into other representations</li>
+     *   <li>Implementing variadic mathematical functions</li>
+     * </ul>
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * LongNFunction<Double> average = args -> {
+     *     if (args.length == 0) return 0.0;
+     *     long sum = 0;
+     *     for (long value : args) {
+     *         sum += value;
+     *     }
+     *     return (double) sum / args.length;
+     * };
+     * Double avg = average.apply(10L, 20L, 30L, 40L); // Returns 25.0
+     * }</pre>
+     *
+     * @param args the function arguments as a varargs array. Can be empty, contain
+     *             a single value, or multiple values. The array should not be
+     *             modified by the implementation
+     * @return the function result of type R
      */
     @Override
     R apply(long... args);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result. If evaluation
+     * of either function throws an exception, it is relayed to the caller of
+     * the composed function.
      *
-     * @param <V>
-     * @param after
-     * @return
+     * <p>This method enables function composition, allowing you to chain operations
+     * where the output of this function becomes the input of the next function.
+     * This is useful for building complex transformations from simpler ones.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * LongNFunction<Long> sum = args -> {
+     *     long total = 0;
+     *     for (long value : args) {
+     *         total += value;
+     *     }
+     *     return total;
+     * };
+     * LongNFunction<String> sumAsString = sum.andThen(String::valueOf);
+     * String result = sumAsString.apply(1L, 2L, 3L, 4L); // "10"
+     * }</pre>
+     *
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied.
+     *              Must not be null
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     @Override
     default <V> LongNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

@@ -32,6 +32,43 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 
+/**
+ * Simple Entity ID (Seid) - A flexible entity identifier implementation.
+ * This class represents an entity identifier that can hold multiple property-value pairs
+ * that uniquely identify an entity.
+ * 
+ * <p>Seid is designed to work with entity objects and their ID properties, providing
+ * a convenient way to create, manipulate, and compare entity identifiers. It maintains
+ * properties in a sorted order for consistent string representation and comparison.
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Supports single or multiple ID properties</li>
+ *   <li>Automatic property name extraction from canonical names</li>
+ *   <li>Type-safe property value retrieval with conversion support</li>
+ *   <li>Immutable-style API (though internally mutable for performance)</li>
+ *   <li>Consistent string representation for debugging and logging</li>
+ * </ul>
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * // Single property ID
+ * Seid userId = Seid.of("User.id", 123);
+ * 
+ * // Multiple property ID
+ * Seid compositeId = Seid.of("Order.customerId", 456, "Order.orderId", 789);
+ * 
+ * // Create from entity object
+ * User user = new User(123, "John");
+ * Seid entityId = Seid.create(user);
+ * 
+ * // Retrieve values
+ * int id = userId.getInt("id");
+ * Long customerId = compositeId.get("customerId");
+ * }</pre>
+ * 
+ * @see EntityId
+ */
 public class Seid implements EntityId {
 
     private static final Comparator<String> keyComparator = Comparators.NATURAL_ORDER;
@@ -48,9 +85,11 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid with the specified entity name.
+     * This constructor is deprecated and for internal use only.
      *
-     * @param entityName
-     * @deprecated
+     * @param entityName the name of the entity
+     * @deprecated for internal use only
      */
     @Deprecated
     @Internal
@@ -63,9 +102,17 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid with a single property-value pair.
+     * The entity name is automatically extracted from the property name.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid userId = new Seid("User.id", 123);
+     * // Entity name will be "User", property name will be "id"
+     * }</pre>
      *
-     * @param propName
-     * @param propValue
+     * @param propName the property name (can be canonical like "Entity.property" or simple like "property")
+     * @param propValue the property value
      */
     public Seid(final String propName, final Object propValue) {
         this(NameUtil.getParentName(propName));
@@ -74,8 +121,18 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid from a map of property names to values.
+     * The entity name is extracted from the first property name in the map.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Object> props = new HashMap<>();
+     * props.put("User.id", 123);
+     * props.put("User.version", 1);
+     * Seid seid = new Seid(props);
+     * }</pre>
      *
-     * @param nameValues
+     * @param nameValues a map of property names to their values
      */
     public Seid(final Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
@@ -84,9 +141,11 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid with the specified entity name.
+     * This factory method is deprecated and for internal use only.
      *
-     * @param entityName
-     * @return
+     * @param entityName the name of the entity
+     * @return a new Seid instance
      * @deprecated for internal use only
      */
     @Deprecated
@@ -96,22 +155,36 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid with a single property-value pair.
+     * This is a convenient factory method alternative to the constructor.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid userId = Seid.of("User.id", 123);
+     * }</pre>
      *
-     * @param propName
-     * @param propValue
-     * @return
+     * @param propName the property name
+     * @param propValue the property value
+     * @return a new Seid instance
      */
     public static Seid of(final String propName, final Object propValue) {
         return new Seid(propName, propValue);
     }
 
     /**
+     * Creates a new Seid with two property-value pairs.
+     * This is useful for composite keys with exactly two components.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid compositeId = Seid.of("Order.customerId", 123, "Order.orderId", 456);
+     * }</pre>
      *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @return
+     * @param propName1 the first property name
+     * @param propValue1 the first property value
+     * @param propName2 the second property name
+     * @param propValue2 the second property value
+     * @return a new Seid instance
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Seid result = new Seid(propName1, propValue1);
@@ -120,14 +193,21 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid with three property-value pairs.
+     * This is useful for composite keys with exactly three components.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid compositeId = Seid.of("Entity.prop1", val1, "Entity.prop2", val2, "Entity.prop3", val3);
+     * }</pre>
      *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @param propName3
-     * @param propValue3
-     * @return
+     * @param propName1 the first property name
+     * @param propValue1 the first property value
+     * @param propName2 the second property name
+     * @param propValue2 the second property value
+     * @param propName3 the third property name
+     * @param propValue3 the third property value
+     * @return a new Seid instance
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
             final Object propValue3) {
@@ -138,18 +218,43 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid from a map of property names to values.
+     * This is an alternative factory method to the constructor.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Object> props = Map.of("User.id", 123, "User.version", 1);
+     * Seid seid = Seid.create(props);
+     * }</pre>
      *
-     * @param nameValues
-     * @return
+     * @param nameValues a map of property names to their values
+     * @return a new Seid instance
      */
     public static Seid create(final Map<String, Object> nameValues) {
         return new Seid(nameValues);
     }
 
     /**
+     * Creates a new Seid from an entity object by extracting its ID properties.
+     * The entity class must have properties annotated as ID fields.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * @Entity
+     * public class User {
+     *     @Id
+     *     private Long id;
+     *     private String name;
+     *     // getters/setters...
+     * }
+     * 
+     * User user = new User(123L, "John");
+     * Seid userId = Seid.create(user); // Will contain id=123
+     * }</pre>
      *
-     * @param entity
-     * @return
+     * @param entity the entity object to extract ID from
+     * @return a new Seid containing the entity's ID properties
+     * @throws IllegalArgumentException if no ID properties are defined in the entity class
      */
     public static Seid create(final Object entity) {
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
@@ -162,10 +267,19 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a new Seid from an entity object using specified property names as IDs.
+     * This allows custom selection of which properties to use as identifiers.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * User user = new User(123L, "john@example.com", "John");
+     * Seid emailId = Seid.create(user, Arrays.asList("email"));
+     * }</pre>
      *
-     * @param entity
-     * @param idPropNames
-     * @return
+     * @param entity the entity object to extract values from
+     * @param idPropNames the names of properties to use as ID
+     * @return a new Seid containing the specified properties
+     * @throws IllegalArgumentException if idPropNames is null or empty
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
         if (N.isEmpty(idPropNames)) {
@@ -183,19 +297,39 @@ public class Seid implements EntityId {
         return seid;
     }
 
+    /**
+     * Returns the entity name associated with this Seid.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid userId = Seid.of("User.id", 123);
+     * String entityName = userId.entityName(); // Returns "User"
+     * }</pre>
+     *
+     * @return the entity name
+     */
     @Override
     public String entityName() {
         return entityName;
     }
 
     /**
+     * Gets the value of the specified property.
+     * Supports both simple property names and canonical names.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123);
+     * Integer id = seid.get("id"); // Returns 123
+     * Integer id2 = seid.get("User.id"); // Also returns 123
+     * }</pre>
      *
-     * @param <T>
-     * @param propName
-     * @return
+     * @param <T> the expected type of the property value
+     * @param propName the property name
+     * @return the property value, or null if not found
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T get(final String propName) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return (T) values.get(NameUtil.getSimpleName(propName));
@@ -204,9 +338,17 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Gets the value of the specified property as an int.
+     * Performs automatic conversion if the stored value is not an int.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.age", "25");
+     * int age = seid.getInt("age"); // Returns 25 (converted from String)
+     * }</pre>
      *
-     * @param propName
-     * @return
+     * @param propName the property name
+     * @return the property value as an int
      */
     @Override
     public int getInt(final String propName) {
@@ -215,9 +357,17 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Gets the value of the specified property as a long.
+     * Performs automatic conversion if the stored value is not a long.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123);
+     * long id = seid.getLong("id"); // Returns 123L
+     * }</pre>
      *
-     * @param propName
-     * @return
+     * @param propName the property name
+     * @return the property value as a long
      */
     @Override
     public long getLong(final String propName) {
@@ -226,11 +376,19 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Gets the value of the specified property, converting it to the target type if necessary.
+     * Returns the default value for the target type if the property value is null.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.active", "true");
+     * Boolean active = seid.get("active", Boolean.class); // Returns Boolean.TRUE
+     * }</pre>
      *
-     * @param <T>
-     * @param propName
-     * @param targetType
-     * @return
+     * @param <T> the target type
+     * @param propName the property name
+     * @param targetType the class of the target type
+     * @return the property value converted to the target type
      */
     @Override
     public <T> T get(final String propName, final Class<? extends T> targetType) {
@@ -244,10 +402,13 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Sets a property value in this Seid.
+     * This method is deprecated and for internal use only.
+     * Supports both simple and canonical property names.
      *
-     * @param propName
-     * @param propValue
-     * @return
+     * @param propName the property name
+     * @param propValue the property value
+     * @return this Seid instance for method chaining
      * @deprecated for internal use only
      */
     @Deprecated
@@ -271,8 +432,10 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Sets multiple property values in this Seid.
+     * This method is deprecated and for internal use only.
      *
-     * @param nameValues
+     * @param nameValues a map of property names to their values
      * @deprecated for internal use only
      */
     @Deprecated
@@ -303,56 +466,19 @@ public class Seid implements EntityId {
         strValue = null;
     }
 
-    //    /**
-    //     *
-    //     * @param propName
-    //     * @return
-    //     * @deprecated for internal use only
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    public Object remove(String propName) {
-    //        if (values.size() == 0) {
-    //            return null;
-    //        }
-    //
-    //        final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
-    //        Object result = null;
-    //
-    //        if (values.size() == 1) {
-    //            if (values.containsKey(simplePropName)) {
-    //                result = values.values().iterator().next();
-    //                values = Collections.emptyMap();
-    //            }
-    //        } else {
-    //            result = values.remove(simplePropName);
-    //        }
-    //
-    //        strValue = null;
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * Removes all.
-    //     *
-    //     * @param propNames
-    //     * @deprecated for internal use only
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    public void removeAll(Collection<String> propNames) {
-    //        for (String propName : propNames) {
-    //            remove(propName);
-    //        }
-    //
-    //        strValue = null;
-    //    }
-
     /**
+     * Checks if this Seid contains the specified property.
+     * Supports both simple and canonical property names.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123);
+     * boolean hasId = seid.containsKey("id"); // Returns true
+     * boolean hasIdCanonical = seid.containsKey("User.id"); // Also returns true
+     * }</pre>
      *
-     * @param propName
-     * @return {@code true}, if successful
+     * @param propName the property name to check
+     * @return true if the property exists, false otherwise
      */
     @Override
     public boolean containsKey(final String propName) {
@@ -367,25 +493,69 @@ public class Seid implements EntityId {
         return values.containsKey(propName);
     }
 
+    /**
+     * Returns a set view of the property names in this Seid.
+     * The returned set is backed by the Seid, so changes to the Seid
+     * are reflected in the set.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123, "User.name", "John");
+     * Set<String> keys = seid.keySet(); // Contains ["id", "name"]
+     * }</pre>
+     *
+     * @return a set view of the property names
+     */
     @Override
     public Set<String> keySet() {
         return values.keySet();
     }
 
+    /**
+     * Returns a set view of the property entries in this Seid.
+     * Each entry contains a property name and its corresponding value.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123);
+     * for (Map.Entry<String, Object> entry : seid.entrySet()) {
+     *     System.out.println(entry.getKey() + " = " + entry.getValue());
+     * }
+     * }</pre>
+     *
+     * @return a set view of the property entries
+     */
     @Override
     public Set<Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
+    /**
+     * Returns the number of properties in this Seid.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123, "User.version", 1);
+     * int count = seid.size(); // Returns 2
+     * }</pre>
+     *
+     * @return the number of properties
+     */
     @Override
     public int size() {
         return values.size();
     }
 
     /**
-     * Checks if is empty.
+     * Checks if this Seid contains no properties.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User");
+     * boolean empty = seid.isEmpty(); // Returns true
+     * }</pre>
      *
-     * @return {@code true}, if is empty
+     * @return true if this Seid contains no properties, false otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -393,7 +563,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * Clear.
+     * Removes all properties from this Seid.
+     * This method is deprecated and for internal use only.
+     * 
      * @deprecated for internal use only
      */
     @Deprecated
@@ -405,8 +577,11 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Creates a copy of this Seid.
+     * The copy contains the same entity name and all property-value pairs.
+     * This method is deprecated and for internal use only.
      *
-     * @return
+     * @return a copy of this Seid
      * @deprecated for internal use only
      */
     @Deprecated
@@ -421,9 +596,18 @@ public class Seid implements EntityId {
     }
 
     /**
+     * Checks if this Seid is equal to another object.
+     * Two Seids are equal if they have the same string representation.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid1 = Seid.of("User.id", 123);
+     * Seid seid2 = Seid.of("User.id", 123);
+     * boolean equal = seid1.equals(seid2); // Returns true
+     * }</pre>
      *
-     * @param obj
-     * @return {@code true}, if successful
+     * @param obj the object to compare with
+     * @return true if the objects are equal, false otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -434,11 +618,30 @@ public class Seid implements EntityId {
         return obj instanceof EntityId && toString().equals(obj.toString());
     }
 
+    /**
+     * Returns a hash code value for this Seid.
+     * The hash code is based on the string representation.
+     *
+     * @return a hash code value
+     */
     @Override
     public int hashCode() {
         return toString().hashCode();
     }
 
+    /**
+     * Returns a string representation of this Seid.
+     * The format is: "EntityName: {prop1=value1, prop2=value2, ...}"
+     * Properties are sorted by name for consistent representation.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123, "User.name", "John");
+     * String str = seid.toString(); // Returns "User: {id=123, name=John}"
+     * }</pre>
+     *
+     * @return a string representation of this Seid
+     */
     @Override
     public String toString() {
         return stringValue();
@@ -515,11 +718,13 @@ public class Seid implements EntityId {
     }
 
     /**
-     * Gets the id field names.
+     * Gets the ID field names for the specified class.
+     * Returns field names that are annotated as ID fields in the class.
+     * This method is for internal use only.
      *
-     * @param targetClass
-     * @return an immutable List.
-     * @deprecated for internal only.
+     * @param targetClass the class to inspect
+     * @return an immutable list of ID field names
+     * @deprecated for internal only
      */
     @Deprecated
     @Internal

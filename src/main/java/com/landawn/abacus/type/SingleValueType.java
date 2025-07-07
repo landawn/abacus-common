@@ -38,11 +38,13 @@ import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
-import com.landawn.abacus.util.TypeAttrParser;
 
 /**
+ * Abstract base class for type handlers that wrap a single value. This class provides
+ * serialization and deserialization support for types that contain a single wrapped value,
+ * with support for JSON/XML annotations and automatic value extraction/creation.
  *
- * @param <T>
+ * @param <T> the type being handled
  */
 abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
@@ -191,35 +193,63 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         isObjectType = jsonValueType == null && valueType == null && valueExtractor == null && !typeClass.isEnum();
     }
 
+    /**
+     * Returns the Class object representing the type handled by this type handler.
+     *
+     * @return the Class object for type T
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     *
+     * @return true if this is a generic type, false otherwise
+     */
     @Override
     public boolean isGenericType() {
         return isGenericType;
     }
 
+    /**
+     * Returns the array of parameter types for generic types.
+     *
+     * @return an array of Type objects representing the type parameters, or an empty array if not generic
+     */
     @Override
     public Type<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is treated as a general object type without specific value extraction.
+     *
+     * @return true if this is an object type, false otherwise
+     */
     @Override
     public boolean isObjectType() {
         return isObjectType;
     }
 
+    /**
+     * Indicates whether instances of this type can be serialized.
+     *
+     * @return true if the type is serializable, false otherwise
+     */
     @Override
     public boolean isSerializable() {
         return isSerializable;
     }
 
     /**
+     * Converts an instance of type T to its string representation.
+     * Uses JSON value annotations or value extractors if available,
+     * otherwise falls back to toString().
      *
-     * @param x
-     * @return
+     * @param x the object to convert
+     * @return the string representation, or null if x is null
      */
     @MayReturnNull
     @Override
@@ -248,9 +278,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Creates an instance of type T from its string representation.
+     * Uses JSON creator annotations or factory methods if available.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return an instance of type T, or the string itself if no converter is available
      */
     @Override
     public T valueOf(final String str) {
@@ -270,11 +302,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Retrieves a value of type T from the specified column in the ResultSet.
+     * Uses JSON creator if available, otherwise attempts string conversion or direct cast.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException
+     * @param rs the ResultSet containing the query results
+     * @param columnIndex the index of the column to retrieve (1-based)
+     * @return an instance of type T, or null if the database value is null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -294,11 +328,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Retrieves a value of type T from the specified column in the ResultSet.
+     * Uses JSON creator if available, otherwise attempts string conversion or direct cast.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException
+     * @param rs the ResultSet containing the query results
+     * @param columnLabel the label of the column to retrieve
+     * @return an instance of type T, or null if the database value is null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -318,11 +354,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Sets a value of type T at the specified parameter index in the PreparedStatement.
+     * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the value to set, may be null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
@@ -344,11 +382,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Sets a value of type T for the specified parameter name in the CallableStatement.
+     * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the value to set, may be null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
@@ -370,12 +410,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Sets a value of type T at the specified parameter index in the PreparedStatement with SQL type information.
+     * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the value to set, may be null
+     * @param sqlTypeOrLength the SQL type code or length information
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws SQLException {
@@ -397,12 +439,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Sets a value of type T for the specified parameter name in the CallableStatement with SQL type information.
+     * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the value to set, may be null
+     * @param sqlTypeOrLength the SQL type code or length information
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws SQLException {
@@ -424,11 +468,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
+     * Writes the character representation of a value to the given CharacterWriter for JSON/XML serialization.
+     * Extracts and writes the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException
+     * @param writer the CharacterWriter to write to
+     * @param x the value to write, may be null
+     * @param config the serialization configuration for formatting options
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -461,6 +507,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * Analyzes a class to extract creator and value extractor functions for single-value types.
+     * Searches for factory methods, constructors, and getter methods following common naming patterns.
+     *
+     * @param <T> the type to analyze
+     * @param typeClass the class to analyze for value extraction patterns
+     * @return a tuple containing the value type, creator function, and value extractor function,
+     *         or null if no suitable pattern is found
+     */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass) {
         final Field[] fields = typeClass.getDeclaredFields();
@@ -470,23 +525,30 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         List<Field> matchedFields = null;
 
         try {
-            matchedFields = N.filter(fields, f -> !Modifier.isStatic(f.getModifiers())//
-                    && N.anyMatch(constructors, c -> Modifier.isPublic(c.getModifiers()) //
+            matchedFields = N.filter(fields, f -> !Modifier.isStatic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers())//
+                    && (N.anyMatch(constructors, c -> Modifier.isPublic(c.getModifiers()) //
                             && c.getParameterCount() == 1 //
-                            && f.getType().isAssignableFrom(c.getParameterTypes()[0])));
+                            && f.getType().isAssignableFrom(c.getParameterTypes()[0]))
+                            || N.anyMatch(methods, m -> Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())//
+                                    && m.getParameterCount() == 1 //
+                                    && f.getType().isAssignableFrom(m.getParameterTypes()[0]))));
         } catch (final Exception e) {
             // ignore
         }
 
-        final Field valueField = N.findFirst(matchedFields, f -> valueFieldNames.contains(f.getName())).orElse(N.firstElement(matchedFields).orElseNull());
+        // if no fields matched or more than one matched, return null.
+        if (N.size(matchedFields) != 1) {
+            return Tuple.of(null, null, null);
+        }
 
-        final Class<?> valueType = valueField == null ? null : valueField.getType();
+        final Field valueField = matchedFields.get(0);
+        final Class<?> valueType = valueField.getType();
 
         Method factoryMethod = null;
 
         for (final String methodName : factoryMethodNames) {
             try {
-                factoryMethod = typeClass.getMethod(methodName, String.class);
+                factoryMethod = typeClass.getMethod(methodName, valueType);
 
                 if (Modifier.isPublic(factoryMethod.getModifiers()) && Modifier.isStatic(factoryMethod.getModifiers())
                         && typeClass.isAssignableFrom(factoryMethod.getReturnType())) {
@@ -499,7 +561,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
-        if (factoryMethod == null && valueType != null) {
+        if (factoryMethod == null) {
             try {
                 factoryMethod = N.findFirst(methods, it -> Modifier.isPublic(it.getModifiers()) //
                         && Modifier.isStatic(it.getModifiers()) //
@@ -515,7 +577,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         if (factoryMethod == null) {
             try {
-                constructor = typeClass.getConstructor(String.class);
+                constructor = typeClass.getConstructor(valueType);
                 if (!Modifier.isPublic(constructor.getModifiers())) {
                     constructor = null;
                 }
@@ -523,7 +585,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 // ignore
             }
 
-            if (constructor == null && valueType != null) {
+            if (constructor == null) {
                 try {
                     constructor = N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                             && it.getParameterCount() == 1 //
@@ -545,7 +607,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 getMethod = typeClass.getMethod(methodName);
 
                 if (Modifier.isPublic(getMethod.getModifiers()) && !Modifier.isStatic(getMethod.getModifiers())
-                        && (valueType == null || valueType.isAssignableFrom(getMethod.getReturnType()))) {
+                        && valueType.isAssignableFrom(getMethod.getReturnType())) {
                     break;
                 } else {
                     getMethod = null;
@@ -555,7 +617,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
-        if (getMethod == null && valueType != null) {
+        if (getMethod == null) {
             try {
                 getMethod = N.findFirst(methods, it -> Modifier.isPublic(it.getModifiers()) //
                         && !Modifier.isStatic(it.getModifiers()) //
@@ -566,8 +628,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
-        if (getMethod == null && valueField != null && !Modifier.isPublic(valueField.getModifiers())) {
-            ClassUtil.setAccessibleQuietly(valueField, true);
+        if (getMethod == null && !Modifier.isPublic(valueField.getModifiers())) {
+            return Tuple.of(null, null, null);
         }
 
         final Method fm = factoryMethod;
@@ -581,14 +643,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         final Method getter = getMethod;
 
-        final Function<T, Object> valueExtractor = getter != null ? x -> ClassUtil.invokeMethod(x, getter) : (valueField != null ? x -> {
+        final Function<T, Object> valueExtractor = getter != null ? x -> ClassUtil.invokeMethod(x, getter) : x -> {
             try {
                 return valueField.get(x);
             } catch (final IllegalAccessException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
-        } : null);
+        };
 
-        return Tuple.of(valueType == null ? null : Type.of(valueType), creator, valueExtractor);
+        return Tuple.of(Type.of(valueType), creator, valueExtractor);
     }
 }

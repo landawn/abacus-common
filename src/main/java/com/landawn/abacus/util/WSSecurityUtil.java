@@ -23,15 +23,39 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
- * <p>
- * Note: it's copied from Apache WSS4J developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
- * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
- * </p>
+ * WS-Security utility methods for cryptographic operations commonly used in web service security.
+ * This class provides thread-safe implementations for generating cryptographically secure nonces,
+ * computing SHA-1 digests, and creating password digests according to WS-Security standards.
+ * 
+ * <p>The class uses cached instances of SecureRandom and MessageDigest for improved performance
+ * while maintaining thread safety through synchronization. All methods are synchronized on the
+ * class level to ensure safe concurrent access.</p>
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Cryptographically secure nonce generation using SHA1PRNG</li>
+ *   <li>SHA-1 digest computation with cached MessageDigest instance</li>
+ *   <li>WS-Security compliant password digest creation</li>
+ *   <li>Thread-safe implementation for concurrent environments</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Generate a nonce
+ * byte[] nonce = WSSecurityUtil.generateNonce(16);
+ * 
+ * // Create WS-Security password digest
+ * String timestamp = getCurrentTimestamp();
+ * String passwordDigest = WSSecurityUtil.doPasswordDigest(
+ *     nonce, timestamp.getBytes(), password.getBytes()
+ * );
+ * }</pre>
+ * 
+ * <p>Note: This class is adapted from Apache WSS4J developed at The Apache Software Foundation
+ * under the Apache License 2.0. The methods may have been modified from their original implementation.</p>
  *
- * WS-Security Utility methods.
- * <p/>
- *
- * @author Davanum Srinivas (dims@yahoo.com).
+ * @author Davanum Srinivas (dims@yahoo.com)
+ * @since 0.8
  */
 public final class WSSecurityUtil {
 
@@ -69,11 +93,24 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Generate a nonce of the given length using the SHA1PRNG algorithm. The SecureRandom instance that backs this method is cached for efficiency.
+     * Generate a cryptographically secure nonce of the given length using the SHA1PRNG algorithm.
+     * The nonce is suitable for use in security protocols where unpredictable random values are required.
+     * 
+     * <p>This method is thread-safe through synchronization. The SecureRandom instance is cached
+     * for efficiency across multiple calls.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Generate a 16-byte nonce for WS-Security
+     * byte[] nonce = WSSecurityUtil.generateNonce(16);
+     * 
+     * // Generate a 32-byte nonce for custom protocol
+     * byte[] longNonce = WSSecurityUtil.generateNonce(32);
+     * }</pre>
      *
-     * @param length The length of the nonce to be generated.
-     * @return A byte array representing the nonce.
-     * @throws RuntimeException If an error occurs during the nonce generation.
+     * @param length The length of the nonce to be generated in bytes
+     * @return A byte array containing cryptographically secure random bytes
+     * @throws RuntimeException If an error occurs during the nonce generation
      */
     public static byte[] generateNonce(final int length) {
         synchronized (WSSecurityUtil.class) {
@@ -89,11 +126,22 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Generate a (SHA1) digest of the input bytes. The MessageDigest instance that backs this method is cached for efficiency.
+     * Generate a SHA-1 digest of the input bytes.
+     * This method provides a thread-safe way to compute SHA-1 hashes using a cached MessageDigest instance.
+     * 
+     * <p>Note: While SHA-1 is considered cryptographically broken for some use cases,
+     * it remains in use for backward compatibility in many protocols including WS-Security.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String data = "Hello World";
+     * byte[] hash = WSSecurityUtil.generateDigest(data.getBytes(StandardCharsets.UTF_8));
+     * String base64Hash = Base64.getEncoder().encodeToString(hash);
+     * }</pre>
      *
-     * @param inputBytes The bytes to be digested.
-     * @return A byte array representing the SHA-1 hash of the input bytes.
-     * @throws RuntimeException If an error occurs during the digest operation.
+     * @param inputBytes The bytes to be digested
+     * @return A byte array containing the SHA-1 hash of the input bytes (20 bytes)
+     * @throws RuntimeException If an error occurs during the digest operation
      */
     public static byte[] generateDigest(final byte[] inputBytes) {
         synchronized (WSSecurityUtil.class) {
@@ -106,12 +154,29 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Returns a base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
+     * Creates a WS-Security compliant password digest by computing the SHA-1 hash of
+     * the concatenated nonce, created timestamp, and password, then encoding the result in Base64.
+     * 
+     * <p>This method implements the WS-Security UsernameToken password digest algorithm:</p>
+     * <pre>
+     * PasswordDigest = Base64(SHA-1(nonce + created + password))
+     * </pre>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Generate components
+     * byte[] nonce = WSSecurityUtil.generateNonce(16);
+     * byte[] created = Instant.now().toString().getBytes(StandardCharsets.UTF_8);
+     * byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
+     * 
+     * // Create digest
+     * String passwordDigest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+     * }</pre>
      *
-     * @param nonce The nonce byte array, which is a random value that should only be used once.
-     * @param created The created time byte array, which is typically the current time.
-     * @param password The password byte array to be digested.
-     * @return A base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
+     * @param nonce The nonce byte array, which is a random value that should only be used once
+     * @param created The created time byte array, typically the current timestamp
+     * @param password The password byte array to be digested
+     * @return A base64 encoded string of the SHA-1 hash of the concatenated inputs
      */
     public static String doPasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
         final byte[] b4 = new byte[nonce.length + created.length + password.length];
@@ -129,12 +194,27 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Returns a base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
+     * Creates a WS-Security compliant password digest using string inputs.
+     * This is a convenience method that converts the string parameters to bytes
+     * using the default charset before processing.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Using string inputs
+     * String nonce = generateNonceString();
+     * String created = Instant.now().toString();
+     * String password = "secretPassword";
+     * 
+     * String passwordDigest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+     * 
+     * // Use in WS-Security header
+     * wsSecurityHeader.setPasswordDigest(passwordDigest);
+     * }</pre>
      *
-     * @param nonce The nonce string, which is a random value that should only be used once.
-     * @param created The created time string, which is typically the current time.
-     * @param password The password string to be digested.
-     * @return A base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
+     * @param nonce The nonce string, which is a random value that should only be used once
+     * @param created The created time string, typically the current timestamp in ISO format
+     * @param password The password string to be digested
+     * @return A base64 encoded string of the SHA-1 hash of the concatenated inputs
      */
     public static String doPasswordDigest(final String nonce, final String created, final String password) {
         return doPasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));

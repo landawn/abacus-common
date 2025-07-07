@@ -20,8 +20,32 @@ import java.util.function.Supplier;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * This class is mainly designed for functional programming.
- * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
+ * A functional programming utility class for creating fluent conditional execution chains.
+ * 
+ * <p>This class provides a fluent API for conditional logic, offering an alternative to traditional
+ * if-else statements and ternary operators. It's particularly useful in functional programming contexts
+ * where method chaining is preferred.</p>
+ * 
+ * <p><strong>Note:</strong> While this class provides a functional approach, traditional if-else statements
+ * or ternary operators are generally preferred for better readability and performance.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Basic condition checking
+ * If.is(x > 0)
+ *   .then(() -> System.out.println("Positive"))
+ *   .orElse(() -> System.out.println("Non-positive"));
+ * 
+ * // Null checking with action
+ * If.notNull(user)
+ *   .then(u -> processUser(u))
+ *   .orElse(() -> handleNullUser());
+ * 
+ * // Collection checking
+ * If.notEmpty(list)
+ *   .then(() -> processList(list))
+ *   .orElseThrow(() -> new IllegalStateException("List is empty"));
+ * }</pre>
  *
  * @see N#ifOrEmpty(boolean, Throwables.Supplier)
  * @see N#ifOrElse(boolean, Throwables.Runnable, Throwables.Runnable)
@@ -29,7 +53,6 @@ import com.landawn.abacus.annotation.Beta;
  * @see N#ifNotEmpty(CharSequence, Throwables.Consumer)
  * @see N#ifNotEmpty(Collection, Throwables.Consumer)
  * @see N#ifNotEmpty(Map, Throwables.Consumer)
- *
  */
 @Beta
 public final class If {
@@ -45,170 +68,228 @@ public final class If {
     }
 
     /**
-     * Returns an instance of If based on the provided boolean value.
+     * Creates an If instance based on the given boolean condition.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.is(temperature > 30)
+     *   .then(() -> System.out.println("It's hot!"));
+     * }</pre>
      *
-     * @param b
-     * @return
+     * @param b the boolean condition to evaluate
+     * @return an If instance representing the condition
      */
     public static If is(final boolean b) {
         return b ? TRUE : FALSE;
     }
 
     /**
-     * Returns an instance of If based on the provided boolean value.
+     * Creates an If instance with the negation of the given boolean condition.
+     * 
+     * <p>This is equivalent to {@code is(!b)} but can be more readable in certain contexts.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.not(list.isEmpty())
+     *   .then(() -> processList(list));
+     * }</pre>
      *
-     * @param b
-     * @return
+     * @param b the boolean condition to negate
+     * @return an If instance representing the negated condition
      */
     public static If not(final boolean b) {
         return b ? FALSE : TRUE;
     }
 
     /**
-     * {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
+     * Creates an If instance that checks if an index is valid (non-negative).
+     * 
+     * <p>Returns {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
+     * This is commonly used for checking the result of indexOf operations.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.exists(list.indexOf(element))
+     *   .then(() -> System.out.println("Element found"))
+     *   .orElse(() -> System.out.println("Element not found"));
+     * }</pre>
      *
-     * @param index
-     * @return
+     * @param index the index value to check
+     * @return an If instance that is true if the index is non-negative
      */
     public static If exists(final int index) {
         return index >= 0 ? TRUE : FALSE;
     }
 
     /**
-     * Checks if the provided object is {@code null}.
+     * Creates an If instance that checks if the given object is null.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isNull(result)
+     *   .then(() -> handleNullResult())
+     *   .orElse(() -> processResult(result));
+     * }</pre>
      *
-     * @param obj the object to check
-     * @return an instance of If indicating whether the object is null
+     * @param obj the object to check for null
+     * @return an If instance that is true if the object is null
      */
     public static If isNull(final Object obj) {
         return is(obj == null);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given CharSequence is null or empty.
+     * 
+     * <p>A CharSequence is considered empty if it is null or has zero length.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isEmpty(username)
+     *   .then(() -> System.out.println("Username is required"));
+     * }</pre>
      *
-     * @param s
-     * @return
+     * @param s the CharSequence to check
+     * @return an If instance that is true if the CharSequence is null or empty
      */
     public static If isEmpty(final CharSequence s) {
         return is(Strings.isEmpty(s));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given boolean array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final boolean[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given char array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the char array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final char[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given byte array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the byte array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final byte[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given short array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the short array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final short[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given int array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the int array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final int[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given long array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the long array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final long[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given float array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the float array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final float[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given double array is null or empty.
      *
-     * @param a
-     * @return
+     * @param a the double array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final double[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given object array is null or empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isEmpty(args)
+     *   .then(() -> System.out.println("No arguments provided"));
+     * }</pre>
      *
-     * @param a
-     * @return
+     * @param a the object array to check
+     * @return an If instance that is true if the array is null or has zero length
      */
     public static If isEmpty(final Object[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given Collection is null or empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isEmpty(resultList)
+     *   .then(() -> System.out.println("No results found"))
+     *   .orElse(() -> displayResults(resultList));
+     * }</pre>
      *
-     * @param c
-     * @return
+     * @param c the Collection to check
+     * @return an If instance that is true if the Collection is null or empty
      */
     public static If isEmpty(final Collection<?> c) {
         return is(N.isEmpty(c));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given Map is null or empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isEmpty(configMap)
+     *   .then(() -> loadDefaultConfig());
+     * }</pre>
      *
-     * @param m
-     * @return
+     * @param m the Map to check
+     * @return an If instance that is true if the Map is null or empty
      */
     public static If isEmpty(final Map<?, ?> m) {
         return is(N.isEmpty(m));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given PrimitiveList is null or empty.
      *
-     * @param list
-     * @return
+     * @param list the PrimitiveList to check
+     * @return an If instance that is true if the PrimitiveList is null or empty
      */
     @SuppressWarnings("rawtypes")
     public static If isEmpty(final PrimitiveList list) {
@@ -216,30 +297,39 @@ public final class If {
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given Multiset is null or empty.
      *
-     * @param s
-     * @return
+     * @param s the Multiset to check
+     * @return an If instance that is true if the Multiset is null or empty
      */
     public static If isEmpty(final Multiset<?> s) {
         return is(N.isEmpty(s));
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Creates an If instance that checks if the given Multimap is null or empty.
      *
-     * @param m
-     * @return
+     * @param m the Multimap to check
+     * @return an If instance that is true if the Multimap is null or empty
      */
     public static If isEmpty(final Multimap<?, ?, ?> m) {
         return is(N.isEmpty(m));
     }
 
     /**
-     * Checks if is {@code null} or empty or blank.
+     * Creates an If instance that checks if the given CharSequence is null, empty, or contains only whitespace.
+     * 
+     * <p>A CharSequence is considered blank if it is null, has zero length, or contains only
+     * whitespace characters as defined by {@link Character#isWhitespace(char)}.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isBlank(userInput)
+     *   .then(() -> System.out.println("Please enter valid input"));
+     * }</pre>
      *
-     * @param s
-     * @return
+     * @param s the CharSequence to check
+     * @return an If instance that is true if the CharSequence is null, empty, or blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isBlank(final CharSequence s) {
@@ -247,140 +337,172 @@ public final class If {
     }
 
     /**
-     * Checks if the provided object is not {@code null}.
+     * Creates an If instance that checks if the given object is not null.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notNull(user)
+     *   .then(u -> System.out.println("User: " + u.getName()))
+     *   .orElse(() -> System.out.println("User not found"));
+     * }</pre>
      *
      * @param obj the object to check
-     * @return an instance of If indicating whether the object is not null
+     * @return an If instance that is true if the object is not null
      */
     public static If notNull(final Object obj) {
         return is(obj != null);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given CharSequence is not null and not empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notEmpty(searchQuery)
+     *   .then(() -> performSearch(searchQuery));
+     * }</pre>
      *
-     * @param s
-     * @return
+     * @param s the CharSequence to check
+     * @return an If instance that is true if the CharSequence is not null and has length > 0
      */
     public static If notEmpty(final CharSequence s) {
         return is(Strings.isNotEmpty(s));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given boolean array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final boolean[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given char array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the char array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final char[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given byte array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the byte array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final byte[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given short array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the short array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final short[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given int array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the int array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final int[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given long array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the long array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final long[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given float array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the float array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final float[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given double array is not null and not empty.
      *
-     * @param a
-     * @return
+     * @param a the double array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final double[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given object array is not null and not empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notEmpty(files)
+     *   .then(() -> processFiles(files));
+     * }</pre>
      *
-     * @param a
-     * @return
+     * @param a the object array to check
+     * @return an If instance that is true if the array is not null and has length > 0
      */
     public static If notEmpty(final Object[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given Collection is not null and not empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notEmpty(selectedItems)
+     *   .then(() -> processSelection(selectedItems))
+     *   .orElse(() -> showNoSelectionMessage());
+     * }</pre>
      *
-     * @param c
-     * @return
+     * @param c the Collection to check
+     * @return an If instance that is true if the Collection is not null and not empty
      */
     public static If notEmpty(final Collection<?> c) {
         return is(N.notEmpty(c));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given Map is not null and not empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notEmpty(properties)
+     *   .then(() -> applyProperties(properties));
+     * }</pre>
      *
-     * @param m
-     * @return
+     * @param m the Map to check
+     * @return an If instance that is true if the Map is not null and not empty
      */
     public static If notEmpty(final Map<?, ?> m) {
         return is(N.notEmpty(m));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given PrimitiveList is not null and not empty.
      *
-     * @param list
-     * @return
+     * @param list the PrimitiveList to check
+     * @return an If instance that is true if the PrimitiveList is not null and not empty
      */
     @SuppressWarnings("rawtypes")
     public static If notEmpty(final PrimitiveList list) {
@@ -388,72 +510,78 @@ public final class If {
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given Multiset is not null and not empty.
      *
-     * @param s
-     * @return
+     * @param s the Multiset to check
+     * @return an If instance that is true if the Multiset is not null and not empty
      */
     public static If notEmpty(final Multiset<?> s) {
         return is(N.notEmpty(s));
     }
 
     /**
-     * Not {@code null} or empty.
+     * Creates an If instance that checks if the given Multimap is not null and not empty.
      *
-     * @param m
-     * @return
+     * @param m the Multimap to check
+     * @return an If instance that is true if the Multimap is not null and not empty
      */
     public static If notEmpty(final Multimap<?, ?, ?> m) {
         return is(N.notEmpty(m));
     }
 
     /**
-     * Not {@code null} or empty or blank.
+     * Creates an If instance that checks if the given CharSequence is not null, not empty, and not blank.
+     * 
+     * <p>A CharSequence is considered not blank if it is not null, has length > 0, and contains
+     * at least one non-whitespace character.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notBlank(username)
+     *   .then(() -> loginUser(username))
+     *   .orElse(() -> showError("Username cannot be blank"));
+     * }</pre>
      *
-     * @param s
-     * @return
+     * @param s the CharSequence to check
+     * @return an If instance that is true if the CharSequence is not null, not empty, and not blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If notBlank(final CharSequence s) {
         return is(Strings.isNotBlank(s));
     }
 
-    //    public <E extends Throwable> void thenRun(final Throwables.Runnable<E> cmd) throws E {
-    //        if (b) {
-    //            cmd.run();
-    //        }
-    //    }
-    //
-    //    public <T, E extends Throwable> void thenRun(final T init, final Try.Consumer<? super T, E> action) throws E {
-    //        if (b) {
-    //            action.accept(init);
-    //        }
-    //    }
-    //
-    //    public <T, E extends Throwable> Nullable<T> thenCall(final Try.Callable<? extends T, E> callable) throws E {
-    //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
-    //    }
-    //
-    //    public <T, R, E extends Throwable> Nullable<R> thenCall(final T init, final Try.Function<? super T, ? extends R, E> func) throws E {
-    //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
-    //    }
-
     /**
-     * Then do nothing if the condition is {@code true}.
+     * Executes no action if the condition is true, but allows chaining to an orElse clause.
+     * 
+     * <p>This method is useful when you only want to execute an action in the false case.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.is(cache.contains(key))
+     *   .thenDoNothing()
+     *   .orElse(() -> cache.load(key));
+     * }</pre>
      *
-     * @return an instance of OrElse to allow further conditional operations
+     * @return an OrElse instance for chaining the else clause
      */
     public OrElse thenDoNothing() {
         return OrElse.of(b);
     }
 
     /**
-     * Executes the provided runnable if the condition is {@code true}.
+     * Executes the given runnable if the condition is true.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.is(debugMode)
+     *   .then(() -> logger.debug("Debug information"))
+     *   .orElse(() -> logger.info("Normal operation"));
+     * }</pre>
      *
      * @param <E> the type of exception that the runnable may throw
      * @param cmd the runnable to execute if the condition is true
-     * @return an instance of OrElse to allow further conditional operations
-     * @throws IllegalArgumentException if the provided runnable is null
+     * @return an OrElse instance for optional chaining of an else clause
+     * @throws IllegalArgumentException if cmd is null
      * @throws E if the runnable throws an exception
      */
     public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -467,15 +595,24 @@ public final class If {
     }
 
     /**
-     * Executes the provided consumer action if the condition is {@code true}.
+     * Executes the given consumer with the provided input if the condition is true.
+     * 
+     * <p>This method is useful for conditional processing of a value.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.notNull(user)
+     *   .then(user, u -> saveUser(u))
+     *   .orElse(() -> createNewUser());
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that the consumer may throw
-     * @param init the initial input to the consumer
-     * @param action the consumer action to execute if the condition is true
-     * @return an instance of OrElse to allow further conditional operations
-     * @throws IllegalArgumentException if the provided action is null
-     * @throws E if the consumer action throws an exception
+     * @param init the input value to pass to the consumer
+     * @param action the consumer to execute if the condition is true
+     * @return an OrElse instance for optional chaining of an else clause
+     * @throws IllegalArgumentException if action is null
+     * @throws E if the consumer throws an exception
      */
     @Beta
     public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -489,13 +626,22 @@ public final class If {
     }
 
     /**
-     * Throws the exception provided by the supplier if the condition is {@code true}.
+     * Throws the exception provided by the supplier if the condition is true.
+     * 
+     * <p>This method is useful for validation scenarios where an exception should be thrown
+     * when a certain condition is met.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * If.isEmpty(requiredField)
+     *   .thenThrow(() -> new ValidationException("Required field is empty"));
+     * }</pre>
      *
-     * @param <E> the type of exception that may be thrown
-     * @param exceptionSupplier the supplier that provides the exception to be thrown
-     * @return an instance of OrElse to allow further conditional operations
-     * @throws IllegalArgumentException if the provided exception supplier is null
-     * @throws E if the condition is {@code true} and the exception supplier provides an exception
+     * @param <E> the type of exception to throw
+     * @param exceptionSupplier the supplier that provides the exception to throw
+     * @return an OrElse instance (though it will never be reached if exception is thrown)
+     * @throws IllegalArgumentException if exceptionSupplier is null
+     * @throws E if the condition is true
      */
     public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier);
@@ -508,16 +654,12 @@ public final class If {
         return OrElse.of(b);
     }
 
-    //    public <T, E extends Throwable> Nullable<T> then(final Try.Callable<T, E> callable) throws E {
-    //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
-    //    }
-    //
-    //    public <T, R, E extends Throwable> Nullable<R> then(final T init, final Try.Function<? super T, ? extends R, E> func) throws E {
-    //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
-    //    }
-
     /**
-     * The Class OrElse.
+     * Represents the else clause in a conditional chain, allowing actions to be executed
+     * when the initial condition is false.
+     * 
+     * <p>This class is returned by the then() methods of the If class and provides methods
+     * to specify what should happen when the initial condition evaluates to false.</p>
      */
     public static final class OrElse {
         /**
@@ -552,18 +694,29 @@ public final class If {
         }
 
         /**
-         * Or else do nothing.
+         * Executes no action in the else case.
+         * 
+         * <p>This method completes the conditional chain without performing any action
+         * when the initial condition is false. It's implicitly called when no orElse
+         * method is chained.</p>
          */
         void orElseDoNothing() {
             // Do nothing.
         }
 
         /**
-         * Executes the provided runnable if the condition is {@code false}.
+         * Executes the given runnable if the initial condition was false.
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * If.is(hasPermission)
+         *   .then(() -> performAction())
+         *   .orElse(() -> showAccessDeniedMessage());
+         * }</pre>
          *
          * @param <E> the type of exception that the runnable may throw
-         * @param cmd the runnable to execute if the condition is false
-         * @throws IllegalArgumentException if the provided runnable is null
+         * @param cmd the runnable to execute if the initial condition was false
+         * @throws IllegalArgumentException if cmd is null
          * @throws E if the runnable throws an exception
          */
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -575,14 +728,21 @@ public final class If {
         }
 
         /**
-         * Executes the provided consumer action if the condition is {@code false}.
+         * Executes the given consumer with the provided input if the initial condition was false.
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * If.isNull(cachedValue)
+         *   .then(() -> value = loadFromCache())
+         *   .orElse(key, k -> value = loadFromDatabase(k));
+         * }</pre>
          *
          * @param <T> the type of the input to the consumer
          * @param <E> the type of exception that the consumer may throw
-         * @param init the initial input to the consumer
-         * @param action the consumer action to execute if the condition is false
-         * @throws IllegalArgumentException if the provided action is null
-         * @throws E if the consumer action throws an exception
+         * @param init the input value to pass to the consumer
+         * @param action the consumer to execute if the initial condition was false
+         * @throws IllegalArgumentException if action is null
+         * @throws E if the consumer throws an exception
          */
         @Beta
         public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -594,12 +754,22 @@ public final class If {
         }
 
         /**
-         * Throws the exception provided by the supplier if the condition is {@code false}.
+         * Throws the exception provided by the supplier if the initial condition was false.
+         * 
+         * <p>This method is useful for validation scenarios where an exception should be thrown
+         * when a required condition is not met.</p>
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * If.notEmpty(results)
+         *   .then(() -> processResults(results))
+         *   .orElseThrow(() -> new NoResultsException("No results found"));
+         * }</pre>
          *
-         * @param <E> the type of exception that may be thrown
-         * @param exceptionSupplier the supplier that provides the exception to be thrown
-         * @throws IllegalArgumentException if the provided exception supplier is null
-         * @throws E if the condition is {@code false} and the exception supplier provides an exception
+         * @param <E> the type of exception to throw
+         * @param exceptionSupplier the supplier that provides the exception to throw
+         * @throws IllegalArgumentException if exceptionSupplier is null
+         * @throws E if the initial condition was false
          */
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier);
@@ -609,264 +779,4 @@ public final class If {
             }
         }
     }
-
-    //    /**
-    //     * This class is mainly designed for functional programming.
-    //     * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
-    //     *
-    //     *
-    //     */
-    //    @Beta
-    //    @Deprecated
-    //    public static final class IF {
-    //        private static final IF TRUE = new IF(true);
-    //        private static final IF FALSE = new IF(false);
-    //
-    //        @SuppressWarnings("rawtypes")
-    //        private static final Or FALSE_OR = new FalseOr();
-    //
-    //        private final boolean b;
-    //
-    //        IF(boolean b) {
-    //            this.b = b;
-    //        }
-    //
-    //        public static IF is(final boolean b) {
-    //            return b ? TRUE : FALSE;
-    //        }
-    //
-    //        public static IF not(final boolean b) {
-    //            return b ? FALSE : TRUE;
-    //        }
-    //
-    //        /**
-    //         * {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
-    //         *
-    //         * @param index
-    //         * @return
-    //         */
-    //        public static IF exists(final int index) {
-    //            return index >= 0 ? TRUE : FALSE;
-    //        }
-    //
-    //        public static IF isEmpty(final CharSequence s) {
-    //            return is(N.isEmpty(s));
-    //        }
-    //
-    //        public static IF isEmpty(final boolean[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final char[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final byte[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final short[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final int[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final long[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final float[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final double[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final Object[] a) {
-    //            return is(N.isEmpty(a));
-    //        }
-    //
-    //        public static IF isEmpty(final Collection<?> c) {
-    //            return is(N.isEmpty(c));
-    //        }
-    //
-    //        public static IF isEmpty(final Map<?, ?> m) {
-    //            return is(N.isEmpty(m));
-    //        }
-    //
-    //        @SuppressWarnings("rawtypes")
-    //        public static IF isEmpty(final PrimitiveList list) {
-    //            return is(N.isEmpty(list));
-    //        }
-    //
-    //        public static IF isEmpty(final Multiset<?> s) {
-    //            return is(N.isEmpty(s));
-    //        }
-    //
-    //        public static IF isEmpty(final LongMultiset<?> s) {
-    //            return is(N.isEmpty(s));
-    //        }
-    //
-    //        public static IF isEmpty(final Multimap<?, ?, ?> m) {
-    //            return is(N.isEmpty(m));
-    //        }
-    //
-    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    //        public static IF isBlank(final CharSequence s) {
-    //            return is(N.isBlank(s));
-    //        }
-    //
-    //        public static IF notEmpty(final CharSequence s) {
-    //            return is(N.notEmpty(s));
-    //        }
-    //
-    //        public static IF notEmpty(final boolean[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final char[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final byte[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final short[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final int[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final long[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final float[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final double[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final Object[] a) {
-    //            return is(N.notEmpty(a));
-    //        }
-    //
-    //        public static IF notEmpty(final Collection<?> c) {
-    //            return is(N.notEmpty(c));
-    //        }
-    //
-    //        public static IF notEmpty(final Map<?, ?> m) {
-    //            return is(N.notEmpty(m));
-    //        }
-    //
-    //        @SuppressWarnings("rawtypes")
-    //        public static IF notEmpty(final PrimitiveList list) {
-    //            return is(N.notEmpty(list));
-    //        }
-    //
-    //        public static IF notEmpty(final Multiset<?> s) {
-    //            return is(N.notEmpty(s));
-    //        }
-    //
-    //        public static IF notEmpty(final LongMultiset<?> s) {
-    //            return is(N.notEmpty(s));
-    //        }
-    //
-    //        public static IF notEmpty(final Multimap<?, ?, ?> m) {
-    //            return is(N.notEmpty(m));
-    //        }
-    //
-    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    //        public static IF notBlank(final CharSequence s) {
-    //            return is(N.notBlank(s));
-    //        }
-    //
-    //        public <T, E extends Throwable> Nullable<T> thenGet(Try.Supplier<T, E> supplier) throws E {
-    //            return b ? Nullable.of(supplier.get()) : Nullable.<T> empty();
-    //        }
-    //
-    //        public <T, U, E extends Throwable> Nullable<T> thenApply(final U init, final Try.Function<? super U, T, E> func) throws E {
-    //            return b ? Nullable.of(func.apply(init)) : Nullable.<T> empty();
-    //        }
-    //
-    //        public <T, E extends Throwable> Or<T> then(final Try.Callable<T, E> callable) throws E {
-    //            N.checkArgNotNull(callable);
-    //
-    //            return b ? new TrueOr<>(callable.call()) : FALSE_OR;
-    //        }
-    //
-    //        public <T, U, E extends Throwable> Or<T> then(final U init, final Try.Function<? super U, T, E> func) throws E {
-    //            N.checkArgNotNull(func);
-    //
-    //            return b ? new TrueOr<>(func.apply(init)) : FALSE_OR;
-    //        }
-    //
-    //        public abstract static class Or<T> {
-    //            Or() {
-    //            }
-    //
-    //            public abstract <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E;
-    //
-    //            public abstract <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E;
-    //
-    //            public abstract <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E;
-    //        }
-    //
-    //        static final class TrueOr<T> extends Or<T> {
-    //            private final T result;
-    //
-    //            TrueOr(final T result) {
-    //                this.result = result;
-    //            }
-    //
-    //            @Override
-    //            public <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E {
-    //                N.checkArgNotNull(callable);
-    //
-    //                return result;
-    //            }
-    //
-    //            @Override
-    //            public <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
-    //                N.checkArgNotNull(func);
-    //
-    //                return result;
-    //            }
-    //
-    //            @Override
-    //            public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
-    //                N.checkArgNotNull(exceptionSupplier);
-    //
-    //                return result;
-    //            }
-    //        }
-    //
-    //        static final class FalseOr<T> extends Or<T> {
-    //            FalseOr() {
-    //            }
-    //
-    //            @Override
-    //            public <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E {
-    //                return callable.call();
-    //            }
-    //
-    //            @Override
-    //            public <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
-    //                return func.apply(init);
-    //            }
-    //
-    //            @Override
-    //            public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
-    //                throw exceptionSupplier.get();
-    //            }
-    //        }
-    //    }
 }

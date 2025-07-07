@@ -45,52 +45,60 @@ import com.landawn.abacus.util.ThreadMode;
 // DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
 
 /**
- * It is responsible for managing the registration and un-registration of subscribers,
- * posting events to subscribers, and handling sticky events. It also provides methods to get all registered subscribers,
- * get subscribers for a specific event type, and remove sticky events.
- * <br />
- * The EventBus class is thread-safe and can be used in a multi-thread environment.
- *
+ * EventBus is a publish-subscribe event bus that simplifies communication between components.
+ * It allows components to communicate with each other without requiring them to have explicit references to one another,
+ * thus promoting loose coupling.
+ * 
+ * <p>The EventBus supports the following features:</p>
+ * <ul>
+ *   <li>Event posting to subscribers based on event type hierarchy</li>
+ *   <li>Sticky events that persist and are delivered to new subscribers</li>
+ *   <li>Thread mode control for event delivery</li>
+ *   <li>Event filtering by event ID</li>
+ *   <li>Interval-based and deduplication filtering</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
  * <pre>
- * <code>
- * final Object strSubscriber_1 = new Subscriber<String>() {
- *     &#64;Override
+ * {@code
+ * // Create a subscriber using the Subscriber interface
+ * final Subscriber<String> strSubscriber = new Subscriber<String>() {
+ *     @Override
  *     public void on(String event) {
- *     System.out.println("Subscriber: strSubscriber_1, event: " + event);
+ *         System.out.println("Received: " + event);
  *     }
  * };
- *
- * final Object anySubscriber_2 = new Object() {
- *     &#64;Subscribe(threadMode = ThreadMode.DEFAULT, interval = 1000)
- *     public void anyMethod(Object event) {
- *     System.out.println("Subscriber: anySubscriber_2, event: " + event);
+ * 
+ * // Create a subscriber using @Subscribe annotation
+ * final Object annotatedSubscriber = new Object() {
+ *     @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
+ *     public void handleEvent(String event) {
+ *         System.out.println("Handled: " + event);
  *     }
  * };
- *
- * final Object anySubscriber_3 = new Object() {
- *     &#64;Subscribe(threadMode = ThreadMode.DEFAULT, sticky = true)
- *     public void anyMethod(Object event) {
- *     System.out.println("Subscriber: anySubscriber_3, event: " + event);
- *     }
- * };
- *
- * final EventBus eventBus = EventBus.getDefault();
- *
- * eventBus.register(strSubscriber_1);
- * eventBus.register(strSubscriber_1);
- * eventBus.register(anySubscriber_2, "eventId_2");
- *
- * eventBus.post("abc");
- * eventBus.postSticky("sticky");
- * eventBus.post("eventId_2", "abc");
- *
- * eventBus.post(123);
- * eventBus.post("eventId_2", 123);
- *
- * eventBus.register(anySubscriber_3);
- * </code>
+ * 
+ * // Register subscribers
+ * EventBus eventBus = EventBus.getDefault();
+ * eventBus.register(strSubscriber, "myEventId");
+ * eventBus.register(annotatedSubscriber);
+ * 
+ * // Post events
+ * eventBus.post("Hello World");
+ * eventBus.post("myEventId", "Targeted Event");
+ * 
+ * // Post sticky event
+ * eventBus.postSticky("Sticky Message");
+ * 
+ * // Unregister when done
+ * eventBus.unregister(strSubscriber);
+ * }
  * </pre>
+ * 
+ * <p>This class is thread-safe and can be used in multi-threaded environments.</p>
  *
+ * @see Subscriber
+ * @see Subscribe
+ * @since 1.0
  */
 public class EventBus {
 
@@ -133,23 +141,54 @@ public class EventBus {
 
     private static final EventBus INSTANCE = new EventBus("default");
 
+    /**
+     * Creates a new EventBus instance with a randomly generated identifier.
+     * This EventBus will use the default executor for asynchronous event delivery.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * EventBus eventBus = new EventBus();
+     * }
+     * </pre>
+     */
     @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
     public EventBus() {
         this(Strings.guid());
     }
 
     /**
+     * Creates a new EventBus instance with the specified identifier.
+     * This EventBus will use the default executor for asynchronous event delivery.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * EventBus eventBus = new EventBus("myEventBus");
+     * }
+     * </pre>
      *
-     * @param identifier
+     * @param identifier the unique identifier for this EventBus instance
      */
     public EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
     }
 
     /**
+     * Creates a new EventBus instance with the specified identifier and executor.
+     * The executor is used for asynchronous event delivery when ThreadMode.THREAD_POOL_EXECUTOR is specified.
+     * If the executor is an ExecutorService, a shutdown hook will be registered to properly shutdown the executor.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * ExecutorService executor = Executors.newFixedThreadPool(4);
+     * EventBus eventBus = new EventBus("myEventBus", executor);
+     * }
+     * </pre>
      *
-     * @param identifier
-     * @param executor
+     * @param identifier the unique identifier for this EventBus instance
+     * @param executor the executor to use for asynchronous event delivery, or null to use the default executor
      */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
@@ -175,35 +214,73 @@ public class EventBus {
     }
 
     /**
-     * Gets the default.
+     * Returns the default EventBus instance.
+     * This is a singleton instance with identifier "default" that can be used throughout the application.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * EventBus eventBus = EventBus.getDefault();
+     * eventBus.post("Hello World");
+     * }
+     * </pre>
      *
-     * @return
+     * @return the default EventBus instance
      */
     @SuppressFBWarnings("MS_EXPOSE_REP")
     public static EventBus getDefault() {
         return INSTANCE;
     }
 
+    /**
+     * Returns the unique identifier of this EventBus instance.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * EventBus eventBus = new EventBus("myBus");
+     * String id = eventBus.identifier(); // Returns "myBus"
+     * }
+     * </pre>
+     *
+     * @return the identifier of this EventBus
+     */
     public String identifier() {
         return identifier;
     }
 
     /**
-     * Returns the subscriber which is registered with specified {@code eventType}(or its subtypes) and {@code null} event id.
+     * Returns all subscribers that are registered to receive events of the specified type or its subtypes.
+     * This method searches for subscribers registered with null event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * List<Object> stringSubscribers = eventBus.getSubscribers(String.class);
+     * }
+     * </pre>
      *
-     * @param eventType
-     * @return
+     * @param eventType the event type to search for
+     * @return a list of subscribers registered for the specified event type
      */
     public List<Object> getSubscribers(final Class<?> eventType) {
         return getSubscribers(null, eventType);
     }
 
     /**
-     * Returns the subscriber which is registered with specified {@code eventType}(or its subtypes) and {@code eventId}.
-     * @param eventId
-     * @param eventType
+     * Returns all subscribers that are registered to receive events of the specified type and event ID.
+     * The method checks both the event type hierarchy and the event ID when searching for subscribers.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * List<Object> subscribers = eventBus.getSubscribers("userEvents", User.class);
+     * }
+     * </pre>
      *
-     * @return
+     * @param eventId the event ID to match, or null for subscribers without event ID
+     * @param eventType the event type to search for
+     * @return a list of subscribers registered for the specified event type and ID
      */
     public List<Object> getSubscribers(final String eventId, final Class<?> eventType) {
         final List<Object> eventSubs = new ArrayList<>();
@@ -224,9 +301,17 @@ public class EventBus {
     }
 
     /**
-     * Returns all registered subscribers.
+     * Returns all currently registered subscribers in this EventBus.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * List<Object> allSubscribers = eventBus.getAllSubscribers();
+     * System.out.println("Total subscribers: " + allSubscribers.size());
+     * }
+     * </pre>
      *
-     * @return
+     * @return a list of all registered subscribers
      */
     public List<Object> getAllSubscribers() {
         synchronized (registeredSubMap) {
@@ -235,42 +320,88 @@ public class EventBus {
     }
 
     /**
+     * Registers a subscriber to receive events.
+     * The subscriber must either implement the {@link Subscriber} interface or have methods annotated with {@link Subscribe}.
+     * Events will be delivered on the default thread mode.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register(new Subscriber<String>() {
+     *     public void on(String event) {
+     *         System.out.println("Received: " + event);
+     *     }
+     * });
+     * }
+     * </pre>
      *
-     * @param subscriber
-     * @return
+     * @param subscriber the subscriber to register
+     * @return this EventBus instance for method chaining
+     * @throws RuntimeException if no subscriber methods are found in the subscriber class
      */
     public EventBus register(final Object subscriber) {
         return register(subscriber, (ThreadMode) null);
     }
 
     /**
+     * Registers a subscriber with a specific event ID.
+     * The subscriber will only receive events posted with the same event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register(mySubscriber, "userEvents");
+     * // This subscriber will only receive events posted with "userEvents" ID
+     * }
+     * </pre>
      *
-     * @param subscriber
-     * @param eventId
-     * @return
+     * @param subscriber the subscriber to register
+     * @param eventId the event ID to filter events
+     * @return this EventBus instance for method chaining
+     * @throws RuntimeException if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber, final String eventId) {
         return register(subscriber, eventId, null);
     }
 
     /**
+     * Registers a subscriber with a specific thread mode.
+     * The thread mode determines on which thread the event will be delivered.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register(mySubscriber, ThreadMode.THREAD_POOL_EXECUTOR);
+     * // Events will be delivered on a background thread
+     * }
+     * </pre>
      *
-     * @param subscriber
-     * @param threadMode
-     * @return
+     * @param subscriber the subscriber to register
+     * @param threadMode the thread mode for event delivery
+     * @return this EventBus instance for method chaining
+     * @throws RuntimeException if the thread mode is not supported
      */
     public EventBus register(final Object subscriber, final ThreadMode threadMode) {
         return register(subscriber, null, threadMode);
     }
 
     /**
-     * Register the subscriber with the specified {@code eventId} and {@code threadMode}.
-     * If the same register has been registered before, it can be over-written with the new specified {@code eventId} and {@code threadMode}.
+     * Registers a subscriber with both event ID and thread mode specifications.
+     * This is the most comprehensive registration method that allows full control over event filtering and delivery.
+     * If the subscriber has sticky event handling enabled, it will immediately receive any matching sticky events.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register(mySubscriber, "userEvents", ThreadMode.THREAD_POOL_EXECUTOR);
+     * }
+     * </pre>
      *
-     * @param subscriber
-     * @param eventId
-     * @param threadMode
-     * @return itself
+     * @param subscriber the subscriber to register
+     * @param eventId the event ID to filter events, or null for no filtering
+     * @param threadMode the thread mode for event delivery, or null for default
+     * @return this EventBus instance for method chaining
+     * @throws RuntimeException if the thread mode is not supported or no subscriber methods are found
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
         if (!isSupportedThreadMode(threadMode)) {
@@ -426,11 +557,23 @@ public class EventBus {
     //    }
 
     /**
+     * Registers a Subscriber interface implementation with a specific event ID.
+     * This method is specifically designed for lambda expressions and anonymous inner classes
+     * that implement the Subscriber interface.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register((Subscriber<String>) event -> {
+     *     System.out.println("Lambda received: " + event);
+     * }, "stringEvents");
+     * }
+     * </pre>
      *
-     * @param <T>
-     * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-     * @param eventId
-     * @return
+     * @param <T> the type of events the subscriber will receive
+     * @param subscriber the Subscriber implementation to register
+     * @param eventId the event ID to filter events (required for lambda subscribers)
+     * @return this EventBus instance for method chaining
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
         return register(subscriber, eventId, null);
@@ -446,12 +589,24 @@ public class EventBus {
     //    }
 
     /**
+     * Registers a Subscriber interface implementation with both event ID and thread mode.
+     * This method provides full control over how lambda-based subscribers receive events.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.register((Subscriber<User>) user -> {
+     *     // Process user on background thread
+     *     processUser(user);
+     * }, "userUpdates", ThreadMode.THREAD_POOL_EXECUTOR);
+     * }
+     * </pre>
      *
-     * @param <T>
-     * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-     * @param eventId
-     * @param threadMode
-     * @return
+     * @param <T> the type of events the subscriber will receive
+     * @param subscriber the Subscriber implementation to register
+     * @param eventId the event ID to filter events (required for lambda subscribers)
+     * @param threadMode the thread mode for event delivery
+     * @return this EventBus instance for method chaining
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, final ThreadMode threadMode) {
         final Object tmp = subscriber;
@@ -459,9 +614,20 @@ public class EventBus {
     }
 
     /**
+     * Unregisters a previously registered subscriber.
+     * All event subscriptions for this subscriber will be removed.
+     * This method should be called when a subscriber is no longer needed to prevent memory leaks.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.unregister(mySubscriber);
+     * // mySubscriber will no longer receive any events
+     * }
+     * </pre>
      *
-     * @param subscriber
-     * @return
+     * @param subscriber the subscriber to unregister
+     * @return this EventBus instance for method chaining
      */
     public EventBus unregister(final Object subscriber) {
         if (logger.isDebugEnabled()) {
@@ -501,19 +667,41 @@ public class EventBus {
     }
 
     /**
+     * Posts an event to all registered subscribers.
+     * The event will be delivered to all subscribers whose parameter type is assignable from the event's type
+     * and who are registered without a specific event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.post("Hello World");
+     * eventBus.post(new UserLoginEvent(userId));
+     * }
+     * </pre>
      *
-     * @param event
-     * @return
+     * @param event the event to post
+     * @return this EventBus instance for method chaining
      */
     public EventBus post(final Object event) {
         return post((String) null, event);
     }
 
     /**
+     * Posts an event with a specific event ID.
+     * The event will only be delivered to subscribers registered with the same event ID,
+     * or to subscribers registered without an event ID whose methods are annotated with the matching event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.post("userEvents", new UserLoginEvent(userId));
+     * // Only subscribers registered with "userEvents" will receive this
+     * }
+     * </pre>
      *
-     * @param eventId
-     * @param event
-     * @return
+     * @param eventId the event ID for filtering subscribers, or null for no filtering
+     * @param event the event to post
+     * @return this EventBus instance for method chaining
      */
     public EventBus post(final String eventId, final Object event) {
         final Class<?> cls = event.getClass();
@@ -540,9 +728,9 @@ public class EventBus {
 
                     listOfEventIdSubMap.put(eventId, listOfEventIdSub);
                 }
-
-                listOfSubs = Collections.singletonList(listOfEventIdSub);
             }
+
+            listOfSubs = Collections.singletonList(listOfEventIdSub);
         }
 
         for (final List<SubIdentifier> subs : listOfSubs) {
@@ -561,19 +749,42 @@ public class EventBus {
     }
 
     /**
+     * Posts a sticky event that will be retained and delivered to future subscribers.
+     * The sticky event will be immediately delivered to current subscribers and also
+     * to any subscribers that register later with sticky=true in their @Subscribe annotation.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.postSticky(new AppConfiguration());
+     * // Later registered subscribers with sticky=true will receive this event
+     * }
+     * </pre>
      *
-     * @param event
-     * @return
+     * @param event the sticky event to post
+     * @return this EventBus instance for method chaining
      */
     public EventBus postSticky(final Object event) {
         return postSticky(null, event);
     }
 
     /**
+     * Posts a sticky event with a specific event ID.
+     * The sticky event will be retained and delivered to matching future subscribers.
+     * Only one sticky event per event object is retained - posting the same object again will update its event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * Configuration config = new Configuration();
+     * eventBus.postSticky("appConfig", config);
+     * // Future subscribers for "appConfig" with sticky=true will receive this
+     * }
+     * </pre>
      *
-     * @param eventId
-     * @param event
-     * @return
+     * @param eventId the event ID for filtering subscribers
+     * @param event the sticky event to post
+     * @return this EventBus instance for method chaining
      */
     public EventBus postSticky(final String eventId, final Object event) {
         synchronized (stickyEventMap) {
@@ -588,21 +799,39 @@ public class EventBus {
     }
 
     /**
-     * Remove the sticky event posted with {@code null} event id.
+     * Removes a sticky event that was posted without an event ID.
+     * The event will no longer be delivered to future subscribers.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * Configuration config = getConfiguration();
+     * eventBus.removeStickyEvent(config);
+     * }
+     * </pre>
      *
-     * @param event
-     * @return {@code true}, if successful
+     * @param event the sticky event to remove
+     * @return true if the event was found and removed, false otherwise
      */
     public boolean removeStickyEvent(final Object event) {
         return removeStickyEvent(event, null);
     }
 
     /**
-     * Remove the sticky event posted with the specified {@code eventId}.
+     * Removes a sticky event that was posted with a specific event ID.
+     * The event will only be removed if both the event object and event ID match.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * Configuration config = getConfiguration();
+     * eventBus.removeStickyEvent(config, "appConfig");
+     * }
+     * </pre>
      *
-     * @param event
-     * @param eventId
-     * @return {@code true}, if successful
+     * @param event the sticky event to remove
+     * @param eventId the event ID the sticky event was posted with
+     * @return true if the event was found with matching event ID and removed, false otherwise
      */
     public boolean removeStickyEvent(final Object event, final String eventId) {
         synchronized (stickyEventMap) {
@@ -620,21 +849,39 @@ public class EventBus {
     }
 
     /**
-     * Remove the sticky events which can be assigned to specified {@code eventType} and posted with {@code null} event id.
+     * Removes all sticky events of a specific type that were posted without an event ID.
+     * This is useful for clearing all sticky events of a particular class.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.removeStickyEvents(UserSession.class);
+     * // All UserSession sticky events with null event ID are removed
+     * }
+     * </pre>
      *
-     * @param eventType
-     * @return {@code true} if one or one more than sticky events are removed, otherwise, {@code false}.
+     * @param eventType the class type of sticky events to remove
+     * @return true if one or more sticky events were removed, false otherwise
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
     }
 
     /**
-     * Remove the sticky events which can be assigned to specified {@code eventType} and posted with the specified {@code eventId}.
-     * @param eventId
-     * @param eventType
+     * Removes all sticky events of a specific type that were posted with the specified event ID.
+     * This allows targeted removal of sticky events by both type and ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.removeStickyEvents("userSessions", UserSession.class);
+     * // All UserSession sticky events with "userSessions" ID are removed
+     * }
+     * </pre>
      *
-     * @return {@code true} if one or one more than sticky events are removed, otherwise, {@code false}.
+     * @param eventId the event ID to match, or null for events without ID
+     * @param eventType the class type of sticky events to remove
+     * @return true if one or more sticky events were removed, false otherwise
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> keyToRemove = new ArrayList<>();
@@ -642,7 +889,7 @@ public class EventBus {
         synchronized (stickyEventMap) {
             for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
                 if (N.equals(entry.getValue(), eventId) && eventType.isAssignableFrom(entry.getKey().getClass())) {
-                    keyToRemove.add(entry);
+                    keyToRemove.add(entry.getKey());
                 }
             }
 
@@ -663,7 +910,16 @@ public class EventBus {
     }
 
     /**
-     * Removes all sticky events.
+     * Removes all sticky events from this EventBus.
+     * After calling this method, no sticky events will be delivered to future subscribers.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * eventBus.removeAllStickyEvents();
+     * // All sticky events are cleared
+     * }
+     * </pre>
      */
     public void removeAllStickyEvents() {
         synchronized (stickyEventMap) {
@@ -674,21 +930,39 @@ public class EventBus {
     }
 
     /**
-     * Returns the sticky events which can be assigned to specified {@code eventType} and posted with {@code null} event id.
+     * Returns all sticky events of a specific type that were posted without an event ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * List<Object> configs = eventBus.getStickyEvents(Configuration.class);
+     * for (Object config : configs) {
+     *     processConfig((Configuration) config);
+     * }
+     * }
+     * </pre>
      *
-     * @param eventType
-     * @return
+     * @param eventType the class type to search for
+     * @return a list of sticky events that can be assigned to the specified type
      */
     public List<Object> getStickyEvents(final Class<?> eventType) {
         return getStickyEvents(null, eventType);
     }
 
     /**
-     * Returns the sticky events which can be assigned to specified {@code eventType} and posted with the specified {@code eventId}.
-     * @param eventId
-     * @param eventType
+     * Returns all sticky events of a specific type that were posted with the specified event ID.
+     * This allows retrieval of sticky events filtered by both type and ID.
+     * 
+     * <p>Example:</p>
+     * <pre>
+     * {@code
+     * List<Object> userConfigs = eventBus.getStickyEvents("userConfig", Configuration.class);
+     * }
+     * </pre>
      *
-     * @return
+     * @param eventId the event ID to match, or null for events without ID
+     * @param eventType the class type to search for
+     * @return a list of sticky events matching both the type and event ID
      */
     public List<Object> getStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> result = new ArrayList<>();
@@ -705,19 +979,22 @@ public class EventBus {
     }
 
     /**
-     * Checks if is supported thread mode.
+     * Checks if the specified thread mode is supported by this EventBus.
+     * Currently supports DEFAULT and THREAD_POOL_EXECUTOR modes.
      *
-     * @param threadMode
-     * @return {@code true}, if is supported thread mode
+     * @param threadMode the thread mode to check
+     * @return true if the thread mode is supported, false otherwise
      */
     protected boolean isSupportedThreadMode(final ThreadMode threadMode) {
         return threadMode == null || threadMode == ThreadMode.DEFAULT || threadMode == ThreadMode.THREAD_POOL_EXECUTOR;
     }
 
     /**
+     * Dispatches an event to a subscriber according to its thread mode configuration.
+     * This method determines whether to deliver the event synchronously or asynchronously.
      *
-     * @param identifier
-     * @param event
+     * @param identifier the subscriber identifier containing delivery configuration
+     * @param event the event to dispatch
      */
     protected void dispatch(final SubIdentifier identifier, final Object event) {
         switch (identifier.threadMode) {
@@ -737,9 +1014,11 @@ public class EventBus {
     }
 
     /**
+     * Delivers an event to a specific subscriber method.
+     * This method handles interval filtering, deduplication, and actual method invocation.
      *
-     * @param sub
-     * @param event
+     * @param sub the subscriber identifier
+     * @param event the event to deliver
      */
     protected void post(final SubIdentifier sub, final Object event) {
         try {
@@ -784,6 +1063,10 @@ public class EventBus {
         }
     }
 
+    /**
+     * Internal class representing a subscriber method and its configuration.
+     * This class holds all the metadata needed to deliver events to a subscriber.
+     */
     protected static final class SubIdentifier {
 
         final Map<Class<?>, Boolean> cachedClasses = new ConcurrentHashMap<>();

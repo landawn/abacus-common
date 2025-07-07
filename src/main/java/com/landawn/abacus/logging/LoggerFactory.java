@@ -20,8 +20,28 @@ import java.util.Map;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * A factory for creating Logger objects.
- *
+ * A factory for creating Logger objects with automatic detection of the logging framework.
+ * 
+ * <p>This factory automatically detects and initializes the appropriate logging implementation
+ * in the following order of preference:</p>
+ * <ol>
+ *   <li>Android Logger (on Android platform)</li>
+ *   <li>SLF4J Logger</li>
+ *   <li>Log4j v2 Logger</li>
+ *   <li>JDK Logger (fallback)</li>
+ * </ol>
+ * 
+ * <p>The factory maintains a cache of logger instances to avoid creating multiple instances
+ * for the same logger name.</p>
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * Logger logger = LoggerFactory.getLogger(MyClass.class);
+ * logger.info("Application started");
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 1.0
  */
 public final class LoggerFactory {
 
@@ -44,20 +64,52 @@ public final class LoggerFactory {
     }
 
     /**
-     * Gets the logger.
+     * Gets a logger instance for the specified class.
+     * 
+     * <p>This method creates a logger with the fully qualified class name. If a logger
+     * with the same name already exists, the cached instance is returned.</p>
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * public class MyService {
+     *     private static final Logger logger = LoggerFactory.getLogger(MyService.class);
+     *     
+     *     public void doSomething() {
+     *         logger.debug("Starting operation");
+     *     }
+     * }
+     * }</pre>
      *
-     * @param clazz
-     * @return
+     * @param clazz the class for which to get the logger
+     * @return a Logger instance for the specified class
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
     }
 
     /**
-     * Gets the logger.
+     * Gets a logger instance for the specified name.
+     * 
+     * <p>This method returns a cached logger if one exists for the given name, otherwise
+     * it creates a new logger using the detected logging framework. The detection happens
+     * only once during the first logger creation.</p>
+     * 
+     * <p>The logging framework detection order is:</p>
+     * <ol>
+     *   <li>Android Logger (only on Android platform)</li>
+     *   <li>SLF4J Logger</li>
+     *   <li>Log4j v2 Logger</li>
+     *   <li>JDK Logger (fallback)</li>
+     * </ol>
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * Logger logger = LoggerFactory.getLogger("com.mycompany.MyComponent");
+     * logger.warn("Configuration not found, using defaults");
+     * }</pre>
      *
-     * @param name
-     * @return
+     * @param name the name of the logger
+     * @return a Logger instance for the specified name
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")

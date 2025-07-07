@@ -33,8 +33,10 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Range objects containing comparable values.
+ * This class handles serialization and deserialization of Range instances.
  *
- * @param <T>
+ * @param <T> the type of values in the range, must be Comparable
  */
 @SuppressWarnings("java:S2160")
 public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
@@ -51,10 +53,6 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
     private final Type<T> elementType;
 
-    //    RangeType() {
-    //        this(Object.class.getSimpleName());
-    //    }
-
     @SuppressWarnings("rawtypes")
     RangeType(final String parameterTypeName) {
         super(RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
@@ -65,30 +63,32 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         elementType = parameterTypes[0];
     }
 
+    /**
+     * Returns the declaring name of this type, which includes the Range class name
+     * and its parameterized type in angle brackets.
+     *
+     * @return the declaring name in the format "Range<ElementType>"
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Range type.
+     *
+     * @return the Class object for Range.class
+     */
     @Override
     public Class<Range<T>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the Type instance for the element type of this Range.
+     * This represents the type of values that the Range can contain.
      *
-     * @return
-     */
-    @Override
-    public Type<T>[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    /**
-     * Gets the element type.
-     *
-     * @return
+     * @return the Type instance for the element type
      */
     @Override
     public Type<T> getElementType() {
@@ -96,9 +96,21 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     * Checks if is generic type.
+     * Returns an array containing the Type instances for the parameter types of this Range.
+     * For Range, this returns a single-element array containing the element type.
      *
-     * @return {@code true}, if is generic type
+     * @return an array with one Type instance representing the element type of the Range
+     */
+    @Override
+    public Type<T>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    /**
+     * Indicates whether this type is a generic type.
+     * RangeType is always generic as it is parameterized with a type T.
+     *
+     * @return true, indicating this is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -106,9 +118,15 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts a Range object to its string representation.
+     * The format depends on the bound type:
+     * - Open-Open: "(lower, upper)"
+     * - Open-Closed: "(lower, upper]"
+     * - Closed-Open: "[lower, upper)"
+     * - Closed-Closed: "[lower, upper]"
+     * 
+     * @param x the Range to convert to string
+     * @return the string representation of the Range, or null if the input is null
      */
     @MayReturnNull
     @Override
@@ -132,9 +150,16 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Parses a string representation of a Range and returns the corresponding Range object.
+     * The string should be in one of the following formats:
+     * - "(lower, upper)" for open-open range
+     * - "(lower, upper]" for open-closed range
+     * - "[lower, upper)" for closed-open range
+     * - "[lower, upper]" for closed-closed range
+     * 
+     * @param str the string to parse
+     * @return the parsed Range object, or null if the input string is null or empty
+     * @throws IllegalArgumentException if the string format is invalid
      */
     @MayReturnNull
     @Override
@@ -158,10 +183,13 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of a Range to the given Appendable.
+     * The format depends on the bound type and includes the appropriate brackets/parentheses.
+     * If the Range is null, appends "null".
+     * 
+     * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
+     * @param x the Range to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Range<T> x) throws IOException {
@@ -215,11 +243,14 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of a Range to the given CharacterWriter.
+     * The Range is first converted to a string representation, then written as a quoted string
+     * according to the serialization configuration.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the Range to write
+     * @param config the serialization configuration that determines string quotation
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {

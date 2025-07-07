@@ -22,58 +22,63 @@ import org.apache.avro.Schema;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
+/**
+ * Configuration class for Apache Avro serialization operations.
+ * This class extends SerializationConfig and adds Avro-specific configuration options,
+ * particularly the Avro schema required for serialization.
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * Schema schema = new Schema.Parser().parse(schemaString);
+ * AvroSerializationConfig config = new AvroSerializationConfig()
+ *     .setSchema(schema)
+ *     .setExclusion(Exclusion.NULL);
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ */
 public class AvroSerializationConfig extends SerializationConfig<AvroSerializationConfig> {
 
     private Schema schema;
 
+    /**
+     * Creates a new instance of AvroSerializationConfig with default settings.
+     */
     public AvroSerializationConfig() { //NOSONAR
     }
 
     /**
-     * Gets the schema.
+     * Gets the Avro schema used for serialization.
+     * The schema defines the structure of the data to be serialized.
      *
-     * @return
+     * @return the Avro schema, or null if not set
      */
     public Schema getSchema() {
         return schema;
     }
 
     /**
-     * Sets the schema.
+     * Sets the Avro schema for serialization.
+     * The schema is required for serializing objects that are not SpecificRecord instances.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * String schemaJson = "{\"type\":\"record\",\"name\":\"User\"," +
+     *     "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
+     *     "{\"name\":\"age\",\"type\":\"int\"}]}";
+     * Schema schema = new Schema.Parser().parse(schemaJson);
+     * config.setSchema(schema);
+     * }</pre>
      *
-     * @param schema
-     * @return
+     * @param schema the Avro schema to use for serialization
+     * @return this instance for method chaining
      */
     public AvroSerializationConfig setSchema(final Schema schema) {
         this.schema = schema;
 
         return this;
     }
-
-    //    /**
-    //     *
-    //     * @return
-    //     */
-    //    @Override
-    //    public AvroSerializationConfig copy() {
-    //        final AvroSerializationConfig copy = new AvroSerializationConfig();
-    //
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.setCharQuotation(this.getCharQuotation());
-    //        copy.setStringQuotation(this.getStringQuotation());
-    //        copy.setDateTimeFormat(this.getDateTimeFormat());
-    //        copy.setExclusion(this.getExclusion());
-    //        copy.setSkipTransientField(this.isSkipTransientField());
-    //        copy.setPrettyFormat(this.isPrettyFormat());
-    //        copy.supportCircularReference(this.supportCircularReference());
-    //        copy.writeBigDecimalAsPlain(this.writeBigDecimalAsPlain());
-    //        copy.setIndentation(this.getIndentation());
-    //        copy.setPropNamingPolicy(this.getPropNamingPolicy());
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.schema = this.schema;
-    //
-    //        return copy;
-    //    }
 
     @Override
     public int hashCode() {
@@ -85,9 +90,12 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     }
 
     /**
+     * Compares this configuration with another object for equality.
+     * Two configurations are considered equal if they have the same ignored properties,
+     * exclusion settings, transient field handling, and schema.
      *
-     * @param obj
-     * @return {@code true}, if successful
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override
@@ -111,19 +119,33 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     }
 
     /**
-     * The Class ASC.
+     * Factory class for creating AvroSerializationConfig instances.
+     * Provides convenient static factory methods for creating configurations.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * AvroSerializationConfig config = ASC.create()
+     *     .setSchema(mySchema)
+     *     .skipTransientField(true);
+     * }</pre>
      */
     public static final class ASC extends AvroSerializationConfig {
 
+        /**
+         * Creates a new instance of AvroSerializationConfig with default settings.
+         *
+         * @return a new AvroSerializationConfig instance
+         */
         public static AvroSerializationConfig create() {
             return new AvroSerializationConfig();
         }
 
         /**
+         * Creates a new AvroSerializationConfig with the specified schema.
          *
-         * @param schema
-         * @return
-         * @deprecated
+         * @param schema the Avro schema to use
+         * @return a new configured AvroSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
         public static AvroSerializationConfig of(final Schema schema) {
@@ -131,12 +153,13 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         }
 
         /**
+         * Creates a new AvroSerializationConfig with schema, exclusion policy, and ignored properties.
          *
-         * @param schema
-         * @param exclusion
-         * @param ignoredPropNames
-         * @return
-         * @deprecated
+         * @param schema the Avro schema to use
+         * @param exclusion the exclusion policy for properties
+         * @param ignoredPropNames map of class to set of property names to ignore
+         * @return a new configured AvroSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
         public static AvroSerializationConfig of(final Schema schema, final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {

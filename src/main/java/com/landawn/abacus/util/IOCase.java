@@ -17,45 +17,51 @@
 package com.landawn.abacus.util;
 
 /**
- * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
- *
- * Enumeration of IO case sensitivity.
- * <p>
- * Different filing systems have different rules for case-sensitivity.
- * Windows is case-insensitive, Unix is case-sensitive.
- * <p>
- * This class captures that difference, providing an enumeration to
- * control how filename comparisons should be performed. It also provides
- * methods that use the enumeration to perform comparisons.
- * <p>
- * Wherever possible, you should use the {@code check} methods in this
- * class to compare filenames.
+ * Enumeration for controlling case sensitivity in I/O operations.
+ * 
+ * <p>This enum provides a consistent way to handle case sensitivity across different
+ * file systems. Windows is typically case-insensitive while Unix/Linux is case-sensitive.
+ * This class provides methods to perform case-aware string comparisons.</p>
+ * 
+ * <p>Note: This class is adapted from Apache Commons IO, licensed under Apache License 2.0.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Check if two filenames are equal considering case sensitivity
+ * boolean isEqual = IOCase.SYSTEM.checkEquals("File.txt", "file.txt");
+ * // On Windows: true, on Unix: false
+ * 
+ * // Always case-sensitive comparison
+ * boolean isSensitive = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt"); // false
+ * }</pre>
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
  */
 public enum IOCase {
 
     /**
-     * The constant for case-sensitive regardless of operating system.
+     * Case-sensitive comparison regardless of operating system.
+     * This constant forces case-sensitive string comparisons on all platforms.
      */
     SENSITIVE("Sensitive", true),
 
     /**
-     * The constant for case-insensitive regardless of operating system.
+     * Case-insensitive comparison regardless of operating system.
+     * This constant forces case-insensitive string comparisons on all platforms.
      */
     INSENSITIVE("Insensitive", false),
 
     /**
-     * The constant for case sensitivity determined by the current operating system.
-     * Windows is case-insensitive, when comparing filenames, Unix is case-sensitive.
-     * <p>
-     * <strong>Note:</strong> This only caters for Windows and Unix. Other operating
+     * Case sensitivity determined by the current operating system.
+     * Windows is treated as case-insensitive, Unix/Linux as case-sensitive.
+     * 
+     * <p><strong>Note:</strong> This only handles Windows and Unix. Other operating
      * systems (e.g., OSX and OpenVMS) are treated as case-sensitive if they use the
      * Unix file separator and case-insensitive if they use the Windows file separator
-     * (see {@link java.io.File#separatorChar}).
-     * <p>
-     * If you serialize this constant of Windows, and deserialize on Unix, or vice
-     * versa, then the value of the case-sensitivity flag will change.
+     * (see {@link java.io.File#separatorChar}).</p>
+     * 
+     * <p>If you serialize this constant on Windows and deserialize on Unix (or vice
+     * versa), the case-sensitivity flag will change to match the target system.</p>
      */
     SYSTEM("System", !IOUtil.IS_OS_WINDOWS);
 
@@ -71,11 +77,16 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
-     * Factory method to create an IOCase from a name.
+     * Factory method to create an IOCase instance from its name.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * IOCase ioCase = IOCase.forName("Sensitive"); // returns IOCase.SENSITIVE
+     * }</pre>
      *
-     * @param name the name to find
-     * @return
-     * @throws IllegalArgumentException if the name is invalid
+     * @param name the name of the IOCase constant ("Sensitive", "Insensitive", or "System")
+     * @return the corresponding IOCase enum constant
+     * @throws IllegalArgumentException if the name is not valid
      */
     public static IOCase forName(final String name) {
         for (final IOCase ioCase : IOCase.values()) {
@@ -89,9 +100,10 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
+     * Private constructor for enum constants.
      *
-     * @param name
-     * @param sensitive the sensitivity
+     * @param name the name of the constant
+     * @param sensitive true if case-sensitive, false if case-insensitive
      */
     IOCase(final String name, final boolean sensitive) {
         this.name = name;
@@ -99,10 +111,11 @@ public enum IOCase {
     }
 
     /**
-     * Replaces the enumeration from the stream with a real one.
-     * This ensures that the correct flag is set for SYSTEM.
+     * Replaces the deserialized enum with the proper singleton instance.
+     * This ensures that the SYSTEM constant has the correct case sensitivity
+     * for the current operating system after deserialization.
      *
-     * @return
+     * @return the resolved enum constant
      */
     private Object readResolve() {
         return forName(name);
@@ -111,18 +124,25 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the name of the constant.
+     * Gets the name of this IOCase constant.
      *
-     * @return
+     * @return the name of the constant ("Sensitive", "Insensitive", or "System")
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Does the object represent case-sensitive comparison.
+     * Checks whether this IOCase represents case-sensitive comparison.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * if (IOCase.SENSITIVE.isCaseSensitive()) {
+     *     // Perform case-sensitive operations
+     * }
+     * }</pre>
      *
-     * @return {@code true} if case-sensitive
+     * @return {@code true} if case-sensitive, {@code false} if case-insensitive
      */
     public boolean isCaseSensitive() {
         return sensitive;
@@ -131,14 +151,20 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
-     * Compares two strings using the case-sensitivity rule.
-     * <p>
-     * This method mimics {@link String#compareTo} but takes case-sensitivity
-     * into account.
+     * Compares two strings using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics {@link String#compareTo} but takes case-sensitivity
+     * into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns 0
+     * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns negative
+     * }</pre>
      *
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
-     * @return {@code true} if equal using the case rules
+     * @return negative if str1 < str2, zero if str1 equals str2, positive if str1 > str2
      * @throws IllegalArgumentException if either string is null
      */
     public int checkCompareTo(final String str1, final String str2) {
@@ -149,14 +175,20 @@ public enum IOCase {
     }
 
     /**
-     * Compares two strings using the case-sensitivity rule.
-     * <p>
-     * This method mimics {@link String#equals} but takes case-sensitivity
-     * into account.
+     * Compares two strings for equality using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics {@link String#equals} but takes case-sensitivity
+     * into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt"); // true
+     * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt"); // false
+     * }</pre>
      *
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
-     * @return {@code true} if equal using the case rules
+     * @return {@code true} if the strings are equal according to the case rule
      * @throws IllegalArgumentException if either string is null
      */
     public boolean checkEquals(final String str1, final String str2) {
@@ -167,14 +199,20 @@ public enum IOCase {
     }
 
     /**
-     * Checks if one string starts with another using the case-sensitivity rule.
-     * <p>
-     * This method mimics {@link String#startsWith(String)} but takes case-sensitivity
-     * into account.
+     * Checks if one string starts with another using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics {@link String#startsWith(String)} but takes case-sensitivity
+     * into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE"); // true
+     * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE"); // false
+     * }</pre>
      *
      * @param str the string to check, not null
-     * @param start the start to compare against, not null
-     * @return {@code true} if equal using the case rules
+     * @param start the prefix to look for, not null
+     * @return {@code true} if str starts with the prefix according to the case rule
      * @throws IllegalArgumentException if either string is null
      */
     public boolean checkStartsWith(final String str, final String start) {
@@ -186,14 +224,20 @@ public enum IOCase {
     }
 
     /**
-     * Checks if one string ends with another using the case-sensitivity rule.
-     * <p>
-     * This method mimics {@link String#endsWith} but takes case-sensitivity
-     * into account.
+     * Checks if one string ends with another using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics {@link String#endsWith} but takes case-sensitivity
+     * into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT"); // true
+     * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT"); // false
+     * }</pre>
      *
      * @param str the string to check, not null
-     * @param end the end to compare against, not null
-     * @return {@code true} if equal using the case rules
+     * @param end the suffix to look for, not null
+     * @return {@code true} if str ends with the suffix according to the case rule
      * @throws IllegalArgumentException if either string is null
      */
     public boolean checkEndsWith(final String str, final String end) {
@@ -206,17 +250,22 @@ public enum IOCase {
     }
 
     /**
-     * Checks if one string contains another starting at a specific index using the
-     * case-sensitivity rule.
-     * <p>
-     * This method mimics parts of {@link String#indexOf(String, int)}
-     * but takes case-sensitivity into account.
+     * Finds the index of a search string within another string starting at a specific index,
+     * using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics parts of {@link String#indexOf(String, int)}
+     * but takes case-sensitivity into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns 7
+     * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns -1
+     * }</pre>
      *
-     * @param str the string to check, not null
-     * @param strStartIndex the index to start at in str
-     * @param search the start to search for, not null
-     * @return
-     *  -1 if no match or {@code null} string input
+     * @param str the string to search in, not null
+     * @param strStartIndex the index to start searching from
+     * @param search the string to search for, not null
+     * @return the index of the first occurrence of search in str, or -1 if not found
      * @throws IllegalArgumentException if either string is null
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
@@ -236,15 +285,22 @@ public enum IOCase {
     }
 
     /**
-     * Checks if one string contains another at a specific index using the case-sensitivity rule.
-     * <p>
-     * This method mimics parts of {@link String#regionMatches(boolean, int, String, int, int)}
-     * but takes case-sensitivity into account.
+     * Checks if a region of one string matches another string at a specific index,
+     * using the case-sensitivity rule of this IOCase.
+     * 
+     * <p>This method mimics parts of {@link String#regionMatches(boolean, int, String, int, int)}
+     * but takes case-sensitivity into account based on this IOCase setting.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // true
+     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // false
+     * }</pre>
      *
      * @param str the string to check, not null
-     * @param strStartIndex the index to start at in str
-     * @param search the start to search for, not null
-     * @return {@code true} if equal using the case rules
+     * @param strStartIndex the index in str to start matching from
+     * @param search the string to match against, not null
+     * @return {@code true} if the region matches according to the case rule
      * @throws IllegalArgumentException if either string is null
      */
     public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
@@ -258,9 +314,9 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
-     * Gets a string describing the sensitivity.
+     * Gets a string representation of this IOCase constant.
      *
-     * @return a string describing the sensitivity
+     * @return the name of this constant ("Sensitive", "Insensitive", or "System")
      */
     @Override
     public String toString() {

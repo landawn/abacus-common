@@ -16,6 +16,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalChar;
 
+/**
+ * Type handler for {@link OptionalChar} objects, providing serialization, deserialization,
+ * and database interaction capabilities for optional character values. This handler manages
+ * the conversion between database character/integer values and OptionalChar wrapper objects.
+ */
 public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
@@ -24,15 +29,21 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
         super(OPTIONAL_CHAR);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link OptionalChar} class object
+     */
     @Override
     public Class<OptionalChar> clazz() {
         return OptionalChar.class;
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether values of this type can be compared.
+     * OptionalChar values support comparison operations.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as OptionalChar values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -40,9 +51,10 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts an {@link OptionalChar} object to its string representation.
+     * 
+     * @param x the OptionalChar object to convert
+     * @return a single-character string, or null if empty or null
      */
     @Override
     public String stringOf(final OptionalChar x) {
@@ -50,9 +62,12 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a string representation to an {@link OptionalChar} object.
+     * The string should contain exactly one character or be convertible to a character.
+     * 
+     * @param str the string to convert
+     * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
+     * @throws IllegalArgumentException if the string cannot be parsed as a single character
      */
     @Override
     public OptionalChar valueOf(final String str) {
@@ -60,11 +75,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a character value from a ResultSet at the specified column index and wraps it in an {@link OptionalChar}.
+     * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -80,11 +97,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}.
+     * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public OptionalChar get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -100,11 +119,14 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalChar}.
+     * Characters are stored as integers in the database. If the OptionalChar is null or empty,
+     * sets the parameter to SQL NULL.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the OptionalChar value to set
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws SQLException {
@@ -116,11 +138,14 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalChar}.
+     * Characters are stored as integers in the database. If the OptionalChar is null or empty,
+     * sets the parameter to SQL NULL.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the OptionalChar value to set
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws SQLException {
@@ -132,10 +157,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of an {@link OptionalChar} to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the OptionalChar value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalChar x) throws IOException {
@@ -147,11 +173,14 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of an {@link OptionalChar} to a CharacterWriter.
+     * Optionally quotes the character based on the serialization configuration.
+     * This method is typically used for JSON/XML serialization.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the OptionalChar value to write
+     * @param config the serialization configuration specifying character quotation
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalChar x, final JSONXMLSerializationConfig<?> config) throws IOException {

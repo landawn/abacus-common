@@ -50,6 +50,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws NegativeArraySizeException if the specified length is negative.
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
+        N.checkArgNotNull(componentType, cs.componentType);
+
         if (length == 0) {
             final Object result = N.CLASS_EMPTY_ARRAY.computeIfAbsent(componentType, k -> java.lang.reflect.Array.newInstance(componentType, length));
 
@@ -76,8 +78,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> The type of the array.
      * @param componentType The Class object representing the component type of the new array.
      * @param dimensions The dimensions of the new array.
-     * @return The new array.
-     * @throws NullPointerException if the componentType is {@code null}.
+     * @return The new array.}.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */

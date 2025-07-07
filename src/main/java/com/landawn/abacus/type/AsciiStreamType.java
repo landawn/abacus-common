@@ -29,8 +29,17 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
+/**
+ * Type handler for ASCII InputStream operations.
+ * This class specializes in handling ASCII character streams from databases and
+ * provides conversion between InputStream and various output formats specifically
+ * for ASCII-encoded data.
+ */
 public class AsciiStreamType extends InputStreamType {
 
+    /**
+     * The type name constant for ASCII stream type identification.
+     */
     public static final String ASCII_STREAM = "AsciiStream";
 
     AsciiStreamType() {
@@ -38,11 +47,12 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Retrieves an ASCII InputStream from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the ASCII stream from
+     * @param columnIndex the column index (1-based) of the ASCII stream
+     * @return an InputStream containing the ASCII data, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -50,11 +60,13 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Retrieves an ASCII InputStream from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the ASCII stream from
+     * @param columnLabel the label for the column specified with the SQL AS clause,
+     *                    or the column name if no AS clause was specified
+     * @return an InputStream containing the ASCII data, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -62,11 +74,13 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream parameter in a PreparedStatement at the specified position.
+     * The JDBC driver will read the stream as needed until end-of-file is reached.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the InputStream containing ASCII data, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
@@ -74,11 +88,13 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets a named ASCII InputStream parameter in a CallableStatement.
+     * The JDBC driver will read the stream as needed until end-of-file is reached.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the InputStream containing ASCII data, may be null
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
@@ -86,12 +102,14 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream parameter in a PreparedStatement with a specified length.
+     * This method allows specification of the stream length for optimization.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the InputStream containing ASCII data, may be null
+     * @param sqlTypeOrLength the number of bytes in the stream
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -99,12 +117,14 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets a named ASCII InputStream parameter in a CallableStatement with a specified length.
+     * This method allows specification of the stream length for optimization.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the InputStream containing ASCII data, may be null
+     * @param sqlTypeOrLength the number of bytes in the stream
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -112,10 +132,14 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Appends the content of an ASCII InputStream to an Appendable object.
+     * If the InputStream is null, appends the string "null".
+     * For Writer instances, performs direct stream-to-writer copying for efficiency.
+     * For other Appendable types, reads the entire stream into a string first.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable object to append to
+     * @param x the InputStream containing ASCII data to append, may be null
+     * @throws IOException if an I/O error occurs during the read or append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
@@ -131,11 +155,15 @@ public class AsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Writes the content of an ASCII InputStream to a CharacterWriter with optional quotation.
+     * This method handles null values and applies string quotation marks if specified in the configuration.
+     * The stream is read in chunks using a buffer from the object pool for efficiency.
      *
-     * @param writer
-     * @param t
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param t the InputStream containing ASCII data to write, may be null
+     * @param config the serialization configuration that may specify string quotation preferences
+     * @throws IOException if an I/O error occurs during the read or write operation
+     * @throws UncheckedIOException wraps any IOException that occurs during stream reading
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {

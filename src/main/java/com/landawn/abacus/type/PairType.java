@@ -31,9 +31,12 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Pair} objects, providing serialization and deserialization capabilities.
+ * This type handler manages the conversion between Pair objects and their string representations,
+ * supporting both JSON serialization and custom formatted output.
  *
- * @param <L>
- * @param <R>
+ * @param <L> the type of the left element in the pair
+ * @param <R> the type of the right element in the pair
  */
 @SuppressWarnings("java:S2160")
 public class PairType<L, R> extends AbstractType<Pair<L, R>> {
@@ -58,20 +61,32 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         parameterTypes = new Type[] { leftType, rightType };
     }
 
+    /**
+     * Returns the declaring name of this type, which includes the simple class name and parameter types.
+     * For example: "Pair<String, Integer>" for a Pair with String left type and Integer right type.
+     *
+     * @return the declaring name of this type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Pair type.
+     *
+     * @return the Class object for Pair
+     */
     @Override
     public Class<Pair<L, R>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the Type objects for the left and right elements of the Pair.
+     * The first element is the type of the left value, and the second element is the type of the right value.
      *
-     * @return
+     * @return an array of Type objects representing the parameter types
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -79,9 +94,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this is a generic type. Always returns true for PairType.
      *
-     * @return {@code true}, if is generic type
+     * @return true, as PairType is always a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -89,19 +104,25 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
+     * Converts a Pair object to its string representation using JSON format.
+     * The pair is serialized as a JSON array with two elements: [leftValue, rightValue].
+     * Returns null if the input pair is null.
      *
-     * @param x
-     * @return
+     * @param x the Pair object to convert to string
+     * @return a JSON string representation of the pair, or null if the input is null
      */
     @Override
     public String stringOf(final Pair<L, R> x) {
-        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left, x.right), Utils.jsc);
+        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.right()), Utils.jsc);
     }
 
     /**
+     * Parses a string representation and creates a Pair object.
+     * The string should be in JSON array format: [leftValue, rightValue].
+     * Returns null if the input string is null or empty.
      *
-     * @param str
-     * @return
+     * @param str the string to parse, expected to be a JSON array with two elements
+     * @return a Pair object created from the parsed values, or null if the input is null or empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -120,10 +141,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
+     * Appends the string representation of a Pair object to an Appendable.
+     * The pair is formatted as [leftValue, rightValue] with appropriate element separation.
+     * If the pair is null, appends "null". Handles Writer instances with buffering optimization.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Pair object to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Pair<L, R> x) throws IOException {
@@ -137,9 +161,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                 try {
                     bw.write(WD._BRACKET_L);
 
-                    leftType.appendTo(bw, x.left);
+                    leftType.appendTo(bw, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    rightType.appendTo(bw, x.right);
+                    rightType.appendTo(bw, x.right());
 
                     bw.write(WD._BRACKET_R);
 
@@ -156,9 +180,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             } else {
                 appendable.append(WD._BRACKET_L);
 
-                leftType.appendTo(appendable, x.left);
+                leftType.appendTo(appendable, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
-                rightType.appendTo(appendable, x.right);
+                rightType.appendTo(appendable, x.right());
 
                 appendable.append(WD._BRACKET_R);
             }
@@ -166,11 +190,14 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
+     * Writes the character representation of a Pair object to a CharacterWriter.
+     * The pair is formatted as [leftValue, rightValue] using the provided serialization configuration.
+     * If the pair is null, writes "null".
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Pair object to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Pair<L, R> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -180,9 +207,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             try {
                 writer.write(WD._BRACKET_L);
 
-                leftType.writeCharacter(writer, x.left, config);
+                leftType.writeCharacter(writer, x.left(), config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                rightType.writeCharacter(writer, x.right, config);
+                rightType.writeCharacter(writer, x.right(), config);
 
                 writer.write(WD._BRACKET_R);
 
@@ -193,12 +220,12 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param leftTypeName
-     * @param rightTypeName
-     * @param isDeclaringName
-     * @return
+     * Generates a type name for a Pair type with the specified left and right type names.
+     * 
+     * @param leftTypeName the name of the left type
+     * @param rightTypeName the name of the right type
+     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @return the generated type name string
      */
     protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

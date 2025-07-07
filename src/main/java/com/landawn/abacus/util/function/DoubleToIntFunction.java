@@ -17,18 +17,31 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a function that accepts a double-valued argument and produces an int-valued result.
+ * This is the double-to-int primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(double)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.Function
+ * @see java.util.function.DoubleToIntFunction
+ * @see DoubleToLongFunction
  */
 @FunctionalInterface
 public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction { //NOSONAR
 
+    /**
+     * A default implementation that casts the double value to int.
+     * Note that this conversion truncates the decimal part and may overflow for large double values.
+     */
     DoubleToIntFunction DEFAULT = value -> (int) value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the double function argument
+     * @return the int function result
      */
     @Override
     int applyAsInt(double value);

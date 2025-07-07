@@ -152,10 +152,58 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
- * So content must be encoded with Base64 if the specified input is String or Reader, otherwise the content must NOT be encoded with Base64 if the specified input is File or InputStream.
- * The reason not to encode the content with Base64 for File/OutputStream is to provide a higher performance solution.
- *
+ * High-performance binary serialization parser using the Kryo framework.
+ * 
+ * <p>This parser provides fast and efficient object graph serialization with support for:
+ * <ul>
+ *   <li>Automatic deep and shallow copying of objects</li>
+ *   <li>Binary serialization with optional Base64 encoding</li>
+ *   <li>Class registration for improved performance and smaller output</li>
+ *   <li>Custom serializers for specific types</li>
+ *   <li>Object pooling for better performance</li>
+ * </ul>
+ * 
+ * <p><b>Encoding behavior:</b>
+ * <ul>
+ *   <li>String/Writer output: Content is Base64 encoded</li>
+ *   <li>File/OutputStream output: Content is NOT Base64 encoded (raw binary)</li>
+ *   <li>String/Reader input: Content must be Base64 encoded</li>
+ *   <li>File/InputStream input: Content must NOT be Base64 encoded (raw binary)</li>
+ * </ul>
+ * 
+ * <p>The parser automatically registers many common Java types for optimal performance.
+ * Additional types can be registered using the {@link #register} methods or globally
+ * via {@link ParserFactory#registerKryo}.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * KryoParser parser = new KryoParser();
+ * 
+ * // Serialize to Base64 string
+ * MyObject obj = new MyObject();
+ * String serialized = parser.serialize(obj);
+ * 
+ * // Deserialize from Base64 string
+ * MyObject restored = parser.deserialize(serialized, MyObject.class);
+ * 
+ * // Binary serialization to file (not Base64 encoded)
+ * parser.serialize(obj, new File("data.kryo"));
+ * 
+ * // Register custom types for better performance
+ * parser.register(MyCustomType.class);
+ * parser.register(MyCustomType.class, 100); // with ID
+ * 
+ * // Deep copy
+ * MyObject copy = parser.clone(obj);
+ * 
+ * // Shallow copy
+ * MyObject shallowCopy = parser.copy(obj);
+ * }</pre>
+ * 
+ * @see ParserFactory#createKryoParser()
+ * @see KryoSerializationConfig
+ * @see KryoDeserializationConfig
+ * @since 1.0
  */
 public final class KryoParser extends AbstractParser<KryoSerializationConfig, KryoDeserializationConfig> {
 
@@ -174,14 +222,25 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     private final List<Kryo> kryoPool = new ArrayList<>(POOL_SIZE);
 
+    /**
+     * Constructs a new KryoParser with default settings.
+     */
     KryoParser() {
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @return a Base64 encoded String
+     * Serializes an object to a Base64 encoded string.
+     * 
+     * @param obj the object to serialize
+     * @param config the serialization configuration (may be null for defaults)
+     * @return a Base64 encoded string representation of the object
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * MyObject obj = new MyObject();
+     * String encoded = parser.serialize(obj, null);
+     * // encoded contains Base64 representation
+     * }</pre>
      */
     @Override
     public String serialize(final Object obj, final KryoSerializationConfig config) {
@@ -197,10 +256,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @param output content is NOT encoded with base64
+     * Serializes an object to a file with raw binary content (NOT Base64 encoded).
+     * 
+     * @param obj the object to serialize
+     * @param config the serialization configuration (may be null for defaults)
+     * @param output the output file
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * MyObject obj = new MyObject();
+     * File file = new File("data.kryo");
+     * parser.serialize(obj, null, file);
+     * // File contains raw binary data
+     * }</pre>
      */
     @Override
     public void serialize(final Object obj, final KryoSerializationConfig config, final File output) {
@@ -222,10 +291,19 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @param output content is NOT encoded with base64
+     * Serializes an object to an output stream with raw binary content (NOT Base64 encoded).
+     * 
+     * @param obj the object to serialize
+     * @param config the serialization configuration (may be null for defaults)
+     * @param output the output stream
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * try (FileOutputStream fos = new FileOutputStream("data.kryo")) {
+     *     parser.serialize(myObject, null, fos);
+     * }
+     * }</pre>
      */
     @Override
     public void serialize(final Object obj, final KryoSerializationConfig config, final OutputStream output) {
@@ -233,10 +311,19 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @param output content is encoded with base64
+     * Serializes an object to a writer with Base64 encoded content.
+     * 
+     * @param obj the object to serialize
+     * @param config the serialization configuration (may be null for defaults)
+     * @param output the output writer
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * StringWriter sw = new StringWriter();
+     * parser.serialize(myObject, null, sw);
+     * String base64 = sw.toString();
+     * }</pre>
      */
     @Override
     public void serialize(final Object obj, final KryoSerializationConfig config, final Writer output) {
@@ -256,10 +343,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @param output
+     * Writes an object to an output stream using Kryo serialization.
+     * 
+     * @param obj the object to write
+     * @param config the serialization configuration
+     * @param output the output stream
      */
     protected void write(final Object obj, final KryoSerializationConfig config, final OutputStream output) {
         final Output kryoOutput = createOutput();
@@ -274,10 +362,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param obj
-     * @param config
-     * @param output
+     * Writes an object using Kryo output.
+     * 
+     * @param obj the object to write
+     * @param config the serialization configuration
+     * @param output the Kryo output
      */
     protected void write(final Object obj, final KryoSerializationConfig config, final Output output) {
         check(config);
@@ -298,15 +387,24 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param <T>
-     * @param source A Base64 encoded String
-     * @param config
-     * @param targetClass
-     * @return
+     * Deserializes an object from a Base64 encoded string.
+     * 
+     * @param <T> the type of the target object
+     * @param source a Base64 encoded string
+     * @param config the deserialization configuration (may be null for defaults)
+     * @param targetClass the target class
+     * @return the deserialized object
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * String base64Data = "rO0ABXNyABF..."; // Base64 encoded
+     * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
+     * }</pre>
      */
     @Override
     public <T> T deserialize(final String source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+        N.checkArgNotNull(source, cs.source);
+
         final Input input = createInput();
 
         try {
@@ -319,12 +417,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
+     * Deserializes an object from a file containing raw binary data (NOT Base64 encoded).
+     * 
+     * @param <T> the type of the target object
+     * @param source the source file
+     * @param config the deserialization configuration (may be null for defaults)
+     * @param targetClass the target class
+     * @return the deserialized object
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * File file = new File("data.kryo");
+     * MyObject obj = parser.deserialize(file, null, MyObject.class);
+     * }</pre>
      */
     @Override
     public <T> T deserialize(final File source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -340,12 +446,21 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
+     * Deserializes an object from an input stream containing raw binary data (NOT Base64 encoded).
+     * 
+     * @param <T> the type of the target object
+     * @param source the source input stream
+     * @param config the deserialization configuration (may be null for defaults)
+     * @param targetClass the target class
+     * @return the deserialized object
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * try (FileInputStream fis = new FileInputStream("data.kryo")) {
+     *     MyObject obj = parser.deserialize(fis, null, MyObject.class);
+     * }
+     * }</pre>
      */
     @Override
     public <T> T deserialize(final InputStream source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -353,12 +468,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param <T>
-     * @param source content is encoded with base64
-     * @param config
-     * @param targetClass
-     * @return
+     * Deserializes an object from a reader containing Base64 encoded content.
+     * 
+     * @param <T> the type of the target object
+     * @param source the source reader with Base64 encoded content
+     * @param config the deserialization configuration (may be null for defaults)
+     * @param targetClass the target class
+     * @return the deserialized object
+     * @throws UncheckedIOException if an I/O error occurs
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * StringReader sr = new StringReader(base64String);
+     * MyObject obj = parser.deserialize(sr, null, MyObject.class);
+     * }</pre>
      */
     @Override
     public <T> T deserialize(final Reader source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -366,12 +489,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * Reads an object from an input stream using Kryo.
+     * 
+     * @param source the input stream
+     * @param config the deserialization configuration
+     * @param targetClass the target class
+     * @param <T> the type of the target object
+     * @return the deserialized object
      */
     protected <T> T read(final InputStream source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
         final Input input = createInput();
@@ -386,12 +510,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * Reads an object using Kryo input.
+     * 
+     * @param source the Kryo input
+     * @param config the deserialization configuration
+     * @param targetClass the target class
+     * @param <T> the type of the target object
+     * @return the deserialized object
      */
     @SuppressWarnings("unchecked")
     protected <T> T read(final Input source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -407,9 +532,10 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param config
-     * @return
+     * Validates the serialization configuration.
+     * 
+     * @param config the configuration to check
+     * @return the configuration
      */
     @SuppressWarnings("UnusedReturnValue")
     protected KryoSerializationConfig check(final KryoSerializationConfig config) {
@@ -423,9 +549,10 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param config
-     * @return
+     * Validates the deserialization configuration.
+     * 
+     * @param config the configuration to check
+     * @return the configuration
      */
     @SuppressWarnings("UnusedReturnValue")
     protected KryoDeserializationConfig check(final KryoDeserializationConfig config) {
@@ -439,11 +566,23 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     * Copy the property values shallowly.
-     *
-     * @param <T>
-     * @param source
-     * @return
+     * Creates a shallow copy of the source object.
+     * Only the object itself is copied, not its referenced objects.
+     * 
+     * @param <T> the type of the object
+     * @param source the object to copy
+     * @return a shallow copy of the source object
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * MyObject original = new MyObject();
+     * original.setName("Test");
+     * original.setList(Arrays.asList("a", "b"));
+     * 
+     * MyObject copy = parser.copy(original);
+     * // copy.getName() equals "Test"
+     * // copy.getList() == original.getList() (same reference)
+     * }</pre>
      */
     public <T> T copy(final T source) {
         final Kryo kryo = createKryo();
@@ -456,11 +595,24 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     * Copy the property values deeply.
-     *
-     * @param <T>
-     * @param source
-     * @return
+     * Creates a deep copy of the source object.
+     * The object and all its referenced objects are copied recursively.
+     * 
+     * @param <T> the type of the object
+     * @param source the object to clone
+     * @return a deep copy of the source object
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * MyObject original = new MyObject();
+     * original.setName("Test");
+     * original.setList(Arrays.asList("a", "b"));
+     * 
+     * MyObject clone = parser.clone(original);
+     * // clone.getName() equals "Test"
+     * // clone.getList() != original.getList() (different reference)
+     * // clone.getList().equals(original.getList()) (same content)
+     * }</pre>
      */
     public <T> T clone(final T source) {
         final Kryo kryo = createKryo();
@@ -473,9 +625,18 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param source
-     * @return
+     * Encodes an object to a byte array.
+     * The byte array includes class information and can be decoded without specifying the target class.
+     * 
+     * @param source the object to encode
+     * @return the encoded byte array
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * MyObject obj = new MyObject();
+     * byte[] encoded = parser.encode(obj);
+     * // Store or transmit the byte array
+     * }</pre>
      */
     public byte[] encode(final Object source) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
@@ -497,10 +658,18 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param <T>
-     * @param source
-     * @return
+     * Decodes an object from a byte array.
+     * The byte array must have been created with {@link #encode(Object)}.
+     * 
+     * @param <T> the type of the decoded object
+     * @param source the byte array to decode
+     * @return the decoded object
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * byte[] encoded = parser.encode(myObject);
+     * MyObject decoded = parser.decode(encoded);
+     * }</pre>
      */
     @SuppressWarnings("unchecked")
     public <T> T decode(final byte[] source) {
@@ -518,9 +687,18 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param type
-     * @throws IllegalArgumentException
+     * Registers a class with this parser instance for improved performance.
+     * Registration allows Kryo to serialize the class more efficiently.
+     * 
+     * @param type the class to register
+     * @throws IllegalArgumentException if type is null
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * parser.register(MyDomainObject.class);
+     * parser.register(MyValueObject.class);
+     * // Now these classes will serialize more efficiently
+     * }</pre>
      */
     public void register(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -534,10 +712,19 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param type
-     * @param id
-     * @throws IllegalArgumentException
+     * Registers a class with a specific ID for this parser instance.
+     * Using fixed IDs ensures compatibility across different JVM instances.
+     * 
+     * @param type the class to register
+     * @param id the unique ID for this class
+     * @throws IllegalArgumentException if type is null
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * parser.register(User.class, 100);
+     * parser.register(Order.class, 101);
+     * parser.register(Product.class, 102);
+     * }</pre>
      */
     public void register(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -551,10 +738,18 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param type
-     * @param serializer
-     * @throws IllegalArgumentException
+     * Registers a class with a custom serializer for this parser instance.
+     * Custom serializers can handle special serialization requirements.
+     * 
+     * @param type the class to register
+     * @param serializer the custom serializer for this class
+     * @throws IllegalArgumentException if type or serializer is null
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * parser.register(DateTime.class, new DateTimeSerializer());
+     * parser.register(Money.class, new MoneySerializer());
+     * }</pre>
      */
     public void register(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -569,11 +764,19 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
-     * @param type
-     * @param serializer
-     * @param id
-     * @throws IllegalArgumentException
+     * Registers a class with a custom serializer and specific ID for this parser instance.
+     * Combines the benefits of custom serialization and fixed IDs.
+     * 
+     * @param type the class to register
+     * @param serializer the custom serializer for this class
+     * @param id the unique ID for this class
+     * @throws IllegalArgumentException if type or serializer is null
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * parser.register(BigDecimal.class, new BigDecimalSerializer(), 200);
+     * parser.register(UUID.class, new UUIDSerializer(), 201);
+     * }</pre>
      */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -767,6 +970,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Creates and configures a new Kryo instance with all registered types.
+     * 
+     * @return a configured Kryo instance
+     */
     protected Kryo createKryo() {
         synchronized (kryoPool) {
             if (kryoPool.size() > 0) {
@@ -834,6 +1042,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Recycles a Kryo instance back to the pool.
+     * 
+     * @param kryo the Kryo instance to recycle
+     */
     void recycle(final Kryo kryo) {
         if (kryo == null) {
             return;
@@ -846,6 +1059,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Creates a new Output instance from the pool or creates a new one.
+     * 
+     * @return a Kryo Output instance
+     */
     static Output createOutput() {
         synchronized (outputPool) {
             if (outputPool.size() > 0) {
@@ -855,6 +1073,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Recycles an Output instance back to the pool.
+     * 
+     * @param output the Output instance to recycle
+     */
     static void recycle(final Output output) {
         if ((output == null) || ((output.getBuffer() != null) && (output.getBuffer().length > BUFFER_SIZE))) {
             return;
@@ -868,6 +1091,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Creates a new Input instance from the pool or creates a new one.
+     * 
+     * @return a Kryo Input instance
+     */
     static Input createInput() {
         synchronized (inputPool) {
             if (inputPool.size() > 0) {
@@ -877,6 +1105,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * Recycles an Input instance back to the pool.
+     * 
+     * @param input the Input instance to recycle
+     */
     static void recycle(final Input input) {
         if ((input == null) || ((input.getBuffer() != null) && (input.getBuffer().length > BUFFER_SIZE))) {
             return;

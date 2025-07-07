@@ -23,8 +23,11 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 
 /**
+ * Abstract base class for Date types in the type system.
+ * This class provides common functionality for handling Date objects and their subclasses,
+ * including serialization, formatting, and type checking operations.
  *
- * @param <T>
+ * @param <T> the specific Date type (e.g., java.util.Date, java.sql.Date, java.sql.Timestamp)
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
@@ -33,9 +36,10 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is date.
+     * Checks if this type represents a Date type.
+     * This method always returns {@code true} for Date types.
      *
-     * @return {@code true}, if is date
+     * @return {@code true}, indicating this is a Date type
      */
     @Override
     public boolean isDate() {
@@ -43,9 +47,10 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is comparable.
+     * Checks if this type is comparable.
+     * Date types are comparable based on their time values.
      *
-     * @return {@code true}, if is comparable
+     * @return {@code true}, indicating that Date types support comparison
      */
     @Override
     public boolean isComparable() {
@@ -53,9 +58,10 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Checks if this type represents values that should not be quoted in CSV format.
+     * Date values are typically formatted as date strings that don't require quotes.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return {@code true}, indicating that Date values should not be quoted in CSV format
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -63,9 +69,11 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
+     * Converts a Date value to its string representation.
+     * Uses the default date format provided by {@link Dates#format(Date)}.
      *
-     * @param x
-     * @return
+     * @param x the Date value to convert
+     * @return the formatted string representation of the date, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -73,10 +81,12 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
+     * Appends the string representation of a Date value to an Appendable.
+     * Writes "null" if the value is {@code null}, otherwise writes the formatted date string.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Date value to append
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -88,11 +98,21 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
+     * Writes a Date value to a CharacterWriter with optional configuration.
+     * The output format depends on the configuration:
+     * <ul>
+     *   <li>{@link DateTimeFormat#LONG} - writes the time in milliseconds since epoch</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_DATE_TIME} - writes ISO 8601 date-time format</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_TIMESTAMP} - writes ISO 8601 timestamp format</li>
+     *   <li>Default - uses the standard date format</li>
+     * </ul>
+     * String quotation is applied based on configuration unless using LONG format.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Date value to write
+     * @param config the serialization configuration, may be {@code null}
+     * @throws IOException if an I/O error occurs
+     * @throws RuntimeException if an unsupported DateTimeFormat is specified
      */
     @SuppressWarnings("null")
     @Override

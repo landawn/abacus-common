@@ -17,20 +17,53 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * A task that returns a result and may throw a RuntimeException.
+ * This interface extends {@link java.util.concurrent.Callable} but restricts the exception type to RuntimeException,
+ * making it more convenient to use in contexts where checked exceptions are not desired.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #call()}.
+ * 
+ * @param <R> the result type of method {@code call}
+ * 
+ * @see java.util.concurrent.Callable
+ * @see Runnable
+ */
 @FunctionalInterface
 public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> { //NOSONAR
 
+    /**
+     * Computes a result, or throws a RuntimeException if unable to do so.
+     * Unlike {@link java.util.concurrent.Callable#call()}, this method only throws RuntimeException,
+     * not checked exceptions.
+     *
+     * @return the computed result
+     * @throws RuntimeException if unable to compute a result
+     */
     @Override
     R call();
 
+    /**
+     * Converts this Callable to a Runnable that executes the call() method but discards the result.
+     * The returned Runnable will execute this Callable when run, ignoring any return value.
+     * Any RuntimeException thrown by the call() method will be propagated.
+     *
+     * @return a Runnable that executes this Callable and discards the result
+     */
     default Runnable toRunnable() {
         return Fn.c2r(this);
     }
 
     /**
+     * Converts this Callable to a Throwables.Callable with a specified exception type.
+     * This method performs an unchecked cast and is useful when you need to adapt this Callable
+     * to a context that expects a different exception type.
+     * 
+     * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
+     * only throws RuntimeException or its subclasses.
      *
-     * @param <E>
-     * @return
+     * @param <E> the type of exception that the returned Callable is declared to throw
+     * @return a Throwables.Callable that is functionally equivalent to this Callable
      */
     default <E extends Throwable> Throwables.Callable<R, E> toThrowable() {
         return (Throwables.Callable<R, E>) this;

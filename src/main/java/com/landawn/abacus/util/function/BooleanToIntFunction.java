@@ -14,18 +14,28 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a {@code boolean}-valued argument and produces an
+ * {@code int}-valued result. This is the {@code boolean}-to-{@code int} primitive specialization
+ * for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(boolean)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanToIntFunction {
 
     /**
-     * Converts a boolean value to an integer: {@code true} to {@code 1} and {@code false} to {@code 0}.
+     * A default function that converts a boolean value to an integer: {@code true} to {@code 1} and {@code false} to {@code 0}.
+     * This follows the common convention of representing boolean values as integers in many programming contexts.
      */
     BooleanToIntFunction DEFAULT = value -> value ? 1 : 0;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as an {@code int}
      */
     int applyAsInt(boolean value);
 }

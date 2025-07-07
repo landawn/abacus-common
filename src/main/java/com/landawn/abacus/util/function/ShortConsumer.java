@@ -16,20 +16,33 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts a single short-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code short}.
+ * Unlike most other functional interfaces, {@code ShortConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(short)}.
+ * 
+ * @see java.util.function.Consumer
+ */
 @FunctionalInterface
 public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given argument.
      *
-     * @param t
+     * @param t the input argument
      */
     @Override
     void accept(short t);
 
     /**
+     * Returns a composed {@code ShortConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code ShortConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortConsumer andThen(final ShortConsumer after) {
         return t -> {

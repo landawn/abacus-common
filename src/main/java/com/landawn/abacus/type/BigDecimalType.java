@@ -26,23 +26,38 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for BigDecimal operations.
+ * This class provides serialization/deserialization and database operations
+ * for java.math.BigDecimal instances with unlimited precision.
+ */
 public final class BigDecimalType extends NumberType<BigDecimal> {
 
+    /**
+     * The type name constant for BigDecimal type identification.
+     */
     public static final String BIG_DECIMAL = BigDecimal.class.getSimpleName();
 
     BigDecimalType() {
         super(BIG_DECIMAL);
     }
 
+    /**
+     * Returns the Class object representing the BigDecimal class.
+     *
+     * @return the Class object for BigDecimal.class
+     */
     @Override
     public Class<BigDecimal> clazz() {
         return BigDecimal.class;
     }
 
     /**
+     * Converts a BigDecimal value to its string representation.
+     * Uses the standard toString() method which may use scientific notation.
      *
-     * @param x
-     * @return
+     * @param x the BigDecimal value to convert
+     * @return the string representation of the BigDecimal, or null if input is null
      */
     @Override
     public String stringOf(final BigDecimal x) {
@@ -50,9 +65,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Converts a string representation to a BigDecimal value.
+     * Creates a BigDecimal with unlimited precision from the string.
      *
-     * @param str
-     * @return
+     * @param str the string to parse as a BigDecimal
+     * @return a new BigDecimal parsed from the string with unlimited precision,
+     *         or null if str is null or empty
+     * @throws NumberFormatException if the string cannot be parsed as a valid BigDecimal
      */
     @Override
     public BigDecimal valueOf(final String str) {
@@ -60,11 +79,16 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Creates a BigDecimal from a character array subset.
+     * Constructs a new BigDecimal from the specified subset of the character array
+     * with unlimited precision.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the digits
+     * @param offset the starting position in the character array
+     * @param len the number of characters to use
+     * @return a new BigDecimal created from the specified characters with unlimited precision,
+     *         or null if len is 0
+     * @throws NumberFormatException if the character sequence cannot be parsed as a valid BigDecimal
      */
     @Override
     public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
@@ -72,11 +96,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Retrieves a BigDecimal value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnIndex the column index (1-based) of the BigDecimal value
+     * @return the BigDecimal value at the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public BigDecimal get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -84,11 +109,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Retrieves a BigDecimal value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnLabel the label for the column specified with the SQL AS clause,
+     *                    or the column name if no AS clause was specified
+     * @return the BigDecimal value in the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public BigDecimal get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -96,11 +123,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Sets a BigDecimal parameter in a PreparedStatement at the specified position.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the BigDecimal value to set, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws SQLException {
@@ -108,11 +136,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Sets a named BigDecimal parameter in a CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the BigDecimal value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws SQLException {
@@ -120,11 +149,15 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
+     * Writes a BigDecimal value to a CharacterWriter with optional plain string formatting.
+     * Can write the value either in standard notation (which may use scientific notation)
+     * or in plain string format based on the configuration.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the BigDecimal value to write, may be null
+     * @param config the serialization configuration that may specify to write BigDecimal
+     *               values in plain format (without scientific notation)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final BigDecimal x, final JSONXMLSerializationConfig<?> config) throws IOException {

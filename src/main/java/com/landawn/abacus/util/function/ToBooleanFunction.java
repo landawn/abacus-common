@@ -16,15 +16,32 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that produces a boolean-valued result.
+ * This is the {@code boolean}-producing primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(Object)}.
+ * 
+ * @param <T> the type of the input to the function
+ * 
+ * @see java.util.function.Function
+ * @see java.util.function.Predicate
+ */
 @FunctionalInterface
 public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, RuntimeException> { //NOSONAR
 
+    /**
+     * A function that safely unboxes a Boolean object to a primitive boolean value.
+     * Returns {@code false} for null inputs and the boolean value for non-null inputs.
+     * This provides null-safe unboxing behavior.
+     */
     ToBooleanFunction<Boolean> UNBOX = value -> value != null && value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as a boolean value
      */
     @Override
     boolean applyAsBoolean(T value);

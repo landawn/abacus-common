@@ -15,12 +15,60 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum WeekDay.
+ * An enumeration representing the days of the week.
+ * Each day is associated with an integer value from 0 (Sunday) to 6 (Saturday).
+ * This enum provides a convenient way to work with weekdays in a type-safe manner.
+ * 
+ * <p>The integer values correspond to the day-of-week values used in many calendar systems,
+ * where Sunday is traditionally the first day of the week (value 0).</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * WeekDay today = WeekDay.MONDAY;
+ * int dayValue = today.intValue(); // Returns 1
+ * 
+ * WeekDay sunday = WeekDay.valueOf(0); // Returns WeekDay.SUNDAY
+ * }</pre>
  *
+ * @author Haiyang Li
+ * @since 0.8
  */
 public enum WeekDay {
 
-    SUNDAY(0), MONDAY(1), TUESDAY(2), WEDNESDAY(3), THURSDAY(4), FRIDAY(5), SATURDAY(6);
+    /**
+     * Sunday, represented by integer value 0.
+     */
+    SUNDAY(0),
+
+    /**
+     * Monday, represented by integer value 1.
+     */
+    MONDAY(1),
+
+    /**
+     * Tuesday, represented by integer value 2.
+     */
+    TUESDAY(2),
+
+    /**
+     * Wednesday, represented by integer value 3.
+     */
+    WEDNESDAY(3),
+
+    /**
+     * Thursday, represented by integer value 4.
+     */
+    THURSDAY(4),
+
+    /**
+     * Friday, represented by integer value 5.
+     */
+    FRIDAY(5),
+
+    /**
+     * Saturday, represented by integer value 6.
+     */
+    SATURDAY(6);
 
     private final int intValue;
 
@@ -28,14 +76,35 @@ public enum WeekDay {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the integer value associated with this weekday.
+     * The values range from 0 (Sunday) to 6 (Saturday).
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int mondayValue = WeekDay.MONDAY.intValue(); // Returns 1
+     * int saturdayValue = WeekDay.SATURDAY.intValue(); // Returns 6
+     * }</pre>
+     *
+     * @return the integer value of this weekday (0-6)
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
+     * Returns the WeekDay enum constant corresponding to the specified integer value.
+     * This method provides a way to convert from integer representation to the enum constant.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * WeekDay day = WeekDay.valueOf(1); // Returns WeekDay.MONDAY
+     * WeekDay weekend = WeekDay.valueOf(6); // Returns WeekDay.SATURDAY
+     * }</pre>
      *
-     * @param intValue
-     * @return
+     * @param intValue the integer value to convert (must be 0-6)
+     * @return the WeekDay enum constant corresponding to the integer value
+     * @throws IllegalArgumentException if the integer value is not in the range 0-6
      */
     public static WeekDay valueOf(final int intValue) {
         switch (intValue) {

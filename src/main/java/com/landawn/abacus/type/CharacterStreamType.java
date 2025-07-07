@@ -14,6 +14,12 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for character stream values.
+ * This class extends ReaderType to provide specific handling for character streams
+ * in database operations and serialization contexts.
+ * It serves as a semantic alias for ReaderType with a distinct type name.
+ */
 public class CharacterStreamType extends ReaderType {
 
     public static final String CHARACTER_STREAM = "CharacterStream";

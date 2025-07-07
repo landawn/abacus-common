@@ -16,29 +16,53 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that accepts a short-valued argument and produces a result.
+ * This is the {@code short}-consuming primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #apply(short)}.
+ * 
+ * @param <R> the type of the result of the function
+ * 
+ * @see java.util.function.Function
+ */
 @FunctionalInterface
 public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+     * A function that boxes a primitive short value into a Short object.
+     * This is equivalent to {@code Short::valueOf}.
+     */
     ShortFunction<Short> BOX = value -> value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result
      */
     @Override
     R apply(short value);
 
     /**
+     * Returns a composed function that first applies this function to its input, and then applies
+     * the {@code after} function to the result. If evaluation of either function throws an exception,
+     * it is relayed to the caller of the composed function.
      *
-     * @param <V>
-     * @param after
-     * @return
+     * @param <V> the type of output of the {@code after} function, and of the composed function
+     * @param after the function to apply after this function is applied
+     * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> ShortFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * Returns a function that always returns its input argument.
+     * This is equivalent to the identity function for short values, boxing them into Short objects.
+     *
+     * @return a function that always returns its input argument as a Short object
+     */
     static ShortFunction<Short> identity() {
         return t -> t;
     }

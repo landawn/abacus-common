@@ -16,15 +16,36 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that produces a char-valued result. This is the
+ * char-producing primitive specialization for {@link java.util.function.Function}.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsChar(Object)}.
+ *
+ * @param <T> the type of the input to the function
+ */
 @FunctionalInterface
 public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> { //NOSONAR
 
+    /**
+     * A predefined ToCharFunction instance that unboxes a Character object to a primitive char.
+     * Returns 0 if the input is null, otherwise returns the char value of the Character object.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Character boxed = 'A';
+     * char primitive = ToCharFunction.UNBOX.applyAsChar(boxed); // returns 'A'
+     * char defaultValue = ToCharFunction.UNBOX.applyAsChar(null); // returns '\0' (0)
+     * }</pre>
+     */
     ToCharFunction<Character> UNBOX = value -> value == null ? 0 : value;
 
     /**
+     * Applies this function to the given argument and returns a char result.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as a primitive char
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     char applyAsChar(T value);

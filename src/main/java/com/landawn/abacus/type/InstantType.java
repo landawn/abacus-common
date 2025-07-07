@@ -26,9 +26,15 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for java.time.Instant.
+ * This class provides serialization, deserialization, and database access capabilities for Instant instances.
+ * Instant represents a point on the time-line in UTC timezone. The default string format is ISO-8601 timestamp.
+ */
 public class InstantType extends AbstractTemporalType<Instant> {
 
     public static final String INSTANT = Instant.class.getSimpleName();
@@ -37,25 +43,36 @@ public class InstantType extends AbstractTemporalType<Instant> {
         super(INSTANT);
     }
 
+    /**
+     * Returns the Class object representing the Instant type.
+     *
+     * @return Instant.class
+     */
     @Override
     public Class<Instant> clazz() {
         return Instant.class;
     }
 
     /**
+     * Converts an Instant to its string representation.
+     * Uses ISO-8601 timestamp format with millisecond precision (e.g., "2023-12-25T10:30:45.123Z").
      *
-     * @param x
-     * @return
+     * @param x the Instant to convert to string
+     * @return the ISO-8601 timestamp string representation, or null if the input is null
      */
     @Override
     public String stringOf(final Instant x) {
-        return (x == null) ? null : iso8601TimestampDTF.format(x);
+        return (x == null) ? null : iso8601TimestampDTF.format(x.atZone(Dates.UTC_ZONE_ID));
     }
 
     /**
+     * Converts various object types to an Instant.
+     * Supported input types include:
+     * - Number: interpreted as milliseconds since epoch
+     * - Other types: converted to string and then parsed
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to Instant
+     * @return an Instant instance, or null if the input is null
      */
     @Override
     public Instant valueOf(final Object obj) {
@@ -67,9 +84,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Parses a string representation into an Instant.
+     * The method handles:
+     * - null or null-like strings: returns null
+     * - "sysTime": returns current instant
+     * - numeric strings: interpreted as milliseconds since epoch
+     * - ISO-8601 formatted strings: parsed according to standard formats
+     * - Standard Instant.parse() format for other strings
      *
-     * @param str
-     * @return
+     * @param str the string to parse into an Instant
+     * @return the parsed Instant instance, or null if the input is null or represents a null datetime
      */
     @MayReturnNull
     @Override
@@ -97,11 +121,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Parses a character array into an Instant.
+     * This method is optimized for performance when parsing from character buffers.
+     * If the character sequence appears to be a long number, it's interpreted as milliseconds since epoch.
+     * Otherwise, the characters are converted to a string and parsed using standard instant parsing.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the instant representation
+     * @param offset the start offset in the character array
+     * @param len the number of characters to parse
+     * @return the parsed Instant instance, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -122,11 +150,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Retrieves an Instant value from the specified column in a ResultSet.
+     * The method reads a Timestamp from the database and converts it to an Instant.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return the Instant value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -136,11 +166,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Retrieves an Instant value from the specified column in a ResultSet using the column name.
+     * The method reads a Timestamp from the database and converts it to an Instant.
      *
-     * @param rs
-     * @param columnName
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnName the name of the column to read
+     * @return the Instant value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
@@ -150,11 +182,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Sets an Instant parameter in a PreparedStatement.
+     * The Instant is converted to a Timestamp for database storage.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the Instant to set, or null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws SQLException {
@@ -162,11 +196,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Sets an Instant parameter in a CallableStatement using a parameter name.
+     * The Instant is converted to a Timestamp for database storage.
      *
-     * @param stmt
-     * @param columnName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param columnName the name of the parameter to set
+     * @param x the Instant to set, or null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String columnName, final Instant x) throws SQLException {
@@ -174,10 +210,12 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Appends the string representation of an Instant to an Appendable.
+     * Uses the default ISO-8601 timestamp format.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Instant to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Instant x) throws IOException {
@@ -189,11 +227,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
+     * Writes the character representation of an Instant to a CharacterWriter.
+     * The format depends on the serialization configuration:
+     * - LONG format: writes milliseconds since epoch as a number
+     * - ISO_8601_DATE_TIME: writes in "yyyy-MM-dd'T'HH:mm:ssZ" format
+     * - ISO_8601_TIMESTAMP: writes in "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format
+     * - Default: uses the standard stringOf() format
+     * String formats are quoted if specified in the configuration.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Instant to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @SuppressWarnings("null")
     @Override
@@ -217,12 +262,12 @@ public class InstantType extends AbstractTemporalType<Instant> {
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        writer.write(iso8601DateTimeDTF.format(x));
+                        writer.write(iso8601DateTimeDTF.format(x.atZone(Dates.UTC_ZONE_ID)));
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        writer.write(iso8601TimestampDTF.format(x));
+                        writer.write(iso8601TimestampDTF.format(x.atZone(Dates.UTC_ZONE_ID)));
 
                         break;
 

@@ -14,13 +14,26 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts a double-valued argument and a DoubleConsumer, 
+ * and returns no result. This functional interface is used to implement a one-to-many
+ * transformation operation, similar to flatMap. The DoubleConsumer parameter can be 
+ * invoked multiple times to pass multiple values downstream.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(double, java.util.function.DoubleConsumer)}.
+ *
+ * @see java.util.stream.DoubleStream.DoubleMapMultiConsumer
+ */
 @FunctionalInterface
 public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR
 
     /**
+     * Performs a one-to-many transformation operation. Accepts a double value and passes
+     * zero or more double values to the provided DoubleConsumer. This method can be used
+     * to expand a single double value into multiple values in a stream pipeline.
      *
-     * @param value
-     * @param ic
+     * @param value the double input value to be transformed
+     * @param ic the DoubleConsumer that will receive the transformed values
      */
     @Override
     void accept(double value, java.util.function.DoubleConsumer ic);

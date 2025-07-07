@@ -3151,6 +3151,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see BooleanList#intersection(BooleanList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static boolean[] intersection(final boolean[] a, final boolean[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -3182,6 +3183,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see CharList#intersection(CharList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static char[] intersection(final char[] a, final char[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_CHAR_ARRAY;
@@ -3213,6 +3215,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ByteList#intersection(ByteList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static byte[] intersection(final byte[] a, final byte[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_BYTE_ARRAY;
@@ -3244,6 +3247,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ShortList#intersection(ShortList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static short[] intersection(final short[] a, final short[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_SHORT_ARRAY;
@@ -3274,6 +3278,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         Returns an empty array if either input array is {@code null} or empty.
      * @see IntList#intersection(IntList)
      */
+    @SuppressWarnings("deprecation")
     public static int[] intersection(final int[] a, final int[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_INT_ARRAY;
@@ -3305,6 +3310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see LongList#intersection(LongList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static long[] intersection(final long[] a, final long[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_LONG_ARRAY;
@@ -3336,6 +3342,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see FloatList#intersection(FloatList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static float[] intersection(final float[] a, final float[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_FLOAT_ARRAY;
@@ -3367,6 +3374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see DoubleList#intersection(DoubleList)
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static double[] intersection(final double[] a, final double[] b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -3551,6 +3559,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(boolean[], boolean[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static boolean[] difference(final boolean[] a, final boolean[] b) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -3594,6 +3603,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(char[], char[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static char[] difference(final char[] a, final char[] b) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
@@ -3637,6 +3647,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(byte[], byte[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static byte[] difference(final byte[] a, final byte[] b) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
@@ -3680,6 +3691,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(short[], short[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static short[] difference(final short[] a, final short[] b) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
@@ -3722,6 +3734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #difference(Collection, Collection)
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static int[] difference(final int[] a, final int[] b) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
@@ -3765,6 +3778,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(long[], long[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static long[] difference(final long[] a, final long[] b) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
@@ -3808,6 +3822,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(float[], float[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static float[] difference(final float[] a, final float[] b) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
@@ -3851,6 +3866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(double[], double[])
      * @see #difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static double[] difference(final double[] a, final double[] b) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -3933,7 +3949,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // All occurrences of '2' are removed from c because d contains at least as many
      * </pre>
      *
-     * <p>Unlike {@link #removeAll(Collection, Collection)} which removes all occurrences of elements found in the second collection,
+     * <p>Unlike {@link Collection#removeAll(Collection)} which removes all occurrences of elements found in the second collection,
      * this method considers the count of occurrences, removing only as many as found in the second collection.
      *
      * @param <T> the type of elements in the first collection
@@ -4002,6 +4018,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(boolean[], boolean[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static boolean[] symmetricDifference(final boolean[] a, final boolean[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_BOOLEAN_ARRAY : b.clone();
@@ -4043,6 +4060,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(char[], char[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static char[] symmetricDifference(final char[] a, final char[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
@@ -4084,6 +4102,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(byte[], byte[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static byte[] symmetricDifference(final byte[] a, final byte[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_BYTE_ARRAY : b.clone();
@@ -4125,6 +4144,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(short[], short[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static short[] symmetricDifference(final short[] a, final short[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
@@ -4165,6 +4185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #difference(int[], int[])
      * @see #intersection(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static int[] symmetricDifference(final int[] a, final int[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_INT_ARRAY : b.clone();
@@ -4206,6 +4227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(long[], long[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static long[] symmetricDifference(final long[] a, final long[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
@@ -4247,6 +4269,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(float[], float[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static float[] symmetricDifference(final float[] a, final float[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_FLOAT_ARRAY : b.clone();
@@ -4288,6 +4311,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #intersection(double[], double[])
      * @see #symmetricDifference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static double[] symmetricDifference(final double[] a, final double[] b) {
         if (isEmpty(a)) {
             return isEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
@@ -4780,45 +4804,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns {@code true} if the given {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
-     * <p>
-     * That is, if the cardinality of <i>e</i> in <i>a</i> is
-     * equal to the cardinality of <i>e</i> in <i>b</i>,
-     * for each element <i>e</i> in <i>a</i> or <i>b</i>.
-     * </p>
-     *
-     * @param a the first collection
-     * @param b the second collection
-     * @return {@code true} if the collections contain the same elements with the same cardinalities.
+     * Checks whether two collections contain the same elements with the same frequencies,
+     * regardless of their order. Two collections are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first collection to compare, may be {@code null}
+     * @param b the second collection to compare, may be {@code null}
+     * @return {@code true} if both collections contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(Collection, Collection)
+     * @see #haveSameElements(int[], int[])
      */
     public static boolean isEqualCollection(final Collection<?> a, final Collection<?> b) {
-        if (a == null && b == null) {
-            return true;
-        } else if ((a == null) == (b != null)) { //NOSONAR
-            return false;
-        }
-
-        final int sizeA = size(a);
-        final int sizeB = size(b);
-
-        if (sizeA != sizeB) {
-            return false;
-        }
-
-        final Multiset<?> multisetA = Multiset.create(a);
-        final Multiset<?> multisetB = Multiset.create(b);
-
-        if (multisetA.size() != multisetB.size()) {
-            return false;
-        }
-
-        for (final Object e : multisetA.elementSet()) {
-            if (multisetA.occurrencesOf(e) != multisetB.occurrencesOf(e)) {
-                return false;
-            }
-        }
-
-        return true;
+        return haveSameElements(a, b);
     }
 
     /**
@@ -8468,6 +8469,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static boolean[] removeAll(final boolean[] a, final boolean... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -8492,6 +8494,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static char[] removeAll(final char[] a, final char... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
@@ -8516,6 +8519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static byte[] removeAll(final byte[] a, final byte... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
@@ -8540,6 +8544,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static short[] removeAll(final short[] a, final short... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
@@ -8564,6 +8569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static int[] removeAll(final int[] a, final int... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
@@ -8588,6 +8594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static long[] removeAll(final long[] a, final long... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
@@ -8612,6 +8619,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static float[] removeAll(final float[] a, final float... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
@@ -8636,6 +8644,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
+    @SuppressWarnings("deprecation")
     public static double[] removeAll(final double[] a, final double... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -22566,6 +22575,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to elements of the array.
      * @return a list of elements from the input array starting from the first element that satisfies the predicate. An empty list if the input array is {@code null} or empty.
      */
+    @Beta
     public static <T> List<T> skipUntil(final T[] a, final Predicate<? super T> filter) {
         if (isEmpty(a)) {
             return new ArrayList<>(0);
@@ -22594,6 +22604,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to elements of the iterable.
      * @return a list of elements from the input iterable starting from the first element that satisfies the predicate. An empty list is returned if the input iterable is {@code null} or empty.
      */
+    @Beta
     public static <T> List<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> filter) {
         if (isEmptyCollection(c)) {
             return new ArrayList<>(0);
@@ -22610,6 +22621,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to elements of the iterator.
      * @return a list of elements from the input iterator starting from the first element that satisfies the predicate. An empty list is returned if the input iterator is {@code null} or empty.
      */
+    @Beta
     public static <T> List<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
         if (iter == null) {
             return new ArrayList<>(0);
@@ -25650,8 +25662,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             for (final T e : c) {
                 unzip.accept(e, p);
 
-                l.add(p.left);
-                r.add(p.right);
+                l.add(p.left());
+                r.add(p.right());
             }
         }
 
@@ -25745,9 +25757,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
             for (final T e : c) {
                 unzip.accept(e, t);
 
-                l.add(t.left);
-                m.add(t.middle);
-                r.add(t.right);
+                l.add(t.left());
+                m.add(t.middle());
+                r.add(t.right());
             }
         }
 
@@ -27009,22 +27021,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> Stream<T> streamJson(final String jsonArray, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array string with the specified target type.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the JSON array string to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
     public static <T> Stream<T> streamJson(final String jsonArray, final Type<? extends T> elementType) {
         return streamJson(jsonArray, null, elementType);
     }
@@ -27042,41 +27038,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> Stream<T> streamJson(final String jsonArray, final JSONDeserializationConfig config, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, config, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array string with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the JSON array string to be streamed
-     * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
     public static <T> Stream<T> streamJson(final String jsonArray, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType.clazz());
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified file with the specified target type.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the JSON array file to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final File jsonArray, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, elementType);
+        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
     /**
@@ -27108,41 +27071,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> Stream<T> streamJson(final File jsonArray, final JSONDeserializationConfig config, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, config, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified file with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the JSON array file to be streamed
-     * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
     public static <T> Stream<T> streamJson(final File jsonArray, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType.clazz());
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified input stream with the specified target type.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final InputStream jsonArray, final Class<? extends T> elementType) {
-        return streamJson(jsonArray, false, elementType);
+        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
     /**
@@ -27159,24 +27089,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final Type<? extends T> elementType) {
         return streamJson(jsonArray, false, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified input stream with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final InputStream jsonArray, final boolean closeInputStreamWhenStreamIsClosed,
-            final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, elementType);
     }
 
     /**
@@ -27211,43 +27123,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final JSONDeserializationConfig config,
-            final boolean closeInputStreamWhenStreamIsClosed, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, config, closeInputStreamWhenStreamIsClosed, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified input stream with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param config the JSON deserialization configuration
-     * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final InputStream jsonArray, final JSONDeserializationConfig config,
             final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeInputStreamWhenStreamIsClosed, elementType.clazz());
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified reader with the specified target type.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final Reader jsonArray, final Class<? extends T> elementType) {
-        return streamJson(jsonArray, false, elementType);
+        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeInputStreamWhenStreamIsClosed, elementType);
     }
 
     /**
@@ -27264,23 +27141,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final Type<? extends T> elementType) {
         return streamJson(jsonArray, false, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified reader with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final Reader jsonArray, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, elementType);
     }
 
     /**
@@ -27315,27 +27175,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
-            final Class<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, config, closeReaderWhenStreamIsClosed, elementType);
-    }
-
-    /**
-     * Creates a stream of elements deserialized from the given JSON array in the specified reader with the specified target type and {@code JSONDeserializationConfig}.
-     *
-     * @param <T> the type of the elements in the JSON array
-     * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param config the JSON deserialization configuration
-     * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
-     * @return a stream of elements deserialized from the given JSON array
-     * @throws IllegalArgumentException if the specified element type is {@code null}.
-     * @see com.landawn.abacus.type.Type
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> Stream<T> streamJson(final Reader jsonArray, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeReaderWhenStreamIsClosed, elementType.clazz());
+        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeReaderWhenStreamIsClosed, elementType);
     }
 
     private static JSONDeserializationConfig setElementType(final JSONDeserializationConfig config, final Type<?> elementType) {
@@ -27353,7 +27194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (config == null || config.getElementType() == null) {
                 configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : config.copy();
 
-                configToReturn.setElementType(targetType.getParameterTypes()[0]);
+                configToReturn.setElementType(targetType.getElementType());
             }
         } else if (targetType.isMap() && (config == null || config.getMapKeyType() == null || config.getMapValueType() == null)) {
             configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : config.copy();
@@ -31608,9 +31449,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the timeout elapses, and only then re-interrupts the thread.
      *
@@ -31637,9 +31476,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
@@ -31673,10 +31510,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
-     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      * @param cmd the command to execute with the remaining time and unit
@@ -31713,9 +31548,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
@@ -31743,9 +31576,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
@@ -31781,9 +31612,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
@@ -32324,9 +32153,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
@@ -32363,9 +32190,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Note: Copied from Google Guava under Apache License v2.0
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.

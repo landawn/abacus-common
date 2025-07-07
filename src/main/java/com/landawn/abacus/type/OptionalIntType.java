@@ -17,6 +17,11 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalInt;
 
+/**
+ * Type handler for {@link OptionalInt} objects, providing serialization, deserialization,
+ * and database interaction capabilities for optional integer values. This handler manages
+ * the conversion between database integer values and OptionalInt wrapper objects.
+ */
 public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = OptionalInt.class.getSimpleName();
@@ -25,15 +30,21 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
         super(OPTIONAL_INT);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link OptionalInt} class object
+     */
     @Override
     public Class<OptionalInt> clazz() {
         return OptionalInt.class;
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether values of this type can be compared.
+     * OptionalInt values support comparison operations.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as OptionalInt values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -41,9 +52,10 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether values of this type should be quoted when written to CSV format.
+     * Numeric values typically don't require quotes in CSV.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating integer values don't need quotes in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -51,9 +63,10 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts an {@link OptionalInt} object to its string representation.
+     * 
+     * @param x the OptionalInt object to convert
+     * @return the string representation of the integer value, or null if empty or null
      */
     @Override
     public String stringOf(final OptionalInt x) {
@@ -61,9 +74,11 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a string representation to an {@link OptionalInt} object.
+     * 
+     * @param str the string to convert
+     * @return an OptionalInt containing the parsed integer value, or empty if the input is empty or null
+     * @throws NumberFormatException if the string cannot be parsed as an integer
      */
     @Override
     public OptionalInt valueOf(final String str) {
@@ -71,11 +86,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an integer value from a ResultSet at the specified column index and wraps it in an {@link OptionalInt}.
+     * Handles type conversion if the database column is not an integer type.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return an OptionalInt containing the integer value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -85,11 +102,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an integer value from a ResultSet using the specified column label and wraps it in an {@link OptionalInt}.
+     * Handles type conversion if the database column is not an integer type.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return an OptionalInt containing the integer value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -99,11 +118,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalInt}.
+     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the OptionalInt value to set
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws SQLException {
@@ -115,11 +136,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalInt}.
+     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the OptionalInt value to set
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws SQLException {
@@ -131,10 +154,11 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of an {@link OptionalInt} to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the OptionalInt value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
@@ -146,11 +170,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of an {@link OptionalInt} to a CharacterWriter.
+     * This method is typically used for JSON/XML serialization.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the OptionalInt value to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalInt x, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -23,6 +23,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for Integer array (Integer[]).
+ * This class provides optimized serialization and deserialization for arrays of Integer objects,
+ * including proper handling of null elements within the array.
+ */
 public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     IntegerArrayType() {
@@ -30,9 +35,13 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
+     * Converts an Integer array to its string representation.
+     * The array is serialized as a JSON array string with proper null handling.
+     * Null elements are represented as "null" in the output string.
+     * This method is optimized for performance using string joining.
      *
-     * @param x
-     * @return
+     * @param x the Integer array to convert to string
+     * @return the JSON array string representation (e.g., "[1,null,3]"), or null if the input array is null
      */
     @MayReturnNull
     @Override
@@ -43,44 +52,25 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 8));
-        //
-        //        sb.append(WD._BRACKET_L);
-        //
-        //        for (int i = 0, len = x.length; i < len; i++) {
-        //            if (i > 0) {
-        //                sb.append(ELEMENT_SEPARATOR);
-        //            }
-        //
-        //            if (x[i] == null) {
-        //                sb.append(NULL_CHAR_ARRAY);
-        //            } else {
-        //                sb.append(x[i]);
-        //            }
-        //        }
-        //
-        //        sb.append(WD._BRACKET_R);
-        //
-        //        final String str = sb.toString();
-        //
-        //        Objectory.recycle(sb);
-        //
-        //        return str;
-
         return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
+     * Parses a string representation into an Integer array.
+     * The string should be in JSON array format. Handles the following cases:
+     * - null string: returns null
+     * - empty string or "[]": returns empty Integer array
+     * - JSON array: parses each element, treating "null" strings as null values
      *
-     * @param str
-     * @return
+     * @param str the JSON array string to parse (e.g., "[1,null,3]")
+     * @return the parsed Integer array, or null if the input is null
      */
     @MayReturnNull
     @Override
     public Integer[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_INT_OBJ_ARRAY;
         }
 
@@ -102,10 +92,13 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
+     * Appends the string representation of an Integer array to an Appendable.
+     * The output format is a JSON array with proper null handling.
+     * This method is optimized to avoid string concatenation overhead.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Integer array to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Integer[] x) throws IOException {
@@ -131,11 +124,14 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
+     * Writes the character representation of an Integer array to a CharacterWriter.
+     * This method is optimized for performance by using specialized writeInt method
+     * for non-null values, avoiding string conversion overhead.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Integer array to write
+     * @param config the serialization configuration (not used for integer arrays)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Integer[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

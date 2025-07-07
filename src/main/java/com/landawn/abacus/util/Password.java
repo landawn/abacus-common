@@ -20,6 +20,23 @@ import java.util.Objects;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
+/**
+ * A utility class for password encryption and verification using various hashing algorithms.
+ * This class provides thread-safe password encryption functionality using MessageDigest
+ * and Base64 encoding. It supports any algorithm available through the Java security provider.
+ * 
+ * <p>This class is immutable and thread-safe for password operations.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Password password = new Password("SHA-256");
+ * String encrypted = password.encrypt("myPassword123");
+ * boolean matches = password.isEqual("myPassword123", encrypted);
+ * }</pre>
+ * 
+ * @see MessageDigest
+ * @see java.security.Security
+ */
 public final class Password {
 
     private final String algorithm;
@@ -27,8 +44,19 @@ public final class Password {
     private final MessageDigest msgDigest;
 
     /**
+     * Creates a new Password instance with the specified hashing algorithm.
+     * The algorithm must be one supported by the Java security provider
+     * (e.g., "MD5", "SHA-1", "SHA-256", "SHA-512").
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Password sha256Password = new Password("SHA-256");
+     * Password md5Password = new Password("MD5");
+     * }</pre>
      *
-     * @param algorithm
+     * @param algorithm the name of the hashing algorithm to use
+     * @throws RuntimeException if the specified algorithm is not available
+     * @see MessageDigest#getInstance(String)
      */
     public Password(final String algorithm) {
         this.algorithm = algorithm;
@@ -41,19 +69,34 @@ public final class Password {
     }
 
     /**
-     * Gets the algorithm.
+     * Returns the name of the hashing algorithm used by this Password instance.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Password password = new Password("SHA-256");
+     * String algo = password.getAlgorithm(); // Returns "SHA-256"
+     * }</pre>
      *
-     * @return
+     * @return the algorithm name (e.g., "SHA-256", "MD5")
      */
     public String getAlgorithm() {
         return algorithm;
     }
 
     /**
-     * Returns the encrypted password encoded with Base64.
+     * Encrypts the given password string using the configured hashing algorithm
+     * and returns the result encoded in Base64 format. This method is thread-safe
+     * due to synchronization.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Password password = new Password("SHA-256");
+     * String encrypted = password.encrypt("mySecretPassword");
+     * // encrypted contains the Base64-encoded hash
+     * }</pre>
      *
-     * @param x
-     * @return
+     * @param x the plain text password to encrypt
+     * @return the encrypted password encoded in Base64, or {@code null} if input is {@code null}
      */
     @MayReturnNull
     public synchronized String encrypt(final String x) {
@@ -69,31 +112,67 @@ public final class Password {
     }
 
     /**
-     * Checks if is equal.
+     * Verifies if a plain text password matches an encrypted password.
+     * This method encrypts the plain password and compares it with the provided
+     * encrypted password for equality.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Password password = new Password("SHA-256");
+     * String encrypted = password.encrypt("myPassword");
+     * 
+     * boolean matches = password.isEqual("myPassword", encrypted); // true
+     * boolean notMatches = password.isEqual("wrongPassword", encrypted); // false
+     * }</pre>
      *
-     * @param plainPassword
-     * @param encryptedPassword
-     * @return {@code true}, if is equal
+     * @param plainPassword the plain text password to verify
+     * @param encryptedPassword the encrypted password to compare against
+     * @return {@code true} if the passwords match, {@code false} otherwise.
+     *         Returns {@code true} if both are {@code null}, {@code false} if only one is {@code null}
      */
     public boolean isEqual(final String plainPassword, final String encryptedPassword) {
         return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));
     }
 
+    /**
+     * Returns a hash code value for this Password instance based on the algorithm name.
+     * Two Password instances with the same algorithm will have the same hash code.
+     *
+     * @return a hash code value for this object
+     */
     @Override
     public int hashCode() {
         return Objects.hash(algorithm);
     }
 
     /**
+     * Compares this Password instance with the specified object for equality.
+     * Two Password instances are considered equal if they use the same algorithm.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Password p1 = new Password("SHA-256");
+     * Password p2 = new Password("SHA-256");
+     * Password p3 = new Password("MD5");
+     * 
+     * p1.equals(p2); // true
+     * p1.equals(p3); // false
+     * }</pre>
      *
-     * @param obj
-     * @return
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
         return obj == this || (obj instanceof Password && ((Password) obj).algorithm.equals(algorithm));
     }
 
+    /**
+     * Returns a string representation of this Password instance.
+     * The string contains the algorithm name in the format: {@code {algorithm=SHA-256}}
+     *
+     * @return a string representation of this object
+     */
     @Override
     public String toString() {
         return "{algorithm=" + algorithm + "}";

@@ -15,14 +15,88 @@
 package com.landawn.abacus.eventbus;
 
 /**
- *
- * @param <E>
+ * A functional interface for implementing event subscribers in the EventBus system.
+ * Classes implementing this interface can be registered with an {@link EventBus} to receive events
+ * of the specified type.
+ * 
+ * <p>This interface is particularly useful for creating subscribers using lambda expressions
+ * or anonymous inner classes. When using lambda expressions, the subscriber must be registered
+ * with an event ID to avoid ambiguity.</p>
+ * 
+ * <p>Example usage with lambda expression:</p>
+ * <pre>
+ * {@code
+ * EventBus eventBus = EventBus.getDefault();
+ * 
+ * // Lambda subscriber for String events
+ * eventBus.register((Subscriber<String>) event -> {
+ *     System.out.println("Received: " + event);
+ * }, "stringEvents");
+ * 
+ * // Lambda subscriber for custom event types
+ * eventBus.register((Subscriber<UserLoginEvent>) event -> {
+ *     System.out.println("User logged in: " + event.getUserId());
+ * }, "userEvents");
+ * }
+ * </pre>
+ * 
+ * <p>Example usage with anonymous inner class:</p>
+ * <pre>
+ * {@code
+ * Subscriber<Integer> numberSubscriber = new Subscriber<Integer>() {
+ *     @Override
+ *     public void on(Integer event) {
+ *         System.out.println("Number received: " + event);
+ *     }
+ * };
+ * eventBus.register(numberSubscriber, "numberEvents");
+ * }
+ * </pre>
+ * 
+ * <p>Example usage with method reference:</p>
+ * <pre>
+ * {@code
+ * public class MyHandler {
+ *     public void handleString(String message) {
+ *         System.out.println("Handling: " + message);
+ *     }
+ * }
+ * 
+ * MyHandler handler = new MyHandler();
+ * eventBus.register((Subscriber<String>) handler::handleString, "messages");
+ * }
+ * </pre>
+ * 
+ * @param <E> the type of event this subscriber will receive
+ * @see EventBus
+ * @see Subscribe
+ * @since 1.0
  */
+@FunctionalInterface
 public interface Subscriber<E> {
 
     /**
+     * Called when an event of type E is posted to the EventBus.
+     * This method will be invoked by the EventBus when a matching event is posted.
+     * 
+     * <p>The method will be called on the thread specified during registration,
+     * or on the posting thread if no thread mode was specified.</p>
+     * 
+     * <p>Implementations should handle the event appropriately and should not throw
+     * unchecked exceptions. Any exceptions thrown will be caught and logged by the EventBus.</p>
+     * 
+     * <p>Example implementation:</p>
+     * <pre>
+     * {@code
+     * public void on(UserEvent event) {
+     *     // Process the user event
+     *     updateUserInterface(event.getUser());
+     *     logUserActivity(event);
+     * }
+     * }
+     * </pre>
      *
-     * @param event
+     * @param event the event instance posted to the EventBus. Never null.
      */
     void on(E event);
 }

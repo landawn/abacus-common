@@ -16,23 +16,40 @@ package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Base64-encoded byte arrays.
+ * This class provides conversion between byte arrays and their Base64 string representations,
+ * enabling storage and transmission of binary data as text.
+ */
 public class Base64EncodedType extends AbstractType<byte[]> {
 
+    /**
+     * The type name constant for Base64-encoded type identification.
+     */
     public static final String BASE64_ENCODED = "Base64Encoded";
 
     Base64EncodedType() {
         super(BASE64_ENCODED);
     }
 
+    /**
+     * Returns the Class object representing the byte array class.
+     *
+     * @return the Class object for byte[].class
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;
     }
 
     /**
+     * Converts a byte array to its Base64-encoded string representation.
+     * Uses standard Base64 encoding to convert binary data to a text format
+     * suitable for storage or transmission in text-based protocols.
      *
-     * @param x
-     * @return
+     * @param x the byte array to encode
+     * @return the Base64-encoded string representation of the byte array,
+     *         or an empty string if the input is null
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -40,9 +57,12 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
+     * Converts a Base64-encoded string back to its original byte array.
+     * Decodes the Base64 string to recover the original binary data.
      *
-     * @param base64String
-     * @return
+     * @param base64String the Base64-encoded string to decode
+     * @return the decoded byte array, or an empty byte array if the input is null
+     * @throws IllegalArgumentException if the input string is not valid Base64
      */
     @Override
     public byte[] valueOf(final String base64String) {

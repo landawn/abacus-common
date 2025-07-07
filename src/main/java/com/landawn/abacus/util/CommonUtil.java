@@ -2734,8 +2734,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @return the {@code non-null} object reference that was validated}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2756,8 +2755,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @return the {@code non-null} object reference that was validated}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2782,8 +2780,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the {@code non-null} object reference that was validated
-     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @return the {@code non-null} object reference that was validated}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3256,6 +3253,34 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two float arrays for equality within a specified delta.
+     *
+     * @param a the first float array, must not be null
+     * @param b the second float array, must not be null
+     * @param delta the maximum difference allowed for equality
+     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
+     */
+    public static boolean equals(final float[] a, final float[] b, final float delta) {
+        if (a == b && (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!Numbers.fuzzyEquals(a[i], b[i], delta)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Compares two arrays for equality.
      *
      * @param a the first array
@@ -3292,6 +3317,34 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (Double.compare(a[i], b[j]) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two double arrays for equality within a specified delta.
+     *
+     * @param a the first double array, must not be null
+     * @param b the second double array, must not be null
+     * @param delta the maximum difference allowed for equality
+     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
+     */
+    public static boolean equals(final double[] a, final double[] b, final double delta) {
+        if (a == b && (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!Numbers.fuzzyEquals(a[i], b[i], delta)) {
                 return false;
             }
         }
@@ -4095,6 +4148,85 @@ sealed class CommonUtil permits N {
         }
 
         return result;
+    }
+
+    /**
+     * Calculates a comprehensive hash code by recursively traversing the entire object structure.
+     * <p>
+     * This method recursively processes the input object to generate a thorough hash code that 
+     * encompasses all nested elements:
+     * <ul>
+     *   <li>For arrays: processes each element recursively</li>
+     *   <li>For collections/iterables: processes each element recursively</li>
+     *   <li>For maps: processes each key and value recursively</li>
+     *   <li>For bean objects: processes each property/field recursively</li>
+     *   <li>For primitive values: uses appropriate hash code calculation</li>
+     * </ul>
+     * <p>
+     * Unlike {@link #hashCode(Object)} or {@link #deepHashCode(Object)}, this method provides a 
+     * more comprehensive hash code by traversing the complete object graph, ensuring that even 
+     * deeply nested structures are incorporated into the resulting hash code.
+     * <p>
+     * Note that this method may be computationally expensive for large or deeply nested objects.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * // Create a complex nested structure
+     * List<Map<String, Object[]>> complexObject = ...
+     * 
+     * // Calculate a comprehensive hash code
+     * long hashCode = hashCodeEverything(complexObject);
+     * }</pre>
+     *
+     * @param obj the object for which to calculate a comprehensive hash code
+     * @return a long value representing the hash code of the entire object structure
+     * @see #hashCode(Object[])
+     * @see #deepHashCode(Object[])
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static long hashCodeEverything(final Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+
+        long ret = 1;
+
+        if (obj instanceof Iterable iter) {
+            for (final Object e : iter) {
+                ret = 31 * ret + hashCodeEverything(e);
+            }
+        } else if (obj instanceof Map) {
+            final Map<Object, Object> map = (Map) obj;
+
+            for (final Map.Entry<Object, Object> entry : map.entrySet()) {
+                ret = 31 * ret + hashCodeEverything(entry.getKey());
+                ret = 31 * ret + hashCodeEverything(entry.getValue());
+            }
+        } else if (obj.getClass().isArray()) {
+            if (obj instanceof Object[] a) {
+                for (final Object e : a) {
+                    ret = 31 * ret + hashCodeEverything(e);
+                }
+            } else {
+                ret = 31 * ret + N.deepHashCode(obj);
+            }
+        } else if (obj instanceof Iterator iter) {
+            while (iter.hasNext()) {
+                ret = 31 * ret + hashCodeEverything(iter.next());
+            }
+        } else if (ClassUtil.isBeanClass(obj.getClass())) {
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(obj.getClass());
+
+            for (final PropInfo propInfo : beanInfo.propInfoList) {
+                ret = 31 * ret + N.hashCode(propInfo.name);
+                ret = 31 * ret + hashCodeEverything(propInfo.getPropValue(obj));
+            }
+        } else {
+            ret = 31 * ret + N.hashCode(obj);
+        }
+
+        return ret;
     }
 
     /**
@@ -7503,6 +7635,8 @@ sealed class CommonUtil permits N {
         return (str == null) ? defaultValueOf(targetType) : (T) typeOf(targetType).valueOf(str);
     }
 
+    // ================================ creation/conversion... =======================================================
+
     private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
 
     /**
@@ -8747,7 +8881,6 @@ sealed class CommonUtil permits N {
      *
      * @param beanClass the class of the bean whose property names are to be retrieved.
      * @return an ImmutableList of strings representing the property names of the given bean class.
-     * @throws IllegalArgumentException if the specified bean class is {@code null}.
      * @see ClassUtil#getPropNameList(Class)
      */
     public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
@@ -8760,7 +8893,6 @@ sealed class CommonUtil permits N {
      * @param beanClass the class of the bean whose property names are to be retrieved.
      * @param propNameToExclude a set of property names to be excluded from the returned list.
      * @return a List of strings representing the property names of the given bean class excluding the specified property names.
-     * @throws IllegalArgumentException if the specified bean class is {@code null}.
      * @see ClassUtil#getPropNames(Class, Set)
      * @see ClassUtil#getPropNames(Class, Collection)
      */
@@ -8773,7 +8905,6 @@ sealed class CommonUtil permits N {
      *
      * @param bean The bean object whose property names are to be retrieved.
      * @return A list of strings representing the property names of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#getPropNameList(Class)
      * @see ClassUtil#getPropNames(Object, Predicate)
      * @see ClassUtil#getPropNames(Object, BiPredicate)
@@ -8792,7 +8923,6 @@ sealed class CommonUtil permits N {
      * @param bean The bean object whose property names are to be retrieved.
      * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
      * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#getPropNameList(Class)
      * @see ClassUtil#getPropNames(Object, Predicate)
      * @see ClassUtil#getPropNames(Object, BiPredicate)
@@ -8812,7 +8942,6 @@ sealed class CommonUtil permits N {
      * @param bean The bean object from which the property value is to be retrieved.
      * @param propName The name of the property whose value is to be retrieved.
      * @return The value of the specified property of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#getPropValue(Object, String)
      * @see BeanInfo#getPropValue(Object, String)
      */
@@ -8828,7 +8957,6 @@ sealed class CommonUtil permits N {
      * @param propName The name of the property whose value is to be retrieved.
      * @param ignoreUnmatchedProperty If {@code true}, the method will not throw an exception if the property does not exist in the bean object.
      * @return The value of the specified property of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is {@code false}.
      * @see ClassUtil#getPropValue(Object, String, boolean)
      * @see BeanInfo#getPropValue(Object, String)
      */
@@ -8844,7 +8972,6 @@ sealed class CommonUtil permits N {
      * @param bean The bean object in which the property value is to be set.
      * @param propName The name of the property whose value is to be set. The property name is case-insensitive.
      * @param propValue The new value to be set for the specified property in the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#setPropValue(Object, String, Object)
      * @see BeanInfo#setPropValue(Object, String, Object)
      * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
@@ -9262,9 +9389,9 @@ sealed class CommonUtil permits N {
                     parent = parent.getEnclosingClass();
                 } while (parent != null && !Modifier.isStatic(parent.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(parent));
 
-                if (parent != null) {
-                    toInstantiate.add(parent);
-                }
+                //    if (parent != null) {
+                //        toInstantiate.add(parent);
+                //    }
 
                 reverse(toInstantiate);
 
@@ -9574,20 +9701,21 @@ sealed class CommonUtil permits N {
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
-    /**
-     * Creates a new instance of a TreeSet with the elements from the specified sorted set.
-     *
-     * @param <T> the type of elements in the set
-     * @param sortedSet the sorted set whose elements are to be placed into this set
-     * @return a new instance of a TreeSet containing the elements from the specified sorted set
-     * @throws IllegalArgumentException if the specified {@code SortedSet} is {@code null}.
-     * @see java.util.TreeSet#TreeSet(SortedSet)
-     */
-    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> sortedSet) { //NOSONAR
-        checkArgNotNull(sortedSet, cs.sortedSet);
-
-        return new TreeSet<>(sortedSet);
-    }
+    // ambiguous
+    //    /**
+    //     * Creates a new instance of a TreeSet with the elements from the specified sorted set.
+    //     *
+    //     * @param <T> the type of elements in the set
+    //     * @param sortedSet the sorted set whose elements are to be placed into this set
+    //     * @return a new instance of a TreeSet containing the elements from the specified sorted set
+    //     * @throws IllegalArgumentException if the specified {@code SortedSet} is {@code null}.
+    //     * @see java.util.TreeSet#TreeSet(SortedSet)
+    //     */
+    //    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> sortedSet) { //NOSONAR
+    //        checkArgNotNull(sortedSet, cs.sortedSet);
+    //
+    //        return new TreeSet<>(sortedSet);
+    //    }
 
     /**
      * Creates a new instance of a concurrent hash set by {@code ConcurrentHashMap}.
@@ -9923,20 +10051,21 @@ sealed class CommonUtil permits N {
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
-    /**
-     * Creates a new instance of a TreeMap with the entries from the specified sorted map.
-     *
-     * @param <K> the type of keys maintained by this map
-     * @param <V> the type of mapped values
-     * @param sortedMap the sorted map whose elements are to be placed into this map
-     * @return a new instance of a TreeMap containing the entries from the specified sorted map
-     * @throws IllegalArgumentException if the specified {@code SortedMap} is {@code null}.
-     */
-    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> sortedMap) { //NOSONAR
-        checkArgNotNull(sortedMap, cs.sortedMap);
-
-        return new TreeMap<>(sortedMap);
-    }
+    // ambiguous
+    //    /**
+    //     * Creates a new instance of a TreeMap with the entries from the specified sorted map.
+    //     *
+    //     * @param <K> the type of keys maintained by this map
+    //     * @param <V> the type of mapped values
+    //     * @param sortedMap the sorted map whose elements are to be placed into this map
+    //     * @return a new instance of a TreeMap containing the entries from the specified sorted map
+    //     * @throws IllegalArgumentException if the specified {@code SortedMap} is {@code null}.
+    //     */
+    //    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> sortedMap) { //NOSONAR
+    //        checkArgNotNull(sortedMap, cs.sortedMap);
+    //
+    //        return new TreeMap<>(sortedMap);
+    //    }
 
     /**
      * Creates a new instance of an IdentityHashMap.
@@ -10733,6 +10862,8 @@ sealed class CommonUtil permits N {
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(it.next());
                 }
+            } else if (columnNames.size() == 1) {
+                columnList.get(0).add(row); // single column case 
             } else {
                 throw new IllegalArgumentException(
                         "Unsupported row type: " + ClassUtil.getCanonicalClassName(row.getClass()) + ". Only array, collection, map and bean are supported");
@@ -10902,7 +11033,7 @@ sealed class CommonUtil permits N {
      *
      * @param dss The collection of DataSets to be merged.
      * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is {@code null}.
+     * @throws IllegalArgumentException if the provided collection is {@code null} or empty.
      */
     public static DataSet merge(final Collection<? extends DataSet> dss) throws IllegalArgumentException {
         return merge(dss, false);
@@ -10916,9 +11047,11 @@ sealed class CommonUtil permits N {
      *                            If set to {@code true}, all DataSets in the collection must have the same columns.
      *                            If set to {@code false}, the DataSets in the collection can have different columns.
      * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is {@code null} or {@code requiresSameColumns} is {@code true} and the {@code DataSets} in {@code dss} don't have the same the same column names.
+     * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code DataSets} in {@code dss} don't have the same the same column names.
      */
     public static DataSet merge(final Collection<? extends DataSet> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
+        checkArgNotEmpty(dss, cs.dataSets);
+
         if (requiresSameColumns && size(dss) > 1) {
             final Iterator<? extends DataSet> iter = dss.iterator();
             final DataSet firstDataSet = iter.next();
@@ -15147,8 +15280,6 @@ sealed class CommonUtil permits N {
         return DataSet.empty();
     }
 
-    // ================================ creation/conversion... =======================================================
-
     // ================================ compare... ====================================================================
 
     /**
@@ -15167,7 +15298,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first char value
      * @param b the second char value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final char a, final char b) {
         return Character.compare(a, b);
@@ -15178,7 +15309,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first byte value
      * @param b the second byte value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final byte a, final byte b) {
         return Byte.compare(a, b);
@@ -15189,7 +15320,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first byte value
      * @param b the second byte value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      * @see Byte#compareUnsigned(byte, byte)
      */
     public static int compareUnsigned(final byte a, final byte b) {
@@ -15201,7 +15332,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first short value
      * @param b the second short value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final short a, final short b) {
         return Short.compare(a, b);
@@ -15212,7 +15343,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first short value
      * @param b the second short value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      * @see Short#compareUnsigned(short, short)
      */
     public static int compareUnsigned(final short a, final short b) {
@@ -15224,7 +15355,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first int value
      * @param b the second int value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final int a, final int b) {
         return Integer.compare(a, b);
@@ -15235,7 +15366,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first int value
      * @param b the second int value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      * @see Integer#compareUnsigned(int, int)
      */
     public static int compareUnsigned(final int a, final int b) {
@@ -15247,7 +15378,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first long value
      * @param b the second long value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final long a, final long b) {
         return Long.compare(a, b);
@@ -15258,7 +15389,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first long value
      * @param b the second long value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      * @see Long#compareUnsigned(long, long)
      */
     public static int compareUnsigned(final long a, final long b) {
@@ -15270,7 +15401,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first float value
      * @param b the second float value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final float a, final float b) {
         return Float.compare(a, b);
@@ -15281,7 +15412,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first double value
      * @param b the second double value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static int compare(final double a, final double b) {
         return Double.compare(a, b);
@@ -15292,7 +15423,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first object value
      * @param b the second object value
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static <T extends Comparable<? super T>> int compare(final T a, final T b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareTo(b));
@@ -15305,7 +15436,7 @@ sealed class CommonUtil permits N {
      * @param a the first object value
      * @param b the second object value
      * @param cmp the comparator to be used
-     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
      */
     public static <T> int compare(final T a, final T b, final Comparator<? super T> cmp) {
         if (cmp == null) {
@@ -16516,14 +16647,11 @@ sealed class CommonUtil permits N {
     @Deprecated
     @SuppressWarnings("rawtypes")
     public static int compareByProps(@NotNull final Object bean1, @NotNull final Object bean2, final Collection<String> propNamesToCompare) {
+        checkArgNotNull(propNamesToCompare);
         checkArgNotNull(bean1);
         checkArgNotNull(bean2);
         checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
         checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
-
-        if (isEmpty(propNamesToCompare)) {
-            return 0;
-        }
 
         final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
         final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
@@ -18124,6 +18252,427 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks whether two boolean arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first boolean array to compare, may be {@code null}
+     * @param b the second boolean array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final boolean[] a, final boolean[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Boolean> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two char arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first char array to compare, may be {@code null}
+     * @param b the second char array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final char[] a, final char[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Character> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two byte arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first byte array to compare, may be {@code null}
+     * @param b the second byte array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final byte[] a, final byte[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Byte> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two short arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first short array to compare, may be {@code null}
+     * @param b the second short array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final short[] a, final short[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Short> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two int arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * <p>For example:
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * int[] b = {2, 1, 3, 2};
+     * int[] c = {1, 2, 3};
+     * int[] d = {1, 2, 2, 2};
+     * 
+     * haveSameElements(a, b); // returns true (same elements, different order)
+     * haveSameElements(a, c); // returns false (different lengths)
+     * haveSameElements(a, d); // returns false (different frequencies of element 2)
+     * haveSameElements(null, null); // returns true
+     * haveSameElements(new int[0], new int[0]); // returns true
+     * }</pre>
+     * 
+     * 
+     * @param a the first int array to compare, may be {@code null}
+     * @param b the second int array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     */
+    public static boolean haveSameElements(final int[] a, final int[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Integer> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two long arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul> 
+     * 
+     * @param a the first long array to compare, may be {@code null}
+     * @param b the second long array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final long[] a, final long[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Long> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two float arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first float array to compare, may be {@code null}
+     * @param b the second float array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final float[] a, final float[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Float> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two double arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first double array to compare, may be {@code null}
+     * @param b the second double array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final double[] a, final double[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Double> multiset = newMultiset(len);
+
+        for (int i = 0; i < len; i++) {
+            multiset.add(a[i]);
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two object arrays contain the same elements with the same frequencies,
+     * regardless of their order. Two arrays are considered to have the same elements if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They are both empty or null</li>
+     *   <li>They contain exactly the same elements with the same frequencies in any order</li>
+     * </ul>
+     * 
+     * @param a the first object array to compare, may be {@code null}
+     * @param b the second object array to compare, may be {@code null}
+     * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
+     * @see #haveSameElements(int[], int[])
+     */
+    public static boolean haveSameElements(final Object[] a, final Object[] b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = len(a);
+
+        if (len(b) != len) {
+            return false;
+        }
+
+        final Multiset<Object> multiset = newMultiset(len);
+
+        multiset.addAll(Arrays.asList(a).subList(0, len));
+
+        for (int i = 0; i < len; i++) {
+            if (!multiset.remove(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks whether two collections contain the same elements with the same frequencies, regardless of their order.
+     * <p>
+     * This method compares the contents of two collections to determine if they are equal in terms of
+     * elements and their frequencies. Two collections are considered equal if:
+     * <ul>
+     *   <li>They are the same reference (a == b)</li>
+     *   <li>They both contain the same elements with identical frequencies</li>
+     *   <li>They are both empty or {@code null}</li>
+     * </ul>
+     * <p>
+     * The method is agnostic to the actual implementation of the collections and focuses only
+     * on their content. Order of elements is not considered in the comparison.
+     *
+     * @param a the first collection to compare, may be {@code null}
+     * @param b the second collection to compare, may be {@code null}
+     * @return {@code true} if both collections contain the same elements with the same frequencies,
+     *         {@code false} otherwise
+     * @see #haveSameElements(Collection, Collection)
+     * @see #haveSameElements(Iterable, Iterable)
+     * @see #isProperSubCollection(Collection, Collection)
+     * @see #isSubCollection(Collection, Collection)
+     */
+    public static boolean haveSameElements(final Collection<?> a, final Collection<?> b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        final int len = size(a);
+
+        if (size(b) != len) {
+            return false;
+        }
+
+        final Multiset<Object> multiset = newMultiset(len);
+
+        for (Object e : a) {
+            multiset.add(e);
+        }
+
+        for (Object e : b) {
+            if (!multiset.remove(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
@@ -19616,12 +20165,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final boolean tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -19684,12 +20233,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final char tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -19752,12 +20301,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final byte tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -19820,12 +20369,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final short tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -19838,8 +20387,20 @@ sealed class CommonUtil permits N {
      * Rotates the elements of the specified int array by the specified distance.
      * 
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
-     * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
-     * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
+     * while a negative distance rotates to the left. For example: </p>
+     * <pre>
+     * // Rotate an int array to the right by 2 positions
+     * int[] a = {1, 2, 3, 4, 5};
+     * rotate(a, 2); // a => [4, 5, 1, 2, 3]
+     *
+     * //  Rotate an int array to the left by 1 position (negative distance)
+     * int[] a = {1, 2, 3, 4, 5};
+     * rotate(a, -1); // a => [2, 3, 4, 5, 1]
+     *
+     * // Rotate by a distance larger than the stream size
+     * int[] a = {1, 2, 3, 4, 5};
+     * rotate(a, 7); // a => [4, 5, 1, 2, 3], same as rotated(2) due to modulo operation
+     * </pre>
      * 
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
@@ -19886,18 +20447,21 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = fromIndex, count = 0; count < len; i++) {
+            N.println("Rotating index: " + i + " with count: " + count);
             final int tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
+                N.println("curr: " + curr + " <- next: " + next);
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
             a[curr] = tmp;
+            N.println("curr: " + curr + " <- next: " + i);
             count++;
         }
     }
@@ -19956,12 +20520,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final long tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -20024,12 +20588,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final float tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -20092,12 +20656,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final double tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -20160,12 +20724,12 @@ sealed class CommonUtil permits N {
         for (int i = fromIndex, count = 0; count < len; i++) {
             final Object tmp = a[i];
             int curr = i;
-            int next = curr < distance ? curr - distance + len : curr - distance;
+            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
                 curr = next;
-                next = curr < distance ? curr - distance + len : curr - distance;
+                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
@@ -20310,8 +20874,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20349,8 +20913,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the char array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final char[] a, final Random rnd) {
@@ -20367,8 +20930,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final char[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20377,8 +20939,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20416,8 +20978,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the byte array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final byte[] a, final Random rnd) {
@@ -20434,8 +20995,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final byte[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20444,8 +21004,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20483,8 +21043,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the short array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final short[] a, final Random rnd) {
@@ -20501,8 +21060,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final short[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20511,8 +21069,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20550,8 +21108,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the int array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final int[] a, final Random rnd) {
@@ -20568,8 +21125,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final int[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20578,8 +21134,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20617,8 +21173,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the long array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final long[] a, final Random rnd) {
@@ -20635,8 +21190,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final long[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20645,8 +21199,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20684,8 +21238,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the float array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final float[] a, final Random rnd) {
@@ -20702,8 +21255,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final float[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20712,8 +21264,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20751,8 +21303,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the double array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final double[] a, final Random rnd) {
@@ -20769,8 +21320,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final double[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20779,8 +21329,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20818,8 +21368,7 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      *
      * @param a the object array to be shuffled. If {@code null} or empty, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @param rnd the random number generator to use for shuffling}
      * @see Random
      */
     public static void shuffle(final Object[] a, final Random rnd) {
@@ -20836,8 +21385,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
      */
     public static void shuffle(final Object[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20846,8 +21394,8 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (int i = toIndex; i > fromIndex; i--) {
-            swap(a, i - 1, rnd.nextInt(i) + fromIndex);
+        for (int i = toIndex, n = toIndex - fromIndex; i > fromIndex; i--, n--) {
+            swap(a, i - 1, rnd.nextInt(n) + fromIndex);
         }
     }
 
@@ -20878,8 +21426,7 @@ sealed class CommonUtil permits N {
      * positional access.</p>
      *
      * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null} (unless the list is {@code null} or has size <= 1)
+     * @param rnd the random number generator to use for shuffling} or has size <= 1)
      * @see java.util.Collections#shuffle(List, Random)
      * @see Random
      */
@@ -20940,8 +21487,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
      *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
      *          no operation is performed.
-     * @param rnd the random number generator to use for shuffling
-     * @throws NullPointerException if {@code rnd} is {@code null} (unless the collection is {@code null} or has size < 2)
+     * @param rnd the random number generator to use for shuffling} or has size < 2)
      * @see #shuffle(List, Random)
      * @see #shuffle(Collection)
      * @see java.util.Collections#shuffle(List, Random)
@@ -21100,7 +21646,7 @@ sealed class CommonUtil permits N {
      * @param pair the pair whose elements are to be swapped
      */
     public static <T> void swap(final Pair<T, T> pair) {
-        pair.set(pair.right, pair.left);
+        pair.set(pair.right(), pair.left());
     }
 
     /**
@@ -21113,7 +21659,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> boolean swapIf(final Pair<T, T> pair, final Predicate<? super Pair<T, T>> predicate) {
         if (predicate.test(pair)) {
-            pair.set(pair.right, pair.left);
+            pair.set(pair.right(), pair.left());
             return true;
         }
 
@@ -21127,8 +21673,8 @@ sealed class CommonUtil permits N {
      * @param triple the triple whose elements are to be swapped
      */
     public static <T, M> void swap(final Triple<T, M, T> triple) {
-        final T left = triple.left;
-        triple.setLeft(triple.right);
+        final T left = triple.left();
+        triple.setLeft(triple.right());
         triple.setRight(left);
     }
 
@@ -21142,8 +21688,8 @@ sealed class CommonUtil permits N {
      */
     public static <T, M> boolean swapIf(final Triple<T, M, T> triple, final Predicate<? super Triple<T, M, T>> predicate) {
         if (predicate.test(triple)) {
-            final T left = triple.left;
-            triple.setLeft(triple.right);
+            final T left = triple.left();
+            triple.setLeft(triple.right());
             triple.setRight(left);
             return true;
         }
@@ -22429,7 +22975,6 @@ sealed class CommonUtil permits N {
      * @param newLength the length of the copy to be returned
      * @return a new Object array containing a copy of the original array
      * @throws IllegalArgumentException if the specified new length is negative
-     * @throws NullPointerException if {@code original} is null
      * @see Arrays#copyOf(Object[], int)
      */
     public static <T> T[] copyOf(final T[] original, final int newLength) {
@@ -22445,8 +22990,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array containing a copy of the original array, truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
-     * @param <T> the type of the elements in the array
-     * @param <U> the type of the elements in the original array
+     * @param <T> the type of the elements in the array 
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @param newType the class of the copy to be returned
@@ -22454,13 +22998,14 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(Object[], int)
      */
-    public static <T, U> T[] copyOf(final U[] original, final int newLength, final Class<? extends T[]> newType) {
+    public static <T> T[] copyOf(final Object[] original, final int newLength, final Class<? extends T[]> newType) {
         checkArgNotNegative(newLength, cs.newLength);
 
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
+        final int originalLength = original == null ? 0 : Array.getLength(original);
 
-        if (notEmpty(original)) {
-            copy(original, 0, copy, 0, Math.min(original.length, newLength));
+        if (originalLength > 0) {
+            copy(original, 0, copy, 0, Math.min(originalLength, newLength));
         }
 
         return copy;
@@ -22474,7 +23019,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new boolean array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(boolean[], int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, final int fromIndex, final int toIndex) {
@@ -22501,7 +23045,6 @@ sealed class CommonUtil permits N {
      * @return a new boolean array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22538,7 +23081,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new char array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(char[], int, int)
      */
     public static char[] copyOfRange(final char[] original, final int fromIndex, final int toIndex) {
@@ -22565,7 +23107,6 @@ sealed class CommonUtil permits N {
      * @return a new char array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22602,7 +23143,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new byte array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(byte[], int, int)
      */
     public static byte[] copyOfRange(final byte[] original, final int fromIndex, final int toIndex) {
@@ -22629,7 +23169,6 @@ sealed class CommonUtil permits N {
      * @return a new byte array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22666,7 +23205,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new short array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(short[], int, int)
      */
     public static short[] copyOfRange(final short[] original, final int fromIndex, final int toIndex) {
@@ -22693,7 +23231,6 @@ sealed class CommonUtil permits N {
      * @return a new short array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22730,7 +23267,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new int array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(int[], int, int)
      */
     public static int[] copyOfRange(final int[] original, final int fromIndex, final int toIndex) {
@@ -22770,7 +23306,6 @@ sealed class CommonUtil permits N {
      * @return a new int array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      */
     public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
@@ -22806,7 +23341,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new long array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(long[], int, int)
      */
     public static long[] copyOfRange(final long[] original, final int fromIndex, final int toIndex) {
@@ -22833,7 +23367,6 @@ sealed class CommonUtil permits N {
      * @return a new long array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22870,7 +23403,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new float array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(float[], int, int)
      */
     public static float[] copyOfRange(final float[] original, final int fromIndex, final int toIndex) {
@@ -22897,7 +23429,6 @@ sealed class CommonUtil permits N {
      * @return a new float array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22934,7 +23465,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new double array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(double[], int, int)
      */
     public static double[] copyOfRange(final double[] original, final int fromIndex, final int toIndex) {
@@ -22961,7 +23491,6 @@ sealed class CommonUtil permits N {
      * @return a new double array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -22999,7 +23528,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new Object array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(Object[], int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex) {
@@ -23024,7 +23552,6 @@ sealed class CommonUtil permits N {
      * @return a new Object array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex, final int step) {
@@ -23035,17 +23562,15 @@ sealed class CommonUtil permits N {
      * Returns a new array containing a copy of the specified range of the original array.
      *
      * @param <T> the type of the elements in the new array
-     * @param <U> the type of the elements in the original array
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @param newType the class of the new array
      * @return a new array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
-     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(Object[], int, int, Class)
      */
-    public static <T, U> T[] copyOfRange(final U[] original, final int fromIndex, final int toIndex, final Class<? extends T[]> newType) {
+    public static <T> T[] copyOfRange(final Object[] original, final int fromIndex, final int toIndex, final Class<? extends T[]> newType) {
         final int newLength = toIndex - fromIndex;
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
         copy(original, fromIndex, copy, 0, Math.min(original.length - fromIndex, newLength));
@@ -23065,10 +23590,9 @@ sealed class CommonUtil permits N {
      * @return a new array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
-    public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
+    public static <T> T[] copyOfRange(final Object[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
@@ -23081,7 +23605,7 @@ sealed class CommonUtil permits N {
         }
 
         if (step == 1) {
-            return copyOfRange(original, fromIndex, toIndex);
+            return copyOfRange(original, fromIndex, toIndex, newType);
         }
 
         fromIndex = fromIndex > toIndex ? N.min(original.length - 1, fromIndex) : fromIndex;
@@ -23089,7 +23613,7 @@ sealed class CommonUtil permits N {
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[len] : (T[]) newArray(newType.getComponentType(), len);
 
         for (int i = 0, j = fromIndex; i < len; i++, j += step) {
-            copy[i] = original[j];
+            copy[i] = (T) original[j];
         }
 
         return copy;
@@ -23104,7 +23628,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new list containing the specified range from the original list
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is greater than the size of list
-     * @throws NullPointerException if original is null
      */
     public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -23126,7 +23649,6 @@ sealed class CommonUtil permits N {
      * @return a new list containing the specified range from the original list
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is greater than the size of list
      * @throws IllegalArgumentException  if step is zero
-     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")

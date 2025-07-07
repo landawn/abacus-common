@@ -21,6 +21,35 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
+/**
+ * Configuration class for JSON serialization operations.
+ * This class provides various settings to control how objects are serialized to JSON format.
+ * All configuration methods support method chaining for convenient setup.
+ * 
+ * <p>The configuration supports method chaining for easy setup:</p>
+ * <pre>{@code
+ * JSONSerializationConfig config = new JSONSerializationConfig()
+ *     .quotePropName(true)
+ *     .quoteMapKey(false)
+ *     .prettyFormat(true)
+ *     .setDateTimeFormat(DateTimeFormat.ISO_8601);
+ * }</pre>
+ * 
+ * <p>Default configuration values:</p>
+ * <ul>
+ *   <li>quotePropName: true - Property names are quoted by default</li>
+ *   <li>quoteMapKey: true - Map keys are quoted by default</li>
+ *   <li>bracketRootValue: true - Root values are bracketed by default</li>
+ *   <li>wrapRootValue: false - Root values are not wrapped with type name by default</li>
+ *   <li>writeNullToEmpty: false - Null values remain null by default</li>
+ *   <li>writeDataSetByRow: false - DataSets are written by columns by default</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ * @see JSONParser
+ * @see JSONDeserializationConfig
+ */
 public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSerializationConfig> {
 
     protected static final boolean defaultQuotePropName = true;
@@ -44,17 +73,66 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
 
     private boolean wrapRootValue = defaultWrapRootValue;
 
+    /**
+     * Creates a new instance of JSONSerializationConfig with default settings.
+     * 
+     * <p>Default settings:</p>
+     * <ul>
+     *   <li>quotePropName: true</li>
+     *   <li>quoteMapKey: true</li>
+     *   <li>bracketRootValue: true</li>
+     *   <li>wrapRootValue: false</li>
+     *   <li>writeNullToEmpty: false</li>
+     *   <li>writeDataSetByRow: false</li>
+     * </ul>
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig();
+     * String json = parser.serialize(object, config);
+     * }</pre>
+     */
     public JSONSerializationConfig() { //NOSONAR
     }
 
+    /**
+     * Checks if null values should be written as empty values.
+     * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
+     * depending on the expected type.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * config.writeNullToEmpty(true);
+     * // null string → ""
+     * // null array → []
+     * // null object → {}
+     * }</pre>
+     * 
+     * @return {@code true} if null values should be written as empty strings/arrays/objects, {@code false} otherwise
+     */
     public boolean writeNullToEmpty() {
         return writeNullToEmpty;
     }
 
     /**
+     * Sets whether null values should be written as empty values during serialization.
+     * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
+     * depending on the expected type. This is useful when the consuming system cannot handle null values.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .writeNullToEmpty(true);
+     * 
+     * class Person {
+     *     String name = null;
+     *     List<String> hobbies = null;
+     * }
+     * // Output: {"name": "", "hobbies": []}
+     * }</pre>
      *
-     * @param writeNullToEmpty
-     * @return
+     * @param writeNullToEmpty {@code true} to write null as empty, {@code false} to write as null
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig writeNullToEmpty(final boolean writeNullToEmpty) {
         this.writeNullToEmpty = writeNullToEmpty;
@@ -62,14 +140,40 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
+    /**
+     * Checks if DataSet should be written row by row.
+     * When enabled, DataSet will be serialized as an array of row objects.
+     * When disabled (default), DataSet will be serialized with column-based structure.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * config.writeDataSetByRow(true);
+     * // DataSet will be serialized as: [{"col1": val1, "col2": val2}, ...]
+     * }</pre>
+     * 
+     * @return {@code true} if DataSet is written by rows, {@code false} if by columns
+     */
     public boolean writeDataSetByRow() {
         return writeDataSetByRow;
     }
 
     /**
+     * Sets whether DataSet should be serialized row by row.
+     * When enabled, DataSet will be serialized as an array of row objects where each object
+     * represents a row with column names as keys. When disabled (default), DataSet will be 
+     * serialized with a column-based structure.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .writeDataSetByRow(true);
+     * 
+     * // Row-based output: [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
+     * // Column-based output: {"id": [1, 2], "name": ["John", "Jane"]}
+     * }</pre>
      *
-     * @param writeDataSetByRow
-     * @return
+     * @param writeDataSetByRow {@code true} to write by rows, {@code false} to write by columns
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig writeDataSetByRow(final boolean writeDataSetByRow) {
         this.writeDataSetByRow = writeDataSetByRow;
@@ -77,14 +181,32 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
+    /**
+     * Checks if row and column key types should be written for Sheet objects.
+     * This is useful for preserving type information during round-trip serialization.
+     * 
+     * @return {@code true} if key types should be written, {@code false} otherwise
+     */
     public boolean writeRowColumnKeyType() {
         return writeRowColumnKeyType;
     }
 
     /**
+     * Sets whether to include row and column key type information when serializing Sheet objects.
+     * This is useful for preserving type information during round-trip serialization, allowing
+     * proper deserialization of complex key types.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .writeRowColumnKeyType(true);
+     * 
+     * // Output will include type information for row/column keys
+     * // Useful when keys are not simple strings
+     * }</pre>
      *
-     * @param writeRowColumnKeyType
-     * @return
+     * @param writeRowColumnKeyType {@code true} to include key type information, {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig writeRowColumnKeyType(final boolean writeRowColumnKeyType) {
         this.writeRowColumnKeyType = writeRowColumnKeyType;
@@ -92,14 +214,41 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
+    /**
+     * Checks if column type information should be written for DataSet and Sheet objects.
+     * When enabled, the type of each column will be included in the serialized output.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * config.writeColumnType(true);
+     * // Output will include: "columnTypes": ["String", "Integer", "Date"]
+     * }</pre>
+     * 
+     * @return {@code true} if column types should be written, {@code false} otherwise
+     */
     public boolean writeColumnType() {
         return writeColumnType;
     }
 
     /**
+     * Sets whether to include column type information when serializing DataSet and Sheet objects.
+     * When enabled, the type of each column will be included in the serialized output, which
+     * helps preserve type information for proper deserialization.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .writeColumnType(true);
+     * 
+     * // Output will include metadata:
+     * // {
+     * //   "columnTypes": ["String", "Integer", "Date"],
+     * //   "data": {...}
+     * // }
+     * }</pre>
      *
-     * @param writeColumnType
-     * @return
+     * @param writeColumnType {@code true} to include column type information, {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig writeColumnType(final boolean writeColumnType) {
         this.writeColumnType = writeColumnType;
@@ -108,11 +257,14 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets the char quotation.
+     * Sets the character quotation for char values.
+     * Note: This method is deprecated as JSON has specific quotation requirements.
+     * JSON specification requires double quotes for all string values.
      *
-     * @param charQuotation
-     * @return
-     * @deprecated this method should not be called
+     * @param charQuotation the character to use for quoting char values
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as JSON has specific quotation requirements.
+     *             JSON always uses double quotes for string values.
      */
     @Deprecated
     @Override
@@ -123,11 +275,14 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets the string quotation.
+     * Sets the string quotation character.
+     * Note: This method is deprecated as JSON requires double quotes for strings.
+     * The JSON specification mandates the use of double quotes for all string values.
      *
-     * @param stringQuotation
-     * @return
-     * @deprecated this method should not be called
+     * @param stringQuotation the character to use for quoting strings
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as JSON requires double quotes for strings.
+     *             Calling this method with any value other than '"' may result in invalid JSON.
      */
     @Deprecated
     @Override
@@ -138,10 +293,13 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets the string quotation.
+     * Disables character quotation.
+     * Note: This method is deprecated as JSON has specific quotation requirements.
+     * Characters in JSON must be represented as quoted strings.
      *
-     * @return
-     * @deprecated this method should not be called
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as JSON has specific quotation requirements.
+     *             Disabling quotation will result in invalid JSON output.
      */
     @Deprecated
     @Override
@@ -152,10 +310,13 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets the string quotation.
+     * Disables string quotation.
+     * Note: This method is deprecated as JSON requires quotes for strings.
+     * The JSON specification requires all string values to be quoted.
      *
-     * @return
-     * @deprecated this method should not be called
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as JSON requires quotes for strings.
+     *             Disabling string quotation will result in invalid JSON output.
      */
     @Deprecated
     @Override
@@ -166,10 +327,13 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets the string quotation.
+     * Disables all quotation.
+     * Note: This method is deprecated as JSON has specific quotation requirements.
+     * JSON requires proper quotation for strings and property names.
      *
-     * @return
-     * @deprecated this method should not be called
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as JSON has specific quotation requirements.
+     *             Disabling all quotation will result in invalid JSON output.
      */
     @Deprecated
     @Override
@@ -180,19 +344,37 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is {@code false} if it's not set.
+     * Checks if property names should be quoted in the JSON output.
+     * The default value is {@code true} if not set, which conforms to the JSON specification.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * config.quotePropName(false);
+     * // Output: {name: "John"} instead of {"name": "John"}
+     * }</pre>
      *
-     * @return {@code true}, if is quote prop name
+     * @return {@code true} if property names should be quoted, {@code false} otherwise
      */
     public boolean quotePropName() {
         return quotePropName;
     }
 
     /**
-     * Sets the quote prop name.
+     * Sets whether property names should be quoted in the JSON output.
+     * According to strict JSON specification, property names should always be quoted.
+     * Setting this to false produces non-standard JSON that may not be parseable by all JSON parsers.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .quotePropName(false);
+     * 
+     * // Standard JSON (quotePropName = true): {"name": "John", "age": 30}
+     * // Non-standard (quotePropName = false): {name: "John", age: 30}
+     * }</pre>
      *
-     * @param quotePropName
-     * @return
+     * @param quotePropName {@code true} to quote property names (standard), {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig quotePropName(final boolean quotePropName) {
         this.quotePropName = quotePropName;
@@ -201,19 +383,32 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is {@code false} if it's not set.
+     * Checks if map keys should be quoted in the JSON output.
+     * The default value is {@code true} if not set.
      *
-     * @return {@code true}, if is quote map key
+     * @return {@code true} if map keys should be quoted, {@code false} otherwise
      */
     public boolean quoteMapKey() {
         return quoteMapKey;
     }
 
     /**
-     * Sets the quote map key.
+     * Sets whether map keys should be quoted in the JSON output.
+     * When serializing Map objects, this determines if the keys should be surrounded by quotes.
+     * Note that setting this to false may produce non-standard JSON for non-string keys.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * Map<Integer, String> map = Map.of(1, "one", 2, "two");
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .quoteMapKey(false);
+     * 
+     * // Output with quoteMapKey(true): {"1": "one", "2": "two"}
+     * // Output with quoteMapKey(false): {1: "one", 2: "two"}
+     * }</pre>
      *
-     * @param quoteMapKey
-     * @return
+     * @param quoteMapKey {@code true} to quote map keys, {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig quoteMapKey(final boolean quoteMapKey) {
         this.quoteMapKey = quoteMapKey;
@@ -222,20 +417,32 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is {@code true} if it's not set.
+     * Checks if the root value should be enclosed with brackets.
+     * The default value is {@code true} if not set.
      *
-     * @return {@code true}, if is bracket root value
+     * @return {@code true} if root value should be bracketed, {@code false} otherwise
      */
     public boolean bracketRootValue() {
         return bracketRootValue;
     }
 
     /**
-     * It's set to if enclose the JSON string/text with '{' and '}' or '[' and
-     * ']'.
+     * Sets whether to enclose the JSON string/text with '{' and '}' or '[' and ']'.
+     * This determines if the root element should be wrapped with brackets when it's a 
+     * single value that would not normally be bracketed.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .bracketRootValue(false);
+     * 
+     * // For a string value "test":
+     * // With bracketRootValue(true): ["test"]
+     * // With bracketRootValue(false): "test"
+     * }</pre>
      *
-     * @param bracketRootValue
-     * @return
+     * @param bracketRootValue {@code true} to bracket root value, {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig bracketRootValue(final boolean bracketRootValue) {
         this.bracketRootValue = bracketRootValue;
@@ -244,19 +451,34 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Checks if is wrap root value.
+     * Checks if the root value should be wrapped with its type name.
      *
-     * @return {@code true}, if is wrap root value
+     * @return {@code true} if root value should be wrapped, {@code false} otherwise
      */
     public boolean wrapRootValue() {
         return wrapRootValue;
     }
 
     /**
-     * Sets the wrap root value.
+     * Sets whether to wrap the root value with its type name as a property.
+     * When enabled, the output will include the class name as a wrapper property.
+     * This is useful for preserving type information in the JSON output.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * Person person = new Person("John", 30);
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .wrapRootValue(true);
+     * 
+     * // Output with wrapRootValue(true): 
+     * // {"Person": {"name": "John", "age": 30}}
+     * // 
+     * // Output with wrapRootValue(false): 
+     * // {"name": "John", "age": 30}
+     * }</pre>
      *
-     * @param wrapRootValue
-     * @return
+     * @param wrapRootValue {@code true} to wrap root value with type name, {@code false} otherwise
+     * @return this instance for method chaining
      */
     public JSONSerializationConfig wrapRootValue(final boolean wrapRootValue) {
         this.wrapRootValue = wrapRootValue;
@@ -264,34 +486,12 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
-    //    /**
-    //     *
-    //     * @return
-    //     */
-    //    @Override
-    //    public JSONSerializationConfig copy() {
-    //        final JSONSerializationConfig copy = new JSONSerializationConfig();
-    //
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.setCharQuotation(this.getCharQuotation());
-    //        copy.setStringQuotation(this.getStringQuotation());
-    //        copy.setDateTimeFormat(this.getDateTimeFormat());
-    //        copy.setExclusion(this.getExclusion());
-    //        copy.setSkipTransientField(this.isSkipTransientField());
-    //        copy.setPrettyFormat(this.isPrettyFormat());
-    //        copy.supportCircularReference(this.supportCircularReference());
-    //        copy.writeBigDecimalAsPlain(this.writeBigDecimalAsPlain());
-    //        copy.setIndentation(this.getIndentation());
-    //        copy.setPropNamingPolicy(this.getPropNamingPolicy());
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.quotePropName = this.quotePropName;
-    //        copy.quoteMapKey = this.quoteMapKey;
-    //        copy.wrapRootValue = this.wrapRootValue;
-    //        copy.bracketRootValue = this.bracketRootValue;
-    //
-    //        return copy;
-    //    }
-
+    /**
+     * Calculates the hash code for this configuration object.
+     * The hash code is based on all configuration settings.
+     *
+     * @return the hash code value for this object
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -322,9 +522,11 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
+     * Compares this configuration with another object for equality.
+     * Two configurations are considered equal if all their settings match.
      *
-     * @param obj
-     * @return {@code true}, if successful
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override
@@ -351,6 +553,12 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return false;
     }
 
+    /**
+     * Returns a string representation of this configuration object.
+     * The string contains all configuration settings in a readable format.
+     *
+     * @return a string representation of this configuration
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
@@ -367,20 +575,47 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The Class JSC.
+     * Factory class for creating JSONSerializationConfig instances.
+     * Provides convenient static factory methods for creating configurations.
+     * This class cannot be instantiated and serves only as a container for factory methods.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONSerializationConfig config = JSC.create()
+     *     .quotePropName(true)
+     *     .prettyFormat(true);
+     * }</pre>
+     * 
+     * @see JSONSerializationConfig
      */
     public static final class JSC extends JSONSerializationConfig {
 
+        /**
+         * Creates a new instance of JSONSerializationConfig with default settings.
+         * This is the recommended way to create a new configuration instance.
+         * 
+         * <p>Usage example:</p>
+         * <pre>{@code
+         * JSONSerializationConfig config = JSC.create()
+         *     .prettyFormat(true)
+         *     .setDateTimeFormat(DateTimeFormat.ISO_8601);
+         * }</pre>
+         *
+         * @return a new JSONSerializationConfig instance
+         */
         public static JSONSerializationConfig create() {
             return new JSONSerializationConfig();
         }
 
         /**
+         * Creates a new JSONSerializationConfig with specified quote settings.
+         * This method allows quick configuration of property name and map key quoting behavior.
          *
-         * @param quotePropName
-         * @param quoteMapKey
-         * @return
-         * @deprecated to be removed in a future version.
+         * @param quotePropName whether to quote property names
+         * @param quoteMapKey whether to quote map keys
+         * @return a new configured JSONSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
+         *             For example: {@code JSC.create().quotePropName(true).quoteMapKey(false)}
          */
         @Deprecated
         public static JSONSerializationConfig of(final boolean quotePropName, final boolean quoteMapKey) {
@@ -388,10 +623,13 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         }
 
         /**
+         * Creates a new JSONSerializationConfig with specified date time format.
+         * This method provides a quick way to set the date/time formatting behavior.
          *
-         * @param dateTimeFormat
-         * @return
-         * @deprecated to be removed in a future version.
+         * @param dateTimeFormat the date time format to use
+         * @return a new configured JSONSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
+         *             For example: {@code JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601)}
          */
         @Deprecated
         public static JSONSerializationConfig of(final DateTimeFormat dateTimeFormat) {
@@ -399,11 +637,14 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         }
 
         /**
+         * Creates a new JSONSerializationConfig with exclusion settings and ignored properties.
+         * This method allows configuration of property exclusion behavior.
          *
-         * @param exclusion
-         * @param ignoredPropNames
-         * @return
-         * @deprecated to be removed in a future version.
+         * @param exclusion the exclusion policy for properties
+         * @param ignoredPropNames map of class to set of property names to ignore
+         * @return a new configured JSONSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
+         *             For example: {@code JSC.create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames)}
          */
         @Deprecated
         public static JSONSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
@@ -411,14 +652,17 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         }
 
         /**
+         * Creates a new JSONSerializationConfig with all specified settings.
+         * This method allows complete configuration in a single call.
          *
-         * @param quotePropName
-         * @param quoteMapKey
-         * @param dateTimeFormat
-         * @param exclusion
-         * @param ignoredPropNames
-         * @return
-         * @deprecated to be removed in a future version.
+         * @param quotePropName whether to quote property names
+         * @param quoteMapKey whether to quote map keys
+         * @param dateTimeFormat the date time format to use
+         * @param exclusion the exclusion policy for properties
+         * @param ignoredPropNames map of class to set of property names to ignore
+         * @return a new configured JSONSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
+         *             For example: {@code JSC.create().quotePropName(true).quoteMapKey(false)...}
          */
         @Deprecated
         public static JSONSerializationConfig of(final boolean quotePropName, final boolean quoteMapKey, final DateTimeFormat dateTimeFormat,

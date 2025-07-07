@@ -1197,8 +1197,8 @@ public final class RowDataSet implements DataSet, Cloneable {
         for (final Object val : column) {
             outputToUse.accept(val, tmp);
 
-            newColumn1.add(tmp.left);
-            newColumn2.add(tmp.right);
+            newColumn1.add(tmp.left());
+            newColumn2.add(tmp.right());
         }
 
         _columnNameList.remove(columnIndex);
@@ -1234,9 +1234,9 @@ public final class RowDataSet implements DataSet, Cloneable {
         for (final Object val : column) {
             outputToUse.accept(val, tmp);
 
-            newColumn1.add(tmp.left);
-            newColumn2.add(tmp.middle);
-            newColumn3.add(tmp.right);
+            newColumn1.add(tmp.left());
+            newColumn2.add(tmp.middle());
+            newColumn3.add(tmp.right());
         }
 
         _columnNameList.remove(columnIndex);
@@ -4163,7 +4163,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Collector<? super Object[], ?, ?> collector) {
-        return groupBy(aggregateOnColumnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
+        return groupBy(keyColumnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
     }
 
     @Override

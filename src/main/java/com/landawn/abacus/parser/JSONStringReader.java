@@ -40,6 +40,24 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
+/**
+ * Internal implementation of JSONReader for parsing JSON from string sources.
+ * This class provides efficient JSON parsing by working directly with character arrays
+ * and minimizing object allocation during parsing.
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Efficient character buffer management</li>
+ *   <li>Direct number parsing without intermediate string creation</li>
+ *   <li>Support for escape character handling</li>
+ *   <li>Optimized parsing of common JSON values (true, false, null)</li>
+ * </ul>
+ * 
+ * <p>This is an internal class and should not be used directly by application code.</p>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ */
 class JSONStringReader extends AbstractJSONReader {
     private static final Logger logger = LoggerFactory.getLogger(JSONStringReader.class);
 
@@ -79,6 +97,7 @@ class JSONStringReader extends AbstractJSONReader {
 
     int cbufLen = 0;
 
+    int lastEvent = -1;
     int nextEvent = -1;
 
     int nextChar = 0;
@@ -111,10 +130,18 @@ class JSONStringReader extends AbstractJSONReader {
     }
 
     /**
+     * Creates a JSONReader for parsing the given JSON string.
+     * This factory method creates an optimized reader for string sources.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * String json = "{\"name\":\"John\"}";
+     * JSONReader reader = JSONStringReader.parse(json, new char[256]);
+     * }</pre>
      *
-     * @param str
-     * @param cbuf
-     * @return
+     * @param str the JSON string to parse
+     * @param cbuf the character buffer to use for parsing
+     * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final char[] cbuf) {
         //        return new JSONStreamReader(new StringReader(str), new char[1], cbuf);
@@ -123,12 +150,20 @@ class JSONStringReader extends AbstractJSONReader {
     }
 
     /**
+     * Creates a JSONReader for parsing a substring of the given JSON string.
+     * This allows parsing a portion of a larger string without creating a substring.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * String json = "prefix{\"name\":\"John\"}suffix";
+     * JSONReader reader = JSONStringReader.parse(json, 6, json.length() - 6, new char[256]);
+     * }</pre>
      *
-     * @param str
-     * @param beginIndex
-     * @param endIndex
-     * @param cbuf
-     * @return
+     * @param str the JSON string
+     * @param beginIndex the starting index (inclusive)
+     * @param endIndex the ending index (exclusive)
+     * @param cbuf the character buffer to use for parsing
+     * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final int beginIndex, final int endIndex, final char[] cbuf) {
         return new JSONStringReader(str, beginIndex, endIndex, cbuf);
@@ -184,14 +219,38 @@ class JSONStringReader extends AbstractJSONReader {
     //    }
 
     /**
-     * TODO performance improvement: Refer to the test above. TODO limitation: the maximum length of property value is
-     * the buffer size.
+     * Returns the last token read from the JSON input.
+     * This method is used to retrieve the last structural token or value
+     * that was parsed by the reader.
      *
-     * @return
-     * @throws UncheckedIOException Signals that an I/O exception has occurred.
+     * @return the last token identifier, or -1 if no tokens have been read yet
+     */
+    @Override
+    public int lastToken() {
+        return lastEvent;
+    }
+
+    /**
+     * Reads and returns the next token from the JSON input.
+     * This method advances the reader position and identifies the next
+     * structural token or value in the JSON stream.
+     * 
+     * <p>The method handles:</p>
+     * <ul>
+     *   <li>Quoted strings (double and single quotes)</li>
+     *   <li>Numbers (integers and decimals)</li>
+     *   <li>Boolean values (true/false)</li>
+     *   <li>Null values</li>
+     *   <li>Structural tokens (braces, brackets, colons, commas)</li>
+     * </ul>
+     *
+     * @return the token identifier, or -1 if no next token is found
+     * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
     public int nextToken() throws UncheckedIOException {
+        lastEvent = nextEvent;
+
         text = null;
         numValue = null;
         nextChar = 0;
@@ -305,9 +364,10 @@ class JSONStringReader extends AbstractJSONReader {
     }
 
     /**
-     * Checks for text.
+     * Checks if the reader has text content available.
+     * This is true when a value has been parsed (string, number, boolean, or null).
      *
-     * @return {@code true}, if successful
+     * @return {@code true} if text content is available, {@code false} otherwise
      */
     //
     @Override
@@ -315,6 +375,21 @@ class JSONStringReader extends AbstractJSONReader {
         return text != null || numValue != null || (nextChar > 0) || (endIndexForText > startIndexForText);
     }
 
+    /**
+     * Reads and parses a number from the JSON input.
+     * This method efficiently parses numbers without creating intermediate strings
+     * when possible, improving performance for numeric data.
+     * 
+     * <p>Supported number formats:</p>
+     * <ul>
+     *   <li>Integers: 123, -456</li>
+     *   <li>Decimals: 123.456, -78.9</li>
+     *   <li>Scientific notation: 1.23e10, -4.56E-7</li>
+     *   <li>Type suffixes: 123L, 45.6f, 78.9d</li>
+     * </ul>
+     *
+     * @param firstChar the first character of the number
+     */
     protected void readNumber(final int firstChar) {
         final boolean negative = firstChar == '-';
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
@@ -427,6 +502,13 @@ class JSONStringReader extends AbstractJSONReader {
         //    }
     }
 
+    /**
+     * Saves a character to the internal buffer, handling escape sequences and whitespace.
+     * This method manages the character buffer efficiently to minimize allocations.
+     *
+     * @param ch the character to save
+     * @return the processed character (after escape handling)
+     */
     protected int saveChar(int ch) {
         if (nextChar > 0) {
             if (ch == WD._BACKSLASH) {

@@ -23,7 +23,35 @@ import com.landawn.abacus.exception.ParseException;
 
 /**
  * A very simple CSV parser released under a commercial-friendly license.
- * This just implements splitting a single line into fields.
+ * This parser is designed to handle the parsing of a single CSV line into fields,
+ * with support for quoted values, escaped characters, and customizable delimiters.
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ * <li>Customizable separator, quote, and escape characters</li>
+ * <li>Handles quoted fields with embedded delimiters</li>
+ * <li>Supports escaped characters within quoted fields</li>
+ * <li>Options for strict quote handling and whitespace trimming</li>
+ * <li>Can ignore quotation marks entirely for simple parsing</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Basic usage with default settings (comma separator, double-quote, backslash escape)
+ * CSVParser parser = new CSVParser();
+ * List<String> fields = parser.parseLine("John,Doe,30,\"New York, NY\"");
+ * // Result: ["John", "Doe", "30", "New York, NY"]
+ * 
+ * // Custom separator
+ * CSVParser tabParser = new CSVParser('\t');
+ * String[] fields = tabParser.parseLineToArray("John\tDoe\t30");
+ * // Result: ["John", "Doe", "30"]
+ * 
+ * // Parse with strict quotes (ignores characters outside quotes)
+ * CSVParser strictParser = new CSVParser(',', '"', '\\', true);
+ * List<String> result = strictParser.parseLine("\"clean\"dirty,\"text\"");
+ * // Result: ["clean", "text"] - "dirty" is ignored
+ * }</pre>
  *
  * @author Glen Smith
  * @author Rainer Pruy
@@ -32,45 +60,56 @@ import com.landawn.abacus.exception.ParseException;
 public class CSVParser {
 
     /**
-     * The default separator to use if none is supplied to the constructor.
+     * The default separator character (comma).
+     * Used if no separator is specified in the constructor.
      */
     public static final char DEFAULT_SEPARATOR = ',';
+
     /**
-     * The average size of a line read by opencsv (used for setting the size of StringBuilders).
+     * The initial read size for string builders.
+     * Used for setting the initial capacity of internal buffers.
      */
     public static final int INITIAL_READ_SIZE = 1024;
+
     /**
-     * In most cases, we know the size of the line we want to read.
-     * In that case, we will set the initial read
-     * to that plus a buffer size.
+     * Buffer size to add when the exact line size is known.
+     * Provides extra space to avoid reallocation during parsing.
      */
     public static final int READ_BUFFER_SIZE = 128;
+
     /**
-     * The default quote character to use if none is supplied to the
-     * constructor.
+     * The default quote character (double quote).
+     * Used to enclose fields containing special characters.
      */
     public static final char DEFAULT_QUOTE_CHARACTER = '"';
+
     /**
-     * The default escape character to use if none is supplied to the
-     * constructor.
+     * The default escape character (backslash).
+     * Used to escape quotes or other special characters within fields.
      */
     public static final char DEFAULT_ESCAPE_CHARACTER = '\\';
+
     /**
-     * The default strict quote behavior to use if none is supplied to the
-     * constructor.
+     * The default strict quotes behavior.
+     * When false, characters outside quotes are included in the field value.
      */
     public static final boolean DEFAULT_STRICT_QUOTES = false;
+
     /**
-     * The default leading whitespace behavior to use if none is supplied to the
-     * constructor.
+     * The default leading whitespace behavior.
+     * When true, leading whitespace is trimmed from unquoted fields.
      */
     public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
+
     /**
-     * If the quote character is set to {@code null} then there is no quote character.
+     * The default behavior for quotation handling.
+     * When false, quote characters are processed normally.
      */
     public static final boolean DEFAULT_IGNORE_QUOTATIONS = false;
+
     /**
-     * This is the "null" character - if a value is set to this then it is ignored.
+     * The null character constant.
+     * Used to indicate that a character parameter should be ignored.
      */
     public static final char NULL_CHARACTER = '\0';
 
@@ -100,79 +139,132 @@ public class CSVParser {
     private final boolean ignoreQuotations;
 
     /**
-     * Constructs CSVParser using a comma for the separator.
+     * Constructs a CSVParser using default settings.
+     * Uses comma as separator, double-quote for quoting, and backslash for escaping.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser();
+     * List<String> fields = parser.parseLine("a,b,c");
+     * }</pre>
      */
     public CSVParser() {
         this(DEFAULT_SEPARATOR, DEFAULT_QUOTE_CHARACTER, DEFAULT_ESCAPE_CHARACTER);
     }
 
     /**
-     * Constructs CSVParser with supplied separator.
+     * Constructs a CSVParser with a custom separator.
+     * Uses default quote (") and escape (\) characters.
      *
-     * @param separator The delimiter to use for separating entries.
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser('|');
+     * List<String> fields = parser.parseLine("a|b|c");
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
      */
     public CSVParser(final char separator) {
         this(separator, DEFAULT_QUOTE_CHARACTER, DEFAULT_ESCAPE_CHARACTER);
     }
 
     /**
-     * Constructs CSVParser with supplied separator and quote char.
+     * Constructs a CSVParser with custom separator and quote characters.
+     * Uses default escape character (\).
      *
-     * @param separator The delimiter to use for separating entries
-     * @param quoteChar The character to use for quoted elements
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser(',', '\'');
+     * List<String> fields = parser.parseLine("a,'b,c',d");
+     * // Result: ["a", "b,c", "d"]
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
+     * @param quoteChar the character to use for quoted elements
      */
     public CSVParser(final char separator, final char quoteChar) {
         this(separator, quoteChar, DEFAULT_ESCAPE_CHARACTER);
     }
 
     /**
-     * Constructs CSVParser with supplied separator and quote char.
+     * Constructs a CSVParser with custom separator, quote, and escape characters.
      *
-     * @param separator The delimiter to use for separating entries
-     * @param quoteChar The character to use for quoted elements
-     * @param escape The character to use for escaping a separator or quote
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser(',', '"', '\\');
+     * List<String> fields = parser.parseLine("a,\"b\\\"c\",d");
+     * // Result: ["a", "b\"c", "d"]
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
+     * @param quoteChar the character to use for quoted elements
+     * @param escape the character to use for escaping a separator or quote
      */
     public CSVParser(final char separator, final char quoteChar, final char escape) {
         this(separator, quoteChar, escape, DEFAULT_STRICT_QUOTES);
     }
 
     /**
-     * Constructs CSVParser with supplied separator and quote char.
-     * Allows setting the "strict quotes" flag.
+     * Constructs a CSVParser with custom settings including strict quotes mode.
+     * In strict quotes mode, characters outside the quotes are ignored.
      *
-     * @param separator The delimiter to use for separating entries
-     * @param quoteChar The character to use for quoted elements
-     * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser(',', '"', '\\', true);
+     * List<String> fields = parser.parseLine("\"clean\"dirty,\"text\"");
+     * // With strictQuotes=true: ["clean", "text"]
+     * // With strictQuotes=false: ["cleandirty", "text"]
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
+     * @param quoteChar the character to use for quoted elements
+     * @param escape the character to use for escaping a separator or quote
+     * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      */
     public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) {
         this(separator, quoteChar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
     }
 
     /**
-     * Constructs CSVParser with supplied separator and quote char.
-     * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
+     * Constructs a CSVParser with custom settings including whitespace handling.
      *
-     * @param separator The delimiter to use for separating entries
-     * @param quoteChar The character to use for quoted elements
-     * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser(',', '"', '\\', false, true);
+     * List<String> fields = parser.parseLine("  a  ,  b  ,  c  ");
+     * // With ignoreLeadingWhiteSpace=true: ["a", "b", "c"]
+     * // With ignoreLeadingWhiteSpace=false: ["  a  ", "  b  ", "  c  "]
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
+     * @param quoteChar the character to use for quoted elements
+     * @param escape the character to use for escaping a separator or quote
+     * @param strictQuotes if {@code true}, characters outside the quotes are ignored
+     * @param ignoreLeadingWhiteSpace if {@code true}, white space in front of a quote in a field is ignored
      */
     public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
         this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
     }
 
     /**
-     * Constructs CSVParser with supplied separator and quote char.
-     * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
+     * Constructs a CSVParser with full control over all parsing options.
      *
-     * @param separator The delimiter to use for separating entries
-     * @param quoteChar The character to use for quoted elements
-     * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
-     * @param ignoreQuotations If {@code true}, treat quotations like any other character.
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Parser that ignores quotes entirely
+     * CSVParser parser = new CSVParser(',', '"', '\\', false, true, true);
+     * List<String> fields = parser.parseLine("\"a\",\"b\",\"c\"");
+     * // Result: ["\"a\"", "\"b\"", "\"c\""] - quotes are treated as regular characters
+     * }</pre>
+     *
+     * @param separator the delimiter to use for separating entries
+     * @param quoteChar the character to use for quoted elements
+     * @param escape the character to use for escaping a separator or quote
+     * @param strictQuotes if {@code true}, characters outside the quotes are ignored
+     * @param ignoreLeadingWhiteSpace if {@code true}, white space in front of a quote in a field is ignored
+     * @param ignoreQuotations if {@code true}, treat quotations like any other character
+     * @throws UnsupportedOperationException if separator, quote, and escape are not all different,
+     *         or if separator is NULL_CHARACTER
      */
     public CSVParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
             final boolean ignoreQuotations) {
@@ -216,64 +308,96 @@ public class CSVParser {
     }
 
     /**
-     * @return The default separator for this parser.
+     * Returns the separator character used by this parser.
+     *
+     * @return the separator character
      */
     public char getSeparator() {
         return separator;
     }
 
     /**
-     * @return The default quotation character for this parser.
+     * Returns the quotation character used by this parser.
+     *
+     * @return the quotation character
      */
     public char getQuoteChar() {
         return quoteChar;
     }
 
     /**
-     * @return The default escape character for this parser.
+     * Returns the escape character used by this parser.
+     *
+     * @return the escape character
      */
     public char getEscape() {
         return escape;
     }
 
     /**
-     * @return The default strictQuotes setting for this parser.
+     * Returns whether this parser uses strict quotes mode.
+     * In strict quotes mode, characters outside quotes are ignored.
+     *
+     * @return true if strict quotes mode is enabled
      */
     public boolean isStrictQuotes() {
         return strictQuotes;
     }
 
     /**
-     * @return The default ignoreLeadingWhiteSpace setting for this parser.
+     * Returns whether this parser ignores leading whitespace.
+     * When true, whitespace before a quote character is ignored.
+     *
+     * @return true if leading whitespace is ignored
      */
     public boolean isIgnoreLeadingWhiteSpace() {
         return ignoreLeadingWhiteSpace;
     }
 
     /**
-     * @return The default ignoreQuotation setting for this parser.
+     * Returns whether this parser ignores quotation marks.
+     * When true, quotes are treated as regular characters.
+     *
+     * @return true if quotations are ignored
      */
     public boolean isIgnoreQuotations() {
         return ignoreQuotations;
     }
 
     /**
-     * Parses an incoming String and returns an array of elements.
-     * This method is used when all data is contained in a single line.
+     * Parses a CSV line into a list of fields.
+     * This method handles quoted fields, escaped characters, and separators according
+     * to the parser's configuration.
      *
-     * @param nextLine Line to be parsed.
-     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
-     * @throws ParseException If bad things happen during the read
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser();
+     * List<String> fields = parser.parseLine("John,\"Doe, Jr.\",30,\"New York\"");
+     * // Result: ["John", "Doe, Jr.", "30", "New York"]
+     * }</pre>
+     *
+     * @param nextLine the line to be parsed
+     * @return a List of String values, or an empty list if nextLine is null
+     * @throws ParseException if the line contains an unterminated quoted field
      */
     public List<String> parseLine(final String nextLine) throws ParseException {
         return parseLine(nextLine, null);
     }
 
     /**
+     * Parses a CSV line into an array of fields.
+     * This is a convenience method that returns an array instead of a List.
      *
-     * @param nextLine
-     * @return
-     * @throws ParseException
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser();
+     * String[] fields = parser.parseLineToArray("a,b,c");
+     * // Result: ["a", "b", "c"]
+     * }</pre>
+     *
+     * @param nextLine the line to be parsed
+     * @return an array of String values, or an empty array if nextLine is null
+     * @throws ParseException if the line contains an unterminated quoted field
      */
     public String[] parseLineToArray(final String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine, null);
@@ -282,9 +406,22 @@ public class CSVParser {
     }
 
     /**
-     * @param nextLine
-     * @param output
-     * @throws ParseException
+     * Parses a CSV line into a pre-allocated array.
+     * This method is useful for performance when parsing many lines with the same
+     * number of fields, as it avoids array allocation.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * CSVParser parser = new CSVParser();
+     * String[] output = new String[4];
+     * parser.parseLineToArray("a,b,c,d", output);
+     * // output now contains: ["a", "b", "c", "d"]
+     * }</pre>
+     *
+     * @param nextLine the line to be parsed
+     * @param output the pre-allocated array to fill with parsed values
+     * @throws ParseException if the line contains an unterminated quoted field
+     * @throws IllegalArgumentException if output is null
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws ParseException {
         N.checkArgNotNull(output, "output");
@@ -371,7 +508,14 @@ public class CSVParser {
 
             // line is done - check status
             if (inQuotes(inQuotes)) {
-                throw new ParseException("Un-terminated quoted field at end of CSV line");
+                int lastQuoteIndex = sb.lastIndexOf(String.valueOf(quoteChar));
+
+                if (lastQuoteIndex >= 0 && Strings.isBlank(sb.substring(lastQuoteIndex + 1))) {
+                    // Tested with: new CSVParser().parseLine("a,  b  ,  \"c\" "); 
+                    sb.setLength(lastQuoteIndex); // remove the last quote character
+                } else {
+                    throw new ParseException("Un-terminated quoted field at end of CSV line");
+                }
             }
 
             if (!quoted && ignoreLeadingWhiteSpace) {

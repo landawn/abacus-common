@@ -5,20 +5,40 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>5.9.0</version>
-	<packaging>jar</packaging>
-
+	<version>6.1</version>
+	<packaging>jar</packaging> 
 	<name>abacus-common</name>
+	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
 	<url>https://github.com/landawn/abacus-common</url>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>https://github.com/landawn/abacus-common/blob/master/LICENSE.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Haiyang Li</name>
+			<email>70lihy@gmail.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:https://github.com/landawn/abacus-common.git</connection>
+		<developerConnection>scm:git:https://github.com/landawn/abacus-common.git</developerConnection>
+		<url>https://github.com/landawn/abacus-common</url>
+	</scm>
 
 	<properties>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<junit.jupiter.version>5.10.2</junit.jupiter.version>
-		<junit.platform.version>1.10.2</junit.platform.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<junit.jupiter.version>5.13.0</junit.jupiter.version> 
+		<mockito.version>5.18.0</mockito.version> 
 	</properties>
 
 	<repositories>
@@ -33,10 +53,10 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>5.8.9</version>
+			<version>6.0</version>
 			<scope>provided</scope>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -52,9 +72,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.14.0</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+    		<version>2.13.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -62,41 +82,6 @@
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
 			<version>1.11.3</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.26.0</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>4.4</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.16.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.15.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.10.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -119,18 +104,6 @@
 			<artifactId>log4j-core</artifactId>
 			<version>2.23.0</version>
 			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi</artifactId>
-		    <version>5.4.1</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi-ooxml</artifactId>
-		    <version>5.4.1</version>
 		</dependency>
 
 		<dependency>
@@ -195,6 +168,18 @@
 			<version>4.0.4</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.4.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>5.4.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -214,13 +199,6 @@
 			<groupId>org.mongodb</groupId>
 			<artifactId>bson</artifactId>
 			<version>4.11.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-			<version>2.0.46</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -282,72 +260,10 @@
 
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>3.14.9</version>
+		    <artifactId>okhttp</artifactId>
+		    <version>4.12.0</version>
 			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.squareup.retrofit2</groupId>
-			<artifactId>retrofit</artifactId>
-			<version>2.9.0</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.konghq</groupId>
-			<artifactId>unirest-java</artifactId>
-			<version>4.0.0-RC2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jibx</groupId>
-			<artifactId>jibx-run</artifactId>
-			<version>1.4.2</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.4.20</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>5.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-			<version>[8.3.0,)</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>2.2.224</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>2.7.2</version>
-			<scope>provided</scope>
-		</dependency>
+		</dependency> 
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -370,51 +286,37 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- 
-		<dependency>
-			<groupId>it.unimi.dsi</groupId>
-			<artifactId>fastutil</artifactId>
-    		<version>8.5.13</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.carrotsearch</groupId>
-			<artifactId>hppc</artifactId>
-			<version>0.9.1</version>
-			<scope>provided</scope>
-		</dependency>
- 		-->
-
-		<!-- 
-		<dependency>
-			<groupId>android</groupId>
-			<artifactId>android</artifactId>
-			<version>UNKNOWN</version>
-			<scope>provided</scope>
-		</dependency>
-		 -->
-
-		<!-- 
-		<dependency>
-			<groupId>io.fastjson</groupId>
-			<artifactId>boon</artifactId>
-			<version>0.34</version>
-			<scope>test</scope>
-		</dependency>
-		 -->
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
+		</dependency> 
+		
+		<dependency>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+		    <scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.squareup.okhttp3</groupId>
+		  <artifactId>mockwebserver</artifactId>
+		  <version>4.12.0</version> <!-- use latest stable version -->
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.assertj</groupId>
+		    <artifactId>assertj-core</artifactId>
+		    <version>3.27.3</version>
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -437,8 +339,14 @@
 				<version>3.3.0</version>
 				<configuration>
 					<excludes>
-						<exclude>com/landawn/abacus/parser/**</exclude>
-						<exclude>com/landawn/abacus/type/**</exclude>
+						<exclude>com/landawn/abacus/util/ClassUtil.java</exclude>
+						<exclude>
+							com/landawn/abacus/util/stream/Abstract*Stream.java</exclude>
+						<exclude>
+							com/landawn/abacus/util/stream/*Array*Stream.java</exclude>
+						<exclude>
+							com/landawn/abacus/util/stream/*Iterator*Stream.java</exclude>
+						<exclude>com/landawn/abacus/util/stream/*IteratorEx.java</exclude>
 					</excludes>
 				</configuration>
 
@@ -452,18 +360,25 @@
 				</executions>
 			</plugin>
 
+
+			<!-- https://bugs.openjdk.java.net/browse/JDK-8281944  -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.6.3</version>
 				<configuration>
+					<doctitle>abacus-common</doctitle>
+					<show>public</show>
 					<doclint>none</doclint>
+					<source>${maven.compiler.source}</source>
+					<detectJavaApiLink>false</detectJavaApiLink>
 					<sourceFileExcludes>
 						<exclude>/com/landawn/abacus/type/**/*.java</exclude>
 						<exclude>/com/landawn/abacus/logging/**/*.java</exclude>
+						<exclude>/com/landawn/abacus/util/cs.java</exclude>
 					</sourceFileExcludes>
-				</configuration>
 
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -473,7 +388,32 @@
 					</execution>
 				</executions>
 			</plugin>
+
+	        <plugin>
+	          <groupId>org.sonatype.central</groupId>
+	          <artifactId>central-publishing-maven-plugin</artifactId>
+	          <version>0.8.0</version>
+	          <extensions>true</extensions>
+	          <configuration>
+	             <publishingServerId>central</publishingServerId>
+	             <autoPublish>true</autoPublish>
+	          </configuration>
+	        </plugin>
+
+		    <plugin>
+		      <groupId>org.apache.maven.plugins</groupId>
+		      <artifactId>maven-gpg-plugin</artifactId>
+		      <version>3.1.0</version>
+		      <executions>
+		        <execution>
+		          <id>sign-artifacts</id>
+		          <phase>verify</phase> <!-- or deploy -->
+		          <goals>
+		            <goal>sign</goal>
+		          </goals>
+		        </execution>
+		      </executions>
+		    </plugin>
 		</plugins>
 	</build>
-
 </project>

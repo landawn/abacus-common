@@ -16,15 +16,25 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation upon three {@code int}-valued operands and producing an {@code int}-valued result.
+ * This is the three-arity primitive specialization of {@link java.util.function.Function}.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(int, int, int)}.
+ *
+ * @see IntBinaryOperator
+ * @see java.util.function.UnaryOperator
+ */
 @FunctionalInterface
 public interface IntTernaryOperator extends Throwables.IntTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     int applyAsInt(int a, int b, int c);

@@ -67,6 +67,8 @@ class JSONStreamReader extends JSONStringReader {
             refill();
         }
 
+        lastEvent = nextEvent;
+
         text = null;
         numValue = null;
         nextChar = 0;

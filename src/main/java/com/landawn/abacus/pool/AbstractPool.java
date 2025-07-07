@@ -27,6 +27,28 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
 
+/**
+ * Abstract base class for implementing object pools with eviction, balancing, and memory management capabilities.
+ * This class provides the core functionality for thread-safe object pooling including statistics tracking,
+ * automatic eviction of idle objects, and memory-based constraints.
+ * 
+ * <p>The pool maintains various statistics such as hit/miss counts, eviction counts, and memory usage.
+ * It uses a ReentrantLock for thread synchronization and condition variables for coordinating
+ * producer-consumer interactions.
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Thread-safe operations with ReentrantLock</li>
+ *   <li>Automatic eviction of expired objects based on configurable policies</li>
+ *   <li>Memory-based capacity constraints</li>
+ *   <li>Statistical tracking of pool operations</li>
+ *   <li>Automatic shutdown hook for cleanup</li>
+ * </ul>
+ * 
+ * @see Pool
+ * @see ObjectPool
+ * @see KeyedObjectPool
+ */
 public abstract class AbstractPool implements Pool {
 
     @Serial
@@ -34,10 +56,21 @@ public abstract class AbstractPool implements Pool {
 
     static final Logger logger = LoggerFactory.getLogger(AbstractPool.class);
 
+    /**
+     * Default delay in milliseconds between eviction runs.
+     */
     static final long DEFAULT_EVICT_DELAY = 3000;
 
+    /**
+     * Default balance factor used when auto-balancing is enabled.
+     * Determines the proportion of objects to remove during balancing operations.
+     */
     static final float DEFAULT_BALANCE_FACTOR = 0.2f;
 
+    /**
+     * Shared scheduled executor service for all pool instances.
+     * Used for running periodic eviction tasks.
+     */
     static final ScheduledExecutorService scheduledExecutor;
 
     static {
@@ -48,34 +81,96 @@ public abstract class AbstractPool implements Pool {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
+    /**
+     * Counter for the number of put operations performed on this pool.
+     */
     final AtomicLong putCount = new AtomicLong();
 
+    /**
+     * Counter for the number of successful get operations (hits) on this pool.
+     */
     final AtomicLong hitCount = new AtomicLong();
 
+    /**
+     * Counter for the number of unsuccessful get operations (misses) on this pool.
+     */
     final AtomicLong missCount = new AtomicLong();
 
+    /**
+     * Counter for the number of objects evicted from this pool.
+     */
     final AtomicLong evictionCount = new AtomicLong();
 
+    /**
+     * Total size of data in bytes currently stored in the pool.
+     * Only tracked when a memory measure is configured.
+     */
     final AtomicLong totalDataSize = new AtomicLong();
 
+    /**
+     * Lock used for synchronizing pool operations.
+     */
     final ReentrantLock lock = new ReentrantLock();
 
+    /**
+     * Condition variable signaled when the pool is not empty.
+     */
     final transient Condition notEmpty = lock.newCondition();
 
+    /**
+     * Condition variable signaled when the pool is not full.
+     */
     final transient Condition notFull = lock.newCondition();
 
+    /**
+     * Maximum number of objects the pool can hold.
+     */
     final int capacity;
 
+    /**
+     * Delay in milliseconds between eviction runs.
+     * A value of 0 or less disables automatic eviction.
+     */
+    final long evictDelay;
+
+    /**
+     * Maximum total memory size in bytes the pool can use.
+     * A value of 0 or less indicates no memory limit.
+     */
     final long maxMemorySize;
 
+    /**
+     * Policy used to determine which objects to evict when the pool is full.
+     */
     final EvictionPolicy evictionPolicy;
 
+    /**
+     * Whether automatic balancing is enabled for this pool.
+     */
     final boolean autoBalance;
 
+    /**
+     * Factor used to determine how many objects to remove during balancing.
+     * Should be between 0 and 1.
+     */
     final float balanceFactor;
 
+    /**
+     * Flag indicating whether this pool has been closed.
+     */
     boolean isClosed = false;
 
+    /**
+     * Constructs a new AbstractPool with the specified configuration.
+     * 
+     * @param capacity the maximum number of objects the pool can hold
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable automatic eviction
+     * @param evictionPolicy the policy to use for evicting objects, or null for LAST_ACCESS_TIME
+     * @param autoBalance whether to automatically balance the pool when full
+     * @param balanceFactor the proportion of objects to remove during balancing (0 uses default of 0.2)
+     * @param maxMemorySize the maximum memory size in bytes, or 0 for no memory limit
+     * @throws IllegalArgumentException if capacity, evictDelay, balanceFactor, or maxMemorySize is negative
+     */
     protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor,
             final long maxMemorySize) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0 || maxMemorySize < 0) {
@@ -84,6 +179,7 @@ public abstract class AbstractPool implements Pool {
         }
 
         this.capacity = capacity;
+        this.evictDelay = evictDelay < 0 ? 0 : evictDelay; // NOSONAR - allow 0 to disable eviction
         this.maxMemorySize = maxMemorySize;
         this.evictionPolicy = evictionPolicy == null ? EvictionPolicy.LAST_ACCESS_TIME : evictionPolicy;
         this.autoBalance = autoBalance;
@@ -103,7 +199,18 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Lock.
+     * Acquires the lock for this pool.
+     * This method blocks until the lock is available.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * pool.lock();
+     * try {
+     *     // perform thread-safe operations
+     * } finally {
+     *     pool.unlock();
+     * }
+     * }</pre>
      */
     @Override
     public void lock() {
@@ -111,7 +218,10 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Unlock.
+     * Releases the lock for this pool.
+     * This method should always be called in a finally block after {@link #lock()}.
+     * 
+     * @throws IllegalMonitorStateException if the current thread does not hold the lock
      */
     @Override
     public void unlock() {
@@ -119,15 +229,27 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Gets the capacity.
-     *
-     * @return
+     * Returns the maximum capacity of this pool.
+     * 
+     * @return the maximum number of objects this pool can hold
      */
     @Override
     public int capacity() {
         return capacity;
     }
 
+    /**
+     * Returns a snapshot of the current pool statistics.
+     * The statistics include capacity, current size, operation counts, and memory usage.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * PoolStats stats = pool.stats();
+     * System.out.println("Hit rate: " + (double)stats.hitCount() / stats.getCount());
+     * }</pre>
+     * 
+     * @return a PoolStats object containing current pool statistics
+     */
     @Override
     public PoolStats stats() {
         final long currentHitCount = hitCount.get();
@@ -139,9 +261,9 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Checks if is empty.
-     *
-     * @return {@code true}, if is empty
+     * Checks whether this pool is empty.
+     * 
+     * @return {@code true} if the pool contains no objects, {@code false} otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -149,9 +271,10 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Checks if is closed.
-     *
-     * @return {@code true}, if is closed
+     * Checks whether this pool has been closed.
+     * Once closed, a pool cannot be reopened and all operations will throw IllegalStateException.
+     * 
+     * @return {@code true} if the pool has been closed, {@code false} otherwise
      */
     @Override
     public boolean isClosed() {
@@ -159,7 +282,10 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Assert not closed.
+     * Verifies that this pool is not closed, throwing an exception if it is.
+     * This method should be called at the beginning of any operation that requires the pool to be open.
+     * 
+     * @throws IllegalStateException if the pool has been closed
      */
     protected void assertNotClosed() {
         if (isClosed) {

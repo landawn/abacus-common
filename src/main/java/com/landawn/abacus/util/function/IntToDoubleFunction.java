@@ -17,18 +17,54 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a function that accepts an int-valued argument and produces a
+ * double-valued result. This is the {@code int}-to-{@code double} primitive
+ * specialization for {@link java.util.function.Function}.
  *
+ * <p>This interface extends both {@link Throwables.IntToDoubleFunction} with
+ * {@link RuntimeException} and {@link java.util.function.IntToDoubleFunction},
+ * providing compatibility with the Java standard library while supporting the
+ * Abacus framework's exception handling capabilities.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #applyAsDouble(int)}.
+ *
+ * <p>Refer to JDK API documentation at: 
+ * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.Function
+ * @see java.util.function.IntToDoubleFunction
+ * @since 1.8
  */
 @FunctionalInterface
 public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<RuntimeException>, java.util.function.IntToDoubleFunction { //NOSONAR
 
+    /**
+     * A default implementation that performs a widening primitive conversion
+     * from {@code int} to {@code double}. This conversion is lossless as every
+     * int value can be exactly represented as a double value.
+     */
     IntToDoubleFunction DEFAULT = value -> value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * <p>The function performs a conversion from an {@code int} value to a
+     * {@code double} value. This is a widening primitive conversion that
+     * preserves the numeric value. All int values can be exactly represented
+     * as double values, so this conversion is lossless.
+     *
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Converting integer counts or indices to double values for mathematical calculations</li>
+     *   <li>Preparing integer data for floating-point arithmetic operations</li>
+     *   <li>Converting integer measurements to double for higher precision calculations</li>
+     * </ul>
+     *
+     * @param value the function argument, an int value to be converted to double
+     * @return the function result as a double value, which exactly represents
+     *         the input int value
      */
     @Override
     double applyAsDouble(int value);

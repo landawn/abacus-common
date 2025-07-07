@@ -20,6 +20,11 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for Double (wrapper class) values.
+ * This class provides database operations and type information for Double objects.
+ * It handles the conversion between database values and Java Double objects, supporting null values.
+ */
 public final class DoubleType extends AbstractDoubleType {
 
     public static final String DOUBLE = Double.class.getSimpleName();
@@ -28,6 +33,12 @@ public final class DoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     * Note: The method uses raw types for compatibility reasons.
+     *
+     * @return The Class object representing Double.class
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -35,9 +46,10 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Indicates whether this type represents a primitive wrapper class.
+     * Since this handles the Double wrapper class (not the primitive double), this returns true.
      *
-     * @return {@code true}, if is primitive wrapper
+     * @return true, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -45,11 +57,15 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
+     * Retrieves a Double value from a ResultSet at the specified column index.
+     * This method handles various numeric types in the database and converts them to Double.
+     * If the database value is NULL, this method returns null.
+     * For optimal performance, if the value is already a Double, it's returned directly.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the double value
+     * @return The Double value at the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @MayReturnNull
     @Override
@@ -66,11 +82,15 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
+     * Retrieves a Double value from a ResultSet using the specified column label.
+     * This method handles various numeric types in the database and converts them to Double.
+     * If the database value is NULL, this method returns null.
+     * For optimal performance, if the value is already a Double, it's returned directly.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the double value
+     * @return The Double value in the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @MayReturnNull
     @Override

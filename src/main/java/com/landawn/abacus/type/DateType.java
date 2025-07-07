@@ -25,6 +25,12 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for java.sql.Date values.
+ * This class provides serialization, deserialization, and database operations for SQL Date objects.
+ * SQL Dates represent dates without time components (year, month, day only).
+ * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
+ */
 public class DateType extends AbstractDateType<Date> {
 
     public static final String DATE = Date.class.getSimpleName();
@@ -37,15 +43,26 @@ public class DateType extends AbstractDateType<Date> {
         super(typeName);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing java.sql.Date.class
+     */
     @Override
     public Class<Date> clazz() {
         return Date.class;
     }
 
     /**
+     * Converts various object types to a SQL Date instance.
+     * Supported input types include:
+     * - Number: interpreted as milliseconds since epoch
+     * - java.util.Date: converted to SQL Date (time portion is truncated)
+     * - String: parsed as a date string
+     * - Other objects: converted to string first, then parsed
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to SQL Date. Can be null.
+     * @return A SQL Date instance representing the input value, or null if input is null
      */
     @Override
     public Date valueOf(final Object obj) {
@@ -59,9 +76,14 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Converts a string representation to a SQL Date instance.
+     * Special handling for:
+     * - null or empty string: returns null
+     * - "sysTime": returns the current system date
+     * - Other strings: parsed using date parsing utilities
      *
-     * @param str
-     * @return
+     * @param str the string to parse. Can be null or empty.
+     * @return A SQL Date instance parsed from the string, or null if input is null/empty
      */
     @Override
     public Date valueOf(final String str) {
@@ -69,11 +91,15 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Converts a character array to a SQL Date instance.
+     * If the character array appears to represent a numeric value (timestamp),
+     * it attempts to parse it as milliseconds since epoch.
+     * Otherwise, it converts to string and uses string parsing.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the value to parse
+     * @param offset the starting position in the character array
+     * @param len the number of characters to use
+     * @return A SQL Date instance parsed from the character array, or null if input is null or empty
      */
     @MayReturnNull
     @Override
@@ -94,11 +120,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Retrieves a SQL Date value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the date value
+     * @return A SQL Date instance from the result set, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -106,11 +133,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Retrieves a SQL Date value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the date value
+     * @return A SQL Date instance from the result set, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -118,11 +146,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Sets a SQL Date value as a parameter in a PreparedStatement.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement in which to set the parameter
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the SQL Date value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Date x) throws SQLException {
@@ -130,11 +159,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
+     * Sets a SQL Date value as a named parameter in a CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement in which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the SQL Date value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Date x) throws SQLException {

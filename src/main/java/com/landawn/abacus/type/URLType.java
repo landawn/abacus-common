@@ -34,15 +34,30 @@ public class URLType extends AbstractType<URL> {
         super(URL);
     }
 
+    /**
+     * Returns the Class object representing the URL class.
+     * <p>
+     * This method returns {@code URL.class}, which is the Class object for the
+     * {@link java.net.URL} class that this URLType handles.
+     * </p>
+     *
+     * @return the Class object for URL.class
+     */
     @Override
     public Class<URL> clazz() {
         return URL.class;
     }
 
     /**
+     * Converts a URL instance to its external string representation.
+     * <p>
+     * This method returns the external form of the URL by calling its {@code toExternalForm()} method,
+     * which produces a string representation of the URL suitable for use in creating new URL instances.
+     * If the input URL is null, this method returns null.
+     * </p>
      *
-     * @param x
-     * @return
+     * @param x the URL instance to convert to string
+     * @return the external string representation of the URL, or null if the input is null
      */
     @Override
     public String stringOf(final URL x) {
@@ -50,9 +65,18 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
+     * Converts a string to a URL instance.
+     * <p>
+     * This method creates a URL instance from the provided string by first creating a URI
+     * and then converting it to a URL. If the string is null or empty, this method returns null.
+     * </p>
+     * <p>
+     * If the string is not a valid URL format, this method throws a runtime exception.
+     * </p>
      *
-     * @param str
-     * @return
+     * @param str the string to convert to a URL
+     * @return a URL instance created from the string, or null if the string is empty
+     * @throws RuntimeException if the string is not a valid URL format (wraps MalformedURLException)
      */
     @MayReturnNull
     @Override
@@ -69,11 +93,16 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
+     * Retrieves a URL value from a ResultSet at the specified column index.
+     * <p>
+     * This method uses the ResultSet's {@code getURL} method to directly retrieve
+     * the URL value from the database.
+     * </p>
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) of the URL value
+     * @return the URL value, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public URL get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -81,11 +110,16 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
+     * Retrieves a URL value from a ResultSet using the specified column label.
+     * <p>
+     * This method uses the ResultSet's {@code getURL} method to directly retrieve
+     * the URL value from the database using the column name.
+     * </p>
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column containing the URL value
+     * @return the URL value, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
     public URL get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -93,11 +127,16 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
+     * Sets a URL value in a PreparedStatement at the specified parameter index.
+     * <p>
+     * This method uses the PreparedStatement's {@code setURL} method to directly set
+     * the URL value. If the URL is null, a NULL value is set in the database.
+     * </p>
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the value in
+     * @param columnIndex the parameter index (1-based) where to set the URL value
+     * @param x the URL value to set, or null for SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final URL x) throws SQLException {
@@ -105,11 +144,16 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
+     * Sets a URL value in a CallableStatement using the specified parameter name.
+     * <p>
+     * This method uses the CallableStatement's {@code setURL} method to directly set
+     * the URL value. If the URL is null, a NULL value is set in the database.
+     * </p>
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the value in
+     * @param parameterName the name of the parameter where to set the URL value
+     * @param x the URL value to set, or null for SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final URL x) throws SQLException {

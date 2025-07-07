@@ -16,15 +16,52 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation on three long-valued operands that produces a long-valued result.
+ * This is the three-arity primitive specialization of {@code Function} for long values.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsLong(long, long, long)}.
+ * 
+ * <p>The interface extends {@code Throwables.LongTernaryOperator} with {@code RuntimeException} as the exception type,
+ * making it suitable for use in contexts where checked exceptions are not required.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * LongTernaryOperator sum = (a, b, c) -> a + b + c;
+ * long result = sum.applyAsLong(10L, 20L, 30L); // returns 60L
+ * 
+ * LongTernaryOperator median = (a, b, c) -> {
+ *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
+ *     if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+ *     return c;
+ * };
+ * }</pre>
+ * 
+ * @see java.util.function.LongUnaryOperator
+ * @see java.util.function.LongBinaryOperator
+ */
 @FunctionalInterface
 public interface LongTernaryOperator extends Throwables.LongTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
+     * 
+     * <p>This method takes three long values as input and produces a long result.
+     * The implementation defines how the three operands are combined to produce the result.
+     * 
+     * <p>Common implementations might include:
+     * <ul>
+     *   <li>Mathematical operations (sum, product, average)</li>
+     *   <li>Conditional operations (min, max, median)</li>
+     *   <li>Bitwise operations</li>
+     *   <li>Custom business logic involving three long values</li>
+     * </ul>
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result as a long value
+     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     long applyAsLong(long a, long b, long c);

@@ -15,27 +15,128 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum ServiceStatus.
- *
+ * Enumeration representing various states of a service lifecycle.
+ * 
+ * <p>This enum provides a standardized way to track and manage service states throughout
+ * their lifecycle, from initial default state through various operational and terminal states.
+ * Each status has an associated integer value for efficient storage and comparison.</p>
+ * 
+ * <p><b>Status progression example:</b></p>
+ * <pre>{@code
+ * ServiceStatus status = ServiceStatus.DEFAULT;
+ * // Service becomes active
+ * status = ServiceStatus.ACTIVE;
+ * // Service expires
+ * status = ServiceStatus.EXPIRED;
+ * 
+ * // Convert from stored integer
+ * int storedValue = 2;
+ * ServiceStatus restoredStatus = ServiceStatus.valueOf(storedValue); // SUSPENDED
+ * }</pre>
+ * 
+ * @author HaiYang Li
  */
 public enum ServiceStatus {
+    /**
+     * Default initial state of a service (value: 0).
+     * Typically represents a newly created or uninitialized service.
+     */
+    DEFAULT(0),
 
-    DEFAULT(0), ACTIVE(1), SUSPENDED(2), EXPIRED(3), CONCLUDED(4), REVOKED(5), REFUNDED(6), CANCELLED(7);
+    /**
+     * Service is currently active and operational (value: 1).
+     * The service is running normally and accepting requests.
+     */
+    ACTIVE(1),
+
+    /**
+     * Service has been temporarily suspended (value: 2).
+     * The service is paused but can potentially be reactivated.
+     */
+    SUSPENDED(2),
+
+    /**
+     * Service has expired due to time constraints (value: 3).
+     * The service validity period has ended.
+     */
+    EXPIRED(3),
+
+    /**
+     * Service has been concluded successfully (value: 4).
+     * The service completed its intended purpose and ended normally.
+     */
+    CONCLUDED(4),
+
+    /**
+     * Service has been revoked by administrative action (value: 5).
+     * The service was terminated due to policy violation or administrative decision.
+     */
+    REVOKED(5),
+
+    /**
+     * Service has been refunded (value: 6).
+     * Applicable for paid services where a refund was issued.
+     */
+    REFUNDED(6),
+
+    /**
+     * Service has been cancelled (value: 7).
+     * The service was terminated at user request or due to other cancellation reasons.
+     */
+    CANCELLED(7);
 
     private final int intValue;
 
+    /**
+     * Constructs a ServiceStatus with the specified integer value.
+     * 
+     * @param intValue the integer representation of this status
+     */
     ServiceStatus(final int intValue) {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the integer value associated with this service status.
+     * 
+     * <p>This value can be used for efficient storage in databases or for
+     * transmission over networks where integer representation is preferred.</p>
+     * 
+     * <p><b>Usage example:</b></p>
+     * <pre>{@code
+     * ServiceStatus status = ServiceStatus.ACTIVE;
+     * int value = status.intValue(); // returns 1
+     * // Store in database
+     * database.saveStatus(serviceId, value);
+     * }</pre>
+     * 
+     * @return the integer value of this status
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
+     * Returns the ServiceStatus corresponding to the specified integer value.
+     * 
+     * <p>This method provides a way to reconstruct a ServiceStatus from its
+     * integer representation, useful when retrieving status values from storage
+     * or network protocols.</p>
+     * 
+     * <p><b>Usage example:</b></p>
+     * <pre>{@code
+     * // Retrieve from database
+     * int storedValue = database.getStatus(serviceId);
+     * ServiceStatus status = ServiceStatus.valueOf(storedValue);
+     * 
+     * if (status == ServiceStatus.ACTIVE) {
+     *     // Handle active service
+     * }
+     * }</pre>
      *
-     * @param intValue
-     * @return
+     * @param intValue the integer value to convert to ServiceStatus
+     * @return the ServiceStatus corresponding to the given integer value
+     * @throws IllegalArgumentException if no ServiceStatus exists for the given integer value
      */
     public static ServiceStatus valueOf(final int intValue) {
         switch (intValue) {

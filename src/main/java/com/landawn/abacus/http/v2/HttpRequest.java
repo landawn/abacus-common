@@ -42,6 +42,31 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
+ * A fluent HTTP request builder and executor based on Java 11+ HttpClient.
+ * This class provides a convenient API for building and executing HTTP requests with various features
+ * such as headers, query parameters, request bodies, authentication, and timeouts.
+ * 
+ * <p>This implementation uses the modern Java HttpClient introduced in Java 11, providing better performance
+ * and support for HTTP/2 compared to older HTTP clients.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Simple GET request
+ * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+ *     .header("Accept", "application/json")
+ *     .get();
+ * 
+ * // POST request with JSON body
+ * User user = new User("John", "Doe");
+ * User createdUser = HttpRequest.url("https://api.example.com/users")
+ *     .jsonBody(user)
+ *     .post(User.class);
+ * 
+ * // Asynchronous request
+ * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("https://api.example.com/data")
+ *     .asyncGet();
+ * }</pre>
+ *
  * @see URLEncodedUtil
  * @see HttpHeaders
  */
@@ -77,11 +102,11 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the URI target of this request.
+     * Creates a new HttpRequest instance with the specified URL and HTTP client.
      *
-     * @param url
-     * @param httpClient
-     * @return
+     * @param url the URL string for the request
+     * @param httpClient the HttpClient to use for executing the request
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final String url, final HttpClient httpClient) {
@@ -89,11 +114,11 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the URI target of this request.
+     * Creates a new HttpRequest instance with the specified URL and HTTP client.
      *
-     * @param url
-     * @param httpClient
-     * @return
+     * @param url the URL object for the request
+     * @param httpClient the HttpClient to use for executing the request
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final URL url, final HttpClient httpClient) {
@@ -101,11 +126,11 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the URI target of this request.
+     * Creates a new HttpRequest instance with the specified URI and HTTP client.
      *
-     * @param uri
-     * @param httpClient
-     * @return
+     * @param uri the URI object for the request
+     * @param httpClient the HttpClient to use for executing the request
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final URI uri, final HttpClient httpClient) {
@@ -113,20 +138,33 @@ public final class HttpRequest {
     }
 
     /**
+     * Creates a new HttpRequest instance with the specified URL using the default HTTP client.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest request = HttpRequest.url("https://api.example.com/users");
+     * }</pre>
      *
-     * @param url
-     * @return
+     * @param url the URL string for the request
+     * @return a new HttpRequest instance
      */
     public static HttpRequest url(final String url) {
         return new HttpRequest(url, null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
     /**
+     * Creates a new HttpRequest instance with the specified URL and timeout settings.
+     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest request = HttpRequest.url("https://api.example.com/data", 5000, 30000);
+     * }</pre>
      *
-     * @param url
-     * @param connectionTimeoutInMillis
-     * @param readTimeoutInMillis
-     * @return
+     * @param url the URL string for the request
+     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @return a new HttpRequest instance
      */
     public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(url, null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
@@ -134,10 +172,10 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the URI target of this request.
+     * Creates a new HttpRequest instance with the specified URL using the default HTTP client.
      *
-     * @param url
-     * @return
+     * @param url the URL object for the request
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URL url) {
@@ -145,11 +183,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Creates a new HttpRequest instance with the specified URL and timeout settings.
+     * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
-     * @param url
-     * @param connectionTimeoutInMillis
-     * @param readTimeoutInMillis
-     * @return
+     * @param url the URL object for the request
+     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(url.toString(), null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
@@ -157,10 +197,10 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the URI target of this request.
+     * Creates a new HttpRequest instance with the specified URI using the default HTTP client.
      *
-     * @param uri
-     * @return
+     * @param uri the URI object for the request
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URI uri) {
@@ -168,11 +208,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Creates a new HttpRequest instance with the specified URI and timeout settings.
+     * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
-     * @param uri
-     * @param connectionTimeoutInMillis
-     * @param readTimeoutInMillis
-     * @return
+     * @param uri the URI object for the request
+     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URI uri, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(null, uri, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
@@ -186,9 +228,11 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the connection timeout for this request.
+     * This creates a new HttpClient builder if one doesn't exist, or copies settings from the existing client.
      *
-     * @param connectTimeout
-     * @return
+     * @param connectTimeout the connection timeout duration
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest connectTimeout(final Duration connectTimeout) {
         initClientBuilder();
@@ -231,9 +275,18 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the read timeout for this request.
+     * The read timeout is the maximum time to wait for data to be read from the server.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest.url("https://api.example.com/slow-endpoint")
+     *     .readTimeout(Duration.ofSeconds(60))
+     *     .get();
+     * }</pre>
      *
-     * @param readTimeout
-     * @return
+     * @param readTimeout the read timeout duration
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
         requestBuilder.timeout(readTimeout);
@@ -242,9 +295,11 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the authenticator for this request.
+     * The authenticator will be used to provide credentials when the server requests authentication.
      *
-     * @param authenticator
-     * @return
+     * @param authenticator the authenticator to use
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest authenticator(final Authenticator authenticator) {
         initClientBuilder();
@@ -255,10 +310,18 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the Basic Authentication header for this request.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest.url("https://api.example.com/secure")
+     *     .basicAuth("username", "password")
+     *     .get();
+     * }</pre>
      *
-     * @param user
-     * @param password
-     * @return
+     * @param user the username for authentication
+     * @param password the password for authentication
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest basicAuth(final String user, final Object password) {
@@ -268,12 +331,20 @@ public final class HttpRequest {
     }
 
     /**
-     * Set http header specified by {@code name/value}.
-     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
+     * Sets the HTTP header specified by {@code name/value}.
+     * If this HttpRequest already has any headers with that name, they are all replaced.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest.url("https://api.example.com/data")
+     *     .header("Accept", "application/json")
+     *     .header("User-Agent", "MyApp/1.0")
+     *     .get();
+     * }</pre>
      *
-     * @param name
-     * @param value
-     * @return
+     * @param name the header name
+     * @param value the header value (will be converted to string)
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest header(final String name, final Object value) {
@@ -283,14 +354,14 @@ public final class HttpRequest {
     }
 
     /**
-     * Set http headers specified by {@code name1/value1}, {@code name2/value2}.
-     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
+     * Sets HTTP headers specified by {@code name1/value1}, {@code name2/value2}.
+     * If this HttpRequest already has any headers with those names, they are all replaced.
      *
-     * @param name1
-     * @param value1
-     * @param name2
-     * @param value2
-     * @return
+     * @param name1 the first header name
+     * @param value1 the first header value
+     * @param name2 the second header name
+     * @param value2 the second header value
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
@@ -298,16 +369,16 @@ public final class HttpRequest {
     }
 
     /**
-     * Set http headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
-     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
+     * Sets HTTP headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
+     * If this HttpRequest already has any headers with those names, they are all replaced.
      *
-     * @param name1
-     * @param value1
-     * @param name2
-     * @param value2
-     * @param name3
-     * @param value3
-     * @return
+     * @param name1 the first header name
+     * @param value1 the first header value
+     * @param name2 the second header name
+     * @param value2 the second header value
+     * @param name3 the third header name
+     * @param value3 the third header value
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
@@ -315,11 +386,22 @@ public final class HttpRequest {
     }
 
     /**
-     * Set http headers specified by the key/value entities from {@code Map}.
-     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
+     * Sets HTTP headers specified by the key/value entries from the provided Map.
+     * If this HttpRequest already has any headers with those names, they are all replaced.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Accept", "application/json");
+     * headers.put("Authorization", "Bearer token123");
+     * 
+     * HttpRequest.url("https://api.example.com/data")
+     *     .headers(headers)
+     *     .get();
+     * }</pre>
      *
-     * @param headers
-     * @return
+     * @param headers a map containing header names and values
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest headers(final Map<String, ?> headers) {
@@ -333,10 +415,10 @@ public final class HttpRequest {
     }
 
     /**
-     * Removes all headers on this {@code HttpSettings} and adds {@code headers}.
+     * Removes all headers on this HttpRequest and adds headers from the provided HttpHeaders object.
      *
-     * @param headers
-     * @return
+     * @param headers the HttpHeaders object containing all headers to set
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      */
     public HttpRequest headers(final HttpHeaders headers) {
@@ -348,10 +430,18 @@ public final class HttpRequest {
     }
 
     /**
-     * Set query parameters for {@code GET} or {@code DELETE} request.
+     * Sets query parameters for {@code GET} or {@code DELETE} request.
+     * The query string will be appended to the URL.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpRequest.url("https://api.example.com/search")
+     *     .query("q=java&limit=10")
+     *     .get();
+     * }</pre>
      *
-     * @param query
-     * @return
+     * @param query the query string
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest query(final String query) {
         this.query = query;
@@ -360,10 +450,22 @@ public final class HttpRequest {
     }
 
     /**
-     * Set query parameters for {@code GET} or {@code DELETE} request.
+     * Sets query parameters for {@code GET} or {@code DELETE} request.
+     * The parameters will be URL-encoded and appended to the URL.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Map<String, Object> params = new HashMap<>();
+     * params.put("q", "java programming");
+     * params.put("limit", 10);
+     * 
+     * HttpRequest.url("https://api.example.com/search")
+     *     .query(params)
+     *     .get();
+     * }</pre>
      *
-     * @param queryParams
-     * @return
+     * @param queryParams a map containing query parameter names and values
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
         query = queryParams;
@@ -372,9 +474,18 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as JSON with Content-Type: application/json.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * String json = "{\"name\":\"John\",\"age\":30}";
+     * HttpRequest.url("https://api.example.com/users")
+     *     .jsonBody(json)
+     *     .post();
+     * }</pre>
      *
-     * @param json
-     * @return
+     * @param json the JSON string to send as the request body
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest jsonBody(final String json) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
@@ -385,9 +496,19 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as JSON with Content-Type: application/json.
+     * The object will be serialized to JSON using the default JSON serializer.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * HttpRequest.url("https://api.example.com/users")
+     *     .jsonBody(user)
+     *     .post();
+     * }</pre>
      *
-     * @param obj
-     * @return
+     * @param obj the object to serialize to JSON and send as the request body
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
@@ -398,9 +519,10 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as XML with Content-Type: application/xml.
      *
-     * @param xml
-     * @return
+     * @param xml the XML string to send as the request body
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest xmlBody(final String xml) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
@@ -411,9 +533,11 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as XML with Content-Type: application/xml.
+     * The object will be serialized to XML using the default XML serializer.
      *
-     * @param obj
-     * @return
+     * @param obj the object to serialize to XML and send as the request body
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest xmlBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
@@ -424,9 +548,22 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
+     * The map entries will be encoded as form fields.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Map<String, String> formData = new HashMap<>();
+     * formData.put("username", "john_doe");
+     * formData.put("password", "secret123");
+     * 
+     * HttpRequest.url("https://api.example.com/login")
+     *     .formBody(formData)
+     *     .post();
+     * }</pre>
      *
-     * @param formBodyByMap
-     * @return
+     * @param formBodyByMap a map containing form field names and values
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -437,9 +574,22 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
+     * The bean properties will be encoded as form fields using getter methods.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * LoginRequest login = new LoginRequest();
+     * login.setUsername("john_doe");
+     * login.setPassword("secret123");
+     * 
+     * HttpRequest.url("https://api.example.com/login")
+     *     .formBody(login)
+     *     .post();
+     * }</pre>
      *
-     * @param formBodyByBean
-     * @return
+     * @param formBodyByBean a bean object whose properties will be used as form fields
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Object formBodyByBean) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -454,9 +604,11 @@ public final class HttpRequest {
     }
 
     /**
+     * Sets the request body with a custom BodyPublisher instance.
+     * This allows full control over the request body content.
      *
-     * @param bodyPublisher
-     * @return
+     * @param bodyPublisher the BodyPublisher to use
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest body(final BodyPublisher bodyPublisher) {
         this.bodyPublisher = bodyPublisher;
@@ -465,31 +617,51 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a GET request and returns the response with a String body.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+     *     .header("Accept", "application/json")
+     *     .get();
+     * 
+     * if (response.statusCode() == 200) {
+     *     String body = response.body();
+     * }
+     * }</pre>
      *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> get() throws UncheckedIOException {
         return get(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a GET request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     public <T> HttpResponse<T> get(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.GET, responseBodyHandler);
     }
 
     /**
+     * Executes a GET request and returns the response body deserialized to the specified type.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * List<User> users = HttpRequest.url("https://api.example.com/users")
+     *     .get(new TypeToken<List<User>>(){}.getType());
+     * }</pre>
      *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
@@ -497,27 +669,51 @@ public final class HttpRequest {
         return getBody(get(responseBodyHandler), resultClass);
     }
 
+    /**
+     * Executes a POST request and returns the response with a String body.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * User newUser = new User("John", "Doe");
+     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+     *     .jsonBody(newUser)
+     *     .post();
+     * }</pre>
+     *
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
+     */
     public HttpResponse<String> post() {
         return post(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a POST request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     public <T> HttpResponse<T> post(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.POST, responseBodyHandler);
     }
 
     /**
+     * Executes a POST request and returns the response body deserialized to the specified type.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * User newUser = new User("John", "Doe");
+     * User createdUser = HttpRequest.url("https://api.example.com/users")
+     *     .jsonBody(newUser)
+     *     .post(User.class);
+     * }</pre>
      *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     public <T> T post(final Class<T> resultClass) throws UncheckedIOException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
@@ -526,31 +722,34 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a PUT request and returns the response with a String body.
      *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> put() throws UncheckedIOException {
         return put(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a PUT request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     public <T> HttpResponse<T> put(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.PUT, responseBodyHandler);
     }
 
     /**
+     * Executes a PUT request and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     public <T> T put(final Class<T> resultClass) throws UncheckedIOException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
@@ -559,31 +758,34 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a PATCH request and returns the response with a String body.
      *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> patch() throws UncheckedIOException {
         return patch(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a PATCH request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     public <T> HttpResponse<T> patch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.PATCH, responseBodyHandler);
     }
 
     /**
+     * Executes a PATCH request and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
@@ -592,31 +794,40 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a DELETE request and returns the response with a String body.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
+     *     .delete();
+     * }</pre>
      *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> delete() throws UncheckedIOException {
         return delete(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a DELETE request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     public <T> HttpResponse<T> delete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.DELETE, responseBodyHandler);
     }
 
     /**
+     * Executes a DELETE request and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
@@ -625,30 +836,34 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a HEAD request and returns the response.
+     * HEAD requests are used to retrieve headers without the response body.
      *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return the HTTP response (with no body)
+     * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<Void> head() throws UncheckedIOException {
         return head(BodyHandlers.discarding());
     }
 
     /**
+     * Executes a HEAD request with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws UncheckedIOException if the request could not be executed
      */
     private <T> HttpResponse<T> head(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.HEAD, responseBodyHandler);
     }
 
     /**
+     * Executes an HTTP request with the specified method and returns the response with a String body.
      *
-     * @param httpMethod
-     * @return
-     * @throws UncheckedIOException
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @return the HTTP response with String body
+     * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
     public HttpResponse<String> execute(final HttpMethod httpMethod) throws UncheckedIOException {
@@ -656,13 +871,14 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an HTTP request with the specified method and custom response body handler.
      *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @return
-     * @throws IllegalArgumentException
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the response body type
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param responseBodyHandler the handler for the response body
+     * @return the HTTP response
+     * @throws IllegalArgumentException if httpMethod is null
+     * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
     public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
@@ -681,12 +897,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an HTTP request with the specified method and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param <T> the type of the result
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param resultClass the class of the result type
+     * @return the deserialized response body
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws UncheckedIOException {
@@ -727,204 +944,278 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * Executes a GET request asynchronously and returns a CompletableFuture with a String body response.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("https://api.example.com/users")
+     *     .asyncGet();
+     * 
+     * future.thenAccept(response -> {
+     *     if (response.statusCode() == 200) {
+     *         System.out.println(response.body());
+     *     }
+     * });
+     * }</pre>
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<String>> asyncGet() {
         return asyncGet(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a GET request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.GET, responseBodyHandler);
     }
 
     /**
+     * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * CompletableFuture<List<User>> future = HttpRequest.url("https://api.example.com/users")
+     *     .asyncGet(new TypeToken<List<User>>(){}.getType());
+     * 
+     * future.thenAccept(users -> {
+     *     users.forEach(System.out::println);
+     * });
+     * }</pre>
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.GET, resultClass);
     }
 
     /**
+     * Executes a GET request asynchronously with a custom response body handler and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
         return asyncExecute(HttpMethod.GET, responseBodyHandler, pushPromiseHandler);
     }
 
+    /**
+     * Executes a POST request asynchronously and returns a CompletableFuture with a String body response.
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<String>> asyncPost() {
         return asyncPost(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a POST request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.POST, responseBodyHandler);
     }
 
     /**
+     * Executes a POST request asynchronously and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncPost(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.POST, resultClass);
     }
 
     /**
+     * Executes a POST request asynchronously with a custom response body handler and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
         return asyncExecute(HttpMethod.POST, responseBodyHandler, pushPromiseHandler);
     }
 
+    /**
+     * Executes a PUT request asynchronously and returns a CompletableFuture with a String body response.
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<String>> asyncPut() {
         return asyncPut(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a PUT request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.PUT, responseBodyHandler);
     }
 
     /**
+     * Executes a PUT request asynchronously and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncPut(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.PUT, resultClass);
     }
 
     /**
+     * Executes a PUT request asynchronously with a custom response body handler and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
         return asyncExecute(HttpMethod.PUT, responseBodyHandler, pushPromiseHandler);
     }
 
+    /**
+     * Executes a PATCH request asynchronously and returns a CompletableFuture with a String body response.
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<String>> asyncPatch() {
         return asyncPatch(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a PATCH request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.PATCH, responseBodyHandler);
     }
 
     /**
+     * Executes a PATCH request asynchronously and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncPatch(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.PATCH, resultClass);
     }
 
     /**
+     * Executes a PATCH request asynchronously with a custom response body handler and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
         return asyncExecute(HttpMethod.PATCH, responseBodyHandler, pushPromiseHandler);
     }
 
+    /**
+     * Executes a DELETE request asynchronously and returns a CompletableFuture with a String body response.
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<String>> asyncDelete() {
         return asyncDelete(BodyHandlers.ofString());
     }
 
     /**
+     * Executes a DELETE request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.DELETE, responseBodyHandler);
     }
 
     /**
+     * Executes a DELETE request asynchronously and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> the type of the result
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.DELETE, resultClass);
     }
 
     /**
+     * Executes a DELETE request asynchronously with a custom response body handler and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) {
         return asyncExecute(HttpMethod.DELETE, responseBodyHandler, pushPromiseHandler);
     }
 
+    /**
+     * Executes a HEAD request asynchronously and returns a CompletableFuture with no response body.
+     *
+     * @return a CompletableFuture that will complete with the HTTP response
+     */
     public CompletableFuture<HttpResponse<Void>> asyncHead() {
         return asyncHead(BodyHandlers.discarding());
     }
 
     /**
+     * Executes a HEAD request asynchronously with a custom response body handler.
      *
-     * @param <T>
-     * @param responseBodyHandler
-     * @return
+     * @param <T> the response body type
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     <T> CompletableFuture<HttpResponse<T>> asyncHead(final HttpResponse.BodyHandler<T> responseBodyHandler) {
         return asyncExecute(HttpMethod.HEAD, responseBodyHandler);
     }
 
     /**
+     * Executes an HTTP request asynchronously with the specified method and returns a CompletableFuture with a String body response.
      *
-     * @param httpMethod
-     * @return
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @return a CompletableFuture that will complete with the HTTP response
      */
     @Beta
     public CompletableFuture<HttpResponse<String>> asyncExecute(final HttpMethod httpMethod) {
@@ -932,12 +1223,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an HTTP request asynchronously with the specified method and custom response body handler.
      *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the response body type
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param responseBodyHandler the handler for the response body
+     * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if httpMethod is null
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
@@ -958,12 +1250,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an HTTP request asynchronously with the specified method and returns the response body deserialized to the specified type.
      *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the result
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param resultClass the class of the result type
+     * @return a CompletableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if httpMethod is null
      */
     @Beta
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -986,13 +1279,15 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an HTTP request asynchronously with the specified method, custom response body handler, and push promise handler.
+     * The push promise handler is used for HTTP/2 server push.
      *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the response body type
+     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param responseBodyHandler the handler for the response body
+     * @param pushPromiseHandler the handler for push promises
+     * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if httpMethod is null
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler,

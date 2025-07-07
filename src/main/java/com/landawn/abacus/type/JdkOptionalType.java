@@ -17,8 +17,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for java.util.Optional with generic type parameter.
+ * This class provides serialization, deserialization, and database access capabilities for Optional instances.
+ * Optional is a container that may or may not contain a non-null value.
+ * Empty optionals are represented as null in serialized form.
  *
- * @param <T>
+ * @param <T> the type of value that may be present in the Optional
  */
 @SuppressWarnings("java:S2160")
 public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
@@ -39,11 +43,22 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
         elementType = parameterTypes[0];
     }
 
+    /**
+     * Returns the declaring name of this optional type.
+     * The declaring name represents the type in a simplified format suitable for type declarations.
+     *
+     * @return the declaring name of this type (e.g., "JdkOptional<String>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Optional type.
+     *
+     * @return Optional.class with appropriate generic type casting
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public Class<Optional<T>> clazz() {
@@ -51,9 +66,9 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Gets the element type.
+     * Returns the type handler for the element that may be contained in the Optional.
      *
-     * @return
+     * @return the Type instance representing the element type of this Optional
      */
     @Override
     public Type<T> getElementType() {
@@ -61,9 +76,10 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the parameter types of this generic optional type.
+     * For optional types, this array contains a single element representing the value type.
      *
-     * @return
+     * @return an array containing the value type as the only parameter type
      */
     @Override
     public Type<T>[] getParameterTypes() {
@@ -71,9 +87,9 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as Optional is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -81,9 +97,13 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Converts an Optional to its string representation.
+     * If the optional is empty or null, returns null.
+     * Otherwise, returns the string representation of the contained value.
+     * Uses the runtime type of the value for accurate serialization.
      *
-     * @param x
-     * @return
+     * @param x the Optional to convert to string
+     * @return the string representation of the contained value, or null if empty or null
      */
     @Override
     public String stringOf(final Optional<T> x) {
@@ -91,9 +111,12 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Parses a string representation into an Optional.
+     * Null strings result in an empty Optional.
+     * Non-null strings are parsed according to the element type and wrapped in Optional.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return Optional.empty() if the string is null, otherwise Optional.ofNullable() of the parsed value
      */
     @Override
     public Optional<T> valueOf(final String str) {
@@ -101,11 +124,14 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Retrieves an Optional value from the specified column in a ResultSet.
+     * If the column value is null, returns an empty Optional.
+     * Otherwise, converts the value to the appropriate type and wraps it in Optional.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return Optional.empty() if the column is null, otherwise Optional containing the converted value
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Optional<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -116,11 +142,14 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Retrieves an Optional value from the specified column in a ResultSet using the column label.
+     * If the column value is null, returns an empty Optional.
+     * Otherwise, converts the value to the appropriate type and wraps it in Optional.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return Optional.empty() if the column is null, otherwise Optional containing the converted value
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Optional<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -131,11 +160,14 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Sets an Optional parameter in a PreparedStatement.
+     * If the Optional is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the contained value as an object parameter.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the Optional to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Optional<T> x) throws SQLException {
@@ -143,11 +175,14 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Sets an Optional parameter in a CallableStatement using a parameter name.
+     * If the Optional is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the contained value as an object parameter.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Optional to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Optional<T> x) throws SQLException {
@@ -155,10 +190,13 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Appends the string representation of an Optional to an Appendable.
+     * Empty optionals are written as "null".
+     * Present values are serialized using their runtime type for accuracy.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Optional to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Optional<T> x) throws IOException {
@@ -171,11 +209,14 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Writes the character representation of an Optional to a CharacterWriter.
+     * Empty optionals are written as null.
+     * Present values are serialized using their runtime type for accuracy.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Optional to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Optional<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {

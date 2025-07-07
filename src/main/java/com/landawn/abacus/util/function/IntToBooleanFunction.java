@@ -14,18 +14,30 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts an {@code int}-valued argument and produces a {@code boolean}-valued result.
+ * This is the {@code int}-to-{@code boolean} primitive specialization for {@link java.util.function.Function}.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(int)}.
+ *
+ * @see java.util.function.Function
+ * @see IntFunction
+ * @see IntPredicate
+ */
 @FunctionalInterface
 public interface IntToBooleanFunction {
 
     /**
-     * Converts an int value to a boolean: {@code true} if the value is greater than 0, otherwise {@code false}.
+     * Default function that converts an {@code int} value to a {@code boolean}.
+     * Returns {@code true} if the value is greater than 0, otherwise {@code false}.
      */
     IntToBooleanFunction DEFAULT = value -> value > 0;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the {@code boolean} result
      */
     boolean applyAsBoolean(int value);
 }

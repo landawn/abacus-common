@@ -14,12 +14,28 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Abstract base class for CharSequence types in the type system.
+ * This class provides common functionality for handling CharSequence implementations
+ * such as String, StringBuilder, StringBuffer, and other custom CharSequence types.
+ * CharSequence types are treated as primary types that can be directly serialized
+ * and compared.
+ *
+ * @param <T> the specific CharSequence type (e.g., String, StringBuilder, StringBuffer)
+ */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 
     protected AbstractCharSequenceType(String typeName) {
         super(typeName);
     }
 
+    /**
+     * Checks if this type represents a CharSequence type.
+     * This method always returns {@code true} for CharSequence types,
+     * indicating that the type handles objects that implement the CharSequence interface.
+     *
+     * @return {@code true}, indicating this is a CharSequence type
+     */
     @Override
     public boolean isCharSequence() {
         return true;

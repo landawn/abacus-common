@@ -28,6 +28,11 @@ public final class LongType extends AbstractLongType {
         super(LONG);
     }
 
+    /**
+     * Returns the Class object representing the Long wrapper type.
+     *
+     * @return The Class object for Long
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -35,9 +40,10 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Indicates whether this type represents a primitive wrapper class.
+     * For LongType, this always returns true since Long is the wrapper class for the primitive long type.
      *
-     * @return {@code true}, if is primitive wrapper
+     * @return true, indicating that Long is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -45,11 +51,18 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
+     * Retrieves a Long value from a ResultSet at the specified column index.
+     * The method handles various data types that can be converted to Long:
+     * - If the value is already a Long, it is returned directly
+     * - If the value is any other Number type, it is converted to Long
+     * - If the value is a String, it is parsed as a Long
+     * - If the value is NULL in the database, null is returned
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnIndex The column index (1-based) to retrieve the value from
+     * @return The Long value from the ResultSet, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
      */
     @MayReturnNull
     @Override
@@ -68,11 +81,18 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
+     * Retrieves a Long value from a ResultSet using the specified column label.
+     * The method handles various data types that can be converted to Long:
+     * - If the value is already a Long, it is returned directly
+     * - If the value is any other Number type, it is converted to Long
+     * - If the value is a String, it is parsed as a Long
+     * - If the value is NULL in the database, null is returned
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnLabel The label of the column to retrieve the value from
+     * @return The Long value from the ResultSet, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
      */
     @MayReturnNull
     @Override

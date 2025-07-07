@@ -20,28 +20,74 @@ import java.nio.charset.Charset;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 
+/**
+ * Package-private implementation of {@link HashFunction} that wraps a Google Guava
+ * {@link com.google.common.hash.HashFunction}. This class serves as an adapter between
+ * the Abacus hashing API and the underlying Guava implementation.
+ * 
+ * <p>This class is immutable and thread-safe, as it delegates all operations to the
+ * wrapped Guava hash function which maintains these properties.
+ * 
+ * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
+ * Use the factory methods in {@link Hashing} to obtain hash function instances.
+ * 
+ * @author Haiyang Li
+ * @see HashFunction
+ * @see Hashing
+ */
 @SuppressWarnings("ClassCanBeRecord")
 final class GuavaHashFunction implements HashFunction {
 
+    /**
+     * The wrapped Google Guava hash function that performs the actual hashing operations.
+     */
     final com.google.common.hash.HashFunction gHashFunction;
 
+    /**
+     * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
+     * 
+     * @param gHashFunction the Guava hash function to wrap
+     */
     GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) {
         this.gHashFunction = gHashFunction;
     }
 
+    /**
+     * Static factory method that creates a new GuavaHashFunction wrapping the given
+     * Guava hash function. This method provides a more convenient way to create
+     * instances compared to using the constructor directly.
+     * 
+     * <p><b>Example usage (internal):</b>
+     * <pre>{@code
+     * com.google.common.hash.HashFunction guavaFunc = com.google.common.hash.Hashing.sha256();
+     * HashFunction wrapped = GuavaHashFunction.wrap(guavaFunc);
+     * }</pre>
+     * 
+     * @param gHashFunction the Guava hash function to wrap
+     * @return a new GuavaHashFunction instance wrapping the given function
+     */
     static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) {
         return new GuavaHashFunction(gHashFunction);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>Creates a new hasher by delegating to the wrapped Guava hash function's
+     * {@code newHasher()} method. The returned hasher is wrapped in a {@link GuavaHasher}
+     * to adapt it to the Abacus API.
+     */
     @Override
     public Hasher newHasher() {
         return GuavaHasher.wrap(gHashFunction.newHasher());
     }
 
     /**
-     *
-     * @param expectedInputSize
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Creates a new hasher optimized for the expected input size by delegating to
+     * the wrapped Guava hash function's {@code newHasher(int)} method. The returned
+     * hasher is wrapped in a {@link GuavaHasher}.
      */
     @Override
     public Hasher newHasher(final int expectedInputSize) {
@@ -49,9 +95,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of an integer by delegating to the wrapped Guava hash
+     * function's {@code hashInt()} method.
      */
     @Override
     public HashCode hash(final int input) {
@@ -59,9 +106,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of a long by delegating to the wrapped Guava hash
+     * function's {@code hashLong()} method.
      */
     @Override
     public HashCode hash(final long input) {
@@ -69,9 +117,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of a byte array by delegating to the wrapped Guava hash
+     * function's {@code hashBytes()} method.
      */
     @Override
     public HashCode hash(final byte[] input) {
@@ -79,11 +128,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @param off
-     * @param len
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of a portion of a byte array by delegating to the wrapped
+     * Guava hash function's {@code hashBytes(byte[], int, int)} method.
      */
     @Override
     public HashCode hash(final byte[] input, final int off, final int len) {
@@ -91,9 +139,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of a character sequence without encoding by delegating to
+     * the wrapped Guava hash function's {@code hashUnencodedChars()} method.
      */
     @Override
     public HashCode hash(final CharSequence input) {
@@ -101,10 +150,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param input
-     * @param charset
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of an encoded character sequence by delegating to the
+     * wrapped Guava hash function's {@code hashString()} method.
      */
     @Override
     public HashCode hash(final CharSequence input, final Charset charset) {
@@ -112,17 +161,22 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     *
-     * @param <T>
-     * @param instance
-     * @param funnel
-     * @return
+     * {@inheritDoc}
+     * 
+     * <p>Computes the hash of an object using a funnel by delegating to the wrapped
+     * Guava hash function's {@code hashObject()} method.
      */
     @Override
     public <T> HashCode hash(final T instance, final Funnel<? super T> funnel) {
         return gHashFunction.hashObject(instance, funnel);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>Returns the number of bits in hash codes produced by this function by
+     * delegating to the wrapped Guava hash function's {@code bits()} method.
+     */
     @Override
     public int bits() {
         return gHashFunction.bits();

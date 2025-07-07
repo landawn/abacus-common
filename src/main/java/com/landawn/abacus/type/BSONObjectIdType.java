@@ -18,23 +18,41 @@ import org.bson.types.ObjectId;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for BSON ObjectId operations.
+ * This class provides conversion between org.bson.types.ObjectId instances
+ * and their hexadecimal string representations, enabling storage and
+ * transmission of MongoDB ObjectIds in text formats.
+ */
 public class BSONObjectIdType extends AbstractType<ObjectId> {
 
+    /**
+     * The type name constant for BSON ObjectId type identification.
+     */
     public static final String BSON_OBJECT_ID = "BSONObjectId";
 
     BSONObjectIdType() {
         super(BSON_OBJECT_ID);
     }
 
+    /**
+     * Returns the Class object representing the ObjectId class.
+     *
+     * @return the Class object for org.bson.types.ObjectId
+     */
     @Override
     public Class<ObjectId> clazz() {
         return ObjectId.class;
     }
 
     /**
+     * Converts an ObjectId to its hexadecimal string representation.
+     * The resulting string is a 24-character hexadecimal representation
+     * of the 12-byte ObjectId value.
      *
-     * @param x
-     * @return
+     * @param x the ObjectId to convert
+     * @return the 24-character hexadecimal string representation of the ObjectId,
+     *         or null if the input is null
      */
     @Override
     public String stringOf(final ObjectId x) {
@@ -42,9 +60,13 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
     }
 
     /**
+     * Converts a hexadecimal string representation to an ObjectId.
+     * Parses a 24-character hexadecimal string to create a new ObjectId instance.
      *
-     * @param str
-     * @return
+     * @param str the hexadecimal string to parse (must be 24 characters)
+     * @return a new ObjectId created from the hexadecimal string,
+     *         or null if str is null or empty
+     * @throws IllegalArgumentException if the string is not a valid 24-character hex string
      */
     @Override
     public ObjectId valueOf(final String str) {

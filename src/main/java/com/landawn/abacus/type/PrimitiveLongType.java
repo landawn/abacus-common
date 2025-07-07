@@ -25,6 +25,11 @@ public final class PrimitiveLongType extends AbstractLongType {
         super(LONG);
     }
 
+    /**
+     * Returns the Class object representing the primitive long type.
+     * 
+     * @return the Class object for long.class
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -32,15 +37,22 @@ public final class PrimitiveLongType extends AbstractLongType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * For PrimitiveLongType, this always returns true since it represents the primitive long type.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, indicating this is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive long type.
+     * The default value for primitive long is 0L.
+     *
+     * @return Long object containing the value 0L
+     */
     @Override
     public Long defaultValue() {
         return DEFAULT_VALUE;

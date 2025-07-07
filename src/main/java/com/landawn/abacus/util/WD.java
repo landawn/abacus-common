@@ -18,8 +18,22 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A dictionary of common characters and strings.
+ * A utility class that provides a comprehensive dictionary of commonly used characters and strings,
+ * including special characters, operators, SQL keywords, and mathematical functions.
+ * This class serves as a centralized repository for string constants to avoid hardcoding
+ * and improve code maintainability.
+ * 
+ * <p>All fields in this class are public static final constants representing either
+ * single characters (prefixed with underscore) or their string equivalents.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * String query = WD.SELECT + WD.SPACE + "*" + WD.SPACE + WD.FROM + WD.SPACE + "users";
+ * String csv = "John" + WD.COMMA_SPACE + "Doe" + WD.COMMA_SPACE + "30";
+ * }</pre>
  *
+ * @author Haiyang Li
+ * @since 0.8
  */
 @Beta
 @Internal
@@ -30,1023 +44,1243 @@ public final class WD {
     }
 
     /**
-     * Represents character: {@code (char) 0}
+     * Represents the null character: {@code (char) 0}.
+     * This is the character with ASCII value 0, often used as a string terminator in C.
      */
     public static final char CHAR_ZERO = (char) 0;
 
     /**
-     * Represents character: {@code '\n'}
+     * Represents the line feed character: {@code '\n'}.
+     * Used for line breaks in Unix/Linux systems.
      */
     public static final char CHAR_LF = '\n';
 
     /**
-     * Represents character: {@code '\r'}
+     * Represents the carriage return character: {@code '\r'}.
+     * Used for line breaks in older Mac systems and as part of Windows line breaks (\r\n).
      */
     public static final char CHAR_CR = '\r';
 
     /**
-     * Represents character: {@code ' '}
+     * Represents the space character: {@code ' '}.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char space = WD._SPACE;
+     * String text = "Hello" + space + "World";
+     * }</pre>
      */
     public static final char _SPACE = ' ';
 
     /**
-     * Represents string: {@code " "}
+     * Represents the space string: {@code " "}.
+     * Useful for string concatenation operations.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String fullName = firstName + WD.SPACE + lastName;
+     * }</pre>
      */
     public static final String SPACE = " ";
 
     /**
-     * Represents character: {@code '.'}
+     * Represents the period character: {@code '.'}.
+     * Commonly used as decimal point or dot notation.
      */
     public static final char _PERIOD = '.';
 
     /**
-     * Represents string: {@code "."}
+     * Represents the period string: {@code "."}.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String filename = "document" + WD.PERIOD + "pdf";
+     * }</pre>
      */
     public static final String PERIOD = ".";
 
     /**
-     * Represents character: {@code ','}
+     * Represents the comma character: {@code ','}.
+     * Used as a separator in lists, CSV files, etc.
      */
     public static final char _COMMA = ',';
 
     /**
-     * Represents string: {@code ","}
+     * Represents the comma string: {@code ","}.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String csv = value1 + WD.COMMA + value2 + WD.COMMA + value3;
+     * }</pre>
      */
     public static final String COMMA = ",";
 
     /**
-     * Represents string: {@code ", "}
+     * Represents comma followed by space: {@code ", "}.
+     * Commonly used for readable list formatting.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String list = "apple" + WD.COMMA_SPACE + "banana" + WD.COMMA_SPACE + "orange";
+     * }</pre>
      */
     public static final String COMMA_SPACE = ", ";
 
     /**
-     * Represents character: {@code ':'}
+     * Represents the colon character: {@code ':'}.
+     * Used in time notation, key-value pairs, etc.
      */
     public static final char _COLON = ':';
 
     /**
-     * Represents string: {@code ":"}
+     * Represents the colon string: {@code ":"}.
      */
     public static final String COLON = ":";
 
     /**
-     * Represents string: {@code ": "}
+     * Represents colon followed by space: {@code ": "}.
+     * Commonly used in key-value formatting.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String keyValue = "Name" + WD.COLON_SPACE + "John Doe";
+     * }</pre>
      */
     public static final String COLON_SPACE = ": ";
 
     /**
-     * Represents character: {@code ';'}
+     * Represents the semicolon character: {@code ';'}.
+     * Used as statement terminator in many programming languages.
      */
     public static final char _SEMICOLON = ';';
 
     /**
-     * Represents string: {@code ";"}
+     * Represents the semicolon string: {@code ";"}.
      */
     public static final String SEMICOLON = ";";
 
     /**
-     * Represents string: {@code "; "}
+     * Represents semicolon followed by space: {@code "; "}.
+     * Used for separating items in a more formal list format.
      */
     public static final String SEMICOLON_SPACE = "; ";
 
     /**
-     * Represents character: {@code '\\'}
+     * Represents the backslash character: {@code '\\'}.
+     * Used as escape character in many contexts.
      */
     public static final char _BACKSLASH = '\\';
 
     /**
-     * Represents string: {@code "\\"}
+     * Represents the backslash string: {@code "\\"}.
+     * Note: The actual string contains a single backslash.
      */
     public static final String BACKSLASH = "\\";
 
     /**
-     * Represents character: {@code '\''}
+     * Represents the single quotation mark character: {@code '\''}.
+     * Used for character literals and string quoting.
      */
     public static final char _QUOTATION_S = '\'';
 
     /**
-     * Represents string: {@code "'"}
+     * Represents the single quotation mark string: {@code "'"}.
      */
     public static final String QUOTATION_S = "'";
 
     /**
-     * Represents string: {@code " '"}
+     * Represents space followed by single quotation mark: {@code " '"}.
+     * Useful for formatting quoted text.
      */
     public static final String SPACE_QUOTATION_S = " '";
 
     /**
-     * Represents string: {@code "' "}
+     * Represents single quotation mark followed by space: {@code "' "}.
+     * Useful for formatting quoted text.
      */
     public static final String QUOTATION_S_SPACE = "' ";
 
     /**
-     * Represents character: {@code '"'}
+     * Represents the double quotation mark character: {@code '"'}.
+     * Used for string literals in many programming languages.
      */
     public static final char _QUOTATION_D = '"';
 
     /**
-     * Represents string: {@code "\""}
+     * Represents the double quotation mark string: {@code "\""}.
      */
     public static final String QUOTATION_D = "\"";
 
     /**
-     * Represents string: {@code " \""}
+     * Represents space followed by double quotation mark: {@code " \""}.
+     * Useful for formatting quoted text.
      */
     public static final String SPACE_QUOTATION_D = " \"";
 
     /**
-     * Represents string: {@code "\" "}
+     * Represents double quotation mark followed by space: {@code "\" "}.
+     * Useful for formatting quoted text.
      */
     public static final String QUOTATION_D_SPACE = "\" ";
 
     /**
-     * Represents character: {@code '&'}
+     * Represents the ampersand character: {@code '&'}.
+     * Used as bitwise AND operator and HTML entity prefix.
      */
     public static final char _AMPERSAND = '&';
 
     /**
-     * Represents string: {@code "&"}
+     * Represents the ampersand string: {@code "&"}.
      */
     public static final String AMPERSAND = "&";
 
     /**
-     * Represents character: {@code '|'}
+     * Represents the vertical bar character: {@code '|'}.
+     * Used as bitwise OR operator and pipe symbol.
      */
     public static final char _VERTICALBAR = '|';
 
     /**
-     * Represents string: {@code "|"}
+     * Represents the vertical bar string: {@code "|"}.
      */
     public static final String VERTICALBAR = "|";
 
     /**
-     * Represents string: {@code "||"}
+     * Represents double vertical bars: {@code "||"}.
+     * Used as logical OR operator in SQL and some programming languages.
      */
     public static final String PARALLEL = "||";
 
     /**
-     * Represents character: {@code '_'}
+     * Represents the underscore character: {@code '_'}.
+     * Commonly used in identifiers and SQL wildcards.
      */
     public static final char _UNDERSCORE = '_';
 
     /**
-     * Represents string: {@code "_"}
+     * Represents the underscore string: {@code "_"}.
      */
     public static final String UNDERSCORE = "_";
 
     /**
-     * Represents character: {@code '<'}
+     * Represents the less than character: {@code '<'}.
+     * Used as comparison operator and XML/HTML tag delimiter.
      */
     public static final char _LESS_THAN = '<';
 
     /**
-     * Represents string: {@code "<"}
+     * Represents the less than string: {@code "<"}.
      */
     public static final String LESS_THAN = "<";
 
     /**
-     * Represents character: {@code '>'}
+     * Represents the greater than character: {@code '>'}.
+     * Used as comparison operator and XML/HTML tag delimiter.
      */
     public static final char _GREATER_THAN = '>';
 
     /**
-     * Represents string: {@code ">"}
+     * Represents the greater than string: {@code ">"}.
      */
     public static final String GREATER_THAN = ">";
 
     /**
-     * Represents character: {@code '='}
+     * Represents the equal sign character: {@code '='}.
+     * Used as assignment and equality operator.
      */
     public static final char _EQUAL = '=';
 
     /**
-     * Represents string: {@code "="}
+     * Represents the equal sign string: {@code "="}.
      */
     public static final String EQUAL = "=";
 
     /**
-     * Represents character: {@code '+'}
+     * Represents the plus character: {@code '+'}.
+     * Used as addition operator and positive sign.
      */
     public static final char _PLUS = '+';
 
     /**
-     * Represents string: {@code "+"}
+     * Represents the plus string: {@code "+"}.
      */
     public static final String PLUS = "+";
 
     /**
-     * Represents character: {@code '-'}
+     * Represents the minus character: {@code '-'}.
+     * Used as subtraction operator and negative sign.
      */
     public static final char _MINUS = '-';
 
     /**
-     * Represents string: {@code "-"}
+     * Represents the minus string: {@code "-"}.
      */
     public static final String MINUS = "-";
 
     /**
-     * Represents character: {@code '%'}
+     * Represents the percent character: {@code '%'}.
+     * Used as modulo operator and percentage symbol.
      */
     public static final char _PERCENT = '%';
 
     /**
-     * Represents string: {@code "%"}
+     * Represents the percent string: {@code "%"}.
      */
     public static final String PERCENT = "%";
 
     /**
-     * Represents character: {@code '/'}
+     * Represents the forward slash character: {@code '/'}.
+     * Used as division operator and path separator.
      */
     public static final char _SLASH = '/';
 
     /**
-     * Represents string: {@code "/"}
+     * Represents the forward slash string: {@code "/"}.
      */
     public static final String SLASH = "/";
 
     /**
-     * Represents character: {@code '*'}
+     * Represents the asterisk character: {@code '*'}.
+     * Used as multiplication operator and wildcard.
      */
     public static final char _ASTERISK = '*';
 
     /**
-     * Represents string: {@code "*"}
+     * Represents the asterisk string: {@code "*"}.
      */
     public static final String ASTERISK = "*";
 
     /**
-     * Represents character: {@code '?'}
+     * Represents the question mark character: {@code '?'}.
+     * Used in ternary operators and SQL parameters.
      */
     public static final char _QUESTION_MARK = '?';
 
     /**
-     * Represents string: {@code "?"}
+     * Represents the question mark string: {@code "?"}.
      */
     public static final String QUESTION_MARK = "?";
 
     /**
-     * Represents character: {@code '('}
+     * Represents the left parenthesis character: {@code '('}.
+     * Used for grouping and function calls.
      */
     public static final char _PARENTHESES_L = '(';
 
     /**
-     * Represents string: {@code "("}
+     * Represents the left parenthesis string: {@code "("}.
      */
     public static final String PARENTHESES_L = "(";
 
     /**
-     * Represents string: {@code " ("}
+     * Represents space followed by left parenthesis: {@code " ("}.
+     * Useful for formatting function calls.
      */
     public static final String SPACE_PARENTHESES_L = " (";
 
     /**
-     * Represents character: {@code ')'}
+     * Represents the right parenthesis character: {@code ')'}.
+     * Used for grouping and function calls.
      */
     public static final char _PARENTHESES_R = ')';
 
     /**
-     * Represents string: {@code ")"}
+     * Represents the right parenthesis string: {@code ")"}.
      */
     public static final String PARENTHESES_R = ")";
 
     /**
-     * Represents string: {@code ") "}
+     * Represents right parenthesis followed by space: {@code ") "}.
+     * Useful for formatting function calls.
      */
     public static final String PARENTHESES_R_SPACE = ") ";
 
     /**
-     * Represents character: {@code '['}
+     * Represents the left square bracket character: {@code '['}.
+     * Used for array indexing and character classes.
      */
     public static final char _BRACKET_L = '[';
 
     /**
-     * Represents string: {@code "["}
+     * Represents the left square bracket string: {@code "["}.
      */
     public static final String BRACKET_L = "[";
 
     /**
-     * Represents character: {@code ']'}
+     * Represents the right square bracket character: {@code ']'}.
+     * Used for array indexing and character classes.
      */
     public static final char _BRACKET_R = ']';
 
     /**
-     * Represents string: {@code "]"}
+     * Represents the right square bracket string: {@code "]"}.
      */
     public static final String BRACKET_R = "]";
 
     /**
-     * Represents character: {@code '{'}
+     * Represents the left curly brace character: {@code '{'}.
+     * Used for block delimiters and object literals.
      */
     public static final char _BRACE_L = '{';
 
     /**
-     * Represents string: {@code "{"}
+     * Represents the left curly brace string: {@code "{"}.
      */
     public static final String BRACE_L = "{";
 
     /**
-     * Represents character: {@code '}'}
+     * Represents the right curly brace character: {@code '}'}.
+     * Used for block delimiters and object literals.
      */
     public static final char _BRACE_R = '}';
 
     /**
-     * Represents string: {@code "}"}
+     * Represents the right curly brace string: {@code "}"}.
      */
     public static final String BRACE_R = "}";
 
     /**
-     * Represents character: {@code '^'}
+     * Represents the circumflex character: {@code '^'}.
+     * Used as bitwise XOR operator and exponentiation symbol.
      */
     public static final char _CIRCUMFLEX = '^';
 
     /**
-     * Represents string: {@code "^"}
+     * Represents the circumflex string: {@code "^"}.
      */
     public static final String CIRCUMFLEX = "^";
 
     /**
-     * Represents character: {@code '~'}
+     * Represents the tilde character: {@code '~'}.
+     * Used as bitwise NOT operator and home directory symbol.
      */
     public static final char _UNARYBIT = '~';
 
     /**
-     * Represents string: {@code "~"}
+     * Represents the tilde string: {@code "~"}.
      */
     public static final String UNARYBIT = "~";
 
     /**
-     * Represents character: {@code '$'}
+     * Represents the dollar sign character: {@code '$'}.
+     * Used in variable references and regular expressions.
      */
     public static final char _DOLLAR = '$';
 
     /**
-     * Represents string: {@code "$"}
+     * Represents the dollar sign string: {@code "$"}.
      */
     public static final String DOLLAR = "$";
 
     /**
-     * Represents character: {@code '#'}
+     * Represents the hash/pound character: {@code '#'}.
+     * Used for comments and CSS selectors.
      */
     public static final char _SHARP = '#';
 
     /**
-     * Represents string: {@code "#"}
+     * Represents the hash/pound string: {@code "#"}.
      */
     public static final String SHARP = "#";
 
     /**
-     * Represents character: {@code '!'}
+     * Represents the exclamation mark character: {@code '!'}.
+     * Used as logical NOT operator.
      */
     public static final char _EXCLAMATION = '!';
 
     /**
-     * Represents string: {@code "!"}
+     * Represents the exclamation mark string: {@code "!"}.
      */
     public static final String EXCLAMATION = "!";
 
     /**
-     * Represents string: {@code "!="}
+     * Represents the not equal operator: {@code "!="}.
+     * Used for inequality comparison in many programming languages.
      */
     public static final String NOT_EQUAL = "!=";
 
     /**
-     * Represents string: {@code "<>"}
+     * Represents the SQL not equal operator: {@code "<>"}.
+     * Alternative syntax for inequality in SQL.
      */
     public static final String NOT_EQUAL2 = "<>";
 
     /**
-     * Represents string: {@code ">="}
+     * Represents the greater than or equal operator: {@code ">="}.
+     * Used for comparison operations.
      */
     public static final String GREATER_EQUAL = ">=";
 
     /**
-     * Represents string: {@code "<="}
+     * Represents the less than or equal operator: {@code "<="}.
+     * Used for comparison operations.
      */
     public static final String LESS_EQUAL = "<=";
 
     // --------------------SQL key words----------------------------
     /**
-     * Represents string: {@code "WITH"}
+     * SQL WITH keyword: {@code "WITH"}.
+     * Used for common table expressions (CTEs).
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String cte = WD.WITH + " temp_table AS (SELECT * FROM users)";
+     * }</pre>
      */
     public static final String WITH = "WITH";
 
     /**
-     * Represents string: {@code "MERGE"}
+     * SQL MERGE keyword: {@code "MERGE"}.
+     * Used for merge operations in SQL.
      */
     public static final String MERGE = "MERGE";
 
     /**
-     * Represents string: {@code "SELECT"}
+     * SQL SELECT keyword: {@code "SELECT"}.
+     * Used to query data from database tables.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String query = WD.SELECT + " * " + WD.FROM + " users";
+     * }</pre>
      */
     public static final String SELECT = "SELECT";
 
     /**
-     * Represents string: {@code "INSERT"}
+     * SQL INSERT keyword: {@code "INSERT"}.
+     * Used to insert data into database tables.
      */
     public static final String INSERT = "INSERT";
 
     /**
-     * Represents string: {@code "INTO"}
+     * SQL INTO keyword: {@code "INTO"}.
+     * Used with INSERT statements.
      */
     public static final String INTO = "INTO";
 
     /**
-     * Represents string: {@code "UPDATE"}
+     * SQL UPDATE keyword: {@code "UPDATE"}.
+     * Used to modify existing data in database tables.
      */
     public static final String UPDATE = "UPDATE";
 
     /**
-     * Represents string: {@code "SET"}
+     * SQL SET keyword: {@code "SET"}.
+     * Used with UPDATE statements to specify column values.
      */
     public static final String SET = "SET";
 
     /**
-     * Represents string: {@code "DELETE"}
+     * SQL DELETE keyword: {@code "DELETE"}.
+     * Used to remove data from database tables.
      */
     public static final String DELETE = "DELETE";
 
     /**
-     * Represents string: {@code "CREATE"}
+     * SQL CREATE keyword: {@code "CREATE"}.
+     * Used to create database objects like tables, views, etc.
      */
     public static final String CREATE = "CREATE";
 
     /**
-     * Represents string: {@code "DROP"}
+     * SQL DROP keyword: {@code "DROP"}.
+     * Used to remove database objects.
      */
     public static final String DROP = "DROP";
 
     /**
-     * Represents string: {@code "SHOW"}
+     * SQL SHOW keyword: {@code "SHOW"}.
+     * Used to display database information.
      */
     public static final String SHOW = "SHOW";
 
     /**
-     * Represents string: {@code "DESCRIBE"}
+     * SQL DESCRIBE keyword: {@code "DESCRIBE"}.
+     * Used to show table structure.
      */
     public static final String DESCRIBE = "DESCRIBE";
 
     /**
-     * Represents string: {@code "ALTER"}
+     * SQL ALTER keyword: {@code "ALTER"}.
+     * Used to modify database object structure.
      */
     public static final String ALTER = "ALTER";
 
     /**
-     * Represents string: {@code "USE"}
+     * SQL USE keyword: {@code "USE"}.
+     * Used to select a database.
      */
     public static final String USE = "USE";
 
     /**
-     * Represents string: {@code "RENAME"}
+     * SQL RENAME keyword: {@code "RENAME"}.
+     * Used to rename database objects.
      */
     public static final String RENAME = "RENAME";
 
     /**
-     * Represents string: {@code "BEGIN TRANSACTION"}
+     * SQL BEGIN TRANSACTION statement: {@code "BEGIN TRANSACTION"}.
+     * Used to start a database transaction.
      */
     public static final String BEGIN_TRANSACTION = "BEGIN TRANSACTION";
 
     /**
-     * Represents string: {@code "START TRANSACTION"}
+     * SQL START TRANSACTION statement: {@code "START TRANSACTION"}.
+     * Alternative syntax to begin a transaction.
      */
     public static final String START_TRANSACTION = "START TRANSACTION";
 
     /**
-     * Represents string: {@code "COMMIT"}
+     * SQL COMMIT keyword: {@code "COMMIT"}.
+     * Used to save transaction changes permanently.
      */
     public static final String COMMIT = "COMMIT";
 
     /**
-     * Represents string: {@code "ROLLBACK"}
+     * SQL ROLLBACK keyword: {@code "ROLLBACK"}.
+     * Used to undo transaction changes.
      */
     public static final String ROLLBACK = "ROLLBACK";
 
     /**
-     * Represents string: {@code "AS"}
+     * SQL AS keyword: {@code "AS"}.
+     * Used for aliasing in queries.
      */
     public static final String AS = "AS";
 
     /**
-     * Represents string: {@code "JOIN"}
+     * SQL JOIN keyword: {@code "JOIN"}.
+     * Used to combine rows from multiple tables.
      */
     public static final String JOIN = "JOIN";
 
     /**
-     * Represents string: {@code "NATURAL"}
+     * SQL NATURAL keyword: {@code "NATURAL"}.
+     * Used with JOIN for natural joins.
      */
     public static final String NATURAL = "NATURAL";
 
     /**
-     * Represents string: {@code "INNER"}
+     * SQL INNER keyword: {@code "INNER"}.
+     * Used with JOIN for inner joins.
      */
     public static final String INNER = "INNER";
 
     /**
-     * Represents string: {@code "OUTER "}
+     * SQL OUTER keyword with trailing space: {@code "OUTER "}.
+     * Used with JOIN for outer joins.
      */
     public static final String OUTER = "OUTER ";
 
     /**
-     * Represents string: {@code "LEFT JOIN"}
+     * SQL LEFT JOIN clause: {@code "LEFT JOIN"}.
+     * Returns all records from left table and matched records from right table.
      */
     public static final String LEFT_JOIN = "LEFT JOIN";
 
     /**
-     * Represents string: {@code "LEFT"}
+     * SQL LEFT keyword: {@code "LEFT"}.
+     * Used in LEFT JOIN operations.
      */
     public static final String LEFT = "LEFT";
 
     /**
-     * Represents string: {@code "RIGHT JOIN"}
+     * SQL RIGHT JOIN clause: {@code "RIGHT JOIN"}.
+     * Returns all records from right table and matched records from left table.
      */
     public static final String RIGHT_JOIN = "RIGHT JOIN";
 
     /**
-     * Represents string: {@code "RIGHT"}
+     * SQL RIGHT keyword: {@code "RIGHT"}.
+     * Used in RIGHT JOIN operations.
      */
     public static final String RIGHT = "RIGHT";
 
     /**
-     * Represents string: {@code "FULL JOIN"}
+     * SQL FULL JOIN clause: {@code "FULL JOIN"}.
+     * Returns all records when there's a match in either table.
      */
     public static final String FULL_JOIN = "FULL JOIN";
 
     /**
-     * Represents string: {@code "FULL"}
+     * SQL FULL keyword: {@code "FULL"}.
+     * Used in FULL JOIN operations.
      */
     public static final String FULL = "FULL";
 
     /**
-     * Represents string: {@code "CROSS JOIN"}
+     * SQL CROSS JOIN clause: {@code "CROSS JOIN"}.
+     * Returns the Cartesian product of both tables.
      */
     public static final String CROSS_JOIN = "CROSS JOIN";
 
     /**
-     * Represents string: {@code "INNER JOIN"}
+     * SQL INNER JOIN clause: {@code "INNER JOIN"}.
+     * Returns records with matching values in both tables.
      */
     public static final String INNER_JOIN = "INNER JOIN";
 
     /**
-     * Represents string: {@code "NATURAL JOIN"}
+     * SQL NATURAL JOIN clause: {@code "NATURAL JOIN"}.
+     * Joins tables based on columns with same names.
      */
     public static final String NATURAL_JOIN = "NATURAL JOIN";
 
     /**
-     * Represents string: {@code "CROSS"}
+     * SQL CROSS keyword: {@code "CROSS"}.
+     * Used in CROSS JOIN operations.
      */
     public static final String CROSS = "CROSS";
 
     /**
-     * Represents string: {@code "ON"}
+     * SQL ON keyword: {@code "ON"}.
+     * Used to specify join conditions.
      */
     public static final String ON = "ON";
 
     /**
-     * Represents string: {@code "USING"}
+     * SQL USING keyword: {@code "USING"}.
+     * Alternative to ON for specifying join columns.
      */
     public static final String USING = "USING";
 
     /**
-     * Represents string: {@code "WHERE"}
+     * SQL WHERE keyword: {@code "WHERE"}.
+     * Used to filter query results.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String query = WD.SELECT + " * " + WD.FROM + " users " + WD.WHERE + " age > 18";
+     * }</pre>
      */
     public static final String WHERE = "WHERE";
 
     /**
-     * Represents string: {@code "GROUP BY"}
+     * SQL GROUP BY clause: {@code "GROUP BY"}.
+     * Used to group rows with same values.
      */
     public static final String GROUP_BY = "GROUP BY";
 
     /**
-     * Represents string: {@code "HAVING"}
+     * SQL HAVING keyword: {@code "HAVING"}.
+     * Used to filter grouped results.
      */
     public static final String HAVING = "HAVING";
 
     /**
-     * Represents string: {@code "ORDER BY"}
+     * SQL ORDER BY clause: {@code "ORDER BY"}.
+     * Used to sort query results.
      */
     public static final String ORDER_BY = "ORDER BY";
 
     /**
-     * Represents string: {@code "LIMIT"}
+     * SQL LIMIT keyword: {@code "LIMIT"}.
+     * Used to limit the number of returned rows.
      */
     public static final String LIMIT = "LIMIT";
 
     /**
-     * Represents string: {@code "OFFSET"}
+     * SQL OFFSET keyword: {@code "OFFSET"}.
+     * Used to skip a number of rows.
      */
     public static final String OFFSET = "OFFSET";
 
     /**
-     * Represents string: {@code "FOR UPDATE"}
+     * SQL FOR UPDATE clause: {@code "FOR UPDATE"}.
+     * Used to lock selected rows for update.
      */
     public static final String FOR_UPDATE = "FOR UPDATE";
 
     /**
-     * Represents string: {@code "FETCH FIRST"}
+     * SQL FETCH FIRST clause: {@code "FETCH FIRST"}.
+     * Standard SQL syntax for limiting results.
      */
     public static final String FETCH_FIRST = "FETCH FIRST";
 
     /**
-     * Represents string: {@code "FETCH NEXT"}
+     * SQL FETCH NEXT clause: {@code "FETCH NEXT"}.
+     * Used with OFFSET for pagination.
      */
     public static final String FETCH_NEXT = "FETCH NEXT";
 
     /**
-     * Represents string: {@code "ROWS"}
+     * SQL ROWS keyword: {@code "ROWS"}.
+     * Used with FETCH clauses.
      */
     public static final String ROWS = "ROWS";
 
     /**
-     * Represents string: {@code "ROWS ONLY"}
+     * SQL ROWS ONLY clause: {@code "ROWS ONLY"}.
+     * Used to complete FETCH syntax.
      */
     public static final String ROWS_ONLY = "ROWS ONLY";
 
     /**
-     * Represents string: {@code "ROW_NEXT"}
+     * SQL ROW_NEXT keyword: {@code "ROW_NEXT"}.
+     * Used in window functions.
      */
     public static final String ROW_NEXT = "ROW_NEXT";
 
     /**
-     * Represents string: {@code "ROWNUM"}
+     * SQL ROWNUM keyword: {@code "ROWNUM"}.
+     * Oracle-specific pseudo-column for row numbering.
      */
     public static final String ROWNUM = "ROWNUM";
 
     /**
-     * Represents string: {@code "EXISTS"}
+     * SQL EXISTS keyword: {@code "EXISTS"}.
+     * Used to test for existence of rows.
      */
     public static final String EXISTS = "EXISTS";
 
     /**
-     * Represents string: {@code "LIKE"}
+     * SQL LIKE keyword: {@code "LIKE"}.
+     * Used for pattern matching in WHERE clauses.
      */
     public static final String LIKE = "LIKE";
 
     /**
-     * Represents string: {@code "AND"}
+     * SQL AND keyword: {@code "AND"}.
+     * Logical AND operator in SQL.
      */
     public static final String AND = "AND";
 
     /**
-     * Represents string: {@code "&&"}
+     * Logical AND operator symbol: {@code "&&"}.
+     * Alternative AND syntax in some databases.
      */
     public static final String AND_OP = "&&";
 
     /**
-     * Represents string: {@code "OR"}
+     * SQL OR keyword: {@code "OR"}.
+     * Logical OR operator in SQL.
      */
     public static final String OR = "OR";
 
     /**
-     * Represents string: {@code "||"}
+     * Logical OR operator symbol: {@code "||"}.
+     * Alternative OR syntax in some databases.
      */
     public static final String OR_OP = "||";
 
     /**
-     * Represents string: {@code "XOR"}
+     * SQL XOR keyword: {@code "XOR"}.
+     * Exclusive OR operator in SQL.
      */
     public static final String XOR = "XOR";
 
     /**
-     * Represents string: {@code "NOT"}
+     * SQL NOT keyword: {@code "NOT"}.
+     * Logical NOT operator in SQL.
      */
     public static final String NOT = "NOT";
 
     /**
-     * Represents string: {@code "BETWEEN"}
+     * SQL BETWEEN keyword: {@code "BETWEEN"}.
+     * Used to filter values within a range.
      */
     public static final String BETWEEN = "BETWEEN";
 
     /**
-     * Represents string: {@code "IS"}
+     * SQL IS keyword: {@code "IS"}.
+     * Used with NULL comparisons.
      */
     public static final String IS = "IS";
 
     /**
-     * Represents string: {@code "IS NOT"}
+     * SQL IS NOT clause: {@code "IS NOT"}.
+     * Used for negative NULL comparisons.
      */
     public static final String IS_NOT = "IS NOT";
 
     /**
-     * Represents string: {@code "NULL"}
+     * SQL NULL keyword: {@code "NULL"}.
+     * Represents absence of value.
      */
     public static final String NULL = "NULL";
 
     /**
-     * Represents string: {@code "IS NULL"}
+     * SQL IS NULL clause: {@code "IS NULL"}.
+     * Tests for NULL values.
      */
     public static final String IS_NULL = "IS NULL";
 
     /**
-     * Represents string: {@code "IS NOT NULL"}
+     * SQL IS NOT NULL clause: {@code "IS NOT NULL"}.
+     * Tests for non-NULL values.
      */
     public static final String IS_NOT_NULL = "IS NOT NULL";
 
     /**
-     * Represents string: {@code "EMPTY"}
+     * EMPTY keyword: {@code "EMPTY"}.
+     * Custom keyword for empty checks.
      */
     public static final String EMPTY = "EMPTY";
 
     /**
-     * Represents string: {@code "IS EMPTY"}
+     * IS EMPTY clause: {@code "IS EMPTY"}.
+     * Custom clause for checking empty values.
      */
     public static final String IS_EMPTY = "IS EMPTY";
 
     /**
-     * Represents string: {@code "IS NOT EMPTY"}
+     * IS NOT EMPTY clause: {@code "IS NOT EMPTY"}.
+     * Custom clause for checking non-empty values.
      */
     public static final String IS_NOT_EMPTY = "IS NOT EMPTY";
 
     /**
-     * Represents string: {@code "BLANK"}
+     * BLANK keyword: {@code "BLANK"}.
+     * Custom keyword for blank checks.
      */
     public static final String BLANK = "BLANK";
 
     /**
-     * Represents string: {@code "IS BLANK"}
+     * IS BLANK clause: {@code "IS BLANK"}.
+     * Custom clause for checking blank values.
      */
     public static final String IS_BLANK = "IS BLANK";
 
     /**
-     * Represents string: {@code "IS NOT BLANK"}
+     * IS NOT BLANK clause: {@code "IS NOT BLANK"}.
+     * Custom clause for checking non-blank values.
      */
     public static final String IS_NOT_BLANK = "IS NOT BLANK";
 
     /**
-     * Represents string: {@code "NOT IN"}
+     * SQL NOT IN clause: {@code "NOT IN"}.
+     * Tests if value is not in a list.
      */
     public static final String NOT_IN = "NOT IN";
 
     /**
-     * Represents string: {@code "NOT EXISTS"}
+     * SQL NOT EXISTS clause: {@code "NOT EXISTS"}.
+     * Tests for non-existence of rows.
      */
     public static final String NOT_EXISTS = "NOT EXISTS";
 
     /**
-     * Represents string: {@code "FROM"}
+     * SQL FROM keyword: {@code "FROM"}.
+     * Specifies tables in queries.
      */
     public static final String FROM = "FROM";
 
     /**
-     * Represents string: {@code "ASC"}
+     * SQL ASC keyword: {@code "ASC"}.
+     * Ascending sort order.
      */
     public static final String ASC = "ASC";
 
     /**
-     * Represents string: {@code "DESC"}
+     * SQL DESC keyword: {@code "DESC"}.
+     * Descending sort order.
      */
     public static final String DESC = "DESC";
 
     /**
-     * Represents string: {@code "VALUES"}
+     * SQL VALUES keyword: {@code "VALUES"}.
+     * Used in INSERT statements.
      */
     public static final String VALUES = "VALUES";
 
     /**
-     * Represents string: {@code "DISTINCT"}
+     * SQL DISTINCT keyword: {@code "DISTINCT"}.
+     * Removes duplicate rows from results.
      */
     public static final String DISTINCT = "DISTINCT";
 
     /**
-     * Represents string: {@code "DISTINCTROW"}
+     * SQL DISTINCTROW keyword: {@code "DISTINCTROW"}.
+     * MySQL-specific distinct syntax.
      */
     public static final String DISTINCTROW = "DISTINCTROW";
 
     /**
-     * Represents string: {@code "UNIQUE"}
+     * SQL UNIQUE keyword: {@code "UNIQUE"}.
+     * Constraint for unique values.
      */
     public static final String UNIQUE = "UNIQUE";
 
     /**
-     * Represents string: {@code "TOP"}
+     * SQL TOP keyword: {@code "TOP"}.
+     * SQL Server syntax for limiting results.
      */
     public static final String TOP = "TOP";
 
     /**
-     * Represents string: {@code "IN"}
+     * SQL IN keyword: {@code "IN"}.
+     * Tests if value is in a list.
      */
     public static final String IN = "IN";
 
     /**
-     * Represents string: {@code "ANY"}
+     * SQL ANY keyword: {@code "ANY"}.
+     * Used with subqueries for comparisons.
      */
     public static final String ANY = "ANY";
 
     /**
-     * Represents string: {@code "ALL"}
+     * SQL ALL keyword: {@code "ALL"}.
+     * Used with subqueries for comparisons.
      */
     public static final String ALL = "ALL";
 
     /**
-     * Represents string: {@code "SOME"}
+     * SQL SOME keyword: {@code "SOME"}.
+     * Synonym for ANY in SQL.
      */
     public static final String SOME = "SOME";
 
     /**
-     * Represents string: {@code "UNION"}
+     * SQL UNION keyword: {@code "UNION"}.
+     * Combines results of multiple queries.
      */
     public static final String UNION = "UNION";
 
     /**
-     * Represents string: {@code "UNION ALL"}
+     * SQL UNION ALL clause: {@code "UNION ALL"}.
+     * Combines results including duplicates.
      */
     public static final String UNION_ALL = "UNION ALL";
 
     /**
-     * Represents string: {@code "INTERSECT"}
+     * SQL INTERSECT keyword: {@code "INTERSECT"}.
+     * Returns common rows from multiple queries.
      */
     public static final String INTERSECT = "INTERSECT";
 
     /**
-     * Represents string: {@code "EXCEPT"}
+     * SQL EXCEPT keyword: {@code "EXCEPT"}.
+     * Returns rows from first query not in second.
      */
     public static final String EXCEPT = "EXCEPT";
 
     /**
-     * Represents string: {@code "MINUS"}
+     * SQL MINUS keyword: {@code "MINUS"}.
+     * Oracle's equivalent of EXCEPT.
      */
     public static final String EXCEPT2 = "MINUS";
 
     /**
-     * Represents string: {@code "AVG"}
+     * SQL AVG function: {@code "AVG"}.
+     * Calculates average value.
      */
     public static final String AVG = "AVG";
 
     /**
-     * Represents string: {@code "COUNT"}
+     * SQL COUNT function: {@code "COUNT"}.
+     * Counts number of rows.
      */
     public static final String COUNT = "COUNT";
 
     /**
-     * Represents string: {@code "SUM"}
+     * SQL SUM function: {@code "SUM"}.
+     * Calculates sum of values.
      */
     public static final String SUM = "SUM";
 
     /**
-     * Represents string: {@code "MIN"}
+     * SQL MIN function: {@code "MIN"}.
+     * Returns minimum value.
      */
     public static final String MIN = "MIN";
 
     /**
-     * Represents string: {@code "MAX"}
+     * SQL MAX function: {@code "MAX"}.
+     * Returns maximum value.
      */
     public static final String MAX = "MAX";
 
     /**
-     * Represents string: {@code "ABS"}
+     * SQL ABS function: {@code "ABS"}.
+     * Returns absolute value.
      */
     public static final String ABS = "ABS";
 
     /**
-     * Represents string: {@code "ACOS"}
+     * SQL ACOS function: {@code "ACOS"}.
+     * Returns arc cosine of a number.
      */
     public static final String ACOS = "ACOS";
 
     /**
-     * Represents string: {@code "ASIN"}
+     * SQL ASIN function: {@code "ASIN"}.
+     * Returns arc sine of a number.
      */
     public static final String ASIN = "ASIN";
 
     /**
-     * Represents string: {@code "ATAN"}
+     * SQL ATAN function: {@code "ATAN"}.
+     * Returns arc tangent of a number.
      */
     public static final String ATAN = "ATAN";
 
     /**
-     * Represents string: {@code "ATAN2"}
+     * SQL ATAN2 function: {@code "ATAN2"}.
+     * Returns arc tangent of two numbers.
      */
     public static final String ATAN2 = "ATAN2";
 
     /**
-     * Represents string: {@code "CEIL"}
+     * SQL CEIL function: {@code "CEIL"}.
+     * Rounds up to nearest integer.
      */
     public static final String CEIL = "CEIL";
 
     /**
-     * Represents string: {@code "COS"}
+     * SQL COS function: {@code "COS"}.
+     * Returns cosine of a number.
      */
     public static final String COS = "COS";
 
     /**
-     * Represents string: {@code "EXP"}
+     * SQL EXP function: {@code "EXP"}.
+     * Returns e raised to a power.
      */
     public static final String EXP = "EXP";
 
     /**
-     * Represents string: {@code "FLOOR"}
+     * SQL FLOOR function: {@code "FLOOR"}.
+     * Rounds down to nearest integer.
      */
     public static final String FLOOR = "FLOOR";
 
     /**
-     * Represents string: {@code "LOG"}
+     * SQL LOG function: {@code "LOG"}.
+     * Returns logarithm of a number.
      */
     public static final String LOG = "LOG";
 
     /**
-     * Represents string: {@code "LN"}
+     * SQL LN function: {@code "LN"}.
+     * Returns natural logarithm.
      */
     public static final String LN = "LN";
 
     /**
-     * Represents string: {@code "MOD"}
+     * SQL MOD function: {@code "MOD"}.
+     * Returns remainder of division.
      */
     public static final String MOD = "MOD";
 
     /**
-     * Represents string: {@code "POWER"}
+     * SQL POWER function: {@code "POWER"}.
+     * Raises number to a power.
      */
     public static final String POWER = "POWER";
 
     /**
-     * Represents string: {@code "SIGN"}
+     * SQL SIGN function: {@code "SIGN"}.
+     * Returns sign of a number.
      */
     public static final String SIGN = "SIGN";
 
     /**
-     * Represents string: {@code "SIN"}
+     * SQL SIN function: {@code "SIN"}.
+     * Returns sine of a number.
      */
     public static final String SIN = "SIN";
 
     /**
-     * Represents string: {@code "SQRT"}
+     * SQL SQRT function: {@code "SQRT"}.
+     * Returns square root.
      */
     public static final String SQRT = "SQRT";
 
     /**
-     * Represents string: {@code "TAN"}
+     * SQL TAN function: {@code "TAN"}.
+     * Returns tangent of a number.
      */
     public static final String TAN = "TAN";
 
     /**
-     * Represents string: {@code "LENGTH"}
+     * SQL LENGTH function: {@code "LENGTH"}.
+     * Returns string length.
      */
     public static final String LENGTH = "LENGTH";
 
     /**
-     * Represents string: {@code "CONCAT"}
+     * SQL CONCAT function: {@code "CONCAT"}.
+     * Concatenates strings.
      */
     public static final String CONCAT = "CONCAT";
 
     /**
-     * Represents string: {@code "TRIM"}
+     * SQL TRIM function: {@code "TRIM"}.
+     * Removes leading and trailing spaces.
      */
     public static final String TRIM = "TRIM";
 
     /**
-     * Represents string: {@code "LTRIM"}
+     * SQL LTRIM function: {@code "LTRIM"}.
+     * Removes leading spaces.
      */
     public static final String LTRIM = "LTRIM";
 
     /**
-     * Represents string: {@code "RTRIM"}
+     * SQL RTRIM function: {@code "RTRIM"}.
+     * Removes trailing spaces.
      */
     public static final String RTRIM = "RTRIM";
 
     /**
-     * Represents string: {@code "LPAD"}
+     * SQL LPAD function: {@code "LPAD"}.
+     * Left-pads string to specified length.
      */
     public static final String LPAD = "LPAD";
 
     /**
-     * Represents string: {@code "RPAD"}
+     * SQL RPAD function: {@code "RPAD"}.
+     * Right-pads string to specified length.
      */
     public static final String RPAD = "RPAD";
 
     /**
-     * Represents string: {@code "REPLACE"}
+     * SQL REPLACE function: {@code "REPLACE"}.
+     * Replaces occurrences of substring.
      */
     public static final String REPLACE = "REPLACE";
 
     /**
-     * Represents string: {@code "SUBSTR"}
+     * SQL SUBSTR function: {@code "SUBSTR"}.
+     * Extracts substring from string.
      */
     public static final String SUBSTR = "SUBSTR";
 
     /**
-     * Represents string: {@code "UPPER"}
+     * SQL UPPER function: {@code "UPPER"}.
+     * Converts string to uppercase.
      */
     public static final String UPPER = "UPPER";
 
     /**
-     * Represents string: {@code "LOWER"}
+     * SQL LOWER function: {@code "LOWER"}.
+     * Converts string to lowercase.
      */
     public static final String LOWER = "LOWER";
 
     /**
-     * Represents string: {@code "CAST"}
+     * SQL CAST function: {@code "CAST"}.
+     * Converts data type.
      */
     public static final String CAST = "CAST";
 
     /**
-     * Represents string: {@code "CURRENT_TIME"}
+     * SQL CURRENT_TIME function: {@code "CURRENT_TIME"}.
+     * Returns current time.
      */
     public static final String CURRENT_TIME = "CURRENT_TIME";
 
     /**
-     * Represents string: {@code "CURRENT_DATE"}
+     * SQL CURRENT_DATE function: {@code "CURRENT_DATE"}.
+     * Returns current date.
      */
     public static final String CURRENT_DATE = "CURRENT_DATE";
 
     /**
-     * Represents string: {@code "CURRENT_TIMESTAMP"}
+     * SQL CURRENT_TIMESTAMP function: {@code "CURRENT_TIMESTAMP"}.
+     * Returns current date and time.
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 

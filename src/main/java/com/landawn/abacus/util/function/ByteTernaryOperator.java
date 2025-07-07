@@ -16,15 +16,26 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation upon three byte-valued operands and producing a byte-valued result.
+ * This is the primitive type specialization of {@link TriFunction} for byte.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte, byte, byte)}.
+ * 
+ * @see ByteBinaryOperator
+ * @see ByteUnaryOperator
+ */
 @FunctionalInterface
 public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given byte operands.
+     * This method performs a ternary operation on three byte values and returns a byte result.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first byte operand
+     * @param b the second byte operand
+     * @param c the third byte operand
+     * @return the byte result of applying this operator to the three operands
      */
     @Override
     byte applyAsByte(byte a, byte b, byte c);

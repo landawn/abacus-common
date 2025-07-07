@@ -34,6 +34,13 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Abstract base class for long types in the type system.
+ * This class provides common functionality for handling long values,
+ * including conversion from various date/time types, database operations, and serialization.
+ * Note that this class uses Number as its generic type to allow for both
+ * primitive long and Long wrapper handling.
+ */
 public abstract class AbstractLongType extends NumberType<Number> {
 
     protected AbstractLongType(final String typeName) {
@@ -41,9 +48,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Converts a Number value to its string representation as a long.
+     * Returns {@code null} if the input is {@code null}, otherwise returns
+     * the string representation of the long value.
      *
-     * @param x
-     * @return
+     * @param x the Number value to convert
+     * @return the string representation of the long value, or {@code null} if input is {@code null}
      */
     @MayReturnNull
     @Override
@@ -56,9 +66,20 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Converts an object to a Long value.
+     * This method handles various input types:
+     * <ul>
+     *   <li>{@code null} returns the default value</li>
+     *   <li>Date objects return their time in milliseconds</li>
+     *   <li>Calendar objects return their time in milliseconds</li>
+     *   <li>Instant objects return their epoch milliseconds</li>
+     *   <li>ZonedDateTime objects return their epoch milliseconds</li>
+     *   <li>LocalDateTime objects are converted to Timestamp then to milliseconds</li>
+     *   <li>Other objects are converted to string and parsed</li>
+     * </ul>
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert
+     * @return the Long value representing milliseconds for date/time types, or parsed value for others
      */
     @Override
     public Long valueOf(final Object obj) {
@@ -82,9 +103,17 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Converts a string to a Long value.
+     * This method handles various string formats:
+     * <ul>
+     *   <li>Empty or {@code null} strings return the default value</li>
+     *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
+     *   <li>Valid numeric strings are parsed to long values</li>
+     * </ul>
      *
-     * @param str
-     * @return
+     * @param str the string to convert
+     * @return the Long value
+     * @throws NumberFormatException if the string cannot be parsed as a long
      */
     @Override
     public Long valueOf(final String str) {
@@ -108,11 +137,13 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Converts a character array to a Long value.
+     * Delegates to the {@link #parseLong(char[], int, int)} method for parsing.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array to convert
+     * @param offset the starting position in the array
+     * @param len the number of characters to read
+     * @return the Long value, or default value if input is {@code null} or empty
      */
     @Override
     public Long valueOf(final char[] cbuf, final int offset, final int len) {
@@ -120,11 +151,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Retrieves a long value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based)
+     * @return the long value at the specified column
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -132,11 +164,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Retrieves a long value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the column label
+     * @return the long value at the specified column
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -144,11 +177,14 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Sets a long parameter in a PreparedStatement at the specified position.
+     * If the value is {@code null}, sets the parameter to SQL NULL.
+     * Otherwise, converts the Number to a long value.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based)
+     * @param x the Number value to set as long, or {@code null} for SQL NULL
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
@@ -160,11 +196,14 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Sets a long parameter in a CallableStatement using the specified parameter name.
+     * If the value is {@code null}, sets the parameter to SQL NULL.
+     * Otherwise, converts the Number to a long value.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the parameter name
+     * @param x the Number value to set as long, or {@code null} for SQL NULL
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
@@ -176,10 +215,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Appends the string representation of a long value to an Appendable.
+     * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Number value to append as long
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final Number x) throws IOException {
@@ -191,11 +232,15 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
+     * Writes a long value to a CharacterWriter with optional configuration.
+     * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
+     * writes 0L instead of {@code null}. If the configuration specifies {@code writeLongAsString},
+     * the long value is wrapped in quotation marks.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Number value to write as long
+     * @param config the serialization configuration, may be {@code null}
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, Number x, final JSONXMLSerializationConfig<?> config) throws IOException {

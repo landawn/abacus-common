@@ -18,20 +18,60 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a function that produces a double-valued result. This is the
+ * double-producing primitive specialization for {@link java.util.function.Function}.
  *
+ * <p>This interface extends both the Throwables.ToDoubleFunction and the standard Java
+ * ToDoubleFunction, providing compatibility with both the Abacus framework's error handling
+ * mechanisms and the standard Java functional interfaces.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the input to the function
  */
 @FunctionalInterface
 public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, RuntimeException>, java.util.function.ToDoubleFunction<T> { //NOSONAR
 
+    /**
+     * A predefined ToDoubleFunction instance that unboxes a Double object to a primitive double.
+     * Returns 0.0 if the input is null, otherwise returns the double value of the Double object.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Double boxed = 3.14;
+     * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed); // returns 3.14
+     * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null); // returns 0.0
+     * }</pre>
+     */
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
 
+    /**
+     * A predefined ToDoubleFunction instance that converts any Number object to a primitive double.
+     * Returns 0.0 if the input is null, otherwise uses the Numbers.toDouble utility method to
+     * perform the conversion. This function can handle various Number subclasses including
+     * Integer, Long, Float, BigDecimal, etc.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Integer intValue = 42;
+     * double result1 = ToDoubleFunction.FROM_NUM.applyAsDouble(intValue); // returns 42.0
+     * 
+     * BigDecimal bigDecimal = new BigDecimal("123.456");
+     * double result2 = ToDoubleFunction.FROM_NUM.applyAsDouble(bigDecimal); // returns 123.456
+     * 
+     * double defaultValue = ToDoubleFunction.FROM_NUM.applyAsDouble(null); // returns 0.0
+     * }</pre>
+     */
     ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toDouble(value);
 
     /**
+     * Applies this function to the given argument and returns a double result.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as a primitive double
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     double applyAsDouble(T value);

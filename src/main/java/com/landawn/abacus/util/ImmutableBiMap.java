@@ -20,9 +20,43 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
+ * An immutable, thread-safe implementation of a bidirectional map (BiMap).
+ * A BiMap is a map that preserves the uniqueness of both its keys and values,
+ * allowing efficient lookups in both directions (key-to-value and value-to-key).
+ * 
+ * <p>Once created, the contents of an ImmutableBiMap cannot be modified.
+ * All mutating operations inherited from Map will throw {@link UnsupportedOperationException}.
+ * 
+ * <p>This class provides several static factory methods for creating instances:
+ * <ul>
+ *   <li>{@link #empty()} - returns an empty ImmutableBiMap</li>
+ *   <li>{@link #of(...)} - creates an ImmutableBiMap with the specified key-value pairs</li>
+ *   <li>{@link #copyOf(BiMap)} - creates a defensive copy from another BiMap</li>
+ *   <li>{@link #wrap(BiMap)} - wraps an existing BiMap (changes to the underlying map will be reflected)</li>
+ * </ul>
+ * 
+ * <p>Unlike regular maps, BiMaps enforce that values are unique. If duplicate values
+ * are provided during construction, an exception may be thrown.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
+ *     "one", 1,
+ *     "two", 2,
+ *     "three", 3
+ * );
+ * 
+ * // Forward lookup
+ * Integer value = biMap.get("two"); // returns 2
+ * 
+ * // Reverse lookup
+ * String key = biMap.getByValue(2); // returns "two"
+ * }</pre>
  *
- * @param <K> the key type
- * @param <V> the value type
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values
+ * @see BiMap
+ * @see ImmutableMap
  */
 @SuppressWarnings("java:S2160")
 public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
@@ -34,6 +68,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
     /**
      * Constructs an ImmutableBiMap from the provided BiMap.
+     * This constructor is marked as @Internal and should not be used directly.
+     * Use the static factory methods instead.
      *
      * @param map the BiMap whose mappings are to be placed in this ImmutableBiMap
      */
@@ -45,11 +81,18 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an empty ImmutableBiMap.
+     * Returns an empty ImmutableBiMap. This method always returns the same cached instance,
+     * making it memory efficient for representing empty bidirectional maps.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
+     * System.out.println(empty.size()); // prints: 0
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableBiMap
      * @param <V> the type of the values in the ImmutableBiMap
-     * @return an empty ImmutableBiMap
+     * @return an empty ImmutableBiMap instance
      */
     @SuppressWarnings("unchecked")
     public static <K, V> ImmutableBiMap<K, V> empty() {
@@ -57,13 +100,22 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pair.
+     * Returns an ImmutableBiMap containing a single key-value mapping.
+     * The returned BiMap is immutable and will have a size of 1.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> single = ImmutableBiMap.of("one", 1);
+     * System.out.println(single.get("one")); // prints: 1
+     * System.out.println(single.getByValue(1)); // prints: "one"
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param k1 the key to be included in the ImmutableBiMap
      * @param v1 the value to be associated with the key
      * @return an ImmutableBiMap containing the provided key-value pair
+     * @throws IllegalArgumentException if the key or value is null and the underlying implementation doesn't support nulls
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1);
@@ -71,7 +123,17 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly two key-value mappings.
+     * Both keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
+     *     "first", 1,
+     *     "second", 2
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -80,6 +142,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param k2 the second key to be included in the ImmutableBiMap
      * @param v2 the value to be associated with the second key
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2);
@@ -87,7 +150,9 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly three key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -98,6 +163,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param k3 the third key to be included in the ImmutableBiMap
      * @param v3 the value to be associated with the third key
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3);
@@ -105,13 +171,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly four key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k4 the keys to be included in the ImmutableBiMap
      * @param v1 to v4 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4);
@@ -119,13 +188,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly five key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k5 the keys to be included in the ImmutableBiMap
      * @param v1 to v5 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -134,13 +206,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly six key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k6 the keys to be included in the ImmutableBiMap
      * @param v1 to v6 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -149,13 +224,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly seven key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k7 the keys to be included in the ImmutableBiMap
      * @param v1 to v7 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -164,13 +242,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly eight key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k8 the keys to be included in the ImmutableBiMap
      * @param v1 to v8 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -179,13 +260,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly nine key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k9 the keys to be included in the ImmutableBiMap
      * @param v1 to v9 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -194,13 +278,16 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns an ImmutableBiMap containing the provided key-value pairs.
+     * Returns an ImmutableBiMap containing exactly ten key-value mappings.
+     * All keys and values must be unique. If duplicate keys or values are provided,
+     * an exception may be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 to k10 the keys to be included in the ImmutableBiMap
      * @param v1 to v10 the values to be included in the ImmutableBiMap
      * @return an ImmutableBiMap containing the provided key-value pairs
+     * @throws IllegalArgumentException if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -210,8 +297,21 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableBiMap containing the same mappings as the provided BiMap.
-     * If the provided BiMap is {@code null} or empty, an empty ImmutableBiMap is returned.
-     * Otherwise, a new ImmutableBiMap is created with the elements of the provided BiMap.
+     * If the provided BiMap is null or empty, an empty ImmutableBiMap is returned.
+     * Otherwise, a new ImmutableBiMap is created with a defensive copy of the BiMap's entries.
+     * 
+     * <p>This method creates a defensive copy, so subsequent modifications to the original
+     * BiMap will not affect the returned ImmutableBiMap.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * BiMap<String, Integer> mutable = new BiMap<>();
+     * mutable.put("one", 1);
+     * mutable.put("two", 2);
+     * 
+     * ImmutableBiMap<String, Integer> immutable = ImmutableBiMap.copyOf(mutable);
+     * mutable.put("three", 3); // Does not affect 'immutable'
+     * }</pre>
      *
      * @param <K> the type of keys in the BiMap
      * @param <V> the type of values in the BiMap
@@ -228,13 +328,14 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
     /**
      * This method is deprecated and will throw an UnsupportedOperationException if used.
+     * Use {@link #copyOf(BiMap)} instead for BiMaps.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param map the map to copy
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated Use {@link #copyOf(BiMap)} instead
      */
     @Deprecated
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
@@ -242,9 +343,23 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Wraps the provided BiMap into an ImmutableBiMap. Changes to the specified map will be reflected in the ImmutableBiMap.
-     * If the provided BiMap is {@code null}, an empty ImmutableBiMap is returned.
-     * Otherwise, returns an ImmutableBiMap backed by the provided BiMap.
+     * Wraps the provided BiMap into an ImmutableBiMap without copying the entries.
+     * The returned ImmutableBiMap is backed by the provided BiMap, so changes to the original
+     * BiMap will be reflected in the ImmutableBiMap. However, the ImmutableBiMap itself cannot be modified.
+     * 
+     * <p>If the provided BiMap is null, an empty ImmutableBiMap is returned.
+     * 
+     * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
+     * the original BiMap after wrapping. This method is marked as @Beta.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * BiMap<String, Integer> mutable = new BiMap<>();
+     * mutable.put("one", 1);
+     * 
+     * ImmutableBiMap<String, Integer> wrapped = ImmutableBiMap.wrap(mutable);
+     * mutable.put("two", 2); // This WILL affect 'wrapped'!
+     * }</pre>
      *
      * @param <K> the type of keys in the BiMap
      * @param <V> the type of values in the BiMap
@@ -262,13 +377,14 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
     /**
      * This method is deprecated and will throw an UnsupportedOperationException if used.
+     * Use {@link #wrap(BiMap)} instead for BiMaps.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param map the map to wrap
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated Use {@link #wrap(BiMap)} instead
      */
     @Deprecated
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
@@ -276,7 +392,22 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Returns the key to which the specified value is mapped in the BiMap.
+     * Returns the key to which the specified value is mapped in this BiMap,
+     * or {@code null} if this BiMap contains no mapping for the value.
+     * 
+     * <p>This is the reverse lookup operation that makes BiMap bidirectional.
+     * The lookup is typically as efficient as the forward lookup (get by key).
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
+     *     "one", 1,
+     *     "two", 2
+     * );
+     * 
+     * String key = biMap.getByValue(2); // returns "two"
+     * String notFound = biMap.getByValue(3); // returns null
+     * }</pre>
      *
      * @param value the value whose associated key is to be returned
      * @return the key to which the specified value is mapped, or {@code null} if this map contains no mapping for the value

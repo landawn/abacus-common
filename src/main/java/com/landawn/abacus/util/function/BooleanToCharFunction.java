@@ -14,18 +14,28 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a {@code boolean}-valued argument and produces a
+ * {@code char}-valued result. This is the {@code boolean}-to-{@code char} primitive specialization
+ * for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsChar(boolean)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanToCharFunction {
 
     /**
-     * Converts a boolean value to a char: {@code true} to 'Y' and {@code false} to 'N'.
+     * A default function that converts a boolean value to a char: {@code true} to 'Y' and {@code false} to 'N'.
+     * This follows a common convention for representing boolean values as single characters.
      */
     BooleanToCharFunction DEFAULT = value -> value ? 'Y' : 'N';
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as a {@code char}
      */
     char applyAsChar(boolean value);
 }

@@ -14,5 +14,24 @@
 
 package com.landawn.abacus.util;
 
+/**
+ * A utility class for security-related operations.
+ * 
+ * <p>This class is currently a placeholder for future security functionality.
+ * It is designed as a final class with no instantiation to follow the utility class pattern.
+ * Future implementations may include methods for:
+ * <ul>
+ *   <li>Cryptographic operations</li>
+ *   <li>Password hashing and validation</li>
+ *   <li>Token generation and validation</li>
+ *   <li>Security checks and validations</li>
+ *   <li>Encoding and decoding operations</li>
+ * </ul>
+ * 
+ * <p>The class uses the NOSONAR comment to suppress SonarQube warnings about
+ * the empty class, as it is intentionally left empty for future development.
+ * 
+ * @since 1.0
+ */
 public final class SecurityUtil {//NOSONAR
 }

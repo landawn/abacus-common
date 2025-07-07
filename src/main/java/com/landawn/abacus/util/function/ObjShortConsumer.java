@@ -20,9 +20,26 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param t
-     * @param value
+     * <p>This method consumes an object of type T and a short value, performing some
+     * side-effect operation without returning any result. Common use cases include
+     * updating the object's state based on the short value, working with small numeric
+     * ranges, or processing data where memory efficiency is important and values fit
+     * within the short range (-32,768 to 32,767).
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * ObjShortConsumer<ShortBuffer> addToBuffer = (buffer, value) -> buffer.put(value);
+     * ObjShortConsumer<Config> setPort = (config, port) -> config.setPort(port);
+     * 
+     * addToBuffer.accept(myBuffer, (short) 42);
+     * setPort.accept(myConfig, (short) 8080);
+     * }</pre>
+     *
+     * @param t the first input argument of type T
+     * @param value the second input argument, a primitive short value
+     * @throws RuntimeException if the operation cannot be completed
      */
     @Override
     void accept(T t, short value);

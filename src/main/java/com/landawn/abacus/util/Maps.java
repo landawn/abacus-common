@@ -89,449 +89,50 @@ public final class Maps {
         // Utility class.
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @return
-    //     */
-    //    public static <T, K> Map<K, T> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
-    //        N.checkArgNotNull(keyExtractor);
-    //
-    //        final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
-    //
-    //        for (T e : c) {
-    //            result.put(keyExtractor.apply(e), e);
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @return
-    //     */
-    //    public static <T, K, V> Map<K, V> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //
-    //        final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
-    //
-    //        for (T e : c) {
-    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param <M>
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mapSupplier
-    //     * @return
-    //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //        N.checkArgNotNull(mapSupplier);
-    //
-    //        final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
-    //
-    //        for (T e : c) {
-    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <M>
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mergeFunction
-    //     * @param mapSupplier
-    //     * @return
-    //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //        N.checkArgNotNull(mergeFunction);
-    //        N.checkArgNotNull(mapSupplier);
-    //
-    //        final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
-    //        K key = null;
-    //
-    //        for (T e : c) {
-    //            key = keyExtractor.apply(e);
-    //
-    //            final V oldValue = result.get(key);
-    //
-    //            if (oldValue == null && !result.containsKey(key)) {
-    //                result.put(key, valueExtractor.apply(e));
-    //            } else {
-    //                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @return
-    //     */
-    //    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor) {
-    //        N.checkArgNotNull(keyExtractor);
-    //
-    //        if (iter == null) {
-    //            return new HashMap<>();
-    //        }
-    //
-    //        final Map<K, T> result = new HashMap<>();
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //            result.put(keyExtractor.apply(e), e);
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @return
-    //     */
-    //    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //
-    //        if (iter == null) {
-    //            return new HashMap<>();
-    //        }
-    //
-    //        final Map<K, V> result = new HashMap<>();
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param <M>
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mapSupplier
-    //     * @return
-    //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //        N.checkArgNotNull(mapSupplier);
-    //
-    //        if (iter == null) {
-    //            return mapSupplier.get();
-    //        }
-    //
-    //        final M result = mapSupplier.get();
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <M>
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mergeFunction
-    //     * @param mapSupplier
-    //     * @return
-    //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyExtractor);
-    //        N.checkArgNotNull(valueExtractor);
-    //        N.checkArgNotNull(mergeFunction);
-    //        N.checkArgNotNull(mapSupplier);
-    //
-    //        if (iter == null) {
-    //            return mapSupplier.get();
-    //        }
-    //
-    //        final M result = mapSupplier.get();
-    //        T e = null;
-    //        K key = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //            key = keyExtractor.apply(e);
-    //
-    //            final V oldValue = result.get(key);
-    //
-    //            if (oldValue == null && !result.containsKey(key)) {
-    //                result.put(key, valueExtractor.apply(e));
-    //            } else {
-    //                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <V2>
-    //     * @param map
-    //     * @param valueExtractor
-    //     * @return
-    //     */
-    //    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueExtractor) {
-    //        N.checkArgNotNull(valueExtractor);
-    //
-    //        if (map == null) {
-    //            return new HashMap<>();
-    //        }
-    //
-    //        final Map<K, V2> result = Maps.newTargetMap(map);
-    //
-    //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-    //            result.put(entry.getKey(), valueExtractor.apply(entry.getValue()));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <V2>
-    //     * @param <M>
-    //     * @param map
-    //     * @param valueExtractor
-    //     * @param mapSupplier
-    //     * @return
-    //     */
-    //    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueExtractor,
-    //            final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(valueExtractor);
-    //        N.checkArgNotNull(mapSupplier);
-    //
-    //        if (map == null) {
-    //            return mapSupplier.apply(0);
-    //        }
-    //
-    //        final M result = mapSupplier.apply(map.size());
-    //
-    //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-    //            result.put(entry.getKey(), valueExtractor.apply(entry.getValue()));
-    //        }
-    //
-    //        return result;
-    //    }
+    /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on)
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Example 1: Same length iterables
+     * List<String> keys = Arrays.asList("name", "age", "city");
+     * List<String> values = Arrays.asList("John", "25", "New York");
+     * Map<String, String> result = zip(keys, values);
+     * // result: {name=John, age=25, city=New York}
+     * 
+     * // Example 2: Different length iterables (keys shorter)
+     * List<Integer> ids = Arrays.asList(1, 2);
+     * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+     * Map<Integer, String> userMap = zip(ids, names);
+     * // userMap: {1=Alice, 2=Bob}
+     * }</pre>
+     *
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
+     */
+    public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
+        if (N.isEmpty(keys) || N.isEmpty(values)) {
+            return new HashMap<>();
+        }
 
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @return
-    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
-    //        return create(c, keyExtractor);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @return
-    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor) {
-    //        return create(c, keyExtractor, valueExtractor);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param <M>
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mapSupplier
-    //     * @return
-    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-    //        return create(c, keyExtractor, valueExtractor, mapSupplier);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <M>
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mergeFunction
-    //     * @param mapSupplier
-    //     * @return
-    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-    //        return create(c, keyExtractor, valueExtractor, mergeFunction, mapSupplier);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor) {
-    //        return create(iter, keyExtractor);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor) {
-    //        return create(iter, keyExtractor, valueExtractor);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param <M>
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mapSupplier
-    //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-    //        return create(iter, keyExtractor, valueExtractor, mapSupplier);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <K>
-    //     * @param <V>
-    //     * @param <M>
-    //     * @param iter
-    //     * @param keyExtractor
-    //     * @param valueExtractor
-    //     * @param mergeFunction
-    //     * @param mapSupplier
-    //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
-    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-    //        return create(iter, keyExtractor, valueExtractor, mergeFunction, mapSupplier);
-    //    }
+        final Iterator<? extends K> keyIter = keys.iterator();
+        final Iterator<? extends V> valueIter = values.iterator();
+
+        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
+                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final Map<K, V> result = N.newHashMap(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.put(keyIter.next(), valueIter.next());
+        }
+
+        return result;
+    }
 
     /**
      * Creates a new entry (key-value pair) with the provided key and value.
@@ -651,11 +252,25 @@ public final class Maps {
     }
 
     /**
-     * Returns the key set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable set is returned.
+     * Returns the key set of the specified map if it is not null or empty. Otherwise, an empty immutable set is returned.
+     * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
      *
-     * @param <K>
-     * @param map
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("one", 1);
+     * map.put("two", 2);
+     * Set<String> keys = Maps.keys(map);
+     * // keys contains: ["one", "two"]
+     * 
+     * Map<String, Integer> emptyMap = null;
+     * Set<String> emptyKeys = Maps.keys(emptyMap);
+     * // emptyKeys is an empty immutable set
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map whose keys are to be returned, may be null
+     * @return the key set of the map if non-empty, otherwise an empty immutable set
      * @see N#nullToEmpty(Map)
      */
     @Beta
@@ -664,11 +279,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the value set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable collection is returned.
+     * Returns the collection of values from the specified map if it is not null or empty. 
+     * Otherwise, an empty immutable list is returned.
+     * This is a convenience method that avoids null checks and provides a guaranteed non-null Collection result.
      *
-     * @param <V>
-     * @param map
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("one", 1);
+     * map.put("two", 2);
+     * Collection<Integer> values = Maps.values(map);
+     * // values contains: [1, 2]
+     * 
+     * Map<String, Integer> emptyMap = null;
+     * Collection<Integer> emptyValues = Maps.values(emptyMap);
+     * // emptyValues is an empty immutable list
+     * }</pre>
+     *
+     * @param <V> the type of values in the map
+     * @param map the map whose values are to be returned, may be null
+     * @return the collection of values from the map if non-empty, otherwise an empty immutable list
      * @see N#nullToEmpty(Map)
      */
     @Beta
@@ -677,12 +307,27 @@ public final class Maps {
     }
 
     /**
-     * Returns the entry set of the specified {@code map} if it is not {@code null} or empty. Otherwise, an empty immutable/unmodifiable set is returned.
+     * Returns the entry set of the specified map if it is not null or empty. 
+     * Otherwise, an empty immutable set is returned.
+     * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
      *
-     * @param <K>
-     * @param <V>
-     * @param map
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("one", 1);
+     * map.put("two", 2);
+     * Set<Map.Entry<String, Integer>> entries = Maps.entrySet(map);
+     * // entries contains the key-value pairs: ["one"=1, "two"=2]
+     * 
+     * Map<String, Integer> emptyMap = null;
+     * Set<Map.Entry<String, Integer>> emptyEntries = Maps.entrySet(emptyMap);
+     * // emptyEntries is an empty immutable set
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the map whose entry set is to be returned, may be null
+     * @return the entry set of the map if non-empty, otherwise an empty immutable set
      * @see N#nullToEmpty(Map)
      */
     @Beta
@@ -692,47 +337,25 @@ public final class Maps {
     }
 
     /**
-     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * Creates a Map by zipping together two Iterables with a custom map supplier.
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
+     * The keys and values are associated in the order in which they are provided.
      *
-     * @param <K> The type of keys in the resulting Map.
-     * @param <V> The type of values in the resulting Map.
-     * @param keys An Iterable of keys for the resulting Map.
-     * @param values An Iterable of values for the resulting Map.
-     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
-     */
-    public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
-        if (N.isEmpty(keys) || N.isEmpty(values)) {
-            return new HashMap<>();
-        }
-
-        final Iterator<? extends K> keyIter = keys.iterator();
-        final Iterator<? extends V> valueIter = values.iterator();
-
-        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
-                values instanceof Collection ? ((Collection<V>) values).size() : 0);
-        final Map<K, V> result = N.newHashMap(minLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result.put(keyIter.next(), valueIter.next());
-        }
-
-        return result;
-    }
-
-    /**
-     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
-     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
+     * <p>Example:
+     * <pre>{@code
+     * List<String> keys = Arrays.asList("a", "b", "c");
+     * List<Integer> values = Arrays.asList(1, 2, 3);
+     * LinkedHashMap<String, Integer> result = Maps.zip(keys, values, LinkedHashMap::new);
+     * // result: {a=1, b=2, c=3} (maintains insertion order)
+     * }</pre>
      *
-     * @param <K> The type of keys in the resulting Map.
-     * @param <V> The type of values in the resulting Map.
-     * @param <M> The type of the resulting Map.
-     * @param keys An Iterable of keys for the resulting Map.
-     * @param values An Iterable of values for the resulting Map.
-     * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
+     * @param <K> The type of keys in the resulting Map
+     * @param <V> The type of values in the resulting Map
+     * @param <M> The type of the resulting Map
+     * @param keys An Iterable of keys for the resulting Map
+     * @param values An Iterable of values for the resulting Map
+     * @param mapSupplier A function that generates a new Map instance based on expected size
+     * @return A Map where each key from the keys Iterable is associated with the corresponding value from the values Iterable
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
@@ -755,19 +378,27 @@ public final class Maps {
     }
 
     /**
-     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * Creates a Map by zipping together two Iterables with a merge function to handle duplicate keys.
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
-     * If there are duplicate keys, the merge function is used to resolve the conflict.
+     * If duplicate keys are encountered, the merge function is used to resolve the conflict.
      *
-     * @param <K> The type of keys in the resulting Map.
-     * @param <V> The type of values in the resulting Map.
-     * @param <M> The type of the resulting Map.
-     * @param keys An Iterable of keys for the resulting Map.
-     * @param values An Iterable of values for the resulting Map.
-     * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
-     * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
+     * <p>Example:
+     * <pre>{@code
+     * List<String> keys = Arrays.asList("a", "b", "a");
+     * List<Integer> values = Arrays.asList(1, 2, 3);
+     * Map<String, Integer> result = Maps.zip(keys, values, 
+     *     (v1, v2) -> v1 + v2, HashMap::new);
+     * // result: {a=4, b=2} (values for duplicate key "a" are summed: 1 + 3 = 4)
+     * }</pre>
+     *
+     * @param <K> The type of keys in the resulting Map
+     * @param <V> The type of values in the resulting Map
+     * @param <M> The type of the resulting Map
+     * @param keys An Iterable of keys for the resulting Map
+     * @param values An Iterable of values for the resulting Map
+     * @param mergeFunction A function used to resolve conflicts when duplicate keys are encountered
+     * @param mapSupplier A function that generates a new Map instance based on expected size
+     * @return A Map where each key from the keys Iterable is associated with the corresponding value from the values Iterable
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -790,39 +421,55 @@ public final class Maps {
     }
 
     /**
-     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
-     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the longer Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
-     * If a key or value is not present in the Iterable, the corresponding default value is used.
+     * Creates a Map by zipping together two Iterables with default values for missing elements.
+     * The resulting Map will have the size of the longer Iterable.
+     * If one Iterable is shorter, the default value is used for the missing elements.
      *
-     * @param <K> The type of keys in the resulting Map.
-     * @param <V> The type of values in the resulting Map.
-     * @param keys An Iterable of keys for the resulting Map.
-     * @param values An Iterable of values for the resulting Map.
-     * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
-     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
+     * <p>Example:
+     * <pre>{@code
+     * List<String> keys = Arrays.asList("a", "b");
+     * List<Integer> values = Arrays.asList(1, 2, 3, 4);
+     * Map<String, Integer> result = Maps.zip(keys, values, "default", 0);
+     * // result: {a=1, b=2, default=3}
+     * // Note: only one default key is used for remaining values
+     * }</pre>
+     *
+     * @param <K> The type of keys in the resulting Map
+     * @param <V> The type of values in the resulting Map
+     * @param keys An Iterable of keys for the resulting Map
+     * @param values An Iterable of values for the resulting Map
+     * @param defaultForKey The default key to use when keys Iterable is shorter than values
+     * @param defaultForValue The default value to use when values Iterable is shorter than keys
+     * @return A Map where each key is associated with the corresponding value, using defaults for missing elements
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
     }
 
     /**
-     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
-     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the longer Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
-     * If there are duplicate keys, the merge function is used to resolve the conflict.
-     * If a key or value is not present in the Iterable, the corresponding default value is used.
+     * Creates a Map by zipping together two Iterables with default values and custom merge function.
+     * The resulting Map will have entries for all elements from both Iterables.
+     * If one Iterable is shorter, default values are used. Duplicate keys are handled by the merge function.
      *
-     * @param <K> The type of keys in the resulting Map.
-     * @param <V> The type of values in the resulting Map.
-     * @param <M> The type of the resulting Map.
-     * @param keys An Iterable of keys for the resulting Map.
-     * @param values An Iterable of values for the resulting Map.
-     * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
-     * @param defaultForValue The default value to be used if the values Iterable is shorter than the keys Iterable.
-     * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
-     * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
+     * <p>Example:
+     * <pre>{@code
+     * List<String> keys = Arrays.asList("a", "b");
+     * List<Integer> values = Arrays.asList(1, 2, 3);
+     * Map<String, Integer> result = Maps.zip(keys, values, "sum", 10,
+     *     (v1, v2) -> v1 + v2, HashMap::new);
+     * // result: {a=1, b=2, sum=3}
+     * }</pre>
+     *
+     * @param <K> The type of keys in the resulting Map
+     * @param <V> The type of values in the resulting Map
+     * @param <M> The type of the resulting Map
+     * @param keys An Iterable of keys for the resulting Map
+     * @param values An Iterable of values for the resulting Map
+     * @param defaultForKey The default key to use when keys Iterable is shorter than values
+     * @param defaultForValue The default value to use when values Iterable is shorter than keys
+     * @param mergeFunction A function used to resolve conflicts when duplicate keys are encountered
+     * @param mapSupplier A function that generates a new Map instance
+     * @return A Map where each key is associated with the corresponding value
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
             final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -854,7 +501,19 @@ public final class Maps {
 
     /**
      * Returns a {@code Nullable} with the value to which the specified key is mapped,
-     * or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
+     * or an empty {@code Nullable} if the map is empty or contains no mapping for the key.
+     * This method properly handles null values in the map.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key1", "value1");
+     * map.put("key2", null);
+     * 
+     * Nullable<String> result1 = Maps.get(map, "key1");  // Nullable.of("value1")
+     * Nullable<String> result2 = Maps.get(map, "key2");  // Nullable.of(null)
+     * Nullable<String> result3 = Maps.get(map, "key3");  // Nullable.empty()
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -896,16 +555,29 @@ public final class Maps {
     //    }
 
     /**
-     * Returns a {@code Nullable} with the value to which the specified {@code key/k2} is mapped,
-     * or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
+     * Returns a {@code Nullable} with the value from a nested map structure.
+     * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
+     * Returns an empty {@code Nullable} if either map is empty or the keys are not found.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Map<String, Integer>> nestedMap = new HashMap<>();
+     * Map<String, Integer> innerMap = new HashMap<>();
+     * innerMap.put("inner1", 100);
+     * nestedMap.put("outer1", innerMap);
+     * 
+     * Nullable<Integer> result1 = Maps.get(nestedMap, "outer1", "inner1");  // Nullable.of(100)
+     * Nullable<Integer> result2 = Maps.get(nestedMap, "outer1", "inner2");  // Nullable.empty()
+     * Nullable<Integer> result3 = Maps.get(nestedMap, "outer2", "inner1");  // Nullable.empty()
+     * }</pre>
      *
      * @param <K> the type of the outer map's keys
      * @param <K2> the type of the inner map's keys
      * @param <V2> the type of the inner map's values
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated map is to be returned
-     * @param k2 the key whose associated value in the inner map is to be returned
-     * @return a {@code Nullable<V2>} with the value mapped by the specified key and k2, or an empty {@code Nullable<V2>} if the map is empty or contains no value for the key
+     * @param map the outer map containing inner maps
+     * @param key the key for the outer map
+     * @param k2 the key for the inner map
+     * @return a {@code Nullable<V2>} with the value if found, or empty if not found
      * @see #getOrDefaultIfAbsent(Map, Object, Object, Object)
      */
     public static <K, K2, V2> Nullable<V2> get(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2) {
@@ -927,16 +599,27 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped if the value is not {@code null},
-     * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the value to which the specified key is mapped, or defaultValue if the key is absent.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key1", "value1");
+     * map.put("key2", null);
+     * 
+     * String result1 = Maps.getOrDefaultIfAbsent(map, "key1", "default");  // "value1"
+     * String result2 = Maps.getOrDefaultIfAbsent(map, "key2", "default");  // "default"
+     * String result3 = Maps.getOrDefaultIfAbsent(map, "key3", "default");  // "default"
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is null
-     * @return the value mapped by the specified key, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null
-     * @throws IllegalArgumentException if specified {@code defaultValue} is null
+     * @param defaultValue the default value to return if the key is absent (must not be null)
+     * @return the value mapped by the key, or defaultValue if the key is absent
+     * @throws IllegalArgumentException if defaultValue is null
      * @see #get(Map, Object)
      * @see #getNonNull(Map, Object, Object)
      */
@@ -976,18 +659,31 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value to which the specified key and k2 are mapped if the value is not {@code null},
-     * or {@code defaultValue} if the specified map is empty or contains no value for the key and k2 or the mapping value is {@code null}.
+     * Returns the value from a nested map structure, or defaultValue if not found.
+     * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
+     * Returns defaultValue if either map is empty, keys are not found, or the value is null.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Map<String, Integer>> nestedMap = new HashMap<>();
+     * Map<String, Integer> innerMap = new HashMap<>();
+     * innerMap.put("count", 5);
+     * nestedMap.put("data", innerMap);
+     * 
+     * Integer result1 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "count", 0);    // 5
+     * Integer result2 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "missing", 0);  // 0
+     * Integer result3 = Maps.getOrDefaultIfAbsent(nestedMap, "missing", "count", 0); // 0
+     * }</pre>
      *
      * @param <K> the type of the outer map's keys
      * @param <K2> the type of the inner map's keys
      * @param <V2> the type of the inner map's values
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated map is to be returned
-     * @param k2 the key whose associated value in the inner map is to be returned
-     * @param defaultValue the default value to return if the map is empty, contains no value for the key and k2, or the value is null
-     * @return the value mapped by the specified key and k2, or {@code defaultValue} if the map is empty, contains no value for the key and k2, or the value is null
-     * @throws IllegalArgumentException if specified {@code defaultValue} is null
+     * @param map the outer map containing inner maps
+     * @param key the key for the outer map
+     * @param k2 the key for the inner map
+     * @param defaultValue the default value to return if not found (must not be null)
+     * @return the value if found, or defaultValue if not found
+     * @throws IllegalArgumentException if defaultValue is null
      * @see #get(Map, Object, Object)
      */
     public static <K, K2, V2> V2 getOrDefaultIfAbsent(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2, final V2 defaultValue) {
@@ -1028,18 +724,26 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * an empty immutable/unmodifiable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the List value to which the specified key is mapped, or an empty immutable List if the key is absent.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, List<String>> map = new HashMap<>();
+     * map.put("fruits", Arrays.asList("apple", "banana"));
+     * map.put("empty", null);
+     * 
+     * List<String> result1 = Maps.getOrEmptyListIfAbsent(map, "fruits");   // ["apple", "banana"]
+     * List<String> result2 = Maps.getOrEmptyListIfAbsent(map, "empty");    // []
+     * List<String> result3 = Maps.getOrEmptyListIfAbsent(map, "missing");  // []
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <E> the type of elements in the list
      * @param <V> the type of list values maintained by the map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code List} if the map is empty, contains no value for the key, or the value is null
+     * @return the List value mapped by the key, or an empty immutable List if the key is absent
      * @see N#emptyList()
      */
     public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
@@ -1074,18 +778,26 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * an empty immutable/unmodifiable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the Set value to which the specified key is mapped, or an empty immutable Set if the key is absent.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Set<Integer>> map = new HashMap<>();
+     * map.put("primes", new HashSet<>(Arrays.asList(2, 3, 5, 7)));
+     * map.put("empty", null);
+     * 
+     * Set<Integer> result1 = Maps.getOrEmptySetIfAbsent(map, "primes");   // {2, 3, 5, 7}
+     * Set<Integer> result2 = Maps.getOrEmptySetIfAbsent(map, "empty");    // {}
+     * Set<Integer> result3 = Maps.getOrEmptySetIfAbsent(map, "missing");  // {}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <E> the type of elements in the set
      * @param <V> the type of set values maintained by the map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code Set} if the map is empty, contains no value for the key, or the value is null
+     * @return the Set value mapped by the key, or an empty immutable Set if the key is absent
      * @see N#emptySet()
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
@@ -1121,11 +833,22 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * an empty immutable/unmodifiable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the Map value to which the specified key is mapped, or an empty immutable Map if the key is absent.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Map<String, Integer>> map = new HashMap<>();
+     * Map<String, Integer> innerMap = new HashMap<>();
+     * innerMap.put("a", 1);
+     * innerMap.put("b", 2);
+     * map.put("data", innerMap);
+     * map.put("empty", null);
+     * 
+     * Map<String, Integer> result1 = Maps.getOrEmptyMapIfAbsent(map, "data");    // {a=1, b=2}
+     * Map<String, Integer> result2 = Maps.getOrEmptyMapIfAbsent(map, "empty");   // {}
+     * Map<String, Integer> result3 = Maps.getOrEmptyMapIfAbsent(map, "missing"); // {}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the outer map
      * @param <KK> the type of keys maintained by the inner map
@@ -1133,7 +856,7 @@ public final class Maps {
      * @param <V> the type of map values maintained by the outer map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code Map} if the map is empty, contains no value for the key, or the value is null
+     * @return the Map value mapped by the key, or an empty immutable Map if the key is absent
      * @see N#emptyMap()
      */
     public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
@@ -1151,14 +874,27 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalBoolean} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code OptionalBoolean} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Boolean type, underline conversion will be executed.
+     * Returns an OptionalBoolean containing the boolean value mapped to the specified key.
+     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalBoolean.
+     * Non-Boolean values are converted to boolean using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("flag1", true);
+     * map.put("flag2", "false");
+     * map.put("flag3", null);
+     * 
+     * OptionalBoolean result1 = Maps.getBoolean(map, "flag1");  // OptionalBoolean.of(true)
+     * OptionalBoolean result2 = Maps.getBoolean(map, "flag2");  // OptionalBoolean.of(false)
+     * OptionalBoolean result3 = Maps.getBoolean(map, "flag3");  // OptionalBoolean.empty()
+     * OptionalBoolean result4 = Maps.getBoolean(map, "flag4");  // OptionalBoolean.empty()
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an OptionalBoolean containing the boolean value, or empty if not found
      */
     public static <K> OptionalBoolean getBoolean(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1177,15 +913,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Boolean type, underline conversion will be executed.
+     * Returns the boolean value mapped to the specified key, or defaultForNull if not found.
+     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
+     * Non-Boolean values are converted to boolean using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("enabled", true);
+     * map.put("disabled", "false");
+     * 
+     * boolean result1 = Maps.getBoolean(map, "enabled", false);   // true
+     * boolean result2 = Maps.getBoolean(map, "disabled", true);   // false
+     * boolean result3 = Maps.getBoolean(map, "missing", true);    // true (default)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the key is not found or value is null
+     * @return the boolean value mapped to the key, or defaultForNull if not found
      */
     public static <K> boolean getBoolean(final Map<? super K, ?> map, final K key, final boolean defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1204,14 +951,27 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalChar} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code OptionalChar} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Character type, underline conversion will be executed.
+     * Returns an OptionalChar containing the character value mapped to the specified key.
+     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalChar.
+     * Non-Character values are converted to char using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("letter", 'A');
+     * map.put("digit", "5");
+     * map.put("empty", null);
+     * 
+     * OptionalChar result1 = Maps.getChar(map, "letter");  // OptionalChar.of('A')
+     * OptionalChar result2 = Maps.getChar(map, "digit");   // OptionalChar.of('5')
+     * OptionalChar result3 = Maps.getChar(map, "empty");   // OptionalChar.empty()
+     * OptionalChar result4 = Maps.getChar(map, "missing"); // OptionalChar.empty()
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an OptionalChar containing the character value, or empty if not found
      */
     public static <K> OptionalChar getChar(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1230,15 +990,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Character type, underline conversion will be executed.
+     * Returns the character value mapped to the specified key, or defaultForNull if not found.
+     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
+     * Non-Character values are converted to char using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("grade", 'A');
+     * map.put("initial", "J");
+     * 
+     * char result1 = Maps.getChar(map, "grade", 'F');    // 'A'
+     * char result2 = Maps.getChar(map, "initial", 'X');  // 'J'
+     * char result3 = Maps.getChar(map, "missing", 'N');  // 'N' (default)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the key is not found or value is null
+     * @return the character value mapped to the key, or defaultForNull if not found
      */
     public static <K> char getChar(final Map<? super K, ?> map, final K key, final char defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1257,14 +1028,27 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalByte} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code OptionalByte} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Byte/Number type, underline conversion will be executed.
+     * Returns an OptionalByte containing the byte value mapped to the specified key.
+     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalByte.
+     * Non-Number values are converted to byte using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("small", (byte) 10);
+     * map.put("medium", 127);
+     * map.put("text", "25");
+     * 
+     * OptionalByte result1 = Maps.getByte(map, "small");   // OptionalByte.of(10)
+     * OptionalByte result2 = Maps.getByte(map, "medium");  // OptionalByte.of(127)
+     * OptionalByte result3 = Maps.getByte(map, "text");    // OptionalByte.of(25)
+     * OptionalByte result4 = Maps.getByte(map, "missing"); // OptionalByte.empty()
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an OptionalByte containing the byte value, or empty if not found
      */
     public static <K> OptionalByte getByte(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1283,15 +1067,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Byte/Number type, underline conversion will be executed.
+     * Returns the byte value mapped to the specified key, or defaultForNull if not found.
+     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
+     * Non-Number values are converted to byte using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("id", (byte) 5);
+     * map.put("count", "10");
+     * 
+     * byte result1 = Maps.getByte(map, "id", (byte) 0);      // 5
+     * byte result2 = Maps.getByte(map, "count", (byte) 0);   // 10
+     * byte result3 = Maps.getByte(map, "missing", (byte) -1); // -1 (default)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the key is not found or value is null
+     * @return the byte value mapped to the key, or defaultForNull if not found
      */
     public static <K> byte getByte(final Map<? super K, ?> map, final K key, final byte defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1310,14 +1105,27 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalShort} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code OptionalShort} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Short/Number type, underline conversion will be executed.
+     * Returns an OptionalShort containing the short value mapped to the specified key.
+     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalShort.
+     * Non-Number values are converted to short using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("year", (short) 2023);
+     * map.put("count", 1000);
+     * map.put("text", "500");
+     * 
+     * OptionalShort result1 = Maps.getShort(map, "year");    // OptionalShort.of(2023)
+     * OptionalShort result2 = Maps.getShort(map, "count");   // OptionalShort.of(1000)
+     * OptionalShort result3 = Maps.getShort(map, "text");    // OptionalShort.of(500)
+     * OptionalShort result4 = Maps.getShort(map, "missing"); // OptionalShort.empty()
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an OptionalShort containing the short value, or empty if not found
      */
     public static <K> OptionalShort getShort(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1336,15 +1144,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Short/Number type, underline conversion will be executed.
+     * Returns the short value mapped to the specified key, or defaultForNull if not found.
+     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
+     * Non-Number values are converted to short using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("port", (short) 8080);
+     * map.put("timeout", "3000");
+     * 
+     * short result1 = Maps.getShort(map, "port", (short) 80);      // 8080
+     * short result2 = Maps.getShort(map, "timeout", (short) 0);    // 3000
+     * short result3 = Maps.getShort(map, "missing", (short) -1);   // -1 (default)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the key is not found or value is null
+     * @return the short value mapped to the key, or defaultForNull if not found
      */
     public static <K> short getShort(final Map<? super K, ?> map, final K key, final short defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1363,14 +1182,27 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalInt} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code OptionalInt} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Integer/Number type, underline conversion will be executed.
+     * Returns an OptionalInt containing the integer value mapped to the specified key.
+     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalInt.
+     * Non-Number values are converted to int using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("count", 42);
+     * map.put("total", "100");
+     * map.put("null", null);
+     * 
+     * OptionalInt result1 = Maps.getInt(map, "count");   // OptionalInt.of(42)
+     * OptionalInt result2 = Maps.getInt(map, "total");   // OptionalInt.of(100)
+     * OptionalInt result3 = Maps.getInt(map, "null");    // OptionalInt.empty()
+     * OptionalInt result4 = Maps.getInt(map, "missing"); // OptionalInt.empty()
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an OptionalInt containing the integer value, or empty if not found
      */
     public static <K> OptionalInt getInt(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1389,15 +1221,26 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Integer/Number type, underline conversion will be executed.
+     * Returns the integer value mapped to the specified key, or defaultForNull if not found.
+     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
+     * Non-Number values are converted to int using standard conversion rules.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("age", 25);
+     * map.put("score", "98");
+     * 
+     * int result1 = Maps.getInt(map, "age", 0);      // 25
+     * int result2 = Maps.getInt(map, "score", 0);    // 98
+     * int result3 = Maps.getInt(map, "missing", -1); // -1 (default)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the key is not found or value is null
+     * @return the integer value mapped to the key, or defaultForNull if not found
      */
     public static <K> int getInt(final Map<? super K, ?> map, final K key, final int defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1418,12 +1261,28 @@ public final class Maps {
     /**
      * Returns an empty {@code OptionalLong} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalLong} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Long/Number type, underline conversion will be executed.
+     * If the mapped value is not Long/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("count", 42L);
+     * map.put("score", "100");
+     * 
+     * OptionalLong count = Maps.getLong(map, "count");
+     * // count.isPresent() = true, count.getAsLong() = 42
+     * 
+     * OptionalLong score = Maps.getLong(map, "score");
+     * // score.isPresent() = true, score.getAsLong() = 100 (converted from String)
+     * 
+     * OptionalLong missing = Maps.getLong(map, "missing");
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @return An {@code OptionalLong} containing the value if present, otherwise empty
      */
     public static <K> OptionalLong getLong(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1444,13 +1303,29 @@ public final class Maps {
     /**
      * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Long/Number type, underline conversion will be executed.
+     * If the mapped value is not Long/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("count", 42L);
+     * map.put("score", "100");
+     * 
+     * long count = Maps.getLong(map, "count", -1L);
+     * // count = 42
+     * 
+     * long score = Maps.getLong(map, "score", -1L);
+     * // score = 100 (converted from String)
+     * 
+     * long missing = Maps.getLong(map, "missing", -1L);
+     * // missing = -1
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param defaultForNull The default value to return if the value is null or not found
+     * @return The long value associated with the key, or defaultForNull if not found
      */
     public static <K> long getLong(final Map<? super K, ?> map, final K key, final long defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1471,12 +1346,28 @@ public final class Maps {
     /**
      * Returns an empty {@code OptionalFloat} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalFloat} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Float/Number type, underline conversion will be executed.
+     * If the mapped value is not Float/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("price", 19.99f);
+     * map.put("discount", "0.15");
+     * 
+     * OptionalFloat price = Maps.getFloat(map, "price");
+     * // price.isPresent() = true, price.getAsFloat() = 19.99
+     * 
+     * OptionalFloat discount = Maps.getFloat(map, "discount");
+     * // discount.isPresent() = true, discount.getAsFloat() = 0.15 (converted from String)
+     * 
+     * OptionalFloat missing = Maps.getFloat(map, "missing");
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @return An {@code OptionalFloat} containing the value if present, otherwise empty
      */
     public static <K> OptionalFloat getFloat(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1495,13 +1386,29 @@ public final class Maps {
     /**
      * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Float/Number type, underline conversion will be executed.
+     * If the mapped value is not Float/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("price", 19.99f);
+     * map.put("discount", "0.15");
+     * 
+     * float price = Maps.getFloat(map, "price", 0.0f);
+     * // price = 19.99
+     * 
+     * float discount = Maps.getFloat(map, "discount", 0.0f);
+     * // discount = 0.15 (converted from String)
+     * 
+     * float missing = Maps.getFloat(map, "missing", 0.0f);
+     * // missing = 0.0
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param defaultForNull The default value to return if the value is null or not found
+     * @return The float value associated with the key, or defaultForNull if not found
      */
     public static <K> float getFloat(final Map<? super K, ?> map, final K key, final float defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1520,12 +1427,28 @@ public final class Maps {
     /**
      * Returns an empty {@code OptionalDouble} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalDouble} with the value mapped by the specified {@code key}.
-     * If the mapped value is not Double/Number type, underline conversion will be executed.
+     * If the mapped value is not Double/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("temperature", 98.6);
+     * map.put("pi", "3.14159");
+     * 
+     * OptionalDouble temp = Maps.getDouble(map, "temperature");
+     * // temp.isPresent() = true, temp.getAsDouble() = 98.6
+     * 
+     * OptionalDouble pi = Maps.getDouble(map, "pi");
+     * // pi.isPresent() = true, pi.getAsDouble() = 3.14159 (converted from String)
+     * 
+     * OptionalDouble missing = Maps.getDouble(map, "missing");
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @return An {@code OptionalDouble} containing the value if present, otherwise empty
      */
     public static <K> OptionalDouble getDouble(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1544,13 +1467,29 @@ public final class Maps {
     /**
      * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not Double/Number type, underline conversion will be executed.
+     * If the mapped value is not Double/Number type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("temperature", 98.6);
+     * map.put("pi", "3.14159");
+     * 
+     * double temp = Maps.getDouble(map, "temperature", 0.0);
+     * // temp = 98.6
+     * 
+     * double pi = Maps.getDouble(map, "pi", 0.0);
+     * // pi = 3.14159 (converted from String)
+     * 
+     * double missing = Maps.getDouble(map, "missing", 0.0);
+     * // missing = 0.0
+     * }</pre>
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param defaultForNull The default value to return if the value is null or not found
+     * @return The double value associated with the key, or defaultForNull if not found
      */
     public static <K> double getDouble(final Map<? super K, ?> map, final K key, final double defaultForNull) {
         if (N.isEmpty(map)) {
@@ -1569,12 +1508,28 @@ public final class Maps {
     /**
      * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
-     * If the mapped value is not String type, underline conversion will be executed.
+     * If the mapped value is not String type, underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("name", "John");
+     * map.put("age", 25);
+     * 
+     * Optional<String> name = Maps.getString(map, "name");
+     * // name.isPresent() = true, name.get() = "John"
+     * 
+     * Optional<String> age = Maps.getString(map, "age");
+     * // age.isPresent() = true, age.get() = "25" (converted from Integer)
+     * 
+     * Optional<String> missing = Maps.getString(map, "missing");
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K> the type of keys maintained by the map
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated value is to be returned
-     * @return an {@code Optional<String>} with the value mapped by the specified key, or an empty {@code Optional<String>} if the map is empty, contains no value for the key, or the value is null
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @return An {@code Optional<String>} with the value mapped by the specified key, or an empty {@code Optional<String>} if the map is empty, contains no value for the key, or the value is null
      */
     public static <K> Optional<String> getString(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1595,13 +1550,29 @@ public final class Maps {
     /**
      * Returns the value to which the specified key is mapped if the value is not {@code null},
      * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
-     * If the mapped value is not of String type, underline conversion will be executed by {@code N.stringOf(value)}.
+     * If the mapped value is not of String type, underlying conversion will be executed by {@code N.stringOf(value)}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("name", "John");
+     * map.put("age", 25);
+     * 
+     * String name = Maps.getString(map, "name", "Unknown");
+     * // name = "John"
+     * 
+     * String age = Maps.getString(map, "age", "Unknown");
+     * // age = "25" (converted from Integer)
+     * 
+     * String missing = Maps.getString(map, "missing", "Unknown");
+     * // missing = "Unknown"
+     * }</pre>
      *
-     * @param <K> the type of keys maintained by the map
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated value is to be returned
-     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
-     * @return the value mapped by the specified key, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
+     * @param <K> The type of keys maintained by the map
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param defaultForNull The default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
+     * @return The value mapped by the specified key, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
      * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      */
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
@@ -1625,14 +1596,30 @@ public final class Maps {
     /**
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
-     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
+     * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("date", "2023-12-25");
+     * map.put("count", "100");
+     * 
+     * Optional<LocalDate> date = Maps.getNonNull(map, "date", LocalDate.class);
+     * // date.isPresent() = true, date.get() = LocalDate.of(2023, 12, 25)
+     * 
+     * Optional<Integer> count = Maps.getNonNull(map, "count", Integer.class);
+     * // count.isPresent() = true, count.get() = 100
+     * 
+     * Optional<BigDecimal> missing = Maps.getNonNull(map, "missing", BigDecimal.class);
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K> the type of keys maintained by the map
-     * @param <T> the type of the value
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated value is to be returned
-     * @param targetType the target type to which the value should be converted
-     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
+     * @param <K> The type of keys maintained by the map
+     * @param <T> The type of the value
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param targetType The target type to which the value should be converted
+     * @return An {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -1656,14 +1643,26 @@ public final class Maps {
     /**
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
-     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
+     * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("items", Arrays.asList("A", "B", "C"));
+     * 
+     * Optional<List<String>> items = Maps.getNonNull(map, "items", new TypeReference<List<String>>() {});
+     * // items.isPresent() = true, items.get() = ["A", "B", "C"]
+     * 
+     * Optional<Set<Integer>> missing = Maps.getNonNull(map, "missing", new TypeReference<Set<Integer>>() {});
+     * // missing.isPresent() = false
+     * }</pre>
      *
-     * @param <K> the type of keys maintained by the map
-     * @param <T> the type of the value
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated value is to be returned
-     * @param targetType the target type to which the value should be converted
-     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
+     * @param <K> The type of keys maintained by the map
+     * @param <T> The type of the value
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param targetType The target type to which the value should be converted
+     * @return An {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -1688,13 +1687,29 @@ public final class Maps {
      * Returns the value to which the specified {@code key} is mapped if the value is not {@code null},
      * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of type {@code T}, an underlying conversion will be executed.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("count", "100");
+     * map.put("active", "true");
+     * 
+     * Integer count = Maps.getNonNull(map, "count", 0);
+     * // count = 100 (converted from String)
+     * 
+     * Boolean active = Maps.getNonNull(map, "active", false);
+     * // active = true (converted from String)
+     * 
+     * Double missing = Maps.getNonNull(map, "missing", 0.0);
+     * // missing = 0.0
+     * }</pre>
      *
-     * @param <K> the type of keys maintained by the map
-     * @param <T> the type of the value
-     * @param map the map from which to retrieve the value
-     * @param key the key whose associated value is to be returned
-     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
-     * @return the value to which the specified key is mapped, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
+     * @param <K> The type of keys maintained by the map
+     * @param <T> The type of the value
+     * @param map The map from which to retrieve the value
+     * @param key The key whose associated value is to be returned
+     * @param defaultForNull The default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
+     * @return The value to which the specified key is mapped, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
      * @throws IllegalArgumentException if {@code defaultForNull} is null
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
@@ -1760,7 +1775,7 @@ public final class Maps {
     //     * @deprecated Use {@link #getAndPutIfAbsent(Map, Object, Supplier)} instead
     //     */
     //    @Deprecated
-    //    public static <K, V> V getAndPutIfNull(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
+    //    public static <K, V> V getAndPutIfNull(final Map<K, V> map, K key, Supplier<? extends V> defaultValueSupplier) {
     //        V val = map.get(key);
     //
     //        if (val == null) {
@@ -1774,16 +1789,31 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new value obtained from {@code defaultValueSupplier} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, List<String>> map = new HashMap<>();
+     * 
+     * List<String> list1 = Maps.getAndPutIfAbsent(map, "key1", () -> new ArrayList<>());
+     * list1.add("value1");
+     * // map now contains: {"key1"=["value1"]}
+     * 
+     * List<String> list2 = Maps.getAndPutIfAbsent(map, "key1", () -> new ArrayList<>());
+     * // list2 is the same instance as list1, supplier not called
+     * 
+     * map.put("key2", null);
+     * List<String> list3 = Maps.getAndPutIfAbsent(map, "key2", () -> new ArrayList<>());
+     * // New list created because value was null
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @param defaultValueSupplier the supplier to provide a default value if the key is absent, which may be null
-     * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent
+     * @param <K> The key type
+     * @param <V> The value type
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @param defaultValueSupplier The supplier to provide a default value if the key is absent, which may be null
+     * @return The value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent
      */
     public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
@@ -1815,15 +1845,28 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code List} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, List<Integer>> map = new HashMap<>();
+     * 
+     * List<Integer> list1 = Maps.getAndPutListIfAbsent(map, "numbers");
+     * list1.add(1);
+     * list1.add(2);
+     * // map now contains: {"numbers"=[1, 2]}
+     * 
+     * List<Integer> list2 = Maps.getAndPutListIfAbsent(map, "numbers");
+     * // list2 is the same instance as list1
+     * // list2 contains [1, 2]
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <E> the element type of the list
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @return the value associated with the specified key, or a new {@code List} if the key is absent
+     * @param <K> The key type
+     * @param <E> The element type of the list
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @return The value associated with the specified key, or a new {@code List} if the key is absent
      */
     public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
@@ -1854,15 +1897,27 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Set} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Set<String>> map = new HashMap<>();
+     * 
+     * Set<String> set1 = Maps.getAndPutSetIfAbsent(map, "tags");
+     * set1.add("java");
+     * set1.add("spring");
+     * // map now contains: {"tags"=["java", "spring"]}
+     * 
+     * Set<String> set2 = Maps.getAndPutSetIfAbsent(map, "tags");
+     * // set2 is the same instance as set1
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <E> the element type of the set
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @return the value associated with the specified key, or a new {@code Set} if the key is absent
+     * @param <K> The key type
+     * @param <E> The element type of the set
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @return The value associated with the specified key, or a new {@code Set} if the key is absent
      */
     public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1893,15 +1948,25 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashSet} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Set<String>> map = new HashMap<>();
+     * 
+     * Set<String> set = Maps.getAndPutLinkedHashSetIfAbsent(map, "orderedTags");
+     * set.add("first");
+     * set.add("second");
+     * set.add("third");
+     * // map now contains: {"orderedTags"=["first", "second", "third"]} (order preserved)
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <E> the element type of the set
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @return the value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent
+     * @param <K> The key type
+     * @param <E> The element type of the set
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @return The value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent
      */
     public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1933,16 +1998,28 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Map} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Map<String, Integer>> map = new HashMap<>();
+     * 
+     * Map<String, Integer> innerMap = Maps.getAndPutMapIfAbsent(map, "scores");
+     * innerMap.put("math", 95);
+     * innerMap.put("english", 88);
+     * // map now contains: {"scores"={"math"=95, "english"=88}}
+     * 
+     * Map<String, Integer> sameMap = Maps.getAndPutMapIfAbsent(map, "scores");
+     * // sameMap is the same instance as innerMap
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <KK> the key type of the value map
-     * @param <VV> the value type of the value map
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @return the value associated with the specified key, or a new {@code Map} if the key is absent
+     * @param <K> The key type
+     * @param <KK> The key type of the value map
+     * @param <VV> The value type of the value map
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @return The value associated with the specified key, or a new {@code Map} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1974,16 +2051,26 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashMap} and returns it.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Map<String, String>> map = new HashMap<>();
+     * 
+     * Map<String, String> innerMap = Maps.getAndPutLinkedHashMapIfAbsent(map, "config");
+     * innerMap.put("first", "1");
+     * innerMap.put("second", "2");
+     * innerMap.put("third", "3");
+     * // map now contains: {"config"={"first"="1", "second"="2", "third"="3"}} (order preserved)
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <KK> the key type of the value map
-     * @param <VV> the value type of the value map
-     * @param map the map to check and possibly update
-     * @param key the key to check for, which may be null
-     * @return the value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent
+     * @param <K> The key type
+     * @param <KK> The key type of the value map
+     * @param <VV> The value type of the value map
+     * @param map The map to check and possibly update
+     * @param key The key to check for, which may be null
+     * @return The value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1999,15 +2086,26 @@ public final class Maps {
     /**
      * Returns a list of values of the keys which exist in the specified {@code Map}.
      * If the key doesn't exist in the {@code Map} or associated value is {@code null}, no value will be added into the returned list.
+     * 
+     * <p>Present means key is found in the specified map with {@code non-null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", null);
+     * 
+     * List<String> keys = Arrays.asList("a", "b", "c", "d");
+     * List<Integer> values = Maps.getIfPresentForEach(map, keys);
+     * // values = [1, 2] (null value for "c" and missing "d" are not included)
+     * }</pre>
      *
-     * <br />
-     * Present -> key is found in the specified map with {@code non-null} value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the map to check for keys
-     * @param keys the collection of keys to check in the map
-     * @return a list of values corresponding to the keys found in the map
+     * @param <K> The key type
+     * @param <V> The value type
+     * @param map The map to check for keys
+     * @param keys The collection of keys to check in the map
+     * @return A list of values corresponding to the keys found in the map
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
@@ -2069,17 +2167,28 @@ public final class Maps {
 
     /**
      * Returns a list of values mapped by the keys which exist in the specified {@code Map}, or default value if the key doesn't exist in the {@code Map} or associated value is {@code null}.
+     * 
+     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", null);
+     * 
+     * List<String> keys = Arrays.asList("a", "b", "c", "d");
+     * List<Integer> values = Maps.getOrDefaultIfAbsentForEach(map, keys, -1);
+     * // values = [1, 2, -1, -1] ("c" has null value, "d" is missing)
+     * }</pre>
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param keys
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> The key type
+     * @param <V> The value type
+     * @param map The map to check for keys
+     * @param keys The collection of keys to check in the map
+     * @param defaultValue The default value to use when key is absent
+     * @return A list of values corresponding to the keys, using defaultValue when absent
+     * @throws IllegalArgumentException if keys is null
      */
     public static <K, V> List<V> getOrDefaultIfAbsentForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue)
             throws IllegalArgumentException {
@@ -2138,9 +2247,9 @@ public final class Maps {
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param map
-     * @param path
+     * @param <T> The type of the value to be returned
+     * @param map The map to retrieve the value from
+     * @param path The dot-separated path with optional array indices
      * @return {@code null} if there is no value found by the specified path.
      */
     @MayReturnNull
@@ -2156,11 +2265,24 @@ public final class Maps {
 
     /**
      * Retrieves a value from a nested map structure using a dot-separated path.
+     * The value is converted to the specified target type if necessary.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("user", N.asMap("age", "25"));
+     * 
+     * Integer age = Maps.getByPath(map, "user.age", Integer.class);
+     * // age = 25 (converted from String to Integer)
+     * 
+     * LocalDate missing = Maps.getByPath(map, "user.birthdate", LocalDate.class);
+     * // missing = null
+     * }</pre>
      *
-     * @param <T>
-     * @param map
-     * @param path
-     * @param targetType
+     * @param <T> The type of the value to be returned
+     * @param map The map to retrieve the value from
+     * @param path The dot-separated path with optional array indices
+     * @param targetType The target type to convert the value to
      * @return {@code null} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
@@ -2182,11 +2304,23 @@ public final class Maps {
     /**
      * Retrieves a value from a nested map structure using a dot-separated path.
      * If the path does not exist in the map, the provided default value is returned.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("config", N.asMap("timeout", 30));
+     * 
+     * Integer timeout = Maps.getByPath(map, "config.timeout", 60);
+     * // timeout = 30
+     * 
+     * Integer retries = Maps.getByPath(map, "config.retries", 3);
+     * // retries = 3 (default value)
+     * }</pre>
      *
-     * @param <T>
-     * @param map
-     * @param path
-     * @param defaultValue
+     * @param <T> The type of the value to be returned
+     * @param map The map to retrieve the value from
+     * @param path The dot-separated path with optional array indices
+     * @param defaultValue The default value to return if path not found
      * @return {@code defaultValue} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
@@ -2204,11 +2338,26 @@ public final class Maps {
 
     /**
      * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("user", N.asMap("name", "John", "age", null));
+     * 
+     * Nullable<String> name = Maps.getByPathIfExists(map, "user.name");
+     * // name.isPresent() = true, name.get() = "John"
+     * 
+     * Nullable<Integer> age = Maps.getByPathIfExists(map, "user.age");
+     * // age.isPresent() = true, age.get() = null
+     * 
+     * Nullable<String> email = Maps.getByPathIfExists(map, "user.email");
+     * // email.isPresent() = false
+     * }</pre>
      *
-     * @param <T>
-     * @param map
-     * @param path
-     * @return an empty {@code Nullable} if there is no value found by the specified path.
+     * @param <T> The type of the value to be returned
+     * @param map The map to retrieve the value from
+     * @param path The dot-separated path with optional array indices
+     * @return An empty {@code Nullable} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
     public static <T> Nullable<T> getByPathIfExists(final Map<String, ?> map, final String path) {
@@ -2223,12 +2372,25 @@ public final class Maps {
 
     /**
      * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
+     * The value is converted to the specified target type if necessary.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("settings", N.asMap("maxConnections", "100"));
+     * 
+     * Nullable<Integer> maxConn = Maps.getByPathIfExists(map, "settings.maxConnections", Integer.class);
+     * // maxConn.isPresent() = true, maxConn.get() = 100 (converted from String)
+     * 
+     * Nullable<Boolean> debug = Maps.getByPathIfExists(map, "settings.debug", Boolean.class);
+     * // debug.isPresent() = false
+     * }</pre>
      *
-     * @param <T>
-     * @param map
-     * @param path
-     * @param targetType
-     * @return an empty {@code Nullable} if there is no value found by the specified path.
+     * @param <T> The type of the value to be returned
+     * @param map The map to retrieve the value from
+     * @param path The dot-separated path with optional array indices
+     * @param targetType The target type to convert the value to
+     * @return An empty {@code Nullable} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
     public static <T> Nullable<T> getByPathIfExists(final Map<String, ?> map, final String path, final Class<? extends T> targetType) {
@@ -2313,9 +2475,25 @@ public final class Maps {
 
     /**
      * Checks if the specified map contains the specified entry.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * 
+     * Map.Entry<String, Integer> entry1 = new AbstractMap.SimpleEntry<>("a", 1);
+     * Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("a", 2);
+     * 
+     * boolean contains1 = Maps.contains(map, entry1);
+     * // contains1 = true
+     * 
+     * boolean contains2 = Maps.contains(map, entry2);
+     * // contains2 = false (value doesn't match)
+     * }</pre>
      *
-     * @param map the map to check, which may be null
-     * @param entry the entry to check for, which may be null
+     * @param map The map to check, which may be null
+     * @param entry The entry to check for, which may be null
      * @return {@code true} if the map contains the specified entry, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
@@ -2324,10 +2502,29 @@ public final class Maps {
 
     /**
      * Checks if the specified map contains the specified key-value pair.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", null);
+     * 
+     * boolean contains1 = Maps.contains(map, "a", 1);
+     * // contains1 = true
+     * 
+     * boolean contains2 = Maps.contains(map, "a", 2);
+     * // contains2 = false
+     * 
+     * boolean contains3 = Maps.contains(map, "b", null);
+     * // contains3 = true
+     * 
+     * boolean contains4 = Maps.contains(map, "c", null);
+     * // contains4 = false (key not present)
+     * }</pre>
      *
-     * @param map the map to be checked
-     * @param key the key whose presence in the map is to be tested
-     * @param value the value whose presence in the map is to be tested
+     * @param map The map to be checked
+     * @param key The key whose presence in the map is to be tested
+     * @param value The value whose presence in the map is to be tested
      * @return {@code true} if the map contains the specified key-value pair, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
@@ -2633,7 +2830,24 @@ public final class Maps {
     }
 
     /**
-     * Puts all entries from the source map into the target map, but only if the key passes the filter.
+     * Puts all entries from the source map into the target map, but only if the key passes the specified filter predicate.
+     * This method iterates through all entries in the source map and adds them to the target map if the key satisfies the filter condition.
+     * The target map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> target = new HashMap<>();
+     * target.put("a", 1);
+     * 
+     * Map<String, Integer> source = new HashMap<>();
+     * source.put("b", 2);
+     * source.put("c", 3);
+     * source.put("abc", 4);
+     * 
+     * boolean changed = Maps.putIf(target, source, key -> key.length() > 1);
+     * // changed: true
+     * // target: {a=1, abc=4}
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2661,7 +2875,24 @@ public final class Maps {
     }
 
     /**
-     * Puts all entries from the source map into the target map, but only if the key and value pass the filter.
+     * Puts all entries from the source map into the target map, but only if the key and value pass the specified filter predicate.
+     * This method iterates through all entries in the source map and adds them to the target map if both the key and value satisfy the filter condition.
+     * The target map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> target = new HashMap<>();
+     * target.put("a", 1);
+     * 
+     * Map<String, Integer> source = new HashMap<>();
+     * source.put("b", 2);
+     * source.put("c", 3);
+     * source.put("d", 10);
+     * 
+     * boolean changed = Maps.putIf(target, source, (key, value) -> value > 2);
+     * // changed: true
+     * // target: {a=1, c=3, d=10}
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2704,6 +2935,19 @@ public final class Maps {
 
     /**
      * Removes the specified key-value pair from the map.
+     * This method removes an entry from the map only if the key is mapped to the specified value.
+     * If the key is not present in the map or is mapped to a different value, the map remains unchanged.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * 
+     * boolean removed1 = Maps.remove(map, "a", 1);  // true, entry removed
+     * boolean removed2 = Maps.remove(map, "b", 3);  // false, value doesn't match
+     * // map: {b=2}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2733,6 +2977,21 @@ public final class Maps {
 
     /**
      * Removes the specified keys from the map.
+     * This method removes all entries from the map whose keys are contained in the provided collection.
+     * If any of the keys in the collection are not present in the map, they are ignored.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * 
+     * List<String> keysToRemove = Arrays.asList("a", "c", "d");
+     * boolean changed = Maps.removeKeys(map, keysToRemove);
+     * // changed: true
+     * // map: {b=2}
+     * }</pre>
      *
      * @param map the map from which the keys are to be removed
      * @param keysToRemove the collection of keys to be removed from the map
@@ -2754,6 +3013,24 @@ public final class Maps {
 
     /**
      * Removes the specified entries from the map.
+     * This method removes all entries from the map that have matching key-value pairs in the entriesToRemove map.
+     * An entry is removed only if both the key and value match exactly.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * 
+     * Map<String, Integer> entriesToRemove = new HashMap<>();
+     * entriesToRemove.put("a", 1);
+     * entriesToRemove.put("b", 5);  // Different value
+     * 
+     * boolean changed = Maps.removeEntries(map, entriesToRemove);
+     * // changed: true
+     * // map: {b=2, c=3}  // Only "a"=1 was removed
+     * }</pre>
      *
      * @param map the map from which the entries are to be removed
      * @param entriesToRemove the map containing the entries to be removed
@@ -2776,7 +3053,21 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified map that match the given filter.
+     * Removes entries from the specified map that match the given filter predicate.
+     * This method iterates through all entries in the map and removes those that satisfy the filter condition.
+     * The map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * 
+     * boolean changed = Maps.removeIf(map, entry -> entry.getValue() > 1);
+     * // changed: true
+     * // map: {a=1}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2816,7 +3107,21 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified map that match the given filter.
+     * Removes entries from the specified map that match the given filter predicate based on key and value.
+     * This method iterates through all entries in the map and removes those whose key and value satisfy the filter condition.
+     * The map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("apple", 1);
+     * map.put("banana", 2);
+     * map.put("cherry", 3);
+     * 
+     * boolean changed = Maps.removeIf(map, (key, value) -> key.length() > 5 && value > 1);
+     * // changed: true
+     * // map: {apple=1, banana=2}  // "cherry" was removed
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2856,7 +3161,21 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified map that match the given key filter.
+     * Removes entries from the specified map that match the given key filter predicate.
+     * This method iterates through all entries in the map and removes those whose keys satisfy the filter condition.
+     * The map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("apple", 1);
+     * map.put("banana", 2);
+     * map.put("cherry", 3);
+     * 
+     * boolean changed = Maps.removeIfKey(map, key -> key.startsWith("b"));
+     * // changed: true
+     * // map: {apple=1, cherry=3}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2896,7 +3215,22 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified map that match the given value filter.
+     * Removes entries from the specified map that match the given value filter predicate.
+     * This method iterates through all entries in the map and removes those whose values satisfy the filter condition.
+     * The map is modified in place.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * map.put("d", 2);
+     * 
+     * boolean changed = Maps.removeIfValue(map, value -> value == 2);
+     * // changed: true
+     * // map: {a=1, c=3}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2937,6 +3271,19 @@ public final class Maps {
 
     /**
      * Replaces the entry for the specified key only if currently mapped to the specified value.
+     * This method updates the value for a key only if the current value matches the oldValue parameter.
+     * If the key is not present or the current value doesn't match oldValue, the map remains unchanged.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * 
+     * boolean replaced1 = Maps.replace(map, "a", 1, 10);  // true
+     * boolean replaced2 = Maps.replace(map, "b", 3, 20);  // false, old value doesn't match
+     * // map: {a=10, b=2}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2963,7 +3310,20 @@ public final class Maps {
     }
 
     /**
-     * Replaces the entry for the specified key with the new value.
+     * Replaces the entry for the specified key with the new value if the key is present in the map.
+     * This method updates the value for a key only if the key exists in the map.
+     * If the key is not present, the map remains unchanged.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * 
+     * Integer oldValue1 = Maps.replace(map, "a", 10);  // returns 1
+     * Integer oldValue2 = Maps.replace(map, "c", 30);  // returns null
+     * // map: {a=10, b=2}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -2989,6 +3349,19 @@ public final class Maps {
 
     /**
      * Replaces each entry's value with the result of applying the given function to that entry.
+     * This method applies the provided function to each key-value pair in the map and updates the value with the function's result.
+     * The function receives both the key and the current value as parameters.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * 
+     * Maps.replaceAll(map, (key, value) -> value * 10);
+     * // map: {a=10, b=20, c=30}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -3048,6 +3421,20 @@ public final class Maps {
 
     /**
      * Filters the entries of the specified map based on the given predicate.
+     * This method creates a new map containing only the entries that satisfy the predicate condition.
+     * The predicate is tested against each Map.Entry in the original map.
+     * The returned map is of the same type as the input map if possible.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("c", 3);
+     * 
+     * Map<String, Integer> filtered = Maps.filter(map, entry -> entry.getValue() > 1);
+     * // filtered: {b=2, c=3}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -3075,14 +3462,28 @@ public final class Maps {
     }
 
     /**
-     * Filters the entries of the specified map based on the given predicate.
+     * Filters the entries of the specified map based on the given predicate applied to key-value pairs.
+     * This method creates a new map containing only the entries whose key and value satisfy the predicate condition.
+     * The predicate receives both the key and value as separate parameters.
+     * The returned map is of the same type as the input map if possible.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("apple", 5);
+     * map.put("banana", 2);
+     * map.put("cherry", 8);
+     * 
+     * Map<String, Integer> filtered = Maps.filter(map, (key, value) -> key.length() > 5 || value > 4);
+     * // filtered: {apple=5, banana=2, cherry=8}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param map the map to be filtered
      * @param predicate the predicate used to filter the entries
      * @return a new map containing only the entries that match the predicate
-     * @throws IllegalArgumentException if the predicate is
+     * @throws IllegalArgumentException if the predicate is null
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -3104,6 +3505,19 @@ public final class Maps {
 
     /**
      * Filters the entries of the specified map based on the given key predicate.
+     * This method creates a new map containing only the entries whose keys satisfy the predicate condition.
+     * The returned map is of the same type as the input map if possible.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("apple", 1);
+     * map.put("banana", 2);
+     * map.put("apricot", 3);
+     * 
+     * Map<String, Integer> filtered = Maps.filterByKey(map, key -> key.startsWith("ap"));
+     * // filtered: {apple=1, apricot=3}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -3132,6 +3546,19 @@ public final class Maps {
 
     /**
      * Filters the entries of the specified map based on the given value predicate.
+     * This method creates a new map containing only the entries whose values satisfy the predicate condition.
+     * The returned map is of the same type as the input map if possible.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 10);
+     * map.put("b", 20);
+     * map.put("c", 30);
+     * 
+     * Map<String, Integer> filtered = Maps.filterByValue(map, value -> value >= 20);
+     * // filtered: {b=20, c=30}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -3449,67 +3876,26 @@ public final class Maps {
         return result;
     }
 
-    //    /**
-    //     * Map type 2 supplier.
-    //     *
-    //     * @param mapType
-    //     * @return
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    static Supplier mapType2Supplier(final Class<? extends Map> mapType) {
-    //        return Suppliers.ofMap(mapType);
-    //    }
-
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @param map
-    //     * @param function
-    //     */
-    //    static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
-    //        N.checkArgNotNull(function);
-    //
-    //        try {
-    //            for (Map.Entry<K, V> entry : map.entrySet()) {
-    //                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
-    //            }
-    //        } catch (IllegalStateException ise) {
-    //            throw new ConcurrentModificationException(ise);
-    //        }
-    //    }
-
-    //    /**
-    //     * Merges the given value with the existing value (if any) in the map for the given key.
-    //     * The merging operation is performed using the provided remapping function.
-    //     *
-    //     * @param <K> The type of keys in the map.
-    //     * @param <V> The type of values in the map.
-    //     * @param map The map where the merging operation will be performed.
-    //     * @param key The key whose value is to be merged with the given value.
-    //     * @param value The value to be merged with the existing value for the given key in the map.
-    //     * @param remappingFunction The function to be used for merging the existing and the given values.
-    //     * @throws IllegalArgumentException if the map or remappingFunction is {@code null}.
-    //     */
-    //    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
-    //            throws IllegalArgumentException {
-    //        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-    //
-    //        final V oldValue = map.get(key);
-    //        final V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
-    //
-    //        if (newValue == null) {
-    //            map.remove(key);
-    //        } else {
-    //            map.put(key, newValue);
-    //        }
-    //    }
-
     /**
      * Converts a map into a bean object of the specified type.
-     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, 
+     * and transforms it into a bean object of the specified type.
      * The resulting bean object has its properties set to the values from the map.
      * Unmatched properties from the specified map are ignored by default.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with a User bean class
+     * Map<String, Object> userMap = new HashMap<>();
+     * userMap.put("name", "John");
+     * userMap.put("age", 25);
+     * userMap.put("email", "john@example.com");
+     * 
+     * User user = Maps.map2Bean(userMap, User.class);
+     * // user.getName() returns "John"
+     * // user.getAge() returns 25
+     * // user.getEmail() returns "john@example.com"
+     * }</pre>
      *
      * @param <T> The type of the bean object to be returned.
      * @param m The map to be converted into a bean object.
@@ -3523,17 +3909,37 @@ public final class Maps {
     }
 
     /**
-     * Converts a map into a bean object of the specified type.
-     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
+     * Converts a map into a bean object of the specified type with control over null and unmatched properties.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, 
+     * and transforms it into a bean object of the specified type.
      * The resulting bean object has its properties set to the values from the map.
-     * The targetType parameter specifies the type of the bean object to be returned.
+     * You can control whether null properties should be ignored and whether unmatched properties should cause an error.
      *
-     * @param <T>
-     * @param m
-     * @param ignoreNullProperty
-     * @param ignoreUnmatchedProperty
-     * @param targetType
-     * @return A bean object of the specified type with its properties set to the values from the map.
+     * <p>Example:
+     * <pre>{@code
+     * // Example with ignoring null properties
+     * Map<String, Object> userMap = new HashMap<>();
+     * userMap.put("name", "John");
+     * userMap.put("age", null);
+     * userMap.put("unknownField", "value"); // This field doesn't exist in User class
+     * 
+     * // Ignore null properties and unmatched properties
+     * User user = Maps.map2Bean(userMap, true, true, User.class);
+     * // user.getName() returns "John"
+     * // user.getAge() remains unchanged (not set to null)
+     * // unknownField is ignored
+     * 
+     * // Don't ignore null, but throw exception for unmatched properties
+     * User user2 = Maps.map2Bean(userMap, false, false, User.class);
+     * // This would throw an exception due to "unknownField"
+     * }</pre>
+     *
+     * @param <T> The type of the bean object to be returned.
+     * @param m The map to be converted into a bean object.
+     * @param ignoreNullProperty If {@code true}, null values in the map will not be set on the bean.
+     * @param ignoreUnmatchedProperty If {@code true}, map entries with keys that don't match any bean property will be ignored; if {@code false}, an exception will be thrown.
+     * @param targetType The type of the bean object to be returned.
+     * @return A bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
      * @see #map2Bean(Map, Collection, Class)
      */
     @MayReturnNull
@@ -3578,15 +3984,33 @@ public final class Maps {
     }
 
     /**
-     * Converts a map into a bean object of the specified type.
-     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
-     * The resulting bean object has its properties set to the values from the map.
+     * Converts a map into a bean object of the specified type, including only selected properties.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, 
+     * and transforms it into a bean object of the specified type.
+     * Only the properties specified in selectPropNames will be set on the bean.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties
+     * Map<String, Object> userMap = new HashMap<>();
+     * userMap.put("name", "John");
+     * userMap.put("age", 25);
+     * userMap.put("email", "john@example.com");
+     * userMap.put("password", "secret");
+     * 
+     * // Only include name and email
+     * Collection<String> selectedProps = Arrays.asList("name", "email");
+     * User user = Maps.map2Bean(userMap, selectedProps, User.class);
+     * // user.getName() returns "John"
+     * // user.getEmail() returns "john@example.com"
+     * // user.getAge() and user.getPassword() remain unset
+     * }</pre>
      *
      * @param <T> The type of the bean object to be returned.
      * @param m The map to be converted into a bean object.
      * @param selectPropNames A collection of property names to be included in the resulting bean objects.
      * @param targetType The type of the bean object to be returned.
-     * @return A bean object of the specified type with its properties set to the values from the map.
+     * @return A bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
      */
     @MayReturnNull
     public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -3622,7 +4046,29 @@ public final class Maps {
 
     /**
      * Converts a collection of maps into a list of bean objects of the specified type.
-     * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
+     * Each map in the collection represents a bean object where the map's keys are the property names 
+     * and the values are the corresponding property values.
+     * Unmatched properties from the maps are ignored by default.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with a list of user maps
+     * List<Map<String, Object>> userMaps = new ArrayList<>();
+     * 
+     * Map<String, Object> user1 = new HashMap<>();
+     * user1.put("name", "John");
+     * user1.put("age", 25);
+     * userMaps.add(user1);
+     * 
+     * Map<String, Object> user2 = new HashMap<>();
+     * user2.put("name", "Jane");
+     * user2.put("age", 30);
+     * userMaps.add(user2);
+     * 
+     * List<User> users = Maps.map2Bean(userMaps, User.class);
+     * // users.get(0).getName() returns "John"
+     * // users.get(1).getName() returns "Jane"
+     * }</pre>
      *
      * @param <T> The type of the bean objects to be returned.
      * @param mList The collection of maps to be converted into bean objects.
@@ -3635,11 +4081,30 @@ public final class Maps {
     }
 
     /**
-     * Converts a collection of maps into a list of bean objects of the specified type.
-     * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
+     * Converts a collection of maps into a list of bean objects of the specified type with control over null and unmatched properties.
+     * Each map in the collection represents a bean object where the map's keys are the property names 
+     * and the values are the corresponding property values.
      * The resulting list contains bean objects of the specified type with their properties set to the values from the corresponding map.
      * The ignoreNullProperty parameter allows the user to specify whether {@code null} properties should be ignored.
      * The ignoreUnmatchedProperty parameter allows the user to specify whether unmatched properties should be ignored.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with null handling
+     * List<Map<String, Object>> userMaps = new ArrayList<>();
+     * 
+     * Map<String, Object> user1 = new HashMap<>();
+     * user1.put("name", "John");
+     * user1.put("age", null);
+     * user1.put("unknownField", "value");
+     * userMaps.add(user1);
+     * 
+     * // Ignore null values and unmatched properties
+     * List<User> users = Maps.map2Bean(userMaps, true, true, User.class);
+     * // users.get(0).getName() returns "John"
+     * // users.get(0).getAge() remains unchanged (not set to null)
+     * // unknownField is ignored
+     * }</pre>
      *
      * @param <T> The type of the bean objects to be returned.
      * @param mList The collection of maps to be converted into bean objects.
@@ -3662,8 +4127,30 @@ public final class Maps {
     }
 
     /**
-     * Converts a collection of maps into a list of bean objects of the specified type.
-     * This method takes a collection of maps where each map represents a bean object. The keys in the map are the property names and the values are the corresponding property values.
+     * Converts a collection of maps into a list of bean objects of the specified type, including only selected properties.
+     * This method takes a collection of maps where each map represents a bean object. 
+     * The keys in the map are the property names and the values are the corresponding property values.
+     * Only the properties specified in selectPropNames will be set on the beans.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties
+     * List<Map<String, Object>> userMaps = new ArrayList<>();
+     * 
+     * Map<String, Object> user1 = new HashMap<>();
+     * user1.put("name", "John");
+     * user1.put("age", 25);
+     * user1.put("email", "john@example.com");
+     * user1.put("password", "secret1");
+     * userMaps.add(user1);
+     * 
+     * // Only include name and email
+     * Collection<String> selectedProps = Arrays.asList("name", "email");
+     * List<User> users = Maps.map2Bean(userMaps, selectedProps, User.class);
+     * // users.get(0).getName() returns "John"
+     * // users.get(0).getEmail() returns "john@example.com"
+     * // age and password remain unset
+     * }</pre>
      *
      * @param <T> The type of the bean objects to be returned.
      * @param mList The collection of maps to be converted into bean objects.
@@ -3687,6 +4174,19 @@ public final class Maps {
     /**
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * The resulting map is a LinkedHashMap to preserve the order of properties.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with a User bean
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * user.setEmail("john@example.com");
+     * 
+     * Map<String, Object> userMap = Maps.bean2Map(user);
+     * // userMap: {name=John, age=25, email=john@example.com}
+     * }</pre>
      *
      * @param bean The bean object to be converted into a map.
      * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
@@ -3699,6 +4199,22 @@ public final class Maps {
      * Converts a bean object into a map using the provided map supplier.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The map supplier function determines the type of the map to be returned.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with a custom map type
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * 
+     * // Using TreeMap to get sorted properties
+     * TreeMap<String, Object> sortedMap = Maps.bean2Map(user, TreeMap::new);
+     * // sortedMap: {age=25, name=John} (sorted by key)
+     * 
+     * // Using HashMap for better performance
+     * HashMap<String, Object> hashMap = Maps.bean2Map(user, HashMap::new);
+     * // hashMap: {name=John, age=25} (order not guaranteed)
+     * }</pre>
      *
      * @param <M> The type of the resulting Map.
      * @param bean The bean object to be converted into a map.
@@ -3713,6 +4229,23 @@ public final class Maps {
      * Converts a bean object into a map, selecting only the properties specified in the provided collection.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
+     * The resulting map is a LinkedHashMap to preserve the order of properties.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * user.setEmail("john@example.com");
+     * user.setPassword("secret");
+     * 
+     * // Only include name and email
+     * Collection<String> selectedProps = Arrays.asList("name", "email");
+     * Map<String, Object> userMap = Maps.bean2Map(user, selectedProps);
+     * // userMap: {name=John, email=john@example.com}
+     * // age and password are not included
+     * }</pre>
      *
      * @param bean The bean object to be converted into a map.
      * @param selectPropNames A collection of property names to be included in the map. If this is {@code null}, all properties are included.
@@ -3727,6 +4260,20 @@ public final class Maps {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
      * The map supplier function determines the type of the map to be returned.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties and custom map type
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * user.setEmail("john@example.com");
+     * 
+     * // Only include name and age, using TreeMap
+     * Collection<String> selectedProps = Arrays.asList("name", "age");
+     * TreeMap<String, Object> sortedMap = Maps.bean2Map(user, selectedProps, TreeMap::new);
+     * // sortedMap: {age=25, name=John} (sorted by key)
+     * }</pre>
      *
      * @param <M> The type of the resulting Map.
      * @param bean The bean object to be converted into a map.
@@ -3743,6 +4290,23 @@ public final class Maps {
      * Converts a bean object into a map, selecting only the properties specified.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The keys are named according to the provided naming policy.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with naming policy
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * 
+     * // Convert to snake_case
+     * Collection<String> props = Arrays.asList("firstName", "lastName");
+     * Map<String, Object> snakeMap = Maps.bean2Map(user, props, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, HashMap::new);
+     * // snakeMap: {first_name=John, last_name=Doe}
+     * 
+     * // Convert to UPPER_CASE
+     * Map<String, Object> upperMap = Maps.bean2Map(user, props, NamingPolicy.UPPER_CASE, HashMap::new);
+     * // upperMap: {FIRSTNAME=John, LASTNAME=Doe}
+     * }</pre>
      *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a map.
@@ -3761,23 +4325,58 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into the provided output map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * All properties of the bean are included in the map.
      *
-     * @param <M>
-     * @param bean
-     * @param output
+     * <p>Example:
+     * <pre>{@code
+     * // Example with existing map
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * 
+     * Map<String, Object> existingMap = new HashMap<>();
+     * existingMap.put("id", 123);
+     * 
+     * Maps.bean2Map(user, existingMap);
+     * // existingMap: {id=123, name=John, age=25}
+     * }</pre>
+     *
+     * @param <M> The type of the map to be filled.
+     * @param bean The bean object to be converted into a map.
+     * @param output The map to be filled with the bean's properties.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final M output) {
         bean2Map(bean, null, output);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into the provided output map, selecting only specified properties.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * Only the properties whose names are included in the selectPropNames collection are added to the map.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param output
+     * <p>Example:
+     * <pre>{@code
+     * // Example with existing map and selected properties
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * user.setEmail("john@example.com");
+     * 
+     * Map<String, Object> existingMap = new HashMap<>();
+     * existingMap.put("id", 123);
+     * 
+     * Collection<String> selectedProps = Arrays.asList("name", "email");
+     * Maps.bean2Map(user, selectedProps, existingMap);
+     * // existingMap: {id=123, name=John, email=john@example.com}
+     * // age is not included
+     * }</pre>
+     *
+     * @param <M> The type of the map to be filled.
+     * @param bean The bean object to be converted into a map.
+     * @param selectPropNames A collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @param output The map to be filled with the bean's properties.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
         bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
@@ -3788,6 +4387,21 @@ public final class Maps {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with naming policy and output map
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * 
+     * Map<String, Object> outputMap = new LinkedHashMap<>();
+     * Collection<String> props = Arrays.asList("firstName", "lastName");
+     * 
+     * // Convert property names to snake_case
+     * Maps.bean2Map(user, props, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * // outputMap: {first_name=John, last_name=Doe}
+     * }</pre>
      *
      * @param <M> The type of the map to be filled.
      * @param bean The bean object to be converted into a map.
@@ -3827,9 +4441,26 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a map.
+     * Converts a bean object into a map with optional null property filtering.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with null property filtering
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(null);
+     * user.setEmail("john@example.com");
+     * 
+     * // Include null properties
+     * Map<String, Object> mapWithNulls = Maps.bean2Map(user, false);
+     * // mapWithNulls: {name=John, age=null, email=john@example.com}
+     * 
+     * // Ignore null properties
+     * Map<String, Object> mapWithoutNulls = Maps.bean2Map(user, true);
+     * // mapWithoutNulls: {name=John, email=john@example.com}
+     * }</pre>
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3840,10 +4471,27 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a map.
+     * Converts a bean object into a map with optional null property filtering and property exclusion.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with null filtering and ignored properties
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(null);
+     * user.setEmail("john@example.com");
+     * user.setPassword("secret");
+     * 
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * 
+     * // Ignore null properties and password field
+     * Map<String, Object> filteredMap = Maps.bean2Map(user, true, ignoredProps);
+     * // filteredMap: {name=John, email=john@example.com}
+     * // age (null) and password (ignored) are not included
+     * }</pre>
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3855,11 +4503,26 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a map.
+     * Converts a bean object into a map with optional null property filtering and property exclusion.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      * The map is created by the provided <i>mapSupplier</i>.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with custom map type
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(null);
+     * user.setEmail("john@example.com");
+     * 
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * 
+     * // Create TreeMap ignoring null properties
+     * TreeMap<String, Object> sortedMap = Maps.bean2Map(user, true, ignoredProps, TreeMap::new);
+     * // sortedMap: {email=john@example.com, name=John} (sorted by key)
+     * }</pre>
      *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a map.
@@ -3874,11 +4537,28 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a map.
+     * Converts a bean object into a map with optional null property filtering, property exclusion, and key naming policy.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      * The keys of the map are formatted according to the provided <i>keyNamingPolicy</i>.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with naming policy
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * user.setAge(null);
+     * 
+     * Set<String> ignoredProps = new HashSet<>();
+     * 
+     * // Convert to snake_case, ignoring null properties
+     * Map<String, Object> snakeMap = Maps.bean2Map(user, true, ignoredProps, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     * // snakeMap: {first_name=John, last_name=Doe}
+     * // age is not included because it's null
+     * }</pre>
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3894,6 +4574,24 @@ public final class Maps {
     /**
      * Converts a bean object into a map, selecting only the properties specified.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * Properties can be filtered based on null values, excluded by name, and keys can be transformed using a naming policy.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with all options
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * user.setAge(null);
+     * user.setPassword("secret");
+     * 
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * 
+     * // Create custom map with snake_case keys, ignoring nulls and password
+     * TreeMap<String, Object> customMap = Maps.bean2Map(user, true, ignoredProps, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, TreeMap::new);
+     * // customMap: {first_name=John, last_name=Doe}
+     * }</pre>
      *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a map.
@@ -3925,6 +4623,23 @@ public final class Maps {
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * The result is stored in the provided output map.
      *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with existing map and null filtering
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(null);
+     * user.setEmail("john@example.com");
+     * 
+     * Map<String, Object> existingMap = new HashMap<>();
+     * existingMap.put("id", 123);
+     * 
+     * // Add properties to existing map, ignoring nulls
+     * Maps.bean2Map(user, true, existingMap);
+     * // existingMap: {id=123, name=John, email=john@example.com}
+     * // age is not included because it's null
+     * }</pre>
+     *
      * @param <M> The type of the output map.
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3939,6 +4654,23 @@ public final class Maps {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with existing map, null filtering, and ignored properties
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(null);
+     * user.setEmail("john@example.com");
+     * user.setPassword("secret");
+     * 
+     * Map<String, Object> existingMap = new HashMap<>();
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * 
+     * Maps.bean2Map(user, true, ignoredProps, existingMap);
+     * // existingMap: {name=John, email=john@example.com}
+     * // age (null) and password (ignored) are not included
+     * }</pre>
      *
      * @param <M> The type of the output map.
      * @param bean The bean object to be converted into a map.
@@ -3956,6 +4688,24 @@ public final class Maps {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with all options and output map
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * user.setAge(null);
+     * user.setPassword("secret");
+     * 
+     * Map<String, Object> outputMap = new LinkedHashMap<>();
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * 
+     * // Fill output map with snake_case keys, ignoring nulls and password
+     * Maps.bean2Map(user, true, ignoredProps, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * // outputMap: {first_name=John, last_name=Doe}
+     * }</pre>
      *
      * @param <M> The type of the map to be filled.
      * @param bean The bean object to be converted into a map.
@@ -3999,6 +4749,25 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The resulting map uses LinkedHashMap to preserve property order.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with nested beans
+     * User user = new User();
+     * user.setName("John");
+     * Address address = new Address();
+     * address.setCity("New York");
+     * address.setZipCode("10001");
+     * user.setAddress(address);
+     * 
+     * Map<String, Object> deepMap = Maps.deepBean2Map(user);
+     * // deepMap: {
+     * //   name=John, 
+     * //   address={city=New York, zipCode=10001}
+     * // }
+     * // Note: address is converted to a Map, not kept as Address object
+     * }</pre>
      *
      * @param bean The bean to be converted into a Map.
      * @return A Map representation of the provided bean.
@@ -4011,11 +4780,29 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The map type is determined by the provided mapSupplier.
      *
-     * @param <M>
-     * @param bean
-     * @param mapSupplier
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * // Example with custom map type
+     * User user = new User();
+     * user.setName("John");
+     * Address address = new Address();
+     * address.setCity("New York");
+     * user.setAddress(address);
+     * 
+     * // Using TreeMap for sorted keys
+     * TreeMap<String, Object> sortedDeepMap = Maps.deepBean2Map(user, TreeMap::new);
+     * // sortedDeepMap: {
+     * //   address={city=New York}, 
+     * //   name=John
+     * // } (sorted by key)
+     * }</pre>
+     *
+     * @param <M> The type of the Map to which the bean will be converted.
+     * @param bean The bean to be converted into a Map.
+     * @param mapSupplier A supplier function to create the Map instance.
+     * @return A Map representation of the provided bean.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
@@ -4025,10 +4812,30 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Only properties specified in selectPropNames are included.
      *
-     * @param bean
-     * @param selectPropNames
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * Address address = new Address();
+     * address.setCity("New York");
+     * user.setAddress(address);
+     * 
+     * Collection<String> props = Arrays.asList("name", "address");
+     * Map<String, Object> selectedDeepMap = Maps.deepBean2Map(user, props);
+     * // selectedDeepMap: {
+     * //   name=John, 
+     * //   address={city=New York}
+     * // }
+     * // age is not included
+     * }</pre>
+     *
+     * @param bean The bean to be converted into a Map.
+     * @param selectPropNames A collection of property names to be included during the conversion process.
+     * @return A Map representation of the provided bean.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final Collection<String> selectPropNames) {
@@ -4038,12 +4845,31 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Only properties specified in selectPropNames are included, and the map type is determined by mapSupplier.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param mapSupplier
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties and custom map
+     * User user = new User();
+     * user.setName("John");
+     * Address address = new Address();
+     * address.setCity("New York");
+     * address.setZipCode("10001");
+     * user.setAddress(address);
+     * 
+     * Collection<String> props = Arrays.asList("name", "address");
+     * HashMap<String, Object> customDeepMap = Maps.deepBean2Map(user, props, HashMap::new);
+     * // customDeepMap: {
+     * //   name=John, 
+     * //   address={city=New York, zipCode=10001}
+     * // }
+     * }</pre>
+     *
+     * @param <M> The type of the Map to which the bean will be converted.
+     * @param bean The bean to be converted into a Map.
+     * @param selectPropNames A collection of property names to be included during the conversion process.
+     * @param mapSupplier A supplier function to create the Map instance.
+     * @return A Map representation of the provided bean.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
@@ -4054,6 +4880,26 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The keys in the map are transformed according to the specified naming policy.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Example with naming policy
+     * User user = new User();
+     * user.setFirstName("John");
+     * Address address = new Address();
+     * address.setStreetName("Main St");
+     * user.setHomeAddress(address);
+     * 
+     * Collection<String> props = Arrays.asList("firstName", "homeAddress");
+     * Map<String, Object> snakeMap = Maps.deepBean2Map(user, props, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, HashMap::new);
+     * // snakeMap: {
+     * //   first_name=John, 
+     * //   home_address={street_name=Main St}
+     * // }
+     * // Note: nested properties are also converted
+     * }</pre>
      *
      * @param <M> The type of the Map to which the bean will be converted.
      * @param bean The bean to be converted into a Map.
@@ -4074,10 +4920,31 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * All properties are included and stored in the provided output map.
      *
-     * @param <M>
-     * @param bean
-     * @param output
+     * <p>Example:
+     * <pre>{@code
+     * // Example with output map
+     * User user = new User();
+     * user.setName("John");
+     * Address address = new Address();
+     * address.setCity("New York");
+     * user.setAddress(address);
+     * 
+     * Map<String, Object> existingMap = new HashMap<>();
+     * existingMap.put("id", 123);
+     * 
+     * Maps.deepBean2Map(user, existingMap);
+     * // existingMap: {
+     * //   id=123,
+     * //   name=John, 
+     * //   address={city=New York}
+     * // }
+     * }</pre>
+     *
+     * @param <M> The type of the output map.
+     * @param bean The bean to be converted into a Map.
+     * @param output The map where the result should be stored.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final M output) {
@@ -4087,11 +4954,32 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Only properties specified in selectPropNames are included and stored in the provided output map.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param output
+     * <p>Example:
+     * <pre>{@code
+     * // Example with selected properties and output map
+     * User user = new User();
+     * user.setName("John");
+     * user.setAge(25);
+     * Address address = new Address();
+     * address.setCity("New York");
+     * user.setAddress(address);
+     * 
+     * Map<String, Object> outputMap = new LinkedHashMap<>();
+     * Collection<String> props = Arrays.asList("name", "address");
+     * 
+     * Maps.deepBean2Map(user, props, outputMap);
+     * // outputMap: {
+     * //   name=John, 
+     * //   address={city=New York}
+     * // }
+     * }</pre>
+     *
+     * @param <M> The type of the output map.
+     * @param bean The bean to be converted into a Map.
+     * @param selectPropNames A collection of property names to be included during the conversion process.
+     * @param output The map where the result should be stored.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -4101,12 +4989,33 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Only properties specified in selectPropNames are included, keys are transformed according to the naming policy, and results are stored in the output map.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * <p>Example:
+     * <pre>{@code
+     * // Example with all options
+     * User user = new User();
+     * user.setFirstName("John");
+     * Address address = new Address();
+     * address.setStreetName("Main St");
+     * user.setHomeAddress(address);
+     * 
+     * Map<String, Object> outputMap = new LinkedHashMap<>();
+     * Collection<String> props = Arrays.asList("firstName", "homeAddress");
+     * 
+     * Maps.deepBean2Map(user, props, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * // outputMap: {
+     * //   first_name=John, 
+     * //   home_address={street_name=Main St}
+     * // }
+     * }</pre>
+     *
+     * @param <M> The type of the output map.
+     * @param bean The bean to be converted into a Map.
+     * @param selectPropNames A collection of property names to be included during the conversion process.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the resulting Map.
+     * @param output The map where the result should be stored.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
@@ -4152,10 +5061,24 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Properties with null values will be included in the resulting Map.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Given a User bean with nested Address
+     * User user = new User("John", 25, new Address("NYC", "10001"));
+     * Map<String, Object> result = deepBean2Map(user, false);
+     * // result: {name=John, age=25, address={city=NYC, zipCode=10001}}
+     * 
+     * // With ignoreNullProperty=true
+     * User userWithNull = new User("Jane", null, null);
+     * Map<String, Object> filtered = deepBean2Map(userWithNull, true);
+     * // filtered: {name=Jane} (null properties excluded)
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @return
+     * @param bean The bean object to be converted into a Map. Can be any Java object with getter/setter methods.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting Map.
+     * @return A Map representation of the bean where nested beans are recursively converted to Maps.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty) {
@@ -4165,11 +5088,21 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Given a User bean with multiple properties
+     * User user = new User("John", 25, "john@example.com", new Address("NYC"));
+     * Set<String> ignored = new HashSet<>(Arrays.asList("email", "age"));
+     * Map<String, Object> result = deepBean2Map(user, false, ignored);
+     * // result: {name=John, address={city=NYC}} (email and age excluded)
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process. Can be null.
+     * @return A Map representation of the bean with specified properties excluded.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
@@ -4179,13 +5112,23 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The resulting Map type can be customized using the mapSupplier function.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Create a TreeMap instead of default LinkedHashMap
+     * User user = new User("John", 25, new Address("NYC"));
+     * TreeMap<String, Object> result = deepBean2Map(user, false, null, 
+     *     size -> new TreeMap<>());
+     * // result: TreeMap with {address={city=NYC}, age=25, name=John} (sorted keys)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A Map of the specified type containing the bean properties.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4196,12 +5139,29 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The keys in the resulting Map can be transformed according to the specified naming policy.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Given a bean with camelCase properties
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setLastName("Doe");
+     * 
+     * Map<String, Object> snakeCase = deepBean2Map(user, false, null, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+     * // snakeCase: {first_name=John, last_name=Doe}
+     * 
+     * Map<String, Object> upperCase = deepBean2Map(user, false, null, 
+     *     NamingPolicy.UPPER_CASE);
+     * // upperCase: {FIRSTNAME=John, LASTNAME=Doe}
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the resulting Map. If null, defaults to LOWER_CAMEL_CASE.
+     * @return A Map representation of the bean with keys transformed according to the naming policy.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4212,14 +5172,27 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Provides full control over the conversion process including naming policy and Map type.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Custom conversion with all options
+     * User user = new User("John", null, new Address("NYC"));
+     * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
+     * 
+     * LinkedHashMap<String, Object> result = deepBean2Map(user, true, ignored,
+     *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES, 
+     *     size -> new LinkedHashMap<>(size));
+     * // result: {NAME=John, ADDRESS={CITY=NYC}} (ordered, uppercase with underscores)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the resulting Map.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A Map of the specified type with full customization applied.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4239,13 +5212,25 @@ public final class Maps {
     }
 
     /**
-     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The conversion is performed in-place into the provided output Map.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Reuse existing map
+     * Map<String, Object> existingMap = new HashMap<>();
+     * existingMap.put("timestamp", System.currentTimeMillis());
+     * 
+     * User user = new User("John", 25);
+     * deepBean2Map(user, false, existingMap);
+     * // existingMap now contains: {timestamp=..., name=John, age=25}
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the output Map.
+     * @param output The Map instance into which the bean properties will be put. Existing entries are preserved.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
@@ -4253,14 +5238,26 @@ public final class Maps {
     }
 
     /**
-     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Populate map with selective properties
+     * Map<String, Object> output = new HashMap<>();
+     * Set<String> ignored = new HashSet<>(Arrays.asList("password", "ssn"));
+     * 
+     * User user = new User("John", "pass123", "123-45-6789");
+     * deepBean2Map(user, false, ignored, output);
+     * // output: {name=John} (sensitive fields excluded)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the output Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param output The Map instance into which the bean properties will be put.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4269,14 +5266,26 @@ public final class Maps {
     }
 
     /**
-     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * The conversion process can be customized by specifying properties to ignore and whether to ignore {@code null} properties.
+     * The conversion process can be customized by specifying properties to ignore, whether to ignore {@code null} properties, and the naming policy for keys.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Full control over in-place conversion
+     * Map<String, Object> output = new TreeMap<>(); // Sorted map
+     * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
+     * 
+     * Product product = new Product("Widget", 29.99, new Category("Electronics"));
+     * deepBean2Map(product, true, ignored, NamingPolicy.UPPER_CASE, output);
+     * // output: {CATEGORY={NAME=Electronics}, NAME=Widget, PRICE=29.99} (sorted)
+     * }</pre>
      *
-     * @param <M> The type of the Map to which the bean will be converted.
-     * @param bean The bean to be converted into a Map.
-     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the resulting Map.
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a Map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the output Map.
      * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the output Map.
      * @param output The Map instance into which the bean properties will be put.
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4321,11 +5330,28 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation where nested properties are represented with dot notation.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * All properties from the bean are included in the result.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Given nested beans
+     * User user = new User("John", new Address("NYC", "10001"));
+     * Map<String, Object> flat = bean2FlatMap(user);
+     * // flat: {name=John, address.city=NYC, address.zipCode=10001}
+     * 
+     * // Deep nesting
+     * Company company = new Company("TechCorp", 
+     *     new Address("NYC", new Location(40.7128, -74.0060)));
+     * Map<String, Object> result = bean2FlatMap(company);
+     * // result: {name=TechCorp, address.city=NYC, 
+     * //          address.location.latitude=40.7128, 
+     * //          address.location.longitude=-74.0060}
+     * }</pre>
      *
      * @param bean The bean object to be converted into a flat map.
-     * @return A map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
+     * @return A map representing the bean object with nested properties flattened using dot notation.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean) {
@@ -4333,13 +5359,23 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation where nested properties are represented with dot notation.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * The type of Map returned can be customized using the mapSupplier.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Create a sorted flat map
+     * User user = new User("John", new Address("NYC", "10001"));
+     * TreeMap<String, Object> sortedFlat = bean2FlatMap(user, 
+     *     size -> new TreeMap<>());
+     * // sortedFlat: {address.city=NYC, address.zipCode=10001, name=John} (sorted)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a flat map.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A map of the specified type with nested properties flattened.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
@@ -4347,26 +5383,53 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with only selected properties.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Only properties specified in selectPropNames are included in the result.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Select specific properties including nested ones
+     * User user = new User("John", 25, new Address("NYC", "10001"));
+     * Collection<String> select = Arrays.asList("name", "address");
+     * Map<String, Object> result = bean2FlatMap(user, select);
+     * // result: {name=John, address.city=NYC, address.zipCode=10001}
+     * 
+     * // Select only top-level properties
+     * Collection<String> topLevel = Arrays.asList("name", "age");
+     * Map<String, Object> flat = bean2FlatMap(user, topLevel);
+     * // flat: {name=John, age=25} (address excluded)
+     * }</pre>
      *
-     * @param bean
-     * @param selectPropNames
-     * @return
+     * @param bean The bean object to be converted into a flat map.
+     * @param selectPropNames A collection of property names to be included in the resulting map. Nested properties of selected beans are automatically included.
+     * @return A map with only the selected properties flattened.
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final Collection<String> selectPropNames) {
         return bean2FlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with only selected properties and custom Map type.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Combines property selection with Map type customization.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Select properties and use custom map type
+     * Employee emp = new Employee("John", "IT", new Manager("Jane"));
+     * Collection<String> select = Arrays.asList("name", "manager");
+     * 
+     * LinkedHashMap<String, Object> result = bean2FlatMap(emp, select,
+     *     size -> new LinkedHashMap<>(size));
+     * // result: {name=John, manager.name=Jane} (ordered, dept excluded)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a flat map.
+     * @param selectPropNames A collection of property names to be included in the resulting map.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A map of the specified type with selected properties flattened.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
@@ -4378,10 +5441,24 @@ public final class Maps {
      * Converts a bean object into a flat map representation with selected properties and a specified naming policy.
      * This method takes a bean object and transforms it into a map where the keys are the property names of the bean and the values are the corresponding property values.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // With naming policy transformation
+     * User user = new User();
+     * user.setFirstName("John");
+     * user.setHomeAddress(new Address("NYC"));
+     * 
+     * Collection<String> select = Arrays.asList("firstName", "homeAddress");
+     * Map<String, Object> snakeCase = bean2FlatMap(user, select,
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES,
+     *     size -> new HashMap<>(size));
+     * // snakeCase: {first_name=John, home_address.city=NYC}
+     * }</pre>
      *
      * @implSpec
      * <code>
-     *  Maps.bean2FlatMap(new User("John", new Address("New York"))) ==> {"name"="John", address.city="New York"};
+     *  Maps.bean2FlatMap(new User("John", new Address("New York"))) ==> {"name"="John", "address.city"="New York"};
      *  <br />
      *  // with the below bean classes
      *  <br />
@@ -4412,12 +5489,24 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation and stores the result in the provided Map instance.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * All properties from the bean are included in the output.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Populate existing map with flattened bean
+     * Map<String, Object> output = new HashMap<>();
+     * output.put("version", "1.0");
+     * 
+     * User user = new User("John", new Address("NYC"));
+     * bean2FlatMap(user, output);
+     * // output: {version=1.0, name=John, address.city=NYC}
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param output The Map instance into which the flattened bean properties will be put. Existing entries are preserved.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final M output) {
@@ -4425,13 +5514,27 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with selected properties and stores the result in the provided Map instance.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Only properties specified in selectPropNames are included.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Selective flattening into existing map
+     * Map<String, Object> output = new LinkedHashMap<>();
+     * Collection<String> select = Arrays.asList("name", "contact");
+     * 
+     * Customer customer = new Customer("John", "123-456", 
+     *     new Contact("john@email.com", "555-1234"));
+     * bean2FlatMap(customer, select, output);
+     * // output: {name=John, contact.email=john@email.com, contact.phone=555-1234}
+     * // (customerId excluded)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param selectPropNames A collection of property names to be included in the output map.
+     * @param output The Map instance into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -4439,14 +5542,28 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with full customization options and stores the result in the provided Map instance.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Provides control over property selection and key naming policy.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Full customization of flattening process
+     * Map<String, Object> output = new TreeMap<>();
+     * Collection<String> select = Arrays.asList("productName", "category");
+     * 
+     * Product product = new Product("WidgetPro", 
+     *     new Category("Electronics", "Gadgets"));
+     * bean2FlatMap(product, select, NamingPolicy.UPPER_CASE, output);
+     * // output: {CATEGORY.NAME=Electronics, CATEGORY.SUBCATEGORY=Gadgets, 
+     * //          PRODUCTNAME=WidgetPro} (sorted, uppercase)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param selectPropNames A collection of property names to be included in the output map.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the output map.
+     * @param output The Map instance into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
@@ -4485,12 +5602,25 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with control over null property handling.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Properties with null values can be included or excluded based on the ignoreNullProperty parameter.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Include null properties
+     * User user = new User("John", null, new Address("NYC", null));
+     * Map<String, Object> withNulls = bean2FlatMap(user, false);
+     * // withNulls: {name=John, age=null, address.city=NYC, address.zipCode=null}
+     * 
+     * // Exclude null properties
+     * Map<String, Object> noNulls = bean2FlatMap(user, true);
+     * // noNulls: {name=John, address.city=NYC}
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @return
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting map.
+     * @return A flat map representation of the bean with null handling as specified.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
@@ -4498,13 +5628,25 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with control over null property handling and property exclusion.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Combines null value filtering with property name exclusion.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Filter nulls and exclude specific properties
+     * User user = new User("John", null, "secret123", new Address("NYC"));
+     * Set<String> ignored = new HashSet<>(Arrays.asList("password"));
+     * 
+     * Map<String, Object> result = bean2FlatMap(user, true, ignored);
+     * // result: {name=John, address.city=NYC} 
+     * // (age is null so excluded, password is in ignored set)
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting map.
+     * @param ignoredPropNames A set of property names to be excluded from the resulting map.
+     * @return A flat map with specified filtering applied.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
@@ -4512,15 +5654,28 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with control over null handling, property exclusion, and Map type.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Provides flexibility in filtering and Map implementation.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Custom map with filtering
+     * Employee emp = new Employee("John", null, "IT", new Office("Building A"));
+     * Set<String> ignored = new HashSet<>(Arrays.asList("department"));
+     * 
+     * TreeMap<String, Object> result = bean2FlatMap(emp, true, ignored,
+     *     size -> new TreeMap<>());
+     * // result: {name=John, office.building=Building A} 
+     * // (sorted, salary null excluded, department ignored)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting map.
+     * @param ignoredPropNames A set of property names to be excluded from the resulting map.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A map of the specified type with filtering applied.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4529,14 +5684,30 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with control over null handling, property exclusion, and key naming policy.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Provides comprehensive control over the flattening process.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Transform to snake_case with filtering
+     * UserProfile profile = new UserProfile();
+     * profile.setFirstName("John");
+     * profile.setLastLogin(null);
+     * profile.setHomeAddress(new Address("NYC"));
+     * 
+     * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
+     * Map<String, Object> result = bean2FlatMap(profile, true, ignored,
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+     * // result: {first_name=John, home_address.city=NYC}
+     * // (last_login null excluded, internal_id ignored, snake_case keys)
+     * }</pre>
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting map.
+     * @param ignoredPropNames A set of property names to be excluded from the resulting map.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the resulting map.
+     * @return A flat map with comprehensive customization applied.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4545,16 +5716,32 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation with full control over all conversion aspects.
+     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * This is the most flexible variant offering complete customization.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Complete customization example
+     * Order order = new Order("ORD-123", null, 
+     *     new Customer("John", new Address("NYC", "10001")));
+     * Set<String> ignored = new HashSet<>(Arrays.asList("internalNotes"));
+     * 
+     * LinkedHashMap<String, Object> result = bean2FlatMap(order, true, ignored,
+     *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES,
+     *     size -> new LinkedHashMap<>(size * 2)); // larger initial capacity
+     * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John, 
+     * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
+     * // (amount null excluded, internal_notes ignored, ordered map)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of Map to be returned.
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the resulting map.
+     * @param ignoredPropNames A set of property names to be excluded from the resulting map.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the resulting map.
+     * @param mapSupplier A function that creates a new Map instance. The function argument is the initial capacity.
+     * @return A fully customized flat map representation of the bean.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4574,13 +5761,26 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation and stores the result in the provided Map instance with null handling.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * This is an in-place operation that modifies the provided output Map.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Populate existing map with null filtering
+     * Map<String, Object> output = new HashMap<>();
+     * output.put("timestamp", new Date());
+     * 
+     * User user = new User("John", null, new Address("NYC"));
+     * bean2FlatMap(user, true, output);
+     * // output: {timestamp=..., name=John, address.city=NYC}
+     * // (age null is excluded)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the output map.
+     * @param output The Map instance into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
@@ -4588,14 +5788,27 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation and stores the result in the provided Map instance with filtering options.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * Combines in-place operation with null handling and property exclusion.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // In-place population with multiple filters
+     * Map<String, Object> output = new LinkedHashMap<>();
+     * Set<String> ignored = new HashSet<>(Arrays.asList("password", "ssn"));
+     * 
+     * Account account = new Account("john123", "pass", null, "123-45-6789");
+     * bean2FlatMap(account, true, ignored, output);
+     * // output: {username=john123}
+     * // (password and ssn ignored, balance null excluded)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the output map.
+     * @param ignoredPropNames A set of property names to be excluded from the output map.
+     * @param output The Map instance into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4604,15 +5817,30 @@ public final class Maps {
     }
 
     /**
-     * Converts a bean object into a flat map representation.
-     * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}
+     * Converts a bean object into a flat map representation and stores the result in the provided Map instance with full customization.
+     * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * This method provides complete control over the in-place flattening operation.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Full control in-place flattening
+     * Map<String, Object> output = new TreeMap<>(); // sorted output
+     * Set<String> ignored = new HashSet<>(Arrays.asList("metadata"));
+     * 
+     * Document doc = new Document("Report", null, 
+     *     new Author("John", new Department("Research")));
+     * bean2FlatMap(doc, true, ignored, 
+     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES, output);
+     * // output: {author.department.name=research, author.name=john, title=report}
+     * // (sorted keys, snake_case, version null excluded, metadata ignored)
+     * }</pre>
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * @param <M> The type of Map to populate.
+     * @param bean The bean object to be converted into a flat map.
+     * @param ignoreNullProperty If {@code true}, properties with {@code null} values will not be included in the output map.
+     * @param ignoredPropNames A set of property names to be excluded from the output map.
+     * @param keyNamingPolicy The naming policy to apply to the keys in the output map.
+     * @param output The Map instance into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5222,14 +6450,33 @@ public final class Maps {
 
     /**
      * Replaces the keys in the specified map using the provided key converter function.
-     * <p>
      * This method iterates over the keys in the map and applies the key converter function to each key.
      * If the converted key is different from the original key, the entry is moved to the new key.
-     * </p>
+     * Note that if multiple original keys convert to the same new key, the last value will overwrite previous ones.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Convert keys to uppercase
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("name", 1);
+     * map.put("age", 2);
+     * map.put("city", 3);
+     * 
+     * replaceKeys(map, String::toUpperCase);
+     * // map now contains: {NAME=1, AGE=2, CITY=3}
+     * 
+     * // Add prefix to keys
+     * Map<String, String> data = new HashMap<>();
+     * data.put("id", "123");
+     * data.put("type", "user");
+     * 
+     * replaceKeys(data, key -> "prefix_" + key);
+     * // data now contains: {prefix_id=123, prefix_type=user}
+     * }</pre>
      *
      * @param <K> the type of keys in the map
-     * @param map the map whose keys are to be replaced
-     * @param keyConverter the function to apply to each key
+     * @param map the map whose keys are to be replaced. This map is modified in-place.
+     * @param keyConverter the function to apply to each key. Must not return null.
      */
     @Beta
     public static <K> void replaceKeys(final Map<K, ?> map, final Function<? super K, ? extends K> keyConverter) {
@@ -5252,17 +6499,37 @@ public final class Maps {
 
     /**
      * Replaces the keys in the specified map using the provided key converter function and merges values if necessary.
-     * <p>
      * This method iterates over the keys in the map and applies the key converter function to each key.
      * If the converted key is different from the original key, the entry is moved to the new key.
      * If there is a conflict (i.e., the new key already exists in the map), the merger function is used to resolve the conflict.
-     * </p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Merge values when keys collide
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a1", 10);
+     * map.put("a2", 20);
+     * map.put("b1", 30);
+     * 
+     * replaceKeys(map, key -> key.substring(0, 1), Integer::sum);
+     * // map now contains: {a=30, b=30} (a1 and a2 merged to 'a')
+     * 
+     * // Concatenate strings on collision
+     * Map<String, String> data = new HashMap<>();
+     * data.put("user_1", "John");
+     * data.put("user_2", "Jane");
+     * data.put("admin_1", "Bob");
+     * 
+     * replaceKeys(data, key -> key.split("_")[0], 
+     *     (v1, v2) -> v1 + ", " + v2);
+     * // data now contains: {user=John, Jane, admin=Bob}
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @param map the map whose keys are to be replaced
-     * @param keyConverter the function to apply to each key
-     * @param merger the function to merge values in case of key conflicts
+     * @param map the map whose keys are to be replaced. This map is modified in-place.
+     * @param keyConverter the function to apply to each key. Must not return null.
+     * @param merger the function to merge values in case of key conflicts. The first argument is the existing value, the second is the new value.
      */
     @Beta
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,

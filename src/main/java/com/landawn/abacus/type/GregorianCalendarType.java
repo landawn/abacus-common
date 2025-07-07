@@ -25,6 +25,11 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for GregorianCalendar objects.
+ * This class provides serialization, deserialization, and database access capabilities for GregorianCalendar instances.
+ * It extends AbstractCalendarType to inherit common calendar handling functionality.
+ */
 @SuppressWarnings("java:S2160")
 public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
@@ -34,15 +39,26 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
         super(GREGORIAN_CALENDAR);
     }
 
+    /**
+     * Returns the Class object representing the GregorianCalendar type.
+     *
+     * @return GregorianCalendar.class
+     */
     @Override
     public Class<GregorianCalendar> clazz() {
         return GregorianCalendar.class;
     }
 
     /**
+     * Converts various object types to a GregorianCalendar instance.
+     * Supported input types include:
+     * - Number: interpreted as milliseconds since epoch
+     * - java.util.Date: converted directly to GregorianCalendar
+     * - Calendar: converted to GregorianCalendar preserving the time
+     * - Other types: converted to string and then parsed
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to GregorianCalendar
+     * @return a GregorianCalendar instance, or null if the input is null
      */
     @Override
     public GregorianCalendar valueOf(final Object obj) {
@@ -58,9 +74,15 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     }
 
     /**
+     * Parses a string representation into a GregorianCalendar instance.
+     * The method handles:
+     * - null or empty strings: returns null
+     * - "sysTime": returns current time as GregorianCalendar
+     * - numeric strings: interpreted as milliseconds since epoch
+     * - date/time strings: parsed according to standard date formats
      *
-     * @param str
-     * @return
+     * @param str the string to parse into a GregorianCalendar
+     * @return the parsed GregorianCalendar instance, or null if the input is null or empty
      */
     @Override
     public GregorianCalendar valueOf(final String str) {
@@ -68,11 +90,15 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     }
 
     /**
+     * Parses a character array into a GregorianCalendar instance.
+     * This method is optimized for performance when parsing from character buffers.
+     * If the character sequence appears to be a long number, it's interpreted as milliseconds since epoch.
+     * Otherwise, the characters are converted to a string and parsed using standard date parsing.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the date/time representation
+     * @param offset the start offset in the character array
+     * @param len the number of characters to parse
+     * @return the parsed GregorianCalendar instance, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -93,34 +119,43 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     }
 
     /**
+     * Retrieves a GregorianCalendar value from the specified column in a ResultSet.
+     * The method reads a Timestamp from the database and converts it to a GregorianCalendar.
+     * If the column value is null, returns null.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return the GregorianCalendar value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public GregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return asGregorianCalendar(rs.getTimestamp(columnIndex));
+        final Timestamp ts = rs.getTimestamp(columnIndex);
+        return ts == null ? null : asGregorianCalendar(ts);
     }
 
     /**
+     * Retrieves a GregorianCalendar value from the specified column in a ResultSet using the column label.
+     * The method reads a Timestamp from the database and converts it to a GregorianCalendar.
+     * If the column value is null, returns null.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return the GregorianCalendar value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public GregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return asGregorianCalendar(rs.getTimestamp(columnLabel));
+        final Timestamp ts = rs.getTimestamp(columnLabel);
+        return ts == null ? null : asGregorianCalendar(ts);
     }
 
     /**
-     * As gregorian calendar.
+     * Converts a SQL Timestamp to a GregorianCalendar instance.
+     * This is a helper method used internally for database value conversions.
      *
-     * @param value
-     * @return
+     * @param value the Timestamp to convert
+     * @return a new GregorianCalendar instance set to the timestamp's time, or null if the input is null
      */
     private static GregorianCalendar asGregorianCalendar(final Timestamp value) {
         if (value == null) {

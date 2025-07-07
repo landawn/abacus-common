@@ -17,25 +17,83 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * A functional interface that represents a function that accepts an object-valued argument
+ * and a long-valued argument, and produces a result. This is a specialization of BiFunction
+ * for the case where the second argument is a primitive long.
  *
+ * <p>This interface is typically used for operations that need to compute a value based on
+ * an object and a long integer, such as timestamp-based calculations, ID lookups,
+ * size/offset operations, or transformations that involve large numeric parameters.
+ *
+ * <p>This is a functional interface whose functional method is {@link #apply(Object, long)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the object argument to the function
+ * @param <R> the type of the result of the function
+ * @see java.util.function.BiFunction
+ * @see ToLongFunction
  */
 @FunctionalInterface
 public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR
     /**
+     * Applies this function to the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * <p>This method takes an object of type T and a long value as input and
+     * produces a result of type R. The function should be deterministic, meaning
+     * that for the same inputs, it should always produce the same output.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * ObjLongFunction<DateFormat, String> formatTimestamp = (formatter, timestamp) -> 
+     *     formatter.format(new Date(timestamp));
+     * ObjLongFunction<Map<Long, String>, String> getById = (map, id) -> 
+     *     map.getOrDefault(id, "Not Found");
+     * 
+     * String formatted = formatTimestamp.apply(myDateFormat, System.currentTimeMillis());
+     * String value = getById.apply(myMap, 12345L);
+     * }</pre>
+     *
+     * @param t the first function argument of type T
+     * @param u the second function argument, a primitive long value
+     * @return the function result of type R
+     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(T t, long u);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result. If evaluation of
+     * either function throws an exception, it is relayed to the caller of the
+     * composed function.
      *
-     * @param <V>
-     * @param after
-     * @return
+     * <p>This method enables function composition, allowing you to chain multiple
+     * transformations together. The output of this function becomes the input to
+     * the {@code after} function.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * ObjLongFunction<TimeZone, Date> createDate = (timezone, millis) -> {
+     *     Calendar cal = Calendar.getInstance(timezone);
+     *     cal.setTimeInMillis(millis);
+     *     return cal.getTime();
+     * };
+     * Function<Date, String> formatDate = date -> 
+     *     new SimpleDateFormat("yyyy-MM-dd").format(date);
+     * 
+     * ObjLongFunction<TimeZone, String> timestampToString = 
+     *     createDate.andThen(formatDate);
+     * 
+     * String result = timestampToString.apply(TimeZone.getDefault(), 
+     *     System.currentTimeMillis());
+     * }</pre>
+     *
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     default <V> ObjLongFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));

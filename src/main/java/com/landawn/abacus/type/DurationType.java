@@ -27,6 +27,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Duration values.
+ * This class provides serialization, deserialization, and database operations for Duration objects.
+ * Durations are stored as milliseconds (long values) in the database and string representations.
+ */
 public class DurationType extends AbstractType<Duration> {
 
     public static final String DURATION = Duration.class.getSimpleName();
@@ -35,15 +40,21 @@ public class DurationType extends AbstractType<Duration> {
         super(DURATION);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing Duration.class
+     */
     @Override
     public Class<Duration> clazz() {
         return Duration.class;
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether this type should be quoted in CSV format.
+     * Duration values are numeric (milliseconds) and don't require quotes.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating Duration values should not be quoted in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -51,9 +62,11 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Converts a Duration to its string representation.
+     * The duration is represented as the number of milliseconds.
      *
-     * @param x
-     * @return
+     * @param x the Duration to convert. Can be null.
+     * @return A string containing the milliseconds value, or null if input is null
      */
     @Override
     public String stringOf(final Duration x) {
@@ -61,9 +74,11 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Converts a string representation back to a Duration.
+     * The string should contain a numeric value representing milliseconds.
      *
-     * @param str
-     * @return
+     * @param str the string containing milliseconds value. Can be null or empty.
+     * @return A Duration created from the milliseconds value, or null if input is null/empty
      */
     @Override
     public Duration valueOf(final String str) {
@@ -71,11 +86,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Retrieves a Duration value from a ResultSet at the specified column index.
+     * The database value is read as a long (milliseconds) and converted to Duration.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the duration value
+     * @return A Duration created from the milliseconds value in the database
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Duration get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -83,11 +100,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Retrieves a Duration value from a ResultSet using the specified column label.
+     * The database value is read as a long (milliseconds) and converted to Duration.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the duration value
+     * @return A Duration created from the milliseconds value in the database
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Duration get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -95,11 +114,14 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Sets a Duration value as a parameter in a PreparedStatement.
+     * The duration is stored as milliseconds (long value) in the database.
+     * Null durations are stored as 0.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement in which to set the parameter
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the Duration value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws SQLException {
@@ -107,11 +129,14 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Sets a Duration value as a named parameter in a CallableStatement.
+     * The duration is stored as milliseconds (long value) in the database.
+     * Null durations are stored as 0.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement in which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the Duration value to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws SQLException {
@@ -119,10 +144,12 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Appends a Duration value to an Appendable output.
+     * The duration is written as its milliseconds value.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Duration to append. Can be null.
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Duration x) throws IOException {
@@ -134,11 +161,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Writes a Duration value to a CharacterWriter.
+     * The duration is written as its milliseconds value using optimized numeric writing.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Duration to write. Can be null.
+     * @param config the serialization configuration (currently unused for Duration)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Duration x, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -1,0 +1,463 @@
+package com.landawn.abacus.util;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeSet;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.function.TriFunction;
+
+public class N106Test extends TestBase {
+
+    // ==================== Complex merge scenarios ====================
+
+    @Test
+    public void testComplexMergeWithMultipleIterables() {
+        List<List<Integer>> iterables = new ArrayList<>();
+        iterables.add(Arrays.asList(1, 5, 9));
+        iterables.add(Arrays.asList(2, 6, 10));
+        iterables.add(Arrays.asList(3, 7, 11));
+        iterables.add(Arrays.asList(4, 8, 12));
+
+        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+
+        List<Integer> result = N.merge(iterables, selector);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), result);
+    }
+
+    @Test
+    public void testMergeWithNullElements() {
+        List<List<Integer>> iterables = new ArrayList<>();
+        iterables.add(null);
+        iterables.add(Arrays.asList(1, 2, 3));
+        iterables.add(null);
+        iterables.add(Arrays.asList(4, 5, 6));
+
+        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> MergeResult.TAKE_FIRST;
+
+        List<Integer> result = N.merge(iterables, selector);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
+    }
+
+    // ==================== Complex groupBy scenarios ====================
+
+    @Test
+    public void testGroupByWithComplexCollector() {
+        List<Person> people = Arrays.asList(new Person("Alice", 25, "Engineering"), new Person("Bob", 30, "Engineering"), new Person("Charlie", 35, "Sales"),
+                new Person("David", 25, "Sales"), new Person("Eve", 30, "Engineering"));
+
+        // Group by department and calculate average age
+        Map<String, Double> avgAgeByDept = N.groupBy(people, Person::getDepartment, Collectors.averagingInt(Person::getAge));
+
+        assertEquals(28.33, avgAgeByDept.get("Engineering"), 0.01);
+        assertEquals(30.0, avgAgeByDept.get("Sales"), 0.01);
+    }
+
+    @Test
+    public void testNestedGroupBy() {
+        List<Person> people = Arrays.asList(new Person("Alice", 25, "Engineering"), new Person("Bob", 30, "Engineering"), new Person("Charlie", 25, "Sales"),
+                new Person("David", 30, "Sales"));
+
+        // First group by department
+        Map<String, List<Person>> byDept = N.groupBy(people, Person::getDepartment);
+
+        // Then group each department by age
+        Map<String, Map<Integer, List<Person>>> result = new HashMap<>();
+        for (Map.Entry<String, List<Person>> entry : byDept.entrySet()) {
+            result.put(entry.getKey(), N.groupBy(entry.getValue(), Person::getAge));
+        }
+
+        assertEquals(2, result.get("Engineering").size());
+        assertEquals(1, result.get("Engineering").get(25).size());
+        assertEquals("Alice", result.get("Engineering").get(25).get(0).getName());
+    }
+
+    // ==================== Complex zip/unzip scenarios ====================
+
+    @Test
+    public void testZipWithDifferentTypesAndTransformations() {
+        String[] names = { "Alice", "Bob", "Charlie" };
+        Integer[] ages = { 25, 30, 35 };
+        String[] departments = { "Engineering", "Sales", "Marketing" };
+
+        TriFunction<String, Integer, String, Person> zipper = (name, age, dept) -> new Person(name, age, dept);
+
+        List<Person> people = N.zip(names, ages, departments, zipper);
+        assertEquals(3, people.size());
+        assertEquals("Alice", people.get(0).getName());
+        assertEquals(30, people.get(1).getAge());
+        assertEquals("Marketing", people.get(2).getDepartment());
+    }
+
+    @Test
+    public void testUnzipComplexObjects() {
+        List<Person> people = Arrays.asList(new Person("Alice", 25, "Engineering"), new Person("Bob", 30, "Sales"), new Person("Charlie", 35, "Marketing"));
+
+        BiConsumer<Person, Pair<String, Integer>> unzipper = (person, pair) -> pair.set(person.getName(), person.getAge());
+
+        Pair<List<String>, List<Integer>> result = N.unzip(people, unzipper);
+        assertEquals(Arrays.asList("Alice", "Bob", "Charlie"), result.left());
+        assertEquals(Arrays.asList(25, 30, 35), result.right());
+    }
+
+    // ==================== Performance and edge case tests ====================
+
+    @Test
+    public void testFilterPerformanceWithLargeData() {
+        // Create large dataset
+        int size = 100000;
+        Integer[] data = new Integer[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = i;
+        }
+
+        long startTime = System.currentTimeMillis();
+        List<Integer> result = N.filter(data, i -> i % 100 == 0);
+        long endTime = System.currentTimeMillis();
+
+        assertEquals(1000, result.size());
+        assertTrue((endTime - startTime) < 100, "Filter operation took too long");
+    }
+
+    @Test
+    public void testChainedOperations() {
+        String[] data = { "apple", "banana", "apricot", "berry", "cherry", "date" };
+
+        // Filter -> Map -> Distinct
+        List<String> filtered = N.filter(data, s -> s.length() > 5);
+        List<Character> mapped = N.map(filtered, s -> s.charAt(0));
+        List<Character> distinct = N.distinct(mapped);
+
+        assertEquals(3, distinct.size());
+        assertTrue(distinct.contains('b'));
+        assertTrue(distinct.contains('a'));
+        assertTrue(distinct.contains('c'));
+    }
+
+    @Test
+    public void testComplexPredicateCombinations() {
+        Integer[] numbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+        // Multiple conditions
+        Predicate<Integer> isEven = i -> i % 2 == 0;
+        Predicate<Integer> isGreaterThan5 = i -> i > 5;
+        Predicate<Integer> combined = i -> isEven.test(i) && isGreaterThan5.test(i);
+
+        List<Integer> result = N.filter(numbers, combined);
+        assertEquals(Arrays.asList(6, 8, 10), result);
+    }
+
+    /**
+     * Additional test class for special scenarios and edge cases
+     */
+    @Nested
+    public class NSpecialCasesTest {
+
+        @Test
+        public void testUnicodeAndSpecialCharacters() {
+            String[] unicodeStrings = { "café", "naïve", "résumé", "🎉", "😀" };
+
+            // Test filter with unicode
+            List<String> filtered = N.filter(unicodeStrings, s -> s.contains("é"));
+            assertEquals(2, filtered.size());
+
+            // Test map with unicode
+            List<Integer> lengths = N.map(unicodeStrings, String::length);
+            assertEquals(Arrays.asList(4, 5, 6, 2, 2), lengths);
+        }
+
+        @Test
+        public void testConcurrentModificationScenarios() {
+            List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+
+            // This should work as N.filter creates a new list
+            assertThrows(ConcurrentModificationException.class, () -> N.filter(list, i -> {
+                if (i == 3) {
+                    list.add(6); // Modifying during iteration
+                }
+                return i % 2 == 0;
+            }));
+
+        }
+
+        @Test
+        public void testMemoryEfficientOperations() {
+            // Test that operations don't create unnecessary intermediate collections
+            int[] largeArray = new int[1000000];
+            for (int i = 0; i < largeArray.length; i++) {
+                largeArray[i] = i;
+            }
+
+            // Count should not create intermediate collection
+            long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+            int count = N.count(largeArray, i -> i % 1000 == 0);
+            long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+            assertEquals(1000, count);
+            // Memory increase should be minimal
+            assertTrue((endMemory - startMemory) < 1000000, "Memory usage increased significantly");
+        }
+
+        @Test
+        public void testBoundaryValues() {
+            // Test with maximum array sizes
+            int maxSize = 1000; // Using smaller size for test performance
+
+            // Boolean array with all same values
+            boolean[] allTrue = new boolean[maxSize];
+            Arrays.fill(allTrue, true);
+            assertTrue(N.allTrue(allTrue));
+            assertFalse(N.anyFalse(allTrue));
+
+            // Empty ranges
+            int[] numbers = { 1, 2, 3, 4, 5 };
+            assertArrayEquals(new int[0], N.filter(numbers, 3, 3, i -> true));
+            assertEquals(0, N.count(numbers, 5, 5, i -> true));
+        }
+
+        @Test
+        public void testCustomPredicatesAndFunctions() {
+            // Test with custom implementations
+            String[] words = { "hello", "world", "java", "programming" };
+
+            // Custom predicate that checks multiple conditions
+            Predicate<String> complexPredicate = new Predicate<String>() {
+                @Override
+                public boolean test(String s) {
+                    return s.length() > 4 && s.contains("o") && !s.startsWith("p");
+                }
+            };
+
+            List<String> result = N.filter(words, complexPredicate);
+            assertEquals(Arrays.asList("hello", "world"), result);
+
+            // Custom function with state
+            Function<String, String> statefulMapper = new Function<String, String>() {
+                private int counter = 0;
+
+                @Override
+                public String apply(String s) {
+                    return s + "_" + (counter++);
+                }
+            };
+
+            List<String> mapped = N.map(words, statefulMapper);
+            assertEquals("hello_0", mapped.get(0));
+            assertEquals("programming_3", mapped.get(3));
+        }
+
+        @Test
+        public void testNullElementHandling() {
+            // Arrays with null elements
+            String[] withNulls = { "a", null, "b", null, "c" };
+
+            // Filter nulls
+            List<String> nonNulls = N.filter(withNulls, Objects::nonNull);
+            assertEquals(Arrays.asList("a", "b", "c"), nonNulls);
+
+            // Map with null handling
+            List<Integer> lengths = N.map(withNulls, s -> s == null ? -1 : s.length());
+            assertEquals(Arrays.asList(1, -1, 1, -1, 1), lengths);
+
+            // Distinct with nulls
+            String[] duplicatesWithNulls = { "a", null, "a", null, "b" };
+            List<String> distinct = N.distinct(duplicatesWithNulls);
+            assertEquals(3, distinct.size()); // "a", null, "b"
+        }
+
+        @Test
+        public void testExtremeRanges() {
+            int[] array = new int[100];
+            for (int i = 0; i < 100; i++) {
+                array[i] = i;
+            }
+
+            // Test with full range
+            int[] filtered = N.filter(array, 0, 100, i -> i % 10 == 0);
+            assertEquals(10, filtered.length);
+
+            // Test with single element range
+            filtered = N.filter(array, 50, 51, i -> true);
+            assertArrayEquals(new int[] { 50 }, filtered);
+
+            // Test with last element
+            filtered = N.filter(array, 99, 100, i -> true);
+            assertArrayEquals(new int[] { 99 }, filtered);
+        }
+    }
+
+    /**
+     * Test class for testing integration with collections framework
+     */
+    @Nested
+    public class NCollectionsIntegrationTest {
+
+        @Test
+        public void testWithDifferentCollectionTypes() {
+            // LinkedList
+            LinkedList<String> linkedList = new LinkedList<>(Arrays.asList("a", "b", "c"));
+            List<String> upperLinked = N.map(linkedList, 0, 3, String::toUpperCase);
+            assertEquals(Arrays.asList("A", "B", "C"), upperLinked);
+
+            // TreeSet (sorted)
+            TreeSet<Integer> treeSet = new TreeSet<>(Arrays.asList(3, 1, 4, 1, 5, 9));
+            List<Integer> filtered = N.filter(treeSet, i -> i > 3);
+            assertEquals(Arrays.asList(4, 5, 9), filtered);
+
+            // ArrayDeque
+            ArrayDeque<String> deque = new ArrayDeque<>(Arrays.asList("first", "second", "third"));
+            List<Integer> lengths = N.map(deque, String::length);
+            assertEquals(Arrays.asList(5, 6, 5), lengths);
+        }
+
+        @Test
+        public void testWithCustomCollections() {
+            // Custom collection that implements Iterable
+            CustomIterable<Integer> custom = new CustomIterable<>(Arrays.asList(1, 2, 3, 4, 5));
+
+            List<Integer> filtered = N.filter(custom, i -> i % 2 == 0);
+            assertEquals(Arrays.asList(2, 4), filtered);
+
+            List<String> mapped = N.map(custom, i -> "num" + i);
+            assertEquals(5, mapped.size());
+        }
+
+        @Test
+        public void testCollectorIntegration() {
+            List<String> words = Arrays.asList("apple", "banana", "apricot", "blueberry", "cherry");
+
+            // Group by first letter and join
+            Map<Character, String> joined = N.groupBy(words, s -> s.charAt(0), Collectors.joining(", "));
+
+            assertEquals("apple, apricot", joined.get('a'));
+            assertEquals("banana, blueberry", joined.get('b'));
+            assertEquals("cherry", joined.get('c'));
+
+            // Group by length and count
+            Map<Integer, Long> countByLength = N.groupBy(words, String::length, Collectors.counting());
+
+            assertEquals(1L, (long) countByLength.get(5));
+            assertEquals(2L, (long) countByLength.get(6));
+        }
+
+        // Helper custom iterable class
+        static class CustomIterable<T> implements Iterable<T> {
+            private final List<T> data;
+
+            public CustomIterable(List<T> data) {
+                this.data = data;
+            }
+
+            @Override
+            public Iterator<T> iterator() {
+                return data.iterator();
+            }
+        }
+    }
+
+    /**
+     * Test class for primitive array operations
+     */
+    @Nested
+    public class NPrimitiveArrayTest {
+
+        @Test
+        public void testPrimitiveArrayConversions() {
+            // Test mapToInt from long
+            long[] longs = { 1L, 2L, 3L, 4L, 5L };
+            int[] ints = N.mapToInt(longs, l -> (int) (l * 2));
+            assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, ints);
+
+            // Test mapToLong from int
+            int[] intArray = { 1, 2, 3 };
+            long[] longArray = N.mapToLong(intArray, i -> i * 1000000L);
+            assertArrayEquals(new long[] { 1000000L, 2000000L, 3000000L }, longArray);
+
+            // Test mapToDouble from int
+            int[] scores = { 85, 90, 78, 92, 88 };
+            double[] percentages = N.mapToDouble(scores, score -> score / 100.0);
+            assertArrayEquals(new double[] { 0.85, 0.90, 0.78, 0.92, 0.88 }, percentages, 0.001);
+        }
+
+        @Test
+        public void testPrimitivePredicates() {
+            // Test with various primitive predicates
+            char[] chars = { 'a', 'B', 'c', 'D', 'e' };
+            char[] uppercase = N.filter(chars, Character::isUpperCase);
+            assertArrayEquals(new char[] { 'B', 'D' }, uppercase);
+
+            byte[] bytes = { -128, -1, 0, 1, 127 };
+            byte[] positive = N.filter(bytes, b -> b > 0);
+            assertArrayEquals(new byte[] { 1, 127 }, positive);
+
+            float[] floats = { 1.5f, 2.0f, 2.5f, 3.0f, 3.5f };
+            float[] integers = N.filter(floats, f -> f == (int) f);
+            assertArrayEquals(new float[] { 2.0f, 3.0f }, integers, 0.001f);
+        }
+
+        @Test
+        public void testPrimitiveDistinct() {
+            // Test distinct with various primitive types
+            char[] chars = { 'a', 'b', 'a', 'c', 'b', 'c' };
+            char[] distinctChars = N.distinct(chars);
+            Arrays.sort(distinctChars);
+            assertArrayEquals(new char[] { 'a', 'b', 'c' }, distinctChars);
+
+            double[] doubles = { 1.1, 2.2, 1.1, 3.3, 2.2, 3.3 };
+            double[] distinctDoubles = N.distinct(doubles);
+            assertEquals(3, distinctDoubles.length);
+
+            // Test with NaN and infinity
+            double[] special = { Double.NaN, 1.0, Double.POSITIVE_INFINITY, Double.NaN, 1.0 };
+            double[] distinctSpecial = N.distinct(special);
+            assertEquals(3, distinctSpecial.length); // NaN, 1.0, Infinity
+        }
+    }
+
+    // Helper class for complex tests
+    public static class Person {
+        private String name;
+        private int age;
+        private String department;
+
+        public Person(String name, int age, String department) {
+            this.name = name;
+            this.age = age;
+            this.department = department;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public String getDepartment() {
+            return department;
+        }
+    }
+}

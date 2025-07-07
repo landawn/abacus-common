@@ -16,13 +16,30 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * A functional interface that represents an operation that accepts an object-valued argument
+ * and a char-valued argument, and returns no result. This is a specialization of BiConsumer
+ * for the case where the second argument is a primitive char.
+ *
+ * <p>This is a functional interface whose functional method is {@link #accept(Object, char)}.
+ *
+ * @param <T> the type of the object argument to the operation
+ * @see java.util.function.BiConsumer
+ */
 @FunctionalInterface
 public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param t
-     * @param value
+     * <p>This method consumes an object of type T and a char value, performing some
+     * side-effect operation without returning any result. Common use cases include
+     * updating the object's state based on the char value, logging, or storing
+     * the char value within the object.
+     *
+     * @param t the first input argument of type T
+     * @param value the second input argument, a primitive char value
+     * @throws RuntimeException if the operation cannot be completed
      */
     @Override
     void accept(T t, char value);

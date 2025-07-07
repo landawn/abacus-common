@@ -28,8 +28,12 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Indexed objects.
+ * Indexed represents a value paired with an index, useful for maintaining position information
+ * during stream operations or when processing collections. This class provides serialization
+ * and deserialization capabilities for Indexed instances.
  *
- * @param <T>
+ * @param <T> the type of value stored in the Indexed container
  */
 @SuppressWarnings("java:S2160")
 public class IndexedType<T> extends AbstractType<Indexed<T>> {
@@ -51,20 +55,33 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         parameterTypes = new Type[] { valueType };
     }
 
+    /**
+     * Returns the declaring name of this indexed type.
+     * The declaring name represents the type in a simplified format suitable for type declarations,
+     * using simple class names rather than fully qualified names.
+     *
+     * @return the declaring name of this type (e.g., "Indexed<String>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Indexed type handled by this type handler.
+     *
+     * @return the Class object for Indexed
+     */
     @Override
     public Class<Indexed<T>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the parameter types of this generic indexed type.
+     * For indexed types, this array contains a single element representing the value type.
      *
-     * @return
+     * @return an array containing the value type as the only parameter type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -72,9 +89,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as Indexed is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -82,9 +99,11 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
+     * Converts an Indexed object to its string representation.
+     * The indexed value is serialized as a JSON array with two elements: [index, value].
      *
-     * @param x
-     * @return
+     * @param x the Indexed object to convert to string
+     * @return the JSON array representation "[index,value]", or null if the input is null
      */
     @Override
     public String stringOf(final Indexed<T> x) {
@@ -92,9 +111,13 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
+     * Parses a string representation into an Indexed instance.
+     * The string should be in JSON array format with exactly two elements: [index, value].
+     * The first element is converted to a long index, and the second element is parsed
+     * according to the value type.
      *
-     * @param str
-     * @return
+     * @param str the JSON array string to parse (e.g., "[0,\"hello\"]")
+     * @return a new Indexed instance with the parsed index and value, or null if the input is null or empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -113,10 +136,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
+     * Appends the string representation of an Indexed object to an Appendable.
+     * The output format is a JSON array: [index,value].
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Indexed object to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Indexed<T> x) throws IOException {
@@ -134,11 +159,14 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
+     * Writes the character representation of an Indexed object to a CharacterWriter.
+     * This method is optimized for performance when writing to character-based outputs.
+     * The indexed value is serialized as a JSON array.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Indexed object to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Indexed<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -161,11 +189,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Gets the type name.
+     * Generates a type name string for an Indexed type with the specified value type.
+     * The format depends on whether a declaring name (simplified) or full name is requested.
      *
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
+     * @param valueTypeName the name of the value type
+     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @return the formatted type name (e.g., "Indexed<String>" or "com.landawn.abacus.util.Indexed<java.lang.String>")
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

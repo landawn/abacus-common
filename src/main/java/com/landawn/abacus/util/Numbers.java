@@ -44,10 +44,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.type.Type;
 
 /**
- *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under the Apache License, Version 2.0.
- *  The purpose of copying the code is to re-organize the APIs.
- * <br />
- * <br />
+ * <p>Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under the Apache License, Version 2.0 and may be modified</p>
+ * <br>The purpose of copying the code is to re-organize the APIs.</br>
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. For example, if
@@ -697,18 +695,31 @@ public final class Numbers {
     }
 
     /**
-     * Converts the given number to the specified target type.
+     * Converts the given number to the specified target type with overflow checking.
+     * 
+     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
+     * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
+     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert a double to an int (throws ArithmeticException if outside int range)
+     * Integer result = Numbers.convert(123.45, Integer.class);
+     * 
+     * // Convert a BigInteger to a long (throws ArithmeticException if too large)
+     * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), Long.class);
+     * 
+     * // Null values return the default value for the target type
+     * Byte byteValue = Numbers.convert(null, Byte.class); // Returns null
+     * byte primByteValue = Numbers.convert(null, byte.class); // Returns 0
+     * }</pre>
      *
-     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
-     * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
-     *
-     * <p>If the conversion resulted in an overflow, an ArithmeticException is thrown.
-     *
-     * @param <T> The target type of the conversion. This must be a subclass of Number.
-     * @param value The number to convert. This can be any instance of Number.
-     * @param targetType The Class object representing the target type of the conversion.
-     * @return The converted number. This will be an instance of the target type.
-     * @throws ArithmeticException if the conversion resulted in an overflow.
+     * @param <T> the target type of the conversion (must extend Number)
+     * @param value the number to convert (may be null)
+     * @param targetType the class object representing the target type
+     * @return the converted number as an instance of the target type,
+     *         or the default value of the target type if the input value is null
+     * @throws ArithmeticException if the conversion would result in an overflow
      */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
@@ -726,18 +737,76 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given number to the specified target type with overflow checking.
+     * If the input value is null, returns the provided default value.
+     *
+     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
+     * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
+     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert a double to an int with a default value for null
+     * Integer result = Numbers.convert(null, Integer.class, -1);
+     *
+     * // Convert a BigInteger to a long with a custom default
+     * Long longValue = Numbers.convert(null, Long.class, 0L);
+     *
+     * // Convert with overflow checking
+     * try {
+     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), Byte.class, (byte)0);
+     * } catch (ArithmeticException e) {
+     *     // Handle overflow exception
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type of the conversion (must extend Number)
+     * @param value the number to convert (may be null)
+     * @param targetType the class object representing the target type
+     * @param defaultValueForNull the value to return if the input value is null
+     * @return the converted number as an instance of the target type,
+     *         or the specified default value if the input value is null
+     * @throws ArithmeticException if the conversion would result in an overflow
+     * @see #convert(Number, Class)
+     */
+    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType, T defaultValueForNull) throws ArithmeticException {
+        if (value == null) {
+            return defaultValueForNull;
+        }
+
+        return convert(value, targetType);
+    }
+
+    /**
      * Converts the given number to the specified target type using the provided Type instance.
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
+     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
      *
-     * <p>If the conversion resulted in an overflow, an ArithmeticException is thrown.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert a double to an int (throws ArithmeticException if outside int range)
+     * Type<Integer> intType = Type.of(Integer.class);
+     * Integer result = Numbers.convert(123.45, intType);
      *
-     * @param <T> The target type of the conversion. This must be a subclass of Number.
-     * @param value The number to convert. This can be any instance of Number.
-     * @param targetType The Type object representing the target type of the conversion.
-     * @return The converted number. This will be an instance of the target type.
-     * @throws ArithmeticException if the conversion resulted in an overflow.
+     * // Convert a BigInteger to a long (throws ArithmeticException if too large)
+     * Type<Long> longType = Type.of(Long.class);
+     * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), longType);
+     *
+     * // Null values return the default value for the target type
+     * Type<Byte> byteType = Type.of(Byte.class);
+     * Byte byteValue = Numbers.convert(null, byteType); // Returns null
+     * }</pre>
+     *
+     * @param <T> the target type of the conversion (must extend Number)
+     * @param value the number to convert (may be null)
+     * @param targetType the Type object representing the target type
+     * @return the converted number as an instance of the target type,
+     *         or the default value of the target type if the input value is null
+     * @throws ArithmeticException if the conversion would result in an overflow
+     * @see #convert(Number, Class)
+     * @see com.landawn.abacus.type.Type
      */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
@@ -752,6 +821,14 @@ public final class Numbers {
         } else {
             return targetType.valueOf(N.stringOf(value));
         }
+    }
+
+    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType, T defaultValueForNull) throws ArithmeticException {
+        if (value == null) {
+            return defaultValueForNull;
+        }
+
+        return convert(value, targetType);
     }
 
     /**
@@ -934,8 +1011,8 @@ public final class Numbers {
      * <p>Example usage:
      * <pre>
      * <code>
-     * Numbers.format(12.105, "0.00"); // returns "12.10"
-     * Numbers.format(12.105, "#.##"); // returns "12.1"
+     * Numbers.format(12.105, "0.00"); // returns "12.11"
+     * Numbers.format(12.105, "#.##"); // returns "12.11"
      * Numbers.format(0.121, "0.00%"); // returns "12.10%"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "0.00%"); // returns "12.16%"
@@ -972,8 +1049,8 @@ public final class Numbers {
      * <p>Example usage:
      * <pre>
      * <code>
-     * Numbers.format(12.105, "0.00"); // returns "12.10"
-     * Numbers.format(12.105, "#.##"); // returns "12.1"
+     * Numbers.format(12.105, "0.00"); // returns "12.11"
+     * Numbers.format(12.105, "#.##"); // returns "12.11"
      * Numbers.format(null, "0.00"); // returns "0.00"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
@@ -5306,6 +5383,42 @@ public final class Numbers {
             0x1.c619094edabffp394, 0x1.3638dd7bd6347p498, 0x1.7cac197cfe503p605, 0x1.1e5dfc140e1e5p716, 0x1.8ce85fadb707ep829, 0x1.95d5f3d928edep945 };
 
     /**
+     * Compares two float values for approximate equality within a specified tolerance.
+     * 
+     * <p>Technically speaking, this is equivalent to
+     * {@code Math.abs(a - b) <= tolerance || Float.valueOf(a).equals(Float.valueOf(b))}.
+     * 
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>{@code
+     * // Returns true, the values are within tolerance
+     * boolean result = Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);
+     * 
+     * // Returns false, the values exceed the tolerance
+     * boolean result = Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);
+     * }</pre>
+     *
+     * @param a the first float value to compare
+     * @param b the second float value to compare
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
+     * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
+     *         {@code false} otherwise
+     * @see #fuzzyEquals(double, double, double)
+     * @see Float#compare(float, float)
+     */
+    public static boolean fuzzyEquals(final float a, final float b, final float tolerance) {
+        // Check that tolerance is valid (non-negative and not NaN)
+        if (tolerance < 0.0 || Float.isNaN(tolerance)) {
+            throw new IllegalArgumentException("tolerance must be non-negative and not NaN");
+        }
+
+        return Math.copySign(a - b, 1.0f) <= tolerance // branch-free version of abs(a - b)
+                // copySign(x, 1.0) is a branch-free version of abs(x), but with different NaN semantics
+                || (N.equals(a, b)) // needed to ensure that infinities equal themselves
+                || (Float.isNaN(a) && Float.isNaN(b));
+    }
+
+    /**
      * Returns {@code true} if {@code a} and {@code b} are within {@code tolerance} of each other.
      *
      * <p>Technically speaking, this is equivalent to
@@ -5326,10 +5439,10 @@ public final class Numbers {
      * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
      * implementations.
      *
-     * @param a
-     * @param b
-     * @param tolerance
-     * @return
+     * @param a the first double value to compare
+     * @param b the second double value to compare
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
+     * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      */
     public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
@@ -5348,6 +5461,35 @@ public final class Numbers {
      * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly equal values.
      *
      * <p>This method is equivalent to
+     * {@code fuzzyEquals(a, b, tolerance) ? 0 : Float.compare(a, b)}. In particular, like
+     * {@link Float#compare(float, float)}, it treats all NaN values as equal and greater than all
+     * other values (including {@link Float#POSITIVE_INFINITY}).
+     *
+     * <p>This is <em>not</em> a total ordering and is <em>not</em> suitable for use in
+     * {@link Comparable#compareTo} implementations. In particular, it is not transitive.
+     *
+     * @param a the first float value to compare
+     * @param b the second float value to compare
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
+     * @return {@code 0} if {@code a} and {@code b} are fuzzily equal, a negative integer if {@code a} is less than {@code b},
+     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     */
+    public static int fuzzyCompare(final float a, final float b, final float tolerance) {
+        if (fuzzyEquals(a, b, tolerance)) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        } else if (a > b) {
+            return 1;
+        } else {
+            return Boolean.compare(Float.isNaN(a), Float.isNaN(b));
+        }
+    }
+
+    /**
+     * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly equal values.
+     *
+     * <p>This method is equivalent to
      * {@code fuzzyEquals(a, b, tolerance) ? 0 : Double.compare(a, b)}. In particular, like
      * {@link Double#compare(double, double)}, it treats all NaN values as equal and greater than all
      * other values (including {@link Double#POSITIVE_INFINITY}).
@@ -5355,10 +5497,10 @@ public final class Numbers {
      * <p>This is <em>not</em> a total ordering and is <em>not</em> suitable for use in
      * {@link Comparable#compareTo} implementations. In particular, it is not transitive.
      *
-     * @param a
-     * @param b
-     * @param tolerance
-     * @return
+     * @param a the first double value to compare
+     * @param b the second double value to compare
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
+     * @return {@code 0} if {@code a} and {@code b} are fuzzily equal, a negative integer if {@code a} is less than {@code b},
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      */
     public static int fuzzyCompare(final double a, final double b, final double tolerance) {

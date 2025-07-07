@@ -17,6 +17,12 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for DataSet values.
+ * This class provides serialization and deserialization for DataSet objects,
+ * which are tabular data structures used for data manipulation and analysis.
+ * DataSets are serialized to and from JSON format.
+ */
 @SuppressWarnings("java:S2160")
 public class DataSetType extends AbstractType<DataSet> {
 
@@ -30,15 +36,21 @@ public class DataSetType extends AbstractType<DataSet> {
         typeClass = DataSet.class;
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing DataSet.class
+     */
     @Override
     public Class<DataSet> clazz() {
         return typeClass;
     }
 
     /**
-     * Checks if is data set.
+     * Indicates whether this type represents a DataSet.
+     * Always returns true for DataSetType.
      *
-     * @return {@code true}, if is data set
+     * @return true, as this type handler specifically handles DataSet objects
      */
     @Override
     public boolean isDataSet() {
@@ -46,9 +58,10 @@ public class DataSetType extends AbstractType<DataSet> {
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this DataSet type is serializable in the type system.
+     * DataSets require special JSON serialization handling.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating DataSets are not simply serializable
      */
     @Override
     public boolean isSerializable() {
@@ -56,9 +69,9 @@ public class DataSetType extends AbstractType<DataSet> {
     }
 
     /**
-     * Gets the serialization type.
+     * Returns the serialization type category for DataSet objects.
      *
-     * @return
+     * @return SerializationType.DATA_SET, indicating special DataSet serialization handling
      */
     @Override
     public SerializationType getSerializationType() {
@@ -66,9 +79,11 @@ public class DataSetType extends AbstractType<DataSet> {
     }
 
     /**
+     * Converts a DataSet to its JSON string representation.
+     * The DataSet is serialized with all its columns, rows, and metadata.
      *
-     * @param x
-     * @return
+     * @param x the DataSet to convert. Can be null.
+     * @return A JSON string representation of the DataSet, or null if input is null
      */
     @Override
     public String stringOf(final DataSet x) {
@@ -76,9 +91,12 @@ public class DataSetType extends AbstractType<DataSet> {
     }
 
     /**
+     * Converts a JSON string representation back to a DataSet object.
+     * The string should contain a valid JSON representation of a DataSet
+     * with its structure and data.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse. Can be null or empty.
+     * @return A DataSet parsed from the JSON string, or null if input is null/empty
      */
     @Override
     public DataSet valueOf(final String str) {

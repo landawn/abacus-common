@@ -15,12 +15,62 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum AccountStatus.
- *
+ * Enumeration representing various states of an account lifecycle.
+ * Each status has an associated integer value that can be used for persistence
+ * or integration with systems that require numeric status codes.
+ * 
+ * <p>The account statuses follow a typical lifecycle progression:</p>
+ * <ul>
+ *   <li>DEFAULT (0) - Initial state of an account</li>
+ *   <li>ACTIVE (1) - Account is active and fully functional</li>
+ *   <li>SUSPENDED (2) - Account is temporarily disabled</li>
+ *   <li>RETIRED (3) - Account is no longer in active use but retained</li>
+ *   <li>CLOSED (4) - Account has been formally closed</li>
+ *   <li>DELETED (5) - Account has been deleted from the system</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * AccountStatus status = AccountStatus.ACTIVE;
+ * int statusCode = status.intValue(); // Returns 1
+ * 
+ * // Convert from int to enum
+ * AccountStatus restored = AccountStatus.valueOf(1); // Returns ACTIVE
+ * 
+ * // Use in switch statements
+ * switch (status) {
+ *     case ACTIVE:
+ *         // Handle active account
+ *         break;
+ *     case SUSPENDED:
+ *         // Handle suspended account
+ *         break;
+ *     default:
+ *         // Handle other statuses
+ * }
+ * }</pre>
+ * 
+ * @since 1.0
  */
 public enum AccountStatus {
 
-    DEFAULT(0), ACTIVE(1), SUSPENDED(2), RETIRED(3), CLOSED(4), DELETED(5);
+    /** Default initial state of an account (value: 0) */
+    DEFAULT(0),
+
+    /** Account is active and fully functional (value: 1) */
+    ACTIVE(1),
+
+    /** Account is temporarily disabled (value: 2) */
+    SUSPENDED(2),
+
+    /** Account is no longer in active use but retained for historical purposes (value: 3) */
+    RETIRED(3),
+
+    /** Account has been formally closed (value: 4) */
+    CLOSED(4),
+
+    /** Account has been deleted from the system (value: 5) */
+    DELETED(5);
 
     private final int intValue;
 
@@ -28,14 +78,36 @@ public enum AccountStatus {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the integer value associated with this account status.
+     * This can be useful for database persistence or API communication
+     * where numeric codes are preferred.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AccountStatus status = AccountStatus.SUSPENDED;
+     * int code = status.intValue(); // Returns 2
+     * }</pre>
+     *
+     * @return the integer value of this status
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
+     * Returns the AccountStatus corresponding to the specified integer value.
+     * This method performs a reverse lookup from integer code to enum constant.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AccountStatus status = AccountStatus.valueOf(1); // Returns ACTIVE
+     * AccountStatus suspended = AccountStatus.valueOf(2); // Returns SUSPENDED
+     * }</pre>
      *
-     * @param intValue
-     * @return
+     * @param intValue the integer value to convert
+     * @return the corresponding AccountStatus
+     * @throws IllegalArgumentException if no AccountStatus exists with the specified integer value
      */
     public static AccountStatus valueOf(final int intValue) {
         switch (intValue) {

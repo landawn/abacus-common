@@ -17,19 +17,40 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
- *
+ * Represents a supplier of results.
+ * 
+ * <p>This is an extended version of {@link java.util.function.Supplier} that implements both
+ * the standard Java supplier interface and a throwable variant. There is no requirement that
+ * a new or distinct result be returned each time the supplier is invoked.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #get()}.
+ * 
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * 
+ * @param <T> the type of results supplied by this supplier
+ * 
+ * @see java.util.function.Supplier
  */
 @FunctionalInterface
 public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, java.util.function.Supplier<T> { //NOSONAR
 
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
     @Override
     T get();
 
     /**
+     * Converts this supplier to a throwable supplier that can throw checked exceptions.
+     * This method provides a way to use this supplier in contexts that require explicit exception handling.
+     * 
+     * <p>The returned supplier will have the same behavior as this supplier but with the ability
+     * to throw checked exceptions of the specified type.
      *
-     * @param <E>
-     * @return
+     * @param <E> the type of exception that the returned supplier may throw
+     * @return a throwable supplier that wraps this supplier
      */
     default <E extends Throwable> Throwables.Supplier<T, E> toThrowable() {
         return (Throwables.Supplier<T, E>) this;

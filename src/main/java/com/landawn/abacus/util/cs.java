@@ -315,6 +315,10 @@ public final class cs { // NOSONAR
     public static final String idExtractor1 = "idExtractor1";
     public static final String idExtractor2 = "idExtractor2";
 
+    public static final String dataSets = "dataSets";
+    public static final String componentType = "componentType";
+    public static final String capacity = "capacity";
+
     private cs() {
         // Utility class for constant string values.
     }

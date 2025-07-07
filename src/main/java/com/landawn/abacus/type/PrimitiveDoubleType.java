@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive double values.
+ * This class handles the primitive double type specifically, as opposed to the Double wrapper class.
+ * It provides type information and default value handling for double primitives.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleType extends AbstractDoubleType {
 
@@ -25,6 +30,12 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
+    /**
+     * Returns the Class object representing the primitive double type.
+     * Note that this returns double.class, not Double.class.
+     *
+     * @return the Class object for the primitive double type
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -32,15 +43,22 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * Always returns true for PrimitiveDoubleType.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, as this type handler is for primitive double
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive double type.
+     * The default value for double primitives is 0.0.
+     *
+     * @return Double value of 0.0 as the default value for primitive double
+     */
     @Override
     public Double defaultValue() {
         return DEFAULT_VALUE;

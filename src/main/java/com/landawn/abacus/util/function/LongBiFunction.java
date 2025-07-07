@@ -16,23 +16,71 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that accepts two {@code long}-valued arguments and produces
+ * a result. This is the {@code long}-consuming primitive specialization for
+ * {@link java.util.function.BiFunction}.
+ *
+ * <p>This interface extends {@link Throwables.LongBiFunction} with
+ * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * exception handling capabilities.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #apply(long, long)}.
+ *
+ * @param <R> the type of the result of the function
+ *
+ * @see java.util.function.BiFunction
+ * @see java.util.function.LongFunction
+ * @since 1.8
+ */
 @FunctionalInterface
 public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
+     * Applies this function to the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * <p>The function processes two long values and produces a result of type R.
+     * Common use cases include:
+     * <ul>
+     *   <li>Computing values from two long inputs (e.g., calculating differences)</li>
+     *   <li>Creating objects from two long parameters (e.g., timestamp ranges)</li>
+     *   <li>Performing lookups based on two long indices</li>
+     *   <li>Aggregating or combining two long values into a single result</li>
+     *   <li>Converting pairs of long values to other representations</li>
+     *   <li>Implementing binary operations on long values that produce non-long results</li>
+     * </ul>
+     *
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result of type R
      */
     @Override
     R apply(long t, long u);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result. If evaluation
+     * of either function throws an exception, it is relayed to the caller of
+     * the composed function.
      *
-     * @param <V>
-     * @param after
-     * @return
+     * <p>This method enables function composition, allowing you to chain operations
+     * where the output of this function becomes the input of the next function.
+     * This is useful for building complex transformations from simpler ones.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * LongBiFunction<Long> difference = (a, b) -> Math.abs(a - b);
+     * LongBiFunction<String> differenceAsString = difference.andThen(String::valueOf);
+     * String result = differenceAsString.apply(100L, 75L); // "25"
+     * }</pre>
+     *
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied.
+     *              Must not be null
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     default <V> LongBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));

@@ -24,6 +24,11 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for Character array (Character[]) values.
+ * This class provides serialization, deserialization, and output operations for Character arrays.
+ * It handles proper formatting with brackets, separators, and null value representation.
+ */
 public final class CharacterArrayType extends ObjectArrayType<Character> {
 
     CharacterArrayType() {
@@ -31,9 +36,14 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
+     * Converts a Character array to its string representation.
+     * The output format is: [element1, element2, ...]
+     * - Null elements are represented as "null"
+     * - Non-null characters are wrapped in single quotes
+     * - Empty arrays return "[]"
      *
-     * @param x
-     * @return
+     * @param x the Character array to convert. Can be null.
+     * @return A string representation of the array with quoted characters, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -71,16 +81,21 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
+     * Converts a string representation back to a Character array.
+     * Expects format: [element1, element2, ...]
+     * - Handles both quoted and unquoted characters
+     * - "null" strings (4 characters) are converted to null elements
+     * - Empty string or "[]" returns empty array
      *
-     * @param str
-     * @return
+     * @param str the string to parse. Can be null.
+     * @return A Character array parsed from the string, or null if input is null
      */
     @MayReturnNull
     @Override
     public Character[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
@@ -114,10 +129,13 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
+     * Appends a Character array to an Appendable output.
+     * The output format is: [element1, element2, ...]
+     * Null elements are represented as "null" (without quotes).
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Character array to append. Can be null.
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Character[] x) throws IOException {
@@ -143,11 +161,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
+     * Writes a Character array to a CharacterWriter with optional quotation based on configuration.
+     * The output format is: [element1, element2, ...]
+     * - If quotation is configured, characters are wrapped in the specified quote character
+     * - Single quotes within characters are escaped when using single quote quotation
+     * - Null elements are always represented as "null" without quotes
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Character array to write. Can be null.
+     * @param config the serialization configuration that specifies quotation settings. Can be null.
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Character[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -196,9 +219,12 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
+     * Converts a Character array to a string representation using standard array formatting.
+     * This is an alternative string representation that uses join utility for formatting.
+     * The output format is: [element1, element2, ...]
      *
-     * @param x
-     * @return
+     * @param x the Character array to convert. Can be null.
+     * @return A string representation of the array, or null if input is null
      */
     @Override
     public String toString(final Character[] x) {

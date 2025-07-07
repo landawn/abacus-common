@@ -22,6 +22,11 @@ public final class ShortType extends AbstractShortType {
         super(SHORT);
     }
 
+    /**
+     * Returns the Class object representing the Short wrapper type.
+     * 
+     * @return the Class object for Short.class
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -29,9 +34,11 @@ public final class ShortType extends AbstractShortType {
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Indicates whether this type represents a primitive wrapper class.
+     * For ShortType, this always returns true since it represents the Short wrapper class
+     * for the primitive short type.
      *
-     * @return {@code true}, if is primitive wrapper
+     * @return true, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {

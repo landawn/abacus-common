@@ -40,15 +40,23 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
         super(INSTANT);
     }
 
+    /**
+     * Gets the class type for Joda Instant.
+     *
+     * @return the Class object representing org.joda.time.Instant
+     */
     @Override
     public Class<Instant> clazz() {
         return Instant.class;
     }
 
     /**
+     * Converts a Joda Instant to its string representation.
+     * 
+     * The Instant is formatted using the ISO 8601 timestamp format with milliseconds (yyyy-MM-dd'T'HH:mm:ss.SSS).
      *
-     * @param x
-     * @return
+     * @param x the Instant to convert
+     * @return the string representation of the Instant, or null if the input is null
      */
     @Override
     public String stringOf(final Instant x) {
@@ -56,9 +64,19 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Parses a string representation into a Joda Instant instance.
+     * 
+     * This method handles the following string formats:
+     * - Empty/null string: returns null
+     * - "SYS_TIME": returns current system time as Instant
+     * - Numeric string (not starting with '-'): parsed as milliseconds since epoch
+     * - ISO 8601 date-time format (20 characters): parsed as yyyy-MM-dd'T'HH:mm:ss
+     * - ISO 8601 timestamp format (24 characters): parsed as yyyy-MM-dd'T'HH:mm:ss.SSS
+     * - Other formats: parsed using the default timestamp parser
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return an Instant instance, or null if the string is empty or null
+     * @throws IllegalArgumentException if the string format is invalid
      */
     @MayReturnNull
     @Override
@@ -84,11 +102,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Parses a character array into a Joda Instant instance.
+     * 
+     * This method first attempts to parse the character array as a long value (milliseconds since epoch).
+     * If that fails, it converts the character array to a string and delegates to valueOf(String).
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character buffer containing the value to parse
+     * @param offset the start offset in the character buffer
+     * @param len the number of characters to parse
+     * @return an Instant instance, or null if the character buffer is null or length is 0
      */
     @MayReturnNull
     @Override
@@ -109,11 +131,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Retrieves an Instant value from the specified column in a ResultSet.
+     * 
+     * This method reads a Timestamp from the ResultSet and converts it to a Joda Instant.
+     * If the timestamp is null, this method returns null.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return an Instant instance created from the timestamp, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -123,11 +149,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Retrieves an Instant value from the specified column in a ResultSet.
+     * 
+     * This method reads a Timestamp from the ResultSet and converts it to a Joda Instant.
+     * If the timestamp is null, this method returns null.
      *
-     * @param rs
-     * @param columnName
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnName the column name to retrieve the value from
+     * @return an Instant instance created from the timestamp, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column name is invalid
      */
     @Override
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
@@ -137,11 +167,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Sets an Instant parameter in a PreparedStatement.
+     * 
+     * This method converts the Joda Instant to a SQL Timestamp before setting it in the statement.
+     * If the Instant is null, a SQL NULL is set for the parameter.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the Instant value to set, or null for SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws SQLException {
@@ -149,11 +183,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Sets a named Instant parameter in a CallableStatement.
+     * 
+     * This method converts the Joda Instant to a SQL Timestamp before setting it in the statement.
+     * If the Instant is null, a SQL NULL is set for the parameter.
      *
-     * @param stmt
-     * @param columnName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param columnName the name of the parameter to set
+     * @param x the Instant value to set, or null for SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String columnName, final Instant x) throws SQLException {
@@ -161,10 +199,14 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Appends the string representation of an Instant to an Appendable.
+     * 
+     * If the Instant is null, appends the null string representation.
+     * Otherwise, appends the string representation obtained from stringOf(Instant).
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Instant to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Instant x) throws IOException {
@@ -176,11 +218,20 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Writes the character representation of an Instant to a CharacterWriter.
+     * 
+     * This method handles different serialization formats based on the configuration:
+     * - LONG: writes the epoch milliseconds as a number
+     * - ISO_8601_DATE_TIME: writes in yyyy-MM-dd'T'HH:mm:ss format
+     * - ISO_8601_TIMESTAMP: writes in yyyy-MM-dd'T'HH:mm:ss.SSS format
+     * - Default: uses the standard string representation
+     * 
+     * The output may be quoted based on the serialization configuration settings.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Instant to write
+     * @param config the serialization configuration specifying format and quoting options
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @SuppressWarnings("null")
     @Override

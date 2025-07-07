@@ -23,11 +23,43 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 /**
- * Once the object is stored in a {@code Set} or {@code Map}, it should not be modified, otherwise, the behavior is undefined.
+ * An immutable wrapper class that provides custom hashCode and equals implementations for wrapped objects.
+ * This is particularly useful for using arrays or other objects with non-standard equality semantics
+ * as keys in HashMaps or elements in HashSets.
+ * 
+ * <p>Once a Wrapper object is stored in a {@code Set} or used as a key in a {@code Map}, 
+ * the wrapped object should not be modified, as this would change its hash code and equals behavior,
+ * leading to undefined behavior in the collection.</p>
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Special handling for arrays with deep equality and hash code computation</li>
+ *   <li>Support for custom hash and equals functions</li>
+ *   <li>Object pooling for zero-length arrays to reduce memory allocation</li>
+ *   <li>Immutable design to ensure collection safety</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Wrapping arrays for use as map keys
+ * int[] array1 = {1, 2, 3};
+ * int[] array2 = {1, 2, 3};
+ * 
+ * Map<Wrapper<int[]>, String> map = new HashMap<>();
+ * map.put(Wrapper.of(array1), "value");
+ * String result = map.get(Wrapper.of(array2)); // Returns "value"
+ * 
+ * // Custom wrapper with specific hash/equals logic
+ * Person person = new Person("John", 30);
+ * Wrapper<Person> wrapper = Wrapper.of(person,
+ *     p -> p.getName().hashCode(),
+ *     (p1, p2) -> p1.getName().equals(p2.getName())
+ * );
+ * }</pre>
  *
- * @param <T> The type of the object that this wrapper will hold.
- *
- * @param <T>
+ * @param <T> The type of the object that this wrapper will hold
+ * @author Haiyang Li
+ * @since 0.8
  * @see Keyed
  * @see IndexedKeyed
  */
@@ -47,11 +79,23 @@ public abstract class Wrapper<T> implements Immutable {
     }
 
     /**
-     * Returns a new instance of Wrapper for the given array.
+     * Creates a new Wrapper instance for the given array with deep equality semantics.
+     * This method automatically detects arrays and applies appropriate deep hash code
+     * and deep equals implementations. Zero-length arrays are cached for efficiency.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] nums = {1, 2, 3};
+     * Wrapper<int[]> wrapper = Wrapper.of(nums);
+     * 
+     * // Works with multi-dimensional arrays
+     * String[][] matrix = {{"a", "b"}, {"c", "d"}};
+     * Wrapper<String[][]> matrixWrapper = Wrapper.of(matrix);
+     * }</pre>
      *
-     * @param <T> The type of the array elements.
-     * @param array The array to be wrapped.
-     * @return A Wrapper instance for the given array.
+     * @param <T> The type of the array elements
+     * @param array The array to be wrapped (must be an array type)
+     * @return A Wrapper instance for the given array
      */
     public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
@@ -76,16 +120,26 @@ public abstract class Wrapper<T> implements Immutable {
     }
 
     /**
-     * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
-     * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
-     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example, array.
+     * Creates a new Wrapper instance with custom hash and equals functions.
+     * This method is useful when the wrapped value's natural hashCode and equals methods
+     * are not suitable for use in collections.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Wrap a Person object but only consider the ID for equality
+     * Person person = new Person(123, "John", 30);
+     * Wrapper<Person> wrapper = Wrapper.of(person,
+     *     p -> p.getId(),                    // Hash by ID
+     *     (p1, p2) -> p1.getId() == p2.getId() // Compare by ID
+     * );
+     * }</pre>
      *
-     * @param <T> The type of the value to be wrapped.
-     * @param value The value to be wrapped.
-     * @param hashFunction The function to calculate the hash code of the wrapped value.
-     * @param equalsFunction The function to compare the wrapped value with other objects.
-     * @return A Wrapper instance for the given value.
-     * @throws IllegalArgumentException if the hashFunction or equalsFunction is {@code null}.
+     * @param <T> The type of the value to be wrapped
+     * @param value The value to be wrapped
+     * @param hashFunction The function to calculate the hash code of the wrapped value
+     * @param equalsFunction The function to compare the wrapped value with other objects
+     * @return A Wrapper instance for the given value
+     * @throws IllegalArgumentException if the hashFunction or equalsFunction is {@code null}
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
@@ -96,16 +150,27 @@ public abstract class Wrapper<T> implements Immutable {
     }
 
     /**
-     * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
-     * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
-     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example, array.
+     * Creates a new Wrapper instance with custom hash, equals, and toString functions.
+     * This provides complete control over how the wrapped object behaves in collections
+     * and how it's represented as a string.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ComplexObject obj = new ComplexObject();
+     * Wrapper<ComplexObject> wrapper = Wrapper.of(obj,
+     *     o -> o.computeHash(),           // Custom hash
+     *     (o1, o2) -> o1.isEquivalent(o2), // Custom equals
+     *     o -> o.toDisplayString()         // Custom toString
+     * );
+     * }</pre>
      *
-     * @param <T> The type of the value to be wrapped.
-     * @param value The value to be wrapped.
-     * @param hashFunction The function to calculate the hash code of the wrapped value.
-     * @param equalsFunction The function to compare the wrapped value with other objects.
-     * @return A Wrapper instance for the given value.
-     * @throws IllegalArgumentException if the hashFunction or equalsFunction or toStringFunction is {@code null}.
+     * @param <T> The type of the value to be wrapped
+     * @param value The value to be wrapped
+     * @param hashFunction The function to calculate the hash code of the wrapped value
+     * @param equalsFunction The function to compare the wrapped value with other objects
+     * @param toStringFunction The function to generate string representation of the wrapped value
+     * @return A Wrapper instance for the given value
+     * @throws IllegalArgumentException if any of the function parameters is {@code null}
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
             final Function<? super T, String> toStringFunction) throws IllegalArgumentException {
@@ -116,13 +181,42 @@ public abstract class Wrapper<T> implements Immutable {
         return new AnyWrapper<>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
+    /**
+     * Returns the wrapped value.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3};
+     * Wrapper<int[]> wrapper = Wrapper.of(array);
+     * int[] unwrapped = wrapper.value(); // Returns the original array
+     * }</pre>
+     *
+     * @return the wrapped value
+     */
     public T value() {
         return value;
     }
 
+    /**
+     * Returns the hash code of the wrapped value.
+     * The implementation depends on how the wrapper was created:
+     * - For arrays: uses deep hash code computation
+     * - For custom wrappers: uses the provided hash function
+     *
+     * @return the hash code of the wrapped value
+     */
     @Override
     public abstract int hashCode();
 
+    /**
+     * Compares this wrapper with another object for equality.
+     * Two wrappers are equal if they wrap equal values according to:
+     * - For arrays: deep equality comparison
+     * - For custom wrappers: the provided equals function
+     *
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
+     */
     @Override
     public abstract boolean equals(final Object obj);
 

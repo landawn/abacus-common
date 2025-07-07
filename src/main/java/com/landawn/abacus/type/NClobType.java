@@ -20,6 +20,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Type handler for {@link NClob} (National Character Large Object) objects, providing
+ * database interaction capabilities for handling large Unicode text data.
+ * Note that this type does not support string conversion operations as NCLOBs
+ * are typically handled as database-specific objects.
+ */
 public class NClobType extends AbstractType<NClob> {
 
     public static final String NCLOB = NClob.class.getSimpleName();
@@ -28,16 +34,24 @@ public class NClobType extends AbstractType<NClob> {
         super(NCLOB);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link NClob} class object
+     */
     @Override
     public Class<NClob> clazz() {
         return NClob.class;
     }
 
     /**
-     *
-     * @param x
-     * @return
-     * @throws UnsupportedOperationException
+     * Converts an {@link NClob} object to its string representation.
+     * This operation is not supported for NCLOB types due to their potentially large size
+     * and database-specific nature.
+     * 
+     * @param x the NClob object to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as this operation is not supported
      */
     @Override
     public String stringOf(final NClob x) throws UnsupportedOperationException {
@@ -45,10 +59,13 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
-     * @param str
-     * @return
-     * @throws UnsupportedOperationException
+     * Converts a string representation to an {@link NClob} object.
+     * This operation is not supported as NCLOBs cannot be created from strings directly
+     * and must be obtained from database operations.
+     * 
+     * @param str the string to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as this operation is not supported
      */
     @Override
     public NClob valueOf(final String str) throws UnsupportedOperationException {
@@ -56,11 +73,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an {@link NClob} value from a ResultSet at the specified column index.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the NCLOB from
+     * @return the NClob object from the ResultSet, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public NClob get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -68,11 +86,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an {@link NClob} value from a ResultSet using the specified column label.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return the NClob object from the ResultSet, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public NClob get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -80,11 +99,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to an {@link NClob} value.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the NClob value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws SQLException {
@@ -92,11 +112,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to an {@link NClob} value.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the NClob value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws SQLException {

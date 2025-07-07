@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive boolean values.
+ * This class handles the primitive boolean type specifically, as opposed to the Boolean wrapper class.
+ * It provides type information and default value handling for boolean primitives.
+ */
 public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     public static final String BOOLEAN = boolean.class.getSimpleName();
@@ -24,21 +29,34 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
         super(BOOLEAN);
     }
 
+    /**
+     * Returns the Class object representing the primitive boolean type.
+     * Note that this returns boolean.class, not Boolean.class.
+     *
+     * @return the Class object for the primitive boolean type
+     */
     @Override
     public Class<Boolean> clazz() {
         return boolean.class;
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * Always returns true for PrimitiveBooleanType.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, as this type handler is for primitive boolean
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive boolean type.
+     * The default value for boolean primitives is false.
+     *
+     * @return Boolean.FALSE as the default value for primitive boolean
+     */
     @Override
     public Boolean defaultValue() {
         return Boolean.FALSE;

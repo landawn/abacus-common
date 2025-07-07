@@ -30,9 +30,14 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts a Short object array to its string representation.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * Null elements are represented as "null" in the output.
+     * For example, an array {1, null, 3} becomes "[1, null, 3]".
+     * 
+     * @param x the Short array to convert to string
+     * @return the string representation of the array, or null if the input array is null.
+     *         Returns "[]" for empty arrays.
      */
     @MayReturnNull
     @Override
@@ -43,44 +48,26 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 7));
-        //
-        //    sb.append(WD._BRACKET_L);
-        //
-        //    for (int i = 0, len = x.length; i < len; i++) {
-        //        if (i > 0) {
-        //            sb.append(ELEMENT_SEPARATOR);
-        //        }
-        //
-        //        if (x[i] == null) {
-        //            sb.append(NULL_CHAR_ARRAY);
-        //        } else {
-        //            sb.append(x[i]);
-        //        }
-        //    }
-        //
-        //    sb.append(WD._BRACKET_R);
-        //
-        //    final String str = sb.toString();
-        //
-        //    Objectory.recycle(sb);
-        //
-        //    return str;
-
         return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Parses a string representation of a Short array and returns the corresponding Short array.
+     * The string should contain comma-separated values enclosed in square brackets.
+     * The string "null" (case-sensitive, exactly 4 characters) is parsed as a null element.
+     * For example, "[1, null, 3]" will be parsed to a Short array {1, null, 3}.
+     * 
+     * @param str the string to parse, expected format is "[value1, value2, ...]"
+     * @return the parsed Short array, or null if the input string is null.
+     *         Returns an empty array for empty string or "[]".
+     * @throws NumberFormatException if any non-null element in the string cannot be parsed as a short
      */
     @MayReturnNull
     @Override
     public Short[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_SHORT_OBJ_ARRAY;
         }
 
@@ -102,10 +89,13 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of a Short array to the given Appendable.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * Null elements are appended as "null". If the array itself is null, appends "null".
+     * 
+     * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
+     * @param x the Short array to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Short[] x) throws IOException {
@@ -131,11 +121,15 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of a Short array to the given CharacterWriter.
+     * This method is optimized for performance when writing to character-based outputs.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * Null elements are written as "null".
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the Short array to write
+     * @param config the serialization configuration (currently unused for Short arrays)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Short[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

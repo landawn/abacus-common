@@ -128,6 +128,23 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * Constructs a BiMap with the specified key and value maps, and an inverse BiMap.
+     * This constructor allows the user to provide the underlying maps used to store keys and values, as well as an inverse BiMap.
+     *
+     * @param keyMap The Map to be used for storing keys.
+     * @param valueMap The Map to be used for storing values.
+     * @param inverse The inverse BiMap containing the same entries as this BiMap but with reversed keys and values.
+     */
+    @Internal
+    BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap, BiMap<V, K> inverse) {
+        keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
+        valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
+        this.keyMap = keyMap;
+        this.valueMap = valueMap;
+        this.inverse = inverse;
+    }
+
+    /**
      * Creates a new BiMap with a single key-value pair.
      *
      * @param <K> The type of the key.
@@ -692,7 +709,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return The inverse view of this BiMap.
      */
     public BiMap<V, K> inversed() {
-        return (inverse == null) ? inverse = new BiMap<>(valueMap, keyMap) : inverse;
+        return (inverse == null) ? inverse = new BiMap<>(valueMap, keyMap, this) : inverse;
     }
 
     /**

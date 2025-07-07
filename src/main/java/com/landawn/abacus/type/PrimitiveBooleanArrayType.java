@@ -24,6 +24,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for primitive boolean arrays (boolean[]).
+ * Provides functionality for serialization, deserialization, and conversion between
+ * boolean arrays and their string representations or collections.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
 
@@ -31,21 +36,29 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
     private final Type<Boolean> elementType;
 
+    private final Type<Boolean>[] parameterTypes;
+
     PrimitiveBooleanArrayType() {
         super(BOOLEAN_ARRAY);
 
         elementType = TypeFactory.getType(boolean.class);
+        parameterTypes = new Type[] { elementType };
     }
 
+    /**
+     * Returns the Class object representing the boolean array type.
+     *
+     * @return the Class object for boolean[]
+     */
     @Override
     public Class<boolean[]> clazz() {
         return boolean[].class;
     }
 
     /**
-     * Gets the element type.
+     * Returns the Type object for the boolean element type.
      *
-     * @return
+     * @return the Type object representing Boolean/boolean elements
      */
     @Override
     public Type<Boolean> getElementType() {
@@ -53,9 +66,23 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Returns the parameter types associated with this array type.
      *
-     * @param x
-     * @return
+     * @return an array containing the Boolean Type that describes the elements of this array type
+     * @see #getElementType()
+     */
+    @Override
+    public Type<Boolean>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    /**
+     * Converts a boolean array to its string representation.
+     * The format is: [true, false, true] with elements separated by commas.
+     * Returns null if the input array is null, or "[]" if the array is empty.
+     *
+     * @param x the boolean array to convert
+     * @return the string representation of the array, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -90,16 +117,19 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Parses a string representation and creates a boolean array.
+     * Expected format: [true, false, true] or similar boolean value representations.
+     * Returns null if input is null, empty array if input is empty or "[]".
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return the parsed boolean array, or null if input is null
      */
     @MayReturnNull
     @Override
     public boolean[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -117,10 +147,13 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Appends the string representation of a boolean array to an Appendable.
+     * The format is: [true, false, true] with proper element separation.
+     * Appends "null" if the array is null.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the boolean array to append
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final boolean[] x) throws IOException {
@@ -142,11 +175,14 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Writes the character representation of a boolean array to a CharacterWriter.
+     * Uses optimized character arrays for true/false values for better performance.
+     * Writes "null" if the array is null.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the boolean array to write
+     * @param config the serialization configuration (currently unused for boolean arrays)
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final boolean[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -168,10 +204,12 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
-     * Collection 2 array.
+     * Converts a Collection of Boolean objects to a primitive boolean array.
+     * Each element in the collection is unboxed to its primitive boolean value.
+     * Returns null if the input collection is null.
      *
-     * @param c
-     * @return
+     * @param c the Collection of Boolean objects to convert
+     * @return a boolean array containing the unboxed values, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -191,6 +229,15 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
         return a;
     }
 
+    /**
+     * Converts a boolean array to a Collection.
+     * Each primitive boolean value is boxed to a Boolean object and added to the output collection.
+     * Does nothing if the input array is null or empty.
+     *
+     * @param <E> the type of elements in the output collection
+     * @param x the boolean array to convert
+     * @param output the Collection to add the boxed Boolean values to
+     */
     @Override
     public <E> void array2Collection(final boolean[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
@@ -203,9 +250,11 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Calculates the hash code for a boolean array.
+     * Uses the standard Arrays.hashCode algorithm for consistency.
      *
-     * @param x
-     * @return
+     * @param x the boolean array to hash
+     * @return the hash code of the array
      */
     @Override
     public int hashCode(final boolean[] x) {
@@ -213,10 +262,13 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
+     * Compares two boolean arrays for equality.
+     * Arrays are considered equal if they have the same length and all corresponding elements are equal.
+     * Two null arrays are considered equal.
      *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
+     * @param x the first boolean array
+     * @param y the second boolean array
+     * @return true if the arrays are equal, false otherwise
      */
     @Override
     public boolean equals(final boolean[] x, final boolean[] y) {

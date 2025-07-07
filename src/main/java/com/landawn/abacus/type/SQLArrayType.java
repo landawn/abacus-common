@@ -28,15 +28,21 @@ public class SQLArrayType extends AbstractType<Array> {
         super(SQL_ARRAY);
     }
 
+    /**
+     * Returns the Class object representing the SQL Array type.
+     *
+     * @return the Class object for java.sql.Array.class
+     */
     @Override
     public Class<Array> clazz() {
         return Array.class;
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this type is serializable.
+     * SQL Array types are not serializable as they represent database-specific array structures.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -44,10 +50,13 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Converts an Array object to its string representation.
+     * This operation is not supported for SQL Array types as they are database-specific
+     * and cannot be reliably converted to a string format.
      *
-     * @param x
-     * @return
-     * @throws UnsupportedOperationException
+     * @param x the Array object to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as Array cannot be converted to string
      */
     @Override
     public String stringOf(final Array x) throws UnsupportedOperationException {
@@ -55,10 +64,13 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Creates an Array object from a string representation.
+     * This operation is not supported for SQL Array types as they are database-specific
+     * and cannot be created from a string representation.
      *
-     * @param str
-     * @return
-     * @throws UnsupportedOperationException
+     * @param str the string to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as Array cannot be created from string
      */
     @Override
     public Array valueOf(final String str) throws UnsupportedOperationException {
@@ -66,11 +78,13 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Retrieves a SQL ARRAY value from the specified column in the ResultSet.
+     * A SQL ARRAY represents an array value in the database.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the Array value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Array get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -78,11 +92,13 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Retrieves a SQL ARRAY value from the specified column in the ResultSet.
+     * A SQL ARRAY represents an array value in the database.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the Array value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Array get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -90,11 +106,13 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Sets an Array parameter in a PreparedStatement.
+     * The Array represents a SQL ARRAY value.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the Array value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Array x) throws SQLException {
@@ -102,11 +120,14 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Sets an Array parameter in a CallableStatement.
+     * The Array represents a SQL ARRAY value.
+     * Note: This method uses setObject instead of setArray as CallableStatement may not support setArray with parameter names.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Array value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Array x) throws SQLException {

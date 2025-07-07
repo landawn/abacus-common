@@ -15,12 +15,69 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum Color.
- *
+ * An enumeration representing common colors with their associated integer values.
+ * This enum provides a mapping between color names and numeric codes, useful for
+ * serialization, database storage, or systems that require numeric color representations.
+ * 
+ * <p>Each color is assigned a unique integer value from 0 to 8, allowing for
+ * consistent numeric representation across different systems.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Color myColor = Color.RED;
+ * int colorCode = myColor.intValue(); // returns 2
+ * Color fromCode = Color.valueOf(2);  // returns Color.RED
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
  */
 public enum Color {
 
-    BLACK(0), WHITE(1), RED(2), ORANGE(3), YELLOW(4), GREEN(5), CYAN(6), BLUE(7), PURPLE(8);
+    /**
+     * The color black, represented by integer value 0.
+     */
+    BLACK(0),
+
+    /**
+     * The color white, represented by integer value 1.
+     */
+    WHITE(1),
+
+    /**
+     * The color red, represented by integer value 2.
+     */
+    RED(2),
+
+    /**
+     * The color orange, represented by integer value 3.
+     */
+    ORANGE(3),
+
+    /**
+     * The color yellow, represented by integer value 4.
+     */
+    YELLOW(4),
+
+    /**
+     * The color green, represented by integer value 5.
+     */
+    GREEN(5),
+
+    /**
+     * The color cyan, represented by integer value 6.
+     */
+    CYAN(6),
+
+    /**
+     * The color blue, represented by integer value 7.
+     */
+    BLUE(7),
+
+    /**
+     * The color purple, represented by integer value 8.
+     */
+    PURPLE(8);
 
     private final int intValue;
 
@@ -28,14 +85,36 @@ public enum Color {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the integer value associated with this color.
+     * This method is useful when you need to store or transmit colors as numeric values.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Color color = Color.BLUE;
+     * int value = color.intValue(); // returns 7
+     * }</pre>
+     * 
+     * @return the integer value representing this color (0-8)
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
-     *
-     * @param intValue
-     * @return
+     * Returns the Color enum constant corresponding to the specified integer value.
+     * This method performs a reverse lookup from integer code to Color instance.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Color red = Color.valueOf(2);    // returns Color.RED
+     * Color green = Color.valueOf(5);  // returns Color.GREEN
+     * }</pre>
+     * 
+     * @param intValue the integer value to look up (must be between 0 and 8 inclusive)
+     * @return the Color enum constant associated with the specified integer value
+     * @throws IllegalArgumentException if the intValue is not between 0 and 8, or
+     *         if no Color is mapped to the specified value
      */
     public static Color valueOf(final int intValue) {
         switch (intValue) {
@@ -70,5 +149,4 @@ public enum Color {
                 throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
         }
     }
-
 }

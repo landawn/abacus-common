@@ -15,8 +15,22 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum Month.
- *
+ * An enumeration representing the twelve months of the Gregorian calendar.
+ * Each month is associated with its corresponding numeric value (1-12).
+ * 
+ * <p>This enum provides a convenient way to work with months in a type-safe manner,
+ * avoiding the use of raw integer values which can be error-prone.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Month month = Month.JANUARY;
+ * int monthNumber = month.intValue(); // returns 1
+ * 
+ * Month decoded = Month.valueOf(3); // returns MARCH
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 1.0
  */
 public enum Month {
 
@@ -28,14 +42,38 @@ public enum Month {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the numeric value of this month.
+     * January is 1, February is 2, and so on through December which is 12.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Month.MARCH.intValue(); // returns 3
+     * Month.DECEMBER.intValue(); // returns 12
+     * }</pre>
+     * 
+     * @return the numeric value of this month (1-12)
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
-     *
-     * @param intValue
-     * @return
+     * Returns the Month enum constant corresponding to the specified numeric value.
+     * 
+     * <p>This method provides a way to convert from numeric month values (1-12) to
+     * the corresponding Month enum constant. This is useful when working with
+     * legacy code or external systems that use numeric month representations.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Month jan = Month.valueOf(1); // returns JANUARY
+     * Month dec = Month.valueOf(12); // returns DECEMBER
+     * }</pre>
+     * 
+     * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)
+     * @return the Month enum constant corresponding to the specified value
+     * @throws IllegalArgumentException if the intValue is not between 1 and 12 inclusive
      */
     public static Month valueOf(final int intValue) {
         switch (intValue) {

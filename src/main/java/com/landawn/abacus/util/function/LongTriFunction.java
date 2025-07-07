@@ -16,24 +16,83 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that accepts three long-valued arguments and produces a result.
+ * This is the three-arity primitive specialization of {@code Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #apply(long, long, long)}.
+ * 
+ * <p>The interface extends {@code Throwables.LongTriFunction} with {@code RuntimeException} as the exception type,
+ * making it suitable for use in contexts where checked exceptions are not required.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * LongTriFunction<String> formatter = (a, b, c) -> 
+ *     String.format("(%d, %d, %d)", a, b, c);
+ * String result = formatter.apply(10L, 20L, 30L); // returns "(10, 20, 30)"
+ * 
+ * LongTriFunction<Long> median = (a, b, c) -> {
+ *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
+ *     if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+ *     return c;
+ * };
+ * }</pre>
+ * 
+ * @param <R> the type of the result of the function
+ * 
+ * @see java.util.function.Function
+ * @see java.util.function.LongFunction
+ */
 @FunctionalInterface
 public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, RuntimeException> { //NOSONAR
 
     /**
+     * Applies this function to the given arguments.
+     * 
+     * <p>This method takes three long values as input and produces a result of type R.
+     * The implementation defines how the three long values are processed to produce the result.
+     * 
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Combining three values into a single object</li>
+     *   <li>Performing calculations and returning the result</li>
+     *   <li>Creating formatted strings from three numeric values</li>
+     *   <li>Looking up values based on three coordinates or indices</li>
+     *   <li>Business logic that requires three long parameters</li>
+     * </ul>
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first argument
+     * @param b the second argument
+     * @param c the third argument
+     * @return the function result of type R
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     R apply(long a, long b, long c);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result.
+     * 
+     * <p>If evaluation of either function throws an exception, it is relayed to
+     * the caller of the composed function.
+     * 
+     * <p>This method allows for function composition, enabling the chaining of
+     * operations where the output of this function becomes the input of the next.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * LongTriFunction<Long> sum = (a, b, c) -> a + b + c;
+     * Function<Long, String> format = n -> "Result: " + n;
+     * LongTriFunction<String> composed = sum.andThen(format);
+     * String result = composed.apply(10L, 20L, 30L); // returns "Result: 60"
+     * }</pre>
      *
-     * @param <V>
-     * @param after
-     * @return
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     default <V> LongTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

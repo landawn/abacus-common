@@ -30,15 +30,21 @@ public class MapEntityType extends AbstractType<MapEntity> {
         typeClass = MapEntity.class;
     }
 
+    /**
+     * Returns the Class object representing the MapEntity type.
+     *
+     * @return The Class object for MapEntity
+     */
     @Override
     public Class<MapEntity> clazz() {
         return typeClass;
     }
 
     /**
-     * Checks if is map bean.
+     * Indicates whether this type represents a MapEntity.
+     * For MapEntityType, this always returns true.
      *
-     * @return {@code true}, if is map bean
+     * @return true, indicating that this type represents a MapEntity
      */
     @Override
     public boolean isMapEntity() {
@@ -46,9 +52,10 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether instances of this type can be serialized.
+     * MapEntity objects are not directly serializable through this type handler.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating that MapEntity is not serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -56,9 +63,10 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
-     * Gets the serialization type.
+     * Gets the serialization type category for MapEntity.
+     * This indicates how the MapEntity should be treated during serialization processes.
      *
-     * @return
+     * @return SerializationType.MAP_ENTITY
      */
     @Override
     public SerializationType getSerializationType() {
@@ -66,9 +74,11 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
+     * Converts a MapEntity object to its JSON string representation.
+     * The MapEntity is serialized using the configured JSON parser with default settings.
      *
-     * @param x
-     * @return
+     * @param x The MapEntity object to convert
+     * @return The JSON string representation of the MapEntity, or null if the input is null
      */
     @Override
     public String stringOf(final MapEntity x) {
@@ -76,9 +86,11 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
+     * Parses a JSON string to create a MapEntity object.
+     * The string should be a valid JSON object representation that can be deserialized into a MapEntity.
      *
-     * @param str
-     * @return
+     * @param str The JSON string to parse
+     * @return The parsed MapEntity object, or null if the input is null or empty
      */
     @Override
     public MapEntity valueOf(final String str) {

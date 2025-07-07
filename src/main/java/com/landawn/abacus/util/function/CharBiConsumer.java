@@ -16,21 +16,39 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts two char-valued arguments and returns no result.
+ * This is the two-arity specialization of {@link CharConsumer}.
+ * Unlike most other functional interfaces, {@code CharBiConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(char, char)}.
+ * 
+ * @see java.util.function.BiConsumer
+ * @see CharConsumer
+ */
 @FunctionalInterface
 public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given char arguments.
+     * This method is expected to operate via side-effects.
      *
-     * @param t
-     * @param u
+     * @param t the first char input argument
+     * @param u the second char input argument
      */
     @Override
     void accept(char t, char u);
 
     /**
+     * Returns a composed {@code CharBiConsumer} that performs, in sequence, this operation
+     * followed by the {@code after} operation. If performing either operation throws an exception,
+     * it is relayed to the caller of the composed operation.
+     * 
+     * <p>The two char arguments are passed to both consumers in the same order.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be null.
+     * @return a composed {@code CharBiConsumer} that performs in sequence this operation
+     *         followed by the {@code after} operation
      */
     default CharBiConsumer andThen(final CharBiConsumer after) {
         return (t, u) -> {

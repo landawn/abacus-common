@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -31,7 +31,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * <p>A utility class that provides methods to find the median value(s) of arrays and collections.</p>
+ * <p>A utility class that provides methods to find the median value(s) of non-sorted arrays and collections.</p>
  * 
  * <p>The median represents the middle value in a sorted sequence. For sequences with an odd number of elements, 
  * there's exactly one median value. For sequences with an even number of elements, there are two median values
@@ -46,7 +46,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * </ul>
  * 
  * <p>For primitive arrays, specialized Optional classes ({@code OptionalInt}, {@code OptionalLong}, etc.) 
- * are used to represent the second median value. For object arrays and collections, {@code Nullable<T>} is used.</p>
+ * are used to represent the second median value. For object arrays and collections, {@code Optional<T>} is used.</p>
  * 
  * <p>The input arrays or collections do not need to be sorted beforehand. The implementation efficiently
  * finds the median without fully sorting the input data.</p>
@@ -74,7 +74,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * @see OptionalByte
  * @see OptionalShort
  * @see OptionalFloat
- * @see Nullable
+ * @see Optional
  */
 public final class Median {
 
@@ -550,7 +550,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
@@ -568,7 +568,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
-    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex) {
         return of(a, fromIndex, toIndex, Comparators.naturalOrder());
     }
 
@@ -583,7 +583,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
-    public static <T> Pair<T, Nullable<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Pair<T, Optional<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
 
         return of(a, 0, a.length, cmp);
@@ -604,7 +604,7 @@ public final class Median {
      * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
+    public static <T> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -616,12 +616,12 @@ public final class Median {
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], Nullable.empty());
+            return Pair.of(a[fromIndex], Optional.empty());
         } else if (len == 2) {
-            return cmp.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? Pair.of(a[fromIndex], Nullable.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], Nullable.of(a[fromIndex]));
+            return cmp.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? Pair.of(a[fromIndex], Optional.of(a[fromIndex + 1]))
+                    : Pair.of(a[fromIndex + 1], Optional.of(a[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex, cmp), Nullable.empty());
+            return Pair.of(N.median(a, fromIndex, toIndex, cmp), Optional.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
@@ -637,7 +637,7 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.empty());
+            return len % 2 == 0 ? Pair.of(queue.poll(), Optional.of(queue.poll())) : Pair.of(queue.peek(), Optional.empty());
         }
     }
 
@@ -651,7 +651,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(int[])
      */
-    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> c) {
         return of(c, Comparators.naturalOrder());
     }
 
@@ -667,7 +667,7 @@ public final class Median {
      * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
         if (N.isEmpty(c)) {
             throw new IllegalArgumentException("The size of collection can't be null or empty");
         }
@@ -677,14 +677,14 @@ public final class Median {
         final int len = c.size();
 
         if (len == 1) {
-            return Pair.of(c.iterator().next(), Nullable.empty());
+            return Pair.of(c.iterator().next(), Optional.empty());
         } else if (len == 2) {
             final Iterator<? extends T> iter = c.iterator();
             final T first = iter.next();
             final T second = iter.next();
-            return cmp.compare(first, second) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
+            return cmp.compare(first, second) <= 0 ? Pair.of(first, Optional.of(second)) : Pair.of(second, Optional.of(first));
         } else if (len == 3) {
-            return Pair.of(N.median(c, cmp), Nullable.empty());
+            return Pair.of(N.median(c, cmp), Optional.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
@@ -700,7 +700,7 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Nullable.of(queue.poll())) : Pair.of(queue.peek(), Nullable.empty());
+            return len % 2 == 0 ? Pair.of(queue.poll(), Optional.of(queue.poll())) : Pair.of(queue.peek(), Optional.empty());
         }
     }
 
@@ -717,7 +717,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(int[])
      */
-    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return of(c, fromIndex, toIndex, Comparators.naturalOrder());
     }
 
@@ -735,7 +735,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(int[])
      */
-    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
         }

@@ -19,6 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Type handler for National String (NString) values, providing database interaction
+ * capabilities for handling Unicode string data using national character sets.
+ * This type is specifically designed for databases that distinguish between
+ * regular strings and national character strings.
+ */
 public class NStringType extends AbstractStringType {
 
     public static final String NSTRING = "NString";
@@ -28,11 +34,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a national character string value from a ResultSet at the specified column index.
+     * This method is designed to handle Unicode strings stored in national character columns.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the string from
+     * @return the national string value from the ResultSet, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -40,11 +48,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a national character string value from a ResultSet using the specified column label.
+     * This method is designed to handle Unicode strings stored in national character columns.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return the national string value from the ResultSet, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -52,11 +62,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to a national character string value.
+     * This method ensures the string is stored using the database's national character set.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the national string value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
@@ -64,11 +76,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to a national character string value.
+     * This method ensures the string is stored using the database's national character set.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the national string value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {

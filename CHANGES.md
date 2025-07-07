@@ -1,3 +1,7 @@
+### 6.0
+
+* Javadoc Improvements and bug fixes.
+
 ### 5.8.9
 
 * Javadoc Improvements and bug fixes.

@@ -35,33 +35,35 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * A simple way to run load/performance tests.
+ * A comprehensive performance profiling utility for measuring and analyzing the execution time of code blocks.
+ * This class provides methods to run performance tests with multiple threads, loops, and rounds,
+ * collecting detailed statistics about execution times.
  *
- * <br />
- * <br />
- * Caution: if the loop number is too big, it may take a lot of memory to save the test result and impact the test result.
- * <br />
- * So instead of running the performance with big loop number:
- * <pre>
- * <code>
- * final int bigLoopNum = 1000_000;
- * Profiler.run(threadNum, bigLoopNum, roundNum, "yourMethod", () -> yourMethod());
- * </code>
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Multi-threaded performance testing with configurable thread counts</li>
+ *   <li>Multiple loops and rounds for accurate measurements</li>
+ *   <li>Detailed statistics including min, max, average, and percentile times</li>
+ *   <li>Support for suspending profiler execution for debugging</li>
+ *   <li>Output results in various formats (text, HTML, XML)</li>
+ * </ul>
  *
- * <b>// reduce the <i>bigLoopNum</i> by for-loop:</b>
- *
- * <code>
- * Profiler.run(threadNum, bigLoopNum / 1000, roundNum, "yourMethod", () ->
- *  {
- *      for (int i = 0; i &lt; 1000; i++) {
- *          yourMethod();
- *      }
- *  });
- * </code>
- * </pre>
+ * <p><b>Important:</b> If the loop number is too big, it may take a lot of memory to save the test results
+ * and impact the test accuracy. Consider using a for-loop inside the test method to reduce memory usage:</p>
+ * 
+ * <pre>{@code
+ * // Instead of:
+ * Profiler.run(threadNum, 1000000, roundNum, "test", () -> yourMethod());
+ * 
+ * // Use:
+ * Profiler.run(threadNum, 1000, roundNum, "test", () -> {
+ *     for (int i = 0; i < 1000; i++) {
+ *         yourMethod();
+ *     }
+ * });
+ * }</pre>
  *
  * @see <a href="https://medium.com/@AlexanderObregon/introduction-to-java-microbenchmarking-with-jmh-java-microbenchmark-harness-55af74b2fd38">Introduction to Java Microbenchmarking with JMH</a>
- *
  */
 @SuppressWarnings({ "java:S1244", "java:S1943" })
 public final class Profiler {
@@ -76,26 +78,47 @@ public final class Profiler {
 
     /**
      * Runs a performance test with the specified number of threads, loops, and rounds.
+     * Each thread will execute the command for the specified number of loops,
+     * and this process will be repeated for the specified number of rounds.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, () -> {
+     *     // Code to profile
+     *     Thread.sleep(1);
+     * });
+     * stats.printResult();
+     * }</pre>
      *
      * @param threadNum the number of threads to use
      * @param loopNum the number of loops to run in each thread
      * @param roundNum the number of rounds to repeat the test
      * @param command the command to be executed in each loop
      * @return the statistics of the performance test
+     * @throws IllegalArgumentException if threadNum or loopNum is less than or equal to 0
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command) {
         return run(threadNum, loopNum, roundNum, "run", command);
     }
 
     /**
-     * Runs a performance test with the specified number of threads, loops, and rounds, and a custom label.
+     * Runs a performance test with the specified parameters and a custom label.
+     * The label will be used to identify the test method in the results.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "StringConcat", () -> {
+     *     String s = "Hello" + "World";
+     * });
+     * }</pre>
      *
      * @param threadNum the number of threads to use
      * @param loopNum the number of loops to run in each thread
      * @param roundNum the number of rounds to repeat the test
-     * @param label a custom label for the test
+     * @param label a custom label for the test (e.g., method name)
      * @param command the command to be executed in each loop
      * @return the statistics of the performance test
+     * @throws IllegalArgumentException if threadNum or loopNum is less than or equal to 0
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
             final Throwables.Runnable<? extends Exception> command) {
@@ -103,16 +126,30 @@ public final class Profiler {
     }
 
     /**
-     * Runs a performance test with the specified number of threads, thread delay, loops, loop delay, rounds, and a custom label.
+     * Runs a performance test with detailed control over timing and delays.
+     * This method allows you to add delays between thread starts and between loop iterations,
+     * which can be useful for simulating real-world scenarios.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Run 4 threads with 100ms delay between thread starts,
+     * // 1000 loops per thread with 10ms delay between loops
+     * MultiLoopsStatistics stats = Profiler.run(
+     *     4, 100, 1000, 10, 3, "DelayedTest", () -> {
+     *         // Test code
+     *     }
+     * );
+     * }</pre>
      *
      * @param threadNum the number of threads to use
-     * @param threadDelay the delay between starting each thread
+     * @param threadDelay the delay in milliseconds between starting each thread
      * @param loopNum the number of loops to run in each thread
-     * @param loopDelay the delay between each loop
+     * @param loopDelay the delay in milliseconds between each loop
      * @param roundNum the number of rounds to repeat the test
      * @param label a custom label for the test
      * @param command the command to be executed in each loop
      * @return the statistics of the performance test
+     * @throws IllegalArgumentException if any numeric parameter is invalid
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
@@ -480,12 +517,36 @@ public final class Profiler {
 
     /**
      * Suspends or resumes performance tests running on {@code Profiler}.
-     * If the performance tests are suspended, the {@code Profiler} will only execute one loop with one thread for each test.
+     * When suspended, the profiler will only execute one loop with one thread for each test,
+     * making it useful for debugging without the overhead of full performance testing.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Suspend profiler for debugging
+     * Profiler.suspend(true);
+     * 
+     * // Run tests in suspended mode (1 thread, 1 loop)
+     * Profiler.run(100, 1000, 10, () -> debugMethod());
+     * 
+     * // Resume normal operation
+     * Profiler.suspend(false);
+     * }</pre>
      *
      * @param yesOrNo if {@code true}, the profiler is suspended; if {@code false}, the profiler is resumed
      */
     public static void suspend(final boolean yesOrNo) {
         suspended = yesOrNo;
+    }
+
+    /**
+     * Checks if the profiler is currently suspended.
+     * When suspended, all profiler runs execute with only one thread and one loop,
+     * regardless of the specified parameters.
+     *
+     * @return {@code true} if the profiler is suspended, {@code false} otherwise
+     */
+    public static boolean isSuspended() {
+        return suspended;
     }
 
     static void sleep(final long millis) {
@@ -506,191 +567,195 @@ public final class Profiler {
     }
 
     /**
-     * The Interface Statistics.
+     * Base interface for all statistics objects in the profiler.
+     * Provides common methods for tracking execution times and results.
      *
      * @version $Revision: 0.8 $
      */
     interface Statistics {
 
         /**
-         * Gets the result.
+         * Gets the result of the execution, typically null for successful runs
+         * or an Exception object if the execution failed.
          *
-         * @return
+         * @return the execution result
          */
         Object getResult();
 
         /**
-         * Sets the result.
+         * Sets the result of the execution.
          *
          * @param result the new result
          */
         void setResult(Object result);
 
         /**
-         * Gets the start time in millis.
+         * Gets the start time in milliseconds since epoch.
          *
-         * @return
+         * @return the start time in milliseconds
          */
         long getStartTimeInMillis();
 
         /**
-         * Sets the start time in millis.
+         * Sets the start time in milliseconds.
          *
-         * @param startTimeInMillis the new start time in millis
+         * @param startTimeInMillis the new start time in milliseconds
          */
         void setStartTimeInMillis(long startTimeInMillis);
 
         /**
-         * Gets the end time in millis.
+         * Gets the end time in milliseconds since epoch.
          *
-         * @return
+         * @return the end time in milliseconds
          */
         long getEndTimeInMillis();
 
         /**
-         * Sets the end time in millis.
+         * Sets the end time in milliseconds.
          *
-         * @param endTimeInMillis the new end time in millis
+         * @param endTimeInMillis the new end time in milliseconds
          */
         void setEndTimeInMillis(long endTimeInMillis);
 
         /**
-         * Gets the start time in nano.
+         * Gets the start time in nanoseconds.
          *
-         * @return
+         * @return the start time in nanoseconds
          */
         long getStartTimeInNano();
 
         /**
-         * Sets the start time in nano.
+         * Sets the start time in nanoseconds.
          *
-         * @param startTimeInNano the new start time in nano
+         * @param startTimeInNano the new start time in nanoseconds
          */
         void setStartTimeInNano(long startTimeInNano);
 
         /**
-         * Gets the end time in nano.
+         * Gets the end time in nanoseconds.
          *
-         * @return
+         * @return the end time in nanoseconds
          */
         long getEndTimeInNano();
 
         /**
-         * Sets the end time in nano.
+         * Sets the end time in nanoseconds.
          *
-         * @param endTimeInNano the new end time in nano
+         * @param endTimeInNano the new end time in nanoseconds
          */
         void setEndTimeInNano(long endTimeInNano);
 
         /**
-         * Gets the elapsed time in millis.
+         * Calculates and returns the elapsed time in milliseconds.
+         * The calculation is based on nanosecond precision for accuracy.
          *
-         * @return
+         * @return the elapsed time in milliseconds
          */
         double getElapsedTimeInMillis();
     }
 
     /**
-     * The Interface LoopStatistics.
+     * Interface for loop-level statistics, providing aggregate information
+     * about multiple method executions within loops.
      *
      * @version $Revision: 0.8 $
      */
     public interface LoopStatistics extends Statistics {
 
         /**
-         * Gets the method name list.
+         * Gets the list of unique method names that were executed.
          *
-         * @return
+         * @return a list of method names
          */
         List<String> getMethodNameList();
 
         /**
-         * Gets the min elapsed time method.
+         * Gets the method execution with the minimum elapsed time.
          *
-         * @return
+         * @return the MethodStatistics with minimum elapsed time
          */
         MethodStatistics getMinElapsedTimeMethod();
 
         /**
-         * Gets the max elapsed time method.
+         * Gets the method execution with the maximum elapsed time.
          *
-         * @return
+         * @return the MethodStatistics with maximum elapsed time
          */
         MethodStatistics getMaxElapsedTimeMethod();
 
         /**
-         * Gets the method total elapsed time in millis.
+         * Gets the total elapsed time for all executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return the total elapsed time in milliseconds
          */
         double getMethodTotalElapsedTimeInMillis(String methodName);
 
         /**
-         * Gets the method max elapsed time in millis.
+         * Gets the maximum elapsed time among all executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return the maximum elapsed time in milliseconds
          */
         double getMethodMaxElapsedTimeInMillis(String methodName);
 
         /**
-         * Gets the method min elapsed time in millis.
+         * Gets the minimum elapsed time among all executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return the minimum elapsed time in milliseconds
          */
         double getMethodMinElapsedTimeInMillis(String methodName);
 
         /**
-         * Gets the method average elapsed time in millis.
+         * Gets the average elapsed time for all executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return the average elapsed time in milliseconds
          */
         double getMethodAverageElapsedTimeInMillis(String methodName);
 
         /**
-         * Gets the total elapsed time in millis.
+         * Gets the total elapsed time for all method executions.
          *
-         * @return
+         * @return the total elapsed time in milliseconds
          */
         double getTotalElapsedTimeInMillis();
 
         /**
-         * Gets the method size.
+         * Gets the number of times the specified method was executed.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return the execution count
          */
         int getMethodSize(String methodName);
 
         /**
-         * Gets the method statistics list.
+         * Gets all statistics for executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return a list of MethodStatistics
          */
         List<MethodStatistics> getMethodStatisticsList(String methodName);
 
         /**
-         * Gets the failed method statistics list.
+         * Gets statistics for failed executions of the specified method.
          *
-         * @param methodName
-         * @return
+         * @param methodName the name of the method
+         * @return a list of MethodStatistics for failed executions
          */
         List<MethodStatistics> getFailedMethodStatisticsList(String methodName);
 
         /**
-         * Gets the all failed method statistics list.
+         * Gets all failed method executions across all methods.
          *
-         * @return
+         * @return a list of all failed MethodStatistics
          */
         List<MethodStatistics> getAllFailedMethodStatisticsList();
     }
 
     /**
-     * The Class AbstractStatistics.
+     * Abstract base class for statistics implementations.
      *
      * @version $Revision: 0.8 $
      */
@@ -856,7 +921,8 @@ public final class Profiler {
     }
 
     /**
-     * The Class MethodStatistics.
+     * Statistics for individual method executions.
+     * This class captures timing information and results for a single method call.
      *
      * @version $Revision: 0.8 $
      */
@@ -869,22 +935,22 @@ public final class Profiler {
         private Object result;
 
         /**
-         * Instantiates a new method statistics.
+         * Creates a new MethodStatistics instance with the specified method name.
          *
-         * @param methodName
+         * @param methodName the name of the method
          */
         public MethodStatistics(final String methodName) {
             this.methodName = methodName;
         }
 
         /**
-         * Instantiates a new method statistics.
+         * Creates a new MethodStatistics instance with timing information.
          *
-         * @param methodName
-         * @param startTimeInMillis
-         * @param endTimeInMillis
-         * @param startTimeInNano
-         * @param endTimeInNano
+         * @param methodName the name of the method
+         * @param startTimeInMillis the start time in milliseconds
+         * @param endTimeInMillis the end time in milliseconds
+         * @param startTimeInNano the start time in nanoseconds
+         * @param endTimeInNano the end time in nanoseconds
          */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano) {
@@ -892,14 +958,14 @@ public final class Profiler {
         }
 
         /**
-         * Instantiates a new method statistics.
+         * Creates a new MethodStatistics instance with complete information.
          *
-         * @param methodName
-         * @param startTimeInMillis
-         * @param endTimeInMillis
-         * @param startTimeInNano
-         * @param endTimeInNano
-         * @param result
+         * @param methodName the name of the method
+         * @param startTimeInMillis the start time in milliseconds
+         * @param endTimeInMillis the end time in milliseconds
+         * @param startTimeInNano the start time in nanoseconds
+         * @param endTimeInNano the end time in nanoseconds
+         * @param result the execution result (null for success, Exception for failure)
          */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano, final Object result) {
@@ -909,18 +975,18 @@ public final class Profiler {
         }
 
         /**
-         * Gets the method name.
+         * Gets the name of the method that was executed.
          *
-         * @return
+         * @return the method name
          */
         public String getMethodName() {
             return methodName;
         }
 
         /**
-         * Gets the result.
+         * Gets the execution result.
          *
-         * @return
+         * @return the result (null for success, Exception for failure)
          */
         @Override
         public Object getResult() {
@@ -928,7 +994,7 @@ public final class Profiler {
         }
 
         /**
-         * Sets the result.
+         * Sets the execution result.
          *
          * @param result the new result
          */
@@ -938,14 +1004,21 @@ public final class Profiler {
         }
 
         /**
-         * Checks if is failed.
+         * Checks if the method execution failed.
+         * A method is considered failed if the result is an Exception.
          *
-         * @return {@code true}, if is failed
+         * @return {@code true} if the execution failed, {@code false} otherwise
          */
         public boolean isFailed() {
             return result instanceof Exception;
         }
 
+        /**
+         * Returns a string representation of this method statistics.
+         * For failed executions, includes the exception class and message.
+         *
+         * @return a string representation of the statistics
+         */
         @Override
         public String toString() {
             if (isFailed()) {
@@ -1255,7 +1328,10 @@ public final class Profiler {
     }
 
     /**
-     * The Class MultiLoopsStatistics.
+     * Comprehensive statistics for multiple loops across multiple threads.
+     * This class aggregates all loop statistics and provides methods to analyze
+     * the overall performance test results, including percentile calculations
+     * and various output formats.
      */
     public static class MultiLoopsStatistics extends AbstractStatistics implements LoopStatistics {
 
@@ -1269,13 +1345,13 @@ public final class Profiler {
         private List<LoopStatistics> loopStatisticsList;
 
         /**
-         * Instantiates a new multi loops statistics.
+         * Creates a new MultiLoopsStatistics instance with timing information.
          *
-         * @param startTimeInMillis
-         * @param endTimeInMillis
-         * @param startTimeInNano
-         * @param endTimeInNano
-         * @param threadNum
+         * @param startTimeInMillis the overall start time in milliseconds
+         * @param endTimeInMillis the overall end time in milliseconds
+         * @param startTimeInNano the overall start time in nanoseconds
+         * @param endTimeInNano the overall end time in nanoseconds
+         * @param threadNum the number of threads used in the test
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum) {
@@ -1283,14 +1359,14 @@ public final class Profiler {
         }
 
         /**
-         * Instantiates a new multi loops statistics.
+         * Creates a new MultiLoopsStatistics instance with complete information.
          *
-         * @param startTimeInMillis
-         * @param endTimeInMillis
-         * @param startTimeInNano
-         * @param endTimeInNano
-         * @param threadNum
-         * @param loopStatisticsList
+         * @param startTimeInMillis the overall start time in milliseconds
+         * @param endTimeInMillis the overall end time in milliseconds
+         * @param startTimeInNano the overall start time in nanoseconds
+         * @param endTimeInNano the overall end time in nanoseconds
+         * @param threadNum the number of threads used in the test
+         * @param loopStatisticsList the list of loop statistics from all threads
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum, final List<LoopStatistics> loopStatisticsList) {
@@ -1300,9 +1376,9 @@ public final class Profiler {
         }
 
         /**
-         * Gets the thread num.
+         * Gets the number of threads used in the performance test.
          *
-         * @return
+         * @return the thread count
          */
         public int getThreadNum() {
             return threadNum;
@@ -1571,23 +1647,49 @@ public final class Profiler {
         }
 
         /**
-         * Prints the result.
+         * Prints the performance test results to the console.
+         * The output includes summary statistics, percentile information,
+         * and details about any failed executions.
+         * 
+         * <p>Example output format:</p>
+         * <pre>
+         * ========================================================================================================================
+         * (unit: milliseconds)
+         * threadNum=4; loops=1000
+         * startTime: 2023-01-01 10:00:00
+         * endTime:   2023-01-01 10:00:05
+         * totalElapsedTime: 5000.000
+         * 
+         * &lt;method name&gt;,  |avg time|, |min time|, |max time|, |0.01% &gt;=|, ...
+         * testMethod,     1.234,      0.123,      12.345,      10.234,     ...
+         * </pre>
          */
         public void printResult() {
             writeResult(new PrintWriter(System.out)); //NOSONAR
         }
 
         /**
+         * Writes the performance test results to the specified output stream.
+         * The output format is the same as {@link #printResult()}.
          *
-         * @param output
+         * @param output the output stream to write to
          */
         public void writeResult(final OutputStream output) {
             writeResult(new PrintWriter(output));
         }
 
         /**
+         * Writes the performance test results to the specified writer.
+         * The output format is the same as {@link #printResult()}.
+         * 
+         * <p>Example usage:</p>
+         * <pre>{@code
+         * try (FileWriter writer = new FileWriter("results.txt")) {
+         *     statistics.writeResult(writer);
+         * }
+         * }</pre>
          *
-         * @param output
+         * @param output the writer to write to
          */
         public void writeResult(final Writer output) {
             writeResult(new PrintWriter(output));
@@ -1678,18 +1780,27 @@ public final class Profiler {
         }
 
         /**
-         * Write html result.
+         * Writes the performance test results in HTML format to the specified output stream.
+         * The HTML output includes a formatted table with all statistics and percentile information.
          *
-         * @param output
+         * @param output the output stream to write to
          */
         public void writeHtmlResult(final OutputStream output) {
             writeHtmlResult(new PrintWriter(output));
         }
 
         /**
-         * Write html result.
+         * Writes the performance test results in HTML format to the specified writer.
+         * The HTML output includes a formatted table with all statistics and percentile information.
+         * 
+         * <p>Example usage:</p>
+         * <pre>{@code
+         * try (FileWriter writer = new FileWriter("results.html")) {
+         *     statistics.writeHtmlResult(writer);
+         * }
+         * }</pre>
          *
-         * @param output
+         * @param output the writer to write to
          */
         public void writeHtmlResult(final Writer output) {
             writeHtmlResult(new PrintWriter(output));
@@ -1792,18 +1903,35 @@ public final class Profiler {
         }
 
         /**
-         * Write xml result.
+         * Writes the performance test results in XML format to the specified output stream.
+         * The XML output includes all statistics in a structured format suitable for parsing.
          *
-         * @param output
+         * @param output the output stream to write to
          */
         public void writeXmlResult(final OutputStream output) {
             writeXmlResult(new PrintWriter(output));
         }
 
         /**
-         * Write xml result.
+         * Writes the performance test results in XML format to the specified writer.
+         * The XML output includes all statistics in a structured format suitable for parsing.
+         * 
+         * <p>Example output structure:</p>
+         * <pre>{@code
+         * <result>
+         *   <unit>milliseconds</unit>
+         *   <threadNum>4</threadNum>
+         *   <loops>1000</loops>
+         *   <method name="testMethod">
+         *     <avgTime>1.234</avgTime>
+         *     <minTime>0.123</minTime>
+         *     <maxTime>12.345</maxTime>
+         *     ...
+         *   </method>
+         * </result>
+         * }</pre>
          *
-         * @param output
+         * @param output the writer to write to
          */
         public void writeXmlResult(final Writer output) {
             writeXmlResult(new PrintWriter(output));

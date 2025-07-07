@@ -24,9 +24,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
+ * Type handler for ListMultimap serialization and deserialization.
+ * This type handles conversion between ListMultimap instances and their JSON string representations.
  *
- * @param <K> the key type
- * @param <E>
+ * @param <K> the key type of the multimap
+ * @param <E> the element type stored in the lists of the multimap
  */
 @SuppressWarnings("java:S2160")
 public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
@@ -36,9 +38,13 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
     }
 
     /**
+     * Converts a ListMultimap to its JSON string representation.
+     * 
+     * The multimap is first converted to a Map<K, List<E>> structure,
+     * then serialized to JSON using the default JSON parser.
      *
-     * @param x
-     * @return
+     * @param x the ListMultimap to convert to JSON string
+     * @return the JSON string representation of the multimap, or null if the input is null
      */
     @Override
     public String stringOf(final ListMultimap<K, E> x) {
@@ -46,15 +52,21 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
     }
 
     /**
+     * Parses a JSON string into a ListMultimap instance.
+     * 
+     * This method deserializes the JSON string as a Map<K, Collection<E>>,
+     * then populates a new LinkedListMultimap with the entries.
+     * The resulting multimap preserves insertion order for both keys and values.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return a ListMultimap instance populated with the parsed data, or null if the string is empty or null
+     * @throws IllegalArgumentException if the JSON string is malformed
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public ListMultimap<K, E> valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 

@@ -16,124 +16,189 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a predicate (boolean-valued function) of one short-valued argument.
+ * This is the short-consuming primitive type specialization of {@link java.util.function.Predicate}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #test(short)}.
+ * 
+ * @see java.util.function.Predicate
+ */
 @FunctionalInterface
 public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> { //NOSONAR
 
+    /**
+     * A predicate that always returns {@code true} regardless of the input value.
+     */
     ShortPredicate ALWAYS_TRUE = value -> true;
 
+    /**
+     * A predicate that always returns {@code false} regardless of the input value.
+     */
     ShortPredicate ALWAYS_FALSE = value -> false;
 
+    /**
+     * A predicate that tests if a short value is zero.
+     * Returns {@code true} if and only if the input value is 0.
+     */
     ShortPredicate IS_ZERO = value -> value == 0;
 
+    /**
+     * A predicate that tests if a short value is not zero.
+     * Returns {@code true} if and only if the input value is not 0.
+     */
     ShortPredicate NOT_ZERO = value -> value != 0;
 
+    /**
+     * A predicate that tests if a short value is positive.
+     * Returns {@code true} if and only if the input value is greater than 0.
+     */
     ShortPredicate IS_POSITIVE = value -> value > 0;
 
+    /**
+     * A predicate that tests if a short value is not positive.
+     * Returns {@code true} if and only if the input value is less than or equal to 0.
+     */
     ShortPredicate NOT_POSITIVE = value -> value <= 0;
 
+    /**
+     * A predicate that tests if a short value is negative.
+     * Returns {@code true} if and only if the input value is less than 0.
+     */
     ShortPredicate IS_NEGATIVE = value -> value < 0;
 
+    /**
+     * A predicate that tests if a short value is not negative.
+     * Returns {@code true} if and only if the input value is greater than or equal to 0.
+     */
     ShortPredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
+     * Evaluates this predicate on the given argument.
      *
-     * @param value
-     * @return
+     * @param value the input argument
+     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
      */
     @Override
     boolean test(short value);
 
     /**
-     * Returns the specified instance.
+     * Returns the specified predicate instance.
+     * This method exists primarily for consistency and readability in method chains.
      *
-     * @param predicate
-     * @return
+     * @param predicate the predicate to return
+     * @return the specified predicate
      */
     static ShortPredicate of(final ShortPredicate predicate) {
         return predicate;
     }
 
+    /**
+     * Returns a predicate that represents the logical negation of this predicate.
+     * 
+     * @return a predicate that represents the logical negation of this predicate
+     */
     default ShortPredicate negate() {
         return t -> !test(t);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other}
+     * predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * @param other a predicate that will be logically-ANDed with this predicate
+     * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ShortPredicate and(final ShortPredicate other) {
         return t -> test(t) && other.test(t);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other}
+     * predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * @param other a predicate that will be logically-ORed with this predicate
+     * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ShortPredicate or(final ShortPredicate other) {
         return t -> test(t) || other.test(t);
     }
 
     /**
+     * Returns a predicate that tests if a short value is equal to the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is equal to {@code targetShort}
      */
     static ShortPredicate equal(final short targetShort) { //NOSONAR
         return value -> value == targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is not equal to the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is not equal to {@code targetShort}
      */
     static ShortPredicate notEqual(final short targetShort) {
         return value -> value != targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is greater than the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is greater than {@code targetShort}
      */
     static ShortPredicate greaterThan(final short targetShort) {
         return value -> value > targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is greater than or equal to the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is greater than or equal to {@code targetShort}
      */
     static ShortPredicate greaterEqual(final short targetShort) {
         return value -> value >= targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is less than the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is less than {@code targetShort}
      */
     static ShortPredicate lessThan(final short targetShort) {
         return value -> value < targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is less than or equal to the specified target value.
      *
-     * @param targetShort
-     * @return
+     * @param targetShort the value to compare against
+     * @return a predicate that tests if the input is less than or equal to {@code targetShort}
      */
     static ShortPredicate lessEqual(final short targetShort) {
         return value -> value <= targetShort;
     }
 
     /**
+     * Returns a predicate that tests if a short value is between the specified minimum and maximum values (exclusive).
+     * The predicate returns {@code true} if and only if {@code minValue < value < maxValue}.
      *
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param minValue the exclusive lower bound
+     * @param maxValue the exclusive upper bound
+     * @return a predicate that tests if the input is strictly between {@code minValue} and {@code maxValue}
      */
     static ShortPredicate between(final short minValue, final short maxValue) {
         return value -> value > minValue && value < maxValue;

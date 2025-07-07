@@ -31,11 +31,14 @@ public class MillisTimestampType extends TimestampType {
     }
 
     /**
+     * Retrieves a Timestamp value from a ResultSet at the specified column index.
+     * The value is read as a long representing milliseconds since epoch.
+     * A value of 0 is treated as NULL and returns null.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnIndex The column index (1-based) to retrieve the value from
+     * @return A Timestamp object created from the milliseconds value, or null if the value is 0
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -45,11 +48,14 @@ public class MillisTimestampType extends TimestampType {
     }
 
     /**
+     * Retrieves a Timestamp value from a ResultSet using the specified column label.
+     * The value is read as a long representing milliseconds since epoch.
+     * A value of 0 is treated as NULL and returns null.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnLabel The label of the column to retrieve the value from
+     * @return A Timestamp object created from the milliseconds value, or null if the value is 0
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -59,11 +65,14 @@ public class MillisTimestampType extends TimestampType {
     }
 
     /**
+     * Sets a Timestamp parameter in a PreparedStatement at the specified position.
+     * The Timestamp is stored as a long value representing milliseconds since epoch.
+     * If the Timestamp is null, 0 is stored.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The PreparedStatement to set the parameter on
+     * @param columnIndex The parameter index (1-based) to set
+     * @param x The Timestamp value to set, or null to store 0
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
@@ -71,11 +80,14 @@ public class MillisTimestampType extends TimestampType {
     }
 
     /**
+     * Sets a Timestamp parameter in a CallableStatement using the specified parameter name.
+     * The Timestamp is stored as a long value representing milliseconds since epoch.
+     * If the Timestamp is null, 0 is stored.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The CallableStatement to set the parameter on
+     * @param parameterName The name of the parameter to set
+     * @param x The Timestamp value to set, or null to store 0
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {

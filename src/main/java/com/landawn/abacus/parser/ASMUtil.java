@@ -24,8 +24,27 @@ import com.landawn.abacus.logging.LoggerFactory;
 
 import lombok.Data;
 
+/**
+ * Utility class for checking ASM (reflectasm) availability in the runtime environment.
+ * This class provides functionality to determine if the reflectasm library is available
+ * and can be used for optimized reflection operations.
+ * 
+ * <p>The class performs a runtime check to verify if reflectasm classes are present
+ * and functional by attempting to use MethodAccess and FieldAccess on a test bean.</p>
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * if (ASMUtil.isASMAvailable()) {
+ *     // Use ASM-optimized reflection
+ * } else {
+ *     // Fall back to standard reflection
+ * }
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ */
 final class ASMUtil {
-
     private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);
 
     private static final boolean isASMAvailable; // NOSONAR
@@ -71,18 +90,45 @@ final class ASMUtil {
     }
 
     /**
-     * Checks if is ASM available.
+     * Checks if ASM (reflectasm) is available in the runtime environment.
+     * 
+     * <p>This method returns the result of the static initialization check that determines
+     * whether the reflectasm library is present and functional. The check is performed
+     * once during class loading.</p>
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * if (ASMUtil.isASMAvailable()) {
+     *     // Use optimized reflection with ASM
+     *     MethodAccess access = MethodAccess.get(MyClass.class);
+     * } else {
+     *     // Use standard Java reflection
+     *     Method method = MyClass.class.getMethod("myMethod");
+     * }
+     * }</pre>
      *
-     * @return {@code true}, if is ASM available
+     * @return {@code true} if ASM (reflectasm) is available and functional, {@code false} otherwise
      */
     public static boolean isASMAvailable() {
         return isASMAvailable;
     }
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * This class is designed as a singleton utility and should not be instantiated.
+     */
     private ASMUtil() {
         // Singleton.
     }
 
+    /**
+     * Test bean class used internally for verifying ASM functionality.
+     * This class is used during the static initialization to test whether
+     * reflectasm can successfully access fields and methods.
+     * 
+     * <p>The class contains a private id field and a public name field
+     * to test different access levels with ASM.</p>
+     */
     @Data
     public static final class TestBeanA {
         private int id;

@@ -25,8 +25,16 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.sql.Time} objects. This class provides serialization,
+ * deserialization, and database operations for Time instances. It supports parsing
+ * time values from various string formats and millisecond values.
+ */
 public class TimeType extends AbstractDateType<Time> {
 
+    /**
+     * The type name identifier for Time type.
+     */
     public static final String TIME = Time.class.getSimpleName();
 
     TimeType() {
@@ -37,15 +45,22 @@ public class TimeType extends AbstractDateType<Time> {
         super(typeName);
     }
 
+    /**
+     * Returns the Class object representing the Time type.
+     *
+     * @return the Class object for java.sql.Time
+     */
     @Override
     public Class<Time> clazz() {
         return Time.class;
     }
 
     /**
+     * Converts an object to a Time.
+     * Supports conversion from Number (as milliseconds), java.util.Date, and String types.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert
+     * @return a Time object, or null if obj is null
      */
     @Override
     public Time valueOf(final Object obj) {
@@ -59,9 +74,11 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Creates a Time from its string representation.
+     * Supports parsing various time formats and the special value "sysTime" for current time.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a Time object, or null if str is empty
      */
     @Override
     public Time valueOf(final String str) {
@@ -69,11 +86,14 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Creates a Time from a character array.
+     * First attempts to parse as milliseconds if the format suggests a long value,
+     * otherwise delegates to string parsing.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character buffer containing the value
+     * @param offset the start offset in the character buffer
+     * @param len the number of characters to use
+     * @return a Time object, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -94,11 +114,12 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Retrieves a Time value from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the query results
+     * @param columnIndex the index of the column to retrieve (1-based)
+     * @return a Time object, or null if the database value is null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -106,11 +127,12 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Retrieves a Time value from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the query results
+     * @param columnLabel the label of the column to retrieve
+     * @return a Time object, or null if the database value is null
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -118,11 +140,12 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Sets a Time value at the specified parameter index in the PreparedStatement.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the Time value to set, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws SQLException {
@@ -130,11 +153,12 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
+     * Sets a Time value for the specified parameter name in the CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Time value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameterName is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Time x) throws SQLException {

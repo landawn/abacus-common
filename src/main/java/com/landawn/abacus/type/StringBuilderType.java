@@ -14,23 +14,38 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for {@link StringBuilder} objects. This class provides serialization
+ * and deserialization support for StringBuilder instances, which are mutable
+ * sequences of characters.
+ */
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
+    /**
+     * The type name identifier for StringBuilder type.
+     */
     public static final String STRING_BUILDER = StringBuilder.class.getSimpleName();
 
     StringBuilderType() {
         super(STRING_BUILDER);
     }
 
+    /**
+     * Returns the Class object representing the StringBuilder type.
+     *
+     * @return the Class object for StringBuilder
+     */
     @Override
     public Class<StringBuilder> clazz() {
         return StringBuilder.class;
     }
 
     /**
+     * Converts a StringBuilder object to its string representation.
+     * This method returns the string content of the StringBuilder.
      *
-     * @param x
-     * @return
+     * @param x the StringBuilder object to convert
+     * @return the string representation of the StringBuilder's content, or null if x is null
      */
     @Override
     public String stringOf(final StringBuilder x) {
@@ -38,15 +53,23 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     }
 
     /**
+     * Creates a StringBuilder object from its string representation.
+     * This method creates a new StringBuilder containing the provided string.
      *
-     * @param str
-     * @return
+     * @param str the string to convert to a StringBuilder
+     * @return a new StringBuilder containing the string content, or null if str is null
      */
     @Override
     public StringBuilder valueOf(final String str) {
         return str == null ? null : new StringBuilder(str);
     }
 
+    /**
+     * Indicates whether instances of this type are immutable.
+     * StringBuilder instances are mutable, so this returns false.
+     *
+     * @return false, as StringBuilder objects are mutable
+     */
     @Override
     public boolean isImmutable() {
         return false;

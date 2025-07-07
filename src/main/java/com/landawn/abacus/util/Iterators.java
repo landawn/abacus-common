@@ -260,10 +260,7 @@ public final class Iterators {
     }
 
     /**
-     * Note: Copied from Google Guava under the Apache License 2.0.
-     *
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * Determines whether two iterators contain equal elements in the same order. More specifically,
      * this method returns {@code true} if {@code iterator1} and {@code iterator2} contain the same
@@ -1494,8 +1491,7 @@ public final class Iterators {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
-                N.checkArgNotNull(mapper);
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
 
                 return new ObjIterator<>() {
                     private ObjIterator<R> mappedIter = null;
@@ -1590,8 +1586,7 @@ public final class Iterators {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
-                N.checkArgNotNull(mapper);
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
 
                 return new ObjIterator<>() {
                     private ObjIterator<R> mappedIter = null;
@@ -2175,8 +2170,8 @@ public final class Iterators {
     }
 
     /**
-     * Note: copied from Google Guava under Apache license v2
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
      * @param iterator The iterator to be advanced.
@@ -2836,6 +2831,7 @@ public final class Iterators {
      * @param predicate A Predicate that tests elements from the original Iterator.
      * @return An ObjIterator that will iterate over the remaining elements after the Predicate returns {@code true} for the first time.
      */
+    @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();

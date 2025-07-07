@@ -16,35 +16,59 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation on a single short-valued operand that produces a short-valued result.
+ * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code short}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsShort(short)}.
+ * 
+ * @see java.util.function.UnaryOperator
+ */
 @FunctionalInterface
 public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operand.
      *
-     * @param operand
-     * @return
+     * @param operand the operand
+     * @return the operator result
      */
     @Override
     short applyAsShort(short operand);
 
     /**
+     * Returns a composed operator that first applies the {@code before} operator to its input,
+     * and then applies this operator to the result. If evaluation of either operator throws an
+     * exception, it is relayed to the caller of the composed operator.
      *
-     * @param before
-     * @return
+     * @param before the operator to apply before this operator is applied
+     * @return a composed operator that first applies the {@code before} operator and then applies this operator
+     * 
+     * @see #andThen(ShortUnaryOperator)
      */
     default ShortUnaryOperator compose(final ShortUnaryOperator before) {
         return v -> applyAsShort(before.applyAsShort(v));
     }
 
     /**
+     * Returns a composed operator that first applies this operator to its input, and then applies
+     * the {@code after} operator to the result. If evaluation of either operator throws an exception,
+     * it is relayed to the caller of the composed operator.
      *
-     * @param after
-     * @return
+     * @param after the operator to apply after this operator is applied
+     * @return a composed operator that first applies this operator and then applies the {@code after} operator
+     * 
+     * @see #compose(ShortUnaryOperator)
      */
     default ShortUnaryOperator andThen(final ShortUnaryOperator after) {
         return t -> after.applyAsShort(applyAsShort(t));
     }
 
+    /**
+     * Returns a unary operator that always returns its input argument.
+     *
+     * @return a unary operator that always returns its input argument
+     */
     static ShortUnaryOperator identity() {
         return t -> t;
     }

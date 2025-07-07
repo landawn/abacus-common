@@ -75,15 +75,21 @@ public class ReaderType extends AbstractType<Reader> {
         }
     }
 
+    /**
+     * Returns the Class object representing the Reader type or its subclass.
+     *
+     * @return the Class object for Reader.class or the specific Reader subclass
+     */
     @Override
     public Class<Reader> clazz() {
         return typeClass;
     }
 
     /**
-     * Checks if is reader.
+     * Indicates whether this type represents a Reader.
+     * For ReaderType, this always returns true.
      *
-     * @return {@code true}, if is reader
+     * @return true, indicating this is a Reader type
      */
     @Override
     public boolean isReader() {
@@ -91,9 +97,12 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Converts a Reader to its string representation by reading all content from the Reader.
+     * The Reader is fully consumed and closed after this operation.
      *
-     * @param x
-     * @return
+     * @param x the Reader to convert to string
+     * @return the string containing all content read from the Reader, or null if the input is null
+     * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
      */
     @Override
     public String stringOf(final Reader x) {
@@ -101,9 +110,13 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Creates a Reader instance from a string value.
+     * If the concrete Reader class has a constructor accepting String or Reader,
+     * it will be used. Otherwise, a StringReader is returned.
      *
-     * @param str
-     * @return
+     * @param str the string to create a Reader from
+     * @return a Reader containing the string content, or null if the input string is null
+     * @throws RuntimeException if the constructor invocation fails
      */
     @MayReturnNull
     @Override
@@ -122,9 +135,13 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Creates a Reader from various object types.
+     * If the object is a Clob, its character stream is returned.
+     * Otherwise, the object is converted to string and then to a Reader.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to a Reader
+     * @return a Reader representation of the object, or null if the input is null
+     * @throws UncheckedSQLException if accessing the Clob's character stream fails
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -144,11 +161,12 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Retrieves a character stream (Reader) from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the Reader for the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -156,11 +174,12 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Retrieves a character stream (Reader) from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the Reader for the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -168,11 +187,13 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Sets a Reader parameter in a PreparedStatement.
+     * The Reader will be used to provide character stream data to the database.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the Reader to set as the parameter value
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
@@ -180,11 +201,13 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Sets a Reader parameter in a CallableStatement.
+     * The Reader will be used to provide character stream data to the database.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Reader to set as the parameter value
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
@@ -192,12 +215,14 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Sets a Reader parameter in a PreparedStatement with a specified length.
+     * The Reader will be used to provide character stream data to the database.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the Reader to set as the parameter value
+     * @param sqlTypeOrLength the length of the stream in characters
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -205,12 +230,14 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Sets a Reader parameter in a CallableStatement with a specified length.
+     * The Reader will be used to provide character stream data to the database.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Reader to set as the parameter value
+     * @param sqlTypeOrLength the length of the stream in characters
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -218,10 +245,14 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Appends the content of a Reader to the given Appendable.
+     * If the Appendable is a Writer, the content is copied directly.
+     * Otherwise, the Reader content is read as a string and appended.
+     * The Reader is fully consumed after this operation.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
+     * @param x the Reader whose content should be appended
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Reader x) throws IOException {
@@ -237,11 +268,14 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
+     * Writes the content of a Reader to the given CharacterWriter.
+     * The content is optionally quoted based on the serialization configuration.
+     * The Reader is fully consumed after this operation.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Reader whose content should be written
+     * @param config the serialization configuration that determines string quotation
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Reader x, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -23,13 +23,17 @@ import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Map objects with generic key and value types.
+ * This class handles serialization and deserialization of Map instances.
+ * Special support is provided for Spring's MultiValueMap where values are Lists.
  *
  * @param <K> the key type
  * @param <V> the value type
- * @param <T>
+ * @param <T> the specific Map implementation type
  */
 @SuppressWarnings("java:S2160")
 public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
@@ -66,30 +70,55 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
     }
 
+    /**
+     * Returns the declaring name of this Map type.
+     * The declaring name includes the fully qualified class names of the key and value types.
+     *
+     * @return The declaring name in format "MapClass<KeyDeclaringName, ValueDeclaringName>"
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the specific Map implementation type.
+     *
+     * @return The Class object for the Map implementation
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
+    /**
+     * Gets the parameter types for this generic Map type.
+     * The array contains two elements: the key type at index 0 and the value type at index 1.
+     * For Spring MultiValueMap, the value type will be List<V> instead of V.
+     *
+     * @return An array containing the key type and value type
+     */
     @Override
     public Type<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type represents a Map.
+     * For MapType, this always returns true.
+     *
+     * @return true, indicating that this type represents a Map
+     */
     @Override
     public boolean isMap() {
         return true;
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this is a generic type.
+     * For MapType, this always returns true since Map is parameterized with key and value types.
      *
-     * @return {@code true}, if is generic type
+     * @return true, indicating that Map is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -97,9 +126,10 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether instances of this type can be serialized.
+     * Map objects are not directly serializable through this type handler.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating that Map is not serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -107,9 +137,10 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * Gets the serialization type.
+     * Gets the serialization type category for Map.
+     * This indicates how the Map should be treated during serialization processes.
      *
-     * @return
+     * @return SerializationType.MAP
      */
     @Override
     public SerializationType getSerializationType() {
@@ -117,9 +148,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
+     * Converts a Map object to its JSON string representation.
+     * Empty maps are represented as "{}".
      *
-     * @param x
-     * @return
+     * @param x The Map object to convert
+     * @return The JSON string representation of the Map, or null if the input is null
      */
     @MayReturnNull
     @Override
@@ -134,16 +167,21 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
+     * Parses a JSON string to create a Map object.
+     * The method handles:
+     * - null input returns null
+     * - Empty string or "{}" returns an empty Map of the appropriate type
+     * - Valid JSON object strings are deserialized into the Map
      *
-     * @param str
-     * @return
+     * @param str The JSON string to parse
+     * @return The parsed Map object, or null if the input is null
      */
     @MayReturnNull
     @Override
     public T valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || "{}".equals(str)) {
+        } else if ("{}".equals(str)) {
             return (T) N.newMap(typeClass);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
@@ -151,10 +189,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
+     * Appends the string representation of a Map to an Appendable.
+     * The Map is serialized as a JSON object. If the Appendable is a Writer,
+     * the serialization is performed directly to the Writer for better performance.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable The Appendable to write to
+     * @param x The Map to append
+     * @throws IOException if an I/O error occurs while appending
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -171,6 +212,15 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         }
     }
 
+    /**
+     * Generates the type name for a Map with the specified implementation class, key and value types.
+     *
+     * @param typeClass The Map implementation class
+     * @param keyTypeName The name of the key type
+     * @param valueTypeName The name of the value type
+     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
+     * @return The formatted type name string
+     */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE

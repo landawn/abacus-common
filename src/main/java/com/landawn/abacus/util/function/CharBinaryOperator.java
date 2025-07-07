@@ -16,14 +16,25 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation upon two char-valued operands and producing a char-valued result.
+ * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code char}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsChar(char, char)}.
+ * 
+ * @see java.util.function.BinaryOperator
+ * @see CharUnaryOperator
+ */
 @FunctionalInterface
 public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given char operands.
+     * This method performs a binary operation on two char values and returns a char result.
      *
-     * @param left
-     * @param right
-     * @return
+     * @param left the first char operand
+     * @param right the second char operand
+     * @return the char result of applying this operator to the two operands
      */
     @Override
     char applyAsChar(char left, char right);

@@ -17,6 +17,11 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalByte;
 
+/**
+ * Type handler for {@link OptionalByte} objects, providing serialization, deserialization,
+ * and database interaction capabilities for optional byte values. This handler manages
+ * the conversion between database byte/numeric values and OptionalByte wrapper objects.
+ */
 public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
@@ -25,15 +30,21 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
         super(OPTIONAL_BYTE);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link OptionalByte} class object
+     */
     @Override
     public Class<OptionalByte> clazz() {
         return OptionalByte.class;
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether values of this type can be compared.
+     * OptionalByte values support comparison operations.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as OptionalByte values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -41,9 +52,10 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether values of this type should be quoted when written to CSV format.
+     * Numeric values typically don't require quotes in CSV.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating byte values don't need quotes in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -51,9 +63,10 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts an {@link OptionalByte} object to its string representation.
+     * 
+     * @param x the OptionalByte object to convert
+     * @return the string representation of the byte value, or null if empty or null
      */
     @Override
     public String stringOf(final OptionalByte x) {
@@ -61,9 +74,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a string representation to an {@link OptionalByte} object.
+     * 
+     * @param str the string to convert
+     * @return an OptionalByte containing the parsed byte value, or empty if the input is empty or null
+     * @throws NumberFormatException if the string cannot be parsed as a byte
      */
     @Override
     public OptionalByte valueOf(final String str) {
@@ -71,11 +86,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a byte value from a ResultSet at the specified column index and wraps it in an {@link OptionalByte}.
+     * Handles type conversion if the database column is not a byte type.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OptionalByte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -85,11 +102,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a byte value from a ResultSet using the specified column label and wraps it in an {@link OptionalByte}.
+     * Handles type conversion if the database column is not a byte type.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public OptionalByte get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -99,11 +118,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalByte}.
+     * If the OptionalByte is null or empty, sets the parameter to SQL NULL.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the OptionalByte value to set
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalByte x) throws SQLException {
@@ -115,11 +136,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalByte}.
+     * If the OptionalByte is null or empty, sets the parameter to SQL NULL.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the OptionalByte value to set
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalByte x) throws SQLException {
@@ -131,10 +154,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of an {@link OptionalByte} to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the OptionalByte value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalByte x) throws IOException {
@@ -146,11 +170,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of an {@link OptionalByte} to a CharacterWriter.
+     * This method is typically used for JSON/XML serialization.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the OptionalByte value to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalByte x, final JSONXMLSerializationConfig<?> config) throws IOException {

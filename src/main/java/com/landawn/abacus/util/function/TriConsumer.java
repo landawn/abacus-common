@@ -16,22 +16,69 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts three input arguments and returns no result.
+ * This is the three-arity specialization of {@link java.util.function.Consumer}.
+ * Unlike most other functional interfaces, TriConsumer is expected to operate via side-effects.
+ *
+ * <p>This interface extends the Throwables.TriConsumer, providing compatibility
+ * with the Abacus framework's error handling mechanisms while limiting thrown exceptions
+ * to RuntimeException.
+ *
+ * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object)}.
+ *
+ * @param <A> the type of the first argument to the operation
+ * @param <B> the type of the second argument to the operation
+ * @param <C> the type of the third argument to the operation
+ */
 @FunctionalInterface
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * TriConsumer<String, Integer, Boolean> logger = 
+     *     (msg, level, timestamp) -> System.out.println("[" + level + "] " + msg + " @ " + timestamp);
+     * logger.accept("Application started", 1, true);
+     * 
+     * TriConsumer<List<String>, String, Integer> listInserter = 
+     *     (list, element, index) -> list.add(index, element);
+     * List<String> myList = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * listInserter.accept(myList, "x", 1); // list becomes ["a", "x", "b", "c"]
+     * }</pre>
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param a the first input argument
+     * @param b the second input argument
+     * @param c the third input argument
+     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(A a, B b, C c);
 
     /**
+     * Returns a composed TriConsumer that performs, in sequence, this operation followed
+     * by the after operation. If performing either operation throws an exception, it is
+     * relayed to the caller of the composed operation. If performing this operation throws
+     * an exception, the after operation will not be performed.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * TriConsumer<String, Integer, Boolean> logger = 
+     *     (msg, level, flag) -> System.out.println("Log: " + msg);
+     * TriConsumer<String, Integer, Boolean> notifier = 
+     *     (msg, level, flag) -> System.out.println("Notify: " + msg);
+     * 
+     * TriConsumer<String, Integer, Boolean> combined = logger.andThen(notifier);
+     * combined.accept("Error occurred", 3, false);
+     * // Output:
+     * // Log: Error occurred
+     * // Notify: Error occurred
+     * }</pre>
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed TriConsumer that performs in sequence this operation followed by the after operation
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
         return (a, b, c) -> {
@@ -41,9 +88,19 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     }
 
     /**
+     * Converts this TriConsumer to a Throwables.TriConsumer that can throw checked exceptions.
+     * This method is useful when you need to use this consumer in a context that expects
+     * a Throwables.TriConsumer with a specific exception type.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * TriConsumer<String, Integer, Boolean> consumer = (s, i, b) -> { ... };
+     * Throwables.TriConsumer<String, Integer, Boolean, IOException> throwableConsumer = 
+     *     consumer.toThrowable();
+     * }</pre>
      *
-     * @param <E>
-     * @return
+     * @param <E> the type of exception that the returned consumer may throw
+     * @return a Throwables.TriConsumer that wraps this consumer
      */
     default <E extends Throwable> Throwables.TriConsumer<A, B, C, E> toThrowable() {
         return (Throwables.TriConsumer<A, B, C, E>) this;

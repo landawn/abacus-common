@@ -14,19 +14,35 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts a variable number of {@code int}-valued arguments and returns no result.
+ * This is the n-arity specialization of {@link IntConsumer}.
+ * Unlike most other functional interfaces, {@code IntNConsumer} is expected to operate via side-effects.
+ *
+ * <p>This is a functional interface whose functional method is {@link #accept(int...)}.
+ *
+ * @see IntConsumer
+ * @see IntBiConsumer
+ */
 @FunctionalInterface
 public interface IntNConsumer {
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param args
+     * @param args the input arguments as a variable-length array of {@code int} values
      */
     void accept(int... args);
 
     /**
+     * Returns a composed {@code IntNConsumer} that performs, in sequence, this operation followed by
+     * the {@code after} operation. If performing either operation throws an exception, it is relayed
+     * to the caller of the composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code IntNConsumer} that performs in sequence this operation followed by
+     *         the {@code after} operation
      */
     default IntNConsumer andThen(final IntNConsumer after) {
         return args -> {

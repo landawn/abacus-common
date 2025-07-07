@@ -14,15 +14,39 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a float-valued argument and produces an int-valued result.
+ * This is a functional interface whose functional method is {@link #applyAsInt(float)}.
+ * 
+ * <p>This is a primitive type specialization of {@link java.util.function.Function} for the
+ * case where the input is a {@code float} and the output is an {@code int}.</p>
+ * 
+ * @since 1.0
+ * @see java.util.function.Function
+ * @see java.util.function.DoubleToIntFunction
+ * @see java.util.function.ToIntFunction
+ */
 @FunctionalInterface
 public interface FloatToIntFunction {
 
+    /**
+     * A default function that converts a float value to int through narrowing primitive conversion (casting).
+     * This truncates the decimal portion and may result in overflow if the float value exceeds int range.
+     * 
+     * <p>Note: For float values outside the int range [-2^31, 2^31-1], the result is undefined
+     * due to overflow. Special float values (NaN, positive/negative infinity) are converted to 0 or
+     * Integer.MAX_VALUE/Integer.MIN_VALUE respectively.</p>
+     */
     FloatToIntFunction DEFAULT = value -> (int) value;
 
     /**
+     * Applies this function to the given float argument.
+     * 
+     * <p>The implementation should define how the float value is transformed into an int value.
+     * Common implementations include truncation, rounding, or custom mapping logic.</p>
      *
-     * @param value
-     * @return
+     * @param value the float function argument
+     * @return the int function result
      */
     int applyAsInt(float value);
 }

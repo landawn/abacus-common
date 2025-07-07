@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive byte values.
+ * This class handles the primitive byte type specifically, as opposed to the Byte wrapper class.
+ * It provides type information and default value handling for byte primitives.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteType extends AbstractByteType {
 
@@ -25,6 +30,12 @@ public final class PrimitiveByteType extends AbstractByteType {
         super(BYTE);
     }
 
+    /**
+     * Returns the Class object representing the primitive byte type.
+     * Note that this returns byte.class, not Byte.class.
+     *
+     * @return the Class object for the primitive byte type
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -32,15 +43,22 @@ public final class PrimitiveByteType extends AbstractByteType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * Always returns true for PrimitiveByteType.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, as this type handler is for primitive byte
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive byte type.
+     * The default value for byte primitives is 0.
+     *
+     * @return Byte value of 0 as the default value for primitive byte
+     */
     @Override
     public Byte defaultValue() {
         return DEFAULT_VALUE;

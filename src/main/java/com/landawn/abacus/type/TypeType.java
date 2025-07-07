@@ -29,15 +29,28 @@ public class TypeType extends AbstractType<Type> {
         super(typeName);
     }
 
+    /**
+     * Returns the Class object representing the Type interface.
+     * <p>
+     * This method returns {@code Type.class}, which is the Class object for the
+     * {@link Type} interface that this TypeType handles.
+     * </p>
+     *
+     * @return the Class object for Type.class
+     */
     @Override
     public Class<Type> clazz() {
         return Type.class;
     }
 
     /**
-     * Checks if is immutable.
+     * Checks if Type instances are immutable.
+     * <p>
+     * Type instances are considered immutable as they represent type metadata
+     * that should not change once created.
+     * </p>
      *
-     * @return {@code true}, if is immutable
+     * @return {@code true}, indicating that Type instances are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -45,9 +58,14 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
+     * Converts a Type instance to its string representation.
+     * <p>
+     * This method returns the name of the Type instance by calling its {@code name()} method.
+     * If the input Type is null, this method returns null.
+     * </p>
      *
-     * @param x
-     * @return
+     * @param x the Type instance to convert to string
+     * @return the name of the Type, or null if the input is null
      */
     @Override
     public String stringOf(final Type x) {
@@ -55,9 +73,19 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
+     * Converts a string to a Type instance.
+     * <p>
+     * This method retrieves a Type instance from the TypeFactory using the provided string
+     * as the type name. If the string is null or empty, this method returns null.
+     * </p>
+     * <p>
+     * The string should be a valid type name that has been registered with the TypeFactory,
+     * such as "String", "Integer", "List<String>", etc.
+     * </p>
      *
-     * @param str
-     * @return
+     * @param str the type name string to convert to a Type instance
+     * @return the Type instance corresponding to the type name, or null if the string is empty
+     * @throws IllegalArgumentException if the type name is not recognized by TypeFactory
      */
     @Override
     public Type valueOf(final String str) {

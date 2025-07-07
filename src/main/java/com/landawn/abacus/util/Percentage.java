@@ -19,8 +19,21 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The Enum Percentage.
- *
+ * Enumeration representing common percentage values with their string representations and decimal equivalents.
+ * This enum provides a convenient way to work with percentages in calculations and formatting.
+ * 
+ * <p>The enum includes values from very small percentages (0.0001%) to very high percentages (99.9999%),
+ * covering most common use cases in statistics, probability, and general calculations.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Percentage p = Percentage._95;
+ * double value = p.doubleValue(); // Returns 0.95
+ * String str = p.toString(); // Returns "95%"
+ * 
+ * // Get a range of percentages
+ * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._100);
+ * }</pre>
  */
 public enum Percentage {
 
@@ -80,10 +93,18 @@ public enum Percentage {
     }
 
     /**
+     * Returns an immutable set of Percentage values within the specified range.
+     * The range is inclusive of the start value and exclusive of the end value.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ImmutableSet<Percentage> mediumRange = Percentage.range(Percentage._40, Percentage._60);
+     * // Returns set containing: _40, _50
+     * }</pre>
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * @param startInclusive the starting percentage (inclusive)
+     * @param endExclusive the ending percentage (exclusive)
+     * @return an immutable set containing all Percentage values in the specified range
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
@@ -106,11 +127,20 @@ public enum Percentage {
     }
 
     /**
+     * Returns an immutable set of Percentage values within the specified range with a step increment.
+     * The range is inclusive of the start value and exclusive of the end value.
+     * Only percentages that are at the specified step intervals from the start are included.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ImmutableSet<Percentage> everyTenth = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
+     * // Returns set containing: _10, _20, _30, _40
+     * }</pre>
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting percentage (inclusive)
+     * @param endExclusive the ending percentage (exclusive)
+     * @param by the step increment between percentages
+     * @return an immutable set containing Percentage values at the specified intervals
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
@@ -138,10 +168,18 @@ public enum Percentage {
     }
 
     /**
+     * Returns an immutable set of Percentage values within the specified closed range.
+     * Both the start and end values are inclusive.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ImmutableSet<Percentage> highRange = Percentage.rangeClosed(Percentage._90, Percentage._99);
+     * // Returns set containing: _90, _91, _92, _93, _94, _95, _96, _97, _98, _99
+     * }</pre>
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * @param startInclusive the starting percentage (inclusive)
+     * @param endInclusive the ending percentage (inclusive)
+     * @return an immutable set containing all Percentage values in the specified closed range
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
@@ -164,11 +202,20 @@ public enum Percentage {
     }
 
     /**
+     * Returns an immutable set of Percentage values within the specified closed range with a step increment.
+     * Both the start and end values are inclusive.
+     * Only percentages that are at the specified step intervals from the start are included.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ImmutableSet<Percentage> everyFifth = Percentage.rangeClosed(Percentage._5, Percentage._20, Percentage._5);
+     * // Returns set containing: _5, _10, _20
+     * }</pre>
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting percentage (inclusive)
+     * @param endInclusive the ending percentage (inclusive)  
+     * @param by the step increment between percentages
+     * @return an immutable set containing Percentage values at the specified intervals
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
@@ -196,18 +243,39 @@ public enum Percentage {
     }
 
     /**
+     * Converts a Percentage enum value to its integer representation.
+     * The integer value is calculated by multiplying the decimal value by 1,000,000.
+     * This internal method is used for precise comparisons and calculations.
      *
-     * @param p
-     * @return
+     * @param p the percentage to convert
+     * @return the integer representation of the percentage
      */
     private static int intValue(final Percentage p) {
         return (int) (p.val * 1_000_000);
     }
 
+    /**
+     * Returns the decimal representation of this percentage.
+     * For example, 95% returns 0.95, 0.1% returns 0.001.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * double value = Percentage._75.doubleValue(); // Returns 0.75
+     * double calculation = 1000 * Percentage._10.doubleValue(); // Returns 100.0
+     * }</pre>
+     *
+     * @return the decimal value of this percentage
+     */
     public double doubleValue() {
         return val;
     }
 
+    /**
+     * Returns the string representation of this percentage.
+     * The format includes the percentage sign, e.g., "95%" or "0.01%".
+     *
+     * @return the string representation of this percentage
+     */
     @Override
     public String toString() {
         return str;

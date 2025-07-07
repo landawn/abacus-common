@@ -38,8 +38,10 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The InputStream must be encoded by base64.
- *
+ * Type handler for InputStream and its subclasses.
+ * This class provides serialization, deserialization, and database access capabilities for InputStream instances.
+ * InputStreams are serialized as base64-encoded strings for text-based storage and transmission.
+ * Note that the InputStream content is consumed during serialization.
  */
 @SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
@@ -79,15 +81,20 @@ public class InputStreamType extends AbstractType<InputStream> {
         }
     }
 
+    /**
+     * Returns the Class object representing the InputStream type handled by this type handler.
+     *
+     * @return the Class object for InputStream or its subclass
+     */
     @Override
     public Class<InputStream> clazz() {
         return typeClass;
     }
 
     /**
-     * Checks if is input stream.
+     * Indicates whether this type represents an InputStream.
      *
-     * @return {@code true}, if is input stream
+     * @return true, as this type handler specifically handles InputStreams
      */
     @Override
     public boolean isInputStream() {
@@ -95,9 +102,12 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Converts an InputStream to its string representation.
+     * The stream is read completely and its contents are encoded as a base64 string.
+     * Note that this operation consumes the stream.
      *
-     * @param x
-     * @return
+     * @param x the InputStream to convert to string
+     * @return the base64-encoded string representation of the stream contents, or null if the input is null
      */
     @Override
     public String stringOf(final InputStream x) {
@@ -105,9 +115,12 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Converts a base64-encoded string back to an InputStream instance.
+     * Creates the appropriate InputStream subclass based on the configured constructors.
+     * If no specific constructors are available, returns a ByteArrayInputStream.
      *
-     * @param str
-     * @return
+     * @param str the base64-encoded string to decode
+     * @return a new InputStream containing the decoded bytes, or null if the input is null
      */
     @MayReturnNull
     @Override
@@ -127,9 +140,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Converts various object types to an InputStream.
+     * Handles Blob objects by extracting their binary stream.
+     * Other objects are converted to string first, then to InputStream.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to InputStream
+     * @return an InputStream representation of the object, or null if the input is null
+     * @throws UncheckedSQLException if a SQLException occurs while reading from a Blob
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -149,11 +166,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Retrieves an InputStream from the specified column in a ResultSet.
+     * Uses the getBinaryStream method to read binary data as a stream.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return the InputStream from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -161,11 +180,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Retrieves an InputStream from the specified column in a ResultSet using the column label.
+     * Uses the getBinaryStream method to read binary data as a stream.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return the InputStream from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -173,11 +194,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Sets an InputStream parameter in a PreparedStatement.
+     * The stream will be read when the statement is executed.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the InputStream to set, or null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
@@ -185,11 +208,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Sets an InputStream parameter in a CallableStatement using a parameter name.
+     * The stream will be read when the statement is executed.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the InputStream to set, or null
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
@@ -197,12 +222,14 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Sets an InputStream parameter in a PreparedStatement with a specified length.
+     * The stream will be read when the statement is executed, up to the specified length.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the InputStream to set, or null
+     * @param sqlTypeOrLength the length of the stream in bytes
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -210,12 +237,14 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Sets an InputStream parameter in a CallableStatement with a specified length.
+     * The stream will be read when the statement is executed, up to the specified length.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the InputStream to set, or null
+     * @param sqlTypeOrLength the length of the stream in bytes
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -223,10 +252,14 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Appends the content of an InputStream to an Appendable.
+     * If the Appendable is a Writer, the stream is efficiently copied using character encoding.
+     * Otherwise, the entire stream is read into a string first.
+     * Note that this operation consumes the stream.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the InputStream to read from
+     * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
     public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
@@ -242,11 +275,15 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Writes the character representation of an InputStream to a CharacterWriter.
+     * The stream is read completely and encoded as base64 before writing.
+     * Handles quotation marks if specified in the configuration.
+     * Note that this operation consumes the stream.
      *
-     * @param writer
-     * @param t
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param t the InputStream to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -30,9 +30,13 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
+     * Converts a Long array to its string representation.
+     * The array is formatted as a comma-separated list of values enclosed in square brackets.
+     * Null values in the array are represented as "null".
      *
-     * @param x
-     * @return
+     * @param x The Long array to convert
+     * @return The string representation of the array in format "[value1, value2, ...]", 
+     *         or null if the input array is null, or "[]" if the array is empty
      */
     @MayReturnNull
     @Override
@@ -71,16 +75,24 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
+     * Parses a string to create a Long array.
+     * The string should be in the format "[value1, value2, ...]" where each value is either a long number or "null".
+     * The method handles:
+     * - null input returns null
+     * - Empty string or "[]" returns an empty Long array
+     * - Values of "null" (case-sensitive, exactly 4 characters) are converted to null elements
+     * - Other values are parsed as Long objects
      *
-     * @param str
-     * @return
+     * @param str The string to parse
+     * @return The parsed Long array, or null if the input is null
+     * @throws NumberFormatException if any non-null value cannot be parsed as a Long
      */
     @MayReturnNull
     @Override
     public Long[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_LONG_OBJ_ARRAY;
         }
 
@@ -102,10 +114,13 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
+     * Appends the string representation of a Long array to an Appendable.
+     * The array is formatted as a comma-separated list of values enclosed in square brackets.
+     * Null array is represented as "null", null elements are represented as "null".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable The Appendable to write to
+     * @param x The Long array to append
+     * @throws IOException if an I/O error occurs while appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Long[] x) throws IOException {
@@ -131,11 +146,15 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
+     * Writes the character representation of a Long array to a CharacterWriter.
+     * The array is formatted as a comma-separated list of values enclosed in square brackets.
+     * This method is optimized for character-based writing and may be more efficient than appendTo
+     * for certain output scenarios.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer The CharacterWriter to write to
+     * @param x The Long array to write
+     * @param config The serialization configuration (currently unused for Long arrays)
+     * @throws IOException if an I/O error occurs while writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Long[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -19,18 +19,30 @@ package com.landawn.abacus.util;
 import java.io.Serial;
 
 /**
- * <p>
- * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
- * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
- * </p>
- *
- * A mutable {@code double} wrapper.
- *
- * <p>
- * {@code MutableDouble} is NOT thread-safe.
- *
+ * A mutable wrapper for a {@code double} value, providing methods to modify the wrapped value.
+ * 
+ * <p>This class is useful in scenarios where you need to pass a double by reference,
+ * accumulate double values in lambda expressions, or store frequently changing double values
+ * in collections without creating new Double objects.</p>
+ * 
+ * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
+ * MutableDouble instance concurrently, and at least one thread modifies it, external
+ * synchronization is required.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * MutableDouble sum = MutableDouble.of(0.0);
+ * prices.forEach(price -> sum.add(price));
+ * System.out.println("Total: " + sum.value());
+ * }</pre>
+ * 
+ * <p>Note: This class is adapted from Apache Commons Lang.</p>
+ * 
  * @version $Id: MutableDouble.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Double
+ * @see Number
+ * @see Comparable
+ * @see Mutable
  */
 public final class MutableDouble extends Number implements Comparable<MutableDouble>, Mutable {
 
@@ -41,13 +53,23 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Constructs a new MutableDouble with the default value of zero.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = new MutableDouble(); // value is 0.0
+     * }</pre>
      */
     MutableDouble() {
     }
 
     /**
-     * Constructs a new MutableDouble with the specified value.
-     *
+     * Constructs a new MutableDouble with the specified initial value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = new MutableDouble(3.14159); // value is 3.14159
+     * }</pre>
+     * 
      * @param value the initial value to store
      */
     MutableDouble(final double value) {
@@ -55,14 +77,32 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     *
-     * @param value
-     * @return
+     * Creates a new MutableDouble instance with the specified value.
+     * This is a factory method that provides a more fluent way to create instances.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble price = MutableDouble.of(19.99);
+     * }</pre>
+     * 
+     * @param value the initial value
+     * @return a new MutableDouble instance containing the specified value
      */
     public static MutableDouble of(final double value) {
         return new MutableDouble(value);
     }
 
+    /**
+     * Returns the current double value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.5);
+     * double val = num.value(); // returns 42.5
+     * }</pre>
+     * 
+     * @return the current double value
+     */
     public double value() {
         return value;
     }
@@ -71,8 +111,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Gets the value as a Double instance.
-     *
-     * @return
+     * 
+     * @return the current value
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -81,8 +121,14 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Sets the value.
-     *
+     * Sets the value to the specified double.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.5);
+     * num.setValue(20.7); // value is now 20.7
+     * }</pre>
+     * 
      * @param value the value to set
      */
     public void setValue(final double value) {
@@ -90,10 +136,17 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns the current value and then set new value
-     *
-     * @param value
-     * @return
+     * Returns the current value and then sets the new value.
+     * This is an atomic-like operation for single-threaded use.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.5);
+     * double old = num.getAndSet(20.7); // returns 10.5, value is now 20.7
+     * }</pre>
+     * 
+     * @param value the new value to set
+     * @return the value before it was updated
      */
     public double getAndSet(final double value) {
         final double result = this.value;
@@ -102,10 +155,18 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Sets with the specified value and then return it.
-     *
-     * @param value
-     * @return
+     * Sets the value and then returns it.
+     * This method first updates the internal value to the specified value,
+     * then returns the newly set value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.5);
+     * double newVal = num.setAndGet(20.7); // returns 20.7, value is now 20.7
+     * }</pre>
+     * 
+     * @param value the new value to set
+     * @return the newly set value
      */
     public double setAndGet(final double value) {
         this.value = value;
@@ -113,14 +174,21 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
-     * Otherwise, just return {@code false} without setting the value to new value.
-     *
-     * @param <E>
-     * @param newValue
-     * @param predicate - test the current value.
-     * @return
-     * @throws E the e
+     * Sets the value to newValue if the predicate returns true for the current value.
+     * If the predicate returns false, the value remains unchanged.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.5);
+     * boolean changed = num.setIf(20.7, val -> val < 15); // returns true, value becomes 20.7
+     * changed = num.setIf(5.0, val -> val < 15); // returns false, value remains 20.7
+     * }</pre>
+     * 
+     * @param <E> the type of exception that the predicate may throw
+     * @param newValue the new value to set if the predicate returns true
+     * @param predicate the predicate that tests the current value
+     * @return true if the value was set, false otherwise
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final double newValue, final Throwables.DoublePredicate<E> predicate) throws E {
         if (predicate.test(value)) {
@@ -131,42 +199,33 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
         return false;
     }
 
-    //    /**
-    //     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-    //     * Otherwise, just return <code>false</code> without setting the value to new value.
-    //     *
-    //     * @param <E>
-    //     * @param newValue
-    //     * @param predicate the first parameter is the current value, the second parameter is the new value.
-    //     * @return
-    //     * @throws E the e
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public <E extends Exception> boolean setIf(double newValue, Throwables.DoubleBiPredicate<E> predicate) throws E {
-    //        if (predicate.test(this.value, newValue)) {
-    //            this.value = newValue;
-    //            return true;
-    //        }
-    //
-    //        return false;
-    //    }
-
     //-----------------------------------------------------------------------
 
     /**
-     * Checks whether the double value is the special NaN value.
-     *
-     * @return {@code true} if NaN
+     * Checks whether the double value is the special NaN (Not-a-Number) value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(Double.NaN);
+     * boolean isNan = num.isNaN(); // returns true
+     * }</pre>
+     * 
+     * @return {@code true} if the value is NaN, {@code false} otherwise
      */
     public boolean isNaN() {
         return Double.isNaN(value);
     }
 
     /**
-     * Checks whether the double value is infinite.
-     *
-     * @return {@code true} if infinite
+     * Checks whether the double value is infinite (positive or negative infinity).
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(Double.POSITIVE_INFINITY);
+     * boolean isInf = num.isInfinite(); // returns true
+     * }</pre>
+     * 
+     * @return {@code true} if the value is infinite, {@code false} otherwise
      */
     public boolean isInfinite() {
         return Double.isInfinite(value);
@@ -175,16 +234,26 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Increments the value.
-     *
+     * Increments the value by 1.0.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.5);
+     * num.increment(); // value is now 6.5
+     * }</pre>
      */
     public void increment() {
         value++;
     }
 
     /**
-     * Decrements the value.
-     *
+     * Decrements the value by 1.0.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.5);
+     * num.decrement(); // value is now 4.5
+     * }</pre>
      */
     public void decrement() {
         value--;
@@ -193,64 +262,106 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Adds a value to the value of this instance.
-     *
-     * @param operand the value to add
+     * Adds the specified operand to the current value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.0);
+     * num.add(5.5); // value is now 15.5
+     * }</pre>
+     * 
+     * @param operand the value to add to the current value
      */
     public void add(final double operand) {
         value += operand;
     }
 
     /**
-     * Subtracts a value from the value of this instance.
-     *
-     * @param operand the value to subtract, not null
+     * Subtracts the specified operand from the current value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.0);
+     * num.subtract(3.5); // value is now 6.5
+     * }</pre>
+     * 
+     * @param operand the value to subtract from the current value
      */
     public void subtract(final double operand) {
         value -= operand;
     }
 
     /**
-     * Increments by one the current value.
-     *
-     * @return
+     * Returns the current value and then increments it by 1.0.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.0);
+     * double old = num.getAndIncrement(); // returns 5.0, value is now 6.0
+     * }</pre>
+     * 
+     * @return the value before incrementing
      */
     public double getAndIncrement() {
         return value++;
     }
 
     /**
-     * Decrements by one the current value.
-     *
-     * @return
+     * Returns the current value and then decrements it by 1.0.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.0);
+     * double old = num.getAndDecrement(); // returns 5.0, value is now 4.0
+     * }</pre>
+     * 
+     * @return the value before decrementing
      */
     public double getAndDecrement() {
         return value--;
     }
 
     /**
-     * Increments by one the current value.
-     *
-     * @return
+     * Increments the value by 1.0 and then returns it.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.0);
+     * double newVal = num.incrementAndGet(); // returns 6.0, value is now 6.0
+     * }</pre>
+     * 
+     * @return the value after incrementing
      */
     public double incrementAndGet() {
         return ++value;
     }
 
     /**
-     * Decrements by one the current value.
-     *
-     * @return
+     * Decrements the value by 1.0 and then returns it.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(5.0);
+     * double newVal = num.decrementAndGet(); // returns 4.0, value is now 4.0
+     * }</pre>
+     * 
+     * @return the value after decrementing
      */
     public double decrementAndGet() {
         return --value;
     }
 
     /**
-     * Adds the given value to the current value.
-     *
+     * Returns the current value and then adds the given delta to it.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.0);
+     * double old = num.getAndAdd(5.5); // returns 10.0, value is now 15.5
+     * }</pre>
+     * 
      * @param delta the value to add
-     * @return
+     * @return the value before adding delta
      */
     public double getAndAdd(final double delta) {
         final double prev = value;
@@ -259,10 +370,16 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Adds the given value to the current value.
-     *
+     * Adds the given delta to the current value and then returns it.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(10.0);
+     * double newVal = num.addAndGet(5.5); // returns 15.5, value is now 15.5
+     * }</pre>
+     * 
      * @param delta the value to add
-     * @return
+     * @return the value after adding delta
      */
     public double addAndGet(final double delta) {
         return value += delta;
@@ -272,9 +389,16 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     // shortValue and byteValue rely on Number implementation
 
     /**
-     * Returns the value of this MutableDouble as an int.
-     *
-     * @return
+     * Returns the value of this MutableDouble as an int by casting.
+     * This may involve rounding or truncation.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.7);
+     * int intVal = num.intValue(); // returns 42
+     * }</pre>
+     * 
+     * @return the numeric value represented by this object after conversion to type int
      */
     @Override
     public int intValue() {
@@ -282,9 +406,16 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns the value of this MutableDouble as a long.
-     *
-     * @return
+     * Returns the value of this MutableDouble as a long by casting.
+     * This may involve rounding or truncation.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.7);
+     * long longVal = num.longValue(); // returns 42L
+     * }</pre>
+     * 
+     * @return the numeric value represented by this object after conversion to type long
      */
     @Override
     public long longValue() {
@@ -292,9 +423,16 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns the value of this MutableDouble as a float.
-     *
-     * @return
+     * Returns the value of this MutableDouble as a float by casting.
+     * This may involve rounding and loss of precision.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.123456789);
+     * float floatVal = num.floatValue(); // returns 42.123456f (with precision loss)
+     * }</pre>
+     * 
+     * @return the numeric value represented by this object after conversion to type float
      */
     @Override
     public float floatValue() {
@@ -303,8 +441,14 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the value of this MutableDouble as a double.
-     *
-     * @return
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.5);
+     * double doubleVal = num.doubleValue(); // returns 42.5
+     * }</pre>
+     * 
+     * @return the numeric value represented by this object
      */
     @Override
     public double doubleValue() {
@@ -314,10 +458,20 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this mutable to another in ascending order.
-     *
-     * @param other the other mutable to compare to, not null
-     * @return negative if this is less, zero if equal, positive if greater
+     * Compares this MutableDouble to another MutableDouble numerically.
+     * Two MutableDouble objects with the same double value are considered equal.
+     * The comparison follows the same rules as {@link Double#compare(double, double)}.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num1 = MutableDouble.of(10.5);
+     * MutableDouble num2 = MutableDouble.of(20.5);
+     * int result = num1.compareTo(num2); // returns negative value
+     * }</pre>
+     * 
+     * @param other the other MutableDouble to compare to, not null
+     * @return a negative value if this is less than other, zero if equal, 
+     *         or a positive value if greater
      */
     @Override
     public int compareTo(final MutableDouble other) {
@@ -327,33 +481,26 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this object against the specified object. The result is {@code true} if and only if the argument
-     * is not {@code null} and is a {@code Double} object that represents a double that has the identical
-     * bit pattern to the bit pattern of the double represented by this object. For this purpose, two
-     * {@code double} values are considered to be the same if and only if the method
-     * {@link Double#doubleToLongBits(double)}returns the same long value when applied to each.
-     * <p>
-     * Note that in most cases, for two instances of class {@code Double},{@code d1} and {@code d2},
-     * the value of {@code d1.equals(d2)} is {@code true} if and only if <blockquote>
-     *
-     * <pre>
-     *   d1.doubleValue()&nbsp;== d2.doubleValue()
-     * </pre>
-     *
-     * </blockquote>
-     * <p>
-     * Also has the value {@code true}. However, there are two exceptions:
+     * Compares this object against the specified object for equality.
+     * The result is {@code true} if and only if the argument is not {@code null} 
+     * and is a {@code MutableDouble} object that contains the same {@code double} value 
+     * as this object.
+     * 
+     * <p>The comparison uses {@link Double#compare(double, double)} to handle special cases:</p>
      * <ul>
-     * <li>If {@code d1} and {@code d2} both represent {@code Double.NaN}, then the
-     * {@code equals} method returns {@code true}, even though {@code Double.NaN==Double.NaN} has
-     * the value {@code false}.
-     * <li>If {@code d1} represents {@code +0.0} while {@code d2} represents {@code -0.0},
-     * or vice versa, the {@code equal} test has the value {@code false}, even though
-     * {@code +0.0==-0.0} has the value {@code true}. This allows hashtables to operate properly.
+     * <li>Two NaN values are considered equal</li>
+     * <li>Positive zero and negative zero are considered different</li>
      * </ul>
-     *
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num1 = MutableDouble.of(10.5);
+     * MutableDouble num2 = MutableDouble.of(10.5);
+     * boolean isEqual = num1.equals(num2); // returns true
+     * }</pre>
+     * 
      * @param obj the object to compare with, {@code null} returns false
-     * @return {@code true} if the objects are the same; {@code false} otherwise.
+     * @return {@code true} if the objects are equal; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -361,9 +508,16 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns a suitable hash code for this mutable.
-     *
-     * @return a suitable hash code
+     * Returns a hash code for this MutableDouble.
+     * The hash code is computed using {@link Double#hashCode(double)} on the wrapped value.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.5);
+     * int hash = num.hashCode(); // returns Double.hashCode(42.5)
+     * }</pre>
+     * 
+     * @return a hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -373,9 +527,17 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Returns the String value of this mutable.
-     *
-     * @return
+     * Returns a String representation of this MutableDouble's value.
+     * The exact format of the string representation is determined by 
+     * {@link N#stringOf(double)}.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.5);
+     * String str = num.toString(); // returns "42.5"
+     * }</pre>
+     * 
+     * @return the String representation of the current value
      */
     @Override
     public String toString() {

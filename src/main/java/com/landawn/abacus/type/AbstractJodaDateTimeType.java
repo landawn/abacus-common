@@ -25,13 +25,19 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 
 /**
+ * Abstract base class for Joda-Time DateTime types in the type system.
+ * This class provides common functionality for handling Joda-Time instant types
+ * (such as DateTime, Instant) including serialization and formatting operations.
+ * It uses pre-configured DateTimeFormatters for ISO 8601 date formats.
  *
- * @param <T>
+ * @param <T> the specific Joda-Time instant type (e.g., DateTime, Instant)
  */
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
+    /** Pre-configured Joda DateTimeFormatter for ISO 8601 date-time format */
     protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_DATE_TIME_FORMAT);
 
+    /** Pre-configured Joda DateTimeFormatter for ISO 8601 timestamp format */
     protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_TIMESTAMP_FORMAT);
 
     protected AbstractJodaDateTimeType(final String typeName) {
@@ -39,9 +45,10 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if is joda date time.
+     * Checks if this type represents a Joda DateTime type.
+     * This method always returns {@code true} for Joda DateTime types.
      *
-     * @return {@code true}, if is joda date time
+     * @return {@code true}, indicating this is a Joda DateTime type
      */
     @Override
     public boolean isJodaDateTime() {
@@ -49,9 +56,10 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if is comparable.
+     * Checks if this type is comparable.
+     * Joda DateTime types are comparable based on their millisecond instant values.
      *
-     * @return {@code true}, if is comparable
+     * @return {@code true}, indicating that Joda DateTime types support comparison
      */
     @Override
     public boolean isComparable() {
@@ -59,9 +67,10 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Checks if this type represents values that should not be quoted in CSV format.
+     * DateTime values are typically formatted as timestamp strings that don't require quotes.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return {@code true}, indicating that Joda DateTime values should not be quoted in CSV format
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -69,9 +78,11 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
+     * Converts a Joda DateTime value to its string representation.
+     * Uses the ISO 8601 timestamp format for consistent serialization.
      *
-     * @param x
-     * @return
+     * @param x the Joda DateTime instant value to convert
+     * @return the ISO 8601 timestamp string representation, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -79,10 +90,12 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
+     * Appends the string representation of a Joda DateTime value to an Appendable.
+     * Writes "null" if the value is {@code null}, otherwise writes the ISO 8601 timestamp format.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Joda DateTime instant value to append
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -94,11 +107,21 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
+     * Writes a Joda DateTime value to a CharacterWriter with optional configuration.
+     * The output format depends on the configuration:
+     * <ul>
+     *   <li>{@link DateTimeFormat#LONG} - writes the time in milliseconds since epoch</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_DATE_TIME} - writes ISO 8601 date-time format</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_TIMESTAMP} - writes ISO 8601 timestamp format</li>
+     *   <li>Default - uses ISO 8601 timestamp format</li>
+     * </ul>
+     * String quotation is applied based on configuration unless using LONG format.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Joda DateTime instant value to write
+     * @param config the serialization configuration, may be {@code null}
+     * @throws IOException if an I/O error occurs
+     * @throws RuntimeException if an unsupported DateTimeFormat is specified
      */
     @SuppressWarnings("null")
     @Override

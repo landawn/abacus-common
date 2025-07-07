@@ -17,25 +17,36 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation that accepts two {@code int}-valued arguments and a single object-valued
+ * argument, and returns no result. This is a specialization of consumer for two primitive {@code int}
+ * values and one reference type.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(int, int, Object)}.
+ * 
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
  *
+ * @param <T> the type of the object argument to the operation
  */
 @FunctionalInterface
 public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { // NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param i
-     * @param j
-     * @param t
+     * @param i the first input argument (int value)
+     * @param j the second input argument (int value)
+     * @param t the third input argument (object value)
      */
     @Override
     void accept(int i, int j, T t);
 
     /**
+     * Returns a composed {@code BiIntObjConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code BiIntObjConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) {
         return (i, j, t) -> {

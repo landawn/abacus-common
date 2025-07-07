@@ -16,22 +16,44 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a function that accepts a variable number of float-valued arguments and produces a result.
+ * This is a functional interface whose functional method is {@link #apply(float...)}.
+ * 
+ * <p>This is a primitive type specialization of {@code Function} for {@code float} varargs.</p>
+ * 
+ * @param <R> the type of the result of the function
+ * 
+ * @since 1.0
+ * @see java.util.function.Function
+ */
 @FunctionalInterface
 public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> { //NOSONAR
 
     /**
+     * Applies this function to the given float arguments.
+     * 
+     * <p>The function implementation should define how the variable number of float
+     * arguments are processed to produce the result.</p>
      *
-     * @param args
-     * @return
+     * @param args the float values to be processed. May be empty, in which case
+     *             the function should handle the empty array appropriately.
+     * @return the function result
      */
     @Override
     R apply(float... args);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result. If evaluation of
+     * either function throws an exception, it is relayed to the caller of the
+     * composed function.
      *
-     * @param <V>
-     * @param after
-     * @return
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied. Must not be null.
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     @Override
     default <V> FloatNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

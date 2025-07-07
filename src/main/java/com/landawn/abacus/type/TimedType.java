@@ -32,8 +32,11 @@ import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Timed} objects. This class provides serialization and
+ * deserialization support for Timed instances, which wrap a value with a timestamp.
+ * The serialization format is a JSON array: [timestamp, value].
  *
- * @param <T>
+ * @param <T> the type of value wrapped in the Timed object
  */
 @SuppressWarnings("java:S2160")
 public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
@@ -55,20 +58,31 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         parameterTypes = new Type[] { valueType };
     }
 
+    /**
+     * Returns the declaring name of this type, which uses simple class names.
+     *
+     * @return the declaring name of this Timed type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Timed type.
+     *
+     * @return the Class object for Timed
+     */
     @Override
     public Class<Timed<T>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the parameter types of this generic type.
+     * For Timed, this is an array containing a single element: the value type.
      *
-     * @return
+     * @return an array containing the value type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -76,9 +90,9 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true, as Timed is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -86,9 +100,11 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
+     * Converts a Timed object to its string representation.
+     * The format is a JSON array: [timestamp, value].
      *
-     * @param x
-     * @return
+     * @param x the Timed object to convert
+     * @return the JSON string representation, or null if x is null
      */
     @Override
     public String stringOf(final Timed<T> x) {
@@ -96,9 +112,11 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
+     * Creates a Timed object from its string representation.
+     * Expects a JSON array format: [timestamp, value].
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a Timed object containing the parsed timestamp and value, or null if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -117,10 +135,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
+     * Appends the string representation of a Timed object to the given Appendable.
+     * Writes the format: [timestamp, value].
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Timed object to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Timed<T> x) throws IOException {
@@ -163,11 +183,13 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
+     * Writes the character representation of a Timed object to the given CharacterWriter.
+     * This method is used for JSON/XML serialization. Writes the format: [timestamp, value].
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Timed object to write
+     * @param config the serialization configuration for formatting options
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Timed<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -190,11 +212,11 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
+     * Generates the type name for a Timed type with the specified value type.
+     * 
+     * @param valueTypeName the name of the value type
+     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @return the generated type name for Timed with the specified value type
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

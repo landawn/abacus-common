@@ -31,28 +31,40 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for primitive byte arrays (byte[]).
+ * Provides functionality for serialization, deserialization, database operations,
+ * and conversion between byte arrays and their various representations including Blob objects.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
 
     private final Type<Byte> elementType;
+    private final Type<Byte>[] parameterTypes;
 
     PrimitiveByteArrayType() {
         super(BYTE_ARRAY);
 
         elementType = TypeFactory.getType(byte.class);
+        parameterTypes = new Type[] { elementType };
     }
 
+    /**
+     * Returns the Class object representing the byte array type.
+     *
+     * @return the Class object for byte[]
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;
     }
 
     /**
-     * Gets the element type.
+     * Returns the Type object for the byte element type.
      *
-     * @return
+     * @return the Type object representing Byte/byte elements
      */
     @Override
     public Type<Byte> getElementType() {
@@ -60,9 +72,21 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
-     * Checks if is a primitive byte array.
+     * Returns the parameter types associated with this array type.
      *
-     * @return {@code true}, if is primitive byte array
+     * @return an array containing the Byte Type that describes the elements of this array type
+     * @see #getElementType()
+     */
+    @Override
+    public Type<Byte>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    /**
+     * Indicates whether this type represents a primitive byte array.
+     * Always returns true for PrimitiveByteArrayType.
+     *
+     * @return true, as this type handler is specifically for byte arrays
      */
     @Override
     public boolean isPrimitiveByteArray() {
@@ -70,9 +94,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Converts a byte array to its string representation.
+     * The format is: [1, 2, 3] with elements separated by commas.
+     * Returns null if the input array is null, or "[]" if the array is empty.
      *
-     * @param x
-     * @return
+     * @param x the byte array to convert
+     * @return the string representation of the array, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -107,16 +134,19 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Parses a string representation and creates a byte array.
+     * Expected format: [1, 2, 3] or similar numeric value representations.
+     * Returns null if input is null, empty array if input is empty or "[]".
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return the parsed byte array, or null if input is null
      */
     @MayReturnNull
     @Override
     public byte[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
@@ -134,9 +164,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Converts an object to a byte array.
+     * Handles special case of Blob objects by extracting their byte content.
+     * For other object types, converts to string first then parses as byte array.
+     * Returns null if input is null.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert (can be a Blob or other type)
+     * @return the byte array representation of the object, or null if input is null
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -162,11 +196,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Retrieves a byte array from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based)
+     * @return the byte array from the database
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -174,11 +209,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Retrieves a byte array from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the column label/name
+     * @return the byte array from the database
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -186,11 +222,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Sets a byte array value in a PreparedStatement at the specified parameter index.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based)
+     * @param x the byte array to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
@@ -198,11 +235,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Sets a byte array value in a CallableStatement using the specified parameter name.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter
+     * @param x the byte array to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {
@@ -210,12 +248,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Sets a byte array value in a PreparedStatement with SQL type information.
+     * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based)
+     * @param x the byte array to set
+     * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x, final int sqlTypeOrLength) throws SQLException {
@@ -223,12 +263,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Sets a byte array value in a CallableStatement with SQL type information.
+     * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter
+     * @param x the byte array to set
+     * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final byte[] x, final int sqlTypeOrLength) throws SQLException {
@@ -236,10 +278,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Appends the string representation of a byte array to an Appendable.
+     * The format is: [1, 2, 3] with proper element separation.
+     * Appends "null" if the array is null.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the byte array to append
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final byte[] x) throws IOException {
@@ -261,11 +306,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Writes the character representation of a byte array to a CharacterWriter.
+     * Uses optimized write methods for better performance.
+     * Writes "null" if the array is null.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the byte array to write
+     * @param config the serialization configuration (currently unused for byte arrays)
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final byte[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -287,10 +335,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
-     * Collection 2 array.
+     * Converts a Collection of Byte objects to a primitive byte array.
+     * Each element in the collection is unboxed to its primitive byte value.
+     * Returns null if the input collection is null.
      *
-     * @param c
-     * @return
+     * @param c the Collection of Byte objects to convert
+     * @return a byte array containing the unboxed values, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -310,6 +360,15 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         return a;
     }
 
+    /**
+     * Converts a byte array to a Collection.
+     * Each primitive byte value is boxed to a Byte object and added to the output collection.
+     * Does nothing if the input array is null or empty.
+     *
+     * @param <E> the type of elements in the output collection
+     * @param x the byte array to convert
+     * @param output the Collection to add the boxed Byte values to
+     */
     @Override
     public <E> void array2Collection(final byte[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
@@ -322,9 +381,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Calculates the hash code for a byte array.
+     * Uses the standard Arrays.hashCode algorithm for consistency.
      *
-     * @param x
-     * @return
+     * @param x the byte array to hash
+     * @return the hash code of the array
      */
     @Override
     public int hashCode(final byte[] x) {
@@ -332,10 +393,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     }
 
     /**
+     * Compares two byte arrays for equality.
+     * Arrays are considered equal if they have the same length and all corresponding elements are equal.
+     * Two null arrays are considered equal.
      *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
+     * @param x the first byte array
+     * @param y the second byte array
+     * @return true if the arrays are equal, false otherwise
      */
     @Override
     public boolean equals(final byte[] x, final byte[] y) {

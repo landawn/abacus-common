@@ -26,23 +26,38 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for AtomicInteger operations.
+ * This class provides serialization/deserialization and database operations
+ * for java.util.concurrent.atomic.AtomicInteger instances.
+ */
 public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
+    /**
+     * The type name constant for AtomicInteger type identification.
+     */
     public static final String ATOMIC_INTEGER = AtomicInteger.class.getSimpleName();
 
     AtomicIntegerType() {
         super(ATOMIC_INTEGER);
     }
 
+    /**
+     * Returns the Class object representing the AtomicInteger class.
+     *
+     * @return the Class object for AtomicInteger.class
+     */
     @Override
     public Class<AtomicInteger> clazz() {
         return AtomicInteger.class;
     }
 
     /**
+     * Converts an AtomicInteger value to its string representation.
+     * The integer value is extracted from the AtomicInteger and converted to string.
      *
-     * @param x
-     * @return
+     * @param x the AtomicInteger value to convert
+     * @return the string representation of the integer value, or null if input is null
      */
     @Override
     public String stringOf(final AtomicInteger x) {
@@ -50,9 +65,12 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Converts a string representation to an AtomicInteger value.
+     * Parses the string as an integer and wraps it in a new AtomicInteger instance.
      *
-     * @param str
-     * @return
+     * @param str the string to parse as an integer
+     * @return a new AtomicInteger containing the parsed value, or null if str is null or empty
+     * @throws NumberFormatException if the string cannot be parsed as an integer
      */
     @Override
     public AtomicInteger valueOf(final String str) {
@@ -60,11 +78,13 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Retrieves an AtomicInteger value from a ResultSet at the specified column index.
+     * The integer value is read from the database and wrapped in a new AtomicInteger instance.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnIndex the column index (1-based) of the integer value
+     * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -72,11 +92,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Retrieves an AtomicInteger value from a ResultSet using the specified column label.
+     * The integer value is read from the database and wrapped in a new AtomicInteger instance.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnLabel the label for the column specified with the SQL AS clause,
+     *                    or the column name if no AS clause was specified
+     * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -84,11 +107,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Sets an AtomicInteger parameter in a PreparedStatement at the specified position.
+     * The integer value is extracted from the AtomicInteger before setting.
+     * If the AtomicInteger is null, sets 0 as the parameter value.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the AtomicInteger value to set, may be null (treated as 0)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws SQLException {
@@ -96,11 +122,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Sets a named AtomicInteger parameter in a CallableStatement.
+     * The integer value is extracted from the AtomicInteger before setting.
+     * If the AtomicInteger is null, sets 0 as the parameter value.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the AtomicInteger value to set, may be null (treated as 0)
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws SQLException {
@@ -108,10 +137,12 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Appends an AtomicInteger value to an Appendable object.
+     * Uses the AtomicInteger's toString() method for the string representation.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable object to append to
+     * @param x the AtomicInteger value to append, may be null
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final AtomicInteger x) throws IOException {
@@ -123,11 +154,13 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
+     * Writes an AtomicInteger value to a CharacterWriter.
+     * Extracts the integer value and uses the writer's optimized writeInt method.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the AtomicInteger value to write, may be null
+     * @param config the serialization configuration (not used for integer values)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final AtomicInteger x, final JSONXMLSerializationConfig<?> config) throws IOException {

@@ -15,7 +15,7 @@
 package com.landawn.abacus.util;
 
 /**
- * Note: It's copied from Google Guava under Apache License 2.0
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * Static methods pertaining to ASCII characters (those in the range of values {@code 0x00} through
  * {@code 0x7F}), and to strings containing such characters.
@@ -27,9 +27,24 @@ package com.landawn.abacus.util;
  * <li>{@link com.google.common.base.CharMatcher#ascii} matches ASCII characters and provides text processing methods which
  * operate only on the ASCII characters of a string.
  * </ul>
+ * 
+ * <p>This class provides constants for all ASCII control characters as defined in RFC 20,
+ * making it easy to work with low-level ASCII protocols and data formats.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Check if a character is ASCII
+ * if (ch >= Ascii.MIN && ch <= Ascii.MAX) {
+ *     // Character is ASCII
+ * }
+ * 
+ * // Use ASCII control characters
+ * String csvLine = "field1" + Ascii.HT + "field2" + Ascii.HT + "field3";
+ * }</pre>
  *
  * @author Craig Berry
  * @author Gregory Kick
+ * @since 1.0
  */
 public final class Ascii {
 

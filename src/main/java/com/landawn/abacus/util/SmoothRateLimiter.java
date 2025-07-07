@@ -19,10 +19,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- * Note: Copied from Google Guava under Apache License v2.0
- * <br />
- * <br />
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  */
 abstract class SmoothRateLimiter extends RateLimiter {

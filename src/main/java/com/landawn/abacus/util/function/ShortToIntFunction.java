@@ -14,15 +14,29 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a short-valued argument and produces an int-valued result.
+ * This is the {@code short}-to-{@code int} primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(short)}.
+ * 
+ * @see java.util.function.Function
+ * @see java.util.function.ToIntFunction
+ */
 @FunctionalInterface
 public interface ShortToIntFunction {
 
+    /**
+     * A function that performs a widening primitive conversion from short to int.
+     * This is equivalent to a simple cast operation and will always preserve the exact numeric value.
+     */
     ShortToIntFunction DEFAULT = value -> value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument as a short value
+     * @return the function result as an int value
      */
     int applyAsInt(short value);
 }

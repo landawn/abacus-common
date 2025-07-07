@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -136,6 +137,46 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.stream.Stream;
 
+/**
+ * A comprehensive utility class for Java reflection operations and class manipulation.
+ * This class provides extensive functionality for working with Java classes, methods, fields,
+ * and properties at runtime. It includes support for bean introspection, property access,
+ * type conversion, and various reflection-based operations.
+ * 
+ * <p>Key features include:</p>
+ * <ul>
+ *   <li>Dynamic class loading and instantiation</li>
+ *   <li>Property getter/setter method discovery and invocation</li>
+ *   <li>Field access and manipulation</li>
+ *   <li>Type conversion and wrapping/unwrapping of primitive types</li>
+ *   <li>Bean property introspection with caching for performance</li>
+ *   <li>Support for XML binding classes and JAXB annotations</li>
+ *   <li>Package scanning and class discovery</li>
+ *   <li>Method handle creation for improved performance</li>
+ * </ul>
+ * 
+ * <p>This class maintains internal caches for frequently accessed metadata to improve
+ * performance in reflection-heavy applications.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Load a class dynamically
+ * Class<?> clazz = ClassUtil.forClass("com.example.MyClass");
+ * 
+ * // Get property value
+ * Object bean = new MyBean();
+ * String name = ClassUtil.getPropValue(bean, "name");
+ * 
+ * // Set property value
+ * ClassUtil.setPropValue(bean, "name", "John");
+ * 
+ * // Get all property names
+ * List<String> propNames = ClassUtil.getPropNameList(MyBean.class);
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ */
 @SuppressWarnings({ "java:S1942" })
 public final class ClassUtil {
 
@@ -274,6 +315,7 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(RowId.class.getCanonicalName(), RowId.class);
 
         BUILT_IN_TYPE.put(URL.class.getCanonicalName(), URL.class);
+        BUILT_IN_TYPE.put(URI.class.getCanonicalName(), URI.class);
 
         BUILT_IN_TYPE.put(BooleanList.class.getCanonicalName(), BooleanList.class);
         BUILT_IN_TYPE.put(CharList.class.getCanonicalName(), CharList.class);
@@ -303,11 +345,8 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(OptionalDouble.class.getCanonicalName(), OptionalDouble.class);
         BUILT_IN_TYPE.put(Optional.class.getCanonicalName(), Optional.class);
         BUILT_IN_TYPE.put(Nullable.class.getCanonicalName(), Nullable.class);
-        BUILT_IN_TYPE.put(Holder.class.getCanonicalName(), Holder.class);
 
-        BUILT_IN_TYPE.put(Fraction.class.getCanonicalName(), Fraction.class);
-        BUILT_IN_TYPE.put(Range.class.getCanonicalName(), Range.class);
-        BUILT_IN_TYPE.put(Duration.class.getCanonicalName(), Duration.class);
+        BUILT_IN_TYPE.put(Holder.class.getCanonicalName(), Holder.class);
         BUILT_IN_TYPE.put(Pair.class.getCanonicalName(), Pair.class);
         BUILT_IN_TYPE.put(Triple.class.getCanonicalName(), Triple.class);
         BUILT_IN_TYPE.put(Tuple.class.getCanonicalName(), Tuple.class);
@@ -321,12 +360,20 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Tuple8.class.getCanonicalName(), Tuple8.class);
         BUILT_IN_TYPE.put(Tuple9.class.getCanonicalName(), Tuple9.class);
 
+        BUILT_IN_TYPE.put(Fraction.class.getCanonicalName(), Fraction.class);
+        BUILT_IN_TYPE.put(Range.class.getCanonicalName(), Range.class);
+        BUILT_IN_TYPE.put(Duration.class.getCanonicalName(), Duration.class);
+
         BUILT_IN_TYPE.put(BiMap.class.getCanonicalName(), BiMap.class);
         BUILT_IN_TYPE.put(ListMultimap.class.getCanonicalName(), ListMultimap.class);
         BUILT_IN_TYPE.put(SetMultimap.class.getCanonicalName(), SetMultimap.class);
         BUILT_IN_TYPE.put(Multimap.class.getCanonicalName(), Multimap.class);
         BUILT_IN_TYPE.put(Multiset.class.getCanonicalName(), Multiset.class);
         BUILT_IN_TYPE.put(HBaseColumn.class.getCanonicalName(), HBaseColumn.class);
+
+        BUILT_IN_TYPE.put(ImmutableList.class.getCanonicalName(), ImmutableList.class);
+        BUILT_IN_TYPE.put(ImmutableSet.class.getCanonicalName(), ImmutableSet.class);
+        BUILT_IN_TYPE.put(ImmutableMap.class.getCanonicalName(), ImmutableMap.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
         BUILT_IN_TYPE.put(DataSet.class.getCanonicalName(), DataSet.class);
@@ -337,6 +384,7 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put("java.util.Map.Entry", Map.Entry.class);
         BUILT_IN_TYPE.put("Map.Entry", Map.Entry.class);
 
+        BUILT_IN_TYPE.put(java.time.Duration.class.getCanonicalName(), java.time.Duration.class);
         BUILT_IN_TYPE.put(Instant.class.getCanonicalName(), Instant.class);
         BUILT_IN_TYPE.put(LocalDate.class.getCanonicalName(), LocalDate.class);
         BUILT_IN_TYPE.put(LocalDateTime.class.getCanonicalName(), LocalDateTime.class);
@@ -346,6 +394,11 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(ZonedDateTime.class.getCanonicalName(), ZonedDateTime.class);
         BUILT_IN_TYPE.put(Year.class.getCanonicalName(), Year.class);
         BUILT_IN_TYPE.put(YearMonth.class.getCanonicalName(), YearMonth.class);
+
+        BUILT_IN_TYPE.put(java.util.Optional.class.getCanonicalName(), java.util.Optional.class);
+        BUILT_IN_TYPE.put(java.util.OptionalInt.class.getCanonicalName(), java.util.OptionalInt.class);
+        BUILT_IN_TYPE.put(java.util.OptionalLong.class.getCanonicalName(), java.util.OptionalLong.class);
+        BUILT_IN_TYPE.put(java.util.OptionalDouble.class.getCanonicalName(), java.util.OptionalDouble.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
 
@@ -361,13 +414,25 @@ public final class ClassUtil {
         }
 
         classes = new ArrayList<>(BUILT_IN_TYPE.values());
+
         for (final Class<?> cls : classes) {
-            if (cls.getCanonicalName().startsWith("java.util.Date")) {
+            if (cls.getCanonicalName().startsWith("java.util.Date") || cls.getCanonicalName().startsWith("java.time.Duration")
+                    || cls.getCanonicalName().startsWith("java.util.Optional")) {
                 continue;
             }
 
             BUILT_IN_TYPE.put(cls.getSimpleName(), cls);
         }
+
+        BUILT_IN_TYPE.put("JUDate", java.util.Date.class);
+
+        BUILT_IN_TYPE.put("JdkDuration", java.time.Duration.class);
+
+        BUILT_IN_TYPE.put("JdkOptional", java.util.Optional.class);
+        BUILT_IN_TYPE.put("JdkOptionalInt", java.util.OptionalInt.class);
+        BUILT_IN_TYPE.put("JdkOptionalLong", java.util.OptionalLong.class);
+        BUILT_IN_TYPE.put("JdkOptionalDouble", java.util.OptionalDouble.class);
+
         //
         // N.println("#########################################Builtin types================================");
         // N.println("size = " + BUILT_IN_TYPE.size());
@@ -554,7 +619,16 @@ public final class ClassUtil {
     }
 
     /**
-     * Registers a class as a non-bean class.
+     * Registers a class as a non-bean class. Non-bean classes are excluded from
+     * bean property introspection and are treated as simple value types.
+     * 
+     * <p>This is useful for classes that should not be treated as JavaBeans,
+     * such as primitive wrappers, dates, or custom value objects.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ClassUtil.registerNonBeanClass(MyValueClass.class);
+     * }</pre>
      *
      * @param cls the class to be registered as a non-bean class
      */
@@ -579,6 +653,14 @@ public final class ClassUtil {
 
     /**
      * Registers a non-property get/set method for the specified class.
+     * This excludes specific methods from being considered as property accessors
+     * during bean introspection.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Exclude 'getInternal' from being treated as a property getter
+     * ClassUtil.registerNonPropGetSetMethod(MyClass.class, "internal");
+     * }</pre>
      *
      * @param cls the class for which the non-property get/set method is to be registered
      * @param propName the name of the property to be registered as a non-property get/set method
@@ -596,9 +678,19 @@ public final class ClassUtil {
 
     /**
      * Registers a property get/set method for the specified property name.
+     * This allows manual registration of methods as property accessors that might
+     * not follow standard JavaBean naming conventions.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Method customGetter = MyClass.class.getMethod("fetchName");
+     * ClassUtil.registerPropGetSetMethod("name", customGetter);
+     * }</pre>
      *
      * @param propName the name of the property
      * @param method the method to be registered as a property get/set method
+     * @throws IllegalArgumentException if the method is not a valid getter or setter,
+     *         or if the property is already registered with a different method
      */
     @SuppressWarnings("deprecation")
     public static void registerPropGetSetMethod(final String propName, final Method method) {
@@ -646,8 +738,17 @@ public final class ClassUtil {
     }
 
     /**
-     * The property maybe only has get method if its type is collection or map by xml binding specification
-     * Otherwise, it will be ignored if not registered as an XML binding class.
+     * Registers a class for XML binding (JAXB) support. When a class is registered
+     * for XML binding, properties that only have getter methods (without setters)
+     * are still considered valid properties if they return collection or map types.
+     * 
+     * <p>This is particularly useful for JAXB-generated classes where collections
+     * are typically exposed only through getters.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ClassUtil.registerXMLBindingClass(JAXBGeneratedClass.class);
+     * }</pre>
      *
      * @param cls the class to be registered for XML binding
      */
@@ -674,6 +775,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is registered for XML binding.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * if (ClassUtil.isRegisteredXMLBindingClass(MyClass.class)) {
+     *     // Handle XML binding specific logic
+     * }
+     * }</pre>
      *
      * @param cls the class to check
      * @return {@code true} if the class is registered for XML binding, {@code false} otherwise
@@ -683,17 +791,29 @@ public final class ClassUtil {
     }
 
     /**
-     * Creates a MethodHandle for the specified method.
+     * Creates a MethodHandle for the specified method. MethodHandles provide
+     * a more efficient way to invoke methods compared to standard reflection.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Method method = MyClass.class.getMethod("getValue");
+     * MethodHandle handle = ClassUtil.createMethodHandle(method);
+     * Object result = handle.invoke(myInstance);
+     * }</pre>
      *
      * @param method the method for which the MethodHandle is to be created
      * @return the MethodHandle for the specified method
+     * @throws UnsupportedOperationException if the MethodHandle cannot be created
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
+        MethodHandles.Lookup lookup = null;
 
         try {
-            return MethodHandles.lookup().in(declaringClass).unreflectSpecial(method, declaringClass);
+            lookup = MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup());
+
+            return lookup.in(declaringClass).unreflectSpecial(method, declaringClass);
         } catch (final Exception e) {
             try {
                 final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
@@ -702,9 +822,8 @@ public final class ClassUtil {
                 return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
             } catch (final Exception ex) {
                 try {
-                    return MethodHandles.lookup()
-                            .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                                    declaringClass);
+                    return lookup.findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                            declaringClass);
                 } catch (final Exception exx) {
                     throw new UnsupportedOperationException(exx);
                 }
@@ -713,7 +832,18 @@ public final class ClassUtil {
     }
 
     /**
-     * <p>Returns the number of inheritance hops between two classes.</p>
+     * Returns the number of inheritance hops between two classes.
+     * This method calculates the distance in the inheritance hierarchy from
+     * a child class to a parent class.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int distance = ClassUtil.distanceOfInheritance(ArrayList.class, List.class);
+     * // Returns 1 (ArrayList directly implements List)
+     * 
+     * distance = ClassUtil.distanceOfInheritance(String.class, Object.class);
+     * // Returns 1 (String directly extends Object)
+     * }</pre>
      *
      * @param child the child class, may be {@code null}
      * @param parent the parent class, may be {@code null}
@@ -757,12 +887,28 @@ public final class ClassUtil {
 
     /**
      * Returns the Class object associated with the class or interface with the given string name.
-     * This method supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
+     * This method supports primitive types (boolean, char, byte, short, int, long, float, double)
+     * and array types with format {@code java.lang.String[]}.
+     * 
+     * <p>The method also handles:</p>
+     * <ul>
+     *   <li>Fully qualified class names</li>
+     *   <li>Simple class names (attempts to load from java.lang package)</li>
+     *   <li>Array notation (e.g., "String[]", "int[][]")</li>
+     *   <li>Inner class notation (with $ separator)</li>
+     * </ul>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Class<?> strClass = ClassUtil.forClass("java.lang.String");
+     * Class<?> intClass = ClassUtil.forClass("int");
+     * Class<?> arrClass = ClassUtil.forClass("String[]");
+     * }</pre>
      *
-     * @param <T>
-     * @param clsName
-     * @return
-     * @throws IllegalArgumentException if class not found.
+     * @param <T> the type of the class
+     * @param clsName the fully qualified name of the desired class
+     * @return the Class object for the class with the specified name
+     * @throws IllegalArgumentException if the class cannot be located
      */
     public static <T> Class<T> forClass(final String clsName) throws IllegalArgumentException {
         return forClass(clsName, true);
@@ -882,8 +1028,22 @@ public final class ClassUtil {
     }
 
     /**
-     * Formalizes the given property name by converting it to camel case and replacing any reserved keywords with their mapped values.
-     * It's designed for field/method/class/column/table names. And source and target Strings will be cached.
+     * Formalizes the given property name by converting it to camel case and
+     * replacing any reserved keywords with their mapped values.
+     * This method is designed for field/method/class/column/table names,
+     * and both source and target strings are cached for performance.
+     * 
+     * <p>The method performs the following transformations:</p>
+     * <ul>
+     *   <li>Converts underscore-separated names to camelCase</li>
+     *   <li>Replaces reserved keywords (e.g., "class" becomes "clazz")</li>
+     * </ul>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String formal = ClassUtil.formalizePropName("user_name");  // Returns "userName"
+     * String formal2 = ClassUtil.formalizePropName("class");     // Returns "clazz"
+     * }</pre>
      *
      * @param propName the property name to be formalized
      * @return the formalized property name
@@ -1177,15 +1337,17 @@ public final class ClassUtil {
 
     /**
      * Retrieves a list of classes in the specified package.
+     * <p>Note: this method does not work for jdk packages</p>
      *
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
      * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
      * @return a list of classes in the specified package
+     * @throws IllegalArgumentException if no resources are found for the specified package(e.g., package does not exist or jdk packages)
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
-            throws UncheckedIOException {
+            throws IllegalArgumentException, UncheckedIOException {
         return getClassesByPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
     }
 
@@ -1197,10 +1359,11 @@ public final class ClassUtil {
      * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
      * @param predicate a predicate to filter the classes
      * @return a list of classes in the specified package
+     * @throws IllegalArgumentException if no resources are found for the specified package(e.g., package does not exist or jdk packages)
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
-            final Predicate<? super Class<?>> predicate) throws UncheckedIOException {
+            final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
         if (logger.isInfoEnabled()) {
             logger.info("Looking for classes in package: " + pkgName);
         }
@@ -1758,6 +1921,8 @@ public final class ClassUtil {
      * @return an immutable list of property names for the specified class
      */
     public static ImmutableList<String> getPropNameList(final Class<?> cls) {
+        N.checkArgNotNull(cls, cs.cls);
+
         ImmutableList<String> propNameList = beanDeclaredPropNameListPool.get(cls);
 
         if (propNameList == null) {
@@ -1780,6 +1945,8 @@ public final class ClassUtil {
     @Deprecated
     @SuppressWarnings("rawtypes")
     public static List<String> getPropNames(final Class<?> cls, final Collection<String> propNameToExclude) {
+        N.checkArgNotNull(cls, cs.cls);
+
         if (N.isEmpty(propNameToExclude)) {
             return new ArrayList<>(getPropNameList(cls));
         }
@@ -1799,6 +1966,8 @@ public final class ClassUtil {
      * @return a list of property names for the specified class, excluding the specified property names
      */
     public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
+        N.checkArgNotNull(cls, cs.cls);
+
         final ImmutableList<String> propNameList = getPropNameList(cls);
 
         if (N.isEmpty(propNameToExclude)) {
@@ -3517,8 +3686,8 @@ public final class ClassUtil {
         Boolean ret = beanClassPool.get(cls);
 
         if (ret == null) {
-            ret = annotatedWithEntity(cls) || isRecordClass(cls)
-                    || (!Number.class.isAssignableFrom(cls) && !Map.Entry.class.isAssignableFrom(cls) && N.notEmpty(ClassUtil.getPropNameList(cls)));
+            ret = annotatedWithEntity(cls) || isRecordClass(cls) || (!CharSequence.class.isAssignableFrom(cls) && !Number.class.isAssignableFrom(cls)
+                    && !Map.Entry.class.isAssignableFrom(cls) && N.notEmpty(ClassUtil.getPropNameList(cls)));
             beanClassPool.put(cls, ret);
         }
 

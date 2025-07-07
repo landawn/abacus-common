@@ -31,17 +31,23 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for object arrays, providing serialization, deserialization,
+ * and collection conversion capabilities for arrays of any object type.
+ * This handler supports JSON serialization and handles nested array elements
+ * by delegating to their respective type handlers.
  *
- * @param <T>
+ * @param <T> the component type of the array
  */
 public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final Class<T[]> typeClass;
 
     protected final Type<T> elementType;
+    protected final Type<T>[] parameterTypes;
 
     protected final JSONDeserializationConfig jdc;
 
@@ -50,6 +56,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
         typeClass = arrayClass;
         elementType = TypeFactory.getType(arrayClass.getComponentType());
+        this.parameterTypes = new Type[] { elementType };
 
         jdc = JDC.create().setElementType(elementType);
     }
@@ -59,29 +66,40 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
         typeClass = (Class<T[]>) N.newArray(elementType.clazz(), 0).getClass();
         this.elementType = elementType;
+        this.parameterTypes = new Type[] { elementType };
 
         jdc = JDC.create().setElementType(elementType);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the array class object
+     */
     @Override
     public Class<T[]> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the element type.
+     * Gets the type handler for the array's element type.
      *
-     * @return
+     * @return the Type handler for array elements
      */
     @Override
     public Type<T> getElementType() {
         return elementType;
     }
 
+    @Override
+    public Type<T>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
     /**
-     * Checks if is an object array.
+     * Indicates whether this type represents an object array.
      *
-     * @return {@code true}, if is object array
+     * @return true, as this is an object array type
      */
     @Override
     public boolean isObjectArray() {
@@ -89,9 +107,10 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether arrays of this type can be serialized.
+     * Serialization capability depends on whether the element type is serializable.
      *
-     * @return {@code true}, if is serializable
+     * @return true if the element type is serializable, false otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -99,9 +118,13 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts an object array to its JSON string representation.
+     * If the element type is serializable, performs custom JSON serialization.
+     * Otherwise, delegates to the JSON parser.
+     * 
+     * @param x the array to convert
+     * @return JSON string representation, null if input is null, or "[]" for empty arrays
+     * @throws UncheckedIOException if an I/O error occurs during serialization
      */
     @MayReturnNull
     @Override
@@ -145,16 +168,18 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a JSON string representation to an object array.
+     * Handles null, empty strings, and the special "[]" representation for empty arrays.
+     * 
+     * @param str the JSON string to parse
+     * @return the parsed array, null if input is null, or empty array for empty representations
      */
     @MayReturnNull
     @Override
     public T[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return Array.newInstance(elementType.clazz(), 0);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
@@ -162,10 +187,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the JSON representation of an object array to an Appendable.
+     * Optimizes performance by using buffered writers when appropriate.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the array to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final T[] x) throws IOException {
@@ -225,11 +252,13 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the JSON character representation of an object array to a CharacterWriter.
+     * This method is typically used for JSON/XML serialization and handles null elements.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the array to write
+     * @param config the serialization configuration
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final T[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -260,10 +289,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     * Collection 2 array.
-     *
-     * @param c
-     * @return
+     * Converts a Collection to an array of the appropriate type.
+     * Creates a new array with the same size as the collection and copies all elements.
+     * 
+     * @param c the collection to convert
+     * @return an array containing all elements from the collection, or null if the collection is null
      */
     @MayReturnNull
     @Override
@@ -283,6 +313,13 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         return (T[]) a;
     }
 
+    /**
+     * Converts an array to a Collection by adding all array elements to the provided collection.
+     * 
+     * @param <E> the element type of the collection
+     * @param x the array to convert
+     * @param output the collection to add elements to
+     */
     @Override
     public <E> void array2Collection(final T[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
@@ -293,9 +330,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Computes a hash code for the given array.
+     * This method computes a shallow hash code based on array elements.
+     * 
+     * @param x the array to hash
+     * @return the computed hash code
      */
     @Override
     public int hashCode(final Object[] x) {
@@ -303,10 +342,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     * Deep hash code.
-     *
-     * @param x
-     * @return
+     * Computes a deep hash code for the given array.
+     * This method recursively computes hash codes for nested arrays and objects.
+     * 
+     * @param x the array to hash
+     * @return the computed deep hash code
      */
     @Override
     public int deepHashCode(final Object[] x) {
@@ -314,10 +354,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
+     * Compares two arrays for equality.
+     * This method performs a shallow equality check on array elements.
+     * 
+     * @param x the first array
+     * @param y the second array
+     * @return true if the arrays are equal, false otherwise
      */
     @Override
     public boolean equals(final Object[] x, final Object[] y) {
@@ -325,10 +367,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
+     * Performs a deep comparison of two arrays for equality.
+     * This method recursively compares nested arrays and objects.
+     * 
+     * @param x the first array
+     * @param y the second array
+     * @return true if the arrays are deeply equal, false otherwise
      */
     @Override
     public boolean deepEquals(final Object[] x, final Object[] y) {
@@ -336,9 +380,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Creates a string representation of the array.
+     * This method produces a shallow string representation using toString() on elements.
+     * 
+     * @param x the array to convert to string
+     * @return string representation of the array, null if input is null, or "[]" for empty arrays
      */
     @Override
     public String toString(final Object[] x) {
@@ -348,40 +394,15 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 16));
-        //
-        //    try {
-        //        sb.append(WD._BRACKET_L);
-        //
-        //        final Object[] a = x;
-        //
-        //        for (int i = 0, len = a.length; i < len; i++) {
-        //            if (i > 0) {
-        //                sb.append(ELEMENT_SEPARATOR);
-        //            }
-        //
-        //            if (a[i] == null) {
-        //                sb.append(NULL_CHAR_ARRAY);
-        //            } else {
-        //                sb.append(a[i].toString());
-        //            }
-        //        }
-        //
-        //        sb.append(WD._BRACKET_R);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
         return N.toString(x);
     }
 
     /**
-     * Deep to string.
-     *
-     * @param x
-     * @return
+     * Creates a deep string representation of the array.
+     * This method recursively converts nested arrays and objects to strings.
+     * 
+     * @param x the array to convert to string
+     * @return deep string representation of the array, null if input is null, or "[]" for empty arrays
      */
     @Override
     public String deepToString(final Object[] x) {
@@ -390,32 +411,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         } else if (x.length == 0) {
             return STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 32));
-        //
-        //    try {
-        //        sb.append(WD._BRACKET_L);
-        //
-        //        final Object[] a = x;
-        //
-        //        for (int i = 0, len = a.length; i < len; i++) {
-        //            if (i > 0) {
-        //                sb.append(ELEMENT_SEPARATOR);
-        //            }
-        //
-        //            if (a[i] == null) {
-        //                sb.append(NULL_CHAR_ARRAY);
-        //            } else {
-        //                sb.append(TypeFactory.getType(a[i].getClass()).deepToString(a[i]));
-        //            }
-        //        }
-        //
-        //        sb.append(WD._BRACKET_R);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return N.deepToString(x);
     }

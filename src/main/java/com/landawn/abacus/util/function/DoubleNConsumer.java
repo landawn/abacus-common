@@ -14,19 +14,33 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts a variable number of double-valued arguments and returns no result.
+ * This is the N-arity specialization of {@link DoubleConsumer}.
+ * Unlike most other functional interfaces, {@code DoubleNConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(double...)}.
+ *
+ * @see DoubleConsumer
+ * @see DoubleBiConsumer
+ */
 @FunctionalInterface
 public interface DoubleNConsumer {
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param args
+     * @param args the double input arguments as a varargs array
      */
     void accept(double... args);
 
     /**
+     * Returns a composed {@code DoubleNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code DoubleNConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default DoubleNConsumer andThen(final DoubleNConsumer after) {
         return args -> {

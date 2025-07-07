@@ -66,6 +66,26 @@ import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.RegExUtil;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Utility class for HTTP operations.
+ * This class provides static utility methods for working with HTTP connections,
+ * including content type/encoding handling, stream wrapping, and response validation.
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Content type and encoding detection</li>
+ *   <li>Stream compression/decompression support</li>
+ *   <li>Charset handling</li>
+ *   <li>HTTP header utilities</li>
+ *   <li>Response code validation</li>
+ *   <li>SSL/TLS utilities</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @see HttpClient
+ * @see HttpRequest
+ * @see HttpResponse
+ */
 @Internal
 public final class HttpUtil {
     static final Executor DEFAULT_EXECUTOR;
@@ -87,8 +107,16 @@ public final class HttpUtil {
 
     static final AsyncExecutor DEFAULT_ASYNC_EXECUTOR = new AsyncExecutor(DEFAULT_EXECUTOR);
 
+    /**
+     * Default charset for HTTP operations (UTF-8).
+     * This charset is used when no specific charset is specified in the Content-Type header.
+     */
     public static final Charset DEFAULT_CHARSET = Charsets.UTF_8; // It should be utf-8 for web service or http call by default. // IOUtil.DEFAULT_CHARSET
 
+    /**
+     * Default content format for HTTP operations (JSON).
+     * This format is used when no specific content format is specified.
+     */
     public static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
 
     static final String JSON = "json";
@@ -209,19 +237,31 @@ public final class HttpUtil {
     }
 
     /**
+     * Checks if the HTTP response code indicates success.
+     * A response code is considered successful if it's in the range [200, 300).
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * if (HttpUtil.isSuccessfulResponseCode(response.getResponseCode())) {
+     *     // Process successful response
+     * }
+     * }</pre>
      *
-     * @param code
-     * @return
+     * @param code The HTTP response code to check
+     * @return {@code true} if the code indicates success, {@code false} otherwise
      */
     public static boolean isSuccessfulResponseCode(final int code) {
         return code >= 200 && code < 300;
     }
 
     /**
+     * Validates an HTTP header key-value pair.
+     * Checks that the key is not empty, doesn't contain line separators or colons,
+     * and that the value doesn't contain unescaped line separators.
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key The header key to validate
+     * @param value The header value to validate
+     * @return {@code true} if the header is valid, {@code false} otherwise
      */
     public static boolean isValidHttpHeader(final String key, final String value) {
         if (Strings.isEmpty(key) || RegExUtil.LINE_SEPARATOR.matcher(key).find() || key.indexOf(':') >= 0) {
@@ -253,13 +293,26 @@ public final class HttpUtil {
     }
 
     /**
+     * Reads an HTTP header value from various object types.
+     * If the value is a Collection, joins multiple values with commas.
+     * Otherwise, converts the value to a string.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Single value
+     * String header1 = HttpUtil.readHttpHeadValue("text/plain");
+     * 
+     * // Multiple values
+     * List<String> values = Arrays.asList("gzip", "deflate");
+     * String header2 = HttpUtil.readHttpHeadValue(values); // "gzip,deflate"
+     * }</pre>
      *
-     * @param value
-     * @return
+     * @param value The header value (can be null, String, Collection, or any object)
+     * @return The header value as a string, or {@code null} string if value is null
      */
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {
-            return Strings.EMPTY;
+            return null;
         }
 
         if (value instanceof Collection<?> c) {
@@ -276,9 +329,11 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Type header value from HTTP headers.
+     * Looks for both "Content-Type" and "content-type" keys.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HTTP headers map
+     * @return The Content-Type value, or null if not found
      */
     @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
@@ -296,9 +351,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Type header value from HttpHeaders.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HttpHeaders object
+     * @return The Content-Type value, or null if not found
      */
     @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
@@ -316,9 +372,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Type from HttpSettings.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings The HttpSettings object
+     * @return The Content-Type value, or null if not found
      */
     @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
@@ -330,18 +387,21 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Type from an HttpURLConnection.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The Content-Type value, or null if not found
      */
     public static String getContentType(final HttpURLConnection connection) {
         return getContentType(connection.getHeaderFields());
     }
 
     /**
+     * Gets the Content-Encoding header value from HTTP headers.
+     * Looks for both "Content-Encoding" and "content-encoding" keys.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HTTP headers map
+     * @return The Content-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
@@ -359,9 +419,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Encoding header value from HttpHeaders.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HttpHeaders object
+     * @return The Content-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
@@ -379,9 +440,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Encoding from HttpSettings.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings The HttpSettings object
+     * @return The Content-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
@@ -393,18 +455,21 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Content-Encoding from an HttpURLConnection.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The Content-Encoding value, or null if not found
      */
     public static String getContentEncoding(final HttpURLConnection connection) {
         return getContentEncoding(connection.getHeaderFields());
     }
 
     /**
+     * Gets the Accept header value from HTTP headers.
+     * Looks for both "Accept" and "accept" keys.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HTTP headers map
+     * @return The Accept value, or null if not found
      */
     @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
@@ -422,9 +487,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept header value from HttpHeaders.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HttpHeaders object
+     * @return The Accept value, or null if not found
      */
     @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
@@ -442,9 +508,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept header from HttpSettings.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings The HttpSettings object
+     * @return The Accept value, or null if not found
      */
     @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
@@ -456,18 +523,21 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept header from an HttpURLConnection.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The Accept value, or null if not found
      */
     public static String getAccept(final HttpURLConnection connection) {
         return getAccept(connection.getHeaderFields());
     }
 
     /**
+     * Gets the Accept-Encoding header value from HTTP headers.
+     * Looks for both "Accept-Encoding" and "accept-encoding" keys.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HTTP headers map
+     * @return The Accept-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
@@ -485,9 +555,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Encoding header value from HttpHeaders.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HttpHeaders object
+     * @return The Accept-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
@@ -505,9 +576,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Encoding header from HttpSettings.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings The HttpSettings object
+     * @return The Accept-Encoding value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
@@ -519,18 +591,21 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Encoding header from an HttpURLConnection.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The Accept-Encoding value, or null if not found
      */
     public static String getAcceptEncoding(final HttpURLConnection connection) {
         return getAcceptEncoding(connection.getHeaderFields());
     }
 
     /**
+     * Gets the Accept-Charset header value from HTTP headers.
+     * Looks for both "Accept-Charset" and "accept-charset" keys.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HTTP headers map
+     * @return The Accept-Charset value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
@@ -548,9 +623,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Charset header value from HttpHeaders.
      *
-     * @param httpHeaders
-     * @return
+     * @param httpHeaders The HttpHeaders object
+     * @return The Accept-Charset value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
@@ -568,9 +644,10 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Charset header from HttpSettings.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings The HttpSettings object
+     * @return The Accept-Charset value, or null if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
@@ -582,19 +659,21 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the Accept-Charset header from an HttpURLConnection.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The Accept-Charset value, or null if not found
      */
     public static String getAcceptCharset(final HttpURLConnection connection) {
         return getAcceptCharset(connection.getHeaderFields());
     }
 
     /**
-     * Gets the content type.
+     * Gets the content type string for a ContentFormat.
+     * For example, ContentFormat.JSON returns "application/json".
      *
-     * @param contentFormat
-     * @return
+     * @param contentFormat The content format
+     * @return The content type string, or null if contentFormat is null or NONE
      */
     @MayReturnNull
     public static String getContentType(final ContentFormat contentFormat) {
@@ -606,10 +685,11 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the content encoding.
+     * Gets the content encoding string for a ContentFormat.
+     * For example, ContentFormat.JSON_GZIP returns "gzip".
      *
-     * @param contentFormat
-     * @return
+     * @param contentFormat The content format
+     * @return The content encoding string, or null if contentFormat is null or has no encoding
      */
     @MayReturnNull
     public static String getContentEncoding(final ContentFormat contentFormat) {
@@ -621,11 +701,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the content format.
+     * Determines the ContentFormat from content type and encoding strings.
+     * This method matches the content type and encoding to find the appropriate ContentFormat.
      *
-     * @param contentType
-     * @param contentEncoding
-     * @return
+     * @param contentType The content type (e.g., "application/json")
+     * @param contentEncoding The content encoding (e.g., "gzip")
+     * @return The matching ContentFormat, or ContentFormat.NONE if no match is found
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * ContentFormat format = HttpUtil.getContentFormat("application/json", "gzip");
+     * // Returns ContentFormat.JSON_GZIP
+     * }</pre>
      */
     public static ContentFormat getContentFormat(String contentType, String contentEncoding) {
         if (contentType == null) {
@@ -686,20 +773,23 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the content format.
+     * Gets the ContentFormat from an HttpURLConnection.
+     * Determines the format based on the Content-Type and Content-Encoding headers.
      *
-     * @param connection
-     * @return
+     * @param connection The HTTP connection
+     * @return The ContentFormat, or ContentFormat.NONE if not determined
      */
     public static ContentFormat getContentFormat(final HttpURLConnection connection) {
         return getContentFormat(getContentType(connection), getContentEncoding(connection));
     }
 
     /**
+     * Gets the response ContentFormat based on response headers and request format.
+     * If the response doesn't specify a content type, falls back to the request format.
      *
-     * @param respHeaders
-     * @param requestContentFormat
-     * @return
+     * @param respHeaders The response headers
+     * @param requestContentFormat The request content format (used as fallback)
+     * @return The response ContentFormat
      */
     public static ContentFormat getResponseContentFormat(final Map<String, ?> respHeaders, final ContentFormat requestContentFormat) {
         String contentType = getContentType(respHeaders);
@@ -719,12 +809,14 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the parser.
+     * Gets the parser for a specific ContentFormat.
+     * The parser is used for serialization and deserialization of request/response bodies.
      *
-     * @param <SC>
-     * @param <DC>
-     * @param contentFormat
-     * @return
+     * @param <SC> The serialization config type
+     * @param <DC> The deserialization config type
+     * @param contentFormat The content format
+     * @return The parser for the content format
+     * @throws IllegalArgumentException if the content format is not supported
      */
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
         if (contentFormat == null) {
@@ -741,11 +833,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Wrap input stream.
+     * Wraps an input stream with decompression based on the content format.
+     * Supports GZIP, Brotli, Snappy, and LZ4 decompression.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * InputStream wrapped = HttpUtil.wrapInputStream(inputStream, ContentFormat.JSON_GZIP);
+     * // wrapped stream will automatically decompress GZIP data
+     * }</pre>
      *
-     * @param is
-     * @param contentFormat
-     * @return
+     * @param is The input stream to wrap
+     * @param contentFormat The content format indicating compression
+     * @return The wrapped input stream, or the original stream if no decompression is needed
      */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
         if (is == null) {
@@ -772,11 +871,19 @@ public final class HttpUtil {
     }
 
     /**
-     * Wrap output stream.
+     * Wraps an output stream with compression based on the content format.
+     * Supports GZIP, Snappy, and LZ4 compression. Brotli compression is not supported for output.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * OutputStream wrapped = HttpUtil.wrapOutputStream(outputStream, ContentFormat.JSON_GZIP);
+     * // Data written to wrapped stream will be automatically compressed
+     * }</pre>
      *
-     * @param os
-     * @param contentFormat
-     * @return
+     * @param os The output stream to wrap
+     * @param contentFormat The content format indicating compression
+     * @return The wrapped output stream, or the original stream if no compression is needed
+     * @throws UnsupportedOperationException if Brotli compression is requested
      */
     public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
@@ -800,14 +907,16 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the output stream.
+     * Gets an output stream from an HttpURLConnection with appropriate headers and wrapping.
+     * Sets Content-Type and Content-Encoding headers based on the content format,
+     * and wraps the stream with compression if needed.
      *
-     * @param connection
-     * @param contentFormat
-     * @param contentType
-     * @param contentEncoding
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param connection The HTTP connection
+     * @param contentFormat The content format for the request body
+     * @param contentType The Content-Type header value (can be null)
+     * @param contentEncoding The Content-Encoding header value (can be null)
+     * @return The output stream, possibly wrapped with compression
+     * @throws IOException if an I/O error occurs
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType, // NOSONAR
             String contentEncoding) throws IOException {
@@ -831,11 +940,13 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the input stream.
+     * Gets an input stream from an HttpURLConnection with appropriate unwrapping.
+     * Automatically handles both successful responses and error streams,
+     * and wraps the stream with decompression based on the content format.
      *
-     * @param connection
-     * @param contentFormat
-     * @return
+     * @param connection The HTTP connection
+     * @param contentFormat The content format for decompression
+     * @return The input stream, possibly wrapped with decompression
      */
     public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) {
         try {
@@ -846,9 +957,11 @@ public final class HttpUtil {
     }
 
     /**
+     * Flushes an output stream, handling special cases for compression streams.
+     * For LZ4 and GZIP streams, calls finish() before flush() to ensure all data is written.
      *
-     * @param os
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param os The output stream to flush
+     * @throws IOException if an I/O error occurs
      */
     public static void flush(final OutputStream os) throws IOException {
         if (os instanceof LZ4BlockOutputStream) {
@@ -861,38 +974,54 @@ public final class HttpUtil {
     }
 
     /**
+     * Gets the charset to use for HTTP requests based on headers.
+     * Extracts the charset from the Content-Type header if present,
+     * otherwise returns the default charset (UTF-8).
      *
-     * @param headers
-     * @return
+     * @param headers The HTTP headers
+     * @return The charset to use for the request
      */
     public static Charset getRequestCharset(final HttpHeaders headers) {
         return getCharset(getContentType(headers), HttpUtil.DEFAULT_CHARSET);
     }
 
     /**
+     * Gets the charset to use for HTTP responses based on headers.
+     * Extracts the charset from the Content-Type header if present,
+     * otherwise returns the request charset as a fallback.
      *
-     * @param headers
-     * @param requestCharset
-     * @return
+     * @param headers The response headers
+     * @param requestCharset The charset used in the request (as fallback)
+     * @return The charset to use for the response
      */
     public static Charset getResponseCharset(final Map<String, ?> headers, final Charset requestCharset) {
         return getCharset(getContentType(headers), requestCharset);
     }
 
     /**
+     * Extracts the charset from a Content-Type header value.
+     * Parses strings like "text/html; charset=UTF-8" to extract the charset.
      *
-     * @param contentType
-     * @return
+     * @param contentType The Content-Type header value
+     * @return The charset, or the default charset (UTF-8) if not found
      */
     public static Charset getCharset(final String contentType) {
         return getCharset(contentType, DEFAULT_CHARSET);
     }
 
     /**
+     * Extracts the charset from a Content-Type header value with a specified default.
+     * Parses strings like "text/html; charset=UTF-8" to extract the charset.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Charset charset = HttpUtil.getCharset("application/json; charset=ISO-8859-1", Charsets.UTF_8);
+     * // Returns Charset for ISO-8859-1
+     * }</pre>
      *
-     * @param contentType
-     * @param defaultIfNull
-     * @return
+     * @param contentType The Content-Type header value
+     * @param defaultIfNull The default charset to return if none is found
+     * @return The charset from the content type, or the default if not found
      */
     public static Charset getCharset(final String contentType, final Charset defaultIfNull) {
         if (Strings.isEmpty(contentType)) {
@@ -912,8 +1041,15 @@ public final class HttpUtil {
     }
 
     /**
-     * For test only. Don't use it in production.
-     * @deprecated
+     * Turns off certificate validation for HTTPS connections.
+     * This method disables all certificate and hostname verification.
+     * 
+     * <b>WARNING: This is extremely insecure and should NEVER be used in production code.</b>
+     * It makes the application vulnerable to man-in-the-middle attacks.
+     * This method is provided for testing purposes only.
+     * 
+     * @deprecated For test only. Don't use it in production.
+     * @throws RuntimeException if SSL context initialization fails
      */
     // copied from: https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
     @Deprecated
@@ -967,9 +1103,11 @@ public final class HttpUtil {
      */
 
     /**
-     * Copied from OkHttp under Apache License, Version 2.0.
-     *
-     * Best-effort parser for HTTP dates.
+     * HTTP date parser and formatter.
+     * This class provides methods for parsing and formatting HTTP dates according to RFC 7231.
+     * It supports multiple date formats for compatibility with various HTTP implementations.
+     * 
+     * <p>Copied from OkHttp under Apache License, Version 2.0.</p>
      */
     public static final class HttpDate {
         /** GMT and UTC are equivalent for our purposes. */
@@ -1006,10 +1144,16 @@ public final class HttpUtil {
         private static final DateFormat[] BROWSER_COMPATIBLE_DATE_FORMATS = new DateFormat[BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length];
 
         /**
-         *  Returns the date for {@code value}. Returns {@code null} if the value couldn't be parsed.
-         *
-         * @param value
-         * @return
+         * Parses an HTTP date string into a Date object.
+         * Supports multiple date formats for compatibility.
+         * 
+         * @param value The date string to parse
+         * @return The parsed Date, or null if the value couldn't be parsed
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * Date date = HttpDate.parse("Wed, 21 Oct 2015 07:28:00 GMT");
+         * }</pre>
          */
         public static Date parse(final String value) {
             if (value.isEmpty()) {
@@ -1049,10 +1193,17 @@ public final class HttpUtil {
         }
 
         /**
-         *  Returns the string for {@code value}.
-         *
-         * @param value
-         * @return
+         * Formats a Date into an HTTP date string.
+         * Uses the standard RFC 7231 format.
+         * 
+         * @param value The date to format
+         * @return The formatted date string
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * String dateStr = HttpDate.format(new Date());
+         * // Returns something like "Wed, 21 Oct 2015 07:28:00 GMT"
+         * }</pre>
          */
         public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);

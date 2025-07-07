@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive char values.
+ * This class handles the primitive char type specifically, as opposed to the Character wrapper class.
+ * It provides type information and default value handling for char primitives.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharType extends AbstractCharacterType {
 
@@ -25,6 +30,12 @@ public final class PrimitiveCharType extends AbstractCharacterType {
         super(CHAR);
     }
 
+    /**
+     * Returns the Class object representing the primitive char type.
+     * Note that this returns char.class, not Character.class.
+     *
+     * @return the Class object for the primitive char type
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -32,15 +43,22 @@ public final class PrimitiveCharType extends AbstractCharacterType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * Always returns true for PrimitiveCharType.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, as this type handler is for primitive char
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive char type.
+     * The default value for char primitives is the null character (Unicode 0).
+     *
+     * @return Character value of 0 ('\0') as the default value for primitive char
+     */
     @Override
     public Character defaultValue() {
         return DEFAULT_VALUE;

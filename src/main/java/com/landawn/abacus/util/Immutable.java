@@ -14,6 +14,49 @@
 
 package com.landawn.abacus.util;
 
+/**
+ * A marker interface for immutable data structures in the Abacus framework.
+ * Classes implementing this interface indicate that their instances are immutable
+ * and cannot be modified after creation.
+ * 
+ * <p>This interface serves as a type marker for immutable collections, maps, and other
+ * data structures. All mutating operations on implementing classes should throw
+ * {@link UnsupportedOperationException}.</p>
+ * 
+ * <p>Immutable objects provide several benefits:
+ * <ul>
+ * <li>Thread-safety: Immutable objects can be shared between threads without synchronization</li>
+ * <li>Simplicity: No need to worry about defensive copying or unexpected modifications</li>
+ * <li>Caching: Immutable objects can be cached and reused safely</li>
+ * <li>Hash stability: Hash codes never change, making them ideal for use as map keys</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common implementations include:
+ * <ul>
+ * <li>{@link ImmutableList} - An immutable list implementation</li>
+ * <li>{@link ImmutableSet} - An immutable set implementation</li>
+ * <li>{@link ImmutableMap} - An immutable map implementation</li>
+ * <li>{@link ImmutableArray} - An immutable array wrapper</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * // Check if an object is immutable
+ * if (myCollection instanceof Immutable) {
+ *     // Safe to share without defensive copying
+ *     sharedCollection = myCollection;
+ * }
+ * }</pre>
+ * </p>
+ * 
+ * @see ImmutableCollection
+ * @see ImmutableList
+ * @see ImmutableSet
+ * @see ImmutableMap
+ * @since 1.0
+ */
 @com.landawn.abacus.annotation.Immutable
 public interface Immutable {
 

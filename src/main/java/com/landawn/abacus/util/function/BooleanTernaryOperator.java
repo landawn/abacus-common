@@ -15,16 +15,25 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Throwables.TernaryOperator;
 
+/**
+ * Represents an operation on three {@code boolean} operands that produces a {@code boolean} result.
+ * This is the primitive type specialization of {@link TernaryOperator} for {@code boolean}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(boolean, boolean, boolean)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     boolean applyAsBoolean(boolean a, boolean b, boolean c);

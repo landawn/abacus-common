@@ -21,11 +21,32 @@ import java.util.function.Predicate;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * ImmutableCollection is a class that extends AbstractCollection and implements the Immutable interface.
- * This class represents a collection that cannot be modified once created.
- * Any attempt to modify the collection will result in an UnsupportedOperationException.
+ * ImmutableCollection is an abstract base class for immutable collection implementations.
+ * This class extends AbstractCollection and implements the Immutable interface,
+ * representing a collection that cannot be modified once created.
+ * 
+ * <p>All mutating operations (add, remove, clear, etc.) will throw UnsupportedOperationException.
+ * The collection provides read-only access to its elements through standard collection methods
+ * like contains(), size(), and iterator().</p>
+ * 
+ * <p>This class serves as the base for other immutable collection types in the framework,
+ * such as ImmutableList and ImmutableSet. It should not be instantiated directly;
+ * use the static factory method {@link #wrap(Collection)} or the specific immutable
+ * collection types instead.</p>
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * Collection<String> mutable = Arrays.asList("a", "b", "c");
+ * ImmutableCollection<String> immutable = ImmutableCollection.wrap(mutable);
+ * System.out.println(immutable.contains("b")); // true
+ * // immutable.add("d"); // throws UnsupportedOperationException
+ * }</pre>
+ * </p>
  *
  * @param <E> the type of elements in this collection
+ * @see Immutable
+ * @see ImmutableList
+ * @see ImmutableSet
  */
 @com.landawn.abacus.annotation.Immutable
 public class ImmutableCollection<E> extends AbstractCollection<E> implements Immutable {
@@ -37,9 +58,24 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Wraps the given collection into an ImmutableCollection. If the given collection is {@code null}, an empty ImmutableList is returned.
-     * If the given collection is already an instance of ImmutableCollection, it is directly returned.
-     * Otherwise, returns a new ImmutableCollection backed by the provided Collection. Changes to the specified Collection will be reflected in the ImmutableCollection.
+     * Wraps the given collection into an ImmutableCollection. If the given collection is {@code null}, 
+     * an empty ImmutableList is returned. If the given collection is already an instance of 
+     * ImmutableCollection, it is directly returned. Otherwise, returns a new ImmutableCollection 
+     * backed by the provided Collection. 
+     * 
+     * <p><b>Warning:</b> Changes to the specified Collection will be reflected in the ImmutableCollection.
+     * This method does not create a defensive copy. For a true immutable copy, use the specific
+     * immutable collection type's copyOf method (e.g., {@link ImmutableList#copyOf}).</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * List<String> mutableList = new ArrayList<>();
+     * mutableList.add("hello");
+     * ImmutableCollection<String> wrapped = ImmutableCollection.wrap(mutableList);
+     * mutableList.add("world"); // This change is visible in wrapped!
+     * System.out.println(wrapped.size()); // 2
+     * }</pre>
+     * </p>
      *
      * @param <E> the type of elements in the collection
      * @param c the collection to be wrapped into an ImmutableCollection
@@ -57,11 +93,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param e
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param e the element to add (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -70,12 +108,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Adds the all.
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param newElements
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param newElements the collection of elements to add (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -84,11 +123,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param object
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param object the element to remove (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -97,12 +138,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Removes the elements which satisfy the given predicate.
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param filter
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param filter the predicate to use for filtering (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -111,12 +153,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Removes all the elements contained in the specified collection.
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param oldElements
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param oldElements the collection of elements to remove (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -125,11 +168,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param elementsToKeep
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @param elementsToKeep the collection of elements to retain (ignored)
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -138,9 +183,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * This operation is not supported by ImmutableCollection.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @throws UnsupportedOperationException
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException always
+     * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
@@ -149,35 +196,122 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * Returns {@code true} if this collection contains the specified element.
+     * More formally, returns {@code true} if and only if this collection contains
+     * at least one element {@code e} such that
+     * {@code (valueToFind==null ? e==null : valueToFind.equals(e))}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
+     * System.out.println(collection.contains("b")); // true
+     * System.out.println(collection.contains("d")); // false
+     * }</pre>
+     * </p>
      *
-     * @param valueToFind
-     * @return
+     * @param valueToFind element whose presence in this collection is to be tested
+     * @return {@code true} if this collection contains the specified element
+     * @throws ClassCastException if the type of the specified element
+     *         is incompatible with this collection
+     *         collection does not permit null elements
      */
     @Override
     public boolean contains(final Object valueToFind) {
         return coll.contains(valueToFind);
     }
 
+    /**
+     * Returns an iterator over the elements in this collection.
+     * The iterator provides read-only access and does not support the remove() operation.
+     * 
+     * <p>The order of elements returned by the iterator depends on the underlying
+     * collection type. For ordered collections (like List), the iteration order
+     * is predictable. For unordered collections (like Set), the order may vary.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<Integer> numbers = ImmutableList.of(1, 2, 3);
+     * ObjIterator<Integer> iter = numbers.iterator();
+     * while (iter.hasNext()) {
+     *     System.out.println(iter.next());
+     * }
+     * }</pre>
+     * </p>
+     *
+     * @return an ObjIterator over the elements in this collection
+     */
     @Override
     public ObjIterator<E> iterator() {
         return ObjIterator.of(coll.iterator());
     }
 
+    /**
+     * Returns the number of elements in this collection. If this collection
+     * contains more than {@code Integer.MAX_VALUE} elements, returns
+     * {@code Integer.MAX_VALUE}.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
+     * System.out.println(collection.size()); // 3
+     * }</pre>
+     * </p>
+     *
+     * @return the number of elements in this collection
+     */
     @Override
     public int size() {
         return coll.size();
     }
 
+    /**
+     * Returns an array containing all of the elements in this collection.
+     * The returned array will be "safe" in that no references to it are maintained
+     * by this collection. The caller is thus free to modify the returned array.
+     * 
+     * <p>This method acts as bridge between array-based and collection-based APIs.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
+     * Object[] array = collection.toArray();
+     * System.out.println(Arrays.toString(array)); // [a, b, c]
+     * }</pre>
+     * </p>
+     *
+     * @return an array containing all of the elements in this collection
+     */
     @Override
     public Object[] toArray() {
         return coll.toArray();
     }
 
     /**
+     * Returns an array containing all of the elements in this collection;
+     * the runtime type of the returned array is that of the specified array.
+     * If the collection fits in the specified array, it is returned therein.
+     * Otherwise, a new array is allocated with the runtime type of the specified
+     * array and the size of this collection.
+     * 
+     * <p>If this collection fits in the specified array with room to spare
+     * (i.e., the array has more elements than this collection), the element in
+     * the array immediately following the end of the collection is set to {@code null}.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
+     * String[] array = collection.toArray(new String[0]);
+     * System.out.println(Arrays.toString(array)); // [x, y, z]
+     * }</pre>
+     * </p>
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the runtime type of the array to contain the collection
+     * @param a the array into which the elements of this collection are to be
+     *        stored, if it is big enough; otherwise, a new array of the same
+     *        runtime type is allocated for this purpose
+     * @return an array containing all of the elements in this collection
+     * @throws ArrayStoreException if the runtime type of the specified array
+     *         is not a supertype of the runtime type of every element in this collection
      */
     @Override
     public <T> T[] toArray(final T[] a) {
@@ -185,20 +319,55 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * Compares the specified object with this collection for equality.
+     * Returns {@code true} if the specified object is also a collection,
+     * the two collections have the same size, and every member of the
+     * specified collection is contained in this collection.
+     * 
+     * <p>This implementation first checks if the specified object is this
+     * collection itself, in which case it returns {@code true}. Then, it
+     * checks if the specified object is a collection. If not, it returns
+     * {@code false}. If so, it delegates to the underlying collection's
+     * equals method.</p>
      *
-     * @param obj
-     * @return
+     * @param obj object to be compared for equality with this collection
+     * @return {@code true} if the specified object is equal to this collection
      */
     @Override
     public boolean equals(final Object obj) {
         return obj instanceof Collection && coll.equals(obj);
     }
 
+    /**
+     * Returns the hash code value for this collection. The hash code of a
+     * collection is defined to be the hash code of the underlying collection.
+     * 
+     * <p>This ensures that {@code c1.equals(c2)} implies that
+     * {@code c1.hashCode()==c2.hashCode()} for any two collections
+     * {@code c1} and {@code c2}, as required by the general contract
+     * of {@link Object#hashCode}.</p>
+     *
+     * @return the hash code value for this collection
+     */
     @Override
     public int hashCode() {
         return coll.hashCode();
     }
 
+    /**
+     * Returns a string representation of this collection. The string
+     * representation consists of the string representation of the underlying
+     * collection.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<Integer> collection = ImmutableList.of(1, 2, 3);
+     * System.out.println(collection.toString()); // [1, 2, 3]
+     * }</pre>
+     * </p>
+     *
+     * @return a string representation of this collection
+     */
     @Override
     public String toString() {
         return coll.toString();

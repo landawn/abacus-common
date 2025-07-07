@@ -17,6 +17,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for java.util.OptionalInt.
+ * This class provides serialization, deserialization, and database access capabilities for OptionalInt instances.
+ * OptionalInt is a container that may or may not contain an int value.
+ * Empty optionals are represented as null in serialized form.
+ */
 public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = "JdkOptionalInt";
@@ -25,15 +31,21 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         super(OPTIONAL_INT);
     }
 
+    /**
+     * Returns the Class object representing the OptionalInt type.
+     *
+     * @return OptionalInt.class
+     */
     @Override
     public Class<OptionalInt> clazz() {
         return OptionalInt.class;
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether instances of this type implement the Comparable interface.
+     * OptionalInt values can be compared when both are present.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as OptionalInt values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -41,9 +53,10 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether this type should be written without quotes in CSV format.
+     * Integer values are numeric and should not be quoted.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating that OptionalInt values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -51,9 +64,12 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Converts an OptionalInt to its string representation.
+     * If the optional is empty or null, returns null.
+     * Otherwise, returns the string representation of the contained int value.
      *
-     * @param x
-     * @return
+     * @param x the OptionalInt to convert to string
+     * @return the string representation of the int value, or null if empty or null
      */
     @Override
     public String stringOf(final OptionalInt x) {
@@ -61,9 +77,12 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Parses a string representation into an OptionalInt.
+     * Empty or null strings result in an empty OptionalInt.
+     * Non-empty strings are parsed as int values and wrapped in OptionalInt.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return OptionalInt.empty() if the string is null or empty, otherwise OptionalInt containing the parsed value
      */
     @Override
     public OptionalInt valueOf(final String str) {
@@ -71,11 +90,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Retrieves an OptionalInt value from the specified column in a ResultSet.
+     * If the column value is null, returns an empty OptionalInt.
+     * Otherwise, converts the value to int and wraps it in OptionalInt.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return OptionalInt.empty() if the column is null, otherwise OptionalInt containing the value
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -85,11 +107,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Retrieves an OptionalInt value from the specified column in a ResultSet using the column label.
+     * If the column value is null, returns an empty OptionalInt.
+     * Otherwise, converts the value to int and wraps it in OptionalInt.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return OptionalInt.empty() if the column is null, otherwise OptionalInt containing the value
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -99,11 +124,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Sets an OptionalInt parameter in a PreparedStatement.
+     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the int value.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the OptionalInt to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws SQLException {
@@ -115,11 +143,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Sets an OptionalInt parameter in a CallableStatement using a parameter name.
+     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the int value.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the OptionalInt to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws SQLException {
@@ -131,10 +162,12 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Appends the string representation of an OptionalInt to an Appendable.
+     * Empty optionals are written as "null".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the OptionalInt to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
@@ -146,11 +179,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Writes the character representation of an OptionalInt to a CharacterWriter.
+     * Empty optionals are written as null.
+     * Present values are written as numeric values without quotes using the optimized writeInt method.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the OptionalInt to write
+     * @param config the serialization configuration (not used for numeric values)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalInt x, final JSONXMLSerializationConfig<?> config) throws IOException {

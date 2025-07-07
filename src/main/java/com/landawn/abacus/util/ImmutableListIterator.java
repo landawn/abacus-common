@@ -19,6 +19,37 @@ package com.landawn.abacus.util;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+/**
+ * An immutable implementation of {@link ListIterator} that provides read-only iteration
+ * over list elements in both forward and backward directions.
+ * 
+ * <p>This class extends {@link ObjIterator} and implements {@link ListIterator}, but
+ * all modification operations ({@link #set(Object)}, {@link #add(Object)}, and inherited
+ * {@link #remove()}) will throw {@link UnsupportedOperationException}.
+ * 
+ * <p>ImmutableListIterator is particularly useful when you need to provide iteration
+ * capabilities over a list while ensuring the underlying data cannot be modified
+ * through the iterator.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * List<String> list = Arrays.asList("one", "two", "three");
+ * ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
+ * 
+ * while (iter.hasNext()) {
+ *     System.out.println(iter.next());
+ * }
+ * 
+ * // Bidirectional iteration
+ * while (iter.hasPrevious()) {
+ *     System.out.println(iter.previous());
+ * }
+ * }</pre>
+ * 
+ * @param <T> the type of elements returned by this iterator
+ * @see ListIterator
+ * @see ObjIterator
+ */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements ListIterator<T> {
 
@@ -56,19 +87,53 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     };
 
     /**
+     * Returns an empty ImmutableListIterator. This iterator has no elements,
+     * so {@link #hasNext()} and {@link #hasPrevious()} always return false.
+     * 
+     * <p>The returned iterator is a singleton instance and can be safely shared.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableListIterator<String> empty = ImmutableListIterator.empty();
+     * System.out.println(empty.hasNext()); // prints: false
+     * System.out.println(empty.nextIndex()); // prints: 0
+     * System.out.println(empty.previousIndex()); // prints: -1
+     * }</pre>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements (not) returned by this iterator
+     * @return an empty ImmutableListIterator instance
      */
     public static <T> ImmutableListIterator<T> empty() {
         return EMPTY;
     }
 
     /**
+     * Creates an ImmutableListIterator that wraps the provided ListIterator.
+     * The returned iterator provides read-only access to the elements.
+     * 
+     * <p>If the provided iterator is null, an empty ImmutableListIterator is returned.
+     * If the provided iterator is already an ImmutableListIterator, it is returned as-is.
+     * 
+     * <p>The returned iterator reflects the current state of the provided iterator,
+     * including its current position. Modifications to the underlying collection
+     * after creating the immutable iterator may lead to undefined behavior.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 2, 3));
+     * ListIterator<Integer> mutableIter = numbers.listIterator();
+     * ImmutableListIterator<Integer> immutableIter = ImmutableListIterator.of(mutableIter);
+     * 
+     * // Can iterate but not modify
+     * while (immutableIter.hasNext()) {
+     *     System.out.println(immutableIter.next());
+     * }
+     * // immutableIter.set(4); // Would throw UnsupportedOperationException
+     * }</pre>
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements returned by the iterator
+     * @param iter the ListIterator to wrap, may be null
+     * @return an ImmutableListIterator wrapping the provided iterator, or empty if iter is null
      */
     public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iter) {
         if (iter == null) {
@@ -111,10 +176,14 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     }
 
     /**
+     * This operation is not supported by ImmutableListIterator.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * 
+     * <p>Use a mutable ListIterator if you need to modify elements during iteration.
      *
-     * @param e
-     * @throws UnsupportedOperationException
-     * @deprecated - UnsupportedOperationException
+     * @param e the element with which to replace the last element returned by next or previous
+     * @throws UnsupportedOperationException always, as this is an immutable iterator
+     * @deprecated ImmutableListIterator does not support modification operations
      */
     @Deprecated
     @Override
@@ -123,10 +192,14 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     }
 
     /**
+     * This operation is not supported by ImmutableListIterator.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * 
+     * <p>Use a mutable ListIterator if you need to add elements during iteration.
      *
-     * @param e
-     * @throws UnsupportedOperationException
-     * @deprecated - UnsupportedOperationException
+     * @param e the element to insert
+     * @throws UnsupportedOperationException always, as this is an immutable iterator
+     * @deprecated ImmutableListIterator does not support modification operations
      */
     @Deprecated
     @Override

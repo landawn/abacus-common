@@ -14,14 +14,27 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts two arguments and produces a boolean-valued result.
+ * This is the {@code boolean}-producing primitive specialization for {@link java.util.function.BiFunction}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(Object, Object)}.
+ * 
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
+ * 
+ * @see java.util.function.BiFunction
+ * @see ToBooleanFunction
+ */
 @FunctionalInterface
 public interface ToBooleanBiFunction<T, U> {
 
     /**
+     * Applies this function to the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a boolean value
      */
     boolean applyAsBoolean(T t, U u);
 }

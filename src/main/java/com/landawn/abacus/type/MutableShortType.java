@@ -17,6 +17,10 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link MutableShort} objects, providing serialization, deserialization,
+ * and database interaction capabilities for mutable short wrapper objects.
+ */
 public class MutableShortType extends NumberType<MutableShort> {
 
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
@@ -25,15 +29,21 @@ public class MutableShortType extends NumberType<MutableShort> {
         super(MUTABLE_SHORT);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link MutableShort} class object
+     */
     @Override
     public Class<MutableShort> clazz() {
         return MutableShort.class;
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts a {@link MutableShort} object to its string representation.
+     * 
+     * @param x the MutableShort object to convert
+     * @return the string representation of the short value, or null if the input is null
      */
     @Override
     public String stringOf(final MutableShort x) {
@@ -41,9 +51,11 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a string representation to a {@link MutableShort} object.
+     * 
+     * @param str the string to convert
+     * @return a MutableShort containing the parsed short value, or null if the input string is empty or null
+     * @throws NumberFormatException if the string cannot be parsed as a short
      */
     @Override
     public MutableShort valueOf(final String str) {
@@ -51,11 +63,12 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a {@link MutableShort} value from a ResultSet at the specified column index.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return a MutableShort containing the short value from the ResultSet
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public MutableShort get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -63,11 +76,12 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves a {@link MutableShort} value from a ResultSet using the specified column label.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return a MutableShort containing the short value from the ResultSet
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public MutableShort get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -75,11 +89,12 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to the value of a {@link MutableShort}.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the MutableShort value to set, or null (will be stored as 0)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableShort x) throws SQLException {
@@ -87,11 +102,12 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to the value of a {@link MutableShort}.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the MutableShort value to set, or null (will be stored as 0)
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableShort x) throws SQLException {
@@ -99,10 +115,11 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of a {@link MutableShort} to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the MutableShort value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final MutableShort x) throws IOException {
@@ -114,11 +131,13 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of a {@link MutableShort} to a CharacterWriter.
+     * This method is typically used for JSON/XML serialization.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the MutableShort value to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final MutableShort x, final JSONXMLSerializationConfig<?> config) throws IOException {

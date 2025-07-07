@@ -161,6 +161,10 @@ import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
+import com.landawn.abacus.util.stream.Stream;
+
+//Claude Opus 4 and generate the Javadoc with blow prompts 
+// Please generate comprehensive javadoc for all public methods starting from line 6 in Fn.java, including public static methods. Please use javadoc of method "toStr()" as a template to generate javadoc for other methods. Please don't take shortcut. The generated javadoc should be specific and details enough to describe the behavior of the method. And merge the generated javadoc into source file Fn.java to replace existing javadoc in Fn.java. Don't generate javadoc for method which is not found in Fn.java. Remember don't use any cache file because I have modified Fn.java. Again, don't generate javadoc for the method which is not in the attached file. Please read and double check if the method is in the attached file before starting to generate javadoc. If the method is not the attached file, don't generate javadoc for it.
 
 /**
  * Factory utility class for functional interfaces.
@@ -181,9 +185,6 @@ import com.landawn.abacus.util.function.UnaryOperator;
  *
  * </code>
  * </pre>
- *
- *
- *
  *
  */
 @SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
@@ -302,9 +303,9 @@ public final class Fn {
 
     private static final Function<Map.Entry<Object, Object>, Object> VALUE = Entry::getValue;
 
-    private static final Function<Pair<Object, Object>, Object> LEFT = Pair::getLeft;
+    private static final Function<Pair<Object, Object>, Object> LEFT = Pair::left;
 
-    private static final Function<Pair<Object, Object>, Object> RIGHT = Pair::getRight;
+    private static final Function<Pair<Object, Object>, Object> RIGHT = Pair::right;
 
     private static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = t -> new ImmutableEntry<>(t.getValue(), t.getKey());
 
@@ -415,34 +416,72 @@ public final class Fn {
         return LazyInitializer.of(supplier);
     }
 
-    // Copied from Google Guava under Apache License v2.
-
     /**
-     * Copied from Google Guava under Apache License v2.
-     * <br />
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
+     * Creates a memoizing supplier that caches the result of the delegate supplier and automatically
+     * expires the cached value after a specified duration. This implementation is thread-safe and
+     * provides automatic cache invalidation based on time.
+     * 
+     * <p>This method is particularly useful for expensive computations or I/O operations that:
+     * <ul>
+     *   <li>Have results that remain valid for a known period of time</li>
+     *   <li>Are called frequently enough to benefit from caching</li>
+     *   <li>Need automatic expiration without manual cache management</li>
+     * </ul>
+     * 
+     * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
+     * safely call {@code get()} concurrently. The implementation uses double-checked locking to
+     * ensure that the delegate supplier is called at most once per expiration period, even under
+     * concurrent access.
+     * 
+     * 
+     * <p><b>Example Usage:</b>
+     * <pre>{@code
+     * // Cache database query results for 5 minutes
+     * Supplier<List<User>> cachedUsers = Fn.memoizeWithExpiration(
+     *     () -> database.getAllUsers(),
+     *     5, TimeUnit.MINUTES
+     * );
+     * 
+     * // First call queries the database
+     * List<User> users1 = cachedUsers.get();
+     * 
+     * // Subsequent calls within 5 minutes return cached value
+     * List<User> users2 = cachedUsers.get(); // No database query
+     * 
+     * // After 5 minutes, the next call will query database again
+     * // and cache the new result
+     * }</pre>
+     * 
+     * <p><b>Typical Use Cases:</b>
+     * <pre>{@code
+     * // Configuration values that might change periodically
+     * Supplier<Config> config = Fn.memoizeWithExpiration(
+     *     () -> loadConfigFromFile(),
+     *     30, TimeUnit.SECONDS
+     * );
+     * 
+     * // API responses with known freshness requirements
+     * Supplier<WeatherData> weather = Fn.memoizeWithExpiration(
+     *     () -> weatherApi.getCurrentWeather(),
+     *     10, TimeUnit.MINUTES
+     * );
+     * }</pre>
      *
-     * Returns a supplier that caches the instance supplied by the delegate and removes the cached
-     * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
-     * value if the expiration time has not passed. After the expiration time, a new value is
-     * retrieved, cached, and returned. See: <a
-     * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
-     *
-     * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
-     * cached value, which will be recalculated when {@code get()} is called on the reserialized
-     * instance. The actual memoization does not happen when the underlying delegate throws an
-     * exception.
-     *
-     * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
-     * delegating calls until it returns valid data.
-     *
-     * @param <T>
-     * @param supplier
-     * @param duration the length of time after a value is created that it should stop being returned
-     *     by subsequent {@code get()} calls
-     * @param unit the unit that {@code duration} is expressed in
-     * @return
-     * @throws IllegalArgumentException if {@code duration} is not positive
+     * @param <T> the type of object returned by the supplier
+     * @param supplier the delegate supplier whose results should be cached. Must not be null.
+     *                 This supplier will be called to provide values when the cache is empty
+     *                 or expired
+     * @param duration the length of time after a value is created that it should remain in
+     *                 the cache before expiring. Must be positive. After this duration passes,
+     *                 the next call to {@code get()} will invoke the delegate supplier again
+     * @param unit the time unit for the duration parameter. Must not be null. Common units
+     *             include {@code TimeUnit.SECONDS}, {@code TimeUnit.MINUTES}, etc.
+     * @return a new supplier that caches the result of the delegate supplier for the specified
+     *         duration. The returned supplier's {@code get()} method will return cached values
+     *         within the expiration window and fetch fresh values when the cache expires
+     * @throws IllegalArgumentException if {@code duration} is not positive (i.e., duration ≤ 0)
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -562,76 +601,59 @@ public final class Fn {
         };
     }
 
-    //    /**
-    //     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-    //     * The returned Collection will clean up before it's returned every time when {@code get} is called.
-    //     * Don't save the returned Collection object or use it to save objects.
-    //     *
-    //     * @param <T>
-    //     * @param <C>
-    //     * @param supplier
-    //     * @return a stateful {@code Supplier}. Don't save or cache for reuse or use it in parallel stream.
-    //     * @see {@code Stream.split/sliding};
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    @SequentialOnly
-    //    @Stateful
-    //    public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final java.util.function.Supplier<? extends C> supplier) {
-    //        return new Supplier<>() {
-    //            private C c;
-    //
-    //            @Override
-    //            public C get() {
-    //                if (c == null) {
-    //                    c = supplier.get();
-    //                } else if (c.size() > 0) {
-    //                    c.clear();
-    //                }
-    //
-    //                return c;
-    //            }
-    //        };
-    //    }
-    //
-    //    /**
-    //     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-    //     * The returned Collection will clean up before it's returned every time when {@code get} is called.
-    //     * Don't save the returned Collection object or use it to save objects.
-    //     *
-    //     * @param <T>
-    //     * @param <C>
-    //     * @param supplier
-    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
-    //     * @see {@code Stream.split/sliding};
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    @SequentialOnly
-    //    @Stateful
-    //    public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final java.util.function.IntFunction<? extends C> supplier) {
-    //        return new IntFunction<>() {
-    //            private C c;
-    //
-    //            @Override
-    //            public C apply(int size) {
-    //                if (c == null) {
-    //                    c = supplier.apply(size);
-    //                } else if (c.size() > 0) {
-    //                    c.clear();
-    //                }
-    //
-    //                return c;
-    //            }
-    //        };
-    //    }
+    @SuppressWarnings("rawtypes")
+    private static final Function TO_JSON = N::toJson;
+
+    @SuppressWarnings("rawtypes")
+    private static final Function TO_XML = N::toXml;
+
+    private static final Function<Keyed<?, Object>, Object> VAL = Keyed::val;
+
+    private static final Function<Map.Entry<Keyed<Object, Object>, Object>, Object> KK_VAL = t -> t.getKey().val();
+
+    private static final Function<Object, Wrapper<Object>> WRAP = Wrapper::of;
+
+    private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
+
+    private static final Predicate<Object[]> IS_EMPTY_A = value -> value == null || value.length == 0;
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Collection> IS_EMPTY_C = value -> value == null || value.size() == 0;
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.isEmpty();
+
+    private static final Predicate<Object[]> NOT_EMPTY_A = value -> value != null && value.length > 0;
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Collection> NOT_EMPTY_C = value -> value != null && value.size() > 0;
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && !value.isEmpty();
+
+    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::flatToMap;
+
+    private static final ToByteFunction<String> PARSE_BYTE_FUNC = Numbers::toByte;
+
+    private static final ToShortFunction<String> PARSE_SHORT_FUNC = Numbers::toShort;
+
+    private static final ToIntFunction<String> PARSE_INT_FUNC = Numbers::toInt;
+
+    private static final ToLongFunction<String> PARSE_LONG_FUNC = Numbers::toLong;
+
+    private static final ToFloatFunction<String> PARSE_FLOAT_FUNC = Numbers::toFloat;
+
+    private static final ToDoubleFunction<String> PARSE_DOUBLE_FUNC = Numbers::toDouble;
+
+    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> Strings.isEmpty(t) ? null : Numbers.createNumber(t);
 
     /**
+     * Returns a Runnable that closes the specified AutoCloseable resource.
+     * The returned Runnable ensures the resource is closed only once, even if called multiple times.
      *
-     * @param closeable
-     * @return
+     * @param closeable the AutoCloseable resource to close
+     * @return a Runnable that closes the resource when executed
+     * @see IOUtil#close(AutoCloseable)
      */
     public static Runnable close(final AutoCloseable closeable) {
         return new Runnable() {
@@ -650,9 +672,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Runnable that closes all specified AutoCloseable resources.
+     * The returned Runnable ensures all resources are closed only once, even if called multiple times.
      *
-     * @param a
-     * @return
+     * @param a the array of AutoCloseable resources to close
+     * @return a Runnable that closes all resources when executed
+     * @see IOUtil#closeAll(AutoCloseable...)
      */
     public static Runnable closeAll(final AutoCloseable... a) {
         return new Runnable() {
@@ -671,9 +696,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Runnable that closes all AutoCloseable resources in the specified collection.
+     * The returned Runnable ensures all resources are closed only once, even if called multiple times.
      *
-     * @param c
-     * @return
+     * @param c the collection of AutoCloseable resources to close
+     * @return a Runnable that closes all resources when executed
+     * @see IOUtil#closeAll(Collection)
      */
     public static Runnable closeAll(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -692,9 +720,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Runnable that quietly closes the specified AutoCloseable resource.
+     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * ensures the resource is closed only once, even if called multiple times.
      *
-     * @param closeable
-     * @return
+     * @param closeable the AutoCloseable resource to close quietly
+     * @return a Runnable that closes the resource quietly when executed
+     * @see IOUtil#closeQuietly(AutoCloseable)
      */
     public static Runnable closeQuietly(final AutoCloseable closeable) {
         return new Runnable() {
@@ -713,10 +745,13 @@ public final class Fn {
     }
 
     /**
-     * Close all quietly.
+     * Returns a Runnable that quietly closes all specified AutoCloseable resources.
+     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * ensures all resources are closed only once, even if called multiple times.
      *
-     * @param a
-     * @return
+     * @param a the array of AutoCloseable resources to close quietly
+     * @return a Runnable that closes all resources quietly when executed
+     * @see IOUtil#closeAllQuietly(AutoCloseable...)
      */
     public static Runnable closeAllQuietly(final AutoCloseable... a) {
         return new Runnable() {
@@ -735,10 +770,13 @@ public final class Fn {
     }
 
     /**
-     * Close all quietly.
+     * Returns a Runnable that quietly closes all AutoCloseable resources in the specified collection.
+     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * ensures all resources are closed only once, even if called multiple times.
      *
-     * @param c
-     * @return
+     * @param c the collection of AutoCloseable resources to close quietly
+     * @return a Runnable that closes all resources quietly when executed
+     * @see IOUtil#closeAllQuietly(Collection)
      */
     public static Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -757,18 +795,21 @@ public final class Fn {
     }
 
     /**
-     * Returns an empty {@code Runnable} which does nothing.
+     * Returns an empty Runnable that performs no operation when executed.
      *
-     * @return an empty {@code Runnable} which does nothing.
+     * @return an empty Runnable which does nothing
      */
     public static Runnable emptyAction() {
         return EMPTY_ACTION;
     }
 
     /**
+     * Returns a Runnable that shuts down the specified ExecutorService.
+     * The returned Runnable ensures the service is shut down only once, even if called multiple times.
      *
-     * @param service
-     * @return
+     * @param service the ExecutorService to shut down
+     * @return a Runnable that shuts down the service when executed
+     * @see ExecutorService#shutdown()
      */
     public static Runnable shutDown(final ExecutorService service) {
         return new Runnable() {
@@ -787,11 +828,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a Runnable that shuts down the specified ExecutorService and waits for termination.
+     * The returned Runnable ensures the service is shut down only once, even if called multiple times.
      *
-     * @param service
-     * @param terminationTimeout
-     * @param timeUnit
-     * @return
+     * @param service the ExecutorService to shut down
+     * @param terminationTimeout the maximum time to wait for termination
+     * @param timeUnit the time unit of the timeout argument
+     * @return a Runnable that shuts down the service and waits for termination
+     * @see ExecutorService#shutdown()
+     * @see ExecutorService#awaitTermination(long, TimeUnit)
      */
     public static Runnable shutDown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
         return new Runnable() {
@@ -816,10 +861,10 @@ public final class Fn {
     }
 
     /**
-     * Returns an empty {@code Consumer} which does nothing.
+     * Returns an empty Consumer that performs no operation on its input.
      *
-     * @param <T>
-     * @return an empty {@code Consumer} which does nothing.
+     * @param <T> the type of the input to the consumer
+     * @return an empty Consumer which does nothing
      * @deprecated Use {@link #emptyConsumer()} instead.
      * @see #emptyConsumer()
      */
@@ -828,20 +873,21 @@ public final class Fn {
     }
 
     /**
-     * Returns an empty {@code Consumer} which does nothing.
+     * Returns an empty Consumer that performs no operation on its input.
      *
-     * @param <T>
-     * @return an empty {@code Consumer} which does nothing.
+     * @param <T> the type of the input to the consumer
+     * @return an empty Consumer which does nothing
      */
     public static <T> Consumer<T> emptyConsumer() {
         return EMPTY_CONSUMER;
     }
 
     /**
+     * Returns a Consumer that throws a RuntimeException with the specified error message.
      *
-     * @param <T>
-     * @param errorMessage
-     * @return
+     * @param <T> the type of the input to the consumer
+     * @param errorMessage the error message for the RuntimeException
+     * @return a Consumer that throws RuntimeException when invoked
      */
     public static <T> Consumer<T> throwRuntimeException(final String errorMessage) {
         return t -> {
@@ -850,10 +896,11 @@ public final class Fn {
     }
 
     /**
+     * Returns a Consumer that throws a RuntimeException created by the specified supplier.
      *
-     * @param <T>
-     * @param exceptionSupplier
-     * @return
+     * @param <T> the type of the input to the consumer
+     * @param exceptionSupplier the supplier that creates the exception to throw
+     * @return a Consumer that throws the supplied exception when invoked
      */
     public static <T> Consumer<T> throwException(final java.util.function.Supplier<? extends RuntimeException> exceptionSupplier) {
         return t -> {
@@ -861,54 +908,73 @@ public final class Fn {
         };
     }
 
+    /**
+     * Returns a Function that converts Throwable to RuntimeException.
+     * If the input is already a RuntimeException, it is returned as-is.
+     * Otherwise, the Throwable is wrapped in a RuntimeException.
+     *
+     * @return a Function that converts Throwable to RuntimeException
+     */
     public static Function<Throwable, RuntimeException> toRuntimeException() {
         return TO_RUNTIME_EXCEPTION;
     }
 
     /**
+     * Returns a Consumer that closes AutoCloseable resources.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of AutoCloseable
+     * @return a Consumer that closes AutoCloseable resources
+     * @see AutoCloseable#close()
      */
     public static <T extends AutoCloseable> Consumer<T> close() {
         return (Consumer<T>) CLOSE;
     }
 
     /**
+     * Returns a Consumer that quietly closes AutoCloseable resources.
+     * Any exceptions thrown during closing are suppressed.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of AutoCloseable
+     * @return a Consumer that quietly closes AutoCloseable resources
+     * @see IOUtil#closeQuietly(AutoCloseable)
      */
     public static <T extends AutoCloseable> Consumer<T> closeQuietly() {
         return (Consumer<T>) CLOSE_QUIETLY;
     }
 
     /**
+     * Returns a Consumer that sleeps for the specified number of milliseconds.
+     * The input value is ignored.
      *
-     * @param <T>
-     * @param millis
-     * @return
+     * @param <T> the type of the input (ignored)
+     * @param millis the sleep duration in milliseconds
+     * @return a Consumer that sleeps for the specified duration
+     * @see N#sleep(long)
      */
     public static <T> Consumer<T> sleep(final long millis) {
         return t -> N.sleep(millis);
     }
 
     /**
+     * Returns a Consumer that sleeps uninterruptibly for the specified number of milliseconds.
+     * The input value is ignored. If interrupted, the interrupt status is preserved.
      *
-     * @param <T>
-     * @param millis
-     * @return
+     * @param <T> the type of the input (ignored)
+     * @param millis the sleep duration in milliseconds
+     * @return a Consumer that sleeps uninterruptibly for the specified duration
+     * @see N#sleepUninterruptibly(long)
      */
     public static <T> Consumer<T> sleepUninterruptibly(final long millis) {
         return t -> N.sleepUninterruptibly(millis);
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * Returns a stateful Consumer that rate-limits execution based on permits per second.
+     * Don't save or cache for reuse, but it can be used in parallel stream.
      *
-     * @param <T>
-     * @param permitsPerSecond
-     * @return a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * @param <T> the type of the input
+     * @param permitsPerSecond the rate limit in permits per second
+     * @return a stateful Consumer that rate-limits execution
      * @see RateLimiter#acquire()
      * @see RateLimiter#create(double)
      */
@@ -918,11 +984,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * Returns a stateful Consumer that rate-limits execution using the provided RateLimiter.
+     * Don't save or cache for reuse, but it can be used in parallel stream.
      *
-     * @param <T>
-     * @param rateLimiter
-     * @return a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * @param <T> the type of the input
+     * @param rateLimiter the RateLimiter to use for rate limiting
+     * @return a stateful Consumer that rate-limits execution
      * @see RateLimiter#acquire()
      */
     @Stateful
@@ -931,21 +998,25 @@ public final class Fn {
     }
 
     /**
+     * Returns a Consumer that prints its input to standard output using N.println().
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input
+     * @return a Consumer that prints its input
+     * @see N#println(Object)
      */
     public static <T> Consumer<T> println() {
         return PRINTLN;
     }
 
     /**
+     * Returns a BiConsumer that prints its two inputs separated by the specified separator.
      *
-     * @param <T>
-     * @param <U>
-     * @param separator
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input
+     * @param <U> the type of the second input
+     * @param separator the separator to use between the two values
+     * @return a BiConsumer that prints both inputs with separator
+     * @throws IllegalArgumentException if separator is null
+     * @see N#println(Object)
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) throws IllegalArgumentException {
         N.checkArgNotNull(separator);
@@ -981,99 +1052,108 @@ public final class Fn {
     }
 
     /**
-     *
-     * @param <T>
-     * @return
+     * Returns a Function that converts its input to a String using String.valueOf().
+     * 
+     * @param <T> the type of the input
+     * @return a Function that converts its input to String
+     * @see String#valueOf(Object)
      */
     public static <T> Function<T, String> toStr() {
         return TO_STRING;
     }
 
     /**
-     * To camel case.
+     * Returns a UnaryOperator that converts strings to camel case.
      *
-     * @return
+     * @return a UnaryOperator that converts strings to camel case
+     * @see Strings#toCamelCase(String)
      */
     public static UnaryOperator<String> toCamelCase() {
         return TO_CAMEL_CASE;
     }
 
     /**
-     * To lower case.
+     * Returns a UnaryOperator that converts strings to lower case.
      *
-     * @return
+     * @return a UnaryOperator that converts strings to lower case
+     * @see String#toLowerCase()
      */
     public static UnaryOperator<String> toLowerCase() {
         return TO_LOWER_CASE;
     }
 
     /**
-     * To lower case with underscore.
+     * Returns a UnaryOperator that converts strings to lower case with underscores.
      *
-     * @return
+     * @return a UnaryOperator that converts strings to lower case with underscores
+     * @see Strings#toLowerCaseWithUnderscore(String)
      */
     public static UnaryOperator<String> toLowerCaseWithUnderscore() {
         return TO_LOWER_CASE_WITH_UNDERSCORE;
     }
 
     /**
-     * To upper case.
+     * Returns a UnaryOperator that converts strings to upper case.
      *
-     * @return
+     * @return a UnaryOperator that converts strings to upper case
+     * @see String#toUpperCase()
      */
     public static UnaryOperator<String> toUpperCase() {
         return TO_UPPER_CASE;
     }
 
     /**
-     * To upper case with underscore.
+     * Returns a UnaryOperator that converts strings to upper case with underscores.
      *
-     * @return
+     * @return a UnaryOperator that converts strings to upper case with underscores
+     * @see Strings#toUpperCaseWithUnderscore(String)
      */
     public static UnaryOperator<String> toUpperCaseWithUnderscore() {
         return TO_UPPER_CASE_WITH_UNDERSCORE;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Function TO_JSON = N::toJson;
-
     /**
+     * Returns a Function that converts objects to JSON string representation.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input object
+     * @return a Function that converts objects to JSON
+     * @see N#toJson(Object)
      */
     public static <T> Function<T, String> toJson() {
         return TO_JSON;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Function TO_XML = N::toXml;
-
     /**
+     * Returns a Function that converts objects to XML string representation.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input object
+     * @return a Function that converts objects to XML
+     * @see N#toXml(Object)
      */
     public static <T> Function<T, String> toXml() {
         return TO_XML;
     }
 
     /**
+     * Returns an identity Function that returns its input unchanged.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input and output
+     * @return an identity Function
+     * @see Function#identity()
      */
     public static <T> Function<T, T> identity() {
         return IDENTITY;
     }
 
     /**
+     * Returns a Function that wraps an object with its key extracted by the keyExtractor.
      *
      * @param <K> the key type
-     * @param <T>
-     * @param keyExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the value type
+     * @param keyExtractor the function to extract the key from the value
+     * @return a Function that creates Keyed objects
+     * @throws IllegalArgumentException if keyExtractor is null
+     * @see Keyed#of(Object, Object)
      */
     public static <K, T> Function<T, Keyed<K, T>> keyed(final java.util.function.Function<? super T, K> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1081,15 +1161,13 @@ public final class Fn {
         return t -> Keyed.of(keyExtractor.apply(t), t);
     }
 
-    private static final Function<Keyed<?, Object>, Object> VAL = Keyed::val;
-
-    private static final Function<Map.Entry<Keyed<Object, Object>, Object>, Object> KK_VAL = t -> t.getKey().val();
-
     /**
+     * Returns a Function that extracts the value from a Keyed object.
      *
      * @param <K> the key type
-     * @param <T>
-     * @return
+     * @param <T> the value type
+     * @return a Function that extracts values from Keyed objects
+     * @see Keyed#val()
      */
     @SuppressWarnings("rawtypes")
     public static <K, T> Function<Keyed<K, T>, T> val() {
@@ -1097,23 +1175,25 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that extracts the value from a Map.Entry with a Keyed key.
+     * This is useful when working with entries where the key itself is a Keyed object.
      *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the key type in the Keyed key
+     * @param <T> the value type in the Keyed key
+     * @param <V> the value type of the Map.Entry
+     * @return a Function that extracts the value from the Keyed key
      */
     @SuppressWarnings("rawtypes")
-    public static <T, K, V> Function<Map.Entry<Keyed<K, T>, V>, T> kkv() {
+    public static <K, T, V> Function<Map.Entry<Keyed<K, T>, V>, T> kkv() {
         return (Function) KK_VAL;
     }
 
-    private static final Function<Object, Wrapper<Object>> WRAP = Wrapper::of;
-
     /**
+     * Returns a Function that wraps objects in a Wrapper.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type to wrap
+     * @return a Function that creates Wrapper objects
+     * @see Wrapper#of(Object)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T, Wrapper<T>> wrap() {
@@ -1121,12 +1201,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that wraps objects with custom hash and equals functions.
      *
-     * @param <T>
-     * @param hashFunction
-     * @param equalsFunction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type to wrap
+     * @param hashFunction the function to compute hash codes
+     * @param equalsFunction the function to test equality
+     * @return a Function that creates Wrapper objects with custom behavior
+     * @throws IllegalArgumentException if hashFunction or equalsFunction is null
+     * @see Wrapper#of(Object, ToIntFunction, BiPredicate)
      */
     public static <T> Function<T, Wrapper<T>> wrap(final java.util.function.ToIntFunction<? super T> hashFunction,
             final java.util.function.BiPredicate<? super T, ? super T> equalsFunction) throws IllegalArgumentException {
@@ -1136,12 +1218,12 @@ public final class Fn {
         return t -> Wrapper.of(t, hashFunction, equalsFunction);
     }
 
-    private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
-
     /**
+     * Returns a Function that unwraps Wrapper objects to get their values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the wrapped type
+     * @return a Function that extracts values from Wrapper objects
+     * @see Wrapper#value()
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<Wrapper<T>, T> unwrap() {
@@ -1149,10 +1231,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that extracts the key from a Map.Entry.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a Function that extracts keys from Map.Entry objects
+     * @see Map.Entry#getKey()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, K> key() {
@@ -1160,10 +1244,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that extracts the value from a Map.Entry.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a Function that extracts values from Map.Entry objects
+     * @see Map.Entry#getValue()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, V> value() {
@@ -1171,10 +1257,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that extracts the left element from a Pair.
      *
-     * @param <L>
-     * @param <R>
-     * @return
+     * @param <L> the left element type
+     * @param <R> the right element type
+     * @return a Function that extracts the left element from Pair objects
+     * @see Pair#left
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, L> left() {
@@ -1182,10 +1270,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that extracts the right element from a Pair.
      *
-     * @param <L>
-     * @param <R>
-     * @return
+     * @param <L> the left element type
+     * @param <R> the right element type
+     * @return a Function that extracts the right element from Pair objects
+     * @see Pair#right
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, R> right() {
@@ -1193,10 +1283,11 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that inverts a Map.Entry by swapping its key and value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a Function that inverts Map.Entry objects
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, Entry<V, K>> inverse() {
@@ -1204,10 +1295,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiFunction that creates a Map.Entry from a key and value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a BiFunction that creates Map.Entry objects
+     * @see ImmutableEntry
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> BiFunction<K, V, Map.Entry<K, V>> entry() {
@@ -1215,12 +1308,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects with a fixed key.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key
-     * @return
+     * @param key the fixed key for all created entries
+     * @return a Function that creates Map.Entry objects with the fixed key
      * @deprecated replaced by {@code Fn#entryWithKey(Object)}
+     * @see #entryWithKey(Object)
      */
     @Deprecated
     public static <K, V> Function<V, Map.Entry<K, V>> entry(final K key) {
@@ -1228,12 +1323,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects by extracting keys from values.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyExtractor
-     * @return
+     * @param keyExtractor the function to extract keys from values
+     * @return a Function that creates Map.Entry objects
      * @deprecated replaced by {@code Fn#entryByKeyMapper(Function)}
+     * @see #entryByKeyMapper(Function)
      */
     @Deprecated
     public static <K, V> Function<V, Map.Entry<K, V>> entry(final java.util.function.Function<? super V, K> keyExtractor) {
@@ -1241,23 +1338,25 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects with a fixed key.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key
-     * @return
+     * @param key the fixed key for all created entries
+     * @return a Function that creates Map.Entry objects with the fixed key
      */
     public static <K, V> Function<V, Map.Entry<K, V>> entryWithKey(final K key) {
         return v -> new ImmutableEntry<>(key, v);
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects by extracting keys from values.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param keyExtractor the function to extract keys from values
+     * @return a Function that creates Map.Entry objects
+     * @throws IllegalArgumentException if keyExtractor is null
      */
     public static <K, V> Function<V, Map.Entry<K, V>> entryByKeyMapper(final java.util.function.Function<? super V, K> keyExtractor)
             throws IllegalArgumentException {
@@ -1267,23 +1366,25 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects with a fixed value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param value
-     * @return
+     * @param value the fixed value for all created entries
+     * @return a Function that creates Map.Entry objects with the fixed value
      */
     public static <K, V> Function<K, Map.Entry<K, V>> entryWithValue(final V value) {
         return k -> new ImmutableEntry<>(k, value);
     }
 
     /**
+     * Returns a Function that creates Map.Entry objects by extracting values from keys.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param valueExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param valueExtractor the function to extract values from keys
+     * @return a Function that creates Map.Entry objects
+     * @throws IllegalArgumentException if valueExtractor is null
      */
     public static <K, V> Function<K, Map.Entry<K, V>> entryByValueMapper(final java.util.function.Function<? super K, V> valueExtractor)
             throws IllegalArgumentException {
@@ -1293,10 +1394,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiFunction that creates Pair objects from two elements.
      *
-     * @param <L>
-     * @param <R>
-     * @return
+     * @param <L> the left element type
+     * @param <R> the right element type
+     * @return a BiFunction that creates Pair objects
+     * @see Pair#of(Object, Object)
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> BiFunction<L, R, Pair<L, R>> pair() {
@@ -1304,11 +1407,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a TriFunction that creates Triple objects from three elements.
      *
-     * @param <L>
-     * @param <M>
-     * @param <R>
-     * @return
+     * @param <L> the left element type
+     * @param <M> the middle element type
+     * @param <R> the right element type
+     * @return a TriFunction that creates Triple objects
+     * @see Triple#of(Object, Object, Object)
      */
     @SuppressWarnings("rawtypes")
     public static <L, M, R> TriFunction<L, M, R, Triple<L, M, R>> triple() {
@@ -1316,9 +1421,11 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that creates Tuple1 objects from a single element.
      *
-     * @param <T>
-     * @return
+     * @param <T> the element type
+     * @return a Function that creates Tuple1 objects
+     * @see Tuple1#of(Object)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T, Tuple1<T>> tuple1() {
@@ -1326,10 +1433,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiFunction that creates Tuple2 objects from two elements.
      *
-     * @param <T>
-     * @param <U>
-     * @return
+     * @param <T> the first element type
+     * @param <U> the second element type
+     * @return a BiFunction that creates Tuple2 objects
+     * @see Tuple2#of(Object, Object)
      */
     @SuppressWarnings("rawtypes")
     public static <T, U> BiFunction<T, U, Tuple2<T, U>> tuple2() {
@@ -1337,11 +1446,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a TriFunction that creates Tuple3 objects from three elements.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @return
+     * @param <A> the first element type
+     * @param <B> the second element type
+     * @param <C> the third element type
+     * @return a TriFunction that creates Tuple3 objects
+     * @see Tuple3#of(Object, Object, Object)
      */
     @SuppressWarnings("rawtypes")
     public static <A, B, C> TriFunction<A, B, C, Tuple3<A, B, C>> tuple3() {
@@ -1349,108 +1460,122 @@ public final class Fn {
     }
 
     /**
+     * Returns a QuadFunction that creates Tuple4 objects from four elements.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @return
+     * @param <A> the first element type
+     * @param <B> the second element type
+     * @param <C> the third element type
+     * @param <D> the fourth element type
+     * @return a QuadFunction that creates Tuple4 objects
+     * @see Tuple4#of(Object, Object, Object, Object)
      */
     @SuppressWarnings({ "rawtypes" })
     public static <A, B, C, D> QuadFunction<A, B, C, D, Tuple4<A, B, C, D>> tuple4() {
         return (QuadFunction) TUPLE_4;
     }
 
+    /**
+     * Returns a UnaryOperator that trims strings by removing leading and trailing whitespace.
+     *
+     * @return a UnaryOperator that trims strings
+     * @see String#trim()
+     */
     public static UnaryOperator<String> trim() {
         return TRIM;
     }
 
+    /**
+     * Returns a UnaryOperator that trims strings and converts null to empty string.
+     *
+     * @return a UnaryOperator that trims strings to empty
+     * @see Strings#trimToEmpty(String)
+     */
     public static UnaryOperator<String> trimToEmpty() {
         return TRIM_TO_EMPTY;
     }
 
+    /**
+     * Returns a UnaryOperator that trims strings and converts empty results to null.
+     *
+     * @return a UnaryOperator that trims strings to null
+     * @see Strings#trimToNull(String)
+     */
     public static UnaryOperator<String> trimToNull() {
         return TRIM_TO_NULL;
     }
 
+    /**
+     * Returns a UnaryOperator that strips strings by removing leading and trailing whitespace.
+     * Unlike trim(), this method uses Character.isWhitespace() for determining whitespace.
+     *
+     * @return a UnaryOperator that strips strings
+     * @see Strings#strip(String)
+     */
     public static UnaryOperator<String> strip() {
         return STRIP;
     }
 
+    /**
+     * Returns a UnaryOperator that strips strings and converts null to empty string.
+     *
+     * @return a UnaryOperator that strips strings to empty
+     * @see Strings#stripToEmpty(String)
+     */
     public static UnaryOperator<String> stripToEmpty() {
         return STRIP_TO_EMPTY;
     }
 
+    /**
+     * Returns a UnaryOperator that strips strings and converts empty results to null.
+     *
+     * @return a UnaryOperator that strips strings to null
+     * @see Strings#stripToNull(String)
+     */
     public static UnaryOperator<String> stripToNull() {
         return STRIP_TO_NULL;
     }
 
+    /**
+     * Returns a UnaryOperator that converts null strings to empty strings.
+     *
+     * @return a UnaryOperator that converts null to empty string
+     * @see Strings#nullToEmpty(String)
+     */
     public static UnaryOperator<String> nullToEmpty() {
         return NULL_TO_EMPTY;
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @return
-    //     * @deprecated replaced by {@code nullToEmptyList}
-    //     */
-    //    @Deprecated
-    //    @SuppressWarnings("rawtypes")
-    //    public static <T> UnaryOperator<List<T>> nullToEmptyL() {
-    //        return (UnaryOperator) NULL_TO_EMPTY_LIST;
-    //    }
-
     /**
+     * Returns a UnaryOperator that converts null Lists to empty Lists.
      *
-     * @param <T>
-     * @return
+     * @param <T> the element type
+     * @return a UnaryOperator that converts null to empty List
+     * @see N#emptyList()
      */
     @SuppressWarnings("rawtypes")
     public static <T> UnaryOperator<List<T>> nullToEmptyList() {
         return (UnaryOperator) NULL_TO_EMPTY_LIST;
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @return
-    //     * @deprecated replaced by {@code nullToEmptySet}
-    //     */
-    //    @Deprecated
-    //    @SuppressWarnings("rawtypes")
-    //    public static <T> UnaryOperator<Set<T>> nullToEmptyS() {
-    //        return (UnaryOperator) NULL_TO_EMPTY_SET;
-    //    }
-
     /**
+     * Returns a UnaryOperator that converts null Sets to empty Sets.
      *
-     * @param <T>
-     * @return
+     * @param <T> the element type
+     * @return a UnaryOperator that converts null to empty Set
+     * @see N#emptySet()
      */
     @SuppressWarnings("rawtypes")
     public static <T> UnaryOperator<Set<T>> nullToEmptySet() {
         return (UnaryOperator) NULL_TO_EMPTY_SET;
     }
 
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <V> the value type
-    //     * @return
-    //     * @deprecated replaced by {@code nullToEmptyMap}
-    //     */
-    //    @Deprecated
-    //    @SuppressWarnings("rawtypes")
-    //    public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyM() {
-    //        return (UnaryOperator) NULL_TO_EMPTY_MAP;
-    //    }
-
     /**
+     * Returns a UnaryOperator that converts null Maps to empty Maps.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a UnaryOperator that converts null to empty Map
+     * @see N#emptyMap()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyMap() {
@@ -1458,9 +1583,11 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that calculates the length of an array.
+     * Returns 0 for null arrays.
      *
-     * @param <T>
-     * @return
+     * @param <T> the array element type
+     * @return a Function that returns array length
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T[], Integer> len() {
@@ -1468,18 +1595,22 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that calculates the length of a CharSequence.
      *
-     * @param <T>
-     * @return
+     * @param <T> the CharSequence type
+     * @return a Function that returns CharSequence length
+     * @see CharSequence#length()
      */
     public static <T extends CharSequence> Function<T, Integer> length() {
         return (Function<T, Integer>) LENGTH;
     }
 
     /**
+     * Returns a Function that calculates the size of a Collection.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Collection type
+     * @return a Function that returns Collection size
+     * @see Collection#size()
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Function<T, Integer> size() {
@@ -1487,9 +1618,11 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that calculates the size of a Map.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Map type
+     * @return a Function that returns Map size
+     * @see Map#size()
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Function<T, Integer> sizeM() {
@@ -1497,104 +1630,112 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that casts objects to the specified class.
+     * This performs an unchecked cast and should be used with caution.
      *
-     * @param <T>
-     * @param <U>
-     * @param clazz
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the source type
+     * @param <U> the target type
+     * @param clazz the class to cast to
+     * @return a Function that performs type casting
+     * @throws IllegalArgumentException if clazz is null
+     * @see Class#cast(Object)
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
 
-        return t -> (U) t;
+        return t -> clazz.cast(t);
     }
 
     /**
+     * Returns a Predicate that always evaluates to true.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @return a Predicate that always returns true
      */
     public static <T> Predicate<T> alwaysTrue() {
         return ALWAYS_TRUE;
     }
 
     /**
+     * Returns a Predicate that always evaluates to false.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @return a Predicate that always returns false
      */
     public static <T> Predicate<T> alwaysFalse() {
         return ALWAYS_FALSE;
     }
 
     /**
-     * Checks if is {@code null}.
+     * Returns a Predicate that tests if the input is null.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @return a Predicate that tests for null
      */
     public static <T> Predicate<T> isNull() {
         return IS_NULL;
     }
 
     /**
-     * Checks if is {@code null}.
+     * Returns a Predicate that tests if a value extracted by the valueExtractor is null.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the value to test
+     * @return a Predicate that tests if the extracted value is null
      */
     public static <T> Predicate<T> isNull(final java.util.function.Function<T, ?> valueExtractor) {
         return t -> valueExtractor.apply(t) == null;
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Returns a Predicate that tests if a CharSequence is null or empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the CharSequence type
+     * @return a Predicate that tests for null or empty
+     * @see Strings#isEmpty(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> isEmpty() {
         return (Predicate<T>) IS_EMPTY;
     }
 
     /**
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is empty.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the CharSequence to test
+     * @return a Predicate that tests if the extracted value is empty
      */
     public static <T> Predicate<T> isEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isEmpty(valueExtractor.apply(t));
     }
 
     /**
-     * Checks if is {@code null} or empty or blank.
+     * Returns a Predicate that tests if a CharSequence is null, empty, or contains only whitespace.
      *
-     * @param <T>
-     * @return
+     * @param <T> the CharSequence type
+     * @return a Predicate that tests for null, empty, or blank
+     * @see Strings#isBlank(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> isBlank() {
         return (Predicate<T>) IS_BLANK;
     }
 
     /**
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is blank.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the CharSequence to test
+     * @return a Predicate that tests if the extracted value is blank
      */
     public static <T> Predicate<T> isBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isBlank(valueExtractor.apply(t));
     }
 
-    private static final Predicate<Object[]> IS_EMPTY_A = value -> value == null || value.length == 0;
-
     /**
+     * Returns a Predicate that tests if an array is null or empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the array element type
+     * @return a Predicate that tests if arrays are empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1602,13 +1743,11 @@ public final class Fn {
         return (Predicate) IS_EMPTY_A;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Predicate<Collection> IS_EMPTY_C = value -> value == null || value.size() == 0;
-
     /**
+     * Returns a Predicate that tests if a Collection is null or empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Collection type
+     * @return a Predicate that tests if Collections are empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1616,13 +1755,11 @@ public final class Fn {
         return (Predicate<T>) IS_EMPTY_C;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.isEmpty();
-
     /**
+     * Returns a Predicate that tests if a Map is null or empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Map type
+     * @return a Predicate that tests if Maps are empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1631,70 +1768,75 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if the input is not null.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @return a Predicate that tests for non-null
      */
     public static <T> Predicate<T> notNull() {
         return NOT_NULL;
     }
 
     /**
+     * Returns a Predicate that tests if a value extracted by the valueExtractor is not null.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the value to test
+     * @return a Predicate that tests if the extracted value is not null
      */
     public static <T> Predicate<T> notNull(final java.util.function.Function<T, ?> valueExtractor) {
         return t -> valueExtractor.apply(t) != null;
     }
 
     /**
-     * Not {@code null} or empty.
+     * Returns a Predicate that tests if a CharSequence is not null and not empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the CharSequence type
+     * @return a Predicate that tests for non-empty
+     * @see Strings#isNotEmpty(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> notEmpty() {
         return (Predicate<T>) IS_NOT_EMPTY;
     }
 
     /**
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is not empty.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the CharSequence to test
+     * @return a Predicate that tests if the extracted value is not empty
      */
     public static <T> Predicate<T> notEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isNotEmpty(valueExtractor.apply(t));
     }
 
     /**
-     * Not {@code null} or empty or blank.
+     * Returns a Predicate that tests if a CharSequence is not null, not empty, and not blank.
      *
-     * @param <T>
-     * @return
+     * @param <T> the CharSequence type
+     * @return a Predicate that tests for non-blank
+     * @see Strings#isNotBlank(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> notBlank() {
         return (Predicate<T>) IS_NOT_BLANK;
     }
 
     /**
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is not blank.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param valueExtractor the function to extract the CharSequence to test
+     * @return a Predicate that tests if the extracted value is not blank
      */
     public static <T> Predicate<T> notBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isNotBlank(valueExtractor.apply(t));
     }
 
-    private static final Predicate<Object[]> NOT_EMPTY_A = value -> value != null && value.length > 0;
-
     /**
+     * Returns a Predicate that tests if an array is not null and not empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the array element type
+     * @return a Predicate that tests if arrays are not empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1702,13 +1844,11 @@ public final class Fn {
         return (Predicate) NOT_EMPTY_A;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Predicate<Collection> NOT_EMPTY_C = value -> value != null && value.size() > 0;
-
     /**
+     * Returns a Predicate that tests if a Collection is not null and not empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Collection type
+     * @return a Predicate that tests if Collections are not empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1716,13 +1856,11 @@ public final class Fn {
         return (Predicate<T>) NOT_EMPTY_C;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && !value.isEmpty();
-
     /**
+     * Returns a Predicate that tests if a Map is not null and not empty.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Map type
+     * @return a Predicate that tests if Maps are not empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1731,162 +1869,190 @@ public final class Fn {
     }
 
     /**
-     * Checks if it is a file.
+     * Returns a Predicate that tests if a File is a regular file.
      *
-     * @return
+     * @return a Predicate that tests if Files are regular files
+     * @see File#isFile()
      */
     public static Predicate<File> isFile() {
         return IS_FILE;
     }
 
     /**
-     * Checks if it is directory.
+     * Returns a Predicate that tests if a File is a directory.
      *
-     * @return
+     * @return a Predicate that tests if Files are directories
+     * @see File#isDirectory()
      */
     public static Predicate<File> isDirectory() {
         return IS_DIRECTORY;
     }
 
     /**
+     * Returns a Predicate that tests if the input equals the target value.
+     * Uses N.equals() for null-safe comparison.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param target the value to compare against
+     * @return a Predicate that tests for equality with target
+     * @see N#equals(Object, Object)
      */
     public static <T> Predicate<T> equal(final Object target) {
         return value -> N.equals(value, target);
     }
 
     /**
+     * Returns a Predicate that tests if the input equals either of two target values.
      *
-     * @param <T>
-     * @param targetValue1
-     * @param targetValue2
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param targetValue1 the first value to compare against
+     * @param targetValue2 the second value to compare against
+     * @return a Predicate that tests for equality with either target
      */
     public static <T> Predicate<T> eqOr(final Object targetValue1, final Object targetValue2) {
         return value -> N.equals(value, targetValue1) || N.equals(value, targetValue2);
     }
 
     /**
+     * Returns a Predicate that tests if the input equals any of three target values.
      *
-     * @param <T>
-     * @param targetValue1
-     * @param targetValue2
-     * @param targetValue3
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param targetValue1 the first value to compare against
+     * @param targetValue2 the second value to compare against
+     * @param targetValue3 the third value to compare against
+     * @return a Predicate that tests for equality with any target
      */
     public static <T> Predicate<T> eqOr(final Object targetValue1, final Object targetValue2, final Object targetValue3) {
         return value -> N.equals(value, targetValue1) || N.equals(value, targetValue2) || N.equals(value, targetValue3);
     }
 
     /**
+     * Returns a Predicate that tests if the input does not equal the target value.
+     * Uses N.equals() for null-safe comparison.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param target the value to compare against
+     * @return a Predicate that tests for inequality with target
+     * @see N#equals(Object, Object)
      */
     public static <T> Predicate<T> notEqual(final Object target) {
         return value -> !N.equals(value, target);
     }
 
     /**
+     * Returns a Predicate that tests if a Comparable is greater than the target value.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param target the value to compare against
+     * @return a Predicate that tests if input > target
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> greaterThan(final T target) {
         return value -> N.compare(value, target) > 0;
     }
 
     /**
+     * Returns a Predicate that tests if a Comparable is greater than or equal to the target value.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param target the value to compare against
+     * @return a Predicate that tests if input >= target
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> greaterEqual(final T target) {
         return value -> N.compare(value, target) >= 0;
     }
 
     /**
+     * Returns a Predicate that tests if a Comparable is less than the target value.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param target the value to compare against
+     * @return a Predicate that tests if input < target
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> lessThan(final T target) {
         return value -> N.compare(value, target) < 0;
     }
 
     /**
+     * Returns a Predicate that tests if a Comparable is less than or equal to the target value.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param target the value to compare against
+     * @return a Predicate that tests if input <= target
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> lessEqual(final T target) {
         return value -> N.compare(value, target) <= 0;
     }
 
     /**
-     * Checks if the value/element: {@code minValue < e < maxValue}.
+     * Returns a Predicate that tests if a value is strictly between two bounds.
+     * Tests if: minValue < value < maxValue
      *
-     * @param <T>
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param minValue the lower bound (exclusive)
+     * @param maxValue the upper bound (exclusive)
+     * @return a Predicate that tests if minValue < input < maxValue
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> gtAndLt(final T minValue, final T maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }
 
     /**
-     * Checks if the value/element: {@code minValue <= e < maxValue}.
+     * Returns a Predicate that tests if a value is between two bounds (inclusive lower).
+     * Tests if: minValue <= value < maxValue
      *
-     * @param <T>
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param minValue the lower bound (inclusive)
+     * @param maxValue the upper bound (exclusive)
+     * @return a Predicate that tests if minValue <= input < maxValue
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> geAndLt(final T minValue, final T maxValue) {
         return value -> N.compare(value, minValue) >= 0 && N.compare(value, maxValue) < 0;
     }
 
     /**
-     * Checks if the value/element: {@code minValue <= e <= maxValue}.
+     * Returns a Predicate that tests if a value is between two bounds (both inclusive).
+     * Tests if: minValue <= value <= maxValue
      *
-     * @param <T>
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param minValue the lower bound (inclusive)
+     * @param maxValue the upper bound (inclusive)
+     * @return a Predicate that tests if minValue <= input <= maxValue
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> geAndLe(final T minValue, final T maxValue) {
         return value -> N.compare(value, minValue) >= 0 && N.compare(value, maxValue) <= 0;
     }
 
     /**
-     * Checks if the value/element: {@code minValue < e <= maxValue}.
+     * Returns a Predicate that tests if a value is between two bounds (inclusive upper).
+     * Tests if: minValue < value <= maxValue
      *
-     * @param <T>
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param minValue the lower bound (exclusive)
+     * @param maxValue the upper bound (inclusive)
+     * @return a Predicate that tests if minValue < input <= maxValue
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> gtAndLe(final T minValue, final T maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) <= 0;
     }
 
     /**
-     * Checks if the value/element: {@code minValue < e < maxValue}.
+     * Returns a Predicate that tests if a value is strictly between two bounds.
+     * Tests if: minValue < value < maxValue
      *
-     * @param <T>
-     * @param minValue
-     * @param maxValue
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @param minValue the lower bound (exclusive)
+     * @param maxValue the upper bound (exclusive)
+     * @return a Predicate that tests if minValue < input < maxValue
      * @deprecated replaced by {@code gtAndLt}.
+     * @see #gtAndLt(Comparable, Comparable)
      */
     @Deprecated
     public static <T extends Comparable<? super T>> Predicate<T> between(final T minValue, final T maxValue) {
@@ -1894,11 +2060,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a value is contained in the specified collection.
+     * Returns false if the collection is empty.
      *
-     * @param <T>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param c the collection to check membership in
+     * @return a Predicate that tests for collection membership
+     * @throws IllegalArgumentException if c is null
+     * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
@@ -1909,11 +2078,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a value is not contained in the specified collection.
+     * Returns true if the collection is empty.
      *
-     * @param <T>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param c the collection to check membership in
+     * @return a Predicate that tests for non-membership in collection
+     * @throws IllegalArgumentException if c is null
+     * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
@@ -1924,11 +2096,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if an object is an instance of the specified class.
      *
-     * @param <T>
-     * @param clazz
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param clazz the class to test instance membership
+     * @return a Predicate that tests if objects are instances of clazz
+     * @throws IllegalArgumentException if clazz is null
+     * @see Class#isInstance(Object)
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
@@ -1937,10 +2111,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a Class is a subtype of the specified class.
      *
-     * @param clazz
-     * @return
-     * @throws IllegalArgumentException
+     * @param clazz the superclass to test against
+     * @return a Predicate that tests if classes are subtypes of clazz
+     * @throws IllegalArgumentException if clazz is null
+     * @see Class#isAssignableFrom(Class)
      */
     public static Predicate<Class<?>> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
@@ -1949,10 +2125,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a String starts with the specified prefix.
      *
-     * @param prefix
-     * @return
-     * @throws IllegalArgumentException
+     * @param prefix the prefix to test for
+     * @return a Predicate that tests if strings start with prefix
+     * @throws IllegalArgumentException if prefix is null
+     * @see String#startsWith(String)
      */
     public static Predicate<String> startsWith(final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
@@ -1961,10 +2139,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a String ends with the specified suffix.
      *
-     * @param suffix
-     * @return
-     * @throws IllegalArgumentException
+     * @param suffix the suffix to test for
+     * @return a Predicate that tests if strings end with suffix
+     * @throws IllegalArgumentException if suffix is null
+     * @see String#endsWith(String)
      */
     public static Predicate<String> endsWith(final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
@@ -1973,10 +2153,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a String contains the specified substring.
      *
-     * @param valueToFind
-     * @return
-     * @throws IllegalArgumentException
+     * @param valueToFind the substring to search for
+     * @return a Predicate that tests if strings contain the substring
+     * @throws IllegalArgumentException if valueToFind is null
+     * @see String#contains(CharSequence)
      */
     public static Predicate<String> contains(final String valueToFind) throws IllegalArgumentException {
         N.checkArgNotNull(valueToFind);
@@ -1985,11 +2167,12 @@ public final class Fn {
     }
 
     /**
-     * Not starts with.
+     * Returns a Predicate that tests if a String does not start with the specified prefix.
      *
-     * @param prefix
-     * @return
-     * @throws IllegalArgumentException
+     * @param prefix the prefix to test against
+     * @return a Predicate that tests if strings don't start with prefix
+     * @throws IllegalArgumentException if prefix is null
+     * @see String#startsWith(String)
      */
     public static Predicate<String> notStartsWith(final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
@@ -1998,11 +2181,12 @@ public final class Fn {
     }
 
     /**
-     * Not ends with.
+     * Returns a Predicate that tests if a String does not end with the specified suffix.
      *
-     * @param suffix
-     * @return
-     * @throws IllegalArgumentException
+     * @param suffix the suffix to test against
+     * @return a Predicate that tests if strings don't end with suffix
+     * @throws IllegalArgumentException if suffix is null
+     * @see String#endsWith(String)
      */
     public static Predicate<String> notEndsWith(final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
@@ -2011,10 +2195,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a String does not contain the specified substring.
      *
-     * @param str
-     * @return
-     * @throws IllegalArgumentException
+     * @param str the substring to test against
+     * @return a Predicate that tests if strings don't contain the substring
+     * @throws IllegalArgumentException if str is null
+     * @see String#contains(CharSequence)
      */
     public static Predicate<String> notContains(final String str) throws IllegalArgumentException {
         N.checkArgNotNull(str);
@@ -2023,10 +2209,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that tests if a CharSequence matches the specified Pattern.
      *
-     * @param pattern
-     * @return
-     * @throws IllegalArgumentException
+     * @param pattern the Pattern to match against
+     * @return a Predicate that tests if CharSequences match the pattern
+     * @throws IllegalArgumentException if pattern is null
+     * @see Pattern#matcher(CharSequence)
+     * @see Matcher#find()
      */
     public static Predicate<CharSequence> matches(final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern);
@@ -2035,67 +2224,80 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that tests if two objects are equal using N.equals().
      *
-     * @param <T>
-     * @param <U>
-     * @return
+     * @param <T> the type of the first object
+     * @param <U> the type of the second object
+     * @return a BiPredicate that tests for equality
+     * @see N#equals(Object, Object)
      */
     public static <T, U> BiPredicate<T, U> equal() {
         return BiPredicates.EQUAL;
     }
 
     /**
+     * Returns a BiPredicate that tests if two objects are not equal using N.equals().
      *
-     * @param <T>
-     * @param <U>
-     * @return
+     * @param <T> the type of the first object
+     * @param <U> the type of the second object
+     * @return a BiPredicate that tests for inequality
+     * @see N#equals(Object, Object)
      */
     public static <T, U> BiPredicate<T, U> notEqual() {
         return BiPredicates.NOT_EQUAL;
     }
 
     /**
+     * Returns a BiPredicate that tests if the first Comparable is greater than the second.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @return a BiPredicate that tests if first > second
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterThan() {
         return (BiPredicate<T, T>) BiPredicates.GREATER_THAN;
     }
 
     /**
+     * Returns a BiPredicate that tests if the first Comparable is greater than or equal to the second.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @return a BiPredicate that tests if first >= second
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterEqual() {
         return (BiPredicate<T, T>) BiPredicates.GREATER_EQUAL;
     }
 
     /**
+     * Returns a BiPredicate that tests if the first Comparable is less than the second.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @return a BiPredicate that tests if first < second
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> lessThan() {
         return (BiPredicate<T, T>) BiPredicates.LESS_THAN;
     }
 
     /**
+     * Returns a BiPredicate that tests if the first Comparable is less than or equal to the second.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of objects that may be compared
+     * @return a BiPredicate that tests if first <= second
+     * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> lessEqual() {
         return (BiPredicate<T, T>) BiPredicates.LESS_EQUAL;
     }
 
     /**
+     * Returns a Predicate that negates the result of the specified predicate.
      *
-     * @param <T>
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param predicate the predicate to negate
+     * @return a Predicate that returns the opposite of the input predicate
+     * @throws IllegalArgumentException if predicate is null
      */
     public static <T> Predicate<T> not(final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2104,12 +2306,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that negates the result of the specified bi-predicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param biPredicate the bi-predicate to negate
+     * @return a BiPredicate that returns the opposite of the input bi-predicate
+     * @throws IllegalArgumentException if biPredicate is null
      */
     public static <T, U> BiPredicate<T, U> not(final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate);
@@ -2118,13 +2321,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a TriPredicate that negates the result of the specified tri-predicate.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param triPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the first input to the predicate
+     * @param <B> the type of the second input to the predicate
+     * @param <C> the type of the third input to the predicate
+     * @param triPredicate the tri-predicate to negate
+     * @return a TriPredicate that returns the opposite of the input tri-predicate
+     * @throws IllegalArgumentException if triPredicate is null
      */
     public static <A, B, C> TriPredicate<A, B, C> not(final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate);
@@ -2133,11 +2337,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BooleanSupplier that performs logical AND on two boolean suppliers.
      *
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param first the first boolean supplier
+     * @param second the second boolean supplier
+     * @return a BooleanSupplier that returns first AND second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static BooleanSupplier and(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second)
             throws IllegalArgumentException {
@@ -2148,12 +2353,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BooleanSupplier that performs logical AND on three boolean suppliers.
      *
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param first the first boolean supplier
+     * @param second the second boolean supplier
+     * @param third the third boolean supplier
+     * @return a BooleanSupplier that returns first AND second AND third
+     * @throws IllegalArgumentException if any supplier is null
      */
     public static BooleanSupplier and(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second,
             final java.util.function.BooleanSupplier third) throws IllegalArgumentException {
@@ -2165,12 +2371,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical AND on two predicates.
      *
-     * @param <T>
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param first the first predicate
+     * @param second the second predicate
+     * @return a Predicate that returns first AND second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static <T> Predicate<T> and(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second)
             throws IllegalArgumentException {
@@ -2181,13 +2388,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical AND on three predicates.
      *
-     * @param <T>
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param first the first predicate
+     * @param second the second predicate
+     * @param third the third predicate
+     * @return a Predicate that returns first AND second AND third
+     * @throws IllegalArgumentException if any predicate is null
      */
     public static <T> Predicate<T> and(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second,
             final java.util.function.Predicate<? super T> third) throws IllegalArgumentException {
@@ -2199,11 +2407,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical AND on all predicates in the collection.
      *
-     * @param <T>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
+     * @param <T> the type of the input to the predicate
+     * @param c the collection of predicates
+     * @return a Predicate that returns true only if all predicates return true
+     * @throws IllegalArgumentException if the collection is null or empty
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2220,13 +2429,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical AND on two bi-predicates.
      *
-     * @param <T>
-     * @param <U>
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param first the first bi-predicate
+     * @param second the second bi-predicate
+     * @return a BiPredicate that returns first AND second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static <T, U> BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second) throws IllegalArgumentException {
@@ -2237,17 +2447,19 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical AND on three bi-predicates.
      *
-     * @param <T>
-     * @param <U>
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param first the first bi-predicate
+     * @param second the second bi-predicate
+     * @param third the third bi-predicate
+     * @return a BiPredicate that returns first AND second AND third
+     * @throws IllegalArgumentException if any bi-predicate is null
      */
     public static <T, U> BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> first,
-            final java.util.function.BiPredicate<? super T, ? super U> second, final BiPredicate<? super T, ? super U> third) throws IllegalArgumentException {
+            final java.util.function.BiPredicate<? super T, ? super U> second, final java.util.function.BiPredicate<? super T, ? super U> third)
+            throws IllegalArgumentException {
         N.checkArgNotNull(first);
         N.checkArgNotNull(second);
         N.checkArgNotNull(third);
@@ -2256,12 +2468,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical AND on all bi-predicates in the list.
      *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param c the list of bi-predicates
+     * @return a BiPredicate that returns true only if all bi-predicates return true
+     * @throws IllegalArgumentException if the list is null or empty
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2278,11 +2491,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BooleanSupplier that performs logical OR on two boolean suppliers.
      *
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param first the first boolean supplier
+     * @param second the second boolean supplier
+     * @return a BooleanSupplier that returns first OR second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static BooleanSupplier or(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second)
             throws IllegalArgumentException {
@@ -2293,12 +2507,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BooleanSupplier that performs logical OR on three boolean suppliers.
      *
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param first the first boolean supplier
+     * @param second the second boolean supplier
+     * @param third the third boolean supplier
+     * @return a BooleanSupplier that returns first OR second OR third
+     * @throws IllegalArgumentException if any supplier is null
      */
     public static BooleanSupplier or(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second,
             final java.util.function.BooleanSupplier third) throws IllegalArgumentException {
@@ -2310,12 +2525,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical OR on two predicates.
      *
-     * @param <T>
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param first the first predicate
+     * @param second the second predicate
+     * @return a Predicate that returns first OR second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static <T> Predicate<T> or(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second)
             throws IllegalArgumentException {
@@ -2326,13 +2542,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical OR on three predicates.
      *
-     * @param <T>
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param first the first predicate
+     * @param second the second predicate
+     * @param third the third predicate
+     * @return a Predicate that returns first OR second OR third
+     * @throws IllegalArgumentException if any predicate is null
      */
     public static <T> Predicate<T> or(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second,
             final java.util.function.Predicate<? super T> third) throws IllegalArgumentException {
@@ -2344,11 +2561,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Predicate that performs logical OR on all predicates in the collection.
      *
-     * @param <T>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
+     * @param <T> the type of the input to the predicate
+     * @param c the collection of predicates
+     * @return a Predicate that returns true if any predicate returns true
+     * @throws IllegalArgumentException if the collection is null or empty
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2365,13 +2583,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical OR on two bi-predicates.
      *
-     * @param <T>
-     * @param <U>
-     * @param first
-     * @param second
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param first the first bi-predicate
+     * @param second the second bi-predicate
+     * @return a BiPredicate that returns first OR second
+     * @throws IllegalArgumentException if first or second is null
      */
     public static <T, U> BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second) throws IllegalArgumentException {
@@ -2382,14 +2601,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical OR on three bi-predicates.
      *
-     * @param <T>
-     * @param <U>
-     * @param first
-     * @param second
-     * @param third
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param first the first bi-predicate
+     * @param second the second bi-predicate
+     * @param third the third bi-predicate
+     * @return a BiPredicate that returns first OR second OR third
+     * @throws IllegalArgumentException if any bi-predicate is null
      */
     public static <T, U> BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second, final java.util.function.BiPredicate<? super T, ? super U> third)
@@ -2402,12 +2622,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiPredicate that performs logical OR on all bi-predicates in the list.
      *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param c the list of bi-predicates
+     * @return a BiPredicate that returns true if any bi-predicate returns true
+     * @throws IllegalArgumentException if the list is null or empty
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2424,13 +2645,13 @@ public final class Fn {
     }
 
     /**
-     * Test by key.
+     * Returns a Predicate for Map.Entry that tests the key using the specified predicate.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param predicate the predicate to apply to the key
+     * @return a Predicate that tests Map.Entry keys
+     * @throws IllegalArgumentException if predicate is null
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByKey(final java.util.function.Predicate<? super K> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2439,13 +2660,13 @@ public final class Fn {
     }
 
     /**
-     * Test by value.
+     * Returns a Predicate for Map.Entry that tests the value using the specified predicate.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param predicate the predicate to apply to the value
+     * @return a Predicate that tests Map.Entry values
+     * @throws IllegalArgumentException if predicate is null
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByValue(final java.util.function.Predicate<? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2454,13 +2675,13 @@ public final class Fn {
     }
 
     /**
-     * Accept by key.
+     * Returns a Consumer for Map.Entry that applies the specified consumer to the key.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param consumer the consumer to apply to the key
+     * @return a Consumer that operates on Map.Entry keys
+     * @throws IllegalArgumentException if consumer is null
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByKey(final java.util.function.Consumer<? super K> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer);
@@ -2469,13 +2690,13 @@ public final class Fn {
     }
 
     /**
-     * Accept by value.
+     * Returns a Consumer for Map.Entry that applies the specified consumer to the value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param consumer the consumer to apply to the value
+     * @return a Consumer that operates on Map.Entry values
+     * @throws IllegalArgumentException if consumer is null
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByValue(final java.util.function.Consumer<? super V> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer);
@@ -2484,14 +2705,14 @@ public final class Fn {
     }
 
     /**
-     * Apply by key.
+     * Returns a Function for Map.Entry that applies the specified function to the key.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the result type
+     * @param func the function to apply to the key
+     * @return a Function that transforms Map.Entry keys
+     * @throws IllegalArgumentException if func is null
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func)
             throws IllegalArgumentException {
@@ -2501,14 +2722,14 @@ public final class Fn {
     }
 
     /**
-     * Apply by value.
+     * Returns a Function for Map.Entry that applies the specified function to the value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the result type
+     * @param func the function to apply to the value
+     * @return a Function that transforms Map.Entry values
+     * @throws IllegalArgumentException if func is null
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -2518,13 +2739,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that transforms a Map.Entry by applying a function to its key.
+     * The value remains unchanged.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <KK>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <KK> the new key type
+     * @param func the function to transform the key
+     * @return a Function that creates new Map.Entry with transformed key
+     * @throws IllegalArgumentException if func is null
      */
     public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> func)
             throws IllegalArgumentException {
@@ -2534,13 +2757,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that transforms a Map.Entry by applying a function to its value.
+     * The key remains unchanged.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <VV>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <VV> the new value type
+     * @param func the function to transform the value
+     * @return a Function that creates new Map.Entry with transformed value
+     * @throws IllegalArgumentException if func is null
      */
     public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> func)
             throws IllegalArgumentException {
@@ -2550,13 +2775,13 @@ public final class Fn {
     }
 
     /**
-     * Test key val.
+     * Returns a Predicate for Map.Entry that tests both key and value using a BiPredicate.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param predicate the bi-predicate to test key and value
+     * @return a Predicate that tests Map.Entry using key and value
+     * @throws IllegalArgumentException if predicate is null
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate)
             throws IllegalArgumentException {
@@ -2566,13 +2791,13 @@ public final class Fn {
     }
 
     /**
-     * Accept key val.
+     * Returns a Consumer for Map.Entry that accepts both key and value using a BiConsumer.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param consumer the bi-consumer to accept key and value
+     * @return a Consumer that operates on Map.Entry key and value
+     * @throws IllegalArgumentException if consumer is null
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final java.util.function.BiConsumer<? super K, ? super V> consumer)
             throws IllegalArgumentException {
@@ -2582,14 +2807,14 @@ public final class Fn {
     }
 
     /**
-     * Apply key val.
+     * Returns a Function for Map.Entry that applies a BiFunction to both key and value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the result type
+     * @param func the bi-function to apply to key and value
+     * @return a Function that transforms Map.Entry using key and value
+     * @throws IllegalArgumentException if func is null
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -2599,11 +2824,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Consumer that only accepts non-null values.
+     * If the value is null, the consumer is not invoked.
      *
-     * @param <T>
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param consumer the consumer to invoke for non-null values
+     * @return a Consumer that only processes non-null values
+     * @throws IllegalArgumentException if consumer is null
      */
     @Beta
     public static <T> Consumer<T> acceptIfNotNull(final java.util.function.Consumer<? super T> consumer) throws IllegalArgumentException {
@@ -2617,12 +2844,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a Consumer that only accepts values that satisfy the predicate.
      *
-     * @param <T>
-     * @param predicate
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param predicate the condition to test
+     * @param consumer the consumer to invoke when predicate is true
+     * @return a Consumer that conditionally processes values
+     * @throws IllegalArgumentException if predicate or consumer is null
      */
     @Beta
     public static <T> Consumer<T> acceptIf(final java.util.function.Predicate<? super T> predicate, final java.util.function.Consumer<? super T> consumer)
@@ -2638,13 +2866,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Consumer that accepts values based on a predicate, with different consumers for true/false.
      *
-     * @param <T>
-     * @param predicate
-     * @param consumerForTrue
-     * @param consumerForFalse
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param predicate the condition to test
+     * @param consumerForTrue the consumer to invoke when predicate is true
+     * @param consumerForFalse the consumer to invoke when predicate is false
+     * @return a Consumer that conditionally processes values
+     * @throws IllegalArgumentException if any parameter is null
      */
     @Beta
     public static <T> Consumer<T> acceptIfOrElse(final java.util.function.Predicate<? super T> predicate,
@@ -2664,11 +2893,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that applies a mapper and returns an empty list if the input is null.
      *
-     * @param <T>
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <T> the type of the input
+     * @param <R> the element type of the result collection
+     * @param mapper the function to apply to non-null inputs
+     * @return a Function that safely handles null inputs
      */
     @Beta
     public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper) {
@@ -2676,16 +2906,16 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or default.
+     * Returns a Function that applies two mappers in sequence, returning a default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param defaultValue the default value to return if any step is null
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if mapperA or mapperB is null
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final R defaultValue) throws IllegalArgumentException {
@@ -2708,18 +2938,18 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or default.
+     * Returns a Function that applies three mappers in sequence, returning a default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param mapperC
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the first intermediate type
+     * @param <C> the second intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param mapperC the third mapper
+     * @param defaultValue the default value to return if any step is null
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if any mapper is null
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC, final R defaultValue)
@@ -2750,20 +2980,20 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or default.
+     * Returns a Function that applies four mappers in sequence, returning a default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param mapperC
-     * @param mapperD
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the first intermediate type
+     * @param <C> the second intermediate type
+     * @param <D> the third intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param mapperC the third mapper
+     * @param mapperD the fourth mapper
+     * @param defaultValue the default value to return if any step is null
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if any mapper is null
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -2801,16 +3031,16 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or get.
+     * Returns a Function that applies two mappers in sequence, using a supplier for the default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param supplier the supplier for the default value
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if mapperA or mapperB is null
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
@@ -2833,18 +3063,18 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or get.
+     * Returns a Function that applies three mappers in sequence, using a supplier for the default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param mapperC
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the first intermediate type
+     * @param <C> the second intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param mapperC the third mapper
+     * @param supplier the supplier for the default value
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if any mapper is null
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
@@ -2875,20 +3105,20 @@ public final class Fn {
     }
 
     /**
-     * Apply if not {@code null} or get.
+     * Returns a Function that applies four mappers in sequence, using a supplier for the default value if any step produces null.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @param <R>
-     * @param mapperA
-     * @param mapperB
-     * @param mapperC
-     * @param mapperD
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the input
+     * @param <B> the first intermediate type
+     * @param <C> the second intermediate type
+     * @param <D> the third intermediate type
+     * @param <R> the result type
+     * @param mapperA the first mapper
+     * @param mapperB the second mapper
+     * @param mapperC the third mapper
+     * @param mapperD the fourth mapper
+     * @param supplier the supplier for the default value
+     * @return a Function with null-safe chaining
+     * @throws IllegalArgumentException if any mapper is null
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -2926,14 +3156,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that conditionally applies a function based on a predicate, with a default value.
      *
-     * @param <T>
-     * @param <R>
-     * @param predicate
-     * @param func
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input
+     * @param <R> the result type
+     * @param predicate the condition to test
+     * @param func the function to apply when predicate is true
+     * @param defaultValue the value to return when predicate is false
+     * @return a Function that conditionally applies transformation
+     * @throws IllegalArgumentException if predicate or func is null
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
@@ -2951,14 +3182,15 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that conditionally applies a function based on a predicate, with a supplier for the else value.
      *
-     * @param <T>
-     * @param <R>
-     * @param predicate
-     * @param func
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input
+     * @param <R> the result type
+     * @param predicate the condition to test
+     * @param func the function to apply when predicate is true
+     * @param supplier the supplier for the value when predicate is false
+     * @return a Function that conditionally applies transformation
+     * @throws IllegalArgumentException if any parameter is null
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
@@ -2977,14 +3209,16 @@ public final class Fn {
         };
     }
 
-    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::flatToMap;
-
     /**
+     * Returns a Function that flattens a Map with Collection values into a List of Maps.
+     * Each output Map contains one key-value pair from the original Map.
+     * 
+     * @implSpec 
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return a Function that flattens Maps with Collection values
      * @see Maps#flatToMap(Map)
      */
     @Beta
@@ -2993,78 +3227,71 @@ public final class Fn {
         return (Function) FLAT_MAP_VALUE_FUNC;
     }
 
-    private static final ToByteFunction<String> PARSE_BYTE_FUNC = Numbers::toByte;
-
     /**
-     * Parses the byte.
+     * Returns a ToByteFunction that parses Strings to byte values.
      *
-     * @return
+     * @return a ToByteFunction that parses strings
+     * @see Numbers#toByte(String)
      */
     public static ToByteFunction<String> parseByte() {
         return PARSE_BYTE_FUNC;
     }
 
-    private static final ToShortFunction<String> PARSE_SHORT_FUNC = Numbers::toShort;
-
     /**
-     * Parses the short.
+     * Returns a ToShortFunction that parses Strings to short values.
      *
-     * @return
+     * @return a ToShortFunction that parses strings
+     * @see Numbers#toShort(String)
      */
     public static ToShortFunction<String> parseShort() {
         return PARSE_SHORT_FUNC;
     }
 
-    private static final ToIntFunction<String> PARSE_INT_FUNC = Numbers::toInt;
-
     /**
-     * Parses the int.
+     * Returns a ToIntFunction that parses Strings to int values.
      *
-     * @return
+     * @return a ToIntFunction that parses strings
+     * @see Numbers#toInt(String)
      */
     public static ToIntFunction<String> parseInt() {
         return PARSE_INT_FUNC;
     }
 
-    private static final ToLongFunction<String> PARSE_LONG_FUNC = Numbers::toLong;
-
     /**
-     * Parses the long.
+     * Returns a ToLongFunction that parses Strings to long values.
      *
-     * @return
+     * @return a ToLongFunction that parses strings
+     * @see Numbers#toLong(String)
      */
     public static ToLongFunction<String> parseLong() {
         return PARSE_LONG_FUNC;
     }
 
-    private static final ToFloatFunction<String> PARSE_FLOAT_FUNC = Numbers::toFloat;
-
     /**
-     * Parses the float.
+     * Returns a ToFloatFunction that parses Strings to float values.
      *
-     * @return
+     * @return a ToFloatFunction that parses strings
+     * @see Numbers#toFloat(String)
      */
     public static ToFloatFunction<String> parseFloat() {
         return PARSE_FLOAT_FUNC;
     }
 
-    private static final ToDoubleFunction<String> PARSE_DOUBLE_FUNC = Numbers::toDouble;
-
     /**
-     * Parses the double.
+     * Returns a ToDoubleFunction that parses Strings to double values.
      *
-     * @return
+     * @return a ToDoubleFunction that parses strings
+     * @see Numbers#toDouble(String)
      */
     public static ToDoubleFunction<String> parseDouble() {
         return PARSE_DOUBLE_FUNC;
     }
 
-    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> Strings.isEmpty(t) ? null : Numbers.createNumber(t);
-
     /**
-     * Creates the number.
+     * Returns a Function that creates Number objects from Strings.
+     * Returns null for empty strings. The type of Number returned depends on the string format.
      *
-     * @return
+     * @return a Function that creates Number objects
      * @see Numbers#createNumber(String)
      */
     public static Function<String, Number> createNumber() {
@@ -3072,10 +3299,11 @@ public final class Fn {
     }
 
     /**
-     * Num to int.
+     * Returns a ToIntFunction that converts Number objects to int values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Number type
+     * @return a ToIntFunction that converts Numbers to int
+     * @see Number#intValue()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToIntFunction<T> numToInt() {
@@ -3083,10 +3311,11 @@ public final class Fn {
     }
 
     /**
-     * Num to long.
+     * Returns a ToLongFunction that converts Number objects to long values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Number type
+     * @return a ToLongFunction that converts Numbers to long
+     * @see Number#longValue()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToLongFunction<T> numToLong() {
@@ -3094,10 +3323,11 @@ public final class Fn {
     }
 
     /**
-     * Num to double.
+     * Returns a ToDoubleFunction that converts Number objects to double values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the Number type
+     * @return a ToDoubleFunction that converts Numbers to double
+     * @see Number#doubleValue()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToDoubleFunction<T> numToDouble() {
@@ -3105,11 +3335,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a stateful Predicate that limits the number of elements that pass through.
+     * The first 'count' elements return true, all subsequent elements return false.
+     * Don't save or cache for reuse, but it can be used in parallel stream.
      *
-     * @param <T>
-     * @param count
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the predicate
+     * @param count the maximum number of elements to accept
+     * @return a stateful Predicate that limits elements
+     * @throws IllegalArgumentException if count is negative
      */
     @Beta
     @Stateful
@@ -3130,14 +3363,83 @@ public final class Fn {
         };
     }
 
+    /** The Constant RETURN_FIRST. */
+    private static final BinaryOperator<Object> RETURN_FIRST = (a, b) -> a;
+
+    /** The Constant RETURN_SECOND. */
+    private static final BinaryOperator<Object> RETURN_SECOND = (a, b) -> b;
+
+    /** The Constant MIN. */
+    @SuppressWarnings({ "rawtypes" })
+    private static final BinaryOperator<Comparable> MIN = (a, b) -> Comparators.NULL_LAST_COMPARATOR.compare(a, b) <= 0 ? a : b;
+
+    /** The Constant MIN_BY_KEY. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
+
+        @Override
+        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
+            return cmp.compare(a.getKey(), b.getKey()) <= 0 ? a : b;
+        }
+    };
+
+    /** The Constant MIN_BY_VALUE. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
+
+        @Override
+        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
+            return cmp.compare(a.getValue(), b.getValue()) <= 0 ? a : b;
+        }
+    };
+
+    /** The Constant MAX. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Comparable> MAX = (a, b) -> Comparators.NULL_FIRST_COMPARATOR.compare(a, b) >= 0 ? a : b;
+
+    /** The Constant MAX_BY_KEY. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
+
+        @Override
+        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
+            return cmp.compare(a.getKey(), b.getKey()) >= 0 ? a : b;
+        }
+    };
+
+    /** The Constant MAX_BY_VALUE. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
+
+        @Override
+        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
+            return cmp.compare(a.getValue(), b.getValue()) >= 0 ? a : b;
+        }
+    };
+
+    private static final Function<Future<Object>, Object> FUTURE_GETTER = f -> {
+        try {
+            return f.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+    };
+
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The predicate limits the number of elements that can pass through. Once the limit is reached,
+     * all subsequent elements will fail the test.
      *
-     * @param <T>
-     * @param limit
-     * @param predicate
+     * @param <T> the type of the input to the predicate
+     * @param limit the maximum number of elements that can pass the predicate
+     * @param predicate the predicate to test elements after checking the limit
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if limit is negative or predicate is null
      */
     @Beta
     @Stateful
@@ -3156,14 +3458,17 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The bi-predicate limits the number of element pairs that can pass through. Once the limit is reached,
+     * all subsequent pairs will fail the test.
      *
-     * @param <T>
-     * @param <U>
-     * @param limit
-     * @param predicate
+     * @param <T> the type of the first input to the bi-predicate
+     * @param <U> the type of the second input to the bi-predicate
+     * @param limit the maximum number of element pairs that can pass the bi-predicate
+     * @param predicate the bi-predicate to test element pairs after checking the limit
      * @return a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if limit is negative or predicate is null
      */
     @Beta
     @Stateful
@@ -3184,12 +3489,15 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The predicate first tests elements with the given predicate, and only allows a limited number
+     * of elements that pass the predicate to return true.
      *
-     * @param <T>
-     * @param predicate
-     * @param limit
+     * @param <T> the type of the input to the predicate
+     * @param predicate the predicate to test elements before applying the limit
+     * @param limit the maximum number of elements that pass the predicate to allow through
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if predicate is null or limit is negative
      */
     @Beta
     @Stateful
@@ -3208,14 +3516,17 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The bi-predicate first tests element pairs with the given bi-predicate, and only allows a limited number
+     * of pairs that pass the bi-predicate to return true.
      *
-     * @param <T>
-     * @param <U>
-     * @param predicate
-     * @param limit
+     * @param <T> the type of the first input to the bi-predicate
+     * @param <U> the type of the second input to the bi-predicate
+     * @param predicate the bi-predicate to test element pairs before applying the limit
+     * @param limit the maximum number of element pairs that pass the bi-predicate to allow through
      * @return a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if predicate is null or limit is negative
      */
     @Beta
     @Stateful
@@ -3236,11 +3547,14 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The predicate allows elements to pass for a specified duration in milliseconds.
+     * After the time limit expires, all subsequent elements will fail the test.
      *
-     * @param <T>
-     * @param timeInMillis
+     * @param <T> the type of the input to the predicate
+     * @param timeInMillis the time limit in milliseconds
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if timeInMillis is negative
      */
     @Beta
     @Stateful
@@ -3267,11 +3581,14 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * 
+     * <p>The predicate allows elements to pass for a specified duration.
+     * After the time limit expires, all subsequent elements will fail the test.
      *
-     * @param <T>
-     * @param duration
+     * @param <T> the type of the input to the predicate
+     * @param duration the time limit as a Duration
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if duration is null
      */
     @Beta
     @Stateful
@@ -3282,9 +3599,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
+     * 
+     * <p>The function wraps each element with its index, starting from 0.
+     * This is useful for tracking the position of elements during stream operations.
      *
-     * @param <T>
+     * @param <T> the type of the input elements
      * @return a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
      */
     @Beta
@@ -3303,9 +3623,12 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+     * 
+     * <p>The predicate tests elements along with their index position using the provided IntObjPredicate.
+     * The index starts from 0 and increments for each element tested.
      *
-     * @param <T>
-     * @param predicate
+     * @param <T> the type of the input to the predicate
+     * @param predicate the predicate that tests elements along with their indices
      * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      */
     @Beta
@@ -3315,38 +3638,39 @@ public final class Fn {
         return Predicates.indexed(predicate);
     }
 
-    /** The Constant RETURN_FIRST. */
-    private static final BinaryOperator<Object> RETURN_FIRST = (a, b) -> a;
-
     /**
+     * Returns a BinaryOperator that always returns the first argument.
+     * 
+     * <p>This is useful in reduction operations where you want to keep the first occurrence
+     * of duplicate elements.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the operands and result
+     * @return a BinaryOperator that returns the first argument
      */
     public static <T> BinaryOperator<T> selectFirst() {
         return (BinaryOperator<T>) RETURN_FIRST;
     }
 
-    /** The Constant RETURN_SECOND. */
-    private static final BinaryOperator<Object> RETURN_SECOND = (a, b) -> b;
-
     /**
+     * Returns a BinaryOperator that always returns the second argument.
+     * 
+     * <p>This is useful in reduction operations where you want to keep the last occurrence
+     * of duplicate elements.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the operands and result
+     * @return a BinaryOperator that returns the second argument
      */
     public static <T> BinaryOperator<T> selectSecond() {
         return (BinaryOperator<T>) RETURN_SECOND;
     }
 
-    /** The Constant MIN. */
-    @SuppressWarnings({ "rawtypes" })
-    private static final BinaryOperator<Comparable> MIN = (a, b) -> Comparators.NULL_LAST_COMPARATOR.compare(a, b) <= 0 ? a : b;
-
     /**
+     * Returns a BinaryOperator that finds the minimum of two Comparable values.
+     * 
+     * <p>Null values are considered greater than non-null values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the Comparable operands and result
+     * @return a BinaryOperator that returns the minimum value
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable<? super T>> BinaryOperator<T> min() {
@@ -3354,11 +3678,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BinaryOperator that finds the minimum of two values using the given Comparator.
      *
-     * @param <T>
-     * @param comparator
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the operands and result
+     * @param comparator the Comparator to determine the minimum
+     * @return a BinaryOperator that returns the minimum value according to the comparator
+     * @throws IllegalArgumentException if comparator is null
      */
     public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3367,11 +3692,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a BinaryOperator that finds the minimum of two values by comparing a key extracted from each.
+     * 
+     * <p>The key must be Comparable. Null keys are considered greater than non-null keys.
      *
-     * @param <T>
-     * @param keyExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the operands and result
+     * @param keyExtractor the function to extract the Comparable key
+     * @return a BinaryOperator that returns the element with the minimum key
+     * @throws IllegalArgumentException if keyExtractor is null
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
@@ -3381,58 +3709,41 @@ public final class Fn {
         return (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
     }
 
-    /** The Constant MIN_BY_KEY. */
-    @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<>() {
-        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
-
-        @Override
-        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
-            return cmp.compare(a.getKey(), b.getKey()) <= 0 ? a : b;
-        }
-    };
-
     /**
+     * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum key.
+     * 
+     * <p>Keys must be Comparable. Null keys are considered greater than non-null keys.
      *
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param <K> the type of the Comparable keys
+     * @param <V> the type of the values
+     * @return a BinaryOperator that returns the entry with the minimum key
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> minByKey() {
         return (BinaryOperator) MIN_BY_KEY;
     }
 
-    /** The Constant MIN_BY_VALUE. */
-    @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<>() {
-        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
-
-        @Override
-        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
-            return cmp.compare(a.getValue(), b.getValue()) <= 0 ? a : b;
-        }
-    };
-
     /**
+     * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum value.
+     * 
+     * <p>Values must be Comparable. Null values are considered greater than non-null values.
      *
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the Comparable values
+     * @return a BinaryOperator that returns the entry with the minimum value
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> minByValue() {
         return (BinaryOperator) MIN_BY_VALUE;
     }
 
-    /** The Constant MAX. */
-    @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Comparable> MAX = (a, b) -> Comparators.NULL_FIRST_COMPARATOR.compare(a, b) >= 0 ? a : b;
-
     /**
+     * Returns a BinaryOperator that finds the maximum of two Comparable values.
+     * 
+     * <p>Null values are considered less than non-null values.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the Comparable operands and result
+     * @return a BinaryOperator that returns the maximum value
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
@@ -3440,11 +3751,12 @@ public final class Fn {
     }
 
     /**
+     * Returns a BinaryOperator that finds the maximum of two values using the given Comparator.
      *
-     * @param <T>
-     * @param comparator
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the operands and result
+     * @param comparator the Comparator to determine the maximum
+     * @return a BinaryOperator that returns the maximum value according to the comparator
+     * @throws IllegalArgumentException if comparator is null
      */
     public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3453,11 +3765,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a BinaryOperator that finds the maximum of two values by comparing a key extracted from each.
+     * 
+     * <p>The key must be Comparable. Null keys are considered less than non-null keys.
      *
-     * @param <T>
-     * @param keyExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the operands and result
+     * @param keyExtractor the function to extract the Comparable key
+     * @return a BinaryOperator that returns the element with the maximum key
+     * @throws IllegalArgumentException if keyExtractor is null
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
@@ -3467,44 +3782,28 @@ public final class Fn {
         return (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
     }
 
-    /** The Constant MAX_BY_KEY. */
-    @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<>() {
-        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
-
-        @Override
-        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
-            return cmp.compare(a.getKey(), b.getKey()) >= 0 ? a : b;
-        }
-    };
-
     /**
+     * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum key.
+     * 
+     * <p>Keys must be Comparable. Null keys are considered less than non-null keys.
      *
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param <K> the type of the Comparable keys
+     * @param <V> the type of the values
+     * @return a BinaryOperator that returns the entry with the maximum key
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> maxByKey() {
         return (BinaryOperator) MAX_BY_KEY;
     }
 
-    /** The Constant MAX_BY_VALUE. */
-    @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<>() {
-        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
-
-        @Override
-        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
-            return cmp.compare(a.getValue(), b.getValue()) >= 0 ? a : b;
-        }
-    };
-
     /**
+     * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum value.
+     * 
+     * <p>Values must be Comparable. Null values are considered less than non-null values.
      *
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the Comparable values
+     * @return a BinaryOperator that returns the entry with the maximum value
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> maxByValue() {
@@ -3512,22 +3811,29 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that compares its input to the target value.
+     * 
+     * <p>The function returns a negative integer, zero, or a positive integer as the input
+     * is less than, equal to, or greater than the target.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * @param <T> the type of the Comparable values
+     * @param target the value to compare against
+     * @return a Function that compares its input to the target
      */
     public static <T extends Comparable<? super T>> Function<T, Integer> compareTo(final T target) {
         return t -> N.compare(t, target);
     }
 
     /**
+     * Returns a Function that compares its input to the target value using the specified Comparator.
+     * 
+     * <p>The function returns a negative integer, zero, or a positive integer as the input
+     * is less than, equal to, or greater than the target according to the comparator.
      *
-     * @param <T>
-     * @param target
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the values
+     * @param target the value to compare against
+     * @param cmp the Comparator to use (uses natural order if null)
+     * @return a Function that compares its input to the target using the comparator
      */
     public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) throws IllegalArgumentException {
         // N.checkArgNotNull(cmp);
@@ -3538,9 +3844,13 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiFunction that compares two Comparable values.
+     * 
+     * <p>The function returns a negative integer, zero, or a positive integer as the first
+     * argument is less than, equal to, or greater than the second.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the Comparable values
+     * @return a BiFunction that compares two values
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable<? super T>> BiFunction<T, T, Integer> compare() {
@@ -3548,11 +3858,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a BiFunction that compares two values using the specified Comparator.
+     * 
+     * <p>The function returns a negative integer, zero, or a positive integer as the first
+     * argument is less than, equal to, or greater than the second according to the comparator.
      *
-     * @param <T>
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the values
+     * @param cmp the Comparator to use (uses natural order if null)
+     * @return a BiFunction that compares two values using the comparator
      */
     public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) throws IllegalArgumentException {
         // N.checkArgNotNull(cmp);
@@ -3565,10 +3878,14 @@ public final class Fn {
     }
 
     /**
+     * Returns a Function that gets the result from a Future, returning the default value on error.
+     * 
+     * <p>If the Future throws an InterruptedException or ExecutionException, the function
+     * will return the provided default value instead of propagating the exception.
      *
-     * @param <T>
-     * @param defaultValue
-     * @return
+     * @param <T> the type of the Future's result
+     * @param defaultValue the value to return if the Future throws an exception
+     * @return a Function that gets the Future's result or returns the default value on error
      */
     @Beta
     public static <T> Function<Future<T>, T> futureGetOrDefaultOnError(final T defaultValue) {
@@ -3583,18 +3900,14 @@ public final class Fn {
         };
     }
 
-    private static final Function<Future<Object>, Object> FUTURE_GETTER = f -> {
-        try {
-            return f.get();
-        } catch (InterruptedException | ExecutionException e) {
-            return ExceptionUtil.toRuntimeException(e, true);
-        }
-    };
-
     /**
+     * Returns a Function that gets the result from a Future.
+     * 
+     * <p>If the Future throws an InterruptedException or ExecutionException, the function
+     * will wrap it in a RuntimeException and throw it.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the Future's result
+     * @return a Function that gets the Future's result
      */
     @SuppressWarnings("rawtypes")
     @Beta
@@ -3603,10 +3916,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.Supplier to a Supplier, preserving the instance if already a Supplier.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param supplier
-     * @return
+     * @param <T> the type of results supplied by the supplier
+     * @param supplier the supplier to convert
+     * @return a Supplier instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3615,10 +3931,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.IntFunction to an IntFunction, preserving the instance if already an IntFunction.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param func
-     * @return
+     * @param <T> the type of the result of the function
+     * @param func the function to convert
+     * @return an IntFunction instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3627,10 +3946,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.Predicate to a Predicate, preserving the instance if already a Predicate.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param predicate
-     * @return
+     * @param <T> the type of the input to the predicate
+     * @param predicate the predicate to convert
+     * @return a Predicate instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3639,11 +3961,14 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.BiPredicate to a BiPredicate, preserving the instance if already a BiPredicate.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param <U>
-     * @param predicate
-     * @return
+     * @param <T> the type of the first input to the predicate
+     * @param <U> the type of the second input to the predicate
+     * @param predicate the bi-predicate to convert
+     * @return a BiPredicate instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3652,10 +3977,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.Consumer to a Consumer, preserving the instance if already a Consumer.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param consumer
-     * @return
+     * @param <T> the type of the input to the consumer
+     * @param consumer the consumer to convert
+     * @return a Consumer instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3664,11 +3992,14 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.BiConsumer to a BiConsumer, preserving the instance if already a BiConsumer.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param <U>
-     * @param consumer
-     * @return
+     * @param <T> the type of the first input to the consumer
+     * @param <U> the type of the second input to the consumer
+     * @param consumer the bi-consumer to convert
+     * @return a BiConsumer instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3677,11 +4008,14 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.Function to a Function, preserving the instance if already a Function.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param <R>
-     * @param function
-     * @return
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param function the function to convert
+     * @return a Function instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3690,12 +4024,15 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.BiFunction to a BiFunction, preserving the instance if already a BiFunction.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param function
-     * @return
+     * @param <T> the type of the first input to the function
+     * @param <U> the type of the second input to the function
+     * @param <R> the type of the result of the function
+     * @param function the bi-function to convert
+     * @return a BiFunction instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3704,10 +4041,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.UnaryOperator to a UnaryOperator, preserving the instance if already a UnaryOperator.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param op
-     * @return
+     * @param <T> the type of the operand and result of the operator
+     * @param op the unary operator to convert
+     * @return a UnaryOperator instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -3716,10 +4056,13 @@ public final class Fn {
     }
 
     /**
+     * Converts a java.util.function.BinaryOperator to a BinaryOperator, preserving the instance if already a BinaryOperator.
+     * 
+     * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
-     * @param <T>
-     * @param op
-     * @return
+     * @param <T> the type of the operands and result of the operator
+     * @param op the binary operator to convert
+     * @return a BinaryOperator instance
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -4058,25 +4401,22 @@ public final class Fn {
         return t -> triConsumer.accept(a, b, t);
     }
 
+    @SuppressWarnings("rawtypes")
+    static final Function<Optional, Object> GET_AS_IT = it -> it.orElse(null);
+
     /**
-     * <p>Returns the provided bi-consumer as is - a shorthand identity method for bi-consumers.</p>
-     *
+     * Returns the provided bi-consumer as is - a shorthand identity method for bi-consumers.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Instead of explicitly typing:
-     * BiConsumer&lt;String, Integer&gt; biConsumer = (str, len) -> System.out.println(str + " has length " + len);
-     * // You can use:
-     * var biConsumer = Fn.c((String str, Integer len) -> System.out.println(str + " has length " + len));
-     * </pre>
      *
      * @param <T> the type of the first input to the bi-consumer
      * @param <U> the type of the second input to the bi-consumer
      * @param biConsumer the bi-consumer to return
      * @return the bi-consumer unchanged
+     * @see #c(Object, TriConsumer)
+     * @see #c(TriConsumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> c(final BiConsumer<T, U> biConsumer) {
@@ -4084,21 +4424,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-consumer that applies inputs along with a fixed value to the provided tri-consumer.</p>
-     *
+     * Creates a bi-consumer that applies inputs along with a fixed value to the provided tri-consumer.
+     * 
      * <p>This method implements partial application by binding the first parameter of the tri-consumer
      * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
      * This is useful for creating bi-consumers that incorporate a reference value in their logic.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a bi-consumer that logs messages with a specific prefix
-     * String prefix = "Log: ";
-     * BiConsumer&lt;String, Integer&gt; logWithPrefix = Fn.c(prefix, (p, msg) -> 
-     *     System.out.println(p + msg));
-     *
-     * logWithPrefix.accept("Hello", 1); // Prints: Log: Hello
-     * </pre>
      *
      * @param <A> the type of the fixed first argument to the tri-consumer
      * @param <T> the type of the first input to the resulting bi-consumer
@@ -4107,6 +4437,8 @@ public final class Fn {
      * @param triConsumer the tri-consumer to apply with the fixed first argument
      * @return a bi-consumer that applies the inputs as the second and third arguments to the tri-consumer
      * @throws IllegalArgumentException if the triConsumer is null
+     * @see #c(BiConsumer)
+     * @see #c(TriConsumer)
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> c(final A a, final TriConsumer<A, T, U> triConsumer) throws IllegalArgumentException {
@@ -4116,27 +4448,19 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided tri-consumer as is - a shorthand identity method for tri-consumers.</p>
-     *
+     * Returns the provided tri-consumer as is - a shorthand identity method for tri-consumers.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate and BiPredicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Instead of explicitly typing:
-     * TriConsumer&lt;String, Integer, Boolean&gt; triConsumer = 
-     *     (str, len, flag) -> System.out.println(flag ? str + " is long" : str + " is short");
-     * // You can use:
-     * var triConsumer = Fn.c((String str, Integer len, Boolean flag) -> 
-     *     System.out.println(flag ? str + " is long" : str + " is short"));
-     * </pre>
      *
      * @param <A> the type of the first input to the tri-consumer
      * @param <B> the type of the second input to the tri-consumer
      * @param <C> the type of the third input to the tri-consumer
      * @param triConsumer the tri-consumer to return
      * @return the tri-consumer unchanged
+     * @see #c(BiConsumer)
+     * @see #c(Object, TriConsumer)
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> c(final TriConsumer<A, B, C> triConsumer) {
@@ -4144,24 +4468,18 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided function as is - a shorthand identity method for functions.</p>
-     *
+     * Returns the provided function as is - a shorthand identity method for functions.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Instead of explicitly typing:
-     * Function&lt;String, Integer&gt; lengthFunction = String::length;
-     * // You can use:
-     * var lengthFunction = Fn.f(String::length);
-     * </pre>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param function the function to return
      * @return the function unchanged
+     * @see #f(Object, BiFunction)
+     * @see #f(Object, Object, TriFunction)
      */
     @Beta
     public static <T, R> Function<T, R> f(final Function<T, R> function) {
@@ -4169,28 +4487,21 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a function that applies the given argument to the provided function.</p>
-     *
-     * <p>This method implements partial application by binding the first parameter of the function
+     * Creates a function that applies the given argument to the provided bi-function.
+     * 
+     * <p>This method implements partial application by binding the first parameter of the bi-function
      * to a fixed value, resulting in a function that only requires the second parameter. This is useful
      * for creating functions that incorporate a reference value in their computation logic.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a function that appends a fixed prefix to a string
-     * String prefix = "Hello, ";
-     * Function&lt;String, String&gt; appendPrefix = Fn.f(prefix, s -> prefix + s);
-     *
-     * String result = appendPrefix.apply("World"); // Returns "Hello, World"
-     * </pre>
-     *
-     * @param <A> the type of the fixed first argument to the function
+     * @param <A> the type of the fixed first argument to the bi-function
      * @param <T> the type of the input to the resulting function
      * @param <R> the type of the result of the resulting function
-     * @param a the fixed value to use as the first argument to the function
+     * @param a the fixed value to use as the first argument to the bi-function
      * @param biFunction the bi-function to apply with the fixed first argument
      * @return a function that applies the input as the second argument to the bi-function
      * @throws IllegalArgumentException if the biFunction is null
+     * @see #f(Function)
+     * @see #f(Object, Object, TriFunction)
      */
     @Beta
     public static <A, T, R> Function<T, R> f(final A a, final java.util.function.BiFunction<A, T, R> biFunction) throws IllegalArgumentException {
@@ -4200,21 +4511,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a function that applies the given arguments to the provided tri-function.</p>
-     *
+     * Creates a function that applies the given arguments to the provided tri-function.
+     * 
      * <p>This method implements partial application by binding the first two parameters of the tri-function
      * to fixed values, resulting in a function that only requires the third parameter. This is useful
      * for creating functions that incorporate two reference values in their computation logic.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a function that formats a message with a fixed prefix and suffix
-     * String prefix = "Message: ";
-     * String suffix = " [end]";
-     * Function&lt;String, String&gt; formatMessage = Fn.f(prefix, suffix, (p, s, msg) -> p + msg + s);
-     *
-     * String result = formatMessage.apply("Hello"); // Returns "Message: Hello [end]"
-     * </pre>
      *
      * @param <A> the type of the first fixed argument to the tri-function
      * @param <B> the type of the second fixed argument to the tri-function
@@ -4225,6 +4526,8 @@ public final class Fn {
      * @param triFunction the tri-function to apply with the fixed first and second arguments
      * @return a function that applies the input as the third argument to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #f(Function)
+     * @see #f(Object, BiFunction)
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) throws IllegalArgumentException {
@@ -4234,25 +4537,19 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided bi-function as is - a shorthand identity method for bi-functions.</p>
-     *
+     * Returns the provided bi-function as is - a shorthand identity method for bi-functions.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Instead of explicitly typing:
-     * BiFunction&lt;String, Integer, String&gt; concatFunction = (str, len) -> str + len;
-     * // You can use:
-     * var concatFunction = Fn.f((String str, Integer len) -> str + len);
-     * </pre>
      *
      * @param <T> the type of the first input to the bi-function
      * @param <U> the type of the second input to the bi-function
      * @param <R> the type of the result of the bi-function
      * @param biFunction the bi-function to return
      * @return the bi-function unchanged
+     * @see #f(Function)
+     * @see #f(Object, TriFunction)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> f(final BiFunction<T, U, R> biFunction) {
@@ -4260,29 +4557,22 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-function that applies the given argument to the provided bi-function.</p>
+     * Creates a bi-function that applies the given argument to the provided tri-function.
+     * 
+     * <p>This method implements partial application by binding the first parameter of the tri-function
+     * to a fixed value, resulting in a bi-function that only requires the second and third parameters. 
+     * This is useful for creating bi-functions that incorporate a reference value in their computation logic.</p>
      *
-     * <p>This method implements partial application by binding the first parameter of the bi-function
-     * to a fixed value, resulting in a bi-function that only requires the second parameter. This is useful
-     * for creating bi-functions that incorporate a reference value in their computation logic.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a bi-function that appends a fixed prefix to a string
-     * String prefix = "Hello, ";
-     * BiFunction&lt;String, Integer, String&gt; appendPrefix = Fn.f(prefix, (p, s) -> p + s);
-     *
-     * String result = appendPrefix.apply("World", 1); // Returns "Hello, World"
-     * </pre>
-     *
-     * @param <A> the type of the fixed first argument to the bi-function
+     * @param <A> the type of the fixed first argument to the tri-function
      * @param <T> the type of the first input to the resulting bi-function
      * @param <U> the type of the second input to the resulting bi-function
      * @param <R> the type of the result of the resulting bi-function
-     * @param a the fixed value to use as the first argument to the bi-function
+     * @param a the fixed value to use as the first argument to the tri-function
      * @param triFunction the tri-function to apply with the fixed first argument
-     * @return a bi-function that applies the input as the second argument to the tri-function
+     * @return a bi-function that applies the inputs as the second and third arguments to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #f(BiFunction)
+     * @see #f(TriFunction)
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> f(final A a, final TriFunction<A, T, U, R> triFunction) throws IllegalArgumentException {
@@ -4292,21 +4582,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided tri-function as is - a shorthand identity method for tri-functions.</p>
-     *
+     * Returns the provided tri-function as is - a shorthand identity method for tri-functions.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate and BiPredicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Instead of explicitly typing:
-     * TriFunction&lt;String, Integer, Boolean, String&gt; triFunction = 
-     *     (str, len, flag) -> flag ? str + " is long" : str + " is short";
-     * // You can use:
-     * var triFunction = Fn.f((String str, Integer len, Boolean flag) -> 
-     *     flag ? str + " is long" : str + " is short");
-     * </pre>
      *
      * @param <A> the type of the first input to the tri-function
      * @param <B> the type of the second input to the tri-function
@@ -4314,6 +4594,8 @@ public final class Fn {
      * @param <R> the type of the result of the tri-function
      * @param triFunction the tri-function to return
      * @return the tri-function unchanged
+     * @see #f(Function)
+     * @see #f(BiFunction)
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> f(final TriFunction<A, B, C, R> triFunction) {
@@ -4321,8 +4603,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided unary operator as is - a shorthand identity method for unary operators.</p>
-     *
+     * Returns the provided unary operator as is - a shorthand identity method for unary operators.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
@@ -4330,6 +4612,8 @@ public final class Fn {
      * @param <T> the type of the operand and result of the unary operator
      * @param unaryOperator the unary operator to return
      * @return the unary operator unchanged
+     * @throws IllegalArgumentException if the unaryOperator is null
+     * @see #o(BinaryOperator)
      */
     @Beta
     public static <T> UnaryOperator<T> o(final UnaryOperator<T> unaryOperator) {
@@ -4339,8 +4623,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided binary operator as is - a shorthand identity method for binary operators.</p>
-     *
+     * Returns the provided binary operator as is - a shorthand identity method for binary operators.
+     * 
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
@@ -4348,6 +4632,8 @@ public final class Fn {
      * @param <T> the type of the operands and result of the binary operator
      * @param binaryOperator the binary operator to return
      * @return the binary operator unchanged
+     * @throws IllegalArgumentException if the binaryOperator is null
+     * @see #o(UnaryOperator)
      */
     @Beta
     public static <T> BinaryOperator<T> o(final BinaryOperator<T> binaryOperator) {
@@ -4357,8 +4643,43 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a supplier that wraps a throwable supplier, converting checked exceptions to runtime exceptions.</p>
+     * Returns the provided {@code java.util.function.BiConsumer} as-is.
+     * This is a shorthand identity method for a mapper that can help with type inference in certain contexts,
+     * particularly when used with stream operations like {@code Stream.mapMulti(mapper)}.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Using mc() to help with type inference in a stream operation
+     * Stream<List<String>> listStream = ...;
+     * Stream<String> flatStream = listStream.mapMulti(
+     *     Fn.mc((List<String> list, Consumer<String> consumer) -> {
+     *         for (String item : list) {
+     *             if (item != null && !item.isEmpty()) {
+     *                 consumer.accept(item);
+     *             }
+     *         }
+     *     }));
+     * }</pre>
+     *
+     * @param <T> the type of the first argument to the consumer
+     * @param <U> the type of elements to be accepted by the result consumer
+     * @param mapper the mapping bi-consumer to return
+     * @return the bi-consumer unchanged
+     * @see Stream#mapMulti(java.util.function.BiConsumer)
+     * @see Seq#mapMulti(Throwables.BiConsumer)
+     * @see Fnn#mc(Throwables.BiConsumer)
+     */
+    @Beta
+    public static <T, U> java.util.function.BiConsumer<T, Consumer<U>> mc(
+            final java.util.function.BiConsumer<? super T, ? extends java.util.function.Consumer<U>> mapper) {
+        N.checkArgNotNull(mapper);
+
+        return (BiConsumer<T, Consumer<U>>) mapper;
+    }
+
+    /**
+     * Returns a supplier that wraps a throwable supplier, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting suppliers that throw checked exceptions into standard suppliers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4366,6 +4687,7 @@ public final class Fn {
      * @param supplier the throwable supplier to wrap
      * @return a supplier that applies the supplier and converts exceptions
      * @throws IllegalArgumentException if the supplier is null
+     * @see #ss(Object, Throwables.Function)
      */
     @Beta
     public static <T> Supplier<T> ss(final Throwables.Supplier<? extends T, ? extends Exception> supplier) {
@@ -4381,18 +4703,19 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a supplier that applies the given argument to the provided throwable function.</p>
-     *
-     * <p>This method implements partial application by binding the first parameter of the function
-     * to a fixed value, resulting in a supplier that only requires the second parameter.
+     * Creates a supplier that applies the given argument to the provided throwable function.
+     * 
+     * <p>This method implements partial application by binding the parameter of the function
+     * to a fixed value, resulting in a supplier that requires no parameters.
      * Any checked exceptions thrown by the function will be converted to runtime exceptions.</p>
      *
-     * @param <A> the type of the fixed first argument to the function
+     * @param <A> the type of the fixed argument to the function
      * @param <T> the type of the result
-     * @param a the fixed value to use as the first argument to the function
-     * @param func the throwable function to apply with the fixed first argument
+     * @param a the fixed value to use as the argument to the function
+     * @param func the throwable function to apply with the fixed argument
      * @return a supplier that computes the result by applying the function to the argument
      * @throws IllegalArgumentException if the function is null
+     * @see #ss(Throwables.Supplier)
      */
     @Beta
     public static <A, T> Supplier<T> ss(final A a, final Throwables.Function<? super A, ? extends T, ? extends Exception> func) {
@@ -4408,8 +4731,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a predicate that wraps a throwable predicate, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a predicate that wraps a throwable predicate, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting predicates that throw checked exceptions into standard predicates
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4417,6 +4740,8 @@ public final class Fn {
      * @param predicate the throwable predicate to wrap
      * @return a predicate that applies the input to the throwable predicate and converts exceptions
      * @throws IllegalArgumentException if the predicate is null
+     * @see #pp(Object, Throwables.BiPredicate)
+     * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
     public static <T> Predicate<T> pp(final Throwables.Predicate<T, ? extends Exception> predicate) throws IllegalArgumentException {
@@ -4432,19 +4757,20 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a predicate that applies the given argument to the provided throwable bi-predicate.</p>
-     *
+     * Creates a predicate that applies the given argument to the provided throwable bi-predicate.
+     * 
      * <p>This method implements partial application by binding the first parameter of the bi-predicate
      * to a fixed value, resulting in a predicate that only requires the second parameter. 
-     * Any checked exceptions thrown by the bi-predicate will be converted to runtime exceptions.
-     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
-     * 
+     * Any checked exceptions thrown by the bi-predicate will be converted to runtime exceptions.</p>
+     *
      * @param <A> the type of the fixed first argument to the bi-predicate
      * @param <T> the type of the input to the resulting predicate
      * @param a the fixed value to use as the first argument to the bi-predicate
      * @param biPredicate the throwable bi-predicate to apply with the fixed first argument
      * @return a predicate that applies the input as the second argument to the bi-predicate
      * @throws IllegalArgumentException if the biPredicate is null
+     * @see #pp(Throwables.Predicate)
+     * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
     public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, ? extends Exception> biPredicate) throws IllegalArgumentException {
@@ -4460,28 +4786,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a predicate that applies inputs along with two fixed values to the provided throwable tri-predicate.</p>
-     *
+     * Creates a predicate that applies inputs along with two fixed values to the provided throwable tri-predicate.
+     * 
      * <p>This method implements partial application by binding the first two parameters of the tri-predicate
      * to fixed values, resulting in a predicate that only requires the third parameter.
-     * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.
-     * that can be used in functional programming contexts without the need for explicit exception handling.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a predicate that tests if a string matches a pattern with specific options
-     * Pattern pattern = Pattern.compile("\\d+");
-     * boolean ignoreCase = true;
-     * Predicate&lt;String&gt; isNumber = Fn.pp(pattern, ignoreCase, (p, ic, str) -> {
-     *     if (ic) {
-     *         return p.matcher(str.toLowerCase()).matches();
-     *     }
-     *     return p.matcher(str).matches();
-     * });
-     *
-     * isNumber.test("123");  // Returns true
-     * isNumber.test("abc");  // Returns false
-     * </pre>
+     * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
      * @param <B> the type of the fixed second argument to the tri-predicate
@@ -4509,41 +4818,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-predicate that safely wraps a throwable bi-predicate by converting any checked exceptions into runtime exceptions.</p>
-     *
+     * Creates a bi-predicate that safely wraps a throwable bi-predicate by converting any checked exceptions into runtime exceptions.
+     * 
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the bi-predicate will be caught and
      * wrapped in a runtime exception.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a bi-predicate that reads and compares two files
-     * BiPredicate&lt;File, File&gt; filesHaveSameContent = Fn.pp((file1, file2) -> {
-     *     try (InputStream is1 = new FileInputStream(file1);
-     *          InputStream is2 = new FileInputStream(file2)) {
-     *         byte[] buffer1 = new byte[8192];
-     *         byte[] buffer2 = new byte[8192];
-     *         int n1, n2;
-     *         
-     *         do {
-     *             n1 = is1.read(buffer1);
-     *             n2 = is2.read(buffer2);
-     *             
-     *             if (n1 != n2) {
-     *                 return false;
-     *             }
-     *             
-     *             if (n1 > 0 && !Arrays.equals(buffer1, 0, n1, buffer2, 0, n2)) {
-     *                 return false;
-     *             }
-     *         } while (n1 > 0);
-     *         
-     *         return true;
-     *     }
-     * });
-     * 
-     * boolean result = filesHaveSameContent.test(new File("file1.txt"), new File("file2.txt"));
-     * </pre>
      *
      * @param <T> the type of the first input to the bi-predicate
      * @param <U> the type of the second input to the bi-predicate
@@ -4568,22 +4847,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-predicate that applies the given argument to the provided throwable tri-predicate.</p>
-     *
+     * Creates a bi-predicate that applies the given argument to the provided throwable tri-predicate.
+     * 
      * <p>This method implements partial application by binding the first parameter of the tri-predicate
      * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a bi-predicate that checks if a substring appears between two indices
-     * String text = "error message";
-     * BiPredicate&lt;Integer, Integer&gt; containsErrorBetween = 
-     *     Fn.pp(text, (str, start, end) -> str.substring(start, end).contains("error"));
-     *
-     * boolean result = containsErrorBetween.test(0, 5);  // Returns true
-     * boolean result2 = containsErrorBetween.test(6, 14); // Returns false
-     * </pre>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
      * @param <T> the type of the first input to the resulting bi-predicate
@@ -4592,6 +4860,8 @@ public final class Fn {
      * @param triPredicate the throwable tri-predicate to apply with the fixed first argument
      * @return a bi-predicate that applies the inputs as the second and third arguments to the tri-predicate
      * @throws IllegalArgumentException if the triPredicate is null
+     * @see #pp(Throwables.BiPredicate)
+     * @see #pp(Throwables.TriPredicate)
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, ? extends Exception> triPredicate)
@@ -4608,27 +4878,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a tri-predicate that safely wraps a throwable tri-predicate by converting any checked exceptions into runtime exceptions.</p>
-     *
+     * Creates a tri-predicate that safely wraps a throwable tri-predicate by converting any checked exceptions into runtime exceptions.
+     * 
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the tri-predicate will be caught and
      * wrapped in a runtime exception.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a tri-predicate that checks if a string matches a pattern with specific options
-     * Pattern pattern = Pattern.compile("\\d+");
-     * boolean ignoreCase = true;
-     * TriPredicate&lt;String, Integer, Boolean&gt; isNumber = Fn.pp(pattern, ignoreCase, (p, ic, str) -> {
-     *     if (ic) {
-     *         return p.matcher(str.toLowerCase()).matches();
-     *     }
-     *     return p.matcher(str).matches();
-     * });
-     *
-     * boolean result = isNumber.test("123", 3, true);  // Returns true
-     * boolean result2 = isNumber.test("abc", 3, false); // Returns false
-     * </pre>
      *
      * @param <A> the type of the first input to the tri-predicate
      * @param <B> the type of the second input to the tri-predicate
@@ -4636,6 +4890,8 @@ public final class Fn {
      * @param triPredicate the throwable tri-predicate to be wrapped
      * @return a tri-predicate that delegates to the given throwable tri-predicate, converting any checked exceptions to runtime exceptions
      * @throws IllegalArgumentException if the triPredicate is null
+     * @see #pp(Throwables.Predicate)
+     * @see #pp(Throwables.BiPredicate)
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, ? extends Exception> triPredicate) throws IllegalArgumentException {
@@ -4651,8 +4907,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a consumer that wraps a throwable consumer, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a consumer that wraps a throwable consumer, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting consumers that throw checked exceptions into standard consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4660,6 +4916,8 @@ public final class Fn {
      * @param consumer the throwable consumer to wrap
      * @return a consumer that applies the input to the throwable consumer and converts exceptions
      * @throws IllegalArgumentException if the consumer is null
+     * @see #cc(Object, Throwables.BiConsumer)
+     * @see #cc(Object, Object, Throwables.TriConsumer)
      */
     @Beta
     public static <T> Consumer<T> cc(final Throwables.Consumer<T, ? extends Exception> consumer) throws IllegalArgumentException {
@@ -4675,8 +4933,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a consumer that applies the given argument to the provided throwable bi-consumer.</p>
-     *
+     * Creates a consumer that applies the given argument to the provided throwable bi-consumer.
+     * 
      * <p>This method implements partial application by binding the first parameter of the bi-consumer
      * to a fixed value, resulting in a consumer that only requires the second parameter.
      * Any checked exceptions thrown by the bi-consumer will be converted to runtime exceptions.</p>
@@ -4687,6 +4945,8 @@ public final class Fn {
      * @param biConsumer the throwable bi-consumer to apply with the fixed first argument
      * @return a consumer that applies the input as the second argument to the bi-consumer
      * @throws IllegalArgumentException if the biConsumer is null
+     * @see #cc(Throwables.Consumer)
+     * @see #cc(Object, Object, Throwables.TriConsumer)
      */
     @Beta
     public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4702,8 +4962,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a consumer that applies inputs along with two fixed values to the provided throwable tri-consumer.</p>
-     *
+     * Creates a consumer that applies inputs along with two fixed values to the provided throwable tri-consumer.
+     * 
      * <p>This method implements partial application by binding the first two parameters of the tri-consumer
      * to fixed values, resulting in a consumer that only requires the third parameter.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
@@ -4716,6 +4976,8 @@ public final class Fn {
      * @param triConsumer the throwable tri-consumer to apply with the fixed first and second arguments
      * @return a consumer that applies the input as the third argument to the tri-consumer
      * @throws IllegalArgumentException if the triConsumer is null
+     * @see #cc(Throwables.Consumer)
+     * @see #cc(Object, Throwables.BiConsumer)
      */
     @Beta
     public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, ? extends Exception> triConsumer)
@@ -4732,8 +4994,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a bi-consumer that wraps a throwable bi-consumer, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a bi-consumer that wraps a throwable bi-consumer, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting bi-consumers that throw checked exceptions into standard bi-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4742,6 +5004,8 @@ public final class Fn {
      * @param biConsumer the throwable bi-consumer to wrap
      * @return a bi-consumer that applies the inputs to the throwable bi-consumer and converts exceptions
      * @throws IllegalArgumentException if the biConsumer is null
+     * @see #cc(Throwables.Consumer)
+     * @see #cc(Object, Throwables.TriConsumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4757,8 +5021,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-consumer that applies the given argument to the provided throwable tri-consumer.</p>
-     *
+     * Creates a bi-consumer that applies the given argument to the provided throwable tri-consumer.
+     * 
      * <p>This method implements partial application by binding the first parameter of the tri-consumer
      * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
@@ -4770,6 +5034,8 @@ public final class Fn {
      * @param triConsumer the throwable tri-consumer to apply with the fixed first argument
      * @return a bi-consumer that applies the inputs as the second and third arguments to the tri-consumer
      * @throws IllegalArgumentException if the triConsumer is null
+     * @see #cc(Throwables.BiConsumer)
+     * @see #cc(Throwables.TriConsumer)
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, ? extends Exception> triConsumer)
@@ -4786,8 +5052,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a tri-consumer that wraps a throwable tri-consumer, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a tri-consumer that wraps a throwable tri-consumer, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting tri-consumers that throw checked exceptions into standard tri-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4797,6 +5063,8 @@ public final class Fn {
      * @param triConsumer the throwable tri-consumer to wrap
      * @return a tri-consumer that applies the inputs to the throwable tri-consumer and converts exceptions
      * @throws IllegalArgumentException if the triConsumer is null
+     * @see #cc(Throwables.Consumer)
+     * @see #cc(Throwables.BiConsumer)
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, ? extends Exception> triConsumer) throws IllegalArgumentException {
@@ -4812,8 +5080,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a function that wraps a throwable function, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a function that wraps a throwable function, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting functions that throw checked exceptions into standard functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4822,6 +5090,8 @@ public final class Fn {
      * @param function the throwable function to wrap
      * @return a function that applies the input to the throwable function and converts exceptions
      * @throws IllegalArgumentException if the function is null
+     * @see #ff(Throwables.Function, Object)
+     * @see #ff(Object, Throwables.BiFunction)
      */
     @Beta
     public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function) throws IllegalArgumentException {
@@ -4837,29 +5107,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a function that safely wraps a throwable function by returning a default value if the function throws an exception.</p>
-     *
+     * Creates a function that safely wraps a throwable function by returning a default value if the function throws an exception.
+     * 
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the function will be caught and the provided
      * default value will be returned instead.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a function that reads content from a file but returns an empty string on error
-     * Function&lt;File, String&gt; readFileContent = Fn.ff(file -> {
-     *     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-     *         StringBuilder content = new StringBuilder();
-     *         String line;
-     *         while ((line = reader.readLine()) != null) {
-     *             content.append(line).append("\n");
-     *         }
-     *         return content.toString();
-     *     }
-     * }, "");
-     *
-     * String content = readFileContent.apply(new File("config.txt")); 
-     * // Returns file content, or empty string if file doesn't exist or can't be read
-     * </pre>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
@@ -4886,8 +5138,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a function that applies the given argument to the provided throwable bi-function.</p>
-     *
+     * Creates a function that applies the given argument to the provided throwable bi-function.
+     * 
      * <p>This method implements partial application by binding the first parameter of the bi-function
      * to a fixed value, resulting in a function that only requires the second parameter.
      * Any checked exceptions thrown by the bi-function will be converted to runtime exceptions.</p>
@@ -4899,6 +5151,8 @@ public final class Fn {
      * @param biFunction the throwable bi-function to apply with the fixed first argument
      * @return a function that applies the input as the second argument to the bi-function
      * @throws IllegalArgumentException if the biFunction is null
+     * @see #ff(Throwables.Function)
+     * @see #ff(Object, Object, Throwables.TriFunction)
      */
     @Beta
     public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4914,8 +5168,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a function that applies inputs along with two fixed values to the provided throwable tri-function.</p>
-     *
+     * Creates a function that applies inputs along with two fixed values to the provided throwable tri-function.
+     * 
      * <p>This method implements partial application by binding the first two parameters of the tri-function
      * to fixed values, resulting in a function that only requires the third parameter.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
@@ -4929,6 +5183,8 @@ public final class Fn {
      * @param triFunction the throwable tri-function to apply with the fixed first and second arguments
      * @return a function that applies the input as the third argument to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #ff(Throwables.Function)
+     * @see #ff(Object, Throwables.BiFunction)
      */
     @Beta
     public static <A, B, T, R> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, ? extends Exception> triFunction)
@@ -4945,8 +5201,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a bi-function that wraps a throwable bi-function, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a bi-function that wraps a throwable bi-function, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting bi-functions that throw checked exceptions into standard bi-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -4956,6 +5212,8 @@ public final class Fn {
      * @param biFunction the throwable bi-function to wrap
      * @return a bi-function that applies the inputs to the throwable bi-function and converts exceptions
      * @throws IllegalArgumentException if the biFunction is null
+     * @see #ff(Throwables.Function)
+     * @see #ff(Throwables.BiFunction, Object)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4971,8 +5229,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-function that safely wraps a throwable bi-function by returning a default value if the function throws an exception.</p>
-     *
+     * Creates a bi-function that safely wraps a throwable bi-function by returning a default value if the function throws an exception.
+     * 
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the bi-function will be caught and the provided
      * default value will be returned instead.</p>
@@ -4984,6 +5242,8 @@ public final class Fn {
      * @param defaultOnError the default value to return if the function throws an exception
      * @return a bi-function that delegates to the given throwable bi-function, returning the default value if an exception occurs
      * @throws IllegalArgumentException if the biFunction is null
+     * @see #ff(Throwables.BiFunction)
+     * @see #ff(Throwables.Function, Object)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction, final R defaultOnError)
@@ -5000,8 +5260,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a bi-function that applies the given argument to the provided throwable tri-function.</p>
-     *
+     * Creates a bi-function that applies the given argument to the provided throwable tri-function.
+     * 
      * <p>This method implements partial application by binding the first parameter of the tri-function
      * to a fixed value, resulting in a bi-function that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
@@ -5014,6 +5274,8 @@ public final class Fn {
      * @param triFunction the throwable tri-function to apply with the fixed first argument
      * @return a bi-function that applies the inputs as the second and third arguments to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #ff(Throwables.BiFunction)
+     * @see #ff(Throwables.TriFunction)
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, ? extends Exception> triFunction)
@@ -5030,8 +5292,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns a tri-function that wraps a throwable tri-function, converting checked exceptions to runtime exceptions.</p>
-     *
+     * Returns a tri-function that wraps a throwable tri-function, converting checked exceptions to runtime exceptions.
+     * 
      * <p>This method is useful for converting tri-functions that throw checked exceptions into standard tri-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5042,6 +5304,8 @@ public final class Fn {
      * @param triFunction the throwable tri-function to wrap
      * @return a tri-function that applies the inputs to the throwable tri-function and converts exceptions
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #ff(Throwables.Function)
+     * @see #ff(Throwables.BiFunction)
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction)
@@ -5058,8 +5322,8 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a tri-function that safely wraps a throwable tri-function by returning a default value if the function throws an exception.</p>
-     *
+     * Creates a tri-function that safely wraps a throwable tri-function by returning a default value if the function throws an exception.
+     * 
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the tri-function will be caught and the provided
      * default value will be returned instead.</p>
@@ -5072,6 +5336,8 @@ public final class Fn {
      * @param defaultOnError the default value to return if the function throws an exception
      * @return a tri-function that delegates to the given throwable tri-function, returning the default value if an exception occurs
      * @throws IllegalArgumentException if the triFunction is null
+     * @see #ff(Throwables.TriFunction)
+     * @see #ff(Throwables.BiFunction, Object)
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction, final R defaultOnError)
@@ -5088,29 +5354,10 @@ public final class Fn {
     }
 
     /**
-     * <p>Creates a synchronized predicate that safely wraps a standard predicate by ensuring all tests are performed within a synchronized block.</p>
-     *
+     * Creates a synchronized predicate that safely wraps a standard predicate by ensuring all tests are performed within a synchronized block.
+     * 
      * <p>This utility method provides thread safety for predicates that might be accessed concurrently. Any test operation
      * will be performed while holding the lock on the provided mutex object, ensuring thread-safe evaluation of the predicate.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>
-     * // Create a thread-safe counter-based predicate
-     * final AtomicInteger counter = new AtomicInteger(0);
-     * final Object lock = new Object();
-     * 
-     * Predicate&lt;String&gt; limitedAcceptance = Fn.sp(lock, str -> {
-     *     if (counter.get() &lt; 5) {
-     *         counter.incrementAndGet();
-     *         return true;
-     *     }
-     *     return false;
-     * });
-     * 
-     * // Can be safely used from multiple threads
-     * boolean result1 = limitedAcceptance.test("first");  // true
-     * boolean result6 = limitedAcceptance.test("sixth");  // false (limit reached)
-     * </pre>
      *
      * @param <T> the type of the input to the predicate
      * @param mutex the object to synchronize on when testing values
@@ -5133,15 +5380,20 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Predicate}.
+     * Creates a synchronized predicate that applies the given argument to the provided bi-predicate within a synchronized block.
+     * 
+     * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-predicate
+     * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param mutex to synchronize on
-     * @param a
-     * @param biPredicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the fixed first argument to the bi-predicate
+     * @param <T> the type of the input to the resulting predicate
+     * @param mutex the object to synchronize on when testing values
+     * @param a the fixed value to use as the first argument to the bi-predicate
+     * @param biPredicate the bi-predicate to apply with the fixed first argument
+     * @return a synchronized predicate that applies the input as the second argument to the bi-predicate
+     * @throws IllegalArgumentException if the mutex or biPredicate is null
+     * @see #sp(Object, Predicate)
+     * @see #sp(Object, BiPredicate)
      */
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -5156,6 +5408,21 @@ public final class Fn {
         };
     }
 
+    /**
+     * Creates a synchronized bi-predicate that safely wraps a standard bi-predicate by ensuring all tests are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for bi-predicates that might be accessed concurrently. Any test operation
+     * will be performed while holding the lock on the provided mutex object.</p>
+     *
+     * @param <T> the type of the first input to the bi-predicate
+     * @param <U> the type of the second input to the bi-predicate
+     * @param mutex the object to synchronize on when testing values
+     * @param biPredicate the bi-predicate to be wrapped with synchronization
+     * @return a bi-predicate that delegates to the given bi-predicate within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or biPredicate is null
+     * @see #sp(Object, Predicate)
+     * @see #sp(Object, TriPredicate)
+     */
     @Beta
     public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
@@ -5168,6 +5435,22 @@ public final class Fn {
         };
     }
 
+    /**
+     * Creates a synchronized tri-predicate that safely wraps a tri-predicate by ensuring all tests are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for tri-predicates that might be accessed concurrently. Any test operation
+     * will be performed while holding the lock on the provided mutex object.</p>
+     *
+     * @param <A> the type of the first input to the tri-predicate
+     * @param <B> the type of the second input to the tri-predicate
+     * @param <C> the type of the third input to the tri-predicate
+     * @param mutex the object to synchronize on when testing values
+     * @param triPredicate the tri-predicate to be wrapped with synchronization
+     * @return a tri-predicate that delegates to the given tri-predicate within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or triPredicate is null
+     * @see #sp(Object, Predicate)
+     * @see #sp(Object, BiPredicate)
+     */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> sp(final Object mutex, final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
@@ -5181,13 +5464,18 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Consumer}.
+     * Creates a synchronized consumer that safely wraps a standard consumer by ensuring all accept operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for consumers that might be accessed concurrently. Any accept operation
+     * will be performed while holding the lock on the provided mutex object, ensuring thread-safe execution.</p>
      *
-     * @param <T>
-     * @param mutex to synchronize on
-     * @param consumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param mutex the object to synchronize on when accepting values
+     * @param consumer the consumer to be wrapped with synchronization
+     * @return a consumer that delegates to the given consumer within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or consumer is null
+     * @see #cc(Throwables.Consumer)
+     * @see #c(Consumer)
      */
     @Beta
     public static <T> Consumer<T> sc(final Object mutex, final java.util.function.Consumer<T> consumer) throws IllegalArgumentException {
@@ -5202,15 +5490,20 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Consumer}.
+     * Creates a synchronized consumer that applies the given argument to the provided bi-consumer within a synchronized block.
+     * 
+     * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-consumer
+     * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param mutex to synchronize on
-     * @param a
-     * @param biConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the fixed first argument to the bi-consumer
+     * @param <T> the type of the input to the resulting consumer
+     * @param mutex the object to synchronize on when accepting values
+     * @param a the fixed value to use as the first argument to the bi-consumer
+     * @param biConsumer the bi-consumer to apply with the fixed first argument
+     * @return a synchronized consumer that applies the input as the second argument to the bi-consumer
+     * @throws IllegalArgumentException if the mutex or biConsumer is null
+     * @see #sc(Object, Consumer)
+     * @see #sc(Object, BiConsumer)
      */
     @Beta
     public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
@@ -5225,14 +5518,19 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code BiConsumer}.
+     * Creates a synchronized bi-consumer that safely wraps a standard bi-consumer by ensuring all accept operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for bi-consumers that might be accessed concurrently. Any accept operation
+     * will be performed while holding the lock on the provided mutex object.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param mutex to synchronize on
-     * @param biConsumer
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the bi-consumer
+     * @param <U> the type of the second input to the bi-consumer
+     * @param mutex the object to synchronize on when accepting values
+     * @param biConsumer the bi-consumer to be wrapped with synchronization
+     * @return a bi-consumer that delegates to the given bi-consumer within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or biConsumer is null
+     * @see #sc(Object, Consumer)
+     * @see #sp(Object, TriConsumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
@@ -5246,8 +5544,24 @@ public final class Fn {
         };
     }
 
+    /**
+     * Creates a synchronized tri-consumer that safely wraps a tri-consumer by ensuring all accept operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for tri-consumers that might be accessed concurrently. Any accept operation
+     * will be performed while holding the lock on the provided mutex object.</p>
+     *
+     * @param <A> the type of the first input to the tri-consumer
+     * @param <B> the type of the second input to the tri-consumer
+     * @param <C> the type of the third input to the tri-consumer
+     * @param mutex the object to synchronize on when accepting values
+     * @param triConsumer the tri-consumer to be wrapped with synchronization  
+     * @return a tri-consumer that delegates to the given tri-consumer within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or triConsumer is null
+     * @see #sc(Object, Consumer)
+     * @see #sc(Object, BiConsumer)
+     */
     @Beta
-    public static <A, B, C> TriConsumer<A, B, C> sp(final Object mutex, final TriConsumer<A, B, C> triPredicate) throws IllegalArgumentException {
+    public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<A, B, C> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(triPredicate, cs.TriConsumer);
 
@@ -5259,14 +5573,19 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Function}.
+     * Creates a synchronized function that safely wraps a standard function by ensuring all apply operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for functions that might be accessed concurrently. Any apply operation
+     * will be performed while holding the lock on the provided mutex object, ensuring thread-safe execution.</p>
      *
-     * @param <T>
-     * @param <R>
-     * @param mutex to synchronize on
-     * @param function
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param mutex the object to synchronize on when applying the function
+     * @param function the function to be wrapped with synchronization
+     * @return a function that delegates to the given function within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or function is null
+     * @see #ff(Throwables.Function)
+     * @see #f(Function)
      */
     @Beta
     public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, ? extends R> function) throws IllegalArgumentException {
@@ -5281,16 +5600,21 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code Function}.
+     * Creates a synchronized function that applies the given argument to the provided bi-function within a synchronized block.
+     * 
+     * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-function
+     * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
-     * @param <A>
-     * @param <T>
-     * @param <R>
-     * @param mutex to synchronize on
-     * @param a
-     * @param biFunction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the fixed first argument to the bi-function
+     * @param <T> the type of the input to the resulting function
+     * @param <R> the type of the result of the resulting function
+     * @param mutex the object to synchronize on when applying the function
+     * @param a the fixed value to use as the first argument to the bi-function
+     * @param biFunction the bi-function to apply with the fixed first argument
+     * @return a synchronized function that applies the input as the second argument to the bi-function
+     * @throws IllegalArgumentException if the mutex or biFunction is null
+     * @see #sf(Object, Function)
+     * @see #sf(Object, BiFunction)
      */
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -5306,15 +5630,20 @@ public final class Fn {
     }
 
     /**
-     * Synchronized {@code BiFunction}.
+     * Creates a synchronized bi-function that safely wraps a standard bi-function by ensuring all apply operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for bi-functions that might be accessed concurrently. Any apply operation
+     * will be performed while holding the lock on the provided mutex object.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param mutex to synchronize on
-     * @param biFunction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the bi-function
+     * @param <U> the type of the second input to the bi-function
+     * @param <R> the type of the result of the bi-function
+     * @param mutex the object to synchronize on when applying the function
+     * @param biFunction the bi-function to be wrapped with synchronization
+     * @return a bi-function that delegates to the given bi-function within a synchronized block on the mutex
+     * @throws IllegalArgumentException if the mutex or biFunction is null
+     * @see #sf(Object, Function)
+     * @see #sf(Object, TriFunction)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final java.util.function.BiFunction<T, U, R> biFunction)
@@ -5329,6 +5658,22 @@ public final class Fn {
         };
     }
 
+    /**
+     * Creates a synchronized tri-function that safely wraps a tri-function by ensuring all apply operations are performed within a synchronized block.
+     * 
+     * <p>This utility method provides thread safety for tri-functions that might be accessed concurrently. Any apply operation
+     * will be performed while holding the lock on the provided mutex object.</p>
+     *
+     * @param <A> the type of the first input to the tri-function
+     * @param <B> the type of the second input to the tri-function
+     * @param <C> the type of the third input to the tri-function
+     * @param <R> the type of the result of the tri-function
+     * @param mutex the object to synchronize on when applying the function
+     * @param triFunction the tri-function to be wrapped with synchronization
+     * @return a tri-function that delegates to the given tri-function within a synchronized block on the mutex
+     * @see #sf(Object, Function)
+     * @see #sf(Object, BiFunction)
+     */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<A, B, C, R> triFunction) {
         N.checkArgNotNull(mutex, cs.mutex);
@@ -5342,12 +5687,19 @@ public final class Fn {
     }
 
     /**
+     * Converts a consumer to a function that returns void (null) after executing the consumer.
+     * 
+     * <p>This method is useful when you need to use a consumer in a context that requires a function,
+     * such as in stream map operations where you want side effects but also need to continue the stream.</p>
      *
-     * @param <T>
-     * @param action
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param action the consumer to convert to a function
+     * @return a function that executes the consumer and returns null
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(Consumer, Object)
+     * @see #f2c(Function)
      */
+    @Beta
     public static <T> Function<T, Void> c2f(final java.util.function.Consumer<? super T> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
@@ -5358,14 +5710,21 @@ public final class Fn {
     }
 
     /**
+     * Converts a consumer to a function that returns a specified value after executing the consumer.
+     * 
+     * <p>This method is useful when you need to use a consumer in a context that requires a function
+     * and want to return a specific value after the consumer executes, such as for chaining operations.</p>
      *
-     * @param <T>
-     * @param <R>
-     * @param action
-     * @param valueToReturn
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the consumer
+     * @param <R> the type of the value to return
+     * @param action the consumer to convert to a function
+     * @param valueToReturn the value to return after the consumer executes
+     * @return a function that executes the consumer and returns the specified value
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(Consumer)
+     * @see #f2c(Function)
      */
+    @Beta
     public static <T, R> Function<T, R> c2f(final java.util.function.Consumer<? super T> action, final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
@@ -5376,13 +5735,20 @@ public final class Fn {
     }
 
     /**
+     * Converts a bi-consumer to a bi-function that returns void (null) after executing the bi-consumer.
+     * 
+     * <p>This method is useful when you need to use a bi-consumer in a context that requires a bi-function,
+     * allowing you to perform side effects while maintaining functional composition.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param action
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the bi-consumer
+     * @param <U> the type of the second input to the bi-consumer
+     * @param action the bi-consumer to convert to a bi-function
+     * @return a bi-function that executes the bi-consumer and returns null
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(BiConsumer, Object)
+     * @see #f2c(BiFunction)
      */
+    @Beta
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
@@ -5393,15 +5759,22 @@ public final class Fn {
     }
 
     /**
+     * Converts a bi-consumer to a bi-function that returns a specified value after executing the bi-consumer.
+     * 
+     * <p>This method is useful when you need to use a bi-consumer in a context that requires a bi-function
+     * and want to return a specific value after the bi-consumer executes.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param action
-     * @param valueToReturn
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the bi-consumer
+     * @param <U> the type of the second input to the bi-consumer
+     * @param <R> the type of the value to return
+     * @param action the bi-consumer to convert to a bi-function
+     * @param valueToReturn the value to return after the bi-consumer executes
+     * @return a bi-function that executes the bi-consumer and returns the specified value
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(BiConsumer)
+     * @see #f2c(BiFunction)
      */
+    @Beta
     public static <T, U, R> BiFunction<T, U, R> c2f(final java.util.function.BiConsumer<? super T, ? super U> action, final R valueToReturn)
             throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -5413,14 +5786,21 @@ public final class Fn {
     }
 
     /**
+     * Converts a tri-consumer to a tri-function that returns void (null) after executing the tri-consumer.
+     * 
+     * <p>This method is useful when you need to use a tri-consumer in a context that requires a tri-function,
+     * allowing you to perform side effects while maintaining functional composition.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param action
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the first input to the tri-consumer
+     * @param <B> the type of the second input to the tri-consumer
+     * @param <C> the type of the third input to the tri-consumer
+     * @param action the tri-consumer to convert to a tri-function
+     * @return a tri-function that executes the tri-consumer and returns null
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(TriConsumer, Object)
+     * @see #f2c(TriFunction)
      */
+    @Beta
     public static <A, B, C> TriFunction<A, B, C, Void> c2f(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
@@ -5431,16 +5811,23 @@ public final class Fn {
     }
 
     /**
+     * Converts a tri-consumer to a tri-function that returns a specified value after executing the tri-consumer.
+     * 
+     * <p>This method is useful when you need to use a tri-consumer in a context that requires a tri-function
+     * and want to return a specific value after the tri-consumer executes.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param action
-     * @param valueToReturn
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the first input to the tri-consumer
+     * @param <B> the type of the second input to the tri-consumer
+     * @param <C> the type of the third input to the tri-consumer
+     * @param <R> the type of the value to return
+     * @param action the tri-consumer to convert to a tri-function
+     * @param valueToReturn the value to return after the tri-consumer executes
+     * @return a tri-function that executes the tri-consumer and returns the specified value
+     * @throws IllegalArgumentException if the action is null
+     * @see #c2f(TriConsumer)
+     * @see #f2c(TriFunction)
      */
+    @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> c2f(final TriConsumer<? super A, ? super B, ? super C> action, final R valueToReturn)
             throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -5452,13 +5839,18 @@ public final class Fn {
     }
 
     /**
-     * Returns a {@code Consumer} which calls the specified {@code func}.
+     * Converts a function to a consumer by discarding the function's return value.
+     * 
+     * <p>This method is useful when you have a function but need a consumer, and you don't care about
+     * the return value. The function will still be executed for its side effects.</p>
      *
-     * @param <T>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the input to the function
+     * @param func the function to convert to a consumer
+     * @return a consumer that executes the function and discards its return value
+     * @throws IllegalArgumentException if the func is null
+     * @see #c2f(Consumer)
      */
+    @Beta
     public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
@@ -5466,13 +5858,19 @@ public final class Fn {
     }
 
     /**
+     * Converts a bi-function to a bi-consumer by discarding the bi-function's return value.
+     * 
+     * <p>This method is useful when you have a bi-function but need a bi-consumer, and you don't care about
+     * the return value. The bi-function will still be executed for its side effects.</p>
      *
-     * @param <T>
-     * @param <U>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the first input to the bi-function
+     * @param <U> the type of the second input to the bi-function
+     * @param func the bi-function to convert to a bi-consumer
+     * @return a bi-consumer that executes the bi-function and discards its return value
+     * @throws IllegalArgumentException if the func is null
+     * @see #c2f(BiConsumer)
      */
+    @Beta
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
@@ -5480,14 +5878,20 @@ public final class Fn {
     }
 
     /**
+     * Converts a tri-function to a tri-consumer by discarding the tri-function's return value.
+     * 
+     * <p>This method is useful when you have a tri-function but need a tri-consumer, and you don't care about
+     * the return value. The tri-function will still be executed for its side effects.</p>
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param func
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the type of the first input to the tri-function
+     * @param <B> the type of the second input to the tri-function
+     * @param <C> the type of the third input to the tri-function
+     * @param func the tri-function to convert to a tri-consumer
+     * @return a tri-consumer that executes the tri-function and discards its return value
+     * @throws IllegalArgumentException if the func is null
+     * @see #c2f(TriConsumer)
      */
+    @Beta
     public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
@@ -5495,9 +5899,14 @@ public final class Fn {
     }
 
     /**
+     * Wraps a throwable runnable to convert checked exceptions to runtime exceptions.
+     * 
+     * <p>This method allows you to use runnables that throw checked exceptions in contexts
+     * that expect standard Runnable interfaces, such as thread creation or executor services.</p>
      *
-     * @param runnable
-     * @return
+     * @param runnable the throwable runnable to wrap
+     * @return a runnable that executes the throwable runnable and converts checked exceptions to runtime exceptions
+     * @see #cc(Throwables.Callable)
      */
     public static Runnable rr(final Throwables.Runnable<? extends Exception> runnable) {
         return () -> {
@@ -5510,10 +5919,15 @@ public final class Fn {
     }
 
     /**
+     * Wraps a throwable callable to convert checked exceptions to runtime exceptions.
+     * 
+     * <p>This method allows you to use callables that throw checked exceptions beyond the standard
+     * Exception in contexts that expect standard Callable interfaces.</p>
      *
-     * @param <R>
-     * @param callable
-     * @return
+     * @param <R> the type of the result
+     * @param callable the throwable callable to wrap
+     * @return a callable that executes the throwable callable and converts checked exceptions to runtime exceptions
+     * @see #rr(Throwables.Runnable)
      */
     public static <R> Callable<R> cc(final Throwables.Callable<R, ? extends Exception> callable) {
         return () -> {
@@ -5526,10 +5940,15 @@ public final class Fn {
     }
 
     /**
+     * Returns the provided runnable as is - a shorthand identity method for runnables.
+     * 
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts.</p>
      *
-     * @param runnable
-     * @return
-     * @throws IllegalArgumentException
+     * @param runnable the runnable to return
+     * @return the runnable unchanged
+     * @throws IllegalArgumentException if the runnable is null
+     * @see #c(Callable)
      */
     public static Runnable r(final Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5538,11 +5957,16 @@ public final class Fn {
     }
 
     /**
+     * Returns the provided callable as is - a shorthand identity method for callables.
+     * 
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts.</p>
      *
-     * @param <R>
-     * @param callable
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of the result
+     * @param callable the callable to return
+     * @return the callable unchanged
+     * @throws IllegalArgumentException if the callable is null
+     * @see #r(Runnable)
      */
     public static <R> Callable<R> c(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5551,10 +5975,15 @@ public final class Fn {
     }
 
     /**
+     * Returns the provided Java runnable as is - a shorthand identity method for Java runnables.
+     * 
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts when working with java.lang.Runnable.</p>
      *
-     * @param runnable
-     * @return
-     * @throws IllegalArgumentException
+     * @param runnable the Java runnable to return
+     * @return the Java runnable unchanged
+     * @throws IllegalArgumentException if the runnable is null
+     * @see #jc(java.util.concurrent.Callable)
      */
     public static java.lang.Runnable jr(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5563,11 +5992,16 @@ public final class Fn {
     }
 
     /**
+     * Returns the provided Java callable as is - a shorthand identity method for Java callables.
+     * 
+     * <p>This method serves as a shorthand convenience method that can help with type inference
+     * in certain contexts when working with java.util.concurrent.Callable.</p>
      *
-     * @param <R>
-     * @param callable
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of the result
+     * @param callable the Java callable to return
+     * @return the Java callable unchanged
+     * @throws IllegalArgumentException if the callable is null
+     * @see #jr(java.lang.Runnable)
      */
     public static <R> java.util.concurrent.Callable<R> jc(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5576,10 +6010,16 @@ public final class Fn {
     }
 
     /**
+     * Converts a runnable to a callable that returns void (null).
+     * 
+     * <p>This method is useful when you need to use a runnable in a context that requires a callable,
+     * such as with executor services when you want to track completion but don't need a return value.</p>
      *
-     * @param runnable
-     * @return
-     * @throws IllegalArgumentException
+     * @param runnable the runnable to convert to a callable
+     * @return a callable that executes the runnable and returns null
+     * @throws IllegalArgumentException if the runnable is null
+     * @see #r2c(Runnable, Object)
+     * @see #c2r(Callable)
      */
     public static Callable<Void> r2c(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5591,12 +6031,18 @@ public final class Fn {
     }
 
     /**
+     * Converts a runnable to a callable that returns a specified value.
+     * 
+     * <p>This method is useful when you need to use a runnable in a context that requires a callable
+     * and want to return a specific value after the runnable executes.</p>
      *
-     * @param <R>
-     * @param runnable
-     * @param valueToReturn
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of the value to return
+     * @param runnable the runnable to convert to a callable
+     * @param valueToReturn the value to return after the runnable executes
+     * @return a callable that executes the runnable and returns the specified value
+     * @throws IllegalArgumentException if the runnable is null
+     * @see #r2c(Runnable)
+     * @see #c2r(Callable)
      */
     public static <R> Callable<R> r2c(final java.lang.Runnable runnable, final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5608,11 +6054,16 @@ public final class Fn {
     }
 
     /**
+     * Converts a callable to a runnable by discarding the callable's return value.
+     * 
+     * <p>This method is useful when you have a callable but need a runnable, and you don't care about
+     * the return value. The callable will still be executed for its side effects.</p>
      *
-     * @param <R>
-     * @param callable
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of the callable's result
+     * @param callable the callable to convert to a runnable
+     * @return a runnable that executes the callable and discards its return value
+     * @throws IllegalArgumentException if the callable is null
+     * @see #r2c(Runnable)
      */
     public static <R> Runnable c2r(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5621,10 +6072,15 @@ public final class Fn {
     }
 
     /**
+     * Converts a Java runnable to an abacus Runnable.
+     * 
+     * <p>This method provides compatibility between Java's standard Runnable interface and
+     * the abacus framework's Runnable interface.</p>
      *
-     * @param runnable
-     * @return
-     * @throws IllegalArgumentException
+     * @param runnable the Java runnable to convert
+     * @return an abacus Runnable that delegates to the Java runnable
+     * @throws IllegalArgumentException if the runnable is null
+     * @see #jc2c(java.util.concurrent.Callable)
      */
     public static Runnable jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5637,11 +6093,16 @@ public final class Fn {
     }
 
     /**
+     * Converts a Java callable to an abacus Callable.
+     * 
+     * <p>This method provides compatibility between Java's standard Callable interface and
+     * the abacus framework's Callable interface, handling exception conversion.</p>
      *
-     * @param <R>
-     * @param callable
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of the result
+     * @param callable the Java callable to convert
+     * @return an abacus Callable that delegates to the Java callable
+     * @throws IllegalArgumentException if the callable is null
+     * @see #jr2r(java.lang.Runnable)
      */
     public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5660,10 +6121,15 @@ public final class Fn {
     }
 
     /**
+     * Converts a callable to a Java runnable by discarding the callable's return value.
+     * 
+     * <p>This method is useful when you have a callable but need a Java runnable for use with
+     * thread creation or other Java APIs that expect Runnable.</p>
      *
-     * @param callable
-     * @return
-     * @throws IllegalArgumentException
+     * @param callable the Java callable to convert to a runnable
+     * @return a Java runnable that executes the callable and discards its return value
+     * @throws IllegalArgumentException if the callable is null
+     * @see #r2c(Runnable)
      */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5678,39 +6144,60 @@ public final class Fn {
     }
 
     /**
+     * Returns a BinaryOperator that always throws an exception when attempting to merge duplicate keys.
+     * 
+     * <p>This operator is useful in collectors and map operations where duplicate keys should be
+     * treated as an error condition rather than being silently merged.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the operands and result
+     * @return a BinaryOperator that throws IllegalStateException on merge attempts
+     * @see #ignoringMerger()
+     * @see #replacingMerger()
      */
     public static <T> BinaryOperator<T> throwingMerger() {
         return BinaryOperators.THROWING_MERGER;
     }
 
     /**
+     * Returns a BinaryOperator that ignores the second value when merging duplicates, keeping the first value.
+     * 
+     * <p>This operator is useful in collectors and map operations where you want to keep the first
+     * occurrence of duplicate keys and ignore subsequent ones.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the operands and result
+     * @return a BinaryOperator that returns the first operand
+     * @see #throwingMerger()
+     * @see #replacingMerger()
      */
     public static <T> BinaryOperator<T> ignoringMerger() {
         return BinaryOperators.IGNORING_MERGER;
     }
 
     /**
+     * Returns a BinaryOperator that replaces the first value with the second value when merging duplicates.
+     * 
+     * <p>This operator is useful in collectors and map operations where you want to keep the last
+     * occurrence of duplicate keys, replacing earlier ones.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the operands and result
+     * @return a BinaryOperator that returns the second operand
+     * @see #throwingMerger()
+     * @see #ignoringMerger()
      */
     public static <T> BinaryOperator<T> replacingMerger() {
         return BinaryOperators.REPLACING_MERGER;
     }
 
-    @SuppressWarnings("rawtypes")
-    static final Function<Optional, Object> GET_AS_IT = it -> it.orElse(null);
-
     /**
+     * Returns a Function that extracts the value from an Optional, returning null if the Optional is empty.
+     * 
+     * <p>This function is useful for converting streams of Optionals to their contained values,
+     * with empty Optionals becoming null values.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the value in the Optional
+     * @return a Function that extracts the Optional's value or returns null
+     * @see #getIfPresentOrElseNullJdk()
+     * @see #isPresent()
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<Optional<T>, T> getIfPresentOrElseNull() {
@@ -5721,9 +6208,15 @@ public final class Fn {
     static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
 
     /**
+     * Returns a Function that extracts the value from a Java Optional, returning null if the Optional is empty.
+     * 
+     * <p>This function is useful for converting streams of Java Optionals to their contained values,
+     * with empty Optionals becoming null values. This is the JDK Optional version of getIfPresentOrElseNull.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the value in the Optional
+     * @return a Function that extracts the Java Optional's value or returns null
+     * @see #getIfPresentOrElseNull()
+     * @see #isPresentJdk()
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<java.util.Optional<T>, T> getIfPresentOrElseNullJdk() {
@@ -5734,9 +6227,14 @@ public final class Fn {
     static final Predicate<Optional> IS_PRESENT_IT = Optional::isPresent;
 
     /**
+     * Returns a Predicate that tests whether an Optional contains a value.
+     * 
+     * <p>This predicate is useful for filtering streams of Optionals to keep only those that contain values.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the value in the Optional
+     * @return a Predicate that returns true if the Optional contains a value
+     * @see #isPresentJdk()
+     * @see #getIfPresentOrElseNull()
      */
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<Optional<T>> isPresent() {
@@ -5747,9 +6245,15 @@ public final class Fn {
     static final Predicate<java.util.Optional> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
 
     /**
+     * Returns a Predicate that tests whether a Java Optional contains a value.
+     * 
+     * <p>This predicate is useful for filtering streams of Java Optionals to keep only those that contain values.
+     * This is the JDK Optional version of isPresent.</p>
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the value in the Optional
+     * @return a Predicate that returns true if the Java Optional contains a value
+     * @see #isPresent()
+     * @see #getIfPresentOrElseNullJdk()
      */
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<java.util.Optional<T>> isPresentJdk() {
@@ -5757,10 +6261,16 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful BiFunction that alternates between returning MergeResult.TAKE_FIRST and MergeResult.TAKE_SECOND.
+     * 
+     * <p>This function maintains internal state and alternates its result with each call. It starts by returning
+     * TAKE_FIRST, then TAKE_SECOND, then TAKE_FIRST again, and so on. This is useful for implementing
+     * alternating merge strategies in stream operations.</p>
+     * 
+     * <p><b>Warning:</b> This is a stateful function. Don't save or cache it for reuse, and don't use it in parallel streams.</p>
      *
-     * @param <T>
-     * @return a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
+     * @param <T> the type of the input elements
+     * @return a stateful BiFunction that alternates between TAKE_FIRST and TAKE_SECOND
      */
     @Beta
     @SequentialOnly
@@ -5783,6 +6293,14 @@ public final class Fn {
 
         private static final LongSupplier CURRENT_TIME = System::currentTimeMillis;
 
+        /**
+         * Returns a LongSupplier that supplies the current time in milliseconds.
+         * 
+         * <p>This supplier returns the current time in milliseconds since the Unix epoch
+         * (January 1, 1970, 00:00:00 GMT) each time it is called.</p>
+         *
+         * @return a LongSupplier that returns System.currentTimeMillis()
+         */
         public static LongSupplier ofCurrentTimeMillis() {
             return CURRENT_TIME;
         }
@@ -5949,19 +6467,11 @@ public final class Fn {
         }
 
         /**
-         * <p>Returns the provided supplier as is - a shorthand identity method for suppliers.</p>
-         *
+         * Returns the provided supplier as is - a shorthand identity method for suppliers.
+         * 
          * <p>This method serves as a shorthand convenience method that can help with type inference
          * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
          * and others.</p>
-         *
-         * <p>Example usage:</p>
-         * <pre>
-         * // Instead of explicitly typing:
-         * Supplier&lt;String&gt; supplier = () -&gt; "value";
-         * // You can use:
-         * var supplier = Suppliers.of(() -&gt; "value");
-         * </pre>
          *
          * @param <T> the type of results supplied by the supplier
          * @param supplier the supplier to return
@@ -5979,18 +6489,10 @@ public final class Fn {
         }
 
         /**
-         * <p>Creates a supplier that always returns the result of applying the provided function to the given value.</p>
-         *
+         * Creates a supplier that always returns the result of applying the provided function to the given value.
+         * 
          * <p>This method creates a supplier that captures the provided value and function,
          * and when the supplier is called, it applies the function to the value and returns the result.</p>
-         *
-         * <p>Example usage:</p>
-         * <pre>
-         * // Create a supplier that always returns the length of a specific string
-         * String text = "Hello, World";
-         * Supplier&lt;Integer&gt; lengthSupplier = Suppliers.of(text, String::length);
-         * Integer length = lengthSupplier.get(); // Returns 12
-         * </pre>
          *
          * @param <A> the type of the input value
          * @param <T> the type of results supplied by the supplier
@@ -6010,199 +6512,259 @@ public final class Fn {
         }
 
         /**
-         * Returns a supplier that always supplies {@code instance}.
+         * Returns a supplier that always supplies the same instance.
+         * 
+         * <p>This method creates a supplier that always returns the provided instance,
+         * useful for creating constant suppliers.</p>
          *
-         * @param <T>
-         * @param instance
-         * @return
+         * @param <T> the type of the instance
+         * @param instance the instance to be supplied
+         * @return a supplier that always returns the same instance
          */
         public static <T> Supplier<T> ofInstance(final T instance) {
             return () -> instance;
         }
 
+        /**
+         * Returns a supplier that generates UUID strings.
+         * 
+         * <p>Each call to the supplier's get() method will generate a new UUID string.</p>
+         *
+         * @return a supplier that generates UUID strings
+         * @see #ofGUID()
+         */
         public static Supplier<String> ofUUID() {
             return UUID;
         }
 
+        /**
+         * Returns a supplier that generates GUID strings.
+         * 
+         * <p>Each call to the supplier's get() method will generate a new GUID string.</p>
+         *
+         * @return a supplier that generates GUID strings
+         * @see #ofUUID()
+         */
         public static Supplier<String> ofGUID() {
             return GUID;
         }
 
         /**
-         * Of empty boolean array.
+         * Returns a supplier that supplies empty boolean arrays.
+         * 
+         * <p>This supplier always returns the same empty boolean array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty boolean array
          */
         public static Supplier<boolean[]> ofEmptyBooleanArray() {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
         /**
-         * Of empty char array.
+         * Returns a supplier that supplies empty char arrays.
+         * 
+         * <p>This supplier always returns the same empty char array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty char array
          */
         public static Supplier<char[]> ofEmptyCharArray() {
             return EMPTY_CHAR_ARRAY;
         }
 
         /**
-         * Of empty byte array.
+         * Returns a supplier that supplies empty byte arrays.
+         * 
+         * <p>This supplier always returns the same empty byte array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty byte array
          */
         public static Supplier<byte[]> ofEmptyByteArray() {
             return EMPTY_BYTE_ARRAY;
         }
 
         /**
-         * Of empty short array.
+         * Returns a supplier that supplies empty short arrays.
+         * 
+         * <p>This supplier always returns the same empty short array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty short array
          */
         public static Supplier<short[]> ofEmptyShortArray() {
             return EMPTY_SHORT_ARRAY;
         }
 
         /**
-         * Of empty int array.
+         * Returns a supplier that supplies empty int arrays.
+         * 
+         * <p>This supplier always returns the same empty int array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty int array
          */
         public static Supplier<int[]> ofEmptyIntArray() {
             return EMPTY_INT_ARRAY;
         }
 
         /**
-         * Of empty long array.
+         * Returns a supplier that supplies empty long arrays.
+         * 
+         * <p>This supplier always returns the same empty long array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty long array
          */
         public static Supplier<long[]> ofEmptyLongArray() {
             return EMPTY_LONG_ARRAY;
         }
 
         /**
-         * Of empty float array.
+         * Returns a supplier that supplies empty float arrays.
+         * 
+         * <p>This supplier always returns the same empty float array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty float array
          */
         public static Supplier<float[]> ofEmptyFloatArray() {
             return EMPTY_FLOAT_ARRAY;
         }
 
         /**
-         * Of empty double array.
+         * Returns a supplier that supplies empty double arrays.
+         * 
+         * <p>This supplier always returns the same empty double array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty double array
          */
         public static Supplier<double[]> ofEmptyDoubleArray() {
             return EMPTY_DOUBLE_ARRAY;
         }
 
         /**
-         * Of empty string array.
+         * Returns a supplier that supplies empty String arrays.
+         * 
+         * <p>This supplier always returns the same empty String array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty String array
          */
         public static Supplier<String[]> ofEmptyStringArray() {
             return EMPTY_STRING_ARRAY;
         }
 
         /**
-         * Of empty object array.
+         * Returns a supplier that supplies empty Object arrays.
+         * 
+         * <p>This supplier always returns the same empty Object array instance for efficiency.</p>
          *
-         * @return
+         * @return a supplier that returns an empty Object array
          */
         public static Supplier<Object[]> ofEmptyObjectArray() {
             return EMPTY_OBJECT_ARRAY;
         }
 
         /**
-         * Of empty String.
+         * Returns a supplier that supplies empty strings.
+         * 
+         * <p>This supplier always returns the same empty string instance.</p>
          *
-         * @return
+         * @return a supplier that returns an empty string
          */
         public static Supplier<String> ofEmptyString() {
             return EMPTY_STRING;
         }
 
         /**
-         * Of boolean list.
+         * Returns a supplier that creates new BooleanList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty BooleanList.</p>
          *
-         * @return
+         * @return a supplier that creates new BooleanList instances
          */
         public static Supplier<BooleanList> ofBooleanList() {
             return BOOLEAN_LIST;
         }
 
         /**
-         * Of char list.
+         * Returns a supplier that creates new CharList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty CharList.</p>
          *
-         * @return
+         * @return a supplier that creates new CharList instances
          */
         public static Supplier<CharList> ofCharList() {
             return CHAR_LIST;
         }
 
         /**
-         * Of byte list.
+         * Returns a supplier that creates new ByteList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ByteList.</p>
          *
-         * @return
+         * @return a supplier that creates new ByteList instances
          */
         public static Supplier<ByteList> ofByteList() {
             return BYTE_LIST;
         }
 
         /**
-         * Of short list.
+         * Returns a supplier that creates new ShortList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ShortList.</p>
          *
-         * @return
+         * @return a supplier that creates new ShortList instances
          */
         public static Supplier<ShortList> ofShortList() {
             return SHORT_LIST;
         }
 
         /**
-         * Of int list.
+         * Returns a supplier that creates new IntList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty IntList.</p>
          *
-         * @return
+         * @return a supplier that creates new IntList instances
          */
         public static Supplier<IntList> ofIntList() {
             return INT_LIST;
         }
 
         /**
-         * Of long list.
+         * Returns a supplier that creates new LongList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LongList.</p>
          *
-         * @return
+         * @return a supplier that creates new LongList instances
          */
         public static Supplier<LongList> ofLongList() {
             return LONG_LIST;
         }
 
         /**
-         * Of float list.
+         * Returns a supplier that creates new FloatList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty FloatList.</p>
          *
-         * @return
+         * @return a supplier that creates new FloatList instances
          */
         public static Supplier<FloatList> ofFloatList() {
             return FLOAT_LIST;
         }
 
         /**
-         * Of double list.
+         * Returns a supplier that creates new DoubleList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty DoubleList.</p>
          *
-         * @return
+         * @return a supplier that creates new DoubleList instances
          */
         public static Supplier<DoubleList> ofDoubleList() {
             return DOUBLE_LIST;
         }
 
         /**
+         * Returns a supplier that creates new List instances (ArrayList).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ArrayList.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the list
+         * @return a supplier that creates new ArrayList instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<List<T>> ofList() {
@@ -6210,10 +6772,12 @@ public final class Fn {
         }
 
         /**
-         * Of linked list.
+         * Returns a supplier that creates new LinkedList instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedList.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the list
+         * @return a supplier that creates new LinkedList instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedList<T>> ofLinkedList() {
@@ -6221,9 +6785,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Set instances (HashSet).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty HashSet.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new HashSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Set<T>> ofSet() {
@@ -6231,10 +6798,12 @@ public final class Fn {
         }
 
         /**
-         * Of linked hash set.
+         * Returns a supplier that creates new LinkedHashSet instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedHashSet.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new LinkedHashSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Set<T>> ofLinkedHashSet() {
@@ -6242,10 +6811,12 @@ public final class Fn {
         }
 
         /**
-         * Of sorted set.
+         * Returns a supplier that creates new SortedSet instances (TreeSet).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new TreeSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<SortedSet<T>> ofSortedSet() {
@@ -6253,10 +6824,12 @@ public final class Fn {
         }
 
         /**
-         * Of navigable set.
+         * Returns a supplier that creates new NavigableSet instances (TreeSet).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new TreeSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<NavigableSet<T>> ofNavigableSet() {
@@ -6264,10 +6837,12 @@ public final class Fn {
         }
 
         /**
-         * Of tree set.
+         * Returns a supplier that creates new TreeSet instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new TreeSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<TreeSet<T>> ofTreeSet() {
@@ -6275,9 +6850,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Queue instances (LinkedList).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Queue.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the queue
+         * @return a supplier that creates new LinkedList instances as Queue
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Queue<T>> ofQueue() {
@@ -6285,9 +6863,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Deque instances (LinkedList).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Deque.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the deque
+         * @return a supplier that creates new LinkedList instances as Deque
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Deque<T>> ofDeque() {
@@ -6295,10 +6876,12 @@ public final class Fn {
         }
 
         /**
-         * Of array deque.
+         * Returns a supplier that creates new ArrayDeque instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ArrayDeque.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the deque
+         * @return a supplier that creates new ArrayDeque instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<ArrayDeque<T>> ofArrayDeque() {
@@ -6306,10 +6889,13 @@ public final class Fn {
         }
 
         /**
-         * Of linked blocking queue.
+         * Returns a supplier that creates new LinkedBlockingQueue instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingQueue
+         * with unbounded capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the queue
+         * @return a supplier that creates new LinkedBlockingQueue instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -6317,9 +6903,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new LinkedBlockingDeque instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingDeque
+         * with unbounded capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the deque
+         * @return a supplier that creates new LinkedBlockingDeque instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
@@ -6327,10 +6917,12 @@ public final class Fn {
         }
 
         /**
-         * Of concurrent linked queue.
+         * Returns a supplier that creates new ConcurrentLinkedQueue instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ConcurrentLinkedQueue.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the queue
+         * @return a supplier that creates new ConcurrentLinkedQueue instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
@@ -6338,10 +6930,13 @@ public final class Fn {
         }
 
         /**
-         * Of priority queue.
+         * Returns a supplier that creates new PriorityQueue instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty PriorityQueue
+         * with natural ordering.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the queue
+         * @return a supplier that creates new PriorityQueue instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<PriorityQueue<T>> ofPriorityQueue() {
@@ -6349,10 +6944,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Map instances (HashMap).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty HashMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new HashMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<Map<K, V>> ofMap() {
@@ -6360,11 +6958,13 @@ public final class Fn {
         }
 
         /**
-         * Of linked hash map.
+         * Returns a supplier that creates new LinkedHashMap instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty LinkedHashMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new LinkedHashMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<Map<K, V>> ofLinkedHashMap() {
@@ -6372,11 +6972,14 @@ public final class Fn {
         }
 
         /**
-         * Of identity hash map.
+         * Returns a supplier that creates new IdentityHashMap instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty IdentityHashMap.
+         * IdentityHashMap uses reference equality (==) instead of object equality (equals).</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new IdentityHashMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<IdentityHashMap<K, V>> ofIdentityHashMap() {
@@ -6384,11 +6987,13 @@ public final class Fn {
         }
 
         /**
-         * Of sorted map.
+         * Returns a supplier that creates new SortedMap instances (TreeMap).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new TreeMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<SortedMap<K, V>> ofSortedMap() {
@@ -6396,11 +7001,13 @@ public final class Fn {
         }
 
         /**
-         * Of navigable map.
+         * Returns a supplier that creates new NavigableMap instances (TreeMap).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new TreeMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<NavigableMap<K, V>> ofNavigableMap() {
@@ -6408,11 +7015,13 @@ public final class Fn {
         }
 
         /**
-         * Of tree map.
+         * Returns a supplier that creates new TreeMap instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new TreeMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<TreeMap<K, V>> ofTreeMap() {
@@ -6420,11 +7029,13 @@ public final class Fn {
         }
 
         /**
-         * Of concurrent map.
+         * Returns a supplier that creates new ConcurrentMap instances (ConcurrentHashMap).
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return
+         * @return a supplier that creates new ConcurrentHashMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -6432,10 +7043,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new ConcurrentHashMap instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
          *
-         * @param <K>
-         * @param <V>
-         * @return
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return a supplier that creates new ConcurrentHashMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
@@ -6443,9 +7057,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new concurrent Set instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty Set backed by ConcurrentHashMap.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return a supplier that creates new concurrent Set instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Set<T>> ofConcurrentHashSet() {
@@ -6453,10 +7070,14 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new BiMap instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty BiMap.
+         * A BiMap maintains a bidirectional mapping between keys and values.</p>
          *
-         * @param <K>
-         * @param <V>
-         * @return
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return a supplier that creates new BiMap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<BiMap<K, V>> ofBiMap() {
@@ -6464,9 +7085,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Multiset instances.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty Multiset.
+         * A Multiset is a collection that allows duplicate elements and counts their occurrences.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the multiset
+         * @return a supplier that creates new Multiset instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Multiset<T>> ofMultiset() {
@@ -6474,10 +7099,14 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Multiset instances with a specific map type.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty Multiset
+         * backed by the specified type of Map.</p>
          *
-         * @param <T>
-         * @param valueMapType
-         * @return
+         * @param <T> the type of elements in the multiset
+         * @param valueMapType the class of Map to use for storing element counts
+         * @return a supplier that creates new Multiset instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
@@ -6485,20 +7114,28 @@ public final class Fn {
         }
 
         /**
+         * Returns a supplier that creates new Multiset instances with a custom map supplier.
+         * 
+         * <p>Each call to the supplier's get() method will create a new, empty Multiset
+         * backed by a Map created by the provided supplier.</p>
          *
-         * @param <T>
-         * @param mapSupplier
-         * @return
+         * @param <T> the type of elements in the multiset
+         * @param mapSupplier supplier to create the backing Map
+         * @return a supplier that creates new Multiset instances
          */
         public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
             return () -> N.newMultiset(mapSupplier);
         }
 
         /**
+         * Returns a Supplier that creates a new ListMultimap with default backing Map and List implementations.
+         * 
+         * <p>The returned supplier creates ListMultimaps backed by HashMap and ArrayList.
+         * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @return a Supplier that creates new ListMultimap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap() {
@@ -6506,11 +7143,16 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new ListMultimap with the specified Map type and default List implementation.
+         * 
+         * <p>The returned supplier creates ListMultimaps backed by the specified Map type and ArrayList.
+         * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapType
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapType the Class object representing the Map implementation to use
+         * @return a Supplier that creates new ListMultimap instances with the specified Map type
+         * @throws IllegalArgumentException if mapType is null
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
@@ -6518,12 +7160,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new ListMultimap with the specified Map and List types.
+         * 
+         * <p>The returned supplier creates ListMultimaps backed by the specified Map and List implementations.
+         * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapType
-         * @param valueType
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapType the Class object representing the Map implementation to use
+         * @param valueType the Class object representing the List implementation to use for values
+         * @return a Supplier that creates new ListMultimap instances with the specified types
+         * @throws IllegalArgumentException if mapType or valueType is null
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -6531,12 +7178,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new ListMultimap using the provided map and value suppliers.
+         * 
+         * <p>The returned supplier creates ListMultimaps using custom suppliers for both the backing Map
+         * and the List instances used for values. This allows for complete control over the multimap's
+         * internal structure.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapSupplier
-         * @param valueSupplier
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapSupplier supplier that creates the backing Map instances
+         * @param valueSupplier supplier that creates the List instances for values
+         * @return a Supplier that creates new ListMultimap instances using the provided suppliers
+         * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
          */
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
                 final java.util.function.Supplier<? extends List<E>> valueSupplier) {
@@ -6544,10 +7197,14 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new SetMultimap with default backing Map and Set implementations.
+         * 
+         * <p>The returned supplier creates SetMultimaps backed by HashMap and HashSet.
+         * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @return a Supplier that creates new SetMultimap instances
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap() {
@@ -6555,11 +7212,16 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new SetMultimap with the specified Map type and default Set implementation.
+         * 
+         * <p>The returned supplier creates SetMultimaps backed by the specified Map type and HashSet.
+         * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapType
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapType the Class object representing the Map implementation to use
+         * @return a Supplier that creates new SetMultimap instances with the specified Map type
+         * @throws IllegalArgumentException if mapType is null
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
@@ -6567,12 +7229,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new SetMultimap with the specified Map and Set types.
+         * 
+         * <p>The returned supplier creates SetMultimaps backed by the specified Map and Set implementations.
+         * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapType
-         * @param valueType
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapType the Class object representing the Map implementation to use
+         * @param valueType the Class object representing the Set implementation to use for values
+         * @return a Supplier that creates new SetMultimap instances with the specified types
+         * @throws IllegalArgumentException if mapType or valueType is null
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -6580,12 +7247,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new SetMultimap using the provided map and value suppliers.
+         * 
+         * <p>The returned supplier creates SetMultimaps using custom suppliers for both the backing Map
+         * and the Set instances used for values. This allows for complete control over the multimap's
+         * internal structure.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param mapSupplier
-         * @param valueSupplier
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param mapSupplier supplier that creates the backing Map instances
+         * @param valueSupplier supplier that creates the Set instances for values
+         * @return a Supplier that creates new SetMultimap instances using the provided suppliers
+         * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
          */
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
                 final java.util.function.Supplier<? extends Set<E>> valueSupplier) {
@@ -6593,13 +7266,19 @@ public final class Fn {
         }
 
         /**
+         * Returns a Supplier that creates a new Multimap using the provided map and value collection suppliers.
+         * 
+         * <p>This is the most general multimap supplier, allowing any Collection type for values.
+         * The returned supplier creates Multimaps using custom suppliers for both the backing Map
+         * and the Collection instances used for values.</p>
          *
-         * @param <K>
-         * @param <E>
-         * @param <V>
-         * @param mapSupplier
-         * @param valueSupplier
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @param <V> the type of Collection used to store values
+         * @param mapSupplier supplier that creates the backing Map instances
+         * @param valueSupplier supplier that creates the Collection instances for values
+         * @return a Supplier that creates new Multimap instances using the provided suppliers
+         * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
          */
         public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
                 final java.util.function.Supplier<? extends V> valueSupplier) {
@@ -6607,9 +7286,11 @@ public final class Fn {
         }
 
         /**
-         * Of string builder.
+         * Returns a Supplier that creates new StringBuilder instances.
+         * 
+         * <p>Each invocation of the supplier creates a new empty StringBuilder with default initial capacity.</p>
          *
-         * @return
+         * @return a Supplier that creates new StringBuilder instances
          */
         public static Supplier<StringBuilder> ofStringBuilder() {
             return STRING_BUILDER;
@@ -6619,15 +7300,31 @@ public final class Fn {
         private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
         /**
+         * Returns a Supplier that creates Collection instances of the specified type.
+         * 
+         * <p>This method provides suppliers for various Collection implementations including List, Set, Queue,
+         * and their subtypes. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
+         * 
+         * <p>Supported types include:
+         * <ul>
+         *   <li>Collection, List, ArrayList - returns ArrayList supplier</li>
+         *   <li>LinkedList - returns LinkedList supplier</li>
+         *   <li>Set, HashSet - returns HashSet supplier</li>
+         *   <li>LinkedHashSet - returns LinkedHashSet supplier</li>
+         *   <li>SortedSet, TreeSet - returns TreeSet supplier</li>
+         *   <li>Queue, Deque - returns ArrayDeque supplier</li>
+         *   <li>Various concurrent collections</li>
+         * </ul>
+         * </p>
          *
-         * @param <T>
-         * @param targetType
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the element type of the collection
+         * @param targetType the Class object representing the desired Collection implementation
+         * @return a Supplier that creates instances of the specified Collection type
+         * @throws IllegalArgumentException if targetType is not a Collection class, is abstract and cannot be instantiated,
+         *         or if no suitable implementation can be found
          */
         @SuppressWarnings("rawtypes")
-        public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType)
-                throws IllegalArgumentException {
+        public static <T> Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
             Supplier ret = collectionSupplierPool.get(targetType);
 
             if (ret == null) {
@@ -6694,12 +7391,28 @@ public final class Fn {
         private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
 
         /**
+         * Returns a Supplier that creates Map instances of the specified type.
+         * 
+         * <p>This method provides suppliers for various Map implementations including HashMap, LinkedHashMap,
+         * TreeMap, and concurrent maps. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
+         * 
+         * <p>Supported types include:
+         * <ul>
+         *   <li>Map, HashMap - returns HashMap supplier</li>
+         *   <li>LinkedHashMap - returns LinkedHashMap supplier</li>
+         *   <li>SortedMap, TreeMap - returns TreeMap supplier</li>
+         *   <li>IdentityHashMap - returns IdentityHashMap supplier</li>
+         *   <li>ConcurrentHashMap - returns ConcurrentHashMap supplier</li>
+         *   <li>BiMap - returns BiMap supplier</li>
+         * </ul>
+         * </p>
          *
-         * @param <K>
-         * @param <V>
-         * @param targetType
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param targetType the Class object representing the desired Map implementation
+         * @return a Supplier that creates instances of the specified Map type
+         * @throws IllegalArgumentException if targetType is not a Map class, is abstract and cannot be instantiated,
+         *         or if no suitable implementation can be found
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -6754,12 +7467,19 @@ public final class Fn {
         }
 
         /**
+         * Registers a custom Supplier for creating instances of the specified Collection class.
+         * 
+         * <p>This method allows registering custom suppliers for Collection implementations that are not
+         * built-in or require special initialization. Once registered, the supplier will be used by
+         * {@link #ofCollection(Class)} when creating instances of the target class.</p>
+         * 
+         * <p>Note: Built-in classes (like ArrayList, HashSet, etc.) cannot be registered with custom suppliers.</p>
          *
-         * @param <T>
-         * @param targetClass
-         * @param supplier
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the Collection type
+         * @param targetClass the Class object of the Collection implementation to register
+         * @param supplier the Supplier that creates instances of the target class
+         * @return true if the registration was successful, false if a supplier was already registered for this class
+         * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -6779,12 +7499,19 @@ public final class Fn {
         }
 
         /**
+         * Registers a custom Supplier for creating instances of the specified Map class.
+         * 
+         * <p>This method allows registering custom suppliers for Map implementations that are not
+         * built-in or require special initialization. Once registered, the supplier will be used by
+         * {@link #ofMap(Class)} when creating instances of the target class.</p>
+         * 
+         * <p>Note: Built-in classes (like HashMap, TreeMap, etc.) cannot be registered with custom suppliers.</p>
          *
-         * @param <T>
-         * @param targetClass
-         * @param supplier
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the Map type
+         * @param targetClass the Class object of the Map implementation to register
+         * @param supplier the Supplier that creates instances of the target class
+         * @return true if the registration was successful, false if a supplier was already registered for this class
+         * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -6804,9 +7531,10 @@ public final class Fn {
         }
 
         /**
+         * Throws UnsupportedOperationException. ImmutableList creation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
          * @deprecated unsupported operation.
          */
         @Deprecated
@@ -6815,9 +7543,10 @@ public final class Fn {
         }
 
         /**
+         * Throws UnsupportedOperationException. ImmutableSet creation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
          * @deprecated unsupported operation.
          */
         @Deprecated
@@ -6826,9 +7555,10 @@ public final class Fn {
         }
 
         /**
+         * Throws UnsupportedOperationException. ImmutableMap creation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
          * @deprecated unsupported operation.
          */
         @Deprecated
@@ -6866,6 +7596,13 @@ public final class Fn {
 
         private static final Supplier<Exception> EXCEPTION = Exception::new;
 
+        /**
+         * Returns a Supplier that creates new Exception instances.
+         * 
+         * <p>Each invocation of the supplier creates a new Exception with no message or cause.</p>
+         *
+         * @return a Supplier that creates new Exception instances
+         */
         @Beta
         public static Supplier<Exception> newException() {
             return EXCEPTION;
@@ -6873,6 +7610,13 @@ public final class Fn {
 
         private static final Supplier<RuntimeException> RUNTIME_EXCEPTION = RuntimeException::new;
 
+        /**
+         * Returns a Supplier that creates new RuntimeException instances.
+         * 
+         * <p>Each invocation of the supplier creates a new RuntimeException with no message or cause.</p>
+         *
+         * @return a Supplier that creates new RuntimeException instances
+         */
         @Beta
         public static Supplier<RuntimeException> newRuntimeException() {
             return RUNTIME_EXCEPTION;
@@ -6880,6 +7624,13 @@ public final class Fn {
 
         private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT_EXCEPTION = NoSuchElementException::new;
 
+        /**
+         * Returns a Supplier that creates new NoSuchElementException instances.
+         * 
+         * <p>Each invocation of the supplier creates a new NoSuchElementException with no message.</p>
+         *
+         * @return a Supplier that creates new NoSuchElementException instances
+         */
         @Beta
         public static Supplier<NoSuchElementException> newNoSuchElementException() {
             return NO_SUCH_ELEMENT_EXCEPTION;
@@ -7039,18 +7790,18 @@ public final class Fn {
         }
 
         /**
-         * <p>Returns the provided IntFunction as is - a shorthand identity method for IntFunction instances.</p>
+         * Returns the provided IntFunction as is - a shorthand identity method for IntFunction instances.
          * 
          * <p>This method serves as a shorthand convenience method that can help with type inference
          * in certain contexts. It's part of a family of factory methods that handle various function types.</p>
          * 
-         * <p>Example usage:</p>
-         * <pre>
+         * <p>Example usage:
+         * <pre>{@code
          * // Instead of explicitly typing:
-         * IntFunction&lt;String[]&gt; arrayCreator = size -> new String[size];
+         * IntFunction<String[]> arrayCreator = size -> new String[size];
          * // You can use:
-         * var arrayCreator = Factory.of(size -> new String[size]);
-         * </pre>
+         * var arrayCreator = IntFunctions.of(size -> new String[size]);
+         * }</pre>
          *
          * @param <T> the type of the result of the function
          * @param func the IntFunction to return
@@ -7061,171 +7812,219 @@ public final class Fn {
         }
 
         /**
-         * Of boolean array.
+         * Returns an IntFunction that creates boolean arrays of the specified size.
+         * 
+         * <p>The returned function creates new boolean arrays with all elements initialized to false.</p>
          *
-         * @return
+         * @return an IntFunction that creates boolean arrays
          */
         public static IntFunction<boolean[]> ofBooleanArray() {
             return BOOLEAN_ARRAY;
         }
 
         /**
-         * Of char array.
+         * Returns an IntFunction that creates char arrays of the specified size.
+         * 
+         * <p>The returned function creates new char arrays with all elements initialized to '\u0000'.</p>
          *
-         * @return
+         * @return an IntFunction that creates char arrays
          */
         public static IntFunction<char[]> ofCharArray() {
             return CHAR_ARRAY;
         }
 
         /**
-         * Of byte array.
+         * Returns an IntFunction that creates byte arrays of the specified size.
+         * 
+         * <p>The returned function creates new byte arrays with all elements initialized to 0.</p>
          *
-         * @return
+         * @return an IntFunction that creates byte arrays
          */
         public static IntFunction<byte[]> ofByteArray() {
             return BYTE_ARRAY;
         }
 
         /**
-         * Of short array.
+         * Returns an IntFunction that creates short arrays of the specified size.
+         * 
+         * <p>The returned function creates new short arrays with all elements initialized to 0.</p>
          *
-         * @return
+         * @return an IntFunction that creates short arrays
          */
         public static IntFunction<short[]> ofShortArray() {
             return SHORT_ARRAY;
         }
 
         /**
-         * Of int array.
+         * Returns an IntFunction that creates int arrays of the specified size.
+         * 
+         * <p>The returned function creates new int arrays with all elements initialized to 0.</p>
          *
-         * @return
+         * @return an IntFunction that creates int arrays
          */
         public static IntFunction<int[]> ofIntArray() {
             return INT_ARRAY;
         }
 
         /**
-         * Of long array.
+         * Returns an IntFunction that creates long arrays of the specified size.
+         * 
+         * <p>The returned function creates new long arrays with all elements initialized to 0L.</p>
          *
-         * @return
+         * @return an IntFunction that creates long arrays
          */
         public static IntFunction<long[]> ofLongArray() {
             return LONG_ARRAY;
         }
 
         /**
-         * Of float array.
+         * Returns an IntFunction that creates float arrays of the specified size.
+         * 
+         * <p>The returned function creates new float arrays with all elements initialized to 0.0f.</p>
          *
-         * @return
+         * @return an IntFunction that creates float arrays
          */
         public static IntFunction<float[]> ofFloatArray() {
             return FLOAT_ARRAY;
         }
 
         /**
-         * Of double array.
+         * Returns an IntFunction that creates double arrays of the specified size.
+         * 
+         * <p>The returned function creates new double arrays with all elements initialized to 0.0.</p>
          *
-         * @return
+         * @return an IntFunction that creates double arrays
          */
         public static IntFunction<double[]> ofDoubleArray() {
             return DOUBLE_ARRAY;
         }
 
         /**
-         * Of string array.
+         * Returns an IntFunction that creates String arrays of the specified size.
+         * 
+         * <p>The returned function creates new String arrays with all elements initialized to null.</p>
          *
-         * @return
+         * @return an IntFunction that creates String arrays
          */
         public static IntFunction<String[]> ofStringArray() {
             return STRING_ARRAY;
         }
 
         /**
-         * Of object array.
+         * Returns an IntFunction that creates Object arrays of the specified size.
+         * 
+         * <p>The returned function creates new Object arrays with all elements initialized to null.</p>
          *
-         * @return
+         * @return an IntFunction that creates Object arrays
          */
         public static IntFunction<Object[]> ofObjectArray() {
             return OBJECT_ARRAY;
         }
 
         /**
-         * Of boolean list.
+         * Returns an IntFunction that creates BooleanList instances with the specified initial capacity.
+         * 
+         * <p>BooleanList is a specialized list implementation for primitive boolean values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates BooleanList instances
          */
         public static IntFunction<BooleanList> ofBooleanList() {
             return BOOLEAN_LIST;
         }
 
         /**
-         * Of char list.
+         * Returns an IntFunction that creates CharList instances with the specified initial capacity.
+         * 
+         * <p>CharList is a specialized list implementation for primitive char values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates CharList instances
          */
         public static IntFunction<CharList> ofCharList() {
             return CHAR_LIST;
         }
 
         /**
-         * Of byte list.
+         * Returns an IntFunction that creates ByteList instances with the specified initial capacity.
+         * 
+         * <p>ByteList is a specialized list implementation for primitive byte values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates ByteList instances
          */
         public static IntFunction<ByteList> ofByteList() {
             return BYTE_LIST;
         }
 
         /**
-         * Of short list.
+         * Returns an IntFunction that creates ShortList instances with the specified initial capacity.
+         * 
+         * <p>ShortList is a specialized list implementation for primitive short values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates ShortList instances
          */
         public static IntFunction<ShortList> ofShortList() {
             return SHORT_LIST;
         }
 
         /**
-         * Of int list.
+         * Returns an IntFunction that creates IntList instances with the specified initial capacity.
+         * 
+         * <p>IntList is a specialized list implementation for primitive int values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates IntList instances
          */
         public static IntFunction<IntList> ofIntList() {
             return INT_LIST;
         }
 
         /**
-         * Of long list.
+         * Returns an IntFunction that creates LongList instances with the specified initial capacity.
+         * 
+         * <p>LongList is a specialized list implementation for primitive long values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates LongList instances
          */
         public static IntFunction<LongList> ofLongList() {
             return LONG_LIST;
         }
 
         /**
-         * Of float list.
+         * Returns an IntFunction that creates FloatList instances with the specified initial capacity.
+         * 
+         * <p>FloatList is a specialized list implementation for primitive float values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates FloatList instances
          */
         public static IntFunction<FloatList> ofFloatList() {
             return FLOAT_LIST;
         }
 
         /**
-         * Of double list.
+         * Returns an IntFunction that creates DoubleList instances with the specified initial capacity.
+         * 
+         * <p>DoubleList is a specialized list implementation for primitive double values,
+         * avoiding boxing/unboxing overhead.</p>
          *
-         * @return
+         * @return an IntFunction that creates DoubleList instances
          */
         public static IntFunction<DoubleList> ofDoubleList() {
             return DOUBLE_LIST;
         }
 
         /**
+         * Returns an IntFunction that creates ArrayList instances with the specified initial capacity.
+         * 
+         * <p>The returned function creates new ArrayList instances optimized with the given initial capacity
+         * to avoid resizing during element addition.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the list
+         * @return an IntFunction that creates ArrayList instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<List<T>> ofList() {
@@ -7233,10 +8032,13 @@ public final class Fn {
         }
 
         /**
-         * Of linked list.
+         * Returns an IntFunction that creates LinkedList instances.
+         * 
+         * <p>The returned function creates new LinkedList instances. Note that the capacity parameter
+         * is ignored as LinkedList does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the list
+         * @return an IntFunction that creates LinkedList instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedList<T>> ofLinkedList() {
@@ -7244,9 +8046,13 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates HashSet instances with the specified initial capacity.
+         * 
+         * <p>The returned function creates new HashSet instances optimized with the given initial capacity
+         * to avoid rehashing during element addition.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return an IntFunction that creates HashSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Set<T>> ofSet() {
@@ -7254,10 +8060,13 @@ public final class Fn {
         }
 
         /**
-         * Of linked hash set.
+         * Returns an IntFunction that creates LinkedHashSet instances with the specified initial capacity.
+         * 
+         * <p>The returned function creates new LinkedHashSet instances that maintain insertion order
+         * and are optimized with the given initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return an IntFunction that creates LinkedHashSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Set<T>> ofLinkedHashSet() {
@@ -7265,10 +8074,13 @@ public final class Fn {
         }
 
         /**
-         * Of sorted set.
+         * Returns an IntFunction that creates TreeSet instances.
+         * 
+         * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
+         * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return an IntFunction that creates TreeSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<SortedSet<T>> ofSortedSet() {
@@ -7276,10 +8088,14 @@ public final class Fn {
         }
 
         /**
-         * Of navigable set.
+         * Returns an IntFunction that creates TreeSet instances as NavigableSet.
+         * 
+         * <p>The returned function creates new TreeSet instances that provide navigation methods
+         * for accessing elements relative to other elements. Note that the capacity parameter
+         * is ignored as TreeSet does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return an IntFunction that creates TreeSet instances as NavigableSet
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<NavigableSet<T>> ofNavigableSet() {
@@ -7287,10 +8103,13 @@ public final class Fn {
         }
 
         /**
-         * Of tree set.
+         * Returns an IntFunction that creates TreeSet instances.
+         * 
+         * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
+         * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the set
+         * @return an IntFunction that creates TreeSet instances
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<TreeSet<T>> ofTreeSet() {
@@ -7298,9 +8117,13 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates LinkedList instances as Queue.
+         * 
+         * <p>The returned function creates new LinkedList instances that implement the Queue interface.
+         * Note that the capacity parameter is ignored as LinkedList does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the queue
+         * @return an IntFunction that creates Queue instances (backed by LinkedList)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Queue<T>> ofQueue() {
@@ -7308,9 +8131,14 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates LinkedList instances as Deque.
+         * 
+         * <p>The returned function creates new LinkedList instances that implement the Deque interface,
+         * supporting element insertion and removal at both ends. Note that the capacity parameter
+         * is ignored as LinkedList does not support initial capacity.</p>
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the deque
+         * @return an IntFunction that creates Deque instances (backed by LinkedList)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Deque<T>> ofDeque() {
@@ -7318,10 +8146,12 @@ public final class Fn {
         }
 
         /**
-         * Of array deque.
+         * Returns an IntFunction that creates ArrayDeque instances with the specified initial capacity.
+         * The returned function can be used to create pre-sized ArrayDeque collections for performance optimization.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the ArrayDeque
+         * @return an IntFunction that accepts an initial capacity and returns a new ArrayDeque instance
+         * @see ArrayDeque#ArrayDeque(int)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ArrayDeque<T>> ofArrayDeque() {
@@ -7329,9 +8159,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates LinkedBlockingQueue instances with the specified initial capacity.
+         * The returned function can be used to create thread-safe blocking queues with bounded capacity.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the LinkedBlockingQueue
+         * @return an IntFunction that accepts an initial capacity and returns a new LinkedBlockingQueue instance
+         * @see LinkedBlockingQueue#LinkedBlockingQueue(int)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -7339,9 +8172,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates ArrayBlockingQueue instances with the specified capacity.
+         * The returned function creates fixed-size, thread-safe blocking queues backed by an array.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the ArrayBlockingQueue
+         * @return an IntFunction that accepts a capacity and returns a new ArrayBlockingQueue instance
+         * @see ArrayBlockingQueue#ArrayBlockingQueue(int)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
@@ -7349,9 +8185,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates LinkedBlockingDeque instances with the specified initial capacity.
+         * The returned function creates thread-safe, optionally-bounded blocking deques based on linked nodes.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the LinkedBlockingDeque
+         * @return an IntFunction that accepts an initial capacity and returns a new LinkedBlockingDeque instance
+         * @see LinkedBlockingDeque#LinkedBlockingDeque(int)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
@@ -7359,9 +8198,13 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates ConcurrentLinkedQueue instances.
+         * The returned function creates unbounded thread-safe queues based on linked nodes.
+         * Note: The capacity parameter is ignored as ConcurrentLinkedQueue is always unbounded.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the ConcurrentLinkedQueue
+         * @return an IntFunction that accepts a capacity (ignored) and returns a new ConcurrentLinkedQueue instance
+         * @see ConcurrentLinkedQueue#ConcurrentLinkedQueue()
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
@@ -7369,10 +8212,12 @@ public final class Fn {
         }
 
         /**
-         * Of priority queue.
+         * Returns an IntFunction that creates PriorityQueue instances with the specified initial capacity.
+         * The returned function creates unbounded priority queues based on a priority heap.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements to be stored in the PriorityQueue
+         * @return an IntFunction that accepts an initial capacity and returns a new PriorityQueue instance
+         * @see PriorityQueue#PriorityQueue(int)
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<PriorityQueue<T>> ofPriorityQueue() {
@@ -7380,10 +8225,13 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates HashMap instances with the specified initial capacity.
+         * The returned function creates hash table based Map implementations.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new HashMap instance
+         * @see HashMap#HashMap(int)
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<Map<K, V>> ofMap() {
@@ -7391,11 +8239,14 @@ public final class Fn {
         }
 
         /**
-         * Of linked hash map.
+         * Returns an IntFunction that creates LinkedHashMap instances with the specified initial capacity.
+         * The returned function creates hash table and linked list implementations of the Map interface,
+         * with predictable iteration order.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new LinkedHashMap instance
+         * @see LinkedHashMap#LinkedHashMap(int)
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<Map<K, V>> ofLinkedHashMap() {
@@ -7403,11 +8254,13 @@ public final class Fn {
         }
 
         /**
-         * Of identity hash map.
+         * Returns an IntFunction that creates IdentityHashMap instances with the specified expected maximum size.
+         * The returned function creates maps that use reference-equality instead of object-equality when comparing keys.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an expected maximum size and returns a new IdentityHashMap instance
+         * @see IdentityHashMap#IdentityHashMap(int)
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<IdentityHashMap<K, V>> ofIdentityHashMap() {
@@ -7415,11 +8268,14 @@ public final class Fn {
         }
 
         /**
-         * Of sorted map.
+         * Returns an IntFunction that creates TreeMap instances.
+         * The returned function creates Red-Black tree based NavigableMap implementations.
+         * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance as SortedMap
+         * @see TreeMap#TreeMap()
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<SortedMap<K, V>> ofSortedMap() {
@@ -7427,11 +8283,14 @@ public final class Fn {
         }
 
         /**
-         * Of navigable map.
+         * Returns an IntFunction that creates TreeMap instances.
+         * The returned function creates Red-Black tree based NavigableMap implementations.
+         * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance as NavigableMap
+         * @see TreeMap#TreeMap()
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<NavigableMap<K, V>> ofNavigableMap() {
@@ -7439,11 +8298,14 @@ public final class Fn {
         }
 
         /**
-         * Of tree map.
+         * Returns an IntFunction that creates TreeMap instances.
+         * The returned function creates Red-Black tree based NavigableMap implementations.
+         * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance
+         * @see TreeMap#TreeMap()
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<TreeMap<K, V>> ofTreeMap() {
@@ -7451,11 +8313,13 @@ public final class Fn {
         }
 
         /**
-         * Of concurrent map.
+         * Returns an IntFunction that creates ConcurrentHashMap instances with the specified initial capacity.
+         * The returned function creates thread-safe hash table based Map implementations.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new ConcurrentHashMap instance as ConcurrentMap
+         * @see ConcurrentHashMap#ConcurrentHashMap(int)
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -7463,11 +8327,13 @@ public final class Fn {
         }
 
         /**
-         * Of concurrent hash map.
+         * Returns an IntFunction that creates ConcurrentHashMap instances with the specified initial capacity.
+         * The returned function creates thread-safe hash table based Map implementations.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new ConcurrentHashMap instance
+         * @see ConcurrentHashMap#ConcurrentHashMap(int)
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
@@ -7475,11 +8341,12 @@ public final class Fn {
         }
 
         /**
-         * Of {@code BiMap}.
+         * Returns an IntFunction that creates BiMap instances with the specified initial capacity.
+         * BiMap is a bidirectional map that preserves the uniqueness of its values as well as that of its keys.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
+         * @param <K> the type of keys maintained by the BiMap
+         * @param <V> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new BiMap instance
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<BiMap<K, V>> ofBiMap() {
@@ -7487,9 +8354,11 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction that creates Multiset instances with the specified initial capacity.
+         * A Multiset is a collection that supports order-independent equality and may contain duplicate elements.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the Multiset
+         * @return an IntFunction that accepts an initial capacity and returns a new Multiset instance
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Multiset<T>> ofMultiset() {
@@ -7497,11 +8366,12 @@ public final class Fn {
         }
 
         /**
-         * Of list multimap.
+         * Returns an IntFunction that creates ListMultimap instances with the specified initial capacity.
+         * A ListMultimap is a Multimap that can hold duplicate key-value pairs and maintains insertion ordering of values for a given key.
          *
-         * @param <K> the key type
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new ListMultimap instance
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> IntFunction<ListMultimap<K, E>> ofListMultimap() {
@@ -7509,11 +8379,12 @@ public final class Fn {
         }
 
         /**
-         * Of set multimap.
+         * Returns an IntFunction that creates SetMultimap instances with the specified initial capacity.
+         * A SetMultimap is a Multimap that cannot hold duplicate key-value pairs.
          *
-         * @param <K> the key type
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the multimap
+         * @param <E> the type of mapped values
+         * @return an IntFunction that accepts an initial capacity and returns a new SetMultimap instance
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> IntFunction<SetMultimap<K, E>> ofSetMultimap() {
@@ -7521,9 +8392,11 @@ public final class Fn {
         }
 
         /**
-         * Returns a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableObjArray} which is defined as a private field.
+         * Returns a new created stateful IntFunction whose apply method will return the same DisposableObjArray instance.
+         * The DisposableObjArray is created lazily on first call and reused for subsequent calls.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful IntFunction that returns a reusable DisposableObjArray instance
          */
         @Beta
         @SequentialOnly
@@ -7544,11 +8417,13 @@ public final class Fn {
         }
 
         /**
-         * Returns a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
+         * Returns a new created stateful IntFunction whose apply method will return the same DisposableArray instance.
+         * The DisposableArray is created lazily on first call with the specified component type and reused for subsequent calls.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param componentType
-         * @return a stateful {@code IntFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @param <T> the component type of the array
+         * @param componentType the Class object representing the component type of the array
+         * @return a stateful IntFunction that returns a reusable DisposableArray instance
          */
         @Beta
         @SequentialOnly
@@ -7572,11 +8447,14 @@ public final class Fn {
         private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
         /**
+         * Returns an IntFunction that creates Collection instances of the specified target type with the given initial capacity.
+         * This method supports various Collection implementations and attempts to find an appropriate constructor or factory method.
+         * The returned IntFunction is cached for performance optimization.
          *
-         * @param <T>
-         * @param targetType
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of elements in the collection
+         * @param targetType the Class object representing the desired Collection implementation
+         * @return an IntFunction that accepts an initial capacity and returns a new Collection instance of the specified type
+         * @throws IllegalArgumentException if targetType is not a Collection class or if no suitable constructor/factory can be found
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
@@ -7671,12 +8549,15 @@ public final class Fn {
         private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
         /**
+         * Returns an IntFunction that creates Map instances of the specified target type with the given initial capacity.
+         * This method supports various Map implementations and attempts to find an appropriate constructor or factory method.
+         * The returned IntFunction is cached for performance optimization.
          *
-         * @param <K>
-         * @param <V>
-         * @param targetType
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param targetType the Class object representing the desired Map implementation
+         * @return an IntFunction that accepts an initial capacity and returns a new Map instance of the specified type
+         * @throws IllegalArgumentException if targetType is not a Map class or if no suitable constructor/factory can be found
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -7754,12 +8635,15 @@ public final class Fn {
         }
 
         /**
+         * Registers a custom IntFunction creator for the specified Collection target class.
+         * The registered creator will be used by ofCollection method to create instances of the target class.
+         * Built-in collection classes cannot be registered.
          *
-         * @param <T>
-         * @param targetClass
-         * @param creator
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of Collection to register
+         * @param targetClass the Class object representing the Collection type to register
+         * @param creator the IntFunction that creates instances of the target class with specified capacity
+         * @return true if the registration was successful, false if a creator was already registered for this class
+         * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -7779,12 +8663,15 @@ public final class Fn {
         }
 
         /**
+         * Registers a custom IntFunction creator for the specified Map target class.
+         * The registered creator will be used by ofMap method to create instances of the target class.
+         * Built-in map classes cannot be registered.
          *
-         * @param <T>
-         * @param targetClass
-         * @param creator
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of Map to register
+         * @param targetClass the Class object representing the Map type to register
+         * @param creator the IntFunction that creates instances of the target class with specified capacity
+         * @return true if the registration was successful, false if a creator was already registered for this class
+         * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -7805,10 +8692,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction for creating ImmutableList instances.
+         * This operation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         * @deprecated unsupported operation.
+         * @return never returns normally
+         * @throws UnsupportedOperationException always thrown as this operation is not supported
+         * @deprecated unsupported operation
          */
         @Deprecated
         public static IntFunction<ImmutableList<?>> ofImmutableList() {
@@ -7816,10 +8705,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction for creating ImmutableSet instances.
+         * This operation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         * @deprecated unsupported operation.
+         * @return never returns normally
+         * @throws UnsupportedOperationException always thrown as this operation is not supported
+         * @deprecated unsupported operation
          */
         @Deprecated
         public static IntFunction<ImmutableSet<?>> ofImmutableSet() {
@@ -7827,10 +8718,12 @@ public final class Fn {
         }
 
         /**
+         * Returns an IntFunction for creating ImmutableMap instances.
+         * This operation is not supported.
          *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         * @deprecated unsupported operation.
+         * @return never returns normally
+         * @throws UnsupportedOperationException always thrown as this operation is not supported
+         * @deprecated unsupported operation
          */
         @Deprecated
         public static IntFunction<ImmutableMap<?, ?>> ofImmutableMap() {
@@ -7867,7 +8760,8 @@ public final class Fn {
     }
 
     /**
-     * The Class
+     * Factory class that extends IntFunctions to provide factory methods for creating collection and map instances.
+     * This class serves as a utility class and cannot be instantiated.
      */
     public static final class Factory extends IntFunctions {
         private Factory() {
@@ -7876,7 +8770,8 @@ public final class Fn {
     }
 
     /**
-     * The Class Predicates.
+     * Utility class providing various Predicate implementations and factory methods.
+     * This class contains methods for creating stateful, indexed, and specialized predicates.
      */
     public static final class Predicates {
 
@@ -7884,12 +8779,14 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful Predicate that tests elements based on their index position.
+         * The predicate maintains an internal counter that increments with each test.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param predicate
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the predicate
+         * @param predicate the IntObjPredicate that accepts an index and element for testing
+         * @return a stateful Predicate that applies the given IntObjPredicate with an incrementing index
+         * @throws IllegalArgumentException if predicate is null
          */
         @Beta
         @SequentialOnly
@@ -7908,10 +8805,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful Predicate that maintains a set of seen elements and returns true only for distinct elements.
+         * The predicate uses a HashSet internally to track previously seen elements.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * @param <T> the type of the input to the predicate
+         * @return a stateful Predicate that returns true for first occurrence of each distinct element
          */
         @Beta
         @SequentialOnly
@@ -7928,11 +8827,13 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful Predicate that maintains distinct elements based on a key extracted by the mapper function.
+         * The predicate returns true only for elements whose mapped keys haven't been seen before.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param mapper
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * @param <T> the type of the input to the predicate
+         * @param mapper the function to extract the key for distinctness comparison
+         * @return a stateful Predicate that returns true for elements with distinct mapped keys
          */
         @Beta
         @SequentialOnly
@@ -7949,10 +8850,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * Returns a stateful Predicate that maintains a concurrent set of seen elements and returns true only for distinct elements.
+         * This predicate is thread-safe and can be used in parallel streams.
+         * This method is marked as Beta and Stateful, indicating it should not be saved or cached for reuse.
          *
-         * @param <T>
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * @param <T> the type of the input to the predicate
+         * @return a stateful thread-safe Predicate that returns true for first occurrence of each distinct element
          */
         @Beta
         @Stateful
@@ -7968,11 +8871,13 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * Returns a stateful Predicate that maintains distinct elements based on a key extracted by the mapper function.
+         * This predicate is thread-safe and can be used in parallel streams.
+         * This method is marked as Beta and Stateful, indicating it should not be saved or cached for reuse.
          *
-         * @param <T>
-         * @param mapper
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * @param <T> the type of the input to the predicate
+         * @param mapper the function to extract the key for distinctness comparison
+         * @return a stateful thread-safe Predicate that returns true for elements with distinct mapped keys
          */
         @Beta
         @Stateful
@@ -7988,11 +8893,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
-         * Remove the continuous repeat elements.
+         * Returns a stateful Predicate that removes continuous repeat elements.
+         * The predicate returns false for elements that are equal to the immediately preceding element.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @return a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
+         * @param <T> the type of the input to the predicate
+         * @return a stateful Predicate that returns true for elements different from their immediate predecessor
          */
         @Beta
         @SequentialOnly
@@ -8012,7 +8918,8 @@ public final class Fn {
     }
 
     /**
-     * The Class BiPredicates.
+     * Utility class providing various BiPredicate implementations and factory methods.
+     * This class contains predefined BiPredicates and methods for creating indexed BiPredicates.
      */
     public static final class BiPredicates {
 
@@ -8052,33 +8959,37 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiPredicate that always returns true regardless of input.
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @return a BiPredicate that always returns true
          */
         public static <T, U> BiPredicate<T, U> alwaysTrue() {
             return ALWAYS_TRUE;
         }
 
         /**
+         * Returns a BiPredicate that always returns false regardless of input.
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @return a BiPredicate that always returns false
          */
         public static <T, U> BiPredicate<T, U> alwaysFalse() {
             return ALWAYS_FALSE;
         }
 
         /**
-         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful BiPredicate that tests elements based on their index position.
+         * The predicate maintains an internal counter that increments with each test.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param <U>
-         * @param predicate
-         * @return a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param predicate the IntBiObjPredicate that accepts an index and two elements for testing
+         * @return a stateful BiPredicate that applies the given IntBiObjPredicate with an incrementing index
+         * @throws IllegalArgumentException if predicate is null
          */
         @Beta
         @SequentialOnly
@@ -8098,7 +9009,8 @@ public final class Fn {
     }
 
     /**
-     * The Class TriPredicates.
+     * Utility class providing various TriPredicate implementations and factory methods.
+     * This class contains predefined TriPredicates for common operations.
      */
     public static final class TriPredicates {
 
@@ -8114,22 +9026,24 @@ public final class Fn {
         }
 
         /**
+         * Returns a TriPredicate that always returns true regardless of input.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @return
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @return a TriPredicate that always returns true
          */
         public static <A, B, C> TriPredicate<A, B, C> alwaysTrue() {
             return ALWAYS_TRUE;
         }
 
         /**
+         * Returns a TriPredicate that always returns false regardless of input.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @return
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @return a TriPredicate that always returns false
          */
         public static <A, B, C> TriPredicate<A, B, C> alwaysFalse() {
             return ALWAYS_FALSE;
@@ -8138,19 +9052,22 @@ public final class Fn {
     }
 
     /**
-     * The Class Consumers.
+     * Utility class providing various Consumer implementations and factory methods.
+     * This class contains methods for creating indexed consumers.
      */
     public static final class Consumers {
         private Consumers() {
         }
 
         /**
-         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful Consumer that accepts elements based on their index position.
+         * The consumer maintains an internal counter that increments with each accept call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param action
-         * @return a stateful {@code Consumer}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the consumer
+         * @param action the IntObjConsumer that accepts an index and element
+         * @return a stateful Consumer that applies the given IntObjConsumer with an incrementing index
+         * @throws IllegalArgumentException if action is null
          */
         @Beta
         @SequentialOnly
@@ -8170,7 +9087,8 @@ public final class Fn {
     }
 
     /**
-     * The Class BiConsumers.
+     * Utility class providing various BiConsumer implementations and factory methods.
+     * This class contains predefined BiConsumers for common collection and map operations.
      */
     public static final class BiConsumers {
 
@@ -8219,41 +9137,46 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiConsumer that does nothing.
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @return a BiConsumer that performs no operation
          */
         public static <T, U> BiConsumer<T, U> doNothing() {
             return DO_NOTHING;
         }
 
         /**
+         * Returns a BiConsumer that adds an element to a collection.
+         * The BiConsumer calls Collection.add(element) on the first argument with the second argument.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of element to add
+         * @param <C> the type of collection
+         * @return a BiConsumer that adds the second argument to the first argument collection
          */
         public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofAdd() {
             return (BiConsumer<C, T>) ADD;
         }
 
         /**
-         * Of add all.
+         * Returns a BiConsumer that adds all elements from one collection to another.
+         * The BiConsumer calls Collection.addAll(collection) on the first argument with the second argument.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collections
+         * @param <C> the type of collection
+         * @return a BiConsumer that adds all elements from the second collection to the first collection
          */
         public static <T, C extends Collection<T>> BiConsumer<C, C> ofAddAll() {
             return (BiConsumer<C, C>) ADD_ALL;
         }
 
         /**
-         * Of add alll.
+         * Returns a BiConsumer that adds all elements from one PrimitiveList to another.
+         * The BiConsumer calls PrimitiveList.addAll(list) on the first argument with the second argument.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of PrimitiveList
+         * @return a BiConsumer that adds all elements from the second PrimitiveList to the first PrimitiveList
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofAddAlll() {
@@ -8261,31 +9184,35 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiConsumer that removes an element from a collection.
+         * The BiConsumer calls Collection.remove(element) on the first argument with the second argument.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of element to remove
+         * @param <C> the type of collection
+         * @return a BiConsumer that removes the second argument from the first argument collection
          */
         public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofRemove() {
             return (BiConsumer<C, T>) REMOVE;
         }
 
         /**
-         * Of remove all.
+         * Returns a BiConsumer that removes all elements of one collection from another.
+         * The BiConsumer calls Collection.removeAll(collection) on the first argument with the second argument.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collections
+         * @param <C> the type of collection
+         * @return a BiConsumer that removes all elements in the second collection from the first collection
          */
         public static <T, C extends Collection<T>> BiConsumer<C, C> ofRemoveAll() {
             return (BiConsumer<C, C>) REMOVE_ALL;
         }
 
         /**
-         * Of remove alll.
+         * Returns a BiConsumer that removes all elements of one PrimitiveList from another.
+         * The BiConsumer calls PrimitiveList.removeAll(list) on the first argument with the second argument.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of PrimitiveList
+         * @return a BiConsumer that removes all elements in the second PrimitiveList from the first PrimitiveList
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofRemoveAlll() {
@@ -8293,62 +9220,76 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiConsumer that puts a Map.Entry into a Map.
+         * The BiConsumer extracts the key and value from the entry and puts them into the map.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @param <E> the type of map entry
+         * @return a BiConsumer that puts the entry into the map
          */
         public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiConsumer<M, E> ofPut() {
             return (BiConsumer<M, E>) PUT;
         }
 
         /**
-         * Of put all.
+         * Returns a BiConsumer that puts all entries from one map into another.
+         * The BiConsumer calls Map.putAll(map) on the first argument with the second argument.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BiConsumer that puts all entries from the second map into the first map
          */
         public static <K, V, M extends Map<K, V>> BiConsumer<M, M> ofPutAll() {
             return (BiConsumer<M, M>) PUT_ALL;
         }
 
         /**
-         * Of remove by key.
+         * Returns a BiConsumer that removes an entry from a map by key.
+         * The BiConsumer calls Map.remove(key) on the first argument with the second argument as the key.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BiConsumer that removes the entry with the given key from the map
          */
         public static <K, V, M extends Map<K, V>> BiConsumer<M, K> ofRemoveByKey() {
             return (BiConsumer<M, K>) REMOVE_BY_KEY;
         }
 
+        /**
+         * Returns a BiConsumer that merges two Joiner instances.
+         * The BiConsumer calls Joiner.merge(joiner) on the first argument with the second argument.
+         *
+         * @return a BiConsumer that merges the second Joiner into the first Joiner
+         */
         public static BiConsumer<Joiner, Joiner> ofMerge() {
             return MERGE;
         }
 
         /**
+         * Returns a BiConsumer that appends an object to a StringBuilder.
+         * The BiConsumer calls StringBuilder.append(object) on the first argument with the second argument.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of object to append
+         * @return a BiConsumer that appends the second argument to the first argument StringBuilder
          */
         public static <T> BiConsumer<StringBuilder, T> ofAppend() {
             return (BiConsumer<StringBuilder, T>) APPEND;
         }
 
         /**
-         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful BiConsumer that accepts elements based on their index position.
+         * The consumer maintains an internal counter that increments with each accept call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param <U>
-         * @param action
-         * @return a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @param action the IntBiObjConsumer that accepts an index and two elements
+         * @return a stateful BiConsumer that applies the given IntBiObjConsumer with an incrementing index
+         * @throws IllegalArgumentException if action is null
          */
         @Beta
         @SequentialOnly
@@ -8368,7 +9309,8 @@ public final class Fn {
     }
 
     /**
-     * The Class TriConsumers.
+     * Utility class providing various TriConsumer implementations and factory methods.
+     * This class is reserved for future TriConsumer utilities.
      */
     public static final class TriConsumers {
         private TriConsumers() {
@@ -8376,7 +9318,8 @@ public final class Fn {
     }
 
     /**
-     * The Class Functions.
+     * Utility class providing various Function implementations and factory methods.
+     * This class contains methods for creating indexed functions.
      */
     public static final class Functions {
 
@@ -8384,13 +9327,15 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful Function that applies a function based on element index position.
+         * The function maintains an internal counter that increments with each apply call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param <R>
-         * @param func
-         * @return a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param func the IntObjFunction that accepts an index and element and produces a result
+         * @return a stateful Function that applies the given IntObjFunction with an incrementing index
+         * @throws IllegalArgumentException if func is null
          */
         @Beta
         @SequentialOnly
@@ -8410,7 +9355,8 @@ public final class Fn {
     }
 
     /**
-     * The Class BiFunctions.
+     * Utility class providing various BiFunction implementations and factory methods.
+     * This class contains predefined BiFunctions for common collection and map operations.
      */
     public static final class BiFunctions {
 
@@ -8486,51 +9432,57 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiFunction that always returns the first argument.
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> the type of the first argument and result
+         * @param <U> the type of the second argument
+         * @return a BiFunction that returns the first argument
          */
         public static <T, U> BiFunction<T, U, T> selectFirst() {
             return (BiFunction<T, U, T>) RETURN_FIRST;
         }
 
         /**
+         * Returns a BiFunction that always returns the second argument.
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> the type of the first argument
+         * @param <U> the type of the second argument and result
+         * @return a BiFunction that returns the second argument
          */
         public static <T, U> BiFunction<T, U, U> selectSecond() {
             return (BiFunction<T, U, U>) RETURN_SECOND;
         }
 
         /**
+         * Returns a BiFunction that adds an element to a collection and returns the collection.
+         * The BiFunction calls Collection.add(element) and returns the modified collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of element to add
+         * @param <C> the type of collection
+         * @return a BiFunction that adds the second argument to the first argument collection and returns the collection
          */
         public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofAdd() {
             return (BiFunction<C, T, C>) ADD;
         }
 
         /**
-         * Of add all.
+         * Returns a BiFunction that adds all elements from one collection to another and returns the target collection.
+         * The BiFunction calls Collection.addAll(collection) and returns the modified collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collections
+         * @param <C> the type of collection
+         * @return a BiFunction that adds all elements from the second collection to the first and returns the first collection
          */
         public static <T, C extends Collection<T>> BiFunction<C, C, C> ofAddAll() {
             return (BiFunction<C, C, C>) ADD_ALL;
         }
 
         /**
-         * Of add alll.
+         * Returns a BiFunction that adds all elements from one PrimitiveList to another and returns the target list.
+         * The BiFunction calls PrimitiveList.addAll(list) and returns the modified list.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of PrimitiveList
+         * @return a BiFunction that adds all elements from the second PrimitiveList to the first and returns the first list
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofAddAlll() {
@@ -8538,31 +9490,35 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiFunction that removes an element from a collection and returns the collection.
+         * The BiFunction calls Collection.remove(element) and returns the modified collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of element to remove
+         * @param <C> the type of collection
+         * @return a BiFunction that removes the second argument from the first argument collection and returns the collection
          */
         public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofRemove() {
             return (BiFunction<C, T, C>) REMOVE;
         }
 
         /**
-         * Of remove all.
+         * Returns a BiFunction that removes all elements of one collection from another and returns the target collection.
+         * The BiFunction calls Collection.removeAll(collection) and returns the modified collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collections
+         * @param <C> the type of collection
+         * @return a BiFunction that removes all elements in the second collection from the first and returns the first collection
          */
         public static <T, C extends Collection<T>> BiFunction<C, C, C> ofRemoveAll() {
             return (BiFunction<C, C, C>) REMOVE_ALL;
         }
 
         /**
-         * Of remove alll.
+         * Returns a BiFunction that removes all elements of one PrimitiveList from another and returns the target list.
+         * The BiFunction calls PrimitiveList.removeAll(list) and returns the modified list.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of PrimitiveList
+         * @return a BiFunction that removes all elements in the second PrimitiveList from the first and returns the first list
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofRemoveAlll() {
@@ -8570,63 +9526,77 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiFunction that puts a Map.Entry into a Map and returns the map.
+         * The BiFunction extracts the key and value from the entry, puts them into the map, and returns the map.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @param <E> the type of map entry
+         * @return a BiFunction that puts the entry into the map and returns the map
          */
         public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiFunction<M, E, M> ofPut() {
             return (BiFunction<M, E, M>) PUT;
         }
 
         /**
-         * Of put all.
+         * Returns a BiFunction that puts all entries from one map into another and returns the target map.
+         * The BiFunction calls Map.putAll(map) and returns the modified map.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BiFunction that puts all entries from the second map into the first and returns the first map
          */
         public static <K, V, M extends Map<K, V>> BiFunction<M, M, M> ofPutAll() {
             return (BiFunction<M, M, M>) PUT_ALL;
         }
 
         /**
-         * Of remove by key.
+         * Returns a BiFunction that removes an entry from a map by key and returns the map.
+         * The BiFunction calls Map.remove(key) and returns the modified map.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BiFunction that removes the entry with the given key from the map and returns the map
          */
         public static <K, V, M extends Map<K, V>> BiFunction<M, K, M> ofRemoveByKey() {
             return (BiFunction<M, K, M>) REMOVE_BY_KEY;
         }
 
+        /**
+         * Returns a BiFunction that merges two Joiner instances and returns the result.
+         * The BiFunction calls Joiner.merge(joiner) and returns the merged Joiner.
+         *
+         * @return a BiFunction that merges the second Joiner into the first and returns the result
+         */
         public static BiFunction<Joiner, Joiner, Joiner> ofMerge() {
             return MERGE;
         }
 
         /**
+         * Returns a BiFunction that appends an object to a StringBuilder and returns the StringBuilder.
+         * The BiFunction calls StringBuilder.append(object) and returns the modified StringBuilder.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of object to append
+         * @return a BiFunction that appends the second argument to the first argument StringBuilder and returns the StringBuilder
          */
         public static <T> BiFunction<StringBuilder, T, StringBuilder> ofAppend() {
             return (BiFunction<StringBuilder, T, StringBuilder>) APPEND;
         }
 
         /**
-         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful BiFunction that applies a function based on element index position.
+         * The function maintains an internal counter that increments with each apply call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param func
-         * @return a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param func the IntBiObjFunction that accepts an index and two elements and produces a result
+         * @return a stateful BiFunction that applies the given IntBiObjFunction with an incrementing index
+         * @throws IllegalArgumentException if func is null
          */
         @Beta
         @SequentialOnly
@@ -8646,7 +9616,8 @@ public final class Fn {
     }
 
     /**
-     * The Class TriFunctions.
+     * Utility class providing various TriFunction implementations and factory methods.
+     * This class is reserved for future TriFunction utilities.
      */
     public static final class TriFunctions {
 
@@ -8655,7 +9626,8 @@ public final class Fn {
     }
 
     /**
-     * The Class BinaryOperators.
+     * Utility class providing various BinaryOperator implementations and factory methods.
+     * This class contains predefined BinaryOperators for common merge and combination operations.
      */
     public static final class BinaryOperators {
 
@@ -8759,11 +9731,12 @@ public final class Fn {
         }
 
         /**
-         * Of add all.
+         * Returns a BinaryOperator that adds all elements from the second collection to the first.
+         * This method is deprecated, use ofAddAllToFirst() instead.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collection
+         * @param <C> the type of collection
+         * @return a BinaryOperator that adds all elements from the second collection to the first and returns the first
          * @deprecated replaced by {@code #ofAddAllToFirst()}
          */
         @Deprecated
@@ -8773,11 +9746,12 @@ public final class Fn {
         }
 
         /**
-         * Of add all to first.
+         * Returns a BinaryOperator that adds all elements from the second collection to the first.
+         * The operator modifies and returns the first collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collection
+         * @param <C> the type of collection
+         * @return a BinaryOperator that adds all elements from the second collection to the first and returns the first
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToFirst() {
@@ -8785,11 +9759,12 @@ public final class Fn {
         }
 
         /**
-         * Of add all to bigger.
+         * Returns a BinaryOperator that adds all elements to the bigger collection.
+         * The operator compares sizes and adds the smaller collection to the larger one, returning the larger.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collection
+         * @param <C> the type of collection
+         * @return a BinaryOperator that adds all elements to the bigger collection and returns it
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToBigger() {
@@ -8797,12 +9772,13 @@ public final class Fn {
         }
 
         /**
-         * Of remove all.
+         * Returns a BinaryOperator that removes all elements of the second collection from the first.
+         * This method is deprecated, use ofRemoveAllFromFirst() instead.
          *
-         * @param <T>
-         * @param <C>
-         * @return
-         * @deprecated replaced by {@code #ofRemoveAllFromFirst()}.
+         * @param <T> the type of elements in the collection
+         * @param <C> the type of collection
+         * @return a BinaryOperator that removes all elements of the second collection from the first and returns the first
+         * @deprecated replaced by {@code #ofRemoveAllFromFirst()}
          */
         @Deprecated
         @SuppressWarnings("unchecked")
@@ -8811,11 +9787,12 @@ public final class Fn {
         }
 
         /**
-         * Of remove all from first.
+         * Returns a BinaryOperator that removes all elements of the second collection from the first.
+         * The operator modifies and returns the first collection.
          *
-         * @param <T>
-         * @param <C>
-         * @return
+         * @param <T> the type of elements in the collection
+         * @param <C> the type of collection
+         * @return a BinaryOperator that removes all elements of the second collection from the first and returns the first
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofRemoveAllFromFirst() {
@@ -8823,12 +9800,13 @@ public final class Fn {
         }
 
         /**
-         * Of put all.
+         * Returns a BinaryOperator that puts all entries from the second map into the first.
+         * This method is deprecated, use ofPutAllToFirst() instead.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BinaryOperator that puts all entries from the second map into the first and returns the first
          * @deprecated replaced by {@code #ofPutAllToFirst()}
          */
         @Deprecated
@@ -8838,12 +9816,13 @@ public final class Fn {
         }
 
         /**
-         * Of put all to first.
+         * Returns a BinaryOperator that puts all entries from the second map into the first.
+         * The operator modifies and returns the first map.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BinaryOperator that puts all entries from the second map into the first and returns the first
          */
         @SuppressWarnings("unchecked")
         public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToFirst() {
@@ -8851,12 +9830,13 @@ public final class Fn {
         }
 
         /**
-         * Of put all to bigger.
+         * Returns a BinaryOperator that puts all entries into the bigger map.
+         * The operator compares sizes and puts the smaller map into the larger one, returning the larger.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @return
+         * @param <K> the type of keys maintained by the map
+         * @param <V> the type of mapped values
+         * @param <M> the type of map
+         * @return a BinaryOperator that puts all entries into the bigger map and returns it
          */
         @SuppressWarnings("unchecked")
         public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToBigger() {
@@ -8864,9 +9844,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a BinaryOperator that merges two Joiners.
+         * This method is deprecated, use ofMergeToFirst() instead.
          *
-         * @return
-         * @deprecated replaced by {@code #ofMergeToFirst}.
+         * @return a BinaryOperator that merges the second Joiner into the first and returns the first
+         * @deprecated replaced by {@code #ofMergeToFirst}
          */
         @Deprecated
         public static BinaryOperator<Joiner> ofMerge() {
@@ -8874,26 +9856,30 @@ public final class Fn {
         }
 
         /**
-         * Of merge to first.
+         * Returns a BinaryOperator that merges the second Joiner into the first.
+         * The operator modifies and returns the first Joiner.
          *
-         * @return
+         * @return a BinaryOperator that merges the second Joiner into the first and returns the first
          */
         public static BinaryOperator<Joiner> ofMergeToFirst() {
             return MERGE_TO_FIRST;
         }
 
         /**
-         * Of merge to bigger.
+         * Returns a BinaryOperator that merges to the bigger Joiner.
+         * The operator compares lengths and merges the smaller Joiner into the larger one, returning the larger.
          *
-         * @return
+         * @return a BinaryOperator that merges to the bigger Joiner and returns it
          */
         public static BinaryOperator<Joiner> ofMergeToBigger() {
             return MERGE_TO_BIGGER;
         }
 
         /**
+         * Returns a BinaryOperator that appends the second StringBuilder to the first.
+         * This method is deprecated, use ofAppendToFirst() instead.
          *
-         * @return
+         * @return a BinaryOperator that appends the second StringBuilder to the first and returns the first
          * @deprecated replaced by {@code #ofAppendToFirst()}
          */
         @Deprecated
@@ -8902,67 +9888,80 @@ public final class Fn {
         }
 
         /**
-         * Of append to first.
+         * Returns a BinaryOperator that appends the second StringBuilder to the first.
+         * The operator modifies and returns the first StringBuilder.
          *
-         * @return
+         * @return a BinaryOperator that appends the second StringBuilder to the first and returns the first
          */
         public static BinaryOperator<StringBuilder> ofAppendToFirst() {
             return APPEND_TO_FIRST;
         }
 
         /**
-         * Of append to bigger.
+         * Returns a BinaryOperator that appends to the bigger StringBuilder.
+         * The operator compares lengths and appends the smaller StringBuilder to the larger one, returning the larger.
          *
-         * @return
+         * @return a BinaryOperator that appends to the bigger StringBuilder and returns it
          */
         public static BinaryOperator<StringBuilder> ofAppendToBigger() {
             return APPEND_TO_BIGGER;
         }
 
+        /**
+         * Returns a BinaryOperator that concatenates two strings.
+         * The operator performs string concatenation using the + operator.
+         *
+         * @return a BinaryOperator that concatenates two strings
+         */
         public static BinaryOperator<String> ofConcat() {
             return CONCAT;
         }
 
         /**
-         * Of add int.
+         * Returns a BinaryOperator that adds two Integer values.
+         * The operator uses Integer.sum for addition.
          *
-         * @return
+         * @return a BinaryOperator that adds two Integer values
          */
         public static BinaryOperator<Integer> ofAddInt() {
             return ADD_INTEGER;
         }
 
         /**
-         * Of add long.
+         * Returns a BinaryOperator that adds two Long values.
+         * The operator uses Long.sum for addition.
          *
-         * @return
+         * @return a BinaryOperator that adds two Long values
          */
         public static BinaryOperator<Long> ofAddLong() {
             return ADD_LONG;
         }
 
         /**
-         * Of add double.
+         * Returns a BinaryOperator that adds two Double values.
+         * The operator uses Double.sum for addition.
          *
-         * @return
+         * @return a BinaryOperator that adds two Double values
          */
         public static BinaryOperator<Double> ofAddDouble() {
             return ADD_DOUBLE;
         }
 
         /**
-         * Of add big integer.
+         * Returns a BinaryOperator that adds two BigInteger values.
+         * The operator uses BigInteger.add for addition.
          *
-         * @return
+         * @return a BinaryOperator that adds two BigInteger values
          */
         public static BinaryOperator<BigInteger> ofAddBigInteger() {
             return ADD_BIG_INTEGER;
         }
 
         /**
-         * Of add big decimal.
+         * Returns a BinaryOperator that adds two BigDecimal values.
+         * The operator uses BigDecimal.add for addition.
          *
-         * @return
+         * @return a BinaryOperator that adds two BigDecimal values
          */
         public static BinaryOperator<BigDecimal> ofAddBigDecimal() {
             return ADD_BIG_DECIMAL;
@@ -8970,7 +9969,8 @@ public final class Fn {
     }
 
     /**
-     * The Class UnaryOperators.
+     * Utility class providing various UnaryOperator implementations and factory methods.
+     * This class contains the identity operator.
      */
     public static final class UnaryOperators {
 
@@ -8982,9 +9982,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a UnaryOperator that always returns its input argument unchanged.
+         * This is the identity function for UnaryOperator.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of the operand and result of the operator
+         * @return a UnaryOperator that returns its input argument
          */
         public static <T> UnaryOperator<T> identity() {
             return IDENTITY;
@@ -8992,7 +9994,8 @@ public final class Fn {
     }
 
     /**
-     * The Class Entries.
+     * Utility class providing functions for working with Map.Entry objects.
+     * This class contains adapter methods to convert BiFunction/BiPredicate/BiConsumer to work with Map.Entry.
      */
     public static final class Entries {
 
@@ -9000,13 +10003,15 @@ public final class Fn {
         }
 
         /**
+         * Adapts a BiFunction to work with Map.Entry by extracting key and value.
+         * The returned function applies the BiFunction to the entry's key and value.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <T>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <T> the type of the result of the function
+         * @param f the BiFunction to adapt
+         * @return a Function that extracts key and value from an entry and applies the BiFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> f(final java.util.function.BiFunction<? super K, ? super V, ? extends T> f)
                 throws IllegalArgumentException {
@@ -9016,12 +10021,14 @@ public final class Fn {
         }
 
         /**
+         * Adapts a BiPredicate to work with Map.Entry by extracting key and value.
+         * The returned predicate tests the entry by applying the BiPredicate to its key and value.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param p the BiPredicate to adapt
+         * @return a Predicate that extracts key and value from an entry and applies the BiPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static <K, V> Predicate<Map.Entry<K, V>> p(final java.util.function.BiPredicate<? super K, ? super V> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.BiPredicate);
@@ -9030,12 +10037,14 @@ public final class Fn {
         }
 
         /**
+         * Adapts a BiConsumer to work with Map.Entry by extracting key and value.
+         * The returned consumer accepts the entry by applying the BiConsumer to its key and value.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param c the BiConsumer to adapt
+         * @return a Consumer that extracts key and value from an entry and applies the BiConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static <K, V> Consumer<Map.Entry<K, V>> c(final java.util.function.BiConsumer<? super K, ? super V> c) throws IllegalArgumentException {
             N.checkArgNotNull(c, cs.BiConsumer);
@@ -9044,14 +10053,17 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiFunction to work with Map.Entry by extracting key and value.
+         * The returned function applies the BiFunction to the entry's key and value.
+         * This method is marked as Beta.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <T>
-         * @param <E>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <T> the type of the result of the function
+         * @param <E> the type of exception that may be thrown
+         * @param f the Throwables.BiFunction to adapt
+         * @return a Throwables.Function that extracts key and value from an entry and applies the BiFunction
+         * @throws IllegalArgumentException if f is null
          */
         @Beta
         public static <K, V, T, E extends Exception> Throwables.Function<Map.Entry<K, V>, T, E> ef(
@@ -9062,13 +10074,16 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiPredicate to work with Map.Entry by extracting key and value.
+         * The returned predicate tests the entry by applying the BiPredicate to its key and value.
+         * This method is marked as Beta.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <E>
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @param p the Throwables.BiPredicate to adapt
+         * @return a Throwables.Predicate that extracts key and value from an entry and applies the BiPredicate
+         * @throws IllegalArgumentException if p is null
          */
         @Beta
         public static <K, V, E extends Exception> Throwables.Predicate<Map.Entry<K, V>, E> ep(final Throwables.BiPredicate<? super K, ? super V, E> p)
@@ -9079,13 +10094,16 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiConsumer to work with Map.Entry by extracting key and value.
+         * The returned consumer accepts the entry by applying the BiConsumer to its key and value.
+         * This method is marked as Beta.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <E>
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @param c the Throwables.BiConsumer to adapt
+         * @return a Throwables.Consumer that extracts key and value from an entry and applies the BiConsumer
+         * @throws IllegalArgumentException if c is null
          */
         @Beta
         public static <K, V, E extends Exception> Throwables.Consumer<Map.Entry<K, V>, E> ec(final Throwables.BiConsumer<? super K, ? super V, E> c)
@@ -9096,13 +10114,15 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiFunction to work with Map.Entry by extracting key and value, wrapping exceptions.
+         * The returned function applies the BiFunction to the entry's key and value, converting checked exceptions to runtime exceptions.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <T>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <T> the type of the result of the function
+         * @param f the Throwables.BiFunction to adapt
+         * @return a Function that extracts key and value from an entry and applies the BiFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> ff(final Throwables.BiFunction<? super K, ? super V, ? extends T, ? extends Exception> f)
                 throws IllegalArgumentException {
@@ -9118,12 +10138,14 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiPredicate to work with Map.Entry by extracting key and value, wrapping exceptions.
+         * The returned predicate tests the entry by applying the BiPredicate to its key and value, converting checked exceptions to runtime exceptions.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param p the Throwables.BiPredicate to adapt
+         * @return a Predicate that extracts key and value from an entry and applies the BiPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static <K, V> Predicate<Map.Entry<K, V>> pp(final Throwables.BiPredicate<? super K, ? super V, ? extends Exception> p)
                 throws IllegalArgumentException {
@@ -9139,12 +10161,14 @@ public final class Fn {
         }
 
         /**
+         * Adapts a Throwables.BiConsumer to work with Map.Entry by extracting key and value, wrapping exceptions.
+         * The returned consumer accepts the entry by applying the BiConsumer to its key and value, converting checked exceptions to runtime exceptions.
          *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param c the Throwables.BiConsumer to adapt
+         * @return a Consumer that extracts key and value from an entry and applies the BiConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static <K, V> Consumer<Map.Entry<K, V>> cc(final Throwables.BiConsumer<? super K, ? super V, ? extends Exception> c)
                 throws IllegalArgumentException {
@@ -9161,25 +10185,28 @@ public final class Fn {
     }
 
     /**
-     * The Class Pairs.
+     * Utility class providing functions for working with Pair objects.
+     * This class contains conversion methods to transform Pairs into collections.
      */
     public static final class Pairs {
 
         /** The Constant PAIR_TO_LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Pair, List> PAIR_TO_LIST = t -> N.asList(t.left, t.right);
+        private static final Function<Pair, List> PAIR_TO_LIST = t -> N.asList(t.left(), t.right());
 
         /** The Constant PAIR_TO_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Pair, Set> PAIR_TO_SET = t -> N.asSet(t.left, t.right);
+        private static final Function<Pair, Set> PAIR_TO_SET = t -> N.asSet(t.left(), t.right());
 
         private Pairs() {
         }
 
         /**
+         * Returns a Function that converts a Pair into a List containing its two elements.
+         * The list will contain the left element followed by the right element.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the Pair
+         * @return a Function that converts a Pair<T,T> to a List<T>
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, List<T>> toList() {
@@ -9187,9 +10214,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that converts a Pair into a Set containing its two elements.
+         * If both elements are equal, the set will contain only one element.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the Pair
+         * @return a Function that converts a Pair<T,T> to a Set<T>
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, Set<T>> toSet() {
@@ -9199,25 +10228,28 @@ public final class Fn {
     }
 
     /**
-     * The Class Triples.
+     * Utility class providing functions for working with Triple objects.
+     * This class contains conversion methods to transform Triples into collections.
      */
     public static final class Triples {
 
         /** The Constant TRIPLE_TO_LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Triple, List> TRIPLE_TO_LIST = t -> N.asList(t.left, t.middle, t.right);
+        private static final Function<Triple, List> TRIPLE_TO_LIST = t -> N.asList(t.left(), t.middle(), t.right());
 
         /** The Constant TRIPLE_TO_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Triple, Set> TRIPLE_TO_SET = t -> N.asSet(t.left, t.middle, t.right);
+        private static final Function<Triple, Set> TRIPLE_TO_SET = t -> N.asSet(t.left(), t.middle(), t.right());
 
         private Triples() {
         }
 
         /**
+         * Returns a Function that converts a Triple into a List containing its three elements.
+         * The list will contain the left element, middle element, and right element in that order.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the Triple
+         * @return a Function that converts a Triple<T,T,T> to a List<T>
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, List<T>> toList() {
@@ -9225,9 +10257,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that converts a Triple into a Set containing its three elements.
+         * Duplicate elements will appear only once in the resulting set.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of elements in the Triple
+         * @return a Function that converts a Triple<T,T,T> to a Set<T>
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, Set<T>> toSet() {
@@ -9236,7 +10270,8 @@ public final class Fn {
     }
 
     /**
-     * The Class Disposables.
+     * Utility class providing functions for working with DisposableArray objects.
+     * This class contains methods for cloning, converting to string, and joining array elements.
      */
     public static final class Disposables {
 
@@ -9252,10 +10287,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that creates a copy of a DisposableArray's underlying array.
+         * The returned function calls DisposableArray.copy() to create a defensive copy.
          *
-         * @param <T>
-         * @param <A>
-         * @return
+         * @param <T> the component type of the array
+         * @param <A> the type of DisposableArray
+         * @return a Function that copies the DisposableArray's content to a new array
          */
         @SuppressWarnings("rawtypes")
         public static <T, A extends DisposableArray<T>> Function<A, T[]> cloneArray() {
@@ -9263,9 +10300,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that converts a DisposableArray to its string representation.
+         * The returned function calls DisposableArray.toString() for the conversion.
          *
-         * @param <A>
-         * @return
+         * @param <A> the type of DisposableArray
+         * @return a Function that converts a DisposableArray to String
          */
         @SuppressWarnings("rawtypes")
         public static <A extends DisposableArray> Function<A, String> toStr() {
@@ -9273,10 +10312,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that joins the elements of a DisposableArray with the specified delimiter.
+         * The returned function calls DisposableArray.join(delimiter) for the concatenation.
          *
-         * @param <A>
-         * @param delimiter
-         * @return
+         * @param <A> the type of DisposableArray
+         * @param delimiter the delimiter to be used between each element
+         * @return a Function that joins the DisposableArray elements with the delimiter
          */
         @SuppressWarnings("rawtypes")
         public static <A extends DisposableArray> Function<A, String> join(final String delimiter) {
@@ -9285,9 +10326,8 @@ public final class Fn {
     }
 
     /**
-     * Utility class for {@code CharPredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for CharPredicate/Function/Consumer operations.
+     * This class provides common char predicates, functions, and binary operators.
      */
     public static final class FC {
 
@@ -9321,48 +10361,97 @@ public final class Fn {
         private FC() {
         }
 
+        /**
+         * Returns a CharPredicate that tests if a character is zero.
+         *
+         * @return a CharPredicate that returns true if the character is '\0'
+         */
         public static CharPredicate isZero() {
             return IS_ZERO;
         }
 
+        /**
+         * Returns a CharPredicate that tests if a character is whitespace.
+         * Uses Character.isWhitespace() for the test.
+         *
+         * @return a CharPredicate that returns true if the character is whitespace
+         */
         public static CharPredicate isWhitespace() {
             return IS_WHITESPACE;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if two characters are equal.
+         *
+         * @return a CharBiPredicate that returns true if the two characters are equal
+         */
         public static CharBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if two characters are not equal.
+         *
+         * @return a CharBiPredicate that returns true if the two characters are not equal
+         */
         public static CharBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if the first character is greater than the second.
+         *
+         * @return a CharBiPredicate that returns true if the first character is greater than the second
+         */
         public static CharBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if the first character is greater than or equal to the second.
+         *
+         * @return a CharBiPredicate that returns true if the first character is greater than or equal to the second
+         */
         public static CharBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if the first character is less than the second.
+         *
+         * @return a CharBiPredicate that returns true if the first character is less than the second
+         */
         public static CharBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a CharBiPredicate that tests if the first character is less than or equal to the second.
+         *
+         * @return a CharBiPredicate that returns true if the first character is less than or equal to the second
+         */
         public static CharBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToCharFunction that converts a Character object to a primitive char.
+         * This function unboxes the Character wrapper to its primitive value.
+         *
+         * @return a ToCharFunction that unboxes Character to char
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToCharFunction<Character> unbox() {
             return ToCharFunction.UNBOX;
         }
 
         /**
+         * Returns the provided CharPredicate as-is.
+         * This is an identity method for CharPredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the CharPredicate to return
+         * @return the same CharPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static CharPredicate p(final CharPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9371,11 +10460,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided CharFunction as-is.
+         * This is an identity method for CharFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the CharFunction to return
+         * @return the same CharFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> CharFunction<R> f(final CharFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9384,10 +10475,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided CharConsumer as-is.
+         * This is an identity method for CharConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the CharConsumer to return
+         * @return the same CharConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static CharConsumer c(final CharConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9395,14 +10488,22 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a char array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a char array or 0 if null
+         */
         public static Function<char[], Integer> len() {
             return LEN;
         }
 
         /**
-         * Returns a stateful {@code CharBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful CharBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code CharBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful CharBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -9418,21 +10519,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing CharBinaryOperator implementations for common operations.
+         */
         public static final class CharBinaryOperators {
             private CharBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A CharBinaryOperator that returns the smaller of two char values.
+             */
             public static final CharBinaryOperator MIN = (left, right) -> left <= right ? left : right;
 
+            /**
+             * A CharBinaryOperator that returns the larger of two char values.
+             */
             public static final CharBinaryOperator MAX = (left, right) -> left >= right ? left : right;
         }
     }
 
     /**
-     * Utility class for {@code BytePredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for BytePredicate/Function/Consumer operations.
+     * This class provides common byte predicates, functions, and binary operators.
      */
     public static final class FB {
 
@@ -9466,48 +10575,96 @@ public final class Fn {
         private FB() {
         }
 
+        /**
+         * Returns a BytePredicate that tests if a byte value is positive (greater than zero).
+         *
+         * @return a BytePredicate that returns true if the byte is greater than 0
+         */
         public static BytePredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns a BytePredicate that tests if a byte value is not negative (greater than or equal to zero).
+         *
+         * @return a BytePredicate that returns true if the byte is greater than or equal to 0
+         */
         public static BytePredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if two byte values are equal.
+         *
+         * @return a ByteBiPredicate that returns true if the two bytes are equal
+         */
         public static ByteBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if two byte values are not equal.
+         *
+         * @return a ByteBiPredicate that returns true if the two bytes are not equal
+         */
         public static ByteBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if the first byte is greater than the second.
+         *
+         * @return a ByteBiPredicate that returns true if the first byte is greater than the second
+         */
         public static ByteBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if the first byte is greater than or equal to the second.
+         *
+         * @return a ByteBiPredicate that returns true if the first byte is greater than or equal to the second
+         */
         public static ByteBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if the first byte is less than the second.
+         *
+         * @return a ByteBiPredicate that returns true if the first byte is less than the second
+         */
         public static ByteBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a ByteBiPredicate that tests if the first byte is less than or equal to the second.
+         *
+         * @return a ByteBiPredicate that returns true if the first byte is less than or equal to the second
+         */
         public static ByteBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToByteFunction that converts a Byte object to a primitive byte.
+         * This function unboxes the Byte wrapper to its primitive value.
+         *
+         * @return a ToByteFunction that unboxes Byte to byte
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToByteFunction<Byte> unbox() {
             return ToByteFunction.UNBOX;
         }
 
         /**
+         * Returns the provided BytePredicate as-is.
+         * This is an identity method for BytePredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the BytePredicate to return
+         * @return the same BytePredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static BytePredicate p(final BytePredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9516,11 +10673,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided ByteFunction as-is.
+         * This is an identity method for ByteFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the ByteFunction to return
+         * @return the same ByteFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> ByteFunction<R> f(final ByteFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9529,10 +10688,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided ByteConsumer as-is.
+         * This is an identity method for ByteConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the ByteConsumer to return
+         * @return the same ByteConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static ByteConsumer c(final ByteConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9540,6 +10701,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a byte array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a byte array or 0 if null
+         */
         public static Function<byte[], Integer> len() {
             return LEN;
         }
@@ -9547,6 +10714,12 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<byte[], Integer> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in a byte array.
+         * The sum is returned as an Integer to avoid overflow.
+         *
+         * @return a Function that returns the sum of byte array elements
+         */
         public static Function<byte[], Integer> sum() {
             return SUM;
         }
@@ -9554,14 +10727,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<byte[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in a byte array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of byte array elements
+         */
         public static Function<byte[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code ByteBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful ByteBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code ByteBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful ByteBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -9577,21 +10758,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing ByteBinaryOperator implementations for common operations.
+         */
         public static final class ByteBinaryOperators {
             private ByteBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A ByteBinaryOperator that returns the smaller of two byte values.
+             */
             public static final ByteBinaryOperator MIN = (left, right) -> left <= right ? left : right;
 
+            /**
+             * A ByteBinaryOperator that returns the larger of two byte values.
+             */
             public static final ByteBinaryOperator MAX = (left, right) -> left >= right ? left : right;
         }
     }
 
     /**
-     * Utility class for {@code ShortPredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for ShortPredicate/Function/Consumer operations.
+     * This class provides common short predicates, functions, and binary operators.
      */
     public static final class FS {
 
@@ -9625,48 +10814,96 @@ public final class Fn {
         private FS() {
         }
 
+        /**
+         * Returns a ShortPredicate that tests if a short value is positive (greater than zero).
+         *
+         * @return a ShortPredicate that returns true if the short is greater than 0
+         */
         public static ShortPredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns a ShortPredicate that tests if a short value is not negative (greater than or equal to zero).
+         *
+         * @return a ShortPredicate that returns true if the short is greater than or equal to 0
+         */
         public static ShortPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if two short values are equal.
+         *
+         * @return a ShortBiPredicate that returns true if the two shorts are equal
+         */
         public static ShortBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if two short values are not equal.
+         *
+         * @return a ShortBiPredicate that returns true if the two shorts are not equal
+         */
         public static ShortBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if the first short is greater than the second.
+         *
+         * @return a ShortBiPredicate that returns true if the first short is greater than the second
+         */
         public static ShortBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if the first short is greater than or equal to the second.
+         *
+         * @return a ShortBiPredicate that returns true if the first short is greater than or equal to the second
+         */
         public static ShortBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if the first short is less than the second.
+         *
+         * @return a ShortBiPredicate that returns true if the first short is less than the second
+         */
         public static ShortBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a ShortBiPredicate that tests if the first short is less than or equal to the second.
+         *
+         * @return a ShortBiPredicate that returns true if the first short is less than or equal to the second
+         */
         public static ShortBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToShortFunction that converts a Short object to a primitive short.
+         * This function unboxes the Short wrapper to its primitive value.
+         *
+         * @return a ToShortFunction that unboxes Short to short
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToShortFunction<Short> unbox() {
             return ToShortFunction.UNBOX;
         }
 
         /**
+         * Returns the provided ShortPredicate as-is.
+         * This is an identity method for ShortPredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the ShortPredicate to return
+         * @return the same ShortPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static ShortPredicate p(final ShortPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9675,11 +10912,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided ShortFunction as-is.
+         * This is an identity method for ShortFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the ShortFunction to return
+         * @return the same ShortFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> ShortFunction<R> f(final ShortFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9688,10 +10927,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided ShortConsumer as-is.
+         * This is an identity method for ShortConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the ShortConsumer to return
+         * @return the same ShortConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static ShortConsumer c(final ShortConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9699,6 +10940,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a short array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a short array or 0 if null
+         */
         public static Function<short[], Integer> len() {
             return LEN;
         }
@@ -9706,6 +10953,12 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<short[], Integer> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in a short array.
+         * The sum is returned as an Integer to avoid overflow.
+         *
+         * @return a Function that returns the sum of short array elements
+         */
         public static Function<short[], Integer> sum() {
             return SUM;
         }
@@ -9713,14 +10966,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<short[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in a short array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of short array elements
+         */
         public static Function<short[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code ShortBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful ShortBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code ShortBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful ShortBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -9736,21 +10997,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing ShortBinaryOperator implementations for common operations.
+         */
         public static final class ShortBinaryOperators {
             private ShortBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A ShortBinaryOperator that returns the smaller of two short values.
+             */
             public static final ShortBinaryOperator MIN = (left, right) -> left <= right ? left : right;
 
+            /**
+             * A ShortBinaryOperator that returns the larger of two short values.
+             */
             public static final ShortBinaryOperator MAX = (left, right) -> left >= right ? left : right;
         }
     }
 
     /**
-     * Utility class for {@code IntPredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for IntPredicate/Function/Consumer operations.
+     * This class provides common int predicates, functions, and binary operators.
      */
     public static final class FI {
 
@@ -9784,48 +11053,96 @@ public final class Fn {
         private FI() {
         }
 
+        /**
+         * Returns an IntPredicate that tests if an int value is positive (greater than zero).
+         *
+         * @return an IntPredicate that returns true if the int is greater than 0
+         */
         public static IntPredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns an IntPredicate that tests if an int value is not negative (greater than or equal to zero).
+         *
+         * @return an IntPredicate that returns true if the int is greater than or equal to 0
+         */
         public static IntPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if two int values are equal.
+         *
+         * @return an IntBiPredicate that returns true if the two ints are equal
+         */
         public static IntBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if two int values are not equal.
+         *
+         * @return an IntBiPredicate that returns true if the two ints are not equal
+         */
         public static IntBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if the first int is greater than the second.
+         *
+         * @return an IntBiPredicate that returns true if the first int is greater than the second
+         */
         public static IntBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if the first int is greater than or equal to the second.
+         *
+         * @return an IntBiPredicate that returns true if the first int is greater than or equal to the second
+         */
         public static IntBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if the first int is less than the second.
+         *
+         * @return an IntBiPredicate that returns true if the first int is less than the second
+         */
         public static IntBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns an IntBiPredicate that tests if the first int is less than or equal to the second.
+         *
+         * @return an IntBiPredicate that returns true if the first int is less than or equal to the second
+         */
         public static IntBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToIntFunction that converts an Integer object to a primitive int.
+         * This function unboxes the Integer wrapper to its primitive value.
+         *
+         * @return a ToIntFunction that unboxes Integer to int
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToIntFunction<Integer> unbox() {
             return ToIntFunction.UNBOX;
         }
 
         /**
+         * Returns the provided IntPredicate as-is.
+         * This is an identity method for IntPredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the IntPredicate to return
+         * @return the same IntPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static IntPredicate p(final IntPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9834,11 +11151,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided IntFunction as-is.
+         * This is an identity method for IntFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the IntFunction to return
+         * @return the same IntFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> IntFunction<R> f(final IntFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9847,10 +11166,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided IntConsumer as-is.
+         * This is an identity method for IntConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the IntConsumer to return
+         * @return the same IntConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static IntConsumer c(final IntConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9858,6 +11179,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of an int array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of an int array or 0 if null
+         */
         public static Function<int[], Integer> len() {
             return LEN;
         }
@@ -9865,6 +11192,11 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<int[], Integer> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in an int array.
+         *
+         * @return a Function that returns the sum of int array elements
+         */
         public static Function<int[], Integer> sum() {
             return SUM;
         }
@@ -9872,14 +11204,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<int[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in an int array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of int array elements
+         */
         public static Function<int[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code IntBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful IntBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code IntBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful IntBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -9895,21 +11235,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing IntBinaryOperator implementations for common operations.
+         */
         public static final class IntBinaryOperators {
             private IntBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * An IntBinaryOperator that returns the smaller of two int values using Math.min.
+             */
             public static final IntBinaryOperator MIN = Math::min;
 
+            /**
+             * An IntBinaryOperator that returns the larger of two int values using Math.max.
+             */
             public static final IntBinaryOperator MAX = Math::max;
         }
     }
 
     /**
-     * Utility class for {@code LongPredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for LongPredicate/Function/Consumer operations.
+     * This class provides common long predicates, functions, and binary operators.
      */
     public static final class FL {
 
@@ -9943,48 +11291,96 @@ public final class Fn {
         private FL() {
         }
 
+        /**
+         * Returns a LongPredicate that tests if a long value is positive (greater than zero).
+         *
+         * @return a LongPredicate that returns true if the long is greater than 0
+         */
         public static LongPredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns a LongPredicate that tests if a long value is not negative (greater than or equal to zero).
+         *
+         * @return a LongPredicate that returns true if the long is greater than or equal to 0
+         */
         public static LongPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if two long values are equal.
+         *
+         * @return a LongBiPredicate that returns true if the two longs are equal
+         */
         public static LongBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if two long values are not equal.
+         *
+         * @return a LongBiPredicate that returns true if the two longs are not equal
+         */
         public static LongBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if the first long is greater than the second.
+         *
+         * @return a LongBiPredicate that returns true if the first long is greater than the second
+         */
         public static LongBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if the first long is greater than or equal to the second.
+         *
+         * @return a LongBiPredicate that returns true if the first long is greater than or equal to the second
+         */
         public static LongBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if the first long is less than the second.
+         *
+         * @return a LongBiPredicate that returns true if the first long is less than the second
+         */
         public static LongBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a LongBiPredicate that tests if the first long is less than or equal to the second.
+         *
+         * @return a LongBiPredicate that returns true if the first long is less than or equal to the second
+         */
         public static LongBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToLongFunction that converts a Long object to a primitive long.
+         * This function unboxes the Long wrapper to its primitive value.
+         *
+         * @return a ToLongFunction that unboxes Long to long
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToLongFunction<Long> unbox() {
             return ToLongFunction.UNBOX;
         }
 
         /**
+         * Returns the provided LongPredicate as-is.
+         * This is an identity method for LongPredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the LongPredicate to return
+         * @return the same LongPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static LongPredicate p(final LongPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9993,11 +11389,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided LongFunction as-is.
+         * This is an identity method for LongFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the LongFunction to return
+         * @return the same LongFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> LongFunction<R> f(final LongFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -10006,10 +11404,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided LongConsumer as-is.
+         * This is an identity method for LongConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the LongConsumer to return
+         * @return the same LongConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static LongConsumer c(final LongConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -10017,6 +11417,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a long array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a long array or 0 if null
+         */
         public static Function<long[], Integer> len() {
             return LEN;
         }
@@ -10024,6 +11430,11 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<long[], Long> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in a long array.
+         *
+         * @return a Function that returns the sum of long array elements
+         */
         public static Function<long[], Long> sum() {
             return SUM;
         }
@@ -10031,14 +11442,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<long[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in a long array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of long array elements
+         */
         public static Function<long[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code LongBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful LongBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code LongBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful LongBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -10054,21 +11473,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing LongBinaryOperator implementations for common operations.
+         */
         public static final class LongBinaryOperators {
             private LongBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A LongBinaryOperator that returns the smaller of two long values using Math.min.
+             */
             public static final LongBinaryOperator MIN = Math::min;
 
+            /**
+             * A LongBinaryOperator that returns the larger of two long values using Math.max.
+             */
             public static final LongBinaryOperator MAX = Math::max;
         }
     }
 
     /**
-     * Utility class for {@code FloatPredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for FloatPredicate/Function/Consumer operations.
+     * This class provides common float predicates, functions, and binary operators.
      */
     public static final class FF {
 
@@ -10102,48 +11529,102 @@ public final class Fn {
         private FF() {
         }
 
+        /**
+         * Returns a FloatPredicate that tests if a float value is positive (greater than zero).
+         *
+         * @return a FloatPredicate that returns true if the float is greater than 0
+         */
         public static FloatPredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns a FloatPredicate that tests if a float value is not negative (greater than or equal to zero).
+         *
+         * @return a FloatPredicate that returns true if the float is greater than or equal to 0
+         */
         public static FloatPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if two float values are equal.
+         * Uses N.equals for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the two floats are equal
+         */
         public static FloatBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if two float values are not equal.
+         * Uses N.compare for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the two floats are not equal
+         */
         public static FloatBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if the first float is greater than the second.
+         * Uses N.compare for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the first float is greater than the second
+         */
         public static FloatBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if the first float is greater than or equal to the second.
+         * Uses N.compare for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the first float is greater than or equal to the second
+         */
         public static FloatBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if the first float is less than the second.
+         * Uses N.compare for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the first float is less than the second
+         */
         public static FloatBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a FloatBiPredicate that tests if the first float is less than or equal to the second.
+         * Uses N.compare for proper float comparison including NaN handling.
+         *
+         * @return a FloatBiPredicate that returns true if the first float is less than or equal to the second
+         */
         public static FloatBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToFloatFunction that converts a Float object to a primitive float.
+         * This function unboxes the Float wrapper to its primitive value.
+         *
+         * @return a ToFloatFunction that unboxes Float to float
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToFloatFunction<Float> unbox() {
             return ToFloatFunction.UNBOX;
         }
 
         /**
+         * Returns the provided FloatPredicate as-is.
+         * This is an identity method for FloatPredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the FloatPredicate to return
+         * @return the same FloatPredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static FloatPredicate p(final FloatPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -10152,11 +11633,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided FloatFunction as-is.
+         * This is an identity method for FloatFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the FloatFunction to return
+         * @return the same FloatFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> FloatFunction<R> f(final FloatFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -10165,10 +11648,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided FloatConsumer as-is.
+         * This is an identity method for FloatConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the FloatConsumer to return
+         * @return the same FloatConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static FloatConsumer c(final FloatConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -10176,6 +11661,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a float array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a float array or 0 if null
+         */
         public static Function<float[], Integer> len() {
             return LEN;
         }
@@ -10183,6 +11674,11 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<float[], Float> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in a float array.
+         *
+         * @return a Function that returns the sum of float array elements
+         */
         public static Function<float[], Float> sum() {
             return SUM;
         }
@@ -10190,14 +11686,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<float[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in a float array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of float array elements as a Double
+         */
         public static Function<float[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code FloatBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful FloatBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code FloatBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful FloatBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -10213,21 +11717,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing FloatBinaryOperator implementations for common operations.
+         */
         public static final class FloatBinaryOperators {
             private FloatBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A FloatBinaryOperator that returns the smaller of two float values using Math.min.
+             */
             public static final FloatBinaryOperator MIN = Math::min;
 
+            /**
+             * A FloatBinaryOperator that returns the larger of two float values using Math.max.
+             */
             public static final FloatBinaryOperator MAX = Math::max;
         }
     }
 
     /**
-     * Utility class for {@code DoublePredicate/Function/Consumer}.
-     *
-     *
+     * Utility class for DoublePredicate/Function/Consumer operations.
+     * This class provides common double predicates, functions, and binary operators.
      */
     public static final class FD {
 
@@ -10261,48 +11773,102 @@ public final class Fn {
         private FD() {
         }
 
+        /**
+         * Returns a DoublePredicate that tests if a double value is positive (greater than zero).
+         *
+         * @return a DoublePredicate that returns true if the double is greater than 0
+         */
         public static DoublePredicate positive() {
             return POSITIVE;
         }
 
+        /**
+         * Returns a DoublePredicate that tests if a double value is not negative (greater than or equal to zero).
+         *
+         * @return a DoublePredicate that returns true if the double is greater than or equal to 0
+         */
         public static DoublePredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if two double values are equal.
+         * Uses N.equals for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the two doubles are equal
+         */
         public static DoubleBiPredicate equal() {
             return EQUAL;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if two double values are not equal.
+         * Uses N.compare for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the two doubles are not equal
+         */
         public static DoubleBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if the first double is greater than the second.
+         * Uses N.compare for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the first double is greater than the second
+         */
         public static DoubleBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if the first double is greater than or equal to the second.
+         * Uses N.compare for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the first double is greater than or equal to the second
+         */
         public static DoubleBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if the first double is less than the second.
+         * Uses N.compare for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the first double is less than the second
+         */
         public static DoubleBiPredicate lessThan() {
             return LESS_THAN;
         }
 
+        /**
+         * Returns a DoubleBiPredicate that tests if the first double is less than or equal to the second.
+         * Uses N.compare for proper double comparison including NaN handling.
+         *
+         * @return a DoubleBiPredicate that returns true if the first double is less than or equal to the second
+         */
         public static DoubleBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
+        /**
+         * Returns a ToDoubleFunction that converts a Double object to a primitive double.
+         * This function unboxes the Double wrapper to its primitive value.
+         *
+         * @return a ToDoubleFunction that unboxes Double to double
+         */
         @SuppressWarnings("SameReturnValue")
         public static ToDoubleFunction<Double> unbox() {
             return ToDoubleFunction.UNBOX;
         }
 
         /**
+         * Returns the provided DoublePredicate as-is.
+         * This is an identity method for DoublePredicate that can be useful for type inference.
          *
-         * @param p
-         * @return
-         * @throws IllegalArgumentException
+         * @param p the DoublePredicate to return
+         * @return the same DoublePredicate
+         * @throws IllegalArgumentException if p is null
          */
         public static DoublePredicate p(final DoublePredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -10311,11 +11877,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided DoubleFunction as-is.
+         * This is an identity method for DoubleFunction that can be useful for type inference.
          *
-         * @param <R>
-         * @param f
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the function
+         * @param f the DoubleFunction to return
+         * @return the same DoubleFunction
+         * @throws IllegalArgumentException if f is null
          */
         public static <R> DoubleFunction<R> f(final DoubleFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -10324,10 +11892,12 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided DoubleConsumer as-is.
+         * This is an identity method for DoubleConsumer that can be useful for type inference.
          *
-         * @param c
-         * @return
-         * @throws IllegalArgumentException
+         * @param c the DoubleConsumer to return
+         * @return the same DoubleConsumer
+         * @throws IllegalArgumentException if c is null
          */
         public static DoubleConsumer c(final DoubleConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -10335,6 +11905,12 @@ public final class Fn {
             return c;
         }
 
+        /**
+         * Returns a Function that calculates the length of a double array.
+         * Returns 0 for null arrays.
+         *
+         * @return a Function that returns the length of a double array or 0 if null
+         */
         public static Function<double[], Integer> len() {
             return LEN;
         }
@@ -10342,6 +11918,11 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<double[], Double> SUM = N::sum;
 
+        /**
+         * Returns a Function that calculates the sum of all elements in a double array.
+         *
+         * @return a Function that returns the sum of double array elements
+         */
         public static Function<double[], Double> sum() {
             return SUM;
         }
@@ -10349,14 +11930,22 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<double[], Double> AVERAGE = N::average;
 
+        /**
+         * Returns a Function that calculates the average of all elements in a double array.
+         * Returns Double.NaN for empty or null arrays.
+         *
+         * @return a Function that returns the average of double array elements
+         */
         public static Function<double[], Double> average() {
             return AVERAGE;
         }
 
         /**
-         * Returns a stateful {@code DoubleBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful DoubleBiFunction that alternates between returning TAKE_FIRST and TAKE_SECOND.
+         * The function maintains internal state and switches its return value on each call.
+         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
-         * @return a stateful {@code DoubleBiFunction}. Don't save or cache for reuse or use it in parallel stream.
+         * @return a stateful DoubleBiFunction that alternates between merge results
          */
         @Beta
         @SequentialOnly
@@ -10372,21 +11961,29 @@ public final class Fn {
             };
         }
 
+        /**
+         * Utility class providing DoubleBinaryOperator implementations for common operations.
+         */
         public static final class DoubleBinaryOperators {
             private DoubleBinaryOperators() {
                 // Singleton for utility class.
             }
 
+            /**
+             * A DoubleBinaryOperator that returns the smaller of two double values using Math.min.
+             */
             public static final DoubleBinaryOperator MIN = Math::min;
 
+            /**
+             * A DoubleBinaryOperator that returns the larger of two double values using Math.max.
+             */
             public static final DoubleBinaryOperator MAX = Math::max;
         }
     }
 
     /**
-     * Utility class for exceptional {@code Predicate/Function/Consumer}.
-     *
-     *
+     * Utility class for exceptional Predicate/Function/Consumer operations.
+     * This class provides methods for creating and manipulating Throwables functional interfaces.
      */
     public static final class Fnn {
         private Fnn() {
@@ -10394,46 +11991,44 @@ public final class Fn {
         }
 
         /**
-         * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.
+         * Returns a Supplier which returns a single instance created by calling the specified supplier.get().
+         * The instance is created lazily on the first call and cached for subsequent calls.
          *
-         * @param <T>
-         * @param <E>
-         * @param supplier
-         * @return
+         * @param <T> the type of results supplied by this supplier
+         * @param <E> the type of exception that may be thrown
+         * @param supplier the supplier to memoize
+         * @return a memoized version of the supplier that caches the result
          */
         public static <T, E extends Throwable> Throwables.Supplier<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
             return Throwables.LazyInitializer.of(supplier);
         }
 
-        // Copied from Google Guava under Apache License v2.
-
         /**
-         * Copied from Google Guava under Apache License v2.
-         * <br />
-         * <br />
+         * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
          *
          * Returns a supplier that caches the instance supplied by the delegate and removes the cached
-         * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
+         * value after the specified time has passed. Subsequent calls to get() return the cached
          * value if the expiration time has not passed. After the expiration time, a new value is
          * retrieved, cached, and returned. See: <a
          * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
          *
          * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
-         * cached value, which will be recalculated when {@code get()} is called on the reserialized
+         * cached value, which will be recalculated when get() is called on the reserialized
          * instance. The actual memoization does not happen when the underlying delegate throws an
          * exception.
          *
          * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
          * delegating calls until it returns valid data.
          *
-         * @param <T>
-         * @param <E>
-         * @param supplier
+         *
+         * @param <T> the type of results supplied by this supplier
+         * @param <E> the type of exception that may be thrown
+         * @param supplier the delegate supplier
          * @param duration the length of time after a value is created that it should stop being returned
-         *     by subsequent {@code get()} calls
-         * @param unit the unit that {@code duration} is expressed in
-         * @return
-         * @throws IllegalArgumentException if {@code duration} is not positive
+         *     by subsequent get() calls
+         * @param unit the unit that duration is expressed in
+         * @return a supplier that caches with expiration
+         * @throws IllegalArgumentException if duration is not positive
          */
         public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
                 final TimeUnit unit) throws IllegalArgumentException {
@@ -10478,12 +12073,14 @@ public final class Fn {
         }
 
         /**
+         * Returns a memoized version of the input function that caches the result of each distinct input.
+         * The function uses a ConcurrentHashMap internally to cache results, making it thread-safe.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of exception that may be thrown
+         * @param func the function to memoize
+         * @return a memoized version of the function that caches results by input
          */
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> func) {
             return new Throwables.Function<>() {
@@ -10523,51 +12120,57 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Function that always returns its input argument unchanged.
+         * This is the identity function for Throwables.Function.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input and output of the function
+         * @param <E> the type of exception that may be thrown
+         * @return a function that always returns its input argument
          */
         public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
             return Fn.IDENTITY;
         }
 
         /**
+         * Returns a Throwables.Predicate that always returns true regardless of input.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of exception that may be thrown
+         * @return a predicate that always returns true
          */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysTrue() {
             return Fn.ALWAYS_TRUE;
         }
 
         /**
+         * Returns a Throwables.Predicate that always returns false regardless of input.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of exception that may be thrown
+         * @return a predicate that always returns false
          */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysFalse() {
             return Fn.ALWAYS_FALSE;
         }
 
         /**
+         * Returns a Throwables.Function that converts its input to a String using String.valueOf().
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the function
+         * @param <E> the type of exception that may be thrown
+         * @return a function that converts its input to String
          */
         public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
             return TO_STRING;
         }
 
         /**
+         * Returns a Throwables.Function that extracts the key from a Map.Entry.
          *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @return a function that returns the key of a Map.Entry
          */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, K, E> key() {
@@ -10575,11 +12178,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Function that extracts the value from a Map.Entry.
          *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @return a function that returns the value of a Map.Entry
          */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, V, E> value() {
@@ -10587,11 +12191,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Function that inverts a Map.Entry by swapping its key and value.
          *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @return a function that returns an inverted Entry with key and value swapped
          */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
@@ -10599,11 +12204,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.BiFunction that creates a Map.Entry from a key and value.
          *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * @param <K> the type of keys in the entry
+         * @param <V> the type of values in the entry
+         * @param <E> the type of exception that may be thrown
+         * @return a BiFunction that creates a Map.Entry from key and value
          */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
@@ -10611,11 +12217,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.BiFunction that creates a Pair from two values.
          *
-         * @param <L>
-         * @param <R>
-         * @param <E>
-         * @return
+         * @param <L> the type of the left element
+         * @param <R> the type of the right element
+         * @param <E> the type of exception that may be thrown
+         * @return a BiFunction that creates a Pair from left and right values
          */
         @SuppressWarnings("rawtypes")
         public static <L, R, E extends Exception> Throwables.BiFunction<L, R, Pair<L, R>, E> pair() {
@@ -10623,12 +12230,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.TriFunction that creates a Triple from three values.
          *
-         * @param <L>
-         * @param <M>
-         * @param <R>
-         * @param <E>
-         * @return
+         * @param <L> the type of the left element
+         * @param <M> the type of the middle element
+         * @param <R> the type of the right element
+         * @param <E> the type of exception that may be thrown
+         * @return a TriFunction that creates a Triple from left, middle, and right values
          */
         @SuppressWarnings("rawtypes")
         public static <L, M, R, E extends Exception> Throwables.TriFunction<L, M, R, Triple<L, M, R>, E> triple() {
@@ -10636,10 +12244,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Function that wraps a single value in a Tuple1.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the element
+         * @param <E> the type of exception that may be thrown
+         * @return a Function that creates a Tuple1 from a single value
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Exception> Throwables.Function<T, Tuple1<T>, E> tuple1() {
@@ -10647,11 +12256,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.BiFunction that wraps two values in a Tuple2.
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @return
+         * @param <T> the type of the first element
+         * @param <U> the type of the second element
+         * @param <E> the type of exception that may be thrown
+         * @return a BiFunction that creates a Tuple2 from two values
          */
         @SuppressWarnings("rawtypes")
         public static <T, U, E extends Exception> Throwables.BiFunction<T, U, Tuple2<T, U>, E> tuple2() {
@@ -10659,12 +12269,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.TriFunction that wraps three values in a Tuple3.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @return
+         * @param <A> the type of the first element
+         * @param <B> the type of the second element
+         * @param <C> the type of the third element
+         * @param <E> the type of exception that may be thrown
+         * @return a TriFunction that creates a Tuple3 from three values
          */
         @SuppressWarnings("rawtypes")
         public static <A, B, C, E extends Exception> Throwables.TriFunction<A, B, C, Tuple3<A, B, C>, E> tuple3() {
@@ -10672,29 +12283,32 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Runnable that performs no operation when executed.
          *
-         * @param <E>
-         * @return
+         * @param <E> the type of exception that may be thrown
+         * @return a Runnable that does nothing
          */
         public static <E extends Exception> Throwables.Runnable<E> emptyAction() {
             return (Throwables.Runnable<E>) Fn.EMPTY_ACTION;
         }
 
         /**
+         * Returns a Throwables.Consumer that performs no operation on its input.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @return a Consumer that does nothing
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
             return Fn.EMPTY_CONSUMER;
         }
 
         /**
+         * Returns a Throwables.Consumer that throws a RuntimeException with the specified error message.
          *
-         * @param <T>
-         * @param errorMessage
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param errorMessage the error message for the exception
+         * @return a Consumer that throws a RuntimeException
          */
         public static <T> Throwables.Consumer<T, RuntimeException> throwRuntimeException(final String errorMessage) {
             return t -> {
@@ -10703,10 +12317,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Consumer that throws an IOException with the specified error message.
          *
-         * @param <T>
-         * @param errorMessage
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param errorMessage the error message for the exception
+         * @return a Consumer that throws an IOException
          */
         public static <T> Throwables.Consumer<T, IOException> throwIOException(final String errorMessage) {
             return t -> {
@@ -10715,10 +12330,11 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Consumer that throws an Exception with the specified error message.
          *
-         * @param <T>
-         * @param errorMessage
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param errorMessage the error message for the exception
+         * @return a Consumer that throws an Exception
          */
         public static <T> Throwables.Consumer<T, Exception> throwException(final String errorMessage) {
             return t -> {
@@ -10727,11 +12343,12 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Consumer that throws an exception provided by the supplier.
          *
-         * @param <T>
-         * @param <E>
-         * @param exceptionSupplier
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param exceptionSupplier the supplier that provides the exception to throw
+         * @return a Consumer that throws the supplied exception
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final java.util.function.Supplier<? extends E> exceptionSupplier) {
             return t -> {
@@ -10740,34 +12357,40 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Consumer that sleeps for the specified number of milliseconds.
+         * The consumer ignores its input and calls N.sleep(millis).
          *
-         * @param <T>
-         * @param <E>
-         * @param millis
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param millis the number of milliseconds to sleep
+         * @return a Consumer that sleeps for the specified duration
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleep(final long millis) {
             return t -> N.sleep(millis);
         }
 
         /**
+         * Returns a Throwables.Consumer that sleeps uninterruptibly for the specified number of milliseconds.
+         * The consumer ignores its input and calls N.sleepUninterruptibly(millis).
          *
-         * @param <T>
-         * @param <E>
-         * @param millis
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param millis the number of milliseconds to sleep
+         * @return a Consumer that sleeps uninterruptibly for the specified duration
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleepUninterruptibly(final long millis) {
             return t -> N.sleepUninterruptibly(millis);
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * Returns a stateful Throwables.Consumer that rate limits execution to the specified permits per second.
+         * The consumer uses a RateLimiter internally to control the rate of execution.
+         * This consumer is stateful and should not be saved or cached for reuse, but it can be used in parallel streams.
          *
-         * @param <T>
-         * @param <E>
-         * @param permitsPerSecond
-         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param permitsPerSecond the number of permits per second
+         * @return a stateful Consumer that rate limits execution
          * @see RateLimiter#acquire()
          * @see RateLimiter#create(double)
          */
@@ -10777,12 +12400,14 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful {@code Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * Returns a stateful Throwables.Consumer that rate limits execution using the provided RateLimiter.
+         * The consumer calls rateLimiter.acquire() before allowing execution to proceed.
+         * This consumer is stateful and should not be saved or cached for reuse, but it can be used in parallel streams.
          *
-         * @param <T>
-         * @param <E>
-         * @param rateLimiter
-         * @return a stateful {@code Throwables.Consumer}. Don't save or cache for reuse, but it can be used in parallel stream.
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param rateLimiter the RateLimiter to use
+         * @return a stateful Consumer that rate limits execution
          * @see RateLimiter#acquire()
          */
         @Stateful
@@ -10829,51 +12454,61 @@ public final class Fn {
         //    }
 
         /**
+         * Returns a Throwables.Consumer that closes an AutoCloseable resource.
+         * The consumer calls close() on the resource if it is not null.
          *
-         * @param <T>
-         * @return
+         * @param <T> the type of AutoCloseable
+         * @return a Consumer that closes the AutoCloseable resource
          */
         public static <T extends AutoCloseable> Throwables.Consumer<T, Exception> close() {
             return (Throwables.Consumer<T, Exception>) CLOSE;
         }
 
         /**
+         * Returns a Throwables.Consumer that closes an AutoCloseable resource quietly.
+         * The consumer calls closeQuietly() on the resource, suppressing any exceptions.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of AutoCloseable
+         * @param <E> the type of exception that may be thrown
+         * @return a Consumer that closes the AutoCloseable resource quietly
          */
         public static <T extends AutoCloseable, E extends Exception> Throwables.Consumer<T, E> closeQuietly() {
             return (Throwables.Consumer<T, E>) Fn.CLOSE_QUIETLY;
         }
 
         /**
+         * Returns a Throwables.Consumer that prints its input to standard output.
+         * The consumer calls System.out.println() with the input value.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @return a Consumer that prints to standard output
          */
         public static <T, E extends Exception> Throwables.Consumer<T, E> println() {
             return Fn.PRINTLN;
         }
 
         /**
+         * Returns a Throwables.BiConsumer that prints its two inputs to standard output with a separator.
+         * The consumer formats the output as "first separator second".
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param separator
-         * @return
+         * @param <T> the type of the first input to the consumer
+         * @param <U> the type of the second input to the consumer
+         * @param <E> the type of exception that may be thrown
+         * @param separator the separator string to use between the two values
+         * @return a BiConsumer that prints two values with a separator
          */
         public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
             return cc(Fn.println(separator));
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if its input is null.
+         * This method is marked as Beta.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the input is null
          */
         @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
@@ -10881,30 +12516,37 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if a CharSequence is empty.
+         * The predicate returns true if the CharSequence has length 0.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of CharSequence
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the CharSequence is empty
          */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isEmpty() {
             return (Throwables.Predicate<T, E>) Fn.IS_EMPTY;
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if a CharSequence is blank.
+         * The predicate returns true if the CharSequence is empty or contains only whitespace characters.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of CharSequence
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the CharSequence is blank
          */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isBlank() {
             return (Throwables.Predicate<T, E>) Fn.IS_BLANK;
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if an array is empty.
+         * The predicate returns true if the array is null or has length 0.
+         * This method is marked as Beta.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the component type of the array
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the array is empty
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -10913,10 +12555,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if a Collection is empty.
+         * The predicate returns true if the Collection is null or has size 0.
+         * This method is marked as Beta.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of Collection
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the Collection is empty
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -10925,10 +12570,13 @@ public final class Fn {
         }
 
         /**
+         * Returns a Throwables.Predicate that tests if a Map is empty.
+         * The predicate returns true if the Map is null or has size 0.
+         * This method is marked as Beta.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of Map
+         * @param <E> the type of exception that may be thrown
+         * @return a Predicate that returns true if the Map is empty
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -10937,10 +12585,12 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether its input is not null.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input is not null, false otherwise
+         * @see java.util.Objects#nonNull(Object)
          */
         @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> notNull() {
@@ -10948,30 +12598,40 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether a CharSequence is not empty.
+         * A CharSequence is considered not empty if it is not null and has a length greater than 0.
+         * 
+         * @param <T> the type of the CharSequence to test
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input CharSequence is not empty, false otherwise
+         * @see CharSequence#length()
          */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notEmpty() {
             return (Throwables.Predicate<T, E>) Fn.IS_NOT_EMPTY;
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether a CharSequence is not blank.
+         * A CharSequence is considered not blank if it is not null, not empty, 
+         * and contains at least one non-whitespace character.
+         * 
+         * @param <T> the type of the CharSequence to test
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input CharSequence is not blank, false otherwise
+         * @see Character#isWhitespace(char)
          */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notBlank() {
             return (Throwables.Predicate<T, E>) Fn.IS_NOT_BLANK;
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether an array is not empty.
+         * An array is considered not empty if it is not null and has a length greater than 0.
+         * 
+         * @param <T> the component type of the array
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input array is not empty, false otherwise
+         * @see java.lang.reflect.Array#getLength(Object)
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -10980,10 +12640,13 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether a Collection is not empty.
+         * A Collection is considered not empty if it is not null and has a size greater than 0.
+         * 
+         * @param <T> the type of the Collection to test
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input Collection is not empty, false otherwise
+         * @see Collection#isEmpty()
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -10992,10 +12655,13 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a Predicate that tests whether a Map is not empty.
+         * A Map is considered not empty if it is not null and has a size greater than 0.
+         * 
+         * @param <T> the type of the Map to test
+         * @param <E> the type of the exception that may be thrown
+         * @return a Predicate that returns true if the input Map is not empty, false otherwise
+         * @see Map#isEmpty()
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11004,43 +12670,55 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that throws an exception when attempting to merge duplicate keys.
+         * This merger is typically used in Collectors.toMap() when duplicate keys should not be allowed.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that throws an exception for any merge operation
+         * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
          */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
             return BinaryOperators.THROWING_MERGER;
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that ignores the second value and returns the first value.
+         * This merger is typically used in Collectors.toMap() when keeping the first occurrence of duplicate keys.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the first operand
+         * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
          */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
             return BinaryOperators.IGNORING_MERGER;
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that replaces the first value with the second value.
+         * This merger is typically used in Collectors.toMap() when keeping the last occurrence of duplicate keys.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the second operand
+         * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
          */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's key.
+         * The returned predicate extracts the key from the Map.Entry and applies the provided key predicate to it.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the predicate to apply to the entry's key
+         * @return a Predicate that tests Map.Entry objects by their keys
+         * @throws IllegalArgumentException if predicate is null
+         * @see Map.Entry#getKey()
          */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByKey(final Throwables.Predicate<? super K, E> predicate)
                 throws IllegalArgumentException {
@@ -11050,13 +12728,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's value.
+         * The returned predicate extracts the value from the Map.Entry and applies the provided value predicate to it.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the predicate to apply to the entry's value
+         * @return a Predicate that tests Map.Entry objects by their values
+         * @throws IllegalArgumentException if predicate is null
+         * @see Map.Entry#getValue()
          */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByValue(final Throwables.Predicate<? super V, E> predicate)
                 throws IllegalArgumentException {
@@ -11066,13 +12747,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @param consumer
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's key.
+         * The returned consumer extracts the key from the Map.Entry and passes it to the provided key consumer.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @param consumer the consumer to apply to the entry's key
+         * @return a Consumer that processes Map.Entry objects by their keys
+         * @throws IllegalArgumentException if consumer is null
+         * @see Map.Entry#getKey()
          */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByKey(final Throwables.Consumer<? super K, E> consumer)
                 throws IllegalArgumentException {
@@ -11082,13 +12766,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @param consumer
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's value.
+         * The returned consumer extracts the value from the Map.Entry and passes it to the provided value consumer.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @param consumer the consumer to apply to the entry's value
+         * @return a Consumer that processes Map.Entry objects by their values
+         * @throws IllegalArgumentException if consumer is null
+         * @see Map.Entry#getValue()
          */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByValue(final Throwables.Consumer<? super V, E> consumer)
                 throws IllegalArgumentException {
@@ -11098,14 +12785,17 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Function that applies the given function to a Map.Entry's key.
+         * The returned function extracts the key from the Map.Entry and applies the provided key function to it.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <R> the type of the result
+         * @param <E> the type of the exception that may be thrown
+         * @param func the function to apply to the entry's key
+         * @return a Function that transforms Map.Entry objects by applying a function to their keys
+         * @throws IllegalArgumentException if func is null
+         * @see Map.Entry#getKey()
          */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(
                 final Throwables.Function<? super K, ? extends R, E> func) throws IllegalArgumentException {
@@ -11115,14 +12805,17 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Function that applies the given function to a Map.Entry's value.
+         * The returned function extracts the value from the Map.Entry and applies the provided value function to it.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the value
+         * @param <R> the type of the result
+         * @param <E> the type of the exception that may be thrown
+         * @param func the function to apply to the entry's value
+         * @return a Function that transforms Map.Entry objects by applying a function to their values
+         * @throws IllegalArgumentException if func is null
+         * @see Map.Entry#getValue()
          */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(
                 final Throwables.Function<? super V, ? extends R, E> func) throws IllegalArgumentException {
@@ -11135,10 +12828,13 @@ public final class Fn {
         private static final Throwables.BinaryOperator<Object, Throwable> RETURN_FIRST = (t, u) -> t;
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that always returns the first of its two operands.
+         * This operator ignores the second operand and returns the first operand unchanged.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the first operand
+         * @see BinaryOperator
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectFirst() {
@@ -11149,10 +12845,13 @@ public final class Fn {
         private static final Throwables.BinaryOperator<Object, Throwable> RETURN_SECOND = (t, u) -> u;
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that always returns the second of its two operands.
+         * This operator ignores the first operand and returns the second operand unchanged.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the second operand
+         * @see BinaryOperator
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectSecond() {
@@ -11164,10 +12863,13 @@ public final class Fn {
         private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the minimum of two Comparable values.
+         * The comparison is performed using the natural ordering of the Comparable type.
+         * 
+         * @param <T> the type of the Comparable operands and result
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the smaller of two Comparable values
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> min() {
@@ -11175,12 +12877,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param comparator
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a BinaryOperator that returns the minimum of two values according to the specified Comparator.
+         * If the comparator indicates the values are equal, the first value is returned.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param comparator the Comparator to use for comparing values
+         * @return a BinaryOperator that returns the smaller of two values according to the comparator
+         * @throws IllegalArgumentException if comparator is null
+         * @see Comparator#compare(Object, Object)
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
             N.checkArgNotNull(comparator);
@@ -11189,12 +12894,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param keyExtractor
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a BinaryOperator that returns the minimum of two values by comparing the results of applying a key extractor function.
+         * The key extractor function is applied to both operands and the resulting Comparable values are compared.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param keyExtractor the function to extract a Comparable key from each operand
+         * @return a BinaryOperator that returns the operand with the smaller extracted key
+         * @throws IllegalArgumentException if keyExtractor is null
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> minBy(
@@ -11210,11 +12918,15 @@ public final class Fn {
                 u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their keys.
+         * The keys must be Comparable and are compared using their natural ordering.
+         * 
+         * @param <K> the type of the Comparable key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the Map.Entry with the smaller key
+         * @see Map.Entry#getKey()
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByKey() {
@@ -11227,11 +12939,15 @@ public final class Fn {
                 u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their values.
+         * The values must be Comparable and are compared using their natural ordering.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the Comparable value
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the Map.Entry with the smaller value
+         * @see Map.Entry#getValue()
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByValue() {
@@ -11243,10 +12959,13 @@ public final class Fn {
         private static final Throwables.BinaryOperator<Comparable, Throwable> MAX = (t, u) -> N.compare(t, u) >= 0 ? t : u;
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the maximum of two Comparable values.
+         * The comparison is performed using the natural ordering of the Comparable type.
+         * 
+         * @param <T> the type of the Comparable operands and result
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the larger of two Comparable values
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> max() {
@@ -11254,12 +12973,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param comparator
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a BinaryOperator that returns the maximum of two values according to the specified Comparator.
+         * If the comparator indicates the values are equal, the first value is returned.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param comparator the Comparator to use for comparing values
+         * @return a BinaryOperator that returns the larger of two values according to the comparator
+         * @throws IllegalArgumentException if comparator is null
+         * @see Comparator#compare(Object, Object)
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
             N.checkArgNotNull(comparator);
@@ -11268,12 +12990,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param keyExtractor
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a BinaryOperator that returns the maximum of two values by comparing the results of applying a key extractor function.
+         * The key extractor function is applied to both operands and the resulting Comparable values are compared.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param keyExtractor the function to extract a Comparable key from each operand
+         * @return a BinaryOperator that returns the operand with the larger extracted key
+         * @throws IllegalArgumentException if keyExtractor is null
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> maxBy(
@@ -11289,11 +13014,15 @@ public final class Fn {
                 u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their keys.
+         * The keys must be Comparable and are compared using their natural ordering.
+         * 
+         * @param <K> the type of the Comparable key
+         * @param <V> the type of the value
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the Map.Entry with the larger key
+         * @see Map.Entry#getKey()
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByKey() {
@@ -11306,11 +13035,15 @@ public final class Fn {
                 u) -> N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
 
         /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
+         * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their values.
+         * The values must be Comparable and are compared using their natural ordering.
+         * 
+         * @param <K> the type of the key
+         * @param <V> the type of the Comparable value
+         * @param <E> the type of the exception that may be thrown
+         * @return a BinaryOperator that returns the Map.Entry with the larger value
+         * @see Map.Entry#getValue()
+         * @see Comparable#compareTo(Object)
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByValue() {
@@ -11318,12 +13051,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a Predicate that represents the logical negation of the given predicate.
+         * When evaluated, the returned predicate returns true if the given predicate returns false, and vice versa.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the predicate to negate
+         * @return a Predicate that represents the logical negation of the given predicate
+         * @throws IllegalArgumentException if predicate is null
+         * @see Predicate#negate()
          */
         public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate);
@@ -11332,13 +13068,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a BiPredicate that represents the logical negation of the given bi-predicate.
+         * When evaluated, the returned bi-predicate returns true if the given bi-predicate returns false, and vice versa.
+         * 
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param biPredicate the bi-predicate to negate
+         * @return a BiPredicate that represents the logical negation of the given bi-predicate
+         * @throws IllegalArgumentException if biPredicate is null
+         * @see BiPredicate#negate()
          */
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate)
                 throws IllegalArgumentException {
@@ -11348,14 +13087,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Returns a TriPredicate that represents the logical negation of the given tri-predicate.
+         * When evaluated, the returned tri-predicate returns true if the given tri-predicate returns false, and vice versa.
+         * 
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param triPredicate the tri-predicate to negate
+         * @return a TriPredicate that represents the logical negation of the given tri-predicate
+         * @throws IllegalArgumentException if triPredicate is null
          */
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate)
                 throws IllegalArgumentException {
@@ -11365,12 +13106,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param count
-         * @return a stateful {@code Throwables.Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-         * @throws IllegalArgumentException
+         * Returns a stateful Predicate that returns true for at most the specified number of evaluations.
+         * The predicate maintains an internal counter that decrements with each test, returning true 
+         * while the counter is positive and false once it reaches zero. This predicate is thread-safe
+         * and can be used in parallel streams.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param count the maximum number of times the predicate should return true
+         * @return a stateful Predicate that limits the number of true results. Don't save or cache for reuse.
+         * @throws IllegalArgumentException if count is negative
          */
         @Beta
         @Stateful
@@ -11388,11 +13133,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param supplier
-         * @return
+         * Converts a standard Java Supplier to a Throwables.Supplier.
+         * If the input is already a Throwables.Supplier, it is returned as-is.
+         * 
+         * @param <T> the type of results supplied by the supplier
+         * @param <E> the type of the exception that may be thrown
+         * @param supplier the Java Supplier to convert
+         * @return a Throwables.Supplier that delegates to the given supplier
+         * @see java.util.function.Supplier
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11401,11 +13149,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param func
-         * @return
+         * Converts a standard Java IntFunction to a Throwables.IntFunction.
+         * If the input is already a Throwables.IntFunction, it is returned as-is.
+         * 
+         * @param <T> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param func the Java IntFunction to convert
+         * @return a Throwables.IntFunction that delegates to the given function
+         * @see java.util.function.IntFunction
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11414,11 +13165,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
+         * Converts a standard Java Predicate to a Throwables.Predicate.
+         * If the input is already a Throwables.Predicate, it is returned as-is.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the Java Predicate to convert
+         * @return a Throwables.Predicate that delegates to the given predicate
+         * @see java.util.function.Predicate
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11427,12 +13181,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param predicate
-         * @return
+         * Converts a standard Java BiPredicate to a Throwables.BiPredicate.
+         * If the input is already a Throwables.BiPredicate, it is returned as-is.
+         * 
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the Java BiPredicate to convert
+         * @return a Throwables.BiPredicate that delegates to the given predicate
+         * @see java.util.function.BiPredicate
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11441,11 +13198,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
+         * Converts a standard Java Consumer to a Throwables.Consumer.
+         * If the input is already a Throwables.Consumer, it is returned as-is.
+         * 
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param consumer the Java Consumer to convert
+         * @return a Throwables.Consumer that delegates to the given consumer
+         * @see java.util.function.Consumer
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11454,12 +13214,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param consumer
-         * @return
+         * Converts a standard Java BiConsumer to a Throwables.BiConsumer.
+         * If the input is already a Throwables.BiConsumer, it is returned as-is.
+         * 
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param consumer the Java BiConsumer to convert
+         * @return a Throwables.BiConsumer that delegates to the given consumer
+         * @see java.util.function.BiConsumer
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11468,12 +13231,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param function
-         * @return
+         * Converts a standard Java Function to a Throwables.Function.
+         * If the input is already a Throwables.Function, it is returned as-is.
+         * 
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param function the Java Function to convert
+         * @return a Throwables.Function that delegates to the given function
+         * @see java.util.function.Function
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11482,13 +13248,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param function
-         * @return
+         * Converts a standard Java BiFunction to a Throwables.BiFunction.
+         * If the input is already a Throwables.BiFunction, it is returned as-is.
+         * 
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param function the Java BiFunction to convert
+         * @return a Throwables.BiFunction that delegates to the given function
+         * @see java.util.function.BiFunction
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11497,11 +13266,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param op
-         * @return
+         * Converts a standard Java UnaryOperator to a Throwables.UnaryOperator.
+         * If the input is already a Throwables.UnaryOperator, it is returned as-is.
+         * 
+         * @param <T> the type of the operand and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param op the Java UnaryOperator to convert
+         * @return a Throwables.UnaryOperator that delegates to the given operator
+         * @see java.util.function.UnaryOperator
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11510,11 +13282,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param op
-         * @return
+         * Converts a standard Java BinaryOperator to a Throwables.BinaryOperator.
+         * If the input is already a Throwables.BinaryOperator, it is returned as-is.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
+         * @param op the Java BinaryOperator to convert
+         * @return a Throwables.BinaryOperator that delegates to the given operator
+         * @see java.util.function.BinaryOperator
          */
         @Beta
         @SuppressWarnings("rawtypes")
@@ -11522,22 +13297,44 @@ public final class Fn {
             return op instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) op) : op::apply;
         }
 
+        /**
+         * Returns the provided Throwables.Supplier as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of results supplied by the supplier
+         * @param <E> the type of the exception that may be thrown
+         * @param supplier the supplier to return
+         * @return the supplier unchanged
+         */
         @Beta
         public static <T, E extends Throwable> Throwables.Supplier<T, E> s(final Throwables.Supplier<T, E> supplier) {
             return supplier;
         }
 
+        /**
+         * Creates a Throwables.Supplier by partially applying a function to a fixed argument.
+         * The returned supplier will invoke the function with the provided argument when called.
+         * 
+         * @param <A> the type of the fixed argument
+         * @param <T> the type of the result
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed argument to apply to the function
+         * @param func the function to partially apply
+         * @return a Supplier that applies the function to the fixed argument
+         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Supplier<T, E> s(final A a, final Throwables.Function<? super A, ? extends T, E> func) {
             return () -> func.apply(a);
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
+         * Returns the provided Throwables.Predicate as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the predicate to return
+         * @return the predicate unchanged
          * @see #from(java.util.function.Predicate)
          */
         @Beta
@@ -11546,14 +13343,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Predicate by partially applying a BiPredicate to a fixed first argument.
+         * The returned predicate will invoke the bi-predicate with the fixed argument and the test input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the input to the resulting predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the bi-predicate
+         * @param biPredicate the bi-predicate to partially apply
+         * @return a Predicate that applies the bi-predicate with the fixed first argument
+         * @throws IllegalArgumentException if biPredicate is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final Throwables.BiPredicate<A, T, E> biPredicate)
@@ -11564,16 +13363,18 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Predicate by partially applying a TriPredicate to fixed first and second arguments.
+         * The returned predicate will invoke the tri-predicate with the fixed arguments and the test input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <B> the type of the fixed second argument
+         * @param <T> the type of the input to the resulting predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-predicate
+         * @param b the fixed second argument to apply to the tri-predicate
+         * @param triPredicate the tri-predicate to partially apply
+         * @return a Predicate that applies the tri-predicate with the fixed arguments
+         * @throws IllegalArgumentException if triPredicate is null
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final B b, final Throwables.TriPredicate<A, B, T, E> triPredicate)
@@ -11584,12 +13385,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biPredicate
-         * @return
+         * Returns the provided Throwables.BiPredicate as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param biPredicate the bi-predicate to return
+         * @return the bi-predicate unchanged
          * @see #from(java.util.function.BiPredicate)
          */
         @Beta
@@ -11598,15 +13401,17 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.BiPredicate by partially applying a TriPredicate to a fixed first argument.
+         * The returned bi-predicate will invoke the tri-predicate with the fixed argument and the two test inputs.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the first argument to the resulting bi-predicate
+         * @param <U> the type of the second argument to the resulting bi-predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-predicate
+         * @param triPredicate the tri-predicate to partially apply
+         * @return a BiPredicate that applies the tri-predicate with the fixed first argument
+         * @throws IllegalArgumentException if triPredicate is null
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final A a, final Throwables.TriPredicate<A, T, U, E> triPredicate)
@@ -11617,13 +13422,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triPredicate
-         * @return
+         * Returns the provided Throwables.TriPredicate as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param triPredicate the tri-predicate to return
+         * @return the tri-predicate unchanged
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> p(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
@@ -11631,11 +13438,13 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
+         * Returns the provided Throwables.Consumer as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param consumer the consumer to return
+         * @return the consumer unchanged
          * @see #from(java.util.function.Consumer)
          */
         @Beta
@@ -11644,14 +13453,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Consumer by partially applying a BiConsumer to a fixed first argument.
+         * The returned consumer will invoke the bi-consumer with the fixed argument and the consumed input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the input to the resulting consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the bi-consumer
+         * @param biConsumer the bi-consumer to partially apply
+         * @return a Consumer that applies the bi-consumer with the fixed first argument
+         * @throws IllegalArgumentException if biConsumer is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
@@ -11662,16 +13473,18 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Consumer by partially applying a TriConsumer to fixed first and second arguments.
+         * The returned consumer will invoke the tri-consumer with the fixed arguments and the consumed input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <B> the type of the fixed second argument
+         * @param <T> the type of the input to the resulting consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-consumer
+         * @param b the fixed second argument to apply to the tri-consumer
+         * @param triConsumer the tri-consumer to partially apply
+         * @return a Consumer that applies the tri-consumer with the fixed arguments
+         * @throws IllegalArgumentException if triConsumer is null
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final B b, final Throwables.TriConsumer<A, B, T, E> triConsumer)
@@ -11682,12 +13495,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
+         * Returns the provided Throwables.BiConsumer as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param biConsumer the bi-consumer to return
+         * @return the bi-consumer unchanged
          * @see #from(java.util.function.BiConsumer)
          */
         @Beta
@@ -11696,15 +13511,17 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.BiConsumer by partially applying a TriConsumer to a fixed first argument.
+         * The returned bi-consumer will invoke the tri-consumer with the fixed argument and the two consumed inputs.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the first argument to the resulting bi-consumer
+         * @param <U> the type of the second argument to the resulting bi-consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-consumer
+         * @param triConsumer the tri-consumer to partially apply
+         * @return a BiConsumer that applies the tri-consumer with the fixed first argument
+         * @throws IllegalArgumentException if triConsumer is null
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final A a, final Throwables.TriConsumer<A, T, U, E> triConsumer)
@@ -11715,13 +13532,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
+         * Returns the provided Throwables.TriConsumer as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <A> the type of the first argument to the consumer
+         * @param <B> the type of the second argument to the consumer
+         * @param <C> the type of the third argument to the consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param triConsumer the tri-consumer to return
+         * @return the tri-consumer unchanged
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> c(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
@@ -11729,12 +13548,14 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param function
-         * @return
+         * Returns the provided Throwables.Function as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param function the function to return
+         * @return the function unchanged
          * @see #from(java.util.function.Function)
          */
         @Beta
@@ -11743,15 +13564,17 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param biFunction
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Function by partially applying a BiFunction to a fixed first argument.
+         * The returned function will invoke the bi-function with the fixed argument and the function input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the input to the resulting function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the bi-function
+         * @param biFunction the bi-function to partially apply
+         * @return a Function that applies the bi-function with the fixed first argument
+         * @throws IllegalArgumentException if biFunction is null
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final Throwables.BiFunction<A, T, R, E> biFunction)
@@ -11762,17 +13585,19 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triFunction
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Function by partially applying a TriFunction to fixed first and second arguments.
+         * The returned function will invoke the tri-function with the fixed arguments and the function input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <B> the type of the fixed second argument
+         * @param <T> the type of the input to the resulting function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-function
+         * @param b the fixed second argument to apply to the tri-function
+         * @param triFunction the tri-function to partially apply
+         * @return a Function that applies the tri-function with the fixed arguments
+         * @throws IllegalArgumentException if triFunction is null
          */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final B b,
@@ -11783,13 +13608,15 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param biFunction
-         * @return
+         * Returns the provided Throwables.BiFunction as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param biFunction the bi-function to return
+         * @return the bi-function unchanged
          * @see #from(java.util.function.BiFunction)
          */
         @Beta
@@ -11798,16 +13625,18 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param triFunction
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.BiFunction by partially applying a TriFunction to a fixed first argument.
+         * The returned bi-function will invoke the tri-function with the fixed argument and the two function inputs.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the first argument to the resulting bi-function
+         * @param <U> the type of the second argument to the resulting bi-function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-function
+         * @param triFunction the tri-function to partially apply
+         * @return a BiFunction that applies the tri-function with the fixed first argument
+         * @throws IllegalArgumentException if triFunction is null
          */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final A a, final Throwables.TriFunction<A, T, U, R, E> triFunction)
@@ -11818,14 +13647,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param triFunction
-         * @return
+         * Returns the provided Throwables.TriFunction as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <A> the type of the first argument to the function
+         * @param <B> the type of the second argument to the function
+         * @param <C> the type of the third argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the exception that may be thrown
+         * @param triFunction the tri-function to return
+         * @return the tri-function unchanged
          */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> f(final Throwables.TriFunction<A, B, C, R, E> triFunction) {
@@ -11833,14 +13664,11 @@ public final class Fn {
         }
 
         /**
-         * <p>Returns the provided unary operator as is - a shorthand identity method for unary operators.</p>
-         *
-         * <p>This method serves as a shorthand convenience method that can help with type inference
-         * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-         * and {@code p()} for Predicate.</p>
-         *
-         * @param <T> the type of the operand and result of the unary operator
-         * @param <E> the type of the exception that may be thrown by the operator
+         * Returns the provided Throwables.UnaryOperator as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the operand and result of the operator
+         * @param <E> the type of the exception that may be thrown
          * @param unaryOperator the unary operator to return
          * @return the unary operator unchanged
          */
@@ -11852,14 +13680,11 @@ public final class Fn {
         }
 
         /**
-         * <p>Returns the provided binary operator as is - a shorthand identity method for binary operators.</p>
-         *
-         * <p>This method serves as a shorthand convenience method that can help with type inference
-         * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-         * and {@code p()} for Predicate.</p>
-         *
-         * @param <T> the type of the operands and result of the binary operator
-         * @param <E> the type of the exception that may be thrown by the operator
+         * Returns the provided Throwables.BinaryOperator as-is.
+         * This is a shorthand identity method that can help with type inference in certain contexts.
+         * 
+         * @param <T> the type of the operands and result of the operator
+         * @param <E> the type of the exception that may be thrown
          * @param binaryOperator the binary operator to return
          * @return the binary operator unchanged
          */
@@ -11871,12 +13696,50 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided Throwables.BiConsumer as-is.
+         * This is a shorthand identity method for a mapper that can help with type inference in certain contexts,
+         * particularly when used with stream operations like mapMulti.
          *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws IllegalArgumentException
+         * <p>Example usage:</p>
+         * <pre>{@code
+         * // Using mc() to help with type inference in a stream operation
+         * Seq<List<String>, Exception> seq = ...;
+         * seq<String, Exception> flatStream = seq.mapMulti(
+         *     Fnn.mc((List<String> list, Consumer<String> consumer) -> {
+         *         for (String item : list) {
+         *             if (item != null && !item.isEmpty()) {
+         *                 consumer.accept(item);
+         *             }
+         *         }
+         *     }));
+         * }</pre>
+         *
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of elements to be accepted by the result consumer
+         * @param <E> the type of the exception that may be thrown
+         * @param mapper the mapping bi-consumer to return
+         * @return the bi-consumer unchanged
+         * @see Seq#mapMulti(Throwables.BiConsumer)
+         * @see Stream#mapMulti(java.util.function.BiConsumer)
+         * @see Fn#mc(java.util.function.BiConsumer)
+         */
+        @Beta
+        public static <T, U, E extends Throwable> Throwables.BiConsumer<T, java.util.function.Consumer<U>, E> mc(
+                final Throwables.BiConsumer<? super T, ? extends java.util.function.Consumer<U>, E> mapper) {
+            N.checkArgNotNull(mapper);
+
+            return (Throwables.BiConsumer<T, java.util.function.Consumer<U>, E>) mapper;
+        }
+
+        /**
+         * Casts a standard Java Predicate to a Throwables.Predicate.
+         * This method performs an unchecked cast and should be used with caution.
+         * 
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param predicate the Java Predicate to cast
+         * @return the predicate cast to Throwables.Predicate
+         * @throws IllegalArgumentException if predicate is null
          * @see #from(java.util.function.Predicate)
          */
         @Beta
@@ -11887,14 +13750,16 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Predicate by partially applying a standard Java BiPredicate to a fixed first argument.
+         * The returned predicate will invoke the bi-predicate with the fixed argument and the test input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <T> the type of the input to the resulting predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the bi-predicate
+         * @param biPredicate the Java BiPredicate to partially apply
+         * @return a Throwables.Predicate that applies the bi-predicate with the fixed first argument
+         * @throws IllegalArgumentException if biPredicate is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -11905,16 +13770,18 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * Creates a Throwables.Predicate by partially applying a TriPredicate to fixed first and second arguments.
+         * The returned predicate will invoke the tri-predicate with the fixed arguments and the test input.
+         * 
+         * @param <A> the type of the fixed first argument
+         * @param <B> the type of the fixed second argument
+         * @param <T> the type of the input to the resulting predicate
+         * @param <E> the type of the exception that may be thrown
+         * @param a the fixed first argument to apply to the tri-predicate
+         * @param b the fixed second argument to apply to the tri-predicate
+         * @param triPredicate the TriPredicate to partially apply
+         * @return a Throwables.Predicate that applies the tri-predicate with the fixed arguments
+         * @throws IllegalArgumentException if triPredicate is null
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate)
@@ -11925,15 +13792,18 @@ public final class Fn {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
-         * @see #from(java.util.function.BiPredicate)
-         */
+        * Returns a BiPredicate that can throw checked exceptions by wrapping the provided BiPredicate.
+        * This method is used to convert a standard BiPredicate to a Throwables.BiPredicate, allowing
+        * it to be used in contexts where checked exceptions are expected.
+        *
+        * @param <T> the type of the first argument to the predicate
+        * @param <U> the type of the second argument to the predicate
+        * @param <E> the type of the checked exception that the returned predicate may throw
+        * @param biPredicate the BiPredicate to wrap
+        * @return a Throwables.BiPredicate that wraps the provided BiPredicate
+        * @throws IllegalArgumentException if biPredicate is null
+        * @see #from(java.util.function.BiPredicate)
+        */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
             N.checkArgNotNull(biPredicate);
@@ -11942,15 +13812,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiPredicate that partially applies the first argument to a TriPredicate.
+         * The returned BiPredicate will test its two arguments along with the pre-supplied
+         * first argument against the original TriPredicate.
          *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the TriPredicate
+         * @param <T> the type of the second argument to the TriPredicate (first argument to the returned BiPredicate)
+         * @param <U> the type of the third argument to the TriPredicate (second argument to the returned BiPredicate)
+         * @param <E> the type of the checked exception that the returned predicate may throw
+         * @param a the first argument to be partially applied to the TriPredicate
+         * @param triPredicate the TriPredicate to be partially applied
+         * @return a Throwables.BiPredicate that partially applies the first argument to the TriPredicate
+         * @throws IllegalArgumentException if triPredicate is null
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate)
@@ -11961,14 +13834,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a TriPredicate that can throw checked exceptions by wrapping the provided TriPredicate.
+         * This method is used to convert a standard TriPredicate to a Throwables.TriPredicate, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @param <E> the type of the checked exception that the returned predicate may throw
+         * @param triPredicate the TriPredicate to wrap
+         * @return a Throwables.TriPredicate that wraps the provided TriPredicate
+         * @throws IllegalArgumentException if triPredicate is null
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate)
@@ -11979,12 +13855,15 @@ public final class Fn {
         }
 
         /**
+         * Returns a Consumer that can throw checked exceptions by wrapping the provided Consumer.
+         * This method is used to convert a standard Consumer to a Throwables.Consumer, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param consumer the Consumer to wrap
+         * @return a Throwables.Consumer that wraps the provided Consumer
+         * @throws IllegalArgumentException if consumer is null
          * @see #from(java.util.function.Consumer)
          */
         @Beta
@@ -11995,14 +13874,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a Consumer that partially applies the first argument to a BiConsumer.
+         * The returned Consumer will accept its argument along with the pre-supplied
+         * first argument to the original BiConsumer.
          *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the BiConsumer
+         * @param <T> the type of the second argument to the BiConsumer (argument to the returned Consumer)
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param a the first argument to be partially applied to the BiConsumer
+         * @param biConsumer the BiConsumer to be partially applied
+         * @return a Throwables.Consumer that partially applies the first argument to the BiConsumer
+         * @throws IllegalArgumentException if biConsumer is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final java.util.function.BiConsumer<A, T> biConsumer)
@@ -12013,16 +13895,19 @@ public final class Fn {
         }
 
         /**
+         * Returns a Consumer that partially applies the first two arguments to a TriConsumer.
+         * The returned Consumer will accept its argument along with the pre-supplied
+         * first two arguments to the original TriConsumer.
          *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the TriConsumer
+         * @param <B> the type of the second argument to the TriConsumer
+         * @param <T> the type of the third argument to the TriConsumer (argument to the returned Consumer)
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param a the first argument to be partially applied to the TriConsumer
+         * @param b the second argument to be partially applied to the TriConsumer
+         * @param triConsumer the TriConsumer to be partially applied
+         * @return a Throwables.Consumer that partially applies the first two arguments to the TriConsumer
+         * @throws IllegalArgumentException if triConsumer is null
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer)
@@ -12033,13 +13918,16 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiConsumer that can throw checked exceptions by wrapping the provided BiConsumer.
+         * This method is used to convert a standard BiConsumer to a Throwables.BiConsumer, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param biConsumer the BiConsumer to wrap
+         * @return a Throwables.BiConsumer that wraps the provided BiConsumer
+         * @throws IllegalArgumentException if biConsumer is null
          * @see #from(java.util.function.BiConsumer)
          */
         @Beta
@@ -12050,15 +13938,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiConsumer that partially applies the first argument to a TriConsumer.
+         * The returned BiConsumer will accept its two arguments along with the pre-supplied
+         * first argument to the original TriConsumer.
          *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the TriConsumer
+         * @param <T> the type of the second argument to the TriConsumer (first argument to the returned BiConsumer)
+         * @param <U> the type of the third argument to the TriConsumer (second argument to the returned BiConsumer)
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param a the first argument to be partially applied to the TriConsumer
+         * @param triConsumer the TriConsumer to be partially applied
+         * @return a Throwables.BiConsumer that partially applies the first argument to the TriConsumer
+         * @throws IllegalArgumentException if triConsumer is null
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer)
@@ -12069,14 +13960,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a TriConsumer that can throw checked exceptions by wrapping the provided TriConsumer.
+         * This method is used to convert a standard TriConsumer to a Throwables.TriConsumer, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the consumer
+         * @param <B> the type of the second argument to the consumer
+         * @param <C> the type of the third argument to the consumer
+         * @param <E> the type of the checked exception that the returned consumer may throw
+         * @param triConsumer the TriConsumer to wrap
+         * @return a Throwables.TriConsumer that wraps the provided TriConsumer
+         * @throws IllegalArgumentException if triConsumer is null
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer)
@@ -12087,13 +13981,16 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that can throw checked exceptions by wrapping the provided Function.
+         * This method is used to convert a standard Function to a Throwables.Function, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param function
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param function the Function to wrap
+         * @return a Throwables.Function that wraps the provided Function
+         * @throws IllegalArgumentException if function is null
          * @see #from(java.util.function.Function)
          */
         @Beta
@@ -12104,15 +14001,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that partially applies the first argument to a BiFunction.
+         * The returned Function will apply its argument along with the pre-supplied
+         * first argument to the original BiFunction.
          *
-         * @param <A>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param biFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the BiFunction
+         * @param <T> the type of the second argument to the BiFunction (argument to the returned Function)
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param a the first argument to be partially applied to the BiFunction
+         * @param biFunction the BiFunction to be partially applied
+         * @return a Throwables.Function that partially applies the first argument to the BiFunction
+         * @throws IllegalArgumentException if biFunction is null
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -12123,17 +14023,20 @@ public final class Fn {
         }
 
         /**
+         * Returns a Function that partially applies the first two arguments to a TriFunction.
+         * The returned Function will apply its argument along with the pre-supplied
+         * first two arguments to the original TriFunction.
          *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the TriFunction
+         * @param <B> the type of the second argument to the TriFunction
+         * @param <T> the type of the third argument to the TriFunction (argument to the returned Function)
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param a the first argument to be partially applied to the TriFunction
+         * @param b the second argument to be partially applied to the TriFunction
+         * @param triFunction the TriFunction to be partially applied
+         * @return a Throwables.Function that partially applies the first two arguments to the TriFunction
+         * @throws IllegalArgumentException if triFunction is null
          */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction)
@@ -12144,14 +14047,17 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiFunction that can throw checked exceptions by wrapping the provided BiFunction.
+         * This method is used to convert a standard BiFunction to a Throwables.BiFunction, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param biFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param biFunction the BiFunction to wrap
+         * @return a Throwables.BiFunction that wraps the provided BiFunction
+         * @throws IllegalArgumentException if biFunction is null
          * @see #from(java.util.function.BiFunction)
          */
         @Beta
@@ -12163,16 +14069,19 @@ public final class Fn {
         }
 
         /**
+         * Returns a BiFunction that partially applies the first argument to a TriFunction.
+         * The returned BiFunction will apply its two arguments along with the pre-supplied
+         * first argument to the original TriFunction.
          *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param triFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the TriFunction
+         * @param <T> the type of the second argument to the TriFunction (first argument to the returned BiFunction)
+         * @param <U> the type of the third argument to the TriFunction (second argument to the returned BiFunction)
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param a the first argument to be partially applied to the TriFunction
+         * @param triFunction the TriFunction to be partially applied
+         * @return a Throwables.BiFunction that partially applies the first argument to the TriFunction
+         * @throws IllegalArgumentException if triFunction is null
          */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction)
@@ -12183,15 +14092,18 @@ public final class Fn {
         }
 
         /**
+         * Returns a TriFunction that can throw checked exceptions by wrapping the provided TriFunction.
+         * This method is used to convert a standard TriFunction to a Throwables.TriFunction, allowing
+         * it to be used in contexts where checked exceptions are expected.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param triFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the function
+         * @param <B> the type of the second argument to the function
+         * @param <C> the type of the third argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the returned function may throw
+         * @param triFunction the TriFunction to wrap
+         * @return a Throwables.TriFunction that wraps the provided TriFunction
+         * @throws IllegalArgumentException if triFunction is null
          */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction)
@@ -12202,14 +14114,15 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Predicate}.
+         * Returns a synchronized Predicate that executes the provided predicate within a synchronized block.
+         * All calls to the returned predicate's test method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param predicate
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the checked exception that the predicate may throw
+         * @param mutex the object to synchronize on
+         * @param predicate the predicate to be executed within the synchronized block
+         * @return a Throwables.Predicate that synchronizes on the mutex before executing the predicate
+         * @throws IllegalArgumentException if mutex or predicate is null
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<T, E> predicate)
@@ -12225,16 +14138,18 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Predicate}.
+         * Returns a synchronized Predicate that partially applies the first argument to a BiPredicate
+         * and executes it within a synchronized block. All calls to the returned predicate's test method
+         * will be synchronized on the specified mutex object.
          *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param a
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the BiPredicate
+         * @param <T> the type of the second argument to the BiPredicate (argument to the returned Predicate)
+         * @param <E> the type of the checked exception that the predicate may throw
+         * @param mutex the object to synchronize on
+         * @param a the first argument to be partially applied to the BiPredicate
+         * @param biPredicate the BiPredicate to be partially applied and executed within the synchronized block
+         * @return a Throwables.Predicate that synchronizes on the mutex before executing the partially applied BiPredicate
+         * @throws IllegalArgumentException if mutex or biPredicate is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
@@ -12250,15 +14165,16 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code BiPredicate}.
+         * Returns a synchronized BiPredicate that executes the provided BiPredicate within a synchronized block.
+         * All calls to the returned BiPredicate's test method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param biPredicate
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the checked exception that the predicate may throw
+         * @param mutex the object to synchronize on
+         * @param biPredicate the BiPredicate to be executed within the synchronized block
+         * @return a Throwables.BiPredicate that synchronizes on the mutex before executing the BiPredicate
+         * @throws IllegalArgumentException if mutex or biPredicate is null
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex, final Throwables.BiPredicate<T, U, E> biPredicate)
@@ -12274,14 +14190,15 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Consumer}.
+         * Returns a synchronized Consumer that executes the provided consumer within a synchronized block.
+         * All calls to the returned consumer's accept method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param consumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of the checked exception that the consumer may throw
+         * @param mutex the object to synchronize on
+         * @param consumer the consumer to be executed within the synchronized block
+         * @return a Throwables.Consumer that synchronizes on the mutex before executing the consumer
+         * @throws IllegalArgumentException if mutex or consumer is null
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<T, E> consumer)
@@ -12297,16 +14214,18 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Consumer}.
+         * Returns a synchronized Consumer that partially applies the first argument to a BiConsumer
+         * and executes it within a synchronized block. All calls to the returned consumer's accept method
+         * will be synchronized on the specified mutex object.
          *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param a
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the BiConsumer
+         * @param <T> the type of the second argument to the BiConsumer (argument to the returned Consumer)
+         * @param <E> the type of the checked exception that the consumer may throw
+         * @param mutex the object to synchronize on
+         * @param a the first argument to be partially applied to the BiConsumer
+         * @param biConsumer the BiConsumer to be partially applied and executed within the synchronized block
+         * @return a Throwables.Consumer that synchronizes on the mutex before executing the partially applied BiConsumer
+         * @throws IllegalArgumentException if mutex or biConsumer is null
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
@@ -12322,15 +14241,16 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code BiConsumer}.
+         * Returns a synchronized BiConsumer that executes the provided BiConsumer within a synchronized block.
+         * All calls to the returned BiConsumer's accept method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the consumer
+         * @param <U> the type of the second argument to the consumer
+         * @param <E> the type of the checked exception that the consumer may throw
+         * @param mutex the object to synchronize on
+         * @param biConsumer the BiConsumer to be executed within the synchronized block
+         * @return a Throwables.BiConsumer that synchronizes on the mutex before executing the BiConsumer
+         * @throws IllegalArgumentException if mutex or biConsumer is null
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex, final Throwables.BiConsumer<T, U, E> biConsumer)
@@ -12346,15 +14266,16 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Function}.
+         * Returns a synchronized Function that executes the provided function within a synchronized block.
+         * All calls to the returned function's apply method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param function
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the function may throw
+         * @param mutex the object to synchronize on
+         * @param function the function to be executed within the synchronized block
+         * @return a Throwables.Function that synchronizes on the mutex before executing the function
+         * @throws IllegalArgumentException if mutex or function is null
          */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function)
@@ -12370,17 +14291,19 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code Function}.
+         * Returns a synchronized Function that partially applies the first argument to a BiFunction
+         * and executes it within a synchronized block. All calls to the returned function's apply method
+         * will be synchronized on the specified mutex object.
          *
-         * @param <A>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param a
-         * @param biFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the BiFunction
+         * @param <T> the type of the second argument to the BiFunction (argument to the returned Function)
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the function may throw
+         * @param mutex the object to synchronize on
+         * @param a the first argument to be partially applied to the BiFunction
+         * @param biFunction the BiFunction to be partially applied and executed within the synchronized block
+         * @return a Throwables.Function that synchronizes on the mutex before executing the partially applied BiFunction
+         * @throws IllegalArgumentException if mutex or biFunction is null
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
@@ -12396,16 +14319,17 @@ public final class Fn {
         }
 
         /**
-         * Synchronized {@code BiFunction}.
+         * Returns a synchronized BiFunction that executes the provided BiFunction within a synchronized block.
+         * All calls to the returned BiFunction's apply method will be synchronized on the specified mutex object.
          *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param mutex to synchronize on
-         * @param biFunction
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that the function may throw
+         * @param mutex the object to synchronize on
+         * @param biFunction the BiFunction to be executed within the synchronized block
+         * @return a Throwables.BiFunction that synchronizes on the mutex before executing the BiFunction
+         * @throws IllegalArgumentException if mutex or biFunction is null
          */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex,
@@ -12421,13 +14345,17 @@ public final class Fn {
         }
 
         /**
+         * Converts a Consumer to a Function that returns null after executing the consumer.
+         * The returned function will execute the consumer's accept method on its input
+         * and then return null.
          *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the consumer/function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param consumer the consumer to convert to a function
+         * @return a Throwables.Function that executes the consumer and returns null
+         * @throws IllegalArgumentException if consumer is null
          */
+        @Beta
         public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) throws IllegalArgumentException {
             N.checkArgNotNull(consumer);
 
@@ -12439,15 +14367,19 @@ public final class Fn {
         }
 
         /**
+         * Converts a Consumer to a Function that returns a specified value after executing the consumer.
+         * The returned function will execute the consumer's accept method on its input
+         * and then return the specified value.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param consumer
-         * @param valueToReturn
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the consumer/function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param consumer the consumer to convert to a function
+         * @param valueToReturn the value to return after executing the consumer
+         * @return a Throwables.Function that executes the consumer and returns the specified value
+         * @throws IllegalArgumentException if consumer is null
          */
+        @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn)
                 throws IllegalArgumentException {
             N.checkArgNotNull(consumer);
@@ -12460,14 +14392,18 @@ public final class Fn {
         }
 
         /**
+         * Converts a BiConsumer to a BiFunction that returns null after executing the consumer.
+         * The returned function will execute the consumer's accept method on its inputs
+         * and then return null.
          *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the consumer/function
+         * @param <U> the type of the second argument to the consumer/function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param biConsumer the BiConsumer to convert to a BiFunction
+         * @return a Throwables.BiFunction that executes the BiConsumer and returns null
+         * @throws IllegalArgumentException if biConsumer is null
          */
+        @Beta
         public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer)
                 throws IllegalArgumentException {
             N.checkArgNotNull(biConsumer);
@@ -12480,16 +14416,20 @@ public final class Fn {
         }
 
         /**
+         * Converts a BiConsumer to a BiFunction that returns a specified value after executing the consumer.
+         * The returned function will execute the consumer's accept method on its inputs
+         * and then return the specified value.
          *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param biConsumer
-         * @param valueToReturn
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the consumer/function
+         * @param <U> the type of the second argument to the consumer/function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param biConsumer the BiConsumer to convert to a BiFunction
+         * @param valueToReturn the value to return after executing the BiConsumer
+         * @return a Throwables.BiFunction that executes the BiConsumer and returns the specified value
+         * @throws IllegalArgumentException if biConsumer is null
          */
+        @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer,
                 final R valueToReturn) throws IllegalArgumentException {
             N.checkArgNotNull(biConsumer);
@@ -12502,15 +14442,19 @@ public final class Fn {
         }
 
         /**
+         * Converts a TriConsumer to a TriFunction that returns null after executing the consumer.
+         * The returned function will execute the consumer's accept method on its inputs
+         * and then return null.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the consumer/function
+         * @param <B> the type of the second argument to the consumer/function
+         * @param <C> the type of the third argument to the consumer/function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param triConsumer the TriConsumer to convert to a TriFunction
+         * @return a Throwables.TriFunction that executes the TriConsumer and returns null
+         * @throws IllegalArgumentException if triConsumer is null
          */
+        @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer)
                 throws IllegalArgumentException {
             N.checkArgNotNull(triConsumer);
@@ -12523,17 +14467,21 @@ public final class Fn {
         }
 
         /**
+         * Converts a TriConsumer to a TriFunction that returns a specified value after executing the consumer.
+         * The returned function will execute the consumer's accept method on its inputs
+         * and then return the specified value.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param triConsumer
-         * @param valueToReturn
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the consumer/function
+         * @param <B> the type of the second argument to the consumer/function
+         * @param <C> the type of the third argument to the consumer/function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the checked exception that may be thrown
+         * @param triConsumer the TriConsumer to convert to a TriFunction
+         * @param valueToReturn the value to return after executing the TriConsumer
+         * @return a Throwables.TriFunction that executes the TriConsumer and returns the specified value
+         * @throws IllegalArgumentException if triConsumer is null
          */
+        @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
                 final R valueToReturn) throws IllegalArgumentException {
             N.checkArgNotNull(triConsumer);
@@ -12546,14 +14494,18 @@ public final class Fn {
         }
 
         /**
+         * Converts a Function to a Consumer that ignores the function's return value.
+         * The returned consumer will execute the function's apply method on its input
+         * and discard the result.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the input to the function/consumer
+         * @param <R> the type of the result of the function (ignored)
+         * @param <E> the type of the checked exception that may be thrown
+         * @param func the function to convert to a consumer
+         * @return a Throwables.Consumer that executes the function and ignores its result
+         * @throws IllegalArgumentException if func is null
          */
+        @Beta
         public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ? extends R, E> func)
                 throws IllegalArgumentException {
             N.checkArgNotNull(func);
@@ -12562,15 +14514,19 @@ public final class Fn {
         }
 
         /**
+         * Converts a BiFunction to a BiConsumer that ignores the function's return value.
+         * The returned consumer will execute the function's apply method on its inputs
+         * and discard the result.
          *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         * @throws IllegalArgumentException
+         * @param <T> the type of the first argument to the function/consumer
+         * @param <U> the type of the second argument to the function/consumer
+         * @param <R> the type of the result of the function (ignored)
+         * @param <E> the type of the checked exception that may be thrown
+         * @param func the BiFunction to convert to a BiConsumer
+         * @return a Throwables.BiConsumer that executes the BiFunction and ignores its result
+         * @throws IllegalArgumentException if func is null
          */
+        @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ? extends R, E> func)
                 throws IllegalArgumentException {
             N.checkArgNotNull(func);
@@ -12579,16 +14535,20 @@ public final class Fn {
         }
 
         /**
+         * Converts a TriFunction to a TriConsumer that ignores the function's return value.
+         * The returned consumer will execute the function's apply method on its inputs
+         * and discard the result.
          *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         * @throws IllegalArgumentException
+         * @param <A> the type of the first argument to the function/consumer
+         * @param <B> the type of the second argument to the function/consumer
+         * @param <C> the type of the third argument to the function/consumer
+         * @param <R> the type of the result of the function (ignored)
+         * @param <E> the type of the checked exception that may be thrown
+         * @param func the TriFunction to convert to a TriConsumer
+         * @return a Throwables.TriConsumer that executes the TriFunction and ignores its result
+         * @throws IllegalArgumentException if func is null
          */
+        @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ? extends R, E> func)
                 throws IllegalArgumentException {
             N.checkArgNotNull(func);
@@ -12597,11 +14557,13 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided Runnable as a Throwables.Runnable.
+         * This is an identity function that simply returns the input runnable.
          *
-         * @param <E>
-         * @param runnable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <E> the type of the checked exception that the runnable may throw
+         * @param runnable the runnable to return
+         * @return the same Throwables.Runnable that was provided
+         * @throws IllegalArgumentException if runnable is null
          */
         public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12610,12 +14572,14 @@ public final class Fn {
         }
 
         /**
+         * Returns the provided Callable as a Throwables.Callable.
+         * This is an identity function that simply returns the input callable.
          *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the callable
+         * @param <E> the type of the checked exception that the callable may throw
+         * @param callable the callable to return
+         * @return the same Throwables.Callable that was provided
+         * @throws IllegalArgumentException if callable is null
          */
         public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12624,11 +14588,13 @@ public final class Fn {
         }
 
         /**
+         * Converts a Runnable to a Callable that returns null after executing the runnable.
+         * The returned callable will execute the runnable's run method and then return null.
          *
-         * @param <E>
-         * @param runnable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <E> the type of the checked exception that may be thrown
+         * @param runnable the runnable to convert to a callable
+         * @return a Throwables.Callable that executes the runnable and returns null
+         * @throws IllegalArgumentException if runnable is null
          */
         public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12640,13 +14606,15 @@ public final class Fn {
         }
 
         /**
+         * Converts a Runnable to a Callable that returns a specified value after executing the runnable.
+         * The returned callable will execute the runnable's run method and then return the specified value.
          *
-         * @param <R>
-         * @param <E>
-         * @param runnable
-         * @param valueToReturn
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the callable
+         * @param <E> the type of the checked exception that may be thrown
+         * @param runnable the runnable to convert to a callable
+         * @param valueToReturn the value to return after executing the runnable
+         * @return a Throwables.Callable that executes the runnable and returns the specified value
+         * @throws IllegalArgumentException if runnable is null
          */
         public static <R, E extends Throwable> Throwables.Callable<R, E> r2c(final Throwables.Runnable<E> runnable, final R valueToReturn)
                 throws IllegalArgumentException {
@@ -12659,12 +14627,14 @@ public final class Fn {
         }
 
         /**
+         * Converts a Callable to a Runnable that ignores the callable's return value.
+         * The returned runnable will execute the callable's call method and discard the result.
          *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the callable (ignored)
+         * @param <E> the type of the checked exception that may be thrown
+         * @param callable the callable to convert to a runnable
+         * @return a Throwables.Runnable that executes the callable and ignores its result
+         * @throws IllegalArgumentException if callable is null
          */
         public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12673,32 +14643,39 @@ public final class Fn {
         }
 
         /**
+         * Casts a standard java.lang.Runnable to a Throwables.Runnable that can throw checked exceptions.
+         * This method performs an unchecked cast and should be used with caution.
          *
-         * @param <E>
-         * @param runnable
-         * @return
+         * @param <E> the type of the checked exception that the returned runnable may throw
+         * @param runnable the standard Runnable to cast
+         * @return a Throwables.Runnable that wraps the provided Runnable
          */
         public static <E extends Throwable> Throwables.Runnable<E> rr(final Runnable runnable) {
             return (Throwables.Runnable<E>) runnable;
         }
 
         /**
+         * Casts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
+         * This method performs an unchecked cast and should be used with caution.
          *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
+         * @param <R> the type of the result of the callable
+         * @param <E> the type of the checked exception that the returned callable may throw
+         * @param callable the standard Callable to cast
+         * @return a Throwables.Callable that wraps the provided Callable
          */
         public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<R> callable) {
             return (Throwables.Callable<R, E>) callable;
         }
 
         /**
+         * Converts a standard java.lang.Runnable to a Throwables.Runnable that can throw checked exceptions.
+         * If the input is already a Throwables.Runnable, it is returned as-is.
+         * Otherwise, a new Throwables.Runnable is created that wraps the standard Runnable.
          *
-         * @param <E>
-         * @param runnable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <E> the type of the checked exception that the returned runnable may throw
+         * @param runnable the standard Runnable to convert
+         * @return a Throwables.Runnable that wraps the provided Runnable
+         * @throws IllegalArgumentException if runnable is null
          */
         public static <E extends Throwable> Throwables.Runnable<E> jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12711,11 +14688,15 @@ public final class Fn {
         }
 
         /**
+         * Converts a Throwables.Runnable to a standard java.lang.Runnable.
+         * If the input is already a java.lang.Runnable, it is returned as-is.
+         * Otherwise, a new java.lang.Runnable is created that wraps the Throwables.Runnable
+         * and converts any checked exceptions to runtime exceptions.
          *
-         * @param <E>
-         * @param runnable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <E> the type of the checked exception that the input runnable may throw
+         * @param runnable the Throwables.Runnable to convert
+         * @return a standard java.lang.Runnable that wraps the provided Throwables.Runnable
+         * @throws IllegalArgumentException if runnable is null
          */
         public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12734,11 +14715,14 @@ public final class Fn {
         }
 
         /**
+         * Converts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
+         * If the input is already a Throwables.Callable, it is returned as-is.
+         * Otherwise, a new Throwables.Callable is created that wraps the standard Callable.
          *
-         * @param <R>
-         * @param callable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the callable
+         * @param callable the standard Callable to convert
+         * @return a Throwables.Callable that wraps the provided Callable
+         * @throws IllegalArgumentException if callable is null
          */
         public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12751,11 +14735,14 @@ public final class Fn {
         }
 
         /**
+         * Converts a Throwables.Callable to a standard java.util.concurrent.Callable.
+         * If the input is already a java.util.concurrent.Callable, it is returned as-is.
+         * Otherwise, a new java.util.concurrent.Callable is created that wraps the Throwables.Callable.
          *
-         * @param <R>
-         * @param callable
-         * @return
-         * @throws IllegalArgumentException
+         * @param <R> the type of the result of the callable
+         * @param callable the Throwables.Callable to convert
+         * @return a standard java.util.concurrent.Callable that wraps the provided Throwables.Callable
+         * @throws IllegalArgumentException if callable is null
          */
         public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, ? extends Exception> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);

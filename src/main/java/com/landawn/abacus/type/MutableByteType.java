@@ -25,15 +25,22 @@ public class MutableByteType extends NumberType<MutableByte> {
         super(MUTABLE_BYTE);
     }
 
+    /**
+     * Returns the Class object representing the MutableByte type.
+     *
+     * @return The Class object for MutableByte
+     */
     @Override
     public Class<MutableByte> clazz() {
         return MutableByte.class;
     }
 
     /**
+     * Converts a MutableByte object to its string representation.
+     * The byte value is converted to a decimal string.
      *
-     * @param x
-     * @return
+     * @param x The MutableByte object to convert
+     * @return The string representation of the byte value, or null if the input is null
      */
     @Override
     public String stringOf(final MutableByte x) {
@@ -41,9 +48,12 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Parses a string to create a MutableByte object.
+     * The string is parsed as a byte value.
      *
-     * @param str
-     * @return
+     * @param str The string to parse
+     * @return A MutableByte containing the parsed value, or null if the input is null or empty
+     * @throws NumberFormatException if the string cannot be parsed as a byte
      */
     @Override
     public MutableByte valueOf(final String str) {
@@ -51,11 +61,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Retrieves a MutableByte value from a ResultSet at the specified column index.
+     * The database byte value is wrapped in a MutableByte object.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnIndex The column index (1-based) to retrieve the value from
+     * @return A MutableByte containing the retrieved value
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public MutableByte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -63,11 +75,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Retrieves a MutableByte value from a ResultSet using the specified column label.
+     * The database byte value is wrapped in a MutableByte object.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnLabel The label of the column to retrieve the value from
+     * @return A MutableByte containing the retrieved value
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public MutableByte get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -75,11 +89,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Sets a MutableByte parameter in a PreparedStatement at the specified position.
+     * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The PreparedStatement to set the parameter on
+     * @param columnIndex The parameter index (1-based) to set
+     * @param x The MutableByte value to set
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableByte x) throws SQLException {
@@ -87,11 +103,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
+     * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The CallableStatement to set the parameter on
+     * @param parameterName The name of the parameter to set
+     * @param x The MutableByte value to set
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableByte x) throws SQLException {
@@ -99,10 +117,12 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Appends the string representation of a MutableByte to an Appendable.
+     * The value is written as a decimal string or "null".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable The Appendable to write to
+     * @param x The MutableByte to append
+     * @throws IOException if an I/O error occurs while appending
      */
     @Override
     public void appendTo(final Appendable appendable, final MutableByte x) throws IOException {
@@ -114,11 +134,14 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
+     * Writes the character representation of a MutableByte to a CharacterWriter.
+     * The value is written as numeric characters or the null character array.
+     * This method is optimized for character-based writing.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer The CharacterWriter to write to
+     * @param x The MutableByte to write
+     * @param config The serialization configuration (currently unused for byte values)
+     * @throws IOException if an I/O error occurs while writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final MutableByte x, final JSONXMLSerializationConfig<?> config) throws IOException {

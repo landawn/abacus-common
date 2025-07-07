@@ -14,19 +14,39 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts a variable number of float-valued arguments and returns no result.
+ * This is a functional interface whose functional method is {@link #accept(float...)}.
+ * 
+ * <p>This is a primitive type specialization of {@code Consumer} for {@code float} varargs.</p>
+ * 
+ * @since 1.0
+ * @see java.util.function.Consumer
+ */
 @FunctionalInterface
 public interface FloatNConsumer {
 
     /**
+     * Performs this operation on the given float arguments.
+     * 
+     * <p>The behavior of this method is implementation-dependent and may process
+     * the float values in any manner required by the specific use case.</p>
      *
-     * @param args
+     * @param args the float values to be processed. May be empty, in which case
+     *             the consumer should handle the empty array appropriately.
      */
     void accept(float... args);
 
     /**
+     * Returns a composed {@code FloatNConsumer} that performs, in sequence, this
+     * operation followed by the {@code after} operation. If performing either
+     * operation throws an exception, it is relayed to the caller of the
+     * composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be null.
+     * @return a composed {@code FloatNConsumer} that performs in sequence this
+     *         operation followed by the {@code after} operation
      */
     default FloatNConsumer andThen(final FloatNConsumer after) {
         return args -> {

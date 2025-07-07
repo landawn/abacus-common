@@ -23,6 +23,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for Boolean array operations.
+ * This class provides serialization/deserialization and I/O operations
+ * for Boolean[] arrays, handling null elements and array formatting.
+ */
 public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
     BooleanArrayType() {
@@ -30,9 +35,13 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
+     * Converts a Boolean array to its string representation.
+     * The array is formatted with square brackets and comma-separated elements.
+     * Null elements are represented as "null" in the output.
      *
-     * @param x
-     * @return
+     * @param x the Boolean array to convert
+     * @return a string representation like "[true, false, null]", or null if input is null,
+     *         or "[]" if the array is empty
      */
     @MayReturnNull
     @Override
@@ -43,43 +52,24 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 7));
-        //    sb.append(WD._BRACKET_L);
-        //
-        //    for (int i = 0, len = x.length; i < len; i++) {
-        //        if (i > 0) {
-        //            sb.append(ELEMENT_SEPARATOR);
-        //        }
-        //
-        //        if (x[i] == null) {
-        //            sb.append(NULL_CHAR_ARRAY);
-        //        } else {
-        //            sb.append(x[i]);
-        //        }
-        //    }
-        //
-        //    sb.append(WD._BRACKET_R);
-        //
-        //    final String str = sb.toString();
-        //
-        //    Objectory.recycle(sb);
-        //
-        //    return str;
-
         return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
+     * Converts a string representation back to a Boolean array.
+     * Parses a string in the format "[true, false, null]" into a Boolean array.
+     * The string "null" (case-sensitive) is parsed as a null element.
      *
-     * @param str
-     * @return
+     * @param str the string to parse, expecting format like "[true, false, null]"
+     * @return a Boolean array parsed from the string, or null if str is null,
+     *         or an empty array if str is empty or equals "[]"
      */
     @MayReturnNull
     @Override
     public Boolean[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }
 
@@ -101,10 +91,13 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
+     * Appends a Boolean array to an Appendable object.
+     * Formats the array with square brackets and comma-separated elements.
+     * Null array elements are appended as "null", and boolean values as "true" or "false".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable object to append to
+     * @param x the Boolean array to append, may be null
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean[] x) throws IOException {
@@ -130,11 +123,14 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
+     * Writes a Boolean array to a CharacterWriter.
+     * Uses optimized character arrays for boolean values to improve performance.
+     * The output format matches the string representation with square brackets.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Boolean array to write, may be null
+     * @param config the serialization configuration (not used for boolean arrays)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Boolean[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

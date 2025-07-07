@@ -24,9 +24,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothBursty;
 import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
 
 /**
- * Note: Copied from Google Guava under Apache License v2.0
- * <br />
- * <br />
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p> 
  *
  * A rate limiter. Conceptually, a rate limiter distributes permits at a configurable rate. Each
  * {@link #acquire()} blocks if necessary until a permit is available, and then takes it. Once

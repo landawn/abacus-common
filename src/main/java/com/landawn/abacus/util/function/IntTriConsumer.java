@@ -16,22 +16,60 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts three {@code int}-valued arguments and
+ * returns no result. This is the three-arity specialization of
+ * {@link java.util.function.Consumer}. Unlike most other functional interfaces,
+ * {@code IntTriConsumer} is expected to operate via side-effects.
+ *
+ * <p>This interface extends {@link Throwables.IntTriConsumer} with
+ * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * exception handling capabilities.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #accept(int, int, int)}.
+ *
+ * @see java.util.function.Consumer
+ * @see java.util.function.BiConsumer
+ * @since 1.8
+ */
 @FunctionalInterface
 public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param a
-     * @param b
-     * @param c
+     * <p>The consumer processes three int values and performs some side-effect
+     * operation. Common use cases include:
+     * <ul>
+     *   <li>Processing 3D coordinates (x, y, z)</li>
+     *   <li>Handling RGB color values</li>
+     *   <li>Managing three related indices or counters</li>
+     *   <li>Accumulating or aggregating three int values</li>
+     *   <li>Updating state based on three int parameters</li>
+     * </ul>
+     *
+     * @param a the first input argument
+     * @param b the second input argument
+     * @param c the third input argument
      */
     @Override
     void accept(int a, int b, int c);
 
     /**
+     * Returns a composed {@code IntTriConsumer} that performs, in sequence, this
+     * operation followed by the {@code after} operation. If performing either
+     * operation throws an exception, it is relayed to the caller of the
+     * composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * <p>This method allows for chaining multiple consumers to create a pipeline
+     * of operations that will be executed sequentially on the same three input
+     * values.
+     *
+     * @param after the operation to perform after this operation. Must not be null
+     * @return a composed {@code IntTriConsumer} that performs in sequence this
+     *         operation followed by the {@code after} operation
      */
     default IntTriConsumer andThen(final IntTriConsumer after) {
         return (a, b, c) -> {

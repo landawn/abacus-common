@@ -24,9 +24,11 @@ import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
 
 /**
+ * Type handler for SetMultimap, which maps keys to sets of values.
+ * This class handles serialization and deserialization of SetMultimap instances.
  *
  * @param <K> the key type
- * @param <E>
+ * @param <E> the element type in the value sets
  */
 @SuppressWarnings("java:S2160")
 public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
@@ -36,9 +38,12 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
     }
 
     /**
+     * Converts a SetMultimap to its JSON string representation.
+     * The multimap is first converted to a Map<K, Collection<E>> format where each key
+     * maps to a collection of its associated values, then serialized to JSON.
      *
-     * @param x
-     * @return
+     * @param x the SetMultimap to convert to string
+     * @return the JSON string representation of the multimap, or null if the input is null
      */
     @Override
     public String stringOf(final SetMultimap<K, E> x) {
@@ -46,15 +51,20 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
     }
 
     /**
+     * Parses a JSON string representation and returns the corresponding SetMultimap.
+     * The string should represent a map where each key maps to a collection of values.
+     * The resulting SetMultimap will use LinkedHashSet for value collections to maintain
+     * insertion order while ensuring uniqueness.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return the parsed SetMultimap, or null if the input string is null or empty
+     * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public SetMultimap<K, E> valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 

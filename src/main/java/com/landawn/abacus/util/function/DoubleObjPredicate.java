@@ -17,37 +17,55 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a predicate (boolean-valued function) of a double-valued argument and an object-valued argument.
+ * This is the (double, reference) specialization of {@link java.util.function.BiPredicate}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #test(double, Object)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the object argument to the predicate
+ *
+ * @see java.util.function.BiPredicate
  */
 @FunctionalInterface
 public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR
     /**
+     * Evaluates this predicate on the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the double input argument
+     * @param u the object input argument
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(double t, T u);
 
+    /**
+     * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * @return a predicate that represents the logical negation of this predicate
+     */
     default DoubleObjPredicate<T> negate() {
         return (i, t) -> !test(i, t);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * @param other a predicate that will be logically-ANDed with this predicate
+     * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default DoubleObjPredicate<T> and(final DoubleObjPredicate<T> other) {
         return (i, t) -> test(i, t) && other.test(i, t);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * @param other a predicate that will be logically-ORed with this predicate
+     * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default DoubleObjPredicate<T> or(final DoubleObjPredicate<T> other) {
         return (i, t) -> test(i, t) || other.test(i, t);

@@ -28,15 +28,21 @@ public class RefType extends AbstractType<Ref> {
         super(REF);
     }
 
+    /**
+     * Returns the Class object representing the SQL Ref type.
+     *
+     * @return the Class object for java.sql.Ref.class
+     */
     @Override
     public Class<Ref> clazz() {
         return Ref.class;
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this type is serializable.
+     * SQL Ref types are not serializable as they represent database references.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -44,10 +50,12 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Converts a Ref object to its string representation.
+     * This operation is not supported for SQL Ref types.
      *
-     * @param x
-     * @return
-     * @throws UnsupportedOperationException
+     * @param x the Ref object to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as Ref cannot be converted to string
      */
     @Override
     public String stringOf(final Ref x) throws UnsupportedOperationException {
@@ -55,10 +63,12 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Creates a Ref object from a string representation.
+     * This operation is not supported for SQL Ref types.
      *
-     * @param str
-     * @return
-     * @throws UnsupportedOperationException
+     * @param str the string to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as Ref cannot be created from string
      */
     @Override
     public Ref valueOf(final String str) throws UnsupportedOperationException {
@@ -66,11 +76,13 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Retrieves a SQL REF value from the specified column in the ResultSet.
+     * A REF value represents a reference to an SQL structured type value in the database.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the Ref value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Ref get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -78,11 +90,13 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Retrieves a SQL REF value from the specified column in the ResultSet.
+     * A REF value represents a reference to an SQL structured type value in the database.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the Ref value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Ref get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -90,11 +104,13 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Sets a Ref parameter in a PreparedStatement.
+     * The Ref represents a reference to an SQL structured type value in the database.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the Ref value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Ref x) throws SQLException {
@@ -102,11 +118,14 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Sets a Ref parameter in a CallableStatement.
+     * The Ref represents a reference to an SQL structured type value in the database.
+     * Note: This method uses setObject instead of setRef as CallableStatement may not support setRef with parameter names.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Ref value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Ref x) throws SQLException {

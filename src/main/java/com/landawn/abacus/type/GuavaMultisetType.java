@@ -32,8 +32,13 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Google Guava Multiset implementations.
+ * This class provides serialization and deserialization capabilities for various Guava Multiset types
+ * including HashMultiset, LinkedHashMultiset, and TreeMultiset.
+ * Multisets are serialized as Map<E, Integer> structures where the value represents the count of each element.
  *
- * @param <E>
+ * @param <E> the element type of the multiset
+ * @param <T> the multiset type (must extend Multiset<E>)
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
@@ -63,30 +68,32 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
     }
 
+    /**
+     * Returns the declaring name of this multiset type.
+     * The declaring name represents the type in a format suitable for type declarations,
+     * using canonical class names with type parameters.
+     *
+     * @return the declaring name of this type (e.g., "com.google.common.collect.Multiset<String>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the multiset type handled by this type handler.
+     *
+     * @return the Class object for the multiset type
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the type handler for the elements contained in this multiset.
      *
-     * @return
-     */
-    @Override
-    public Type<E>[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    /**
-     * Gets the element type.
-     *
-     * @return
+     * @return the Type instance representing the element type of this multiset
      */
     @Override
     public Type<E> getElementType() {
@@ -94,9 +101,20 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     }
 
     /**
-     * Checks if is generic type.
+     * Returns an array containing the parameter types of this generic multiset type.
+     * For multiset types, this array contains a single element representing the element type.
      *
-     * @return {@code true}, if is generic type
+     * @return an array containing the element type as the only parameter type
+     */
+    @Override
+    public Type<E>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    /**
+     * Indicates that this is a generic type with type parameters.
+     *
+     * @return true as multiset types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -104,9 +122,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether instances of this type can be serialized.
+     * Guava multisets are serializable through their Map representation.
      *
-     * @return {@code true}, if is serializable
+     * @return true, as multisets can be serialized
      */
     @Override
     public boolean isSerializable() {
@@ -114,9 +133,12 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     }
 
     /**
+     * Converts a multiset to its string representation.
+     * The multiset is serialized as a JSON object where each element maps to its count.
+     * For ordered multisets (LinkedHashMultiset, TreeMultiset), the order is preserved using LinkedHashMap.
      *
-     * @param x
-     * @return
+     * @param x the multiset to convert to string
+     * @return the JSON string representation of the multiset as a map of elements to counts, or null if the input is null
      */
     @Override
     public String stringOf(final T x) {
@@ -134,9 +156,12 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     }
 
     /**
+     * Converts a string representation back to a multiset instance.
+     * The string should be in JSON format representing a Map<E, Integer> where values are element counts.
+     * Creates the appropriate multiset implementation based on the type class.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return a new multiset instance containing the parsed elements with their counts, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -156,6 +181,15 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         return multiset;
     }
 
+    /**
+     * Generates a type name string for a multiset type with the specified element type.
+     * The format depends on whether a declaring name or full name is requested.
+     *
+     * @param typeClass the multiset class
+     * @param parameterTypeName the name of the element type
+     * @param isDeclaringName true to generate a declaring name, false for the full name
+     * @return the formatted type name (e.g., "Multiset<String>")
+     */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
@@ -164,6 +198,18 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         }
     }
 
+    /**
+     * Creates a new instance of the appropriate multiset implementation.
+     * Selects the concrete implementation based on the type class:
+     * - HashMultiset for unordered multisets and abstract types
+     * - LinkedHashMultiset for ordered multisets
+     * - TreeMultiset for sorted multisets
+     * Falls back to reflection-based instantiation for custom implementations.
+     *
+     * @param size the expected number of distinct elements
+     * @return a new multiset instance
+     * @throws IllegalArgumentException if no suitable constructor or factory method is found
+     */
     protected T newInstance(int size) {
         if (HashMultiset.class.isAssignableFrom(typeClass) || Modifier.isAbstract(typeClass.getModifiers())) {
             return (T) HashMultiset.create(size);

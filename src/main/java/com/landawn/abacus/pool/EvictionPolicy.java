@@ -15,20 +15,89 @@
 package com.landawn.abacus.pool;
 
 /**
- * The Enum EvictionPolicy.
- *
+ * Enumeration of eviction policies that determine which objects to remove from a pool
+ * when it reaches capacity or during periodic eviction runs.
+ * 
+ * <p>The eviction policy affects both:
+ * <ul>
+ *   <li>Automatic eviction of expired objects during scheduled eviction runs</li>
+ *   <li>Selection of objects to remove during vacate operations when the pool is full</li>
+ * </ul>
+ * 
+ * <p>Each policy uses different criteria from the object's {@link ActivityPrint} to determine
+ * eviction priority. Objects with lower values according to the policy's criteria are
+ * evicted first.
+ * 
+ * <p>Usage example:
+ * <pre>{@code
+ * // LRU-style pool - evicts least recently used objects
+ * ObjectPool<Resource> lruPool = PoolFactory.createObjectPool(
+ *     100, 60000, EvictionPolicy.LAST_ACCESS_TIME
+ * );
+ * 
+ * // LFU-style pool - evicts least frequently used objects  
+ * ObjectPool<Resource> lfuPool = PoolFactory.createObjectPool(
+ *     100, 60000, EvictionPolicy.ACCESS_COUNT
+ * );
+ * 
+ * // Time-based pool - evicts objects closest to expiration
+ * ObjectPool<Resource> timePool = PoolFactory.createObjectPool(
+ *     100, 60000, EvictionPolicy.EXPIRATION_TIME
+ * );
+ * }</pre>
+ * 
+ * @see AbstractPool
+ * @see ActivityPrint
+ * @see PoolFactory
  */
 public enum EvictionPolicy {
     /**
-     * Field LAST_ACCESSED_TIME.
+     * Least Recently Used (LRU) eviction policy.
+     * Objects are evicted based on their last access time, with the least recently
+     * accessed objects being evicted first.
+     * 
+     * <p>This policy is ideal for:
+     * <ul>
+     *   <li>General-purpose caching where recent access indicates future use</li>
+     *   <li>Scenarios where temporal locality is important</li>
+     *   <li>Default choice when unsure which policy to use</li>
+     * </ul>
+     * 
+     * <p>Objects with the oldest {@link ActivityPrint#getLastAccessTime()} are evicted first.
      */
     LAST_ACCESS_TIME,
+
     /**
-     * Field EXPIRATION_TIME.
+     * Time-based eviction policy.
+     * Objects are evicted based on their expiration time, with objects closest to
+     * expiration being evicted first.
+     * 
+     * <p>This policy is ideal for:
+     * <ul>
+     *   <li>Pools where objects have varying lifetimes</li>
+     *   <li>Scenarios where you want to maximize object lifetime utilization</li>
+     *   <li>Cases where objects become less valuable as they age</li>
+     * </ul>
+     * 
+     * <p>Objects with the earliest {@link ActivityPrint#getExpirationTime()} are evicted first.
+     * This ensures objects are used for as much of their lifetime as possible.
      */
     EXPIRATION_TIME,
+
     /**
-     * Field ACCESSED_COUNT.
+     * Least Frequently Used (LFU) eviction policy.
+     * Objects are evicted based on their access count, with the least frequently
+     * accessed objects being evicted first.
+     * 
+     * <p>This policy is ideal for:
+     * <ul>
+     *   <li>Scenarios where popular objects should remain cached</li>
+     *   <li>Pools where access frequency is a good predictor of future use</li>
+     *   <li>Long-running applications with stable access patterns</li>
+     * </ul>
+     * 
+     * <p>Objects with the lowest {@link ActivityPrint#getAccessCount()} are evicted first.
+     * Note that this policy may keep old but frequently accessed objects indefinitely.
      */
     ACCESS_COUNT
 }

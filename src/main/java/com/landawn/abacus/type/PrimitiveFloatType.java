@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive float values.
+ * This class handles the primitive float type specifically, as opposed to the Float wrapper class.
+ * It provides type information and default value handling for float primitives.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatType extends AbstractFloatType {
 
@@ -25,6 +30,12 @@ public final class PrimitiveFloatType extends AbstractFloatType {
         super(FLOAT);
     }
 
+    /**
+     * Returns the Class object representing the primitive float type.
+     * Note that this returns float.class, not Float.class.
+     *
+     * @return the Class object for the primitive float type
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -32,15 +43,22 @@ public final class PrimitiveFloatType extends AbstractFloatType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * Always returns true for PrimitiveFloatType.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, as this type handler is for primitive float
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive float type.
+     * The default value for float primitives is 0.0f.
+     *
+     * @return Float value of 0.0f as the default value for primitive float
+     */
     @Override
     public Float defaultValue() {
         return DEFAULT_VALUE;

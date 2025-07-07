@@ -16,20 +16,32 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts a single {@code byte}-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code byte}.
+ * Unlike most other functional interfaces, {@code ByteConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(byte)}.
+ *
+ */
 @FunctionalInterface
 public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given argument.
      *
-     * @param t
+     * @param t the input argument
      */
     @Override
     void accept(byte t);
 
     /**
+     * Returns a composed {@code ByteConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code ByteConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ByteConsumer andThen(final ByteConsumer after) {
         return t -> {

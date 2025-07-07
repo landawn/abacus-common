@@ -28,8 +28,12 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 
 /**
+ * Abstract base type handler for {@link Number} subclasses, providing common functionality
+ * for numeric type handling including serialization, deserialization, and type conversions.
+ * This class uses reflection to automatically discover factory methods or constructors
+ * for creating instances from strings.
  *
- * @param <T>
+ * @param <T> the specific Number subclass this type handler manages
  */
 public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
@@ -133,9 +137,9 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     * Checks if is number.
+     * Indicates whether this type represents a numeric value.
      *
-     * @return {@code true}, if is number
+     * @return true, as this is a number type
      */
     @Override
     public boolean isNumber() {
@@ -143,29 +147,45 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether values of this type should be quoted when written to CSV format.
+     * Numeric values typically don't require quotes in CSV.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating numeric values don't need quotes in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
         return true;
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the class object for the specific Number subclass
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
+    /**
+     * Converts a string representation to an instance of the number type.
+     * This method uses the discovered factory method or constructor to create instances.
+     * 
+     * @param str the string to convert
+     * @return an instance of the number type, or null if the input string is empty or null
+     * @throws NumberFormatException if the string cannot be parsed as the target number type
+     * @throws UnsupportedOperationException if no suitable factory method or constructor was found
+     */
     @Override
     public T valueOf(final String str) {
         return N.isEmpty(str) ? null : creator.apply(str);
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts a number object to its string representation.
+     * 
+     * @param x the number object to convert
+     * @return the string representation using toString(), or null if the input is null
      */
     @Override
     public String stringOf(final T x) {
@@ -173,10 +193,11 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of a number to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the number value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -188,11 +209,13 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of a number to a CharacterWriter.
+     * This method delegates to the appendTo method and is typically used for JSON/XML serialization.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the number value to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {

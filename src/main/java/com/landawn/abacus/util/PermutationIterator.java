@@ -25,9 +25,27 @@ import java.util.NoSuchElementException;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 
 /**
- * Copied from Google Guava.
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
- * Provides static methods for working with {@code Collection} instances.
+ * Provides static methods for generating permutations of collections.
+ * This class offers two main approaches for generating permutations:
+ * <ul>
+ *   <li>Plain Changes algorithm - generates all permutations without considering order</li>
+ *   <li>Lexicographical algorithm - generates permutations in a specific order based on a comparator</li>
+ * </ul>
+ * 
+ * <p>All methods return iterators that generate permutations lazily, making them memory-efficient
+ * for large collections. The generated lists are new instances and modifications to them do not
+ * affect the original collection.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * List<String> items = Arrays.asList("A", "B", "C");
+ * ObjIterator<List<String>> perms = PermutationIterator.of(items);
+ * while (perms.hasNext()) {
+ *     System.out.println(perms.next()); // Prints each permutation
+ * }
+ * }</pre>
  *
  * @author Chris Povirk
  * @author Mike Bostock
@@ -39,22 +57,28 @@ public final class PermutationIterator {
     }
 
     /**
-     * Returns a {@link Collection} of all the permutations of the specified
-     * {@link Collection}.
+     * Returns an iterator over all permutations of the specified collection.
+     * 
+     * <p>This implementation uses the Plain Changes algorithm for permutation generation,
+     * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.</p>
+     * 
+     * <p>If the input collection contains duplicate elements, some of the generated
+     * permutations will be equal. An empty collection has only one permutation: an empty list.</p>
+     * 
+     * <p>The returned iterator generates permutations lazily and does not store all permutations
+     * in memory, making it suitable for large collections.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3);
+     * ObjIterator<List<Integer>> perms = PermutationIterator.of(numbers);
+     * // Generates: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]
+     * }</pre>
      *
-     * <p><i>Notes:</i> This is an implementation of the Plain Changes algorithm
-     * for permutations generation, described in Knuth's "The Art of Computer
-     * Programming", Volume 4, Chapter 7, Section 7.2.1.2.
-     *
-     * <p>If the input list contains equal elements, some of the generated
-     * permutations will be equal.
-     *
-     * <p>An empty collection has only one permutation, which is an empty list.
-     *
-     * @param <T>
-     * @param elements the original collection whose elements have to be permuted.
-     * @return an immutable {@link Collection} containing all the different
-     *     permutations of the original collection.
+     * @param <T> the type of elements in the collection
+     * @param elements the original collection whose elements have to be permuted
+     * @return an iterator containing all the different permutations of the original collection
+     * @throws IllegalArgumentException if elements is null
      */
     public static <T> ObjIterator<List<T>> of(final Collection<T> elements) {
         N.checkArgNotNull(elements, cs.elements);
@@ -149,78 +173,66 @@ public final class PermutationIterator {
     }
 
     /**
-     * Returns a {@link Collection} of all the permutations of the specified
-     * {@link Iterable}.
+     * Returns an iterator over all permutations of the specified collection in lexicographical order.
+     * The elements must implement {@link Comparable}.
+     * 
+     * <p>This is an implementation of the algorithm for Lexicographical Permutations Generation,
+     * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.
+     * The iteration order follows the lexicographical order. This means that the first permutation
+     * will be in ascending order, and the last will be in descending order.</p>
+     * 
+     * <p>Duplicate elements are considered equal. For example, the list [1, 1] will have only
+     * one permutation, instead of two. This is why the elements have to implement {@link Comparable}.</p>
+     * 
+     * <p>An empty collection has only one permutation: an empty list.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(3, 1, 2);
+     * ObjIterator<List<Integer>> perms = PermutationIterator.ordered(numbers);
+     * // Generates: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]
+     * }</pre>
      *
-     * <p><i>Notes:</i> This is an implementation of the algorithm for
-     * Lexicographical Permutations Generation, described in Knuth's "The Art of
-     * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
-     * iteration order follows the lexicographical order. This means that
-     * the first permutation will be in ascending order, and the last will be in
-     * descending order.
-     *
-     * <p>Duplicate elements are considered equal. For example, the list [1, 1]
-     * will have only one permutation, instead of two. This is why the elements
-     * have to implement {@link Comparable}.
-     *
-     * <p>An empty iterable has only one permutation, which is an empty list.
-     *
-     * <p>This method is equivalent to
-     * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
-     *
-     * @param <T>
-     * @param elements the original iterable whose elements have to be permuted.
-     * @return an immutable {@link Collection} containing all the different
-     *     permutations of the original iterable.
+     * @param <T> the type of elements in the collection
+     * @param elements the original iterable whose elements have to be permuted
+     * @return an iterator containing all the different permutations of the original iterable
+     * @throws IllegalArgumentException if elements is null
      */
     public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) {
         return ordered(elements, Comparators.naturalOrder());
     }
 
     /**
-     * Returns a {@link Collection} of all the permutations of the specified
-     * {@link Iterable} using the specified {@link Comparator} for establishing
-     * the lexicographical ordering.
+     * Returns an iterator over all permutations of the specified collection using the specified
+     * {@link Comparator} for establishing the lexicographical ordering.
+     * 
+     * <p>Examples:</p>
+     * <pre>{@code
+     * // String permutations in alphabetical order
+     * List<String> words = Arrays.asList("b", "c", "a");
+     * ObjIterator<List<String>> perms = PermutationIterator.ordered(words, String::compareTo);
+     * // Generates: [a,b,c], [a,c,b], [b,a,c], [b,c,a], [c,a,b], [c,b,a]
+     * 
+     * // Handling duplicates
+     * List<Integer> numbers = Arrays.asList(1, 2, 2, 1);
+     * ObjIterator<List<Integer>> perms2 = PermutationIterator.ordered(numbers, Integer::compare);
+     * // Generates: [1,1,2,2], [1,2,1,2], [1,2,2,1], [2,1,1,2], [2,1,2,1], [2,2,1,1]
+     * }</pre>
+     * 
+     * <p>This is an implementation of the algorithm for Lexicographical Permutations Generation,
+     * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.
+     * The iteration order follows the lexicographical order defined by the comparator.</p>
+     * 
+     * <p>Elements that compare as equal are considered identical and no new permutations
+     * are created by swapping them.</p>
+     * 
+     * <p>An empty collection has only one permutation: an empty list.</p>
      *
-     * <p>Examples: <pre>   {@code
-     *
-     *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
-     *     println(perm);
-     *   }
-     *   // -> ["a", "b", "c"]
-     *   // -> ["a", "c", "b"]
-     *   // -> ["b", "a", "c"]
-     *   // -> ["b", "c", "a"]
-     *   // -> ["c", "a", "b"]
-     *   // -> ["c", "b", "a"]
-     *
-     *   for (List<Integer> perm : orderedPermutations(asList(1, 2, 2, 1))) {
-     *     println(perm);
-     *   }
-     *   // -> [1, 1, 2, 2]
-     *   // -> [1, 2, 1, 2]
-     *   // -> [1, 2, 2, 1]
-     *   // -> [2, 1, 1, 2]
-     *   // -> [2, 1, 2, 1]
-     *   // -> [2, 2, 1, 1]}</pre>
-     *
-     * <p><i>Notes:</i> This is an implementation of the algorithm for
-     * Lexicographical Permutations Generation, described in Knuth's "The Art of
-     * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
-     * iteration order follows the lexicographical order. This means that
-     * the first permutation will be in ascending order, and the last will be in
-     * descending order.
-     *
-     * <p>Elements that compare equal are considered equal and no new permutations
-     * are created by swapping them.
-     *
-     * <p>An empty iterable has only one permutation, which is an empty list.
-     *
-     * @param <T>
-     * @param elements the original iterable whose elements have to be permuted.
-     * @param comparator a comparator for the iterable's elements.
-     * @return an immutable {@link Collection} containing all the different
-     *     permutations of the original iterable.
+     * @param <T> the type of elements in the collection
+     * @param elements the original iterable whose elements have to be permuted
+     * @param comparator a comparator for the iterable's elements
+     * @return an iterator containing all the different permutations of the original iterable
+     * @throws IllegalArgumentException if elements or comparator is null
      */
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
         N.checkArgNotNull(elements, cs.elements);

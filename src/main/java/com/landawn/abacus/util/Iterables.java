@@ -3584,9 +3584,8 @@ public final class Iterables {
     }
 
     /**
-     *
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      *
      * Returns the set of all possible subsets of {@code set}. For example,
      * {@code powerSet(ImmutableSet.of(1, 2))} returns the set {@code {{},
@@ -3647,8 +3646,8 @@ public final class Iterables {
     }
 
     /**
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Collection}.
@@ -3676,8 +3675,7 @@ public final class Iterables {
     }
 
     /**
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable}.
@@ -3712,9 +3710,8 @@ public final class Iterables {
     }
 
     /**
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
-     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable} using the specified {@link Comparator} for establishing
      * the lexicographical ordering.
@@ -3769,9 +3766,8 @@ public final class Iterables {
     }
 
     /**
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
-     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
@@ -3830,9 +3826,8 @@ public final class Iterables {
     }
 
     /**
-     * Note: copy from Google Guava under Apache License v2.
-     * <br />
-     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian

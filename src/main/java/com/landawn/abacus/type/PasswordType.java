@@ -22,8 +22,10 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Password;
 
 /**
- * Default algorithm is SHA-256.
- *
+ * Type handler for password fields that automatically encrypts passwords before storing them in a database.
+ * This type extends AbstractStringType and uses SHA-256 as the default encryption algorithm.
+ * When setting password values in prepared statements or callable statements, the password is automatically
+ * encrypted using the configured algorithm before being stored.
  */
 @SuppressWarnings("java:S2160")
 public class PasswordType extends AbstractStringType {
@@ -44,11 +46,13 @@ public class PasswordType extends AbstractStringType {
     }
 
     /**
+     * Retrieves a password value from a ResultSet at the specified column index.
+     * The password is returned as-is from the database (in its encrypted form).
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based)
+     * @return the password string from the database
+     * @throws SQLException if a database access error occurs
      */
     @SuppressWarnings("RedundantMethodOverride")
     @Override
@@ -57,11 +61,13 @@ public class PasswordType extends AbstractStringType {
     }
 
     /**
+     * Retrieves a password value from a ResultSet using the specified column label.
+     * The password is returned as-is from the database (in its encrypted form).
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the column label/name
+     * @return the password string from the database
+     * @throws SQLException if a database access error occurs
      */
     @SuppressWarnings("RedundantMethodOverride")
     @Override
@@ -70,11 +76,13 @@ public class PasswordType extends AbstractStringType {
     }
 
     /**
+     * Sets a password value in a PreparedStatement at the specified parameter index.
+     * The password is automatically encrypted using the configured algorithm before being set.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based)
+     * @param x the plain text password to encrypt and set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
@@ -82,11 +90,13 @@ public class PasswordType extends AbstractStringType {
     }
 
     /**
+     * Sets a password value in a CallableStatement using the specified parameter name.
+     * The password is automatically encrypted using the configured algorithm before being set.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter
+     * @param x the plain text password to encrypt and set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {

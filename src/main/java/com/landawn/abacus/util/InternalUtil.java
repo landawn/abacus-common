@@ -24,15 +24,38 @@ import java.util.List;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
+/**
+ * Internal utility class for the Abacus library.
+ * 
+ * <p><strong>WARNING:</strong> This class is for internal use only. Do not use any methods
+ * in this class directly. The API is subject to change without notice and may break
+ * your code in future versions.</p>
+ * 
+ * <p>This class contains various internal constants and helper methods used throughout
+ * the Abacus library for performance optimization and internal operations.</p>
+ *
+ * @see Internal
+ */
 @Internal
 public final class InternalUtil {
+    /**
+     * Standard error message for NoSuchElementException when a target object/value does not exist.
+     */
     public static final String ERROR_MSG_FOR_NO_SUCH_EX = "Target object/value does not exist or is not found";
+
+    /**
+     * Standard error message for NoSuchElementException when a target object/value does not exist or is null.
+     */
     public static final String ERROR_MSG_FOR_NULL_ELEMENT_EX = "Target object/value does not exist or is not found, or its value is null";
 
     // To avoid SpotBugs: CD_CIRCULAR_DEPENDENCY, IC_INIT_CIRCULARITY
     static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     /**
+     * Internal pool size calculated based on available memory.
+     * 
+     * <p>The pool size is dynamically calculated based on the JVM's maximum memory,
+     * ranging from 1000 to 8192 elements.</p>
      *
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
@@ -72,9 +95,14 @@ public final class InternalUtil {
     }
 
     /**
+     * Attempts to get the internal array backing an ArrayList without copying.
+     * 
+     * <p>This method uses reflection to access the internal elementData field of ArrayList
+     * for performance optimization. If reflection fails or the collection is not an ArrayList,
+     * returns null.</p>
      *
-     * @param c
-     * @return
+     * @param c the collection to get the internal array from
+     * @return the internal array if accessible, null otherwise
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
@@ -98,13 +126,21 @@ public final class InternalUtil {
     }
 
     /**
-     * Create an array list by initializing its elements with the specified array {@code a}.
-     * The returned list may share the same elements with the specified array {@code a}.
-     * That's to say, any change on the List/Array will affect the Array/List.
+     * Creates an ArrayList by initializing its elements with the specified array.
+     * 
+     * <p>The returned list may share the same elements array with the input array.
+     * Any modification to the list/array will affect the array/list.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * List<String> list = InternalUtil.createList(array);
+     * // Modifications to list may affect array and vice versa
+     * }</pre>
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the element type
+     * @param a the array to create the list from
+     * @return a new ArrayList backed by the array
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
@@ -118,65 +154,25 @@ public final class InternalUtil {
         return N.asList(a);
     }
 
-    //    static volatile boolean isStringCharsGettable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
-    //    static volatile boolean isStringCharsCreatable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
-    //
-    //    static final Field strValueField;
-    //    static final Constructor<String> sharedStringConstructor;
-    //
-    //    static {
-    //        Field tmp = null;
-    //
-    //        try {
-    //            tmp = String.class.getDeclaredField("value");
-    //        } catch (Throwable e) {
-    //            // ignore.
-    //        }
-    //
-    //        strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
-    //
-    //        if (strValueField != null) {
-    //            ClassUtil.setAccessibleQuietly(strValueField, true);
-    //        }
-    //
-    //        Constructor<String> tmpConstructor = null;
-    //
-    //        try {
-    //            tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
-    //            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
-    //        } catch (Throwable e) {
-    //            // ignore.
-    //        }
-    //
-    //        sharedStringConstructor = tmpConstructor;
-    //    }
-
     /**
-     * Gets the chars for read-only.
+     * Gets the character array from a string for read-only purposes.
+     * 
+     * <p>This method attempts to optimize string to char array conversion.
+     * The returned array should not be modified as it may be shared with the original string.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * char[] chars = InternalUtil.getCharsForReadOnly("Hello");
+     * // Use chars for reading only, do not modify
+     * }</pre>
      *
-     * @param str
-     * @return
+     * @param str the string to get characters from
+     * @return a character array (may be shared, do not modify)
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
     @Beta
     public static char[] getCharsForReadOnly(final String str) {
-        //    if (isStringCharsGettable && strValueField != null && str.length() > 3) {
-        //        try {
-        //            final char[] chars = (char[]) strValueField.get(str);
-        //
-        //            if (chars.length == str.length()) {
-        //                return chars;
-        //            } else {
-        //                isStringCharsGettable = false;
-        //            }
-        //
-        //        } catch (Throwable e) {
-        //            // ignore.
-        //            isStringCharsGettable = false;
-        //        }
-        //    }
-
         if (N.isEmpty(str)) {
             return N.EMPTY_CHAR_ARRAY;
         }
@@ -184,76 +180,9 @@ public final class InternalUtil {
         return str.toCharArray();
     }
 
-    //    /**
-    //     *
-    //     * @param a the array should not be modified after it's used to
-    //     *            create the new String.
-    //     * @param share the same array will be shared with the new created ArrayList
-    //     *            if it's true.
-    //     * @return
-    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    static String newString(final char[] a, @SuppressWarnings("unused") final boolean share) {
-    //        //    if (isStringCharsCreatable && share && sharedStringConstructor != null) {
-    //        //        try {
-    //        //            return sharedStringConstructor.newInstance(a, true);
-    //        //        } catch (Throwable e) {
-    //        //            // ignore
-    //        //            isStringCharsCreatable = false;
-    //        //        }
-    //        //    }
-    //
-    //        return String.valueOf(a);
-    //    }
-
-    //    /**
-    //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-    //     *
-    //     *
-    //     * @param s
-    //     * @return true, if it's not null or default
-    //     * @deprecated internal only
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    @Beta
-    //    static boolean notNullOrDefault(final Object value) {
-    //        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
-    //    }
-
-    //    /**
-    //     * Checks if is null or default.
-    //     * {@code null} is default value for all reference types,
-    //     * {@code false} is default value for primitive boolean, {@code 0} is the default value for a primitive number type.
-    //     *
-    //     * @param s
-    //     * @return true, if it is null or default
-    //     * @deprecated DO NOT call the methods defined in this class.
-    //     It's for internal use only.
-    //     */
-    //    @Deprecated
-    //    static boolean isNullOrDefault(final Object value) {
-    //        return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
-    //    }
-
-    //    /**
-    //     * Checks if it's not null or default.
-    //     * {@code null} is default value for all reference types,
-    //     * {@code false} is default value for primitive boolean, {@code 0} is the default value for a primitive number type.
-    //     *
-    //     *
-    //     * @param s
-    //     * @return true, if it's not null or default
-    //     * @deprecated DO NOT call the methods defined in this class.
-    //     It's for internal use only.
-    //     */
-    //    @Deprecated
-    //    static boolean notNullOrDefault(final Object value) {
-    //        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
-    //    }
-
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private InternalUtil() {
         // singleton for utility class
     }

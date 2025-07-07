@@ -17,8 +17,12 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.PrimitiveList;
 
 /**
+ * Abstract base class for primitive list types in the type system.
+ * This class provides common functionality for handling specialized list implementations
+ * that store primitive values directly without boxing overhead.
+ * Examples include IntList, DoubleList, BooleanList, etc.
  *
- * @param <T>
+ * @param <T> the primitive list type (e.g., IntList, DoubleList, BooleanList)
  */
 public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>> extends AbstractType<T> {
 
@@ -27,9 +31,12 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
     }
 
     /**
-     * Checks if is a primitive list.
+     * Checks if this type represents a primitive list.
+     * This method always returns {@code true} for primitive list types,
+     * indicating that the type handles specialized list implementations
+     * that store primitive values without boxing.
      *
-     * @return {@code true}, if is primitive list
+     * @return {@code true}, indicating this is a primitive list type
      */
     @Override
     public boolean isPrimitiveList() {

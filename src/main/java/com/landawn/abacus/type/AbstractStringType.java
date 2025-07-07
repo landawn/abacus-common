@@ -30,21 +30,32 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Abstract base class for String type handling in the type system.
+ * This class provides the foundation for String serialization/deserialization,
+ * database operations, and character-based I/O operations.
+ */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
     protected AbstractStringType(final String typeName) {
         super(typeName);
     }
 
+    /**
+     * Returns the Class object representing the String class.
+     *
+     * @return the Class object for String.class
+     */
     @Override
     public Class<String> clazz() {
         return String.class;
     }
 
     /**
-     * Checks if is string.
+     * Determines whether this type represents a String type.
+     * Always returns true for AbstractStringType implementations.
      *
-     * @return {@code true}, if is string
+     * @return {@code true} indicating this is a string type
      */
     @Override
     public boolean isString() {
@@ -52,9 +63,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Converts a String value to its string representation.
+     * Since the input is already a String, this method simply returns the input value unchanged.
      *
-     * @param str
-     * @return
+     * @param str the String value to convert
+     * @return the same String value passed as input, or null if input is null
      */
     @Override
     public String stringOf(final String str) {
@@ -62,9 +75,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Converts a string representation to a String value.
+     * Since the input is already a String, this method simply returns the input value unchanged.
      *
-     * @param str
-     * @return
+     * @param str the string representation to convert
+     * @return the same String value passed as input, or null if input is null
      */
     @Override
     public String valueOf(final String str) {
@@ -72,11 +87,14 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Creates a String from a character array subset.
+     * Constructs a new String from the specified subset of the character array.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the characters to convert
+     * @param offset the starting position in the character array
+     * @param len the number of characters to include
+     * @return a new String created from the specified characters, or null if cbuf is null,
+     *         or an empty string if cbuf is empty or len is 0
      */
     @Override
     public String valueOf(final char[] cbuf, final int offset, final int len) {
@@ -84,9 +102,15 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Converts an Object to a String value.
+     * This method handles special cases including Clob objects and uses type-specific
+     * string conversion for other object types.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to String
+     * @return the String representation of the object, or null if obj is null.
+     *         For Clob objects, extracts and returns the character data.
+     *         For other objects, uses their type-specific string conversion.
+     * @throws UncheckedSQLException if there's an error reading from a Clob or freeing Clob resources
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -112,11 +136,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Retrieves a String value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnIndex the column index (1-based) of the value to retrieve
+     * @return the String value at the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -124,11 +149,13 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Retrieves a String value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnLabel the label for the column specified with the SQL AS clause,
+     *                    or the column name if no AS clause was specified
+     * @return the String value in the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -136,11 +163,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Sets a String parameter in a PreparedStatement at the specified position.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the String value to set, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
@@ -148,11 +176,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Sets a named String parameter in a CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the String value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
@@ -160,10 +189,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Appends a String value to an Appendable object.
+     * If the String is null, appends the string "null" instead.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable object to append to
+     * @param x the String value to append, may be null
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final String x) throws IOException {
@@ -171,11 +202,14 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
+     * Writes a String value to a CharacterWriter with optional quotation based on configuration.
+     * This method handles null values and applies string quotation marks if specified in the configuration.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the String value to write, may be null
+     * @param config the serialization configuration that may specify string quotation preferences
+     *               and null string handling options
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, String x, final JSONXMLSerializationConfig<?> config) throws IOException {

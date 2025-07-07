@@ -16,20 +16,35 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts a single char-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code char}.
+ * Unlike most other functional interfaces, {@code CharConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(char)}.
+ * 
+ * @see java.util.function.Consumer
+ */
 @FunctionalInterface
 public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given char argument.
+     * This method is expected to operate via side-effects.
      *
-     * @param t
+     * @param t the char input argument
      */
     @Override
     void accept(char t);
 
     /**
+     * Returns a composed {@code CharConsumer} that performs, in sequence, this operation
+     * followed by the {@code after} operation. If performing either operation throws an exception,
+     * it is relayed to the caller of the composed operation.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be null.
+     * @return a composed {@code CharConsumer} that performs in sequence this operation
+     *         followed by the {@code after} operation
      */
     default CharConsumer andThen(final CharConsumer after) {
         return t -> {

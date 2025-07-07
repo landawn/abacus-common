@@ -15,20 +15,69 @@
 package com.landawn.abacus.parser;
 
 /**
- * The Enum Exclusion.
- *
+ * Enumeration defining property exclusion policies for serialization.
+ * This enum controls which bean properties should be excluded during the serialization process.
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * // Exclude properties with null values
+ * SerializationConfig config = new SerializationConfig()
+ *     .setExclusion(Exclusion.NULL);
+ * 
+ * // Exclude properties with default values (including null)
+ * config.setExclusion(Exclusion.DEFAULT);
+ * 
+ * // Include all properties
+ * config.setExclusion(Exclusion.NONE);
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
  */
 public enum Exclusion {
     /**
-     * Excludes the bean properties with {@code null} values.
+     * Excludes bean properties with {@code null} values during serialization.
+     * Properties that are null will not be included in the serialized output.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Person person = new Person();
+     * person.setName("John");
+     * person.setAge(null);  // This property will be excluded
+     * 
+     * // With Exclusion.NULL, output: {"name": "John"}
+     * }</pre>
      */
     NULL,
+
     /**
-     * Excludes the bean properties with default values.
+     * Excludes bean properties with default values during serialization.
+     * This includes null values and primitive type default values (0, false, etc.).
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Person person = new Person();
+     * person.setName("John");
+     * person.setAge(0);      // Default int value, will be excluded
+     * person.setActive(false); // Default boolean value, will be excluded
+     * 
+     * // With Exclusion.DEFAULT, output: {"name": "John"}
+     * }</pre>
      */
     DEFAULT,
+
     /**
-     * No bean property is excluded.
+     * No bean properties are excluded during serialization.
+     * All properties will be included in the serialized output regardless of their values.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Person person = new Person();
+     * person.setName("John");
+     * person.setAge(null);
+     * 
+     * // With Exclusion.NONE, output: {"name": "John", "age": null}
+     * }</pre>
      */
     NONE
 }

@@ -16,35 +16,63 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation on a single byte-valued operand that produces a byte-valued result.
+ * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code byte}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte)}.
+ * 
+ * @see java.util.function.UnaryOperator
+ * @see ByteBinaryOperator
+ */
 @FunctionalInterface
 public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given byte operand.
      *
-     * @param operand
-     * @return
+     * @param operand the byte operand
+     * @return the byte result of applying this operator to the operand
      */
     @Override
     byte applyAsByte(byte operand);
 
     /**
+     * Returns a composed operator that first applies the {@code before} operator to its input,
+     * and then applies this operator to the result. If evaluation of either operator throws
+     * an exception, it is relayed to the caller of the composed operator.
      *
-     * @param before
-     * @return
+     * @param before the operator to apply before this operator is applied. Must not be null.
+     * @return a composed operator that first applies the {@code before} operator and then
+     *         applies this operator
+     * 
+     * @see #andThen(ByteUnaryOperator)
      */
     default ByteUnaryOperator compose(final ByteUnaryOperator before) {
         return v -> applyAsByte(before.applyAsByte(v));
     }
 
     /**
+     * Returns a composed operator that first applies this operator to its input, and then
+     * applies the {@code after} operator to the result. If evaluation of either operator
+     * throws an exception, it is relayed to the caller of the composed operator.
      *
-     * @param after
-     * @return
+     * @param after the operator to apply after this operator is applied. Must not be null.
+     * @return a composed operator that first applies this operator and then applies the
+     *         {@code after} operator
+     * 
+     * @see #compose(ByteUnaryOperator)
      */
     default ByteUnaryOperator andThen(final ByteUnaryOperator after) {
         return t -> after.applyAsByte(applyAsByte(t));
     }
 
+    /**
+     * Returns a unary operator that always returns its input argument.
+     * This is the identity function for byte values.
+     *
+     * @return a unary operator that always returns its input argument
+     */
     static ByteUnaryOperator identity() {
         return t -> t;
     }

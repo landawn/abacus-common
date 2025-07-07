@@ -17,24 +17,70 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation on a single {@code int}-valued operand that produces
+ * an {@code int}-valued result. This is the primitive type specialization of
+ * {@link java.util.function.UnaryOperator} for {@code int}.
  *
+ * <p>This interface extends both {@link Throwables.IntUnaryOperator} with
+ * {@link RuntimeException} and {@link java.util.function.IntUnaryOperator},
+ * providing compatibility with the Java standard library while supporting the
+ * Abacus framework's exception handling capabilities.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #applyAsInt(int)}.
+ *
+ * <p>Refer to JDK API documentation at: 
+ * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.UnaryOperator
+ * @see java.util.function.IntUnaryOperator
+ * @since 1.8
  */
 @FunctionalInterface
 public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator { //NOSONAR
 
     /**
+     * Applies this operator to the given operand.
      *
-     * @param operand
-     * @return
+     * <p>The operator transforms an int value into another int value.
+     * Common use cases include:
+     * <ul>
+     *   <li>Mathematical operations (increment, decrement, negation, absolute value)</li>
+     *   <li>Bit manipulation (shifting, masking)</li>
+     *   <li>Scaling or transformation operations</li>
+     *   <li>Applying business rules or constraints to integer values</li>
+     * </ul>
+     *
+     * @param operand the operand to which the operation is applied
+     * @return the operator result
      */
     @Override
     int applyAsInt(int operand);
 
     /**
+     * Returns a composed operator that first applies the {@code before}
+     * operator to its input, and then applies this operator to the result.
+     * If evaluation of either operator throws an exception, it is relayed to
+     * the caller of the composed operator.
      *
-     * @param before
-     * @return
+     * <p>This method enables operator composition, creating a pipeline where
+     * the output of the {@code before} operator becomes the input to this operator.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * IntUnaryOperator multiplyBy2 = x -> x * 2;
+     * IntUnaryOperator add5 = x -> x + 5;
+     * IntUnaryOperator add5ThenMultiplyBy2 = multiplyBy2.compose(add5);
+     * int result = add5ThenMultiplyBy2.applyAsInt(10); // (10 + 5) * 2 = 30
+     * }</pre>
+     *
+     * @param before the operator to apply before this operator is applied.
+     *               Must not be null
+     * @return a composed operator that first applies the {@code before}
+     *         operator and then applies this operator
+     *
+     * @see #andThen(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) {
@@ -42,15 +88,48 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
     }
 
     /**
+     * Returns a composed operator that first applies this operator to
+     * its input, and then applies the {@code after} operator to the result.
+     * If evaluation of either operator throws an exception, it is relayed to
+     * the caller of the composed operator.
      *
-     * @param after
-     * @return
+     * <p>This method enables operator composition, creating a pipeline where
+     * the output of this operator becomes the input to the {@code after} operator.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * IntUnaryOperator multiplyBy2 = x -> x * 2;
+     * IntUnaryOperator add5 = x -> x + 5;
+     * IntUnaryOperator multiplyBy2ThenAdd5 = multiplyBy2.andThen(add5);
+     * int result = multiplyBy2ThenAdd5.applyAsInt(10); // (10 * 2) + 5 = 25
+     * }</pre>
+     *
+     * @param after the operator to apply after this operator is applied.
+     *              Must not be null
+     * @return a composed operator that first applies this operator and then
+     *         applies the {@code after} operator
+     *
+     * @see #compose(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) {
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 
+    /**
+     * Returns a unary operator that always returns its input argument.
+     *
+     * <p>This is useful as a default operator or when an operator is required
+     * but no transformation is needed.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * IntUnaryOperator identity = IntUnaryOperator.identity();
+     * int result = identity.applyAsInt(42); // 42
+     * }</pre>
+     *
+     * @return a unary operator that always returns its input argument
+     */
     static IntUnaryOperator identity() {
         return t -> t;
     }

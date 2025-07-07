@@ -17,17 +17,39 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a function that accepts two arguments and produces an int-valued result.
+ * This is the int-producing primitive specialization for {@link java.util.function.BiFunction}.
  *
+ * <p>This interface extends both the Throwables.ToIntBiFunction and the standard Java
+ * ToIntBiFunction, providing compatibility with both the Abacus framework's error handling
+ * mechanisms and the standard Java functional interfaces.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(Object, Object)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
 public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, RuntimeException>, java.util.function.ToIntBiFunction<T, U> { //NOSONAR
 
     /**
+     * Applies this function to the given arguments and returns an int result.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * ToIntBiFunction<String, String> combinedLength = (s1, s2) -> s1.length() + s2.length();
+     * int total = combinedLength.applyAsInt("Hello", "World"); // returns 10
+     * 
+     * ToIntBiFunction<Integer, Integer> multiplier = (a, b) -> a * b;
+     * int product = multiplier.applyAsInt(5, 6); // returns 30
+     * }</pre>
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a primitive int
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     int applyAsInt(T t, U u);

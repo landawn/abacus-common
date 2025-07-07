@@ -17,25 +17,97 @@ package com.landawn.abacus.exception;
 import java.io.IOException;
 import java.io.Serial;
 
+/**
+ * A runtime exception that wraps {@link IOException}, allowing I/O exceptions to be thrown
+ * without being declared in method signatures.
+ * 
+ * <p>This exception is particularly useful in contexts where IOException cannot be declared, such as:</p>
+ * <ul>
+ *   <li>Lambda expressions and functional interfaces</li>
+ *   <li>Stream operations</li>
+ *   <li>Implementing interfaces that don't declare IOException</li>
+ *   <li>Simplifying exception handling in I/O-heavy code</li>
+ * </ul>
+ * 
+ * <p><strong>Note:</strong> Java 8+ includes its own {@link java.io.UncheckedIOException}.
+ * This class predates the Java 8 version and may be retained for backward compatibility
+ * or to maintain consistency with other unchecked exceptions in this framework.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // In a stream operation
+ * files.stream()
+ *     .map(file -> {
+ *         try {
+ *             return Files.readAllLines(file);
+ *         } catch (IOException e) {
+ *             throw new UncheckedIOException("Failed to read file: " + file, e);
+ *         }
+ *     })
+ *     .forEach(System.out::println);
+ * 
+ * // In a lambda expression
+ * Supplier<String> fileReader = () -> {
+ *     try {
+ *         return new String(Files.readAllBytes(path));
+ *     } catch (IOException e) {
+ *         throw new UncheckedIOException(e);
+ *     }
+ * };
+ * }</pre>
+ * 
+ * @since 1.0
+ * @see UncheckedException
+ * @see IOException
+ * @see java.io.UncheckedIOException
+ */
 public class UncheckedIOException extends UncheckedException {
 
     @Serial
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**
-     * Constructor for UncheckedIOException.
+     * Constructs a new {@code UncheckedIOException} by wrapping the specified {@link IOException}.
+     * 
+     * <p>This constructor preserves all information from the original IOException including
+     * its message, stack trace, and any suppressed exceptions.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     fileInputStream.read();
+     * } catch (IOException e) {
+     *     throw new UncheckedIOException(e);
+     * }
+     * }</pre>
      *
-     * @param cause
+     * @param cause the {@link IOException} to wrap. Must not be null.
+     * @throws IllegalArgumentException if cause is null
      */
     public UncheckedIOException(final IOException cause) {
         super(cause);
     }
 
     /**
-     * Constructor for UncheckedIOException.
+     * Constructs a new {@code UncheckedIOException} with a custom message and the specified {@link IOException}.
+     * 
+     * <p>This constructor allows you to provide additional context about the I/O operation
+     * that failed, while preserving all information from the original exception.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     Files.copy(source, target);
+     * } catch (IOException e) {
+     *     throw new UncheckedIOException(
+     *         "Failed to copy file from " + source + " to " + target, e);
+     * }
+     * }</pre>
      *
-     * @param message
-     * @param cause
+     * @param message the detail message providing context about the I/O failure.
+     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param cause the {@link IOException} to wrap. Must not be null.
+     * @throws IllegalArgumentException if cause is null
      */
     public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);

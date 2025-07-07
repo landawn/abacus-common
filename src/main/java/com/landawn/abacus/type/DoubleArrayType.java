@@ -23,6 +23,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for Double array (Double[]) values.
+ * This class provides serialization, deserialization, and output operations for Double arrays.
+ * It handles proper formatting with brackets, separators, and null value representation.
+ */
 public final class DoubleArrayType extends ObjectArrayType<Double> {
 
     DoubleArrayType() {
@@ -30,9 +35,14 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
+     * Converts a Double array to its string representation.
+     * The output format is: [element1, element2, ...]
+     * - Null elements are represented as "null"
+     * - Empty arrays return "[]"
+     * - Uses efficient string joining for performance
      *
-     * @param x
-     * @return
+     * @param x the Double array to convert. Can be null.
+     * @return A string representation of the array, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -71,16 +81,21 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
+     * Converts a string representation back to a Double array.
+     * Expects format: [element1, element2, ...]
+     * - "null" strings (4 characters) are converted to null elements
+     * - Empty string or "[]" returns empty array
+     * - Individual elements are parsed as Double values
      *
-     * @param str
-     * @return
+     * @param str the string to parse. Can be null.
+     * @return A Double array parsed from the string, or null if input is null
      */
     @MayReturnNull
     @Override
     public Double[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
@@ -102,10 +117,14 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
+     * Appends a Double array to an Appendable output.
+     * The output format is: [element1, element2, ...]
+     * Null elements are represented as "null".
+     * Uses toString() for Double values to ensure proper formatting.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Double array to append. Can be null.
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Double[] x) throws IOException {
@@ -131,11 +150,15 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
+     * Writes a Double array to a CharacterWriter.
+     * The output format is: [element1, element2, ...]
+     * Null elements are represented as "null".
+     * Uses optimized numeric writing for Double values.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Double array to write. Can be null.
+     * @param config the serialization configuration (currently unused for Double arrays)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Double[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

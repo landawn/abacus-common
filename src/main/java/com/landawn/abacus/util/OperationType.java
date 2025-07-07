@@ -15,24 +15,41 @@
 package com.landawn.abacus.util;
 
 /**
- * The Enum OperationType.
- *
+ * Enumeration representing different types of database operations.
+ * Each operation type has an associated integer value that can be used for bitwise operations
+ * to combine multiple operation types.
+ * 
+ * <p>This enum is typically used in ORM frameworks and data access layers to specify
+ * what type of operation is being performed on entities or database records.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * OperationType opType = OperationType.UPDATE;
+ * int intValue = opType.intValue(); // Returns 4
+ * 
+ * // Convert from int value
+ * OperationType retrieved = OperationType.valueOf(4); // Returns UPDATE
+ * }</pre>
  */
 public enum OperationType {
     /**
-     * Field QUERY.
+     * Represents a query/read operation.
+     * Associated integer value: 1
      */
     QUERY(1),
     /**
-     * Field ADD.
+     * Represents an add/insert operation.
+     * Associated integer value: 2
      */
     ADD(2),
     /**
-     * Field UPDATE.
+     * Represents an update/modify operation.
+     * Associated integer value: 4
      */
     UPDATE(4),
     /**
-     * Field DELETE.
+     * Represents a delete/remove operation.
+     * Associated integer value: 8
      */
     DELETE(8);
 
@@ -42,14 +59,36 @@ public enum OperationType {
         this.intValue = intValue;
     }
 
+    /**
+     * Returns the integer value associated with this operation type.
+     * The values are designed to be used in bitwise operations, allowing
+     * multiple operation types to be combined into a single integer.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int readWrite = OperationType.QUERY.intValue() | OperationType.UPDATE.intValue();
+     * // readWrite = 5 (binary: 101)
+     * }</pre>
+     *
+     * @return the integer value of this operation type
+     */
     public int intValue() {
         return intValue;
     }
 
     /**
+     * Returns the OperationType corresponding to the specified integer value.
+     * This method is the inverse of {@link #intValue()}.
      *
-     * @param intValue
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * OperationType op = OperationType.valueOf(2);
+     * // op = OperationType.ADD
+     * }</pre>
+     *
+     * @param intValue the integer value to convert
+     * @return the corresponding OperationType
+     * @throws IllegalArgumentException if no OperationType exists for the given integer value
      */
     public static OperationType valueOf(final int intValue) {
         switch (intValue) {

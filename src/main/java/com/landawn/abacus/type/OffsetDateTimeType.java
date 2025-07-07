@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -30,6 +31,11 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for {@link OffsetDateTime} objects, providing serialization, deserialization,
+ * and database interaction capabilities for date-time values with timezone offset information.
+ * This handler supports multiple date-time formats including ISO-8601 and epoch milliseconds.
+ */
 public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
@@ -38,21 +44,36 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
         super(OFFSET_DATE_TIME);
     }
 
+    /**
+     * Returns the Java class type that this type handler manages.
+     *
+     * @return the {@link OffsetDateTime} class object
+     */
     @Override
     public Class<OffsetDateTime> clazz() {
         return OffsetDateTime.class;
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Converts an {@link OffsetDateTime} object to its ISO-8601 string representation.
+     * The format used is "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" with UTC timezone.
+     * 
+     * @param x the OffsetDateTime object to convert
+     * @return the ISO-8601 formatted string, or null if the input is null
      */
     @Override
     public String stringOf(final OffsetDateTime x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
+    /**
+     * Converts an object to an {@link OffsetDateTime}.
+     * If the object is a Number, it's treated as epoch milliseconds.
+     * Otherwise, the object is converted to string and parsed.
+     *
+     * @param obj the object to convert
+     * @return the OffsetDateTime value, or null if the input is null
+     */
     @Override
     public OffsetDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
@@ -63,9 +84,17 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Converts a string representation to an {@link OffsetDateTime} object.
+     * Supports multiple formats:
+     * - Epoch milliseconds as a numeric string
+     * - ISO-8601 date-time format (20 characters ending with 'Z')
+     * - ISO-8601 timestamp format (24 characters ending with 'Z')
+     * - Standard OffsetDateTime parse format
+     * - Special value "SYS_TIME" returns current system time
+     * 
+     * @param str the string to parse
+     * @return the parsed OffsetDateTime, or null if the input is null or represents a null date-time
+     * @throws DateTimeParseException if the string cannot be parsed as an OffsetDateTime
      */
     @MayReturnNull
     @Override
@@ -93,11 +122,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * Converts a character array to an {@link OffsetDateTime} object.
+     * This method creates a string from the character array and delegates to the string parsing method.
+     * 
+     * @param cbuf the character array containing the date-time string
+     * @param offset the offset in the array where the date-time string starts
+     * @param len the length of the date-time string
+     * @return the parsed OffsetDateTime, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -118,11 +149,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an {@link OffsetDateTime} value from a ResultSet at the specified column index.
+     * The timestamp from the database is converted to OffsetDateTime using the default zone ID.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return an OffsetDateTime representing the timestamp, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OffsetDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -132,11 +165,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnName
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an {@link OffsetDateTime} value from a ResultSet using the specified column name.
+     * The timestamp from the database is converted to OffsetDateTime using the default zone ID.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnName the name of the column to retrieve the value from
+     * @return an OffsetDateTime representing the timestamp, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
     public OffsetDateTime get(final ResultSet rs, final String columnName) throws SQLException {
@@ -146,11 +181,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to an {@link OffsetDateTime} value.
+     * The OffsetDateTime is converted to a Timestamp for database storage.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the OffsetDateTime value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OffsetDateTime x) throws SQLException {
@@ -158,11 +195,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to an {@link OffsetDateTime} value.
+     * The OffsetDateTime is converted to a Timestamp for database storage.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param columnName the name of the parameter to set
+     * @param x the OffsetDateTime value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String columnName, final OffsetDateTime x) throws SQLException {
@@ -170,10 +209,11 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of an {@link OffsetDateTime} to an Appendable.
+     * 
+     * @param appendable the Appendable to write to
+     * @param x the OffsetDateTime value to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final OffsetDateTime x) throws IOException {
@@ -185,11 +225,17 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of an {@link OffsetDateTime} to a CharacterWriter.
+     * The format depends on the serialization configuration, supporting:
+     * - LONG format: epoch milliseconds as a number
+     * - ISO_8601_DATE_TIME: "yyyy-MM-dd'T'HH:mm:ss'Z'"
+     * - ISO_8601_TIMESTAMP: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+     * - Default: standard string representation
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the OffsetDateTime value to write
+     * @param config the serialization configuration specifying format and quoting
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @SuppressWarnings("null")
     @Override

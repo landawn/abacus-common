@@ -34,6 +34,9 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for immutable Map.Entry objects.
+ * This class provides serialization and deserialization capabilities for SimpleImmutableEntry instances,
+ * which represent immutable key-value pairs. The entries are serialized as single-entry JSON objects.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -41,7 +44,7 @@ import com.landawn.abacus.util.WD;
 @SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
 
-    private static final String MAP_IMMUTABLE_ENTRY = "Map.ImmutableEntry";
+    static final String MAP_IMMUTABLE_ENTRY = "Map.ImmutableEntry";
 
     @SuppressWarnings("rawtypes")
     private final Class<AbstractMap.SimpleImmutableEntry<K, V>> typeClass = (Class) AbstractMap.SimpleImmutableEntry.class; //NOSONAR
@@ -66,20 +69,32 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
+    /**
+     * Returns the declaring name of this immutable map entry type.
+     * The declaring name represents the type in a simplified format suitable for type declarations.
+     *
+     * @return the declaring name of this type (e.g., "Map.ImmutableEntry<String, Integer>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the SimpleImmutableEntry type handled by this type handler.
+     *
+     * @return the Class object for AbstractMap.SimpleImmutableEntry
+     */
     @Override
     public Class<AbstractMap.SimpleImmutableEntry<K, V>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the parameter types of this generic map entry type.
+     * For map entry types, this array contains two elements: the key type and the value type.
      *
-     * @return
+     * @return an array containing the key type and value type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -87,9 +102,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as map entry types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -97,9 +112,11 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
+     * Converts an immutable map entry to its string representation.
+     * The entry is serialized as a JSON object with a single key-value pair.
      *
-     * @param x
-     * @return
+     * @param x the immutable map entry to convert to string
+     * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or null if the input is null
      */
     @Override
     public String stringOf(final AbstractMap.SimpleImmutableEntry<K, V> x) {
@@ -107,14 +124,17 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
+     * Parses a string representation into an immutable map entry instance.
+     * The string should be in JSON object format with a single key-value pair.
+     * Empty strings or empty JSON objects ("{}") result in null.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse (e.g., "{\"key\":\"value\"}")
+     * @return a new immutable map entry instance, or null if the input is null, empty, or "{}"
      */
     @MayReturnNull
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) {
-        if (Strings.isEmpty(str) || "{}".equals(str)) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str) || "{}".equals(str)) {
             return null; // NOSONAR
         }
 
@@ -122,10 +142,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
+     * Appends the string representation of an immutable map entry to an Appendable.
+     * The output format is a JSON object with the key and value.
+     * Handles Writer instances specially for better performance with buffering.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the immutable map entry to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final AbstractMap.SimpleImmutableEntry<K, V> x) throws IOException {
@@ -168,11 +191,14 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
+     * Writes the character representation of an immutable map entry to a CharacterWriter.
+     * This method is optimized for performance when writing to character-based outputs.
+     * The entry is serialized as a JSON object.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the immutable map entry to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JSONXMLSerializationConfig<?> config)
@@ -196,12 +222,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Gets the type name.
+     * Generates a type name string for an immutable map entry type with the specified key and value types.
+     * The format depends on whether a declaring name (simplified) or full name is requested.
      *
-     * @param keyTypeName
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
+     * @param keyTypeName the name of the key type
+     * @param valueTypeName the name of the value type
+     * @param isDeclaringName true to generate a declaring name with simple type names, false for fully qualified names
+     * @return the formatted type name (e.g., "Map.ImmutableEntry<String, Integer>")
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

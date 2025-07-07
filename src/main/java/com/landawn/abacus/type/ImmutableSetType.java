@@ -24,8 +24,11 @@ import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for ImmutableSet objects.
+ * This class provides serialization and deserialization capabilities for ImmutableSet instances,
+ * delegating most operations to the underlying Set type handler while ensuring immutability.
  *
- * @param <E>
+ * @param <E> the element type of the immutable set
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
@@ -51,20 +54,32 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
         setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
     }
 
+    /**
+     * Returns the declaring name of this immutable set type.
+     * The declaring name represents the type in a simplified format suitable for type declarations,
+     * using simple class names rather than fully qualified names.
+     *
+     * @return the declaring name of this type (e.g., "ImmutableSet<String>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the ImmutableSet type handled by this type handler.
+     *
+     * @return the Class object for ImmutableSet
+     */
     @Override
     public Class<ImmutableSet<E>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the element type.
+     * Returns the type handler for the elements contained in this immutable set.
      *
-     * @return
+     * @return the Type instance representing the element type of this immutable set
      */
     @Override
     public Type<E> getElementType() {
@@ -72,29 +87,42 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the parameter types of this generic immutable set type.
+     * For immutable set types, this array contains a single element representing the element type.
      *
-     * @return
+     * @return an array containing the element type as the only parameter type
      */
     @Override
     public Type<E>[] getParameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type represents a Set or its subtype.
+     * ImmutableSet is considered a set type.
+     *
+     * @return true, as ImmutableSet is a set type
+     */
     @Override
     public boolean isSet() {
         return true;
     }
 
+    /**
+     * Indicates whether this type represents a Collection or its subtype.
+     * ImmutableSet is a collection type.
+     *
+     * @return true, as ImmutableSet is a collection type
+     */
     @Override
     public boolean isCollection() {
         return true;
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as ImmutableSet is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -102,9 +130,10 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Checks if is serializable.
+     * Checks whether the elements of this immutable set type are serializable.
+     * The immutable set is considered serializable if its element type is serializable.
      *
-     * @return {@code true}, if is serializable
+     * @return true if the underlying set type is serializable, false otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -112,9 +141,10 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Gets the serialization type.
+     * Returns the serialization type category for this immutable set.
+     * Delegates to the underlying set type for serialization categorization.
      *
-     * @return
+     * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
      */
     @Override
     public SerializationType getSerializationType() {
@@ -122,9 +152,11 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
+     * Converts an immutable set to its string representation.
+     * Delegates the serialization to the underlying set type handler.
      *
-     * @param x
-     * @return
+     * @param x the immutable set to convert to string
+     * @return the string representation of the immutable set, or null if the input is null
      */
     @Override
     public String stringOf(final ImmutableSet<E> x) {
@@ -132,9 +164,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
+     * Converts a string representation back to an immutable set instance.
+     * First deserializes to a mutable set using the set type handler,
+     * then wraps it in an ImmutableSet to ensure immutability.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a new immutable set instance containing the parsed elements
      */
     @Override
     public ImmutableSet<E> valueOf(final String str) {
@@ -142,10 +177,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
+     * Appends the string representation of an immutable set to an Appendable.
+     * Delegates to the underlying set type handler for the actual appending logic.
      *
-     * @param writer
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the Appendable to write to
+     * @param x the immutable set to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable writer, final ImmutableSet<E> x) throws IOException {
@@ -153,11 +190,13 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
+     * Writes the character representation of an immutable set to a CharacterWriter.
+     * Delegates to the underlying set type handler for the actual writing logic.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the immutable set to write
+     * @param config the serialization configuration to use
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -165,12 +204,13 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Gets the type name.
+     * Generates a type name string for an ImmutableSet type with the specified element type.
+     * The format depends on whether a declaring name (simplified) or full name is requested.
      *
-     * @param typeClass
-     * @param parameterTypeName
-     * @param isDeclaringName
-     * @return
+     * @param typeClass the ImmutableSet class
+     * @param parameterTypeName the name of the element type
+     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @return the formatted type name (e.g., "ImmutableSet<String>" or "com.landawn.abacus.util.ImmutableSet<java.lang.String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

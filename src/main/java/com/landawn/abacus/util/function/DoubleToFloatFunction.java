@@ -14,15 +14,30 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a double-valued argument and produces a float-valued result.
+ * This is the double-to-float primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsFloat(double)}.
+ *
+ * @see java.util.function.Function
+ * @see DoubleToIntFunction
+ * @see DoubleToLongFunction
+ */
 @FunctionalInterface
 public interface DoubleToFloatFunction {
 
+    /**
+     * A default implementation that casts the double value to float.
+     * Note that this conversion may lose precision for large double values.
+     */
     DoubleToFloatFunction DEFAULT = value -> (float) value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the double function argument
+     * @return the float function result
      */
     float applyAsFloat(double value);
 }

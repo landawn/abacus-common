@@ -32,12 +32,15 @@ import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Tuple5} objects.
+ * This class provides serialization and deserialization support for tuple instances
+ * containing five elements of potentially different types.
  *
- * @param <T1>
- * @param <T2>
- * @param <T3>
- * @param <T4>
- * @param <T5>
+ * @param <T1> the type of the first element in the tuple
+ * @param <T2> the type of the second element in the tuple
+ * @param <T3> the type of the third element in the tuple
+ * @param <T4> the type of the fourth element in the tuple
+ * @param <T5> the type of the fifth element in the tuple
  */
 @SuppressWarnings("java:S2160")
 public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, T3, T4, T5>> {
@@ -72,20 +75,32 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
         parameterTypes = new Type[] { type1, type2, type3, type4, type5 };
     }
 
+    /**
+     * Returns the declaring name of this type, which includes simple class names.
+     * For example: "Tuple5<String, Integer, Double, Boolean, Long>" instead of the fully qualified name.
+     *
+     * @return the declaring name of this Tuple5 type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Java class that this type handler manages.
+     *
+     * @return {@code Tuple5.class}
+     */
     @Override
     public Class<Tuple5<T1, T2, T3, T4, T5>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the parameter types of this tuple type.
+     * The returned array contains the types of all five elements in order.
      *
-     * @return
+     * @return an array containing the types of the tuple elements
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -93,9 +108,10 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this is a generic type.
+     * Tuple5Type is always a generic type as it has type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return {@code true} always, as Tuple5 is a parameterized type
      */
     @Override
     public boolean isGenericType() {
@@ -103,9 +119,11 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
+     * Converts the given Tuple5 object to its string representation.
+     * The tuple is serialized as a JSON array containing its five elements.
      *
-     * @param x
-     * @return
+     * @param x the Tuple5 object to convert
+     * @return a JSON string representation of the tuple, or null if x is null
      */
     @Override
     public String stringOf(final Tuple5<T1, T2, T3, T4, T5> x) {
@@ -113,9 +131,12 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
+     * Parses the given string into a Tuple5 object.
+     * The string should be a JSON array representation with exactly five elements.
+     * Each element will be converted to the appropriate type based on the tuple's type parameters.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return a Tuple5 object parsed from the string, or null if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -137,10 +158,13 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
+     * Appends the string representation of the Tuple5 to the given Appendable.
+     * The output format is: [element1, element2, element3, element4, element5]
+     * Special handling is provided for Writer instances to improve performance.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Tuple5 object to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Tuple5<T1, T2, T3, T4, T5> x) throws IOException {
@@ -195,11 +219,14 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
+     * Writes the character representation of the Tuple5 to the given CharacterWriter.
+     * The output format is: [element1, element2, element3, element4, element5]
+     * This method is optimized for character-based output streams.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Tuple5 object to write
+     * @param config the serialization configuration (may be null)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Tuple5<T1, T2, T3, T4, T5> x, final JSONXMLSerializationConfig<?> config)
@@ -229,15 +256,16 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param t1TypeName
-     * @param t2TypeName
-     * @param t3TypeName
-     * @param t4TypeName
-     * @param t5TypeName
-     * @param isDeclaringName
-     * @return
+     * Generates the type name for a Tuple5 with the specified element type names.
+     * 
+     * @param t1TypeName the type name of the first element
+     * @param t2TypeName the type name of the second element
+     * @param t3TypeName the type name of the third element
+     * @param t4TypeName the type name of the fourth element
+     * @param t5TypeName the type name of the fifth element
+     * @param isDeclaringName if true, returns the declaring name (simple class names); 
+     *                        if false, returns the full canonical name
+     * @return the formatted type name string
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
             final String t5TypeName, final boolean isDeclaringName) {

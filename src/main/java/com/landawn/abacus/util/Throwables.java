@@ -39,13 +39,12 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception.
+     * Executes the specified runnable command that may throw a checked exception.
+     * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception.
-     * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
-     *
-     * @param cmd The runnable task that might throw an exception. Must not be {@code null}.
-     * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @param cmd the runnable command to execute that may throw a checked exception
+     * @throws RuntimeException if the command throws any exception, the original exception will be wrapped in a RuntimeException
+     * @throws IllegalArgumentException if cmd is null
      * @see Try#run(Throwables.Runnable)
      */
     @Beta
@@ -58,12 +57,12 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code actionOnError} consumer on the exception.
+     * Executes the specified runnable command that may throw a checked exception.
+     * If the command throws an exception, the specified error handler will be invoked with the exception.
      *
-     * <p>This method is useful when you want to run a piece of code that might throw an exception, and you want to handle that exception in a specific way.</p>
-     *
-     * @param cmd The runnable task that might throw an exception, must not be {@code null}.
-     * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
+     * @param cmd the runnable command to execute that may throw a checked exception
+     * @param actionOnError the consumer that will handle any exception thrown by the command
+     * @throws IllegalArgumentException if cmd or actionOnError is null
      * @see Try#run(Throwables.Runnable, java.util.function.Consumer)
      */
     @Beta
@@ -76,15 +75,14 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception and returns the result.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
-     * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
-     *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @return The result of the {@code cmd}.
-     * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @param <R> the type of the result returned by the callable
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @return the result returned by the callable command
+     * @throws RuntimeException if the command throws any exception, the original exception will be wrapped in a RuntimeException
+     * @throws IllegalArgumentException if cmd is null
      * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
@@ -97,16 +95,15 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception and returns the result.
-     * If an exception occurs during the execution of the {@code cmd}, the {@code actionOnError} function is applied to the exception to provide a return value.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception, the specified error handler function will be invoked with the exception
+     * and its result will be returned instead.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
-     * It allows you to handle exceptions in a specific way by providing a function that can transform an exception into a return value.
-     *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param actionOnError The function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
+     * @param <R> the type of the result returned by the callable or the error handler
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @param actionOnError the function that will handle any exception thrown by the command and provide an alternative result
+     * @return the result returned by the callable command if successful, or the result of the error handler if an exception occurs
+     * @throws IllegalArgumentException if cmd or actionOnError is null
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Function)
      */
     @Beta
@@ -120,16 +117,14 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception and returns the result.
-     * If an exception occurs during the execution of the {@code cmd}, the {@code supplier} is used to provide a return value.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception, the result from the specified supplier will be returned instead.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
-     * It allows you to handle exceptions in a specific way by providing a supplier that can provide a return value when an exception occurs.
-     *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param supplier The supplier to provide a return value when an exception occurs. Must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
+     * @param <R> the type of the result returned by the callable or the supplier
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @param supplier the supplier that provides an alternative result if the command throws an exception
+     * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs
+     * @throws IllegalArgumentException if cmd or supplier is null
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Supplier)
      */
     @Beta
@@ -144,16 +139,14 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception and returns the result.
-     * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception, the specified default value will be returned instead.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
-     * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs.
-     *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
-     * @return The result of the {@code cmd} or the default value if an exception occurs.
+     * @param <R> the type of the result returned by the callable or the default value
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @param defaultValue the default value to return if the command throws an exception
+     * @return the result returned by the callable command if successful, or the default value if an exception occurs
+     * @throws IllegalArgumentException if cmd is null
      * @see Try#call(java.util.concurrent.Callable, Object)
      */
     @Beta
@@ -166,16 +159,18 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code supplier} to provide a return value.
-     * The {@code predicate} is used to test the exception. If the {@code predicate} returns {@code true}, the {@code supplier} is used to provide a return value.
-     * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception and the predicate returns true for that exception,
+     * the result from the supplier will be returned. If the predicate returns false,
+     * the exception will be wrapped in a RuntimeException and rethrown.
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception, must not be {@code null}.
-     * @param predicate The predicate to test the exception, must not be {@code null}.
-     * @param supplier The supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
-     * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @param <R> the type of the result returned by the callable or the supplier
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @param predicate the predicate that tests whether to handle the exception or rethrow it
+     * @param supplier the supplier that provides an alternative result if the predicate returns true
+     * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs and the predicate returns true
+     * @throws RuntimeException if the command throws an exception and the predicate returns false
+     * @throws IllegalArgumentException if cmd, predicate, or supplier is null
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
@@ -195,19 +190,18 @@ public final class Throwables {
     }
 
     /**
-     * Executes the provided {@code cmd} that may throw an exception and returns the result.
-     * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned if the {@code predicate} returns {@code true}.
-     * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
+     * Executes the specified callable command that may throw a checked exception and returns its result.
+     * If the command throws an exception and the predicate returns true for that exception,
+     * the specified default value will be returned. If the predicate returns false,
+     * the exception will be wrapped in a RuntimeException and rethrown.
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need the result of that code.
-     * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs and the {@code predicate} returns {@code true}.
-     *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param predicate The predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown. Must not be {@code null}.
-     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
-     * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
-     * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @param <R> the type of the result returned by the callable or the default value
+     * @param cmd the callable command to execute that may throw a checked exception
+     * @param predicate the predicate that tests whether to handle the exception or rethrow it
+     * @param defaultValue the default value to return if the predicate returns true
+     * @return the result returned by the callable command if successful, or the default value if an exception occurs and the predicate returns true
+     * @throws RuntimeException if the command throws an exception and the predicate returns false
+     * @throws IllegalArgumentException if cmd or predicate is null
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, Object)
      */
     @Beta
@@ -246,21 +240,23 @@ public final class Throwables {
     @SuppressWarnings({ "java:S6548" })
     public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable, Immutable {
         /**
+         * Returns an empty iterator that has no elements and whose hasNext() always returns false.
          *
-         * @param <T>
-         * @param <E>
-         * @return
+         * @param <T> the type of elements that would be returned by this iterator
+         * @param <E> the type of exception that may be thrown
+         * @return an empty iterator
          */
         public static <T, E extends Throwable> Throwables.Iterator<T, E> empty() {
             return EMPTY;
         }
 
         /**
+         * Returns an iterator containing only the specified single element.
          *
-         * @param <T>
-         * @param <E>
-         * @param val
-         * @return
+         * @param <T> the type of the element
+         * @param <E> the type of exception that may be thrown
+         * @param val the single element to be contained in the iterator
+         * @return an iterator containing only the specified element
          */
         public static <T, E extends Throwable> Throwables.Iterator<T, E> just(final T val) {
             return new Throwables.Iterator<>() {
@@ -285,11 +281,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns an iterator over the specified array of elements.
          *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @return
+         * @param <T> the type of elements in the array
+         * @param <E> the type of exception that may be thrown
+         * @param a the array of elements to iterate over
+         * @return an iterator over the elements in the array, or an empty iterator if the array is null or empty
          */
         @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T... a) {
@@ -297,14 +294,16 @@ public final class Throwables {
         }
 
         /**
+         * Returns an iterator over a range of elements in the specified array.
          *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param fromIndex
-         * @param toIndex
-         * @return
-         * @throws IndexOutOfBoundsException
+         * @param <T> the type of elements in the array
+         * @param <E> the type of exception that may be thrown
+         * @param a the array of elements to iterate over
+         * @param fromIndex the starting index (inclusive) of the range to iterate
+         * @param toIndex the ending index (exclusive) of the range to iterate
+         * @return an iterator over the specified range of elements in the array
+         * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than the array length,
+         *         or fromIndex is greater than toIndex
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T[] a, final int fromIndex, final int toIndex)
                 throws IndexOutOfBoundsException {
@@ -352,11 +351,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns an iterator over the elements in the specified Iterable.
          *
-         * @param <T>
-         * @param <E>
-         * @param iterable
-         * @return
+         * @param <T> the type of elements in the iterable
+         * @param <E> the type of exception that may be thrown
+         * @param iterable the iterable whose elements are to be iterated over
+         * @return an iterator over the elements in the iterable, or an empty iterator if the iterable is null
          */
         public static <T, E extends Throwable> Iterator<T, E> of(final Iterable<? extends T> iterable) {
             if (iterable == null) {
@@ -379,11 +379,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns a Throwables.Iterator that wraps the specified java.util.Iterator.
          *
-         * @param <T>
-         * @param <E>
-         * @param iter
-         * @return
+         * @param <T> the type of elements returned by the iterator
+         * @param <E> the type of exception that may be thrown
+         * @param iter the java.util.Iterator to wrap
+         * @return a Throwables.Iterator wrapping the specified iterator, or an empty iterator if iter is null
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> of(final java.util.Iterator<? extends T> iter) {
             if (iter == null) {
@@ -479,11 +480,13 @@ public final class Throwables {
         }
 
         /**
+         * Concatenates multiple iterators into a single iterator that iterates over all elements
+         * from all the iterators in sequence.
          *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @return
+         * @param <T> the type of elements returned by the iterators
+         * @param <E> the type of exception that may be thrown
+         * @param a the array of iterators to concatenate
+         * @return a single iterator that iterates over all elements from all iterators in order
          */
         @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
@@ -491,11 +494,14 @@ public final class Throwables {
         }
 
         /**
+         * Concatenates a collection of iterators into a single iterator that iterates over all elements
+         * from all the iterators in sequence.
          *
-         * @param <T>
-         * @param <E>
-         * @param c
-         * @return
+         * @param <T> the type of elements returned by the iterators
+         * @param <E> the type of exception that may be thrown
+         * @param c the collection of iterators to concatenate
+         * @return a single iterator that iterates over all elements from all iterators in order,
+         *         or an empty iterator if the collection is null or empty
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Collection<? extends Throwables.Iterator<? extends T, ? extends E>> c) {
             if (N.isEmpty(c)) {
@@ -527,10 +533,12 @@ public final class Throwables {
         }
 
         /**
-         * It's caller's responsibility to close the specified {@code reader}.
+         * Returns an iterator that reads lines from the specified Reader.
+         * The caller is responsible for closing the Reader.
          *
-         * @param reader
-         * @return
+         * @param reader the Reader to read lines from
+         * @return an iterator over the lines in the reader, or an empty iterator if the reader is null
+         * @throws IOException if an I/O error occurs while reading from the reader
          */
         public static Throwables.Iterator<String, IOException> ofLines(final Reader reader) {
             if (reader == null) {
@@ -575,24 +583,29 @@ public final class Throwables {
         }
 
         /**
+         * Returns true if the iterator has more elements to iterate over.
          *
-         * @return
-         * @throws E
+         * @return true if there are more elements, false otherwise
+         * @throws E if an exception occurs while checking for more elements
          */
         public abstract boolean hasNext() throws E;
 
         /**
+         * Returns the next element in the iteration.
          *
-         * @return
-         * @throws E
+         * @return the next element in the iteration
+         * @throws E if an exception occurs while retrieving the next element
+         * @throws NoSuchElementException if there are no more elements
          */
         public abstract T next() throws E;
 
         /**
+         * Advances the iterator by skipping the specified number of elements.
+         * If n is greater than the number of remaining elements, the iterator will be positioned at the end.
          *
-         * @param n
-         * @throws IllegalArgumentException
-         * @throws E the e
+         * @param n the number of elements to skip, must be non-negative
+         * @throws IllegalArgumentException if n is negative
+         * @throws E if an exception occurs while advancing the iterator
          */
         public void advance(long n) throws IllegalArgumentException, E {
             N.checkArgNotNegative(n, cs.n);
@@ -603,9 +616,11 @@ public final class Throwables {
         }
 
         /**
+         * Returns the count of remaining elements in the iterator.
+         * This method will consume all remaining elements in the iterator.
          *
-         * @return
-         * @throws E the e
+         * @return the number of remaining elements
+         * @throws E if an exception occurs while counting the elements
          */
         public long count() throws E {
             long result = 0;
@@ -620,6 +635,12 @@ public final class Throwables {
 
         private boolean isClosed = false;
 
+        /**
+         * Closes this iterator and releases any resources associated with it.
+         * If the iterator is already closed, this method has no effect.
+         * This method calls closeResource() which can be overridden by subclasses
+         * to perform specific cleanup operations.
+         */
         @Override
         public final void close() {
             if (isClosed) {
@@ -636,9 +657,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns a new iterator that contains only elements matching the specified predicate.
+         * Elements that don't satisfy the predicate will be skipped.
          *
-         * @param predicate
-         * @return
+         * @param predicate the predicate to test each element
+         * @return a new iterator containing only elements that satisfy the predicate
+         * @throws IllegalArgumentException if predicate is null
          */
         public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
             final Throwables.Iterator<T, E> iter = this;
@@ -678,10 +702,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns a new iterator that applies the specified mapping function to each element.
          *
-         * @param <U>
-         * @param mapper
-         * @return
+         * @param <U> the type of elements returned by the new iterator
+         * @param mapper the function to apply to each element
+         * @return a new iterator with the mapping function applied to each element
+         * @throws IllegalArgumentException if mapper is null
          */
         public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final Throwables.Iterator<T, E> iter = this;
@@ -700,9 +726,11 @@ public final class Throwables {
         }
 
         /**
+         * Returns the first element from this iterator wrapped in a Nullable.
+         * If the iterator is empty, returns an empty Nullable.
          *
-         * @return
-         * @throws E
+         * @return a Nullable containing the first element if present, otherwise an empty Nullable
+         * @throws E if an exception occurs while retrieving the first element
          */
         public Nullable<T> first() throws E {
             if (hasNext()) {
@@ -713,9 +741,11 @@ public final class Throwables {
         }
 
         /**
+         * Returns the first non-null element from this iterator wrapped in an Optional.
+         * If no non-null element is found or the iterator is empty, returns an empty Optional.
          *
-         * @return
-         * @throws E
+         * @return an Optional containing the first non-null element if present, otherwise an empty Optional
+         * @throws E if an exception occurs while searching for a non-null element
          */
         public u.Optional<T> firstNonNull() throws E {
             T next = null;
@@ -732,9 +762,12 @@ public final class Throwables {
         }
 
         /**
+         * Returns the last element from this iterator wrapped in a Nullable.
+         * This method will consume all elements in the iterator.
+         * If the iterator is empty, returns an empty Nullable.
          *
-         * @return
-         * @throws E
+         * @return a Nullable containing the last element if present, otherwise an empty Nullable
+         * @throws E if an exception occurs while iterating through the elements
          */
         public Nullable<T> last() throws E {
             if (hasNext()) {
@@ -751,29 +784,37 @@ public final class Throwables {
         }
 
         /**
+         * Returns an array containing all remaining elements in this iterator.
+         * This method will consume all remaining elements.
          *
-         * @return
-         * @throws E
+         * @return an array containing all remaining elements
+         * @throws E if an exception occurs while iterating through the elements
          */
         public Object[] toArray() throws E {
             return toArray(N.EMPTY_OBJECT_ARRAY);
         }
 
         /**
+         * Returns an array containing all remaining elements in this iterator.
+         * If the specified array is large enough, the elements are stored in it.
+         * Otherwise, a new array of the same type is created.
+         * This method will consume all remaining elements.
          *
-         * @param <A>
-         * @param a
-         * @return
-         * @throws E
+         * @param <A> the component type of the array
+         * @param a the array into which the elements are to be stored, if it is big enough
+         * @return an array containing all remaining elements
+         * @throws E if an exception occurs while iterating through the elements
          */
         public <A> A[] toArray(final A[] a) throws E {
             return toList().toArray(a);
         }
 
         /**
+         * Returns a List containing all remaining elements in this iterator.
+         * This method will consume all remaining elements.
          *
-         * @return
-         * @throws E
+         * @return a List containing all remaining elements
+         * @throws E if an exception occurs while iterating through the elements
          */
         public List<T> toList() throws E {
             final List<T> list = new ArrayList<>();
@@ -786,9 +827,12 @@ public final class Throwables {
         }
 
         /**
+         * Performs the given action for each remaining element in this iterator.
+         * This method will consume all remaining elements.
          *
-         * @param action
-         * @throws E
+         * @param action the action to be performed for each element
+         * @throws E if an exception occurs while iterating through the elements
+         * @throws IllegalArgumentException if action is null
          */
         public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             while (hasNext()) {
@@ -797,11 +841,14 @@ public final class Throwables {
         }
 
         /**
+         * Performs the given action for each remaining element in this iterator.
+         * This method will consume all remaining elements.
          *
-         * @param <E2>
-         * @param action
-         * @throws E the e
-         * @throws E2
+         * @param <E2> the type of exception that the action may throw
+         * @param action the action to be performed for each element
+         * @throws E if an exception occurs while iterating through the elements
+         * @throws E2 if the action throws an exception
+         * @throws IllegalArgumentException if action is null
          */
         public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             while (hasNext()) {
@@ -810,11 +857,15 @@ public final class Throwables {
         }
 
         /**
+         * Performs the given action for each remaining element in this iterator,
+         * providing both the element and its index (starting from 0).
+         * This method will consume all remaining elements.
          *
-         * @param <E2>
-         * @param action
-         * @throws E the e
-         * @throws E2
+         * @param <E2> the type of exception that the action may throw
+         * @param action the action to be performed for each element with its index
+         * @throws E if an exception occurs while iterating through the elements
+         * @throws E2 if the action throws an exception
+         * @throws IllegalArgumentException if action is null
          */
         public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             int idx = 0;
@@ -834,11 +885,18 @@ public final class Throwables {
     public interface Runnable<E extends Throwable> {
 
         /**
+         * Executes this runnable operation.
          *
-         * @throws E the e
+         * @throws E if an exception occurs during execution
          */
         void run() throws E;
 
+        /**
+         * Returns a java.util.function.Runnable that wraps this Throwables.Runnable.
+         * Any checked exceptions thrown by this runnable will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Runnable that executes this runnable and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Runnable unchecked() {
             return () -> {
@@ -861,12 +919,19 @@ public final class Throwables {
     public interface Callable<R, E extends Throwable> {
 
         /**
+         * Computes a result.
          *
-         * @return
-         * @throws E the e
+         * @return the computed result
+         * @throws E if an exception occurs during computation
          */
         R call() throws E;
 
+        /**
+         * Returns a java.util.function.Callable that wraps this Throwables.Callable.
+         * Any checked exceptions thrown by this callable will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Callable that executes this callable and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Callable<R> unchecked() {
             return () -> {
@@ -889,12 +954,19 @@ public final class Throwables {
     public interface Supplier<T, E extends Throwable> {
 
         /**
+         * Gets a result.
          *
-         * @return
-         * @throws E the e
+         * @return the result
+         * @throws E if an exception occurs while getting the result
          */
         T get() throws E;
 
+        /**
+         * Returns a java.util.function.Supplier that wraps this Throwables.Supplier.
+         * Any checked exceptions thrown by this supplier will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Supplier that executes this supplier and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Supplier<T> unchecked() {
             return () -> {
@@ -916,10 +988,10 @@ public final class Throwables {
     public interface BooleanSupplier<E extends Throwable> {
 
         /**
-         * Returns the value as boolean.
+         * Gets a boolean result.
          *
-         * @return
-         * @throws E the e
+         * @return the boolean result
+         * @throws E if an exception occurs while getting the result
          */
         boolean getAsBoolean() throws E; // NOSONAR
     }
@@ -933,10 +1005,10 @@ public final class Throwables {
     public interface CharSupplier<E extends Throwable> {
 
         /**
-         * Return the value as char.
+         * Gets a char result.
          *
-         * @return
-         * @throws E the e
+         * @return the char result
+         * @throws E if an exception occurs while getting the result
          */
         char getAsChar() throws E;
     }
@@ -950,10 +1022,10 @@ public final class Throwables {
     public interface ByteSupplier<E extends Throwable> {
 
         /**
-         * Return the value as byte.
+         * Gets a byte result.
          *
-         * @return
-         * @throws E the e
+         * @return the byte result
+         * @throws E if an exception occurs while getting the result
          */
         byte getAsByte() throws E;
     }
@@ -967,10 +1039,10 @@ public final class Throwables {
     public interface ShortSupplier<E extends Throwable> {
 
         /**
-         * Return the value as short.
+         * Gets a short result.
          *
-         * @return
-         * @throws E the e
+         * @return the short result
+         * @throws E if an exception occurs while getting the result
          */
         short getAsShort() throws E;
     }
@@ -984,10 +1056,10 @@ public final class Throwables {
     public interface IntSupplier<E extends Throwable> {
 
         /**
-         * Return the value as int.
+         * Gets an int result.
          *
-         * @return
-         * @throws E the e
+         * @return the int result
+         * @throws E if an exception occurs while getting the result
          */
         int getAsInt() throws E;
     }
@@ -1001,10 +1073,10 @@ public final class Throwables {
     public interface LongSupplier<E extends Throwable> {
 
         /**
-         * Return the value as long.
+         * Gets a long result.
          *
-         * @return
-         * @throws E the e
+         * @return the long result
+         * @throws E if an exception occurs while getting the result
          */
         long getAsLong() throws E;
     }
@@ -1018,10 +1090,10 @@ public final class Throwables {
     public interface FloatSupplier<E extends Throwable> {
 
         /**
-         * Return the value as float.
+         * Gets a float result.
          *
-         * @return
-         * @throws E the e
+         * @return the float result
+         * @throws E if an exception occurs while getting the result
          */
         float getAsFloat() throws E;
     }
@@ -1035,10 +1107,10 @@ public final class Throwables {
     public interface DoubleSupplier<E extends Throwable> {
 
         /**
-         * Return the value as double.
+         * Gets a double result.
          *
-         * @return
-         * @throws E the e
+         * @return the double result
+         * @throws E if an exception occurs while getting the result
          */
         double getAsDouble() throws E;
     }
@@ -1053,17 +1125,29 @@ public final class Throwables {
     public interface Predicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given argument.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(T t) throws E;
 
+        /**
+         * Returns a predicate that represents the logical negation of this predicate.
+         *
+         * @return a predicate that represents the logical negation of this predicate
+         */
         default Predicate<T, E> negate() {
             return t -> !test(t);
         }
 
+        /**
+         * Returns a java.util.function.Predicate that wraps this Throwables.Predicate.
+         * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Predicate that executes this predicate and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Predicate<T> unchecked() {
             return t -> {
@@ -1087,14 +1171,21 @@ public final class Throwables {
     public interface BiPredicate<T, U, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return true if the input arguments match the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(T t, U u) throws E;
 
+        /**
+         * Returns a java.util.function.BiPredicate that wraps this Throwables.BiPredicate.
+         * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.BiPredicate that executes this predicate and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
             return (t, u) -> {
@@ -1119,12 +1210,13 @@ public final class Throwables {
     public interface TriPredicate<A, B, C, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return true if the input arguments match the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c) throws E;
     }
@@ -1142,13 +1234,14 @@ public final class Throwables {
     public interface QuadPredicate<A, B, C, D, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @param d
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @param d the fourth input argument
+         * @return true if the input arguments match the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c, D d) throws E;
     }
@@ -1164,13 +1257,20 @@ public final class Throwables {
     public interface Function<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given argument.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(T t) throws E;
 
+        /**
+         * Returns a java.util.function.Function that wraps this Throwables.Function.
+         * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Function that executes this function and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Function<T, R> unchecked() {
             return t -> {
@@ -1195,14 +1295,21 @@ public final class Throwables {
     public interface BiFunction<T, U, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(T t, U u) throws E;
 
+        /**
+         * Returns a java.util.function.BiFunction that wraps this Throwables.BiFunction.
+         * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.BiFunction that executes this function and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
             return (t, u) -> {
@@ -1228,12 +1335,13 @@ public final class Throwables {
     public interface TriFunction<A, B, C, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(A a, B b, C c) throws E;
     }
@@ -1252,13 +1360,14 @@ public final class Throwables {
     public interface QuadFunction<A, B, C, D, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @param d
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @param d the fourth function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(A a, B b, C c, D d) throws E;
     }
@@ -1273,12 +1382,19 @@ public final class Throwables {
     public interface Consumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(T t) throws E;
 
+        /**
+         * Returns a java.util.function.Consumer that wraps this Throwables.Consumer.
+         * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.Consumer that executes this consumer and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.Consumer<T> unchecked() {
             return t -> {
@@ -1302,13 +1418,20 @@ public final class Throwables {
     public interface BiConsumer<T, U, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(T t, U u) throws E;
 
+        /**
+         * Returns a java.util.function.BiConsumer that wraps this Throwables.BiConsumer.
+         * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
+         *
+         * @return a java.util.function.BiConsumer that executes this consumer and wraps any checked exceptions
+         */
         @Beta
         default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
             return (t, u) -> {
@@ -1333,11 +1456,12 @@ public final class Throwables {
     public interface TriConsumer<A, B, C, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(A a, B b, C c) throws E;
     }
@@ -1355,12 +1479,13 @@ public final class Throwables {
     public interface QuadConsumer<A, B, C, D, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @param d
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @param d the fourth input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(A a, B b, C c, D d) throws E;
     }
@@ -1374,9 +1499,10 @@ public final class Throwables {
     public interface BooleanConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given boolean argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the boolean input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(boolean t) throws E;
     }
@@ -1390,10 +1516,11 @@ public final class Throwables {
     public interface BooleanPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given boolean argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the boolean input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(boolean value) throws E;
     }
@@ -1408,10 +1535,11 @@ public final class Throwables {
     public interface BooleanFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given boolean argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the boolean function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(boolean value) throws E;
     }
@@ -1425,9 +1553,10 @@ public final class Throwables {
     public interface CharConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given char argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the char input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(char t) throws E;
     }
@@ -1441,10 +1570,11 @@ public final class Throwables {
     public interface CharPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given char argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the char input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(char value) throws E;
     }
@@ -1459,10 +1589,11 @@ public final class Throwables {
     public interface CharFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given char argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the char function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(char value) throws E;
     }
@@ -1476,9 +1607,10 @@ public final class Throwables {
     public interface ByteConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given byte argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the byte input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(byte t) throws E;
     }
@@ -1492,10 +1624,11 @@ public final class Throwables {
     public interface BytePredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given byte argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the byte input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(byte value) throws E;
     }
@@ -1510,10 +1643,11 @@ public final class Throwables {
     public interface ByteFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given byte argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the byte function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(byte value) throws E;
     }
@@ -1527,9 +1661,10 @@ public final class Throwables {
     public interface ShortConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given short argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the short input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(short t) throws E;
     }
@@ -1543,10 +1678,11 @@ public final class Throwables {
     public interface ShortPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given short argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the short input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(short value) throws E;
     }
@@ -1561,10 +1697,11 @@ public final class Throwables {
     public interface ShortFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given short argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the short function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(short value) throws E;
     }
@@ -1578,9 +1715,10 @@ public final class Throwables {
     public interface IntConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given int argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the int input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(int t) throws E;
     }
@@ -1594,10 +1732,11 @@ public final class Throwables {
     public interface IntPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given int argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the int input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(int value) throws E;
     }
@@ -1612,10 +1751,11 @@ public final class Throwables {
     public interface IntFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given int argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the int function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(int value) throws E;
     }
@@ -1629,10 +1769,11 @@ public final class Throwables {
     public interface IntToLongFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given int argument and produces a long result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the int function argument
+         * @return the long function result
+         * @throws E if an exception occurs during function application
          */
         long applyAsLong(int value) throws E;
     }
@@ -1646,10 +1787,11 @@ public final class Throwables {
     public interface IntToDoubleFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given int argument and produces a double result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the int function argument
+         * @return the double function result
+         * @throws E if an exception occurs during function application
          */
         double applyAsDouble(int value) throws E;
     }
@@ -1663,9 +1805,10 @@ public final class Throwables {
     public interface LongConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given long argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the long input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(long t) throws E;
     }
@@ -1679,10 +1822,11 @@ public final class Throwables {
     public interface LongPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given long argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the long input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(long value) throws E;
     }
@@ -1697,10 +1841,11 @@ public final class Throwables {
     public interface LongFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given long argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the long function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(long value) throws E;
     }
@@ -1714,10 +1859,11 @@ public final class Throwables {
     public interface LongToIntFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given long argument and produces an int result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the long function argument
+         * @return the int function result
+         * @throws E if an exception occurs during function application
          */
         int applyAsInt(long value) throws E;
     }
@@ -1731,10 +1877,11 @@ public final class Throwables {
     public interface LongToDoubleFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given long argument and produces a double result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the long function argument
+         * @return the double function result
+         * @throws E if an exception occurs during function application
          */
         double applyAsDouble(long value) throws E;
     }
@@ -1748,9 +1895,10 @@ public final class Throwables {
     public interface FloatConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given float argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the float input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(float t) throws E;
     }
@@ -1764,10 +1912,11 @@ public final class Throwables {
     public interface FloatPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given float argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the float input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(float value) throws E;
     }
@@ -1782,10 +1931,11 @@ public final class Throwables {
     public interface FloatFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given float argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the float function argument
+         * @return the function result
+         * @throws E if an exception occurs during function application
          */
         R apply(float value) throws E;
     }
@@ -1799,9 +1949,10 @@ public final class Throwables {
     public interface DoubleConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given double argument.
          *
-         * @param t
-         * @throws E the e
+         * @param t the double input argument
+         * @throws E if an exception occurs during the operation
          */
         void accept(double t) throws E;
     }
@@ -1815,2530 +1966,2849 @@ public final class Throwables {
     public interface DoublePredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given double argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the double input argument
+         * @return true if the input argument matches the predicate, otherwise false
+         * @throws E if an exception occurs during evaluation
          */
         boolean test(double value) throws E;
     }
 
     /**
-     * The Interface DoubleFunction.
+     * Represents a function that accepts a double-valued argument and produces a result.
+     * This is the double-consuming primitive specialization for {@code Function}.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface DoubleFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given double-valued argument.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the double value to be processed
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(double value) throws E;
     }
 
     /**
-     * The Interface DoubleToIntFunction.
+     * Represents a function that accepts a double-valued argument and produces an int-valued result.
+     * This is the double-to-int primitive specialization for {@code Function}.
      *
-     * @param <E>
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface DoubleToIntFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given double value and returns an int result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the double value to be processed
+         * @return the int result
+         * @throws E if an error occurs during function execution
          */
         int applyAsInt(double value) throws E;
     }
 
     /**
-     * The Interface DoubleToLongFunction.
+     * Represents a function that accepts a double-valued argument and produces a long-valued result.
+     * This is the double-to-long primitive specialization for {@code Function}.
      *
-     * @param <E>
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface DoubleToLongFunction<E extends Throwable> {
 
         /**
+         * Applies this function to the given double value and returns a long result.
          *
-         * @param value
-         * @return
-         * @throws E the e
+         * @param value the double value to be processed
+         * @return the long result
+         * @throws E if an error occurs during function execution
          */
         long applyAsLong(double value) throws E;
     }
 
     /**
-     * The Interface ToBooleanFunction.
+     * Represents a function that produces a boolean-valued result.
+     * This is the boolean-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToBooleanFunction<T, E extends Throwable> {
 
         /**
-         * Apply as boolean.
+         * Applies this function to the given argument and returns a boolean result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the boolean result
+         * @throws E if an error occurs during function execution
          */
         boolean applyAsBoolean(T t) throws E;
     }
 
     /**
-     * The Interface ToCharFunction.
+     * Represents a function that produces a char-valued result.
+     * This is the char-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToCharFunction<T, E extends Throwable> {
 
         /**
-         * Apply as char.
+         * Applies this function to the given argument and returns a char result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the char result
+         * @throws E if an error occurs during function execution
          */
         char applyAsChar(T t) throws E;
     }
 
     /**
-     * The Interface ToByteFunction.
+     * Represents a function that produces a byte-valued result.
+     * This is the byte-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToByteFunction<T, E extends Throwable> {
 
         /**
-         * Apply as byte.
+         * Applies this function to the given argument and returns a byte result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the byte result
+         * @throws E if an error occurs during function execution
          */
         byte applyAsByte(T t) throws E;
     }
 
     /**
-     * The Interface ToShortFunction.
+     * Represents a function that produces a short-valued result.
+     * This is the short-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToShortFunction<T, E extends Throwable> {
 
         /**
-         * Apply as short.
+         * Applies this function to the given argument and returns a short result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the short result
+         * @throws E if an error occurs during function execution
          */
         short applyAsShort(T t) throws E;
     }
 
     /**
-     * The Interface ToIntFunction.
+     * Represents a function that produces an int-valued result.
+     * This is the int-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToIntFunction<T, E extends Throwable> {
 
         /**
-         * Apply as int.
+         * Applies this function to the given argument and returns an int result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the int result
+         * @throws E if an error occurs during function execution
          */
         int applyAsInt(T t) throws E;
     }
 
     /**
-     * The Interface ToLongFunction.
+     * Represents a function that produces a long-valued result.
+     * This is the long-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToLongFunction<T, E extends Throwable> {
 
         /**
-         * Apply as long.
+         * Applies this function to the given argument and returns a long result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the long result
+         * @throws E if an error occurs during function execution
          */
         long applyAsLong(T t) throws E;
     }
 
     /**
-     * The Interface ToFloatFunction.
+     * Represents a function that produces a float-valued result.
+     * This is the float-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToFloatFunction<T, E extends Throwable> {
 
         /**
-         * Apply as float.
+         * Applies this function to the given argument and returns a float result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the float result
+         * @throws E if an error occurs during function execution
          */
         float applyAsFloat(T t) throws E;
     }
 
     /**
-     * The Interface ToDoubleFunction.
+     * Represents a function that produces a double-valued result.
+     * This is the double-producing primitive specialization for {@code Function}.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToDoubleFunction<T, E extends Throwable> {
 
         /**
-         * Apply as double.
+         * Applies this function to the given argument and returns a double result.
          *
-         * @param t
-         * @return
-         * @throws E the e
+         * @param t the input argument
+         * @return the double result
+         * @throws E if an error occurs during function execution
          */
         double applyAsDouble(T t) throws E;
     }
 
     /**
-     * The Interface TriIntFunction.
+     * Represents a function that accepts two arguments and produces an int-valued result.
+     * This is the int-producing primitive specialization for {@code BiFunction}.
      *
-     * @param <A>
-     * @param <B>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToIntBiFunction<A, B, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns an int result.
          *
-         * @param a
-         * @param b
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the int result
+         * @throws E if an error occurs during function execution
          */
         int applyAsInt(A a, B b) throws E;
     }
 
     /**
-     * The Interface TriLongFunction.
+     * Represents a function that accepts two arguments and produces a long-valued result.
+     * This is the long-producing primitive specialization for {@code BiFunction}.
      *
-     * @param <A>
-     * @param <B>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToLongBiFunction<A, B, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns a long result.
          *
-         * @param a
-         * @param b
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the long result
+         * @throws E if an error occurs during function execution
          */
         long applyAsLong(A a, B b) throws E;
     }
 
     /**
-     * The Interface TriDoubleFunction.
+     * Represents a function that accepts two arguments and produces a double-valued result.
+     * This is the double-producing primitive specialization for {@code BiFunction}.
      *
-     * @param <A>
-     * @param <B>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToDoubleBiFunction<A, B, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns a double result.
          *
-         * @param a
-         * @param b
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the double result
+         * @throws E if an error occurs during function execution
          */
         double applyAsDouble(A a, B b) throws E;
     }
 
     /**
-     * The Interface TriIntFunction.
+     * Represents a function that accepts three arguments and produces an int-valued result.
+     * This is the int-producing primitive specialization for TriFunction.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <C> the type of the third argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToIntTriFunction<A, B, C, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns an int result.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the int result
+         * @throws E if an error occurs during function execution
          */
         int applyAsInt(A a, B b, C c) throws E;
     }
 
     /**
-     * The Interface TriLongFunction.
+     * Represents a function that accepts three arguments and produces a long-valued result.
+     * This is the long-producing primitive specialization for TriFunction.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <C> the type of the third argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToLongTriFunction<A, B, C, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns a long result.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the long result
+         * @throws E if an error occurs during function execution
          */
         long applyAsLong(A a, B b, C c) throws E;
     }
 
     /**
-     * The Interface TriDoubleFunction.
+     * Represents a function that accepts three arguments and produces a double-valued result.
+     * This is the double-producing primitive specialization for TriFunction.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <C> the type of the third argument to the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ToDoubleTriFunction<A, B, C, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments and returns a double result.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the double result
+         * @throws E if an error occurs during function execution
          */
         double applyAsDouble(A a, B b, C c) throws E;
     }
 
     /**
-     * The Interface UnaryOperator.
+     * Represents an operation on a single operand that produces a result of the same type as its operand.
+     * This is a specialization of {@code Function} for the case where the operand and result are of the same type.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the operand and result of the operator
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface UnaryOperator<T, E extends Throwable> extends Function<T, T, E> {
     }
 
     /**
-     * The Interface BinaryOperator.
+     * Represents an operation upon two operands of the same type, producing a result of the same type as the operands.
+     * This is a specialization of {@code BiFunction} for the case where the operands and the result are all of the same type.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the operands and result of the operator
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface BinaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
     }
 
     /**
-     * The Interface TernaryOperator.
+     * Represents an operation upon three operands of the same type, producing a result of the same type as the operands.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the operands and result of the operator
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface TernaryOperator<T, E extends Throwable> {
 
         /**
-         * Apply as char.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         T apply(T a, T b, T c) throws E;
     }
 
     /**
-     * The Interface BooleanUnaryOperator.
+     * Represents an operation on a single boolean-valued operand that produces a boolean-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface BooleanUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as boolean.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean operand) throws E;
     }
 
     /**
-     * The Interface CharUnaryOperator.
+     * Represents an operation on a single char-valued operand that produces a char-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface CharUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as char.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char operand) throws E;
     }
 
     /**
-     * The Interface ByteUnaryOperator.
+     * Represents an operation on a single byte-valued operand that produces a byte-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ByteUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as byte.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte operand) throws E;
     }
 
     /**
-     * The Interface ShortUnaryOperator.
+     * Represents an operation on a single short-valued operand that produces a short-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ShortUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as short.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short operand) throws E;
     }
 
     /**
-     * The Interface IntUnaryOperator.
+     * Represents an operation on a single int-valued operand that produces an int-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface IntUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as int.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int operand) throws E;
     }
 
     /**
-     * The Interface IntObjOperator.
+     * Represents an operation that accepts an int-valued operand and an object operand, and produces an int-valued result.
      *
-     * @param <E>
+     * @param <T> the type of the object operand
+     * @param <E> the type of exception that the operator may throw
      */
     @Beta
     @FunctionalInterface
     public interface IntObjOperator<T, E extends Throwable> {
 
         /**
-         * Apply as int.
+         * Applies this operator to the given operands.
          *
-         * @param operand
-         * @param obj
-         * @return
-         * @throws E the e
+         * @param operand the int operand
+         * @param obj the object operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int operand, T obj) throws E;
     }
 
     /**
-     * The Interface LongUnaryOperator.
+     * Represents an operation on a single long-valued operand that produces a long-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface LongUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as long.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long operand) throws E;
     }
 
     /**
-     * The Interface FloatUnaryOperator.
+     * Represents an operation on a single float-valued operand that produces a float-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface FloatUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as float.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float operand) throws E;
     }
 
     /**
-     * The Interface DoubleUnaryOperator.
+     * Represents an operation on a single double-valued operand that produces a double-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface DoubleUnaryOperator<E extends Throwable> {
 
         /**
-         * Apply as double.
+         * Applies this operator to the given operand.
          *
-         * @param operand
-         * @return
-         * @throws E the e
+         * @param operand the operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double operand) throws E;
     }
 
     /**
-     * The Interface BooleanBinaryOperator.
+     * Represents an operation upon two boolean-valued operands and producing a boolean-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface BooleanBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as boolean.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean left, boolean right) throws E;
     }
 
     /**
-     * The Interface CharBinaryOperator.
+     * Represents an operation upon two char-valued operands and producing a char-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface CharBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as char.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char left, char right) throws E;
     }
 
     /**
-     * The Interface ByteBinaryOperator.
+     * Represents an operation upon two byte-valued operands and producing a byte-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ByteBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as byte.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte left, byte right) throws E;
     }
 
     /**
-     * The Interface ShortBinaryOperator.
+     * Represents an operation upon two short-valued operands and producing a short-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ShortBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as short.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short left, short right) throws E;
     }
 
     /**
-     * The Interface IntBinaryOperator.
+     * Represents an operation upon two int-valued operands and producing an int-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface IntBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as int.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int left, int right) throws E;
     }
 
     /**
-     * The Interface LongBinaryOperator.
+     * Represents an operation upon two long-valued operands and producing a long-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface LongBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as long.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long left, long right) throws E;
     }
 
     /**
-     * The Interface FloatBinaryOperator.
+     * Represents an operation upon two float-valued operands and producing a float-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface FloatBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as float.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float left, float right) throws E;
     }
 
     /**
-     * The Interface DoubleBinaryOperator.
+     * Represents an operation upon two double-valued operands and producing a double-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface DoubleBinaryOperator<E extends Throwable> {
 
         /**
-         * Apply as double.
+         * Applies this operator to the given operands.
          *
-         * @param left
-         * @param right
-         * @return
-         * @throws E the e
+         * @param left the first operand
+         * @param right the second operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double left, double right) throws E;
     }
 
     /**
-     * The Interface BooleanTernaryOperator.
+     * Represents an operation upon three boolean-valued operands and producing a boolean-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface BooleanTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as boolean.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean a, boolean b, boolean c) throws E;
     }
 
     /**
-     * The Interface CharTernaryOperator.
+     * Represents an operation upon three char-valued operands and producing a char-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface CharTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as char.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char a, char b, char c) throws E;
     }
 
     /**
-     * The Interface ByteTernaryOperator.
+     * Represents an operation upon three byte-valued operands and producing a byte-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ByteTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as byte.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte a, byte b, byte c) throws E;
     }
 
     /**
-     * The Interface ShortTernaryOperator.
+     * Represents an operation upon three short-valued operands and producing a short-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface ShortTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as short.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short a, short b, short c) throws E;
     }
 
     /**
-     * The Interface IntTernaryOperator.
+     * Represents an operation upon three int-valued operands and producing an int-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface IntTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as int.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int a, int b, int c) throws E;
     }
 
     /**
-     * The Interface LongTernaryOperator.
+     * Represents an operation upon three long-valued operands and producing a long-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface LongTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as long.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long a, long b, long c) throws E;
     }
 
     /**
-     * The Interface FloatTernaryOperator.
+     * Represents an operation upon three float-valued operands and producing a float-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface FloatTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as float.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float a, float b, float c) throws E;
     }
 
     /**
-     * The Interface DoubleTernaryOperator.
+     * Represents an operation upon three double-valued operands and producing a double-valued result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
     public interface DoubleTernaryOperator<E extends Throwable> {
 
         /**
-         * Apply as double.
+         * Applies this operator to the given operands.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first operand
+         * @param b the second operand
+         * @param c the third operand
+         * @return the operator result
+         * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double a, double b, double c) throws E;
     }
 
     /**
-     * The Interface BooleanBiPredicate.
+     * Represents a predicate (boolean-valued function) of two boolean-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface BooleanBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(boolean t, boolean u) throws E;
     }
 
     /**
-     * The Interface CharBiPredicate.
+     * Represents a predicate (boolean-valued function) of two char-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface CharBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(char t, char u) throws E;
     }
 
     /**
-     * The Interface ByteBiPredicate.
+     * Represents a predicate (boolean-valued function) of two byte-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ByteBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(byte t, byte u) throws E;
     }
 
     /**
-     * The Interface ShortBiPredicate.
+     * Represents a predicate (boolean-valued function) of two short-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ShortBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(short t, short u) throws E;
     }
 
     /**
-     * The Interface IntBiPredicate.
+     * Represents a predicate (boolean-valued function) of two int-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface IntBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(int t, int u) throws E;
     }
 
     /**
-     * The Interface LongBiPredicate.
+     * Represents a predicate (boolean-valued function) of two long-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface LongBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(long t, long u) throws E;
     }
 
     /**
-     * The Interface FloatBiPredicate.
+     * Represents a predicate (boolean-valued function) of two float-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface FloatBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(float t, float u) throws E;
     }
 
     /**
-     * The Interface DoubleBiPredicate.
+     * Represents a predicate (boolean-valued function) of two double-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface DoubleBiPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(double t, double u) throws E;
     }
 
     /**
-     * The Interface BooleanBiFunction.
+     * Represents a function that accepts two boolean-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface BooleanBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(boolean t, boolean u) throws E;
     }
 
     /**
-     * The Interface CharBiFunction.
+     * Represents a function that accepts two char-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface CharBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(char t, char u) throws E;
     }
 
     /**
-     * The Interface ByteBiFunction.
+     * Represents a function that accepts two byte-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ByteBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(byte t, byte u) throws E;
     }
 
     /**
-     * The Interface ShortBiFunction.
+     * Represents a function that accepts two short-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ShortBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(short t, short u) throws E;
     }
 
     /**
-     * The Interface IntBiFunction.
+     * Represents a function that accepts two int-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface IntBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int t, int u) throws E;
     }
 
     /**
-     * The Interface LongBiFunction.
+     * Represents a function that accepts two long-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface LongBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(long t, long u) throws E;
     }
 
     /**
-     * The Interface FloatBiFunction.
+     * Represents a function that accepts two float-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface FloatBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(float t, float u) throws E;
     }
 
     /**
-     * The Interface DoubleBiFunction.
+     * Represents a function that accepts two double-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface DoubleBiFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the first function argument
+         * @param u the second function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(double t, double u) throws E;
     }
 
     /**
-     * The Interface BooleanBiConsumer.
+     * Represents an operation that accepts two boolean-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface BooleanBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(boolean t, boolean u) throws E;
     }
 
     /**
-     * The Interface CharBiConsumer.
+     * Represents an operation that accepts two char-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface CharBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(char t, char u) throws E;
     }
 
     /**
-     * The Interface ByteBiConsumer.
+     * Represents an operation that accepts two byte-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ByteBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(byte t, byte u) throws E;
     }
 
     /**
-     * The Interface ShortBiConsumer.
+     * Represents an operation that accepts two short-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ShortBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(short t, short u) throws E;
     }
 
     /**
-     * The Interface IntBiConsumer.
+     * Represents an operation that accepts two int-valued arguments and returns no result.
+     * This is the int-specialized primitive type specialization of {@code BiConsumer}.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntBiConsumer<E extends Throwable> extends IntIntConsumer<E> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         @Override
         void accept(int t, int u) throws E;
     }
 
     /**
-     * The Interface LongBiConsumer.
+     * Represents an operation that accepts two long-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface LongBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(long t, long u) throws E;
     }
 
     /**
-     * The Interface FloatBiConsumer.
+     * Represents an operation that accepts two float-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface FloatBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(float t, float u) throws E;
     }
 
     /**
-     * The Interface DoubleBiConsumer.
+     * Represents an operation that accepts two double-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface DoubleBiConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the first input argument
+         * @param u the second input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(double t, double u) throws E;
     }
 
     /**
-     * The Interface BooleanTriPredicate.
+     * Represents a predicate (boolean-valued function) of three boolean-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface BooleanTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(boolean a, boolean b, boolean c) throws E;
     }
 
     /**
-     * The Interface CharTriPredicate.
+     * Represents a predicate (boolean-valued function) of three char-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface CharTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(char a, char b, char c) throws E;
     }
 
     /**
-     * The Interface ByteTriPredicate.
+     * Represents a predicate (boolean-valued function) of three byte-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ByteTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(byte a, byte b, byte c) throws E;
     }
 
     /**
-     * The Interface ShortTriPredicate.
+     * Represents a predicate (boolean-valued function) of three short-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ShortTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(short a, short b, short c) throws E;
     }
 
     /**
-     * The Interface IntTriPredicate.
+     * Represents a predicate (boolean-valued function) of three int-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface IntTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(int a, int b, int c) throws E;
     }
 
     /**
-     * The Interface LongTriPredicate.
+     * Represents a predicate (boolean-valued function) of three long-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface LongTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(long a, long b, long c) throws E;
     }
 
     /**
-     * The Interface FloatTriPredicate.
+     * Represents a predicate (boolean-valued function) of three float-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface FloatTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(float a, float b, float c) throws E;
     }
 
     /**
-     * The Interface DoubleTriPredicate.
+     * Represents a predicate (boolean-valued function) of three double-valued arguments.
      *
-     * @param <E>
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface DoubleTriPredicate<E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(double a, double b, double c) throws E;
     }
 
     /**
-     * The Interface BooleanTriFunction.
+     * Represents a function that accepts three boolean-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface BooleanTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(boolean a, boolean b, boolean c) throws E;
     }
 
     /**
-     * The Interface CharTriFunction.
+     * Represents a function that accepts three char-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface CharTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(char a, char b, char c) throws E;
     }
 
     /**
-     * The Interface ByteTriFunction.
+     * Represents a function that accepts three byte-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ByteTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(byte a, byte b, byte c) throws E;
     }
 
     /**
-     * The Interface ShortTriFunction.
+     * Represents a function that accepts three short-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ShortTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(short a, short b, short c) throws E;
     }
 
     /**
-     * The Interface IntTriFunction.
+     * Represents a function that accepts three int-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface IntTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int a, int b, int c) throws E;
     }
 
     /**
-     * The Interface LongTriFunction.
+     * Represents a function that accepts three long-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface LongTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(long a, long b, long c) throws E;
     }
 
     /**
-     * The Interface FloatTriFunction.
+     * Represents a function that accepts three float-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface FloatTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(float a, float b, float c) throws E;
     }
 
     /**
-     * The Interface DoubleTriFunction.
+     * Represents a function that accepts three double-valued arguments and produces a result.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface DoubleTriFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         * @throws E the e
+         * @param a the first function argument
+         * @param b the second function argument
+         * @param c the third function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(double a, double b, double c) throws E;
     }
 
     /**
-     * The Interface BooleanTriConsumer.
+     * Represents an operation that accepts three boolean-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface BooleanTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(boolean a, boolean b, boolean c) throws E;
     }
 
     /**
-     * The Interface CharTriConsumer.
+     * Represents an operation that accepts three char-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface CharTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(char a, char b, char c) throws E;
     }
 
     /**
-     * The Interface ByteTriConsumer.
+     * Represents an operation that accepts three byte-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ByteTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(byte a, byte b, byte c) throws E;
     }
 
     /**
-     * The Interface ShortTriConsumer.
+     * Represents an operation that accepts three short-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ShortTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(short a, short b, short c) throws E;
     }
 
     /**
-     * The Interface IntTriConsumer.
+     * Represents an operation that accepts three int-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(int a, int b, int c) throws E;
     }
 
     /**
-     * The Interface LongTriConsumer.
+     * Represents an operation that accepts three long-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface LongTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(long a, long b, long c) throws E;
     }
 
     /**
-     * The Interface FloatTriConsumer.
+     * Represents an operation that accepts three float-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface FloatTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(float a, float b, float c) throws E;
     }
 
     /**
-     * The Interface DoubleTriConsumer.
+     * Represents an operation that accepts three double-valued arguments and returns no result.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface DoubleTriConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param a
-         * @param b
-         * @param c
-         * @throws E the e
+         * @param a the first input argument
+         * @param b the second input argument
+         * @param c the third input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(double a, double b, double c) throws E;
     }
 
     /**
-     * The Interface ObjBooleanConsumer.
+     * Represents an operation that accepts an object and a boolean value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjBooleanConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param value
-         * @throws E the e
+         * @param t the object input argument
+         * @param value the boolean input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, boolean value) throws E;
     }
 
     /**
-     * The Interface ObjCharConsumer.
+     * Represents an operation that accepts an object and a char value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjCharConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param value
-         * @throws E the e
+         * @param t the object input argument
+         * @param value the char input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, char value) throws E;
     }
 
     /**
-     * The Interface ObjByteConsumer.
+     * Represents an operation that accepts an object and a byte value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjByteConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param value
-         * @throws E the e
+         * @param t the object input argument
+         * @param value the byte input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, byte value) throws E;
     }
 
     /**
-     * The Interface ObjShortConsumer.
+     * Represents an operation that accepts an object and a short value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjShortConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param value
-         * @throws E the e
+         * @param t the object input argument
+         * @param value the short input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, short value) throws E;
     }
 
     /**
-     * The Interface ObjIntConsumer.
+     * Represents an operation that accepts an object and an int value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjIntConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the int input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, int u) throws E;
     }
 
     /**
-     * The Interface ObjIntConsumer.
+     * Represents a function that accepts an object and an int value and produces a result.
      *
-     * @param <T>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ObjIntFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object function argument
+         * @param u the int function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(T t, int u) throws E;
     }
 
     /**
-     * The Interface ObjIntPredicate.
+     * Represents a predicate (boolean-valued function) of an object and an int value.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ObjIntPredicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the int input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(T t, int u) throws E;
     }
 
     /**
-     * The Interface ObjLongConsumer.
+     * Represents an operation that accepts an object and a long value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjLongConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the long input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, long u) throws E;
     }
 
     /**
-     * The Interface ObjLongFunction.
+     * Represents a function that accepts an object and a long value and produces a result.
      *
-     * @param <T>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ObjLongFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object function argument
+         * @param u the long function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(T t, long u) throws E;
     }
 
     /**
-     * The Interface ObjLongPredicate.
+     * Represents a predicate (boolean-valued function) of an object and a long value.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ObjLongPredicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the long input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(T t, long u) throws E;
     }
 
     /**
-     * The Interface ObjFloatConsumer.
+     * Represents an operation that accepts an object and a float value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjFloatConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param value
-         * @throws E the e
+         * @param t the object input argument
+         * @param value the float input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, float value) throws E;
     }
 
     /**
-     * The Interface ObjDoubleConsumer.
+     * Represents an operation that accepts an object and a double value and returns no result.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface ObjDoubleConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the double input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, double u) throws E;
     }
 
     /**
-     * The Interface ObjDoubleFunction.
+     * Represents a function that accepts an object and a double value and produces a result.
      *
-     * @param <T>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface ObjDoubleFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object function argument
+         * @param u the double function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(T t, double u) throws E;
     }
 
     /**
-     * The Interface ObjDoublePredicate.
+     * Represents a predicate (boolean-valued function) of an object and a double value.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface ObjDoublePredicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @return
-         * @throws E the e
+         * @param t the object input argument
+         * @param u the double input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(T t, double u) throws E;
     }
 
+    /**
+     * Represents an operation that accepts an object and two int values and returns no result.
+     *
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface ObjBiIntConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param i
-         * @param j
-         * @throws E
+         * @param t the object input argument
+         * @param i the first int input argument
+         * @param j the second int input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, int i, int j) throws E;
     }
 
+    /**
+     * Represents a function that accepts an object and two int values and produces a result.
+     *
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface ObjBiIntFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param t
-         * @param i
-         * @param j
-         * @return
-         * @throws E
+         * @param t the object function argument
+         * @param i the first int function argument
+         * @param j the second int function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(T t, int i, int j) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of an object and two int values.
+     *
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface ObjBiIntPredicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param i
-         * @param j
-         * @return
-         * @throws E
+         * @param t the object input argument
+         * @param i the first int input argument
+         * @param j the second int input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(T t, int i, int j) throws E;
     }
 
     /**
-     * The Interface IndexedBiConsumer.
+     * Represents an operation that accepts two objects and an int value and returns no result.
+     * This is the indexed variant of BiConsumer.
      *
-     * @param <T>
-     * @param <U>
-     * @param <E>
+     * @param <T> the type of the first object argument to the operation
+     * @param <U> the type of the second object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface BiObjIntConsumer<T, U, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param t
-         * @param u
-         * @param i
-         * @throws E the e
+         * @param t the first object input argument
+         * @param u the second object input argument
+         * @param i the int index argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(T t, U u, int i) throws E;
     }
 
     /**
-     * The Interface IndexedBiFunction.
+     * Represents a function that accepts two objects and an int value and produces a result.
+     * This is the indexed variant of BiFunction.
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the first object argument to the function
+     * @param <U> the type of the second object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
      */
     @FunctionalInterface
     public interface BiObjIntFunction<T, U, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param e
-         * @param u
-         * @param i
-         * @return
-         * @throws E the e
+         * @param e the first object function argument
+         * @param u the second object function argument
+         * @param i the int index argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(T e, U u, int i) throws E;
     }
 
     /**
-     * The Interface IndexedBiPredicate.
+     * Represents a predicate (boolean-valued function) of two objects and an int value.
+     * This is the indexed variant of BiPredicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param <E>
+     * @param <T> the type of the first object argument to the predicate
+     * @param <U> the type of the second object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
      */
     @FunctionalInterface
     public interface BiObjIntPredicate<T, U, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param t
-         * @param u
-         * @param i
-         * @return
-         * @throws E the e
+         * @param t the first object input argument
+         * @param u the second object input argument
+         * @param i the int index argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(T t, U u, int i) throws E;
     }
 
+    /**
+     * Represents an operation that accepts an int value and an object and returns no result.
+     *
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface IntObjConsumer<T, E extends Throwable> {
 
         /**
+         * Returns an IntObjConsumer that performs the given operation.
          *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
+         * @param <T> the type of the object argument to the consumer
+         * @param <E> the type of exception that the consumer may throw
+         * @param consumer the operation to be performed
+         * @return the input consumer
          */
         static <T, E extends Throwable> IntObjConsumer<T, E> of(final IntObjConsumer<T, E> consumer) {
             return consumer;
         }
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param i
-         * @param t
-         * @throws E
+         * @param i the int input argument
+         * @param t the object input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(int i, T t) throws E;
     }
 
+    /**
+     * Represents a function that accepts an int value and an object and produces a result.
+     *
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface IntObjFunction<T, R, E extends Throwable> {
 
         /**
+         * Returns an IntObjFunction that performs the given function.
          *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
+         * @param <T> the type of the object argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of exception that the function may throw
+         * @param func the function to be performed
+         * @return the input function
          */
         static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) {
             return func;
         }
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the int function argument
+         * @param t the object function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int i, T t) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of an int value and an object.
+     *
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface IntObjPredicate<T, E extends Throwable> {
 
         /**
+         * Returns an IntObjPredicate that performs the given test.
          *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
+         * @param <T> the type of the object argument to the predicate
+         * @param <E> the type of exception that the predicate may throw
+         * @param predicate the predicate to be performed
+         * @return the input predicate
          */
         static <T, E extends Throwable> IntObjPredicate<T, E> of(final IntObjPredicate<T, E> predicate) {
             return predicate;
         }
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the int input argument
+         * @param t the object input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(int i, T t) throws E;
     }
 
+    /**
+     * Represents an operation that accepts an int value and two objects and returns no result.
+     *
+     * @param <T> the type of the first object argument to the operation
+     * @param <U> the type of the second object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface IntBiObjConsumer<T, U, E extends Throwable> {
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param i
-         * @param t
-         * @param u
-         * @throws E
+         * @param i the int input argument
+         * @param t the first object input argument
+         * @param u the second object input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(int i, T t, U u) throws E;
     }
 
+    /**
+     * Represents a function that accepts an int value and two objects and produces a result.
+     *
+     * @param <T> the type of the first object argument to the function
+     * @param <U> the type of the second object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface IntBiObjFunction<T, U, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param i
-         * @param t
-         * @param u
-         * @return
-         * @throws E
+         * @param i the int function argument
+         * @param t the first object function argument
+         * @param u the second object function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int i, T t, U u) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of an int value and two objects.
+     *
+     * @param <T> the type of the first object argument to the predicate
+     * @param <U> the type of the second object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface IntBiObjPredicate<T, U, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param i
-         * @param t
-         * @param u
-         * @return
-         * @throws E
+         * @param i the int input argument
+         * @param t the first object input argument
+         * @param u the second object input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(int i, T t, U u) throws E;
     }
 
+    /**
+     * Represents an operation that accepts two int values and an object and returns no result.
+     *
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface BiIntObjConsumer<T, E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param i
-         * @param j
-         * @param t
-         * @throws E
+         * @param i the first int input argument
+         * @param j the second int input argument
+         * @param t the object input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(int i, int j, T t) throws E;
     }
 
+    /**
+     * Represents a function that accepts two int values and an object and produces a result.
+     *
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface BiIntObjFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param i
-         * @param j
-         * @param t
-         * @return
-         * @throws E
+         * @param i the first int function argument
+         * @param j the second int function argument
+         * @param t the object function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int i, int j, T t) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of two int values and an object.
+     *
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface BiIntObjPredicate<T, E extends Throwable> {
 
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param i
-         * @param j
-         * @param t
-         * @return
-         * @throws E
+         * @param i the first int input argument
+         * @param j the second int input argument
+         * @param t the object input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(int i, int j, T t) throws E;
     }
 
+    /**
+     * Represents an operation that accepts a long value and an object and returns no result.
+     *
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface LongObjConsumer<T, E extends Throwable> {
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param i
-         * @param t
-         * @throws E
+         * @param i the long input argument
+         * @param t the object input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(long i, T t) throws E;
     }
 
+    /**
+     * Represents a function that accepts a long value and an object and produces a result.
+     *
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface LongObjFunction<T, R, E extends Throwable> {
         /**
+         * Applies this function to the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the long function argument
+         * @param t the object function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(long i, T t) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of a long value and an object.
+     *
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface LongObjPredicate<T, E extends Throwable> {
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the long input argument
+         * @param t the object input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(long i, T t) throws E;
     }
 
+    /**
+     * Represents an operation that accepts a double value and an object and returns no result.
+     *
+     * @param <T> the type of the object argument to the operation
+     * @param <E> the type of exception that the consumer may throw
+     */
     @FunctionalInterface
     public interface DoubleObjConsumer<T, E extends Throwable> {
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param i
-         * @param t
-         * @throws E
+         * @param i the double input argument
+         * @param t the object input argument
+         * @throws E if an error occurs during operation execution
          */
         void accept(double i, T t) throws E;
     }
 
+    /**
+     * Represents a function that accepts a double value and an object and produces a result.
+     *
+     * @param <T> the type of the object argument to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface DoubleObjFunction<T, R, E extends Throwable> {
         /**
+         * Applies this function to the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the double function argument
+         * @param t the object function argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(double i, T t) throws E;
     }
 
+    /**
+     * Represents a predicate (boolean-valued function) of a double value and an object.
+     *
+     * @param <T> the type of the object argument to the predicate
+     * @param <E> the type of exception that the predicate may throw
+     */
     @FunctionalInterface
     public interface DoubleObjPredicate<T, E extends Throwable> {
         /**
+         * Evaluates this predicate on the given arguments.
          *
-         * @param i
-         * @param t
-         * @return
-         * @throws E
+         * @param i the double input argument
+         * @param t the object input argument
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+         * @throws E if an error occurs during predicate evaluation
          */
         boolean test(double i, T t) throws E;
     }
 
+    /**
+     * Represents a function that accepts a boolean array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface BooleanNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given boolean array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the boolean array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(boolean... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> BooleanNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a char array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface CharNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given char array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the char array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(char... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> CharNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a byte array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface ByteNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given byte array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the byte array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(byte... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> ByteNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a short array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface ShortNFunction<R, E extends Throwable> {
         /**
+         * Applies this function to the given short array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the short array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(short... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> ShortNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts an int array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface IntNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given int array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the int array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(int... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> IntNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a long array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface LongNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given long array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the long array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(long... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> LongNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a float array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface FloatNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given float array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the float array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(float... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> FloatNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a double array and produces a result.
+     *
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface DoubleNFunction<R, E extends Throwable> {
 
         /**
+         * Applies this function to the given double array.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the double array argument
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         R apply(double... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> DoubleNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
         }
     }
 
+    /**
+     * Represents a function that accepts a variable number of arguments and produces a result.
+     *
+     * @param <T> the type of the input arguments to the function
+     * @param <R> the type of the result of the function
+     * @param <E> the type of exception that the function may throw
+     */
     @FunctionalInterface
     public interface NFunction<T, R, E extends Throwable> {
 
         /**
+         * Applies this function to the given arguments.
          *
-         * @param args
-         * @return
-         * @throws E
+         * @param args the variable arguments of type T
+         * @return the function result
+         * @throws E if an error occurs during function execution
          */
         @SuppressWarnings("unchecked")
         R apply(T... args) throws E;
 
         /**
+         * Returns a composed function that first applies this function to its input,
+         * and then applies the {@code after} function to the result.
          *
-         * @param <V>
-         * @param after
-         * @return
+         * @param <V> the type of output of the {@code after} function, and of the composed function
+         * @param after the function to apply after this function is applied
+         * @return a composed function that first applies this function and then applies the {@code after} function
          */
         default <V> NFunction<T, V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             return args -> after.apply(apply(args));
@@ -4346,319 +4816,433 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntBooleanConsumer.
+     * Represents an operation that accepts an int index and a boolean value and returns no result.
+     * This is the indexed variant of BooleanConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntBooleanConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the boolean element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, boolean e) throws E;
     }
 
     /**
-     * The Interface IndexedCharConsumer.
+     * Represents an operation that accepts an int index and a char value and returns no result.
+     * This is the indexed variant of CharConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntCharConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the char element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, char e) throws E;
     }
 
     /**
-     * The Interface IndexedByteConsumer.
+     * Represents an operation that accepts an int index and a byte value and returns no result.
+     * This is the indexed variant of ByteConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntByteConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the byte element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, byte e) throws E;
     }
 
     /**
-     * The Interface IndexedShortConsumer.
+     * Represents an operation that accepts an int index and a short value and returns no result.
+     * This is the indexed variant of ShortConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntShortConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the short element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, short e) throws E;
     }
 
     /**
-     * The Interface IndexedIntConsumer.
+     * Represents an operation that accepts two int values and returns no result.
+     * The first int typically represents an index.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntIntConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the int element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, int e) throws E;
     }
 
     /**
-     * The Interface IndexedLongConsumer.
+     * Represents an operation that accepts an int index and a long value and returns no result.
+     * This is the indexed variant of LongConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntLongConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the long element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, long e) throws E;
     }
 
     /**
-     * The Interface IndexedFloatConsumer.
+     * Represents an operation that accepts an int index and a float value and returns no result.
+     * This is the indexed variant of FloatConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntFloatConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the float element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, float e) throws E;
     }
 
     /**
-     * The Interface IndexedDoubleConsumer.
+     * Represents an operation that accepts an int index and a double value and returns no result.
+     * This is the indexed variant of DoubleConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
     public interface IntDoubleConsumer<E extends Throwable> {
 
         /**
+         * Performs this operation on the given arguments.
          *
-         * @param idx
-         * @param e
-         * @throws E the e
+         * @param idx the index
+         * @param e the double element at the index
+         * @throws E if an error occurs during operation execution
          */
         void accept(int idx, double e) throws E;
     }
 
+    /**
+     * Utility class containing functional interfaces that can throw two different types of exceptions.
+     */
     public static final class EE {
         private EE() {
             // Singleton. Utility class.
         }
 
+        /**
+         * Represents a task that returns no result and may throw two types of exceptions.
+         *
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Runnable<E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Executes the task.
              *
-             *
-             * @throws E
-             * @throws E2
+             * @throws E if the first type of error occurs during execution
+             * @throws E2 if the second type of error occurs during execution
              */
             void run() throws E, E2;
         }
 
+        /**
+         * Represents a task that returns a result and may throw two types of exceptions.
+         *
+         * @param <R> the type of the result
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Callable<R, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Computes a result.
              *
-             *
-             * @return
-             * @throws E
-             * @throws E2
+             * @return the computed result
+             * @throws E if the first type of error occurs during computation
+             * @throws E2 if the second type of error occurs during computation
              */
             R call() throws E, E2;
         }
 
+        /**
+         * Represents a supplier of results that may throw two types of exceptions.
+         *
+         * @param <T> the type of results supplied by this supplier
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Supplier<T, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Gets a result.
              *
-             *
-             * @return
-             * @throws E
-             * @throws E2
+             * @return a result
+             * @throws E if the first type of error occurs while getting the result
+             * @throws E2 if the second type of error occurs while getting the result
              */
             T get() throws E, E2;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of one argument that may throw two types of exceptions.
+         *
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Predicate<T, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given argument.
              *
-             *
-             * @param t
-             * @return
-             * @throws E
-             * @throws E2
+             * @param t the input argument
+             * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
              */
             boolean test(T t) throws E, E2;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of two arguments that may throw two types of exceptions.
+         *
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @return
-             * @throws E
-             * @throws E2
+             * @param t the first input argument
+             * @param u the second input argument
+             * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
              */
             boolean test(T t, U u) throws E, E2;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of three arguments that may throw two types of exceptions.
+         *
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @return
-             * @throws E
-             * @throws E2
+             * @param a the first input argument
+             * @param b the second input argument
+             * @param c the third input argument
+             * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
              */
             boolean test(A a, B b, C c) throws E, E2;
         }
 
+        /**
+         * Represents a function that accepts one argument and produces a result, and may throw two types of exceptions.
+         *
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Function<T, R, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Applies this function to the given argument.
              *
-             *
-             * @param t
-             * @return
-             * @throws E
-             * @throws E2
+             * @param t the function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
              */
             R apply(T t) throws E, E2;
         }
 
+        /**
+         * Represents a function that accepts two arguments and produces a result, and may throw two types of exceptions.
+         *
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Applies this function to the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @return
-             * @throws E
-             * @throws E2
+             * @param t the first function argument
+             * @param u the second function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
              */
             R apply(T t, U u) throws E, E2;
         }
 
+        /**
+         * Represents a function that accepts three arguments and produces a result, and may throw two types of exceptions.
+         *
+         * @param <A> the type of the first argument to the function
+         * @param <B> the type of the second argument to the function
+         * @param <C> the type of the third argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Applies this function to the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @return
-             * @throws E
-             * @throws E2
+             * @param a the first function argument
+             * @param b the second function argument
+             * @param c the third function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
              */
             R apply(A a, B b, C c) throws E, E2;
         }
 
+        /**
+         * Represents an operation that accepts a single input argument and returns no result, and may throw two types of exceptions.
+         *
+         * @param <T> the type of the input to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface Consumer<T, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Performs this operation on the given argument.
              *
-             *
-             * @param t
-             * @throws E
-             * @throws E2
+             * @param t the input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
              */
             void accept(T t) throws E, E2;
         }
 
+        /**
+         * Represents an operation that accepts two input arguments and returns no result, and may throw two types of exceptions.
+         *
+         * @param <T> the type of the first argument to the operation
+         * @param <U> the type of the second argument to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Performs this operation on the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @throws E
-             * @throws E2
+             * @param t the first input argument
+             * @param u the second input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
              */
             void accept(T t, U u) throws E, E2;
         }
 
+        /**
+         * Represents an operation that accepts three input arguments and returns no result, and may throw two types of exceptions.
+         *
+         * @param <A> the type of the first argument to the operation
+         * @param <B> the type of the second argument to the operation
+         * @param <C> the type of the third argument to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
+             * Performs this operation on the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @throws E
-             * @throws E2
+             * @param a the first input argument
+             * @param b the second input argument
+             * @param c the third input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
              */
             void accept(A a, B b, C c) throws E, E2;
         }
     }
 
     /**
-     * The Class EEE.
+     * Utility class containing functional interfaces that can throw three different types of exceptions.
      */
     public static final class EEE {
 
@@ -4666,189 +5250,303 @@ public final class Throwables {
             // Singleton. Utility class.
         }
 
+        /**
+         * Represents a task that returns no result and may throw three types of exceptions.
+         *
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Runnable<E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Executes the task.
              *
-             *
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @throws E if the first type of error occurs during execution
+             * @throws E2 if the second type of error occurs during execution
+             * @throws E3 if the third type of error occurs during execution
              */
             void run() throws E, E2, E3;
         }
 
+        /**
+         * Represents a task that returns a result and may throw three types of exceptions.
+         *
+         * @param <R> the type of the result
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Callable<R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Computes a result.
              *
-             *
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @return the computed result
+             * @throws E if the first type of error occurs during computation
+             * @throws E2 if the second type of error occurs during computation
+             * @throws E3 if the third type of error occurs during computation
              */
             R call() throws E, E2, E3;
         }
 
+        /**
+         * Represents a supplier of results that may throw three types of exceptions.
+         *
+         * @param <T> the type of results supplied by this supplier
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Supplier<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Gets a result.
              *
-             *
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @return a result
+             * @throws E if the first type of error occurs while getting the result
+             * @throws E2 if the second type of error occurs while getting the result
+             * @throws E3 if the third type of error occurs while getting the result
              */
             T get() throws E, E2, E3;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of one argument that may throw three types of exceptions.
+         *
+         * @param <T> the type of the input to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Predicate<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given argument.
              *
-             *
-             * @param t
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the input argument
+             * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
+             * @throws E3 if the third type of error occurs during evaluation
              */
             boolean test(T t) throws E, E2, E3;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of two arguments that may throw three types of exceptions.
+         *
+         * @param <T> the type of the first argument to the predicate
+         * @param <U> the type of the second argument to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the first input argument
+             * @param u the second input argument
+             * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
+             * @throws E3 if the third type of error occurs during evaluation
              */
             boolean test(T t, U u) throws E, E2, E3;
         }
 
+        /**
+         * Represents a predicate (boolean-valued function) of three arguments that may throw three types of exceptions.
+         *
+         * @param <A> the type of the first argument to the predicate
+         * @param <B> the type of the second argument to the predicate
+         * @param <C> the type of the third argument to the predicate
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Evaluates this predicate on the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param a the first input argument
+             * @param b the second input argument
+             * @param c the third input argument
+             * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+             * @throws E if the first type of error occurs during evaluation
+             * @throws E2 if the second type of error occurs during evaluation
+             * @throws E3 if the third type of error occurs during evaluation
              */
             boolean test(A a, B b, C c) throws E, E2, E3;
         }
 
+        /**
+         * Represents a function that accepts one argument and produces a result, and may throw three types of exceptions.
+         *
+         * @param <T> the type of the input to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Function<T, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Applies this function to the given argument.
              *
-             *
-             * @param t
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
+             * @throws E3 if the third type of error occurs during function execution
              */
             R apply(T t) throws E, E2, E3;
         }
 
+        /**
+         * Represents a function that accepts two arguments and produces a result, and may throw three types of exceptions.
+         *
+         * @param <T> the type of the first argument to the function
+         * @param <U> the type of the second argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Applies this function to the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the first function argument
+             * @param u the second function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
+             * @throws E3 if the third type of error occurs during function execution
              */
             R apply(T t, U u) throws E, E2, E3;
         }
 
+        /**
+         * Represents a function that accepts three arguments and produces a result, and may throw three types of exceptions.
+         *
+         * @param <A> the type of the first argument to the function
+         * @param <B> the type of the second argument to the function
+         * @param <C> the type of the third argument to the function
+         * @param <R> the type of the result of the function
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Applies this function to the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @return
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param a the first function argument
+             * @param b the second function argument
+             * @param c the third function argument
+             * @return the function result
+             * @throws E if the first type of error occurs during function execution
+             * @throws E2 if the second type of error occurs during function execution
+             * @throws E3 if the third type of error occurs during function execution
              */
             R apply(A a, B b, C c) throws E, E2, E3;
         }
 
+        /**
+         * Represents an operation that accepts a single input argument and returns no result, and may throw three types of exceptions.
+         *
+         * @param <T> the type of the input to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface Consumer<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Performs this operation on the given argument.
              *
-             *
-             * @param t
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
+             * @throws E3 if the third type of error occurs during operation execution
              */
             void accept(T t) throws E, E2, E3;
         }
 
+        /**
+         * Represents an operation that accepts two input arguments and returns no result, and may throw three types of exceptions.
+         *
+         * @param <T> the type of the first argument to the operation
+         * @param <U> the type of the second argument to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Performs this operation on the given arguments.
              *
-             *
-             * @param t
-             * @param u
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param t the first input argument
+             * @param u the second input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
+             * @throws E3 if the third type of error occurs during operation execution
              */
             void accept(T t, U u) throws E, E2, E3;
         }
 
+        /**
+         * Represents an operation that accepts three input arguments and returns no result, and may throw three types of exceptions.
+         *
+         * @param <A> the type of the first argument to the operation
+         * @param <B> the type of the second argument to the operation
+         * @param <C> the type of the third argument to the operation
+         * @param <E> the type of the first exception that may be thrown
+         * @param <E2> the type of the second exception that may be thrown
+         * @param <E3> the type of the third exception that may be thrown
+         */
         @FunctionalInterface
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
+             * Performs this operation on the given arguments.
              *
-             *
-             * @param a
-             * @param b
-             * @param c
-             * @throws E
-             * @throws E2
-             * @throws E3
+             * @param a the first input argument
+             * @param b the second input argument
+             * @param c the third input argument
+             * @throws E if the first type of error occurs during operation execution
+             * @throws E2 if the second type of error occurs during operation execution
+             * @throws E3 if the third type of error occurs during operation execution
              */
             void accept(A a, B b, C c) throws E, E2, E3;
         }
     }
 
+    /**
+     * A thread-safe lazy initializer that defers the creation of the underlying value until first access.
+     * The value is computed exactly once using the provided supplier, and subsequent calls return the cached value.
+     *
+     * @param <T> the type of the value to be lazily initialized
+     * @param <E> the type of exception that may be thrown during initialization
+     */
     static final class LazyInitializer<T, E extends Throwable> implements Throwables.Supplier<T, E> {
         private final Supplier<T, E> supplier;
         private volatile boolean initialized = false;
@@ -4861,11 +5559,14 @@ public final class Throwables {
         }
 
         /**
+         * Creates a new LazyInitializer with the specified supplier.
+         * If the supplier is already a LazyInitializer, it is returned as-is.
          *
-         * @param <T>
-         * @param <E>
-         * @param supplier
-         * @return
+         * @param <T> the type of the value to be lazily initialized
+         * @param <E> the type of exception that may be thrown during initialization
+         * @param supplier the supplier that will provide the value when first requested
+         * @return a LazyInitializer that will use the provided supplier
+         * @throws IllegalArgumentException if supplier is null
          */
         public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
             N.checkArgNotNull(supplier);
@@ -4878,9 +5579,11 @@ public final class Throwables {
         }
 
         /**
+         * Gets the lazily initialized value. On first access, the value is computed using the supplier
+         * and cached for subsequent calls. This method is thread-safe.
          *
-         * @return
-         * @throws E
+         * @return the lazily initialized value
+         * @throws E if the supplier throws an exception during initialization
          */
         @Override
         public T get() throws E {

@@ -22,8 +22,13 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type implementation for XML serialization and deserialization of objects.
+ * <p>
+ * This type allows objects to be converted to and from XML format. It supports
+ * various target classes including Map, List, and custom classes.
+ * </p>
  *
- * @param <T>
+ * @param <T> the type of objects handled by this XMLType
  */
 @SuppressWarnings("java:S2160")
 public class XMLType<T> extends AbstractType<T> {
@@ -46,11 +51,28 @@ public class XMLType<T> extends AbstractType<T> {
         //        this.elementType = parameterTypes[0];
     }
 
+    /**
+     * Returns the declaring name of this XML type.
+     * <p>
+     * The declaring name includes the "XML" prefix and the type parameter in angle brackets,
+     * for example: "XML&lt;Map&gt;" or "XML&lt;User&gt;".
+     * </p>
+     *
+     * @return the declaring name of this XML type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the target class for XML conversion.
+     * <p>
+     * This is the class of objects that this XMLType can serialize to and deserialize from XML.
+     * </p>
+     *
+     * @return the Class object for the target type
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
@@ -72,9 +94,14 @@ public class XMLType<T> extends AbstractType<T> {
     //    }
 
     /**
+     * Converts an object to its XML string representation.
+     * <p>
+     * This method uses the XML parser to serialize the provided object to an XML string.
+     * If the input object is null, this method returns null.
+     * </p>
      *
-     * @param x
-     * @return
+     * @param x the object to convert to XML
+     * @return the XML string representation of the object, or null if the input is null
      */
     @Override
     public String stringOf(final T x) {
@@ -82,9 +109,15 @@ public class XMLType<T> extends AbstractType<T> {
     }
 
     /**
+     * Converts an XML string to an object of the target type.
+     * <p>
+     * This method uses the XML parser to deserialize the provided XML string into an
+     * object of the target class. If the string is null or empty, this method returns null.
+     * </p>
      *
-     * @param str
-     * @return
+     * @param str the XML string to deserialize
+     * @return an object of type T deserialized from the XML string, or null if the string is empty
+     * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
      */
     @Override
     public T valueOf(final String str) {

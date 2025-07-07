@@ -17,23 +17,40 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation that accepts a single {@code int}-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code int}.
+ * Unlike most other functional interfaces, {@code IntConsumer} is expected to operate via side-effects.
  *
+ * <p>This interface extends both {@link java.util.function.IntConsumer} and
+ * {@link Throwables.IntConsumer}, providing compatibility with the standard Java functional
+ * interfaces while also supporting the Throwables framework.
+ *
+ * <p>This is a functional interface whose functional method is {@link #accept(int)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.Consumer
  */
 @FunctionalInterface
 public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, java.util.function.IntConsumer { //NOSONAR
 
     /**
+     * Performs this operation on the given argument.
      *
-     * @param t
+     * @param t the input argument
      */
     @Override
     void accept(int t);
 
     /**
+     * Returns a composed {@code IntConsumer} that performs, in sequence, this operation followed by
+     * the {@code after} operation. If performing either operation throws an exception, it is relayed
+     * to the caller of the composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code IntConsumer} that performs in sequence this operation followed by
+     *         the {@code after} operation
      */
     @Override
     default IntConsumer andThen(final java.util.function.IntConsumer after) {

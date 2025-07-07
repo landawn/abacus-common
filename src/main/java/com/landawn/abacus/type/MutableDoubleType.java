@@ -25,15 +25,22 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
         super(MUTABLE_DOUBLE);
     }
 
+    /**
+     * Returns the Class object representing the MutableDouble type.
+     *
+     * @return The Class object for MutableDouble
+     */
     @Override
     public Class<MutableDouble> clazz() {
         return MutableDouble.class;
     }
 
     /**
+     * Converts a MutableDouble object to its string representation.
+     * The double value is converted to a decimal string representation.
      *
-     * @param x
-     * @return
+     * @param x The MutableDouble object to convert
+     * @return The string representation of the double value, or null if the input is null
      */
     @Override
     public String stringOf(final MutableDouble x) {
@@ -41,9 +48,12 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Parses a string to create a MutableDouble object.
+     * The string is parsed as a double value.
      *
-     * @param str
-     * @return
+     * @param str The string to parse
+     * @return A MutableDouble containing the parsed value, or null if the input is null or empty
+     * @throws NumberFormatException if the string cannot be parsed as a double
      */
     @Override
     public MutableDouble valueOf(final String str) {
@@ -51,11 +61,13 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Retrieves a MutableDouble value from a ResultSet at the specified column index.
+     * The database double value is wrapped in a MutableDouble object.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnIndex The column index (1-based) to retrieve the value from
+     * @return A MutableDouble containing the retrieved value
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public MutableDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -63,11 +75,13 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Retrieves a MutableDouble value from a ResultSet using the specified column label.
+     * The database double value is wrapped in a MutableDouble object.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnLabel The label of the column to retrieve the value from
+     * @return A MutableDouble containing the retrieved value
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public MutableDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -75,11 +89,13 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Sets a MutableDouble parameter in a PreparedStatement at the specified position.
+     * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The PreparedStatement to set the parameter on
+     * @param columnIndex The parameter index (1-based) to set
+     * @param x The MutableDouble value to set
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableDouble x) throws SQLException {
@@ -87,11 +103,13 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Sets a MutableDouble parameter in a CallableStatement using the specified parameter name.
+     * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The CallableStatement to set the parameter on
+     * @param parameterName The name of the parameter to set
+     * @param x The MutableDouble value to set
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableDouble x) throws SQLException {
@@ -99,10 +117,12 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Appends the string representation of a MutableDouble to an Appendable.
+     * The value is written as a decimal string or "null".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable The Appendable to write to
+     * @param x The MutableDouble to append
+     * @throws IOException if an I/O error occurs while appending
      */
     @Override
     public void appendTo(final Appendable appendable, final MutableDouble x) throws IOException {
@@ -114,11 +134,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
+     * Writes the character representation of a MutableDouble to a CharacterWriter.
+     * The value is written as numeric characters or the null character array.
+     * This method is optimized for character-based writing.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer The CharacterWriter to write to
+     * @param x The MutableDouble to write
+     * @param config The serialization configuration (currently unused for double values)
+     * @throws IOException if an I/O error occurs while writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final MutableDouble x, final JSONXMLSerializationConfig<?> config) throws IOException {

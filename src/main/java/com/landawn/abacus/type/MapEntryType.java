@@ -33,6 +33,8 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Map.Entry objects with generic key and value types.
+ * This class handles serialization and deserialization of Map.Entry instances.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -63,20 +65,32 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
         jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
+    /**
+     * Returns the declaring name of this MapEntry type.
+     * The declaring name includes the fully qualified class names of the key and value types.
+     *
+     * @return The declaring name in format "Map.Entry<KeyDeclaringName, ValueDeclaringName>"
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Map.Entry type.
+     *
+     * @return The Class object for Map.Entry
+     */
     @Override
     public Class<Map.Entry<K, V>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Gets the parameter types for this generic Map.Entry type.
+     * The array contains two elements: the key type at index 0 and the value type at index 1.
      *
-     * @return
+     * @return An array containing the key type and value type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -84,9 +98,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this is a generic type.
+     * For MapEntryType, this always returns true since Map.Entry is parameterized with key and value types.
      *
-     * @return {@code true}, if is generic type
+     * @return true, indicating that Map.Entry is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -94,9 +109,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
+     * Converts a Map.Entry object to its JSON string representation.
+     * The entry is serialized as a JSON object with a single key-value pair.
      *
-     * @param x
-     * @return
+     * @param x The Map.Entry object to convert
+     * @return The JSON string representation in format "{key:value}", or null if the input is null
      */
     @Override
     public String stringOf(final Map.Entry<K, V> x) {
@@ -104,14 +121,16 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
+     * Parses a JSON string to create a Map.Entry object.
+     * The string should represent a JSON object with exactly one key-value pair.
      *
-     * @param str
-     * @return
+     * @param str The JSON string to parse
+     * @return The parsed Map.Entry object, or null if the input is null, empty, or represents an empty object "{}"
      */
     @MayReturnNull
     @Override
     public Map.Entry<K, V> valueOf(final String str) {
-        if (Strings.isEmpty(str) || "{}".equals(str)) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str) || "{}".equals(str)) {
             return null; // NOSONAR
         }
 
@@ -119,10 +138,13 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
+     * Appends the string representation of a Map.Entry to an Appendable.
+     * The entry is formatted as a JSON object with the key and value properly serialized according to their types.
+     * If the Appendable is a Writer, buffering is used for better performance.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable The Appendable to write to
+     * @param x The Map.Entry to append
+     * @throws IOException if an I/O error occurs while appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws IOException {
@@ -165,11 +187,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
+     * Writes the character representation of a Map.Entry to a CharacterWriter.
+     * The entry is formatted as a JSON object with the key and value properly serialized.
+     * This method is optimized for character-based writing.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer The CharacterWriter to write to
+     * @param x The Map.Entry to write
+     * @param config The serialization configuration to use for formatting
+     * @throws IOException if an I/O error occurs while writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -192,12 +217,12 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Gets the type name.
+     * Generates the type name for a Map.Entry with the specified key and value types.
      *
-     * @param keyTypeName
-     * @param valueTypeName
-     * @param isDeclaringName
-     * @return
+     * @param keyTypeName The name of the key type
+     * @param valueTypeName The name of the value type
+     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
+     * @return The formatted type name string
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

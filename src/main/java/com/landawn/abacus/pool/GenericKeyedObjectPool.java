@@ -34,37 +34,124 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- *
- * @param <K> the key type
- * @param <E>
+ * A generic implementation of KeyedObjectPool that manages poolable objects by keys.
+ * This implementation uses a HashMap internally to store key-value mappings.
+ * 
+ * <p>Features:
+ * <ul>
+ *   <li>Thread-safe operations using ReentrantLock</li>
+ *   <li>Automatic eviction of expired objects based on configurable policies</li>
+ *   <li>Memory-based capacity constraints when configured with MemoryMeasure</li>
+ *   <li>Auto-balancing to maintain optimal pool size</li>
+ *   <li>Per-key storage and retrieval of poolable objects</li>
+ * </ul>
+ * 
+ * <p>The pool can be configured with different eviction policies:
+ * <ul>
+ *   <li>LAST_ACCESS_TIME - Evicts least recently accessed entries</li>
+ *   <li>ACCESS_COUNT - Evicts least frequently accessed entries</li>
+ *   <li>EXPIRATION_TIME - Evicts entries closest to expiration</li>
+ * </ul>
+ * 
+ * <p>Usage example:
+ * <pre>{@code
+ * // Create a keyed pool for database connections by schema
+ * GenericKeyedObjectPool<String, DBConnection> pool = new GenericKeyedObjectPool<>(
+ *     100, 300000, EvictionPolicy.LAST_ACCESS_TIME
+ * );
+ * 
+ * // Store connections
+ * pool.put("schema1", new DBConnection("schema1"));
+ * pool.put("schema2", new DBConnection("schema2"));
+ * 
+ * // Retrieve connections
+ * DBConnection conn = pool.get("schema1");
+ * }</pre>
+ * 
+ * @param <K> the type of keys maintained by this pool
+ * @param <E> the type of pooled values, must implement Poolable
+ * @see KeyedObjectPool
+ * @see AbstractPool
+ * @see PoolFactory
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
 
     @Serial
     private static final long serialVersionUID = 4137548490922758243L;
 
+    /**
+     * Optional memory measure for tracking memory usage of key-value pairs.
+     */
     private final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure;
 
+    /**
+     * Internal storage for key-value mappings.
+     */
     final Map<K, E> pool;
 
+    /**
+     * Comparator used to determine eviction order based on the configured eviction policy.
+     */
     final Comparator<Map.Entry<K, E>> cmp;
 
+    /**
+     * Future representing the scheduled eviction task, null if eviction is disabled.
+     */
     ScheduledFuture<?> scheduleFuture;
 
+    /**
+     * Constructs a new GenericKeyedObjectPool with basic configuration.
+     * Uses default auto-balancing and balance factor settings.
+     * 
+     * @param capacity the maximum number of key-value pairs the pool can hold
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     * @param evictionPolicy the policy to use for selecting entries to evict
+     */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
+    /**
+     * Constructs a new GenericKeyedObjectPool with memory-based constraints.
+     * Uses default auto-balancing and balance factor settings.
+     * 
+     * @param capacity the maximum number of key-value pairs the pool can hold
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
+     * @param memoryMeasure the function to calculate key-value pair memory size, or null if not using memory limits
+     */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
+    /**
+     * Constructs a new GenericKeyedObjectPool with auto-balancing configuration.
+     * Does not use memory-based constraints.
+     * 
+     * @param capacity the maximum number of key-value pairs the pool can hold
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param autoBalance whether to automatically remove entries when the pool is full
+     * @param balanceFactor the proportion of entries to remove during balancing (0-1)
+     */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
+    /**
+     * Constructs a new GenericKeyedObjectPool with full configuration options.
+     * 
+     * @param capacity the maximum number of key-value pairs the pool can hold
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param autoBalance whether to automatically remove entries when the pool is full
+     * @param balanceFactor the proportion of entries to remove during balancing (0-1)
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
+     * @param memoryMeasure the function to calculate key-value pair memory size, or null if not using memory limits
+     */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
@@ -111,11 +198,22 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @param e
-     * @return {@code true}, if successful
-     * @throws IllegalStateException
+     * Associates the specified value with the specified key in this pool.
+     * If the pool previously contained a mapping for the key, the old value is replaced and destroyed.
+     * 
+     * <p>The put operation will fail if:
+     * <ul>
+     *   <li>Either key or value is null</li>
+     *   <li>The value has already expired</li>
+     *   <li>The pool is at capacity and auto-balancing is disabled</li>
+     *   <li>The key-value pair would exceed memory constraints</li>
+     * </ul>
+     * 
+     * @param key the key with which the specified value is to be associated
+     * @param e the value to be associated with the specified key
+     * @return {@code true} if the mapping was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public boolean put(final K key, final E e) throws IllegalStateException {
@@ -169,11 +267,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @param e
-     * @param autoDestroyOnFailedToPut
-     * @return {@code true}, if successful
+     * Associates the specified value with the specified key in this pool,
+     * with optional automatic destruction on failure.
+     * 
+     * @param key the key with which the specified value is to be associated
+     * @param e the value to be associated with the specified key
+     * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
+     * @return {@code true} if the mapping was successfully added, {@code false} otherwise
      */
     @Override
     public boolean put(final K key, final E e, final boolean autoDestroyOnFailedToPut) {
@@ -191,10 +291,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @return
-     * @throws IllegalStateException
+     * Returns the value associated with the specified key, or null if no mapping exists.
+     * If the value has expired, it is removed and destroyed, and null is returned.
+     * The value's activity print is updated on successful retrieval.
+     * 
+     * @param key the key whose associated value is to be returned
+     * @return the value associated with the key, or null if no mapping exists or value expired
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public E get(final K key) throws IllegalStateException {
@@ -233,10 +336,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @return
-     * @throws IllegalStateException
+     * Removes and returns the value associated with the specified key.
+     * The value's activity print is updated before removal.
+     * 
+     * @param key the key whose mapping is to be removed
+     * @return the value previously associated with the key, or null if no mapping existed
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public E remove(final K key) throws IllegalStateException {
@@ -268,10 +373,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @return
-     * @throws IllegalStateException
+     * Returns the value associated with the specified key without updating access statistics.
+     * If the value has expired, it is removed and destroyed, and null is returned.
+     * 
+     * @param key the key whose associated value is to be returned
+     * @return the value associated with the key, or null if no mapping exists or value expired
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public E peek(final K key) throws IllegalStateException {
@@ -300,10 +407,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @return {@code true}, if successful
-     * @throws IllegalStateException
+     * Returns true if this pool contains a mapping for the specified key.
+     * 
+     * @param key the key whose presence in this pool is to be tested
+     * @return {@code true} if this pool contains a mapping for the specified key
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public boolean containsKey(final K key) throws IllegalStateException {
@@ -339,9 +447,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     //    }
 
     /**
-     *
-     * @return
-     * @throws IllegalStateException
+     * Returns a snapshot of the keys contained in this pool.
+     * The returned set is a copy and will not reflect subsequent changes to the pool.
+     * 
+     * @return a set containing all keys currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public Set<K> keySet() throws IllegalStateException {
@@ -357,9 +467,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @return
-     * @throws IllegalStateException
+     * Returns a snapshot of the values contained in this pool.
+     * The returned collection is a copy and will not reflect subsequent changes to the pool.
+     * 
+     * @return a collection containing all values currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public Collection<E> values() throws IllegalStateException {
@@ -375,8 +487,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @throws IllegalStateException
+     * Removes all mappings from this pool.
+     * All removed values are destroyed with the REMOVE_REPLACE_CLEAR reason.
+     * 
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public void clear() throws IllegalStateException {
@@ -386,7 +500,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Close.
+     * Closes this pool and releases all resources.
+     * Cancels the eviction task if scheduled and destroys all pooled values.
+     * This method is idempotent.
      */
     @Override
     public void close() {
@@ -406,8 +522,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @throws IllegalStateException
+     * Removes a portion of mappings from the pool based on the configured balance factor.
+     * Entries are selected for removal according to the eviction policy.
+     * 
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public void vacate() throws IllegalStateException {
@@ -425,9 +543,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @return
-     * @throws IllegalStateException
+     * Returns the current number of key-value mappings in the pool.
+     * 
+     * @return the number of mappings currently in the pool
      */
     @Override
     public int size() throws IllegalStateException {
@@ -436,30 +554,48 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return pool.size();
     }
 
+    /**
+     * Returns the hash code value for this pool.
+     * The hash code is based on the internal pool map.
+     * 
+     * @return a hash code value for this pool
+     */
     @Override
     public int hashCode() {
         return pool.hashCode();
     }
 
     /**
-     *
-     * @param obj
-     * @return {@code true}, if successful
+     * Compares this pool to the specified object for equality.
+     * Two pools are equal if they contain the same key-value mappings.
+     * 
+     * @param obj the object to compare with
+     * @return {@code true} if the pools are equal, {@code false} otherwise
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(final Object obj) {
         return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
     }
 
+    /**
+     * Returns a string representation of this pool.
+     * The string representation consists of the string representation of the internal pool map.
+     * 
+     * @return a string representation of this pool
+     */
     @Override
     public String toString() {
-        return pool.toString();
+        return "{pool=GenericKeyedObjectPool, capacity=" + capacity + ", evictDelay=" + evictDelay + ", evictionPolicy=" + evictionPolicy + ", autoBalance="
+                + autoBalance + ", balanceFactor=" + balanceFactor + ", maxMemorySize=" + maxMemorySize + ", memoryMeasure=" + memoryMeasure
+                + ", totalDataSize=" + totalDataSize.get() + "}";
     }
 
     /**
-     *
-     * @param vacationNumber
+     * Removes the specified number of entries from the pool based on the eviction policy.
+     * This method is called internally during vacate operations.
+     * 
+     * @param vacationNumber the number of entries to remove
      */
     protected void vacate(final int vacationNumber) {
         final int size = pool.size();
@@ -467,7 +603,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         if (vacationNumber >= size) {
             destroyAll(new HashMap<>(pool), Caller.VACATE);
             pool.clear();
-        } else {
+        } else if (vacationNumber > 0) {
             final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, cmp);
 
             for (final Map.Entry<K, E> entry : pool.entrySet()) {
@@ -491,8 +627,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * scan the object pool to find the idle object which inactive time greater than permitted the inactive time and remove it.
-     *
+     * Scans the pool for expired values and removes them.
+     * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings({ "null", "deprecation" })
     protected void evict() {
@@ -528,10 +664,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param key
-     * @param value
-     * @param caller
+     * Destroys a single key-value pair and updates statistics.
+     * 
+     * @param key the key part of the pair
+     * @param value the value to destroy
+     * @param caller the reason for destruction
      */
     protected void destroy(final K key, final E value, final Caller caller) {
         if (caller == Caller.EVICT || caller == Caller.VACATE) {
@@ -558,9 +695,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param map
-     * @param caller
+     * Destroys all entries in the specified map.
+     * 
+     * @param map the map of entries to destroy
+     * @param caller the reason for destruction
      */
     protected void destroyAll(final Map<K, E> map, final Caller caller) {
         if (N.notEmpty(map)) {
@@ -571,8 +709,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Removes the all.
-     * @param caller
+     * Removes and destroys all entries from the pool.
+     * 
+     * @param caller the reason for removal
      */
     private void removeAll(final Caller caller) {
         lock.lock();
@@ -589,9 +728,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param os
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Serializes this pool to an ObjectOutputStream.
+     * The pool is locked during serialization to ensure consistency.
+     * 
+     * @param os the output stream
+     * @throws IOException if an I/O error occurs
      */
     @Serial
     private void writeObject(final java.io.ObjectOutputStream os) throws IOException {
@@ -605,10 +746,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
-     * @param is
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException
+     * Deserializes this pool from an ObjectInputStream.
+     * The pool is locked during deserialization to ensure consistency.
+     * 
+     * @param is the input stream
+     * @throws IOException if an I/O error occurs
+     * @throws ClassNotFoundException if the class of a serialized object cannot be found
      */
     @Serial
     private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {

@@ -18,32 +18,68 @@ import static java.lang.Character.MAX_SURROGATE;
 import static java.lang.Character.MIN_SURROGATE;
 
 /**
- * Note: It's copied from Google Guava under Apache License 2.0
- *
- * Low-level, high-performance utility methods related to the {@linkplain Charsets#UTF_8 UTF-8}
- * character encoding. UTF-8 is defined in section D92 of <a
- * href="http://www.unicode.org/versions/Unicode6.2.0/ch03.pdf">The Unicode Standard Core
- * Specification, Chapter 3</a>.
- *
- * <p>The variant of UTF-8 implemented by this class is the restricted definition of UTF-8
- * introduced in Unicode 3.1. One implication of this is that it rejects <a
- * href="http://www.unicode.org/versions/corrigendum1.html">"non-shortest form"</a> byte sequences,
- * even though the JDK decoder may accept them.
+ * Low-level, high-performance utility methods for working with UTF-8 character encoding.
+ * This class provides optimized implementations for UTF-8 validation and length calculation
+ * that are more efficient than using {@code String.getBytes(UTF_8)}.
+ * 
+ * <p>The implementation follows the restricted definition of UTF-8 introduced in Unicode 3.1,
+ * which means it rejects "non-shortest form" byte sequences. This is stricter than some
+ * JDK decoders which may accept such sequences.</p>
+ * 
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Highly optimized for performance with special handling for ASCII characters</li>
+ *   <li>Validates proper UTF-8 encoding including surrogate pair validation</li>
+ *   <li>Rejects overlong encodings and invalid byte sequences</li>
+ *   <li>More efficient than standard Java UTF-8 operations for validation and length calculation</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * String text = "Hello 世界";
+ * int utf8Length = Utf8.encodedLength(text); // More efficient than text.getBytes("UTF-8").length
+ * 
+ * byte[] bytes = getDataFromNetwork();
+ * if (Utf8.isWellFormed(bytes)) {
+ *     String decoded = new String(bytes, StandardCharsets.UTF_8);
+ * }
+ * }</pre>
+ * 
+ * <p>Note: This class is adapted from Google Guava under Apache License 2.0.</p>
  *
  * @author Martin Buchholz
  * @author Clément Roux
+ * @since 0.8
  */
 public class Utf8 {
 
     /**
-     * Returns the number of bytes in the UTF-8-encoded form of {@code sequence}. For a string, this
-     * method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient in both
-     * time and space.
+     * Returns the number of bytes in the UTF-8-encoded form of the given character sequence.
+     * This method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient
+     * in both time and space.
+     * 
+     * <p>The implementation is optimized with fast paths for:</p>
+     * <ul>
+     *   <li>Pure ASCII strings (single pass, no expansion)</li>
+     *   <li>Characters less than 0x800 (2-byte UTF-8)</li>
+     *   <li>General Unicode including surrogate pairs</li>
+     * </ul>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String ascii = "Hello World";
+     * int length1 = Utf8.encodedLength(ascii); // Returns 11 (1 byte per char)
+     * 
+     * String unicode = "Hello 世界";
+     * int length2 = Utf8.encodedLength(unicode); // Returns 12 (6 + 3 + 3)
+     * 
+     * String emoji = "Hello 👋";
+     * int length3 = Utf8.encodedLength(emoji); // Accounts for surrogate pairs
+     * }</pre>
      *
-     * @param sequence
-     * @return
-     * @throws IllegalArgumentException if {@code sequence} contains ill-formed UTF-16 (unpaired
-     *     surrogates)
+     * @param sequence the character sequence to measure
+     * @return the number of bytes needed to encode the sequence in UTF-8
+     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired surrogates)
      */
     public static int encodedLength(final CharSequence sequence) {
         // Warning to maintainers: this implementation is highly optimized.
@@ -97,32 +133,60 @@ public class Utf8 {
     }
 
     /**
-     * Returns {@code true} if {@code bytes} is a <i>well-formed</i> UTF-8 byte sequence according to
-     * Unicode 6.0. Note that this is a stronger criterion than simply whether the bytes can be
-     * decoded. For example, some versions of the JDK decoder will accept "non-shortest form" byte
-     * sequences, but encoding never reproduces these. Such byte sequences are <i>not</i> considered
-     * well-formed.
+     * Returns {@code true} if the given byte array is a well-formed UTF-8 byte sequence
+     * according to Unicode 6.0 standards. This method performs stricter validation than
+     * simple decoding - it ensures the bytes follow proper UTF-8 encoding rules.
+     * 
+     * <p>The validation checks for:</p>
+     * <ul>
+     *   <li>Proper continuation byte sequences</li>
+     *   <li>No overlong encodings (non-shortest form)</li>
+     *   <li>No invalid surrogate code points</li>
+     *   <li>Valid Unicode code point ranges</li>
+     * </ul>
+     * 
+     * <p>This method returns {@code true} if and only if 
+     * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return true,
+     * but is more efficient in both time and space.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * byte[] validUtf8 = "Hello 世界".getBytes(StandardCharsets.UTF_8);
+     * boolean valid1 = Utf8.isWellFormed(validUtf8); // Returns true
+     * 
+     * byte[] invalid = {(byte)0xC0, (byte)0x80}; // Overlong encoding of NULL
+     * boolean valid2 = Utf8.isWellFormed(invalid); // Returns false
+     * }</pre>
      *
-     * <p>This method returns {@code true} if and only if {@code Arrays.equals(bytes, new
-     * String(bytes, UTF_8).getBytes(UTF_8))} does, but is more efficient in both time and space.
-     *
-     * @param bytes
-     * @return
+     * @param bytes the byte array to validate
+     * @return {@code true} if the bytes form a valid UTF-8 sequence, {@code false} otherwise
      */
     public static boolean isWellFormed(final byte[] bytes) {
         return isWellFormed(bytes, 0, bytes.length);
     }
 
     /**
-     * Returns whether the given byte array slice is a well-formed UTF-8 byte sequence, as defined by
-     * {@link #isWellFormed(byte[])}. Note that this can be {@code false} even when {@code
-     * isWellFormed(bytes)} is {@code true}.
+     * Returns whether the given byte array slice is a well-formed UTF-8 byte sequence,
+     * as defined by {@link #isWellFormed(byte[])}. 
+     * 
+     * <p>This method allows validation of a portion of a byte array without copying.
+     * Note that this can return {@code false} even when {@code isWellFormed(bytes)} 
+     * would return {@code true} if the slice boundaries split a multi-byte character.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * byte[] buffer = new byte[1024];
+     * int bytesRead = inputStream.read(buffer);
+     * if (Utf8.isWellFormed(buffer, 0, bytesRead)) {
+     *     String text = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
+     * }
+     * }</pre>
      *
-     * @param bytes the input buffer
-     * @param off the offset in the buffer of the first byte to read
-     * @param len the number of bytes to read from the buffer
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param bytes the input buffer containing the bytes to validate
+     * @param off the offset in the buffer of the first byte to validate
+     * @param len the number of bytes to validate from the buffer
+     * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
+     * @throws IndexOutOfBoundsException if offset and length are out of bounds
      */
     public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, bytes.length);

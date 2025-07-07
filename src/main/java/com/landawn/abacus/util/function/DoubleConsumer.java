@@ -17,24 +17,35 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation that accepts a single double-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for double.
+ * Unlike most other functional interfaces, {@code DoubleConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(double)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.Consumer
+ * @see java.util.function.DoubleConsumer
  */
-
 @FunctionalInterface
 public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeException>, java.util.function.DoubleConsumer { //NOSONAR
 
     /**
+     * Performs this operation on the given argument.
      *
-     * @param t
+     * @param t the double input argument
      */
     @Override
     void accept(double t);
 
     /**
+     * Returns a composed {@code DoubleConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code DoubleConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     @Override
     default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) {

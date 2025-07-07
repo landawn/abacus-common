@@ -21,181 +21,369 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 
 /**
- * Note: It's copied from Google Guava under Apache License 2.0 and modified.
- *
- * Each hasher should translate all multibyte values ({@link #put(int)}, {@link #put(long)}, etc.) to bytes in
- * little-endian order.
- *
- * <p><b>Warning:</b> The result of calling any methods after calling {@link #hash} is undefined.
- *
- * <p><b>Warning:</b> Using a specific character encoding when hashing a {@link CharSequence} with
- * {@link #put(CharSequence, Charset)} is generally only useful for cross-language
- * compatibility (otherwise prefer {@link #putUnencodedChars}). However, the character encodings
- * must be identical across languages. Also beware that {@link Charset} definitions may occasionally
- * change between Java releases.
- *
- * <p><b>Warning:</b> Chunks of data that are put into the {@link Hasher} are not delimited. The
- * resulting {@link HashCode} is dependent only on the bytes inserted, and the order in which they
- * were inserted, not how those bytes were chunked into discrete put() operations. For example, the
- * following three expressions all generate colliding hash codes: <pre>   {@code
- *
- *   newHasher().putByte(b1).putByte(b2).putByte(b3).hash()
- *   newHasher().putByte(b1).putBytes(new byte[] { b2, b3 }).hash()
- *   newHasher().putBytes(new byte[] { b1, b2, b3 }).hash()}</pre>
- *
- * <p>If you wish to avoid this, you should either prepend or append the size of each chunk. Keep in
- * mind that when dealing with char sequences, the encoded form of two concatenated char sequences
- * is not equivalent to the concatenation of their encoded form. Therefore,
- * {@link #put(CharSequence, Charset)} should only be used consistently with <i>complete</i>
- * sequences and not broken into chunks.
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ * 
+ * A stateful object for computing hash codes incrementally. Hasher instances are created
+ * by {@link HashFunction#newHasher()} and accumulate data through their various put methods
+ * before generating a final {@link HashCode}.
+ * 
+ * <h3>Usage Pattern</h3>
+ * <ol>
+ *   <li>Obtain a new Hasher from a HashFunction</li>
+ *   <li>Add data using put methods (can be chained)</li>
+ *   <li>Call {@link #hash()} to get the final HashCode</li>
+ * </ol>
+ * 
+ * <p><b>Example:</b>
+ * <pre>{@code
+ * HashCode hash = Hashing.sha256()
+ *     .newHasher()
+ *     .putString("username", StandardCharsets.UTF_8)
+ *     .putLong(timestamp)
+ *     .putBytes(sessionToken)
+ *     .hash();
+ * }</pre>
+ * 
+ * <h3>Important Notes</h3>
+ * <ul>
+ *   <li><b>Single use:</b> Each Hasher instance should be used for exactly one hash computation</li>
+ *   <li><b>Order matters:</b> Data must be added in a consistent order for reproducible results</li>
+ *   <li><b>No delimiters:</b> Consecutive put operations are not delimited. {@code putBytes(new byte[] {1, 2})} 
+ *       followed by {@code putBytes(new byte[] {3, 4})} produces the same result as 
+ *       {@code putBytes(new byte[] {1, 2, 3, 4})}</li>
+ *   <li><b>Multibyte values:</b> All multibyte values (int, long, etc.) are interpreted in 
+ *       little-endian order</li>
+ * </ul>
+ * 
+ * <h3>Avoiding Collisions</h3>
+ * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:
+ * <pre>{@code
+ * // These produce the same hash:
+ * hasher1.putString("foo", UTF_8).putString("bar", UTF_8).hash();
+ * hasher2.putString("foobar", UTF_8).hash();
+ * 
+ * // To avoid this, consider adding delimiters:
+ * hasher3.putString("foo", UTF_8).putChar('\0').putString("bar", UTF_8).hash();
+ * }</pre>
+ * 
+ * <p><b>Warning:</b> The result of calling any methods after {@link #hash()} is undefined.
+ * Do not reuse a Hasher instance after calling hash().
  *
  * @author Kevin Bourrillion
+ * @see HashFunction
+ * @see HashCode
  */
 public interface Hasher {
 
     /**
+     * Adds a single byte to this hasher's internal state.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put((byte) 0xFF).put((byte) 0x00);
+     * }</pre>
      *
-     * @param b
-     * @return
+     * @param b the byte to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(byte b);
 
     /**
+     * Adds all bytes in the given array to this hasher's internal state.
+     * This is equivalent to {@code put(bytes, 0, bytes.length)}.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * byte[] data = "Hello".getBytes(StandardCharsets.UTF_8);
+     * hasher.put(data);
+     * }</pre>
      *
-     * @param bytes
-     * @return
+     * @param bytes the byte array to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(byte[] bytes);
 
     /**
+     * Adds a portion of the given byte array to this hasher's internal state.
+     * Only bytes from {@code off} to {@code off + len - 1} (inclusive) are processed.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * byte[] buffer = new byte[1024];
+     * int bytesRead = inputStream.read(buffer);
+     * hasher.put(buffer, 0, bytesRead);
+     * }</pre>
      *
-     * @param bytes
-     * @param off
-     * @param len
-     * @return
+     * @param bytes the byte array containing data to add
+     * @param off the starting offset in the array (inclusive)
+     * @param len the number of bytes to process
+     * @return this hasher instance (for method chaining)
+     * @throws IndexOutOfBoundsException if off or len is negative, or if
+     *         {@code off + len > bytes.length}
      */
     Hasher put(byte[] bytes, int off, int len);
 
     /**
+     * Adds all remaining bytes from the given ByteBuffer to this hasher's internal state.
+     * This method reads from the buffer's current position to its limit, and advances
+     * the buffer's position accordingly.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * ByteBuffer buffer = ByteBuffer.wrap("data".getBytes());
+     * hasher.put(buffer); // Buffer position is now at limit
+     * }</pre>
      *
-     * @param bytes
-     * @return
+     * @param bytes the ByteBuffer to read from
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(ByteBuffer bytes);
 
     /**
+     * Adds a short value to this hasher's internal state. The short is interpreted
+     * in little-endian byte order.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put((short) 12345).put((short) -1);
+     * }</pre>
      *
-     * @param s
-     * @return
+     * @param s the short value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(short s);
 
     /**
+     * Adds an integer value to this hasher's internal state. The integer is interpreted
+     * in little-endian byte order.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put(42).put(Integer.MAX_VALUE);
+     * }</pre>
      *
-     * @param i
-     * @return
+     * @param i the integer value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(int i);
 
     /**
+     * Adds a long value to this hasher's internal state. The long is interpreted
+     * in little-endian byte order.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put(System.currentTimeMillis()).put(userId);
+     * }</pre>
      *
-     * @param l
-     * @return
+     * @param l the long value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(long l);
 
     /**
-     * Equivalent to {@code putInt(Float.floatToRawIntBits(f))}.
+     * Adds a float value to this hasher's internal state. This is equivalent to
+     * {@code put(Float.floatToRawIntBits(f))}, which means the float's binary
+     * representation is hashed, not its numeric value.
+     * 
+     * <p><b>Note:</b> NaN values may have different binary representations but the
+     * same numeric meaning. Use {@link Float#floatToRawIntBits(float)} explicitly
+     * if you need consistent handling of NaN values.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put(3.14159f).put(Float.POSITIVE_INFINITY);
+     * }</pre>
      *
-     * @param f
-     * @return
+     * @param f the float value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(float f);
 
     /**
-     * Equivalent to {@code putLong(Double.doubleToRawLongBits(d))}.
+     * Adds a double value to this hasher's internal state. This is equivalent to
+     * {@code put(Double.doubleToRawLongBits(d))}, which means the double's binary
+     * representation is hashed, not its numeric value.
+     * 
+     * <p><b>Note:</b> NaN values may have different binary representations but the
+     * same numeric meaning. Use {@link Double#doubleToRawLongBits(double)} explicitly
+     * if you need consistent handling of NaN values.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put(Math.PI).put(Double.NaN);
+     * }</pre>
      *
-     * @param d
-     * @return
+     * @param d the double value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(double d);
 
     /**
-     * Equivalent to {@code putByte(b ? (byte) 1 : (byte) 0)}.
+     * Adds a boolean value to this hasher's internal state. This is equivalent to
+     * {@code put((byte) 1)} for true and {@code put((byte) 0)} for false.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put(user.isActive()).put(user.isVerified());
+     * }</pre>
      *
-     * @param b
-     * @return
+     * @param b the boolean value to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(boolean b);
 
     /**
+     * Adds a character value to this hasher's internal state. The character is
+     * processed by first adding its low byte, then its high byte (little-endian order).
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put('A').put('\n').put('中');
+     * }</pre>
      *
-     * @param c
-     * @return
+     * @param c the character to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(char c);
 
     /**
+     * Adds all characters from the given array to this hasher's internal state.
+     * This is equivalent to {@code put(chars, 0, chars.length)}.
+     * 
+     * <p>Each character is processed in little-endian order (low byte first, then high byte).
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * char[] password = {'s', 'e', 'c', 'r', 'e', 't'};
+     * hasher.put(password);
+     * }</pre>
      *
-     * @param chars
-     * @return
+     * @param chars the character array to add
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(char[] chars);
 
     /**
+     * Adds a portion of the given character array to this hasher's internal state.
+     * Only characters from {@code off} to {@code off + len - 1} (inclusive) are processed.
+     * 
+     * <p>Each character is processed in little-endian order (low byte first, then high byte).
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * char[] buffer = new char[100];
+     * int charsRead = reader.read(buffer);
+     * hasher.put(buffer, 0, charsRead);
+     * }</pre>
      *
-     * @param chars
-     * @param off
-     * @param len
-     * @return
+     * @param chars the character array containing data to add
+     * @param off the starting offset in the array (inclusive)
+     * @param len the number of characters to process
+     * @return this hasher instance (for method chaining)
+     * @throws IndexOutOfBoundsException if off or len is negative, or if
+     *         {@code off + len > chars.length}
      */
     Hasher put(char[] chars, int off, int len);
 
     /**
-     * Equivalent to processing each {@code char} value in the {@code CharSequence}, in order. In
-     * other words, no character encoding is performed; the low byte and high byte of each {@code
-     * char} are hashed directly (in that order). The input must not be updated while this method is
-     * in progress.
+     * Adds all characters from the given CharSequence to this hasher's internal state
+     * without performing any character encoding. Each character is processed by hashing
+     * its low byte followed by its high byte (little-endian order).
+     * 
+     * <p>This method is faster than {@link #put(CharSequence, Charset)} and produces
+     * consistent results across Java versions, but the output will differ from most
+     * other programming languages when hashing the same string.
+     * 
+     * <p><b>Warning:</b> For cross-language compatibility, use {@link #put(CharSequence, Charset)}
+     * with a specific encoding (usually UTF-8) instead.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put("fast hash").put(new StringBuilder("builder"));
+     * }</pre>
      *
-     * <p><b>Warning:</b> This method will produce different output than most other languages do when
-     * running the same hash function on the equivalent input. For cross-language compatibility, use
-     * {@link #putString}, usually with a charset of UTF-8. For other use cases, use {@code
-     * putUnencodedChars}.
-     *
-     * @param charSequence
-     * @return
+     * @param charSequence the character sequence to add (String, StringBuilder, etc.)
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(CharSequence charSequence);
 
     /**
-     * Equivalent to {@code putBytes(charSequence.toString().getBytes(charset))}.
+     * Adds the given CharSequence to this hasher's internal state after encoding it
+     * using the specified charset. This method first converts the characters to bytes
+     * using the charset, then hashes those bytes.
+     * 
+     * <p>This method is useful for cross-language compatibility as it produces the same
+     * hash values as other languages when using the same character encoding. UTF-8 is
+     * the most commonly used encoding for this purpose.
+     * 
+     * <p><b>Warning:</b> This method is slower than {@link #put(CharSequence)} due to
+     * the encoding step. Use the unencoded version for better performance when
+     * cross-language compatibility is not required.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * hasher.put("Hello 世界", StandardCharsets.UTF_8)
+     *       .put("Здравствуй", StandardCharsets.UTF_8);
+     * }</pre>
      *
-     * <p><b>Warning:</b> This method, which reencodes the input before hashing it, is useful only for
-     * cross-language compatibility. For other use cases, prefer {@link #putUnencodedChars}, which is
-     * faster, produces the same output across Java releases, and hashes every {@code char} in the
-     * input, even if some are invalid.
-     *
-     * @param charSequence
-     * @param charset
-     * @return
+     * @param charSequence the character sequence to encode and add
+     * @param charset the character encoding to use
+     * @return this hasher instance (for method chaining)
      */
     Hasher put(CharSequence charSequence, Charset charset);
 
     /**
-     * A simple convenience for {@code funnel.funnel(object, this)}.
+     * Adds an arbitrary object to this hasher's internal state using a {@link Funnel}
+     * to decompose the object into primitive values. This is a convenience method
+     * equivalent to {@code funnel.funnel(instance, this)}.
+     * 
+     * <p>The funnel is responsible for breaking down the object into a sequence of
+     * primitive values that can be hashed. This ensures consistent hashing of complex
+     * objects.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * Funnel<Person> personFunnel = (person, into) -> {
+     *     into.putString(person.name, StandardCharsets.UTF_8)
+     *         .putInt(person.age)
+     *         .putLong(person.id);
+     * };
+     * 
+     * Person person = new Person("Alice", 30, 12345L);
+     * hasher.put(person, personFunnel);
+     * }</pre>
      *
-     * @param <T>
-     * @param instance
-     * @param funnel
-     * @return
+     * @param <T> the type of object to hash
+     * @param instance the object instance to add
+     * @param funnel the funnel to use for decomposing the object
+     * @return this hasher instance (for method chaining)
      */
     <T> Hasher put(T instance, Funnel<? super T> funnel);
 
     /**
-     * Computes a hash code based on the data that have been provided to this hasher. The result is
-     * unspecified if this method is called more than once on the same instance.
+     * Computes and returns the final hash code based on all data that has been added
+     * to this hasher. After calling this method, the hasher instance should not be used
+     * again.
+     * 
+     * <p>The returned {@link HashCode} contains the computed hash value and provides
+     * various methods to access it (as bytes, as int, as long, as hex string, etc.).
+     * 
+     * <p><b>Warning:</b> The behavior of calling any methods on this hasher after
+     * calling hash() is undefined. Create a new hasher for each hash computation.
+     * 
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * HashCode result = hasher
+     *     .putString("data", StandardCharsets.UTF_8)
+     *     .putLong(timestamp)
+     *     .hash();
+     * 
+     * byte[] hashBytes = result.asBytes();
+     * String hashHex = result.toString();
+     * }</pre>
      *
-     * @return
+     * @return the computed hash code
      */
     HashCode hash();
 }

@@ -18,20 +18,61 @@
 package com.landawn.abacus.util;
 
 /**
- * <p>
- * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
- * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
- * </p>
- *
- * Provides mutable access to a value.
- * <p>
- * {@code Mutable} is used as a generic interface to the implementations in this package.
- * <p>
- * A typical use case would be to enable a primitive or string to be passed to a method and allow that method to
- * effectively change the value of the primitive/string. Another use case is to store a frequently changing primitive in
- * a collection (for example, a total in a map) without needing to create new Integer/Long wrapper objects.
- *
+ * A marker interface that provides mutable access to a value.
+ * 
+ * <p>This interface serves as a generic marker for the mutable wrapper implementations
+ * in this package. It identifies classes that wrap primitive or object values and allow
+ * those values to be modified after construction.</p>
+ * 
+ * <p>The primary use cases for mutable wrappers include:</p>
+ * <ul>
+ *   <li>Passing primitive values by reference to methods that need to modify them</li>
+ *   <li>Storing frequently changing values in collections without creating new wrapper objects</li>
+ *   <li>Accumulating values within lambda expressions or anonymous inner classes</li>
+ *   <li>Avoiding the overhead of autoboxing when working with primitive values that change frequently</li>
+ * </ul>
+ * 
+ * <p>Common implementations include:</p>
+ * <ul>
+ *   <li>{@link MutableBoolean} - for boolean values</li>
+ *   <li>{@link MutableByte} - for byte values</li>
+ *   <li>{@link MutableShort} - for short values</li>
+ *   <li>{@link MutableInt} - for int values</li>
+ *   <li>{@link MutableLong} - for long values</li>
+ *   <li>{@link MutableFloat} - for float values</li>
+ *   <li>{@link MutableDouble} - for double values</li>
+ *   <li>{@link MutableChar} - for char values</li>
+ * </ul>
+ * 
+ * <p>Example usage with a mutable counter in a lambda:</p>
+ * <pre>{@code
+ * MutableInt counter = MutableInt.of(0);
+ * list.forEach(item -> {
+ *     if (item.isValid()) {
+ *         counter.increment();
+ *     }
+ * });
+ * System.out.println("Valid items: " + counter.value());
+ * }</pre>
+ * 
+ * <p>Example usage for passing by reference:</p>
+ * <pre>{@code
+ * public void processData(List<Integer> data, MutableLong sum, MutableInt count) {
+ *     for (Integer value : data) {
+ *         sum.add(value);
+ *         count.increment();
+ *     }
+ * }
+ * }</pre>
+ * 
+ * <p><strong>Thread Safety:</strong> Implementations of this interface are generally
+ * NOT thread-safe. If multiple threads access a mutable instance concurrently,
+ * and at least one thread modifies it, external synchronization is required.</p>
+ * 
+ * <p>Note: This interface is adapted from Apache Commons Lang.</p>
+ * 
  * @version $Id: Mutable.java 1478488 2013-05-02 19:05:44Z ggregory $
+ * @since 1.0
  */
 public interface Mutable {
 

@@ -22,27 +22,59 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Configuration class for XML serialization settings.
+ * 
+ * <p>This class extends {@link JSONXMLSerializationConfig} to provide XML-specific
+ * serialization options such as tag naming strategies and type information handling.</p>
+ * 
+ * <p>Note: XML serialization does not use quotation marks for values, so the
+ * quotation-related methods inherited from the parent class should not be used.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * XMLSerializationConfig config = new XMLSerializationConfig()
+ *     .tagByPropertyName(true)
+ *     .writeTypeInfo(false)
+ *     .prettyFormat(true)
+ *     .setDateTimeFormat(DateTimeFormat.ISO_8601);
+ * }</pre>
+ * 
+ * @see JSONXMLSerializationConfig
+ * @see XMLParser
+ */
 public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerializationConfig> {
 
     protected static final boolean defaultTagByPropertyName = true;
 
-    protected static final boolean defaultIgnoreTypeInfo = true;
+    protected static final boolean defaultWriteTypeInfo = false;
 
     private boolean tagByPropertyName = defaultTagByPropertyName;
 
-    private boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
+    private boolean writeTypeInfo = defaultWriteTypeInfo;
 
+    /**
+     * Creates a new XMLSerializationConfig with default settings.
+     * 
+     * <p>Default settings:</p>
+     * <ul>
+     *   <li>tagByPropertyName: true</li>
+     *   <li>writeTypeInfo: false</li>
+     *   <li>No quotation marks (set to null character)</li>
+     *   <li>Inherits other defaults from JSONXMLSerializationConfig</li>
+     * </ul>
+     */
     public XMLSerializationConfig() {
         setCharQuotation(WD.CHAR_ZERO); // NOSONAR
         setStringQuotation(WD.CHAR_ZERO); // NOSONAR
     }
 
     /**
-     * Sets the string quotation.
-     *
-     * @param stringQuotation
-     * @return
-     * @deprecated this method should not be called
+     * Sets the string quotation character.
+     * 
+     * @param stringQuotation the quotation character
+     * @return this configuration instance
+     * @deprecated this method should not be called for XML serialization
      */
     @Deprecated
     @Override
@@ -53,11 +85,11 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Sets the char quotation.
-     *
-     * @param charQuotation
-     * @return
-     * @deprecated this method should not be called
+     * Sets the character quotation.
+     * 
+     * @param charQuotation the quotation character
+     * @return this configuration instance
+     * @deprecated this method should not be called for XML serialization
      */
     @Deprecated
     @Override
@@ -68,10 +100,10 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Sets the string quotation.
-     *
-     * @return
-     * @deprecated this method should not be called
+     * Removes character quotation.
+     * 
+     * @return this configuration instance
+     * @deprecated this method should not be called for XML serialization
      */
     @Deprecated
     @Override
@@ -82,10 +114,10 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Sets the string quotation.
-     *
-     * @return
-     * @deprecated this method should not be called
+     * Removes string quotation.
+     * 
+     * @return this configuration instance
+     * @deprecated this method should not be called for XML serialization
      */
     @Deprecated
     @Override
@@ -96,10 +128,10 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Sets the string quotation.
-     *
-     * @return
-     * @deprecated this method should not be called
+     * Removes all quotation marks.
+     * 
+     * @return this configuration instance
+     * @deprecated this method should not be called for XML serialization
      */
     @Deprecated
     @Override
@@ -110,19 +142,44 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Checks if is tag by property name.
+     * Checks if XML tags should be named after property names.
+     * 
+     * <p>When true, XML elements will use the property name as the tag name.
+     * When false, a generic tag structure is used with name attributes.</p>
+     * 
+     * <p>Example with tagByPropertyName=true:</p>
+     * <pre>{@code
+     * <person>
+     *   <name>John</name>
+     *   <age>30</age>
+     * </person>
+     * }</pre>
+     * 
+     * <p>Example with tagByPropertyName=false:</p>
+     * <pre>{@code
+     * <bean name="person">
+     *   <property name="name">John</property>
+     *   <property name="age">30</property>
+     * </bean>
+     * }</pre>
      *
-     * @return {@code true}, if is tag by property name
+     * @return {@code true} if tags are named after properties, {@code false} otherwise
      */
     public boolean tagByPropertyName() {
         return tagByPropertyName;
     }
 
     /**
-     * Sets the tag by property name.
+     * Sets whether XML tags should be named after property names.
+     * 
+     * <p>This setting affects the structure of the generated XML:</p>
+     * <ul>
+     *   <li>true: Uses property names as XML element names (more readable)</li>
+     *   <li>false: Uses generic element names with attributes (more flexible)</li>
+     * </ul>
      *
-     * @param tagByPropertyName
-     * @return
+     * @param tagByPropertyName {@code true} to use property names as tags
+     * @return this configuration instance for method chaining
      */
     public XMLSerializationConfig tagByPropertyName(final boolean tagByPropertyName) {
         this.tagByPropertyName = tagByPropertyName;
@@ -131,51 +188,63 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Checks if type info should be ignored.
+     * Sets whether to include type information during XML serialization.
+     * 
+     * <p>Type information includes class names and type hints that help with
+     * accurate deserialization. When enabled, the XML output will contain type
+     * attributes that specify the Java class types of objects.</p>
+     * 
+     * <p>Example with writeTypeInfo=false (no type information):</p>
+     * <pre>{@code
+     * <items>
+     *   <item>...</item>
+     * </items>
+     * }</pre>
+     * 
+     * <p>Example with writeTypeInfo=true (type information included):</p>
+     * <pre>{@code
+     * <property name="items" type="java.util.ArrayList">
+     *   <item type="com.example.Product">...</item>
+     * </property>
+     * }</pre>
      *
-     * @return {@code true}, if type info should be ignored
+     * @return this configuration instance for method chaining
+     * @see #writeTypeInfo()
      */
-    public boolean ignoreTypeInfo() {
-        return ignoreTypeInfo;
+    public boolean writeTypeInfo() {
+        return writeTypeInfo;
     }
 
     /**
-     * Sets the ignore type info.
+     * Sets whether to include type information during XML serialization.
      *
-     * @param ignoreTypeInfo
-     * @return
+     * <p>Type information includes class names and type hints that help with
+     * accurate deserialization. When enabled, the XML output will contain type
+     * attributes that specify the Java class types of objects.</p>
+     * 
+     * <p>Example with writeTypeInfo=false (no type information):</p>
+     * <pre>{@code
+     * <items>
+     *   <item>...</item>
+     * </items>
+     * }</pre>
+     * 
+     * <p>Example with writeTypeInfo=true (type information included):</p>
+     * <pre>{@code
+     * <property name="items" type="java.util.ArrayList">
+     *   <item type="com.example.Product">...</item>
+     * </property>
+     * }</pre>
+     *
+     * @param writeTypeInfo {@code true} to include type information, {@code false} to omit it
+     * @return this configuration instance for method chaining
+     * @see #writeTypeInfo()
      */
-    public XMLSerializationConfig ignoreTypeInfo(final boolean ignoreTypeInfo) {
-        this.ignoreTypeInfo = ignoreTypeInfo;
+    public XMLSerializationConfig writeTypeInfo(final boolean writeTypeInfo) {
+        this.writeTypeInfo = writeTypeInfo;
 
         return this;
     }
-
-    //    /**
-    //     *
-    //     * @return
-    //     */
-    //    @Override
-    //    public XMLSerializationConfig copy() {
-    //        final XMLSerializationConfig copy = new XMLSerializationConfig();
-    //
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.setCharQuotation(this.getCharQuotation());
-    //        copy.setStringQuotation(this.getStringQuotation());
-    //        copy.setDateTimeFormat(this.getDateTimeFormat());
-    //        copy.setExclusion(this.getExclusion());
-    //        copy.setSkipTransientField(this.isSkipTransientField());
-    //        copy.setPrettyFormat(this.isPrettyFormat());
-    //        copy.supportCircularReference(this.supportCircularReference());
-    //        copy.writeBigDecimalAsPlain(this.writeBigDecimalAsPlain());
-    //        copy.setIndentation(this.getIndentation());
-    //        copy.setPropNamingPolicy(this.getPropNamingPolicy());
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.tagByPropertyName = this.tagByPropertyName;
-    //        copy.ignoreTypeInfo = this.ignoreTypeInfo;
-    //
-    //        return copy;
-    //    }
 
     @Override
     public int hashCode() {
@@ -197,13 +266,17 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
         h = 31 * h + N.hashCode(tagByPropertyName);
-        return 31 * h + N.hashCode(ignoreTypeInfo);
+        return 31 * h + N.hashCode(writeTypeInfo);
     }
 
     /**
+     * Determines whether this configuration is equal to another object.
+     * 
+     * <p>Two XMLSerializationConfig instances are considered equal if they have
+     * the same values for all configuration settings.</p>
      *
-     * @param obj
-     * @return {@code true}, if successful
+     * @param obj the object to compare with
+     * @return {@code true} if the configurations are equal, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override
@@ -221,7 +294,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
                     && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
                     && N.equals(failOnEmptyBean(), other.failOnEmptyBean()) && N.equals(supportCircularReference(), other.supportCircularReference())
                     && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
-                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo);
+                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(writeTypeInfo, other.writeTypeInfo);
         }
 
         return false;
@@ -236,36 +309,54 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
                 + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="
                 + N.toString(writeBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference="
                 + N.toString(supportCircularReference()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
-                + N.toString(getPropNamingPolicy()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo)
+                + N.toString(getPropNamingPolicy()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", writeTypeInfo=" + N.toString(writeTypeInfo)
                 + "}";
     }
 
     /**
-     * The Class XSC.
+     * Factory class for creating XMLSerializationConfig instances.
+     * 
+     * <p>Provides static factory methods for convenient configuration creation.
+     * This inner class is named XSC for brevity.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * XMLSerializationConfig config = XSC.create()
+     *     .tagByPropertyName(true)
+     *     .writeTypeInfo(false)
+     *     .prettyFormat(true);
+     * }</pre>
      */
     public static final class XSC extends XMLSerializationConfig {
 
+        /**
+         * Creates a new XMLSerializationConfig instance with default settings.
+         *
+         * @return a new XMLSerializationConfig instance
+         */
         public static XMLSerializationConfig create() {
             return new XMLSerializationConfig();
         }
 
         /**
-         *
-         * @param tagByPropertyName
-         * @param ignoreTypeInfo
-         * @return
-         * @deprecated to be removed in a future version.
+         * Creates a new XMLSerializationConfig with specified tag naming and type info settings.
+         * 
+         * @param tagByPropertyName whether to use property names as XML tags
+         * @param writeTypeInfo whether to write type information
+         * @return a new configured XMLSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
-        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo) {
-            return create().tagByPropertyName(tagByPropertyName).ignoreTypeInfo(ignoreTypeInfo);
+        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean writeTypeInfo) {
+            return create().tagByPropertyName(tagByPropertyName).writeTypeInfo(writeTypeInfo);
         }
 
         /**
-         *
-         * @param dateTimeFormat
-         * @return
-         * @deprecated to be removed in a future version.
+         * Creates a new XMLSerializationConfig with the specified date/time format.
+         * 
+         * @param dateTimeFormat the date/time format to use
+         * @return a new configured XMLSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
         public static XMLSerializationConfig of(final DateTimeFormat dateTimeFormat) {
@@ -273,11 +364,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         }
 
         /**
-         *
-         * @param exclusion
-         * @param ignoredPropNames
-         * @return
-         * @deprecated to be removed in a future version.
+         * Creates a new XMLSerializationConfig with exclusion and ignored properties.
+         * 
+         * @param exclusion the exclusion strategy
+         * @param ignoredPropNames map of ignored property names by class
+         * @return a new configured XMLSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
         public static XMLSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
@@ -285,20 +377,21 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         }
 
         /**
-         *
-         * @param tagByPropertyName
-         * @param ignoreTypeInfo
-         * @param dateTimeFormat
-         * @param exclusion
-         * @param ignoredPropNames
-         * @return
-         * @deprecated to be removed in a future version.
+         * Creates a new XMLSerializationConfig with all specified settings.
+         * 
+         * @param tagByPropertyName whether to use property names as XML tags
+         * @param writeTypeInfo whether to write type information
+         * @param dateTimeFormat the date/time format to use
+         * @param exclusion the exclusion strategy
+         * @param ignoredPropNames map of ignored property names by class
+         * @return a new configured XMLSerializationConfig instance
+         * @deprecated to be removed in a future version. Use {@link #create()} with method chaining instead.
          */
         @Deprecated
-        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo, final DateTimeFormat dateTimeFormat,
+        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean writeTypeInfo, final DateTimeFormat dateTimeFormat,
                 final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().tagByPropertyName(tagByPropertyName)
-                    .ignoreTypeInfo(ignoreTypeInfo)
+                    .writeTypeInfo(writeTypeInfo)
                     .setDateTimeFormat(dateTimeFormat)
                     .setExclusion(exclusion)
                     .setIgnoredPropNames(ignoredPropNames);

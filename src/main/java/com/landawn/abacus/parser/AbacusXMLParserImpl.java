@@ -207,6 +207,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw, final boolean flush) throws IOException {
         final XMLSerializationConfig configToUse = check(config);
 
+        if (hasCircularReference(obj, serializedObjects, configToUse, bw)) {
+            return;
+        }
+
         if (obj == null) {
             IOUtil.write(Strings.EMPTY, bw);
             return;
@@ -278,9 +282,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
-            return;
-        }
+        //    if (hasCircularReference(obj, serializedObjects, bw)) {
+        //        return;
+        //    }
 
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
@@ -290,7 +294,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         final boolean tagByPropertyName = config.tagByPropertyName();
-        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean writeTypeInfo = config.writeTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
@@ -301,16 +305,16 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (tagByPropertyName) {
-            if (ignoreTypeInfo) {
-                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStart);
-            } else {
+            if (writeTypeInfo) {
                 bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+            } else {
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStart);
             }
         } else {
-            if (ignoreTypeInfo) {
-                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStart);
-            } else {
+            if (writeTypeInfo) {
                 bw.write(beanInfo.xmlNameTags[nameTagIdx].epStartWithType);
+            } else {
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStart);
             }
         }
 
@@ -345,9 +349,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
-            return;
-        }
+        //    if (hasCircularReference(obj, serializedObjects, bw)) {
+        //        return;
+        //    }
 
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
@@ -359,7 +363,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean tagByPropertyName = config.tagByPropertyName();
-        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean writeTypeInfo = config.writeTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
         final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY : propIndentation) + config.getIndentation()) : null;
@@ -393,30 +397,30 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             if (propValue == null) {
                 if (tagByPropertyName) {
-                    if (ignoreTypeInfo) {
-                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedNull);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(propInfo.xmlNameTags[nameTagIdx].namedNullWithType);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedNull);
                     }
                 } else {
-                    if (ignoreTypeInfo) {
-                        bw.write(propInfo.xmlNameTags[nameTagIdx].epNull);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(propInfo.xmlNameTags[nameTagIdx].epNullWithType);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epNull);
                     }
                 }
             } else {
                 if (tagByPropertyName) {
-                    if (ignoreTypeInfo) {
-                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedStart);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(propInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedStart);
                     }
                 } else {
-                    if (ignoreTypeInfo) {
-                        bw.write(propInfo.xmlNameTags[nameTagIdx].epStart);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(propInfo.xmlNameTags[nameTagIdx].epStartWithType);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epStart);
                     }
                 }
 
@@ -464,14 +468,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(m, serializedObjects, bw)) {
-            return;
-        }
+        //    if (hasCircularReference(m, serializedObjects, bw)) {
+        //        return;
+        //    }
 
         final Class<?> cls = type.clazz();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean writeTypeInfo = config.writeTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
@@ -479,12 +483,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(indentation);
         }
 
-        if (ignoreTypeInfo) {
-            bw.write(XMLConstants.MAP_ELE_START);
-        } else {
+        if (writeTypeInfo) {
             bw.write(XMLConstants.START_MAP_ELE_WITH_TYPE);
             bw.write(N.typeOf(cls).xmlName());
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+        } else {
+            bw.write(XMLConstants.MAP_ELE_START);
         }
 
         final String entryIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
@@ -527,22 +531,22 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 bw.write(XMLConstants.KEY_NULL_ELE);
             } else {
                 if (key.getClass() == String.class) {
-                    if (ignoreTypeInfo) {
-                        bw.write(XMLConstants.KEY_ELE_START);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(XMLConstants.START_KEY_ELE_WITH_STRING_TYPE);
+                    } else {
+                        bw.write(XMLConstants.KEY_ELE_START);
                     }
 
                     stringType.writeCharacter(bw, key, config);
                 } else {
                     keyType = N.typeOf(key.getClass());
 
-                    if (ignoreTypeInfo) {
-                        bw.write(XMLConstants.KEY_ELE_START);
-                    } else {
+                    if (writeTypeInfo) {
                         bw.write(XMLConstants.START_KEY_ELE_WITH_TYPE);
                         bw.write(keyType.xmlName());
                         bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                    } else {
+                        bw.write(XMLConstants.KEY_ELE_START);
                     }
 
                     if (keyType.isSerializable()) {
@@ -576,12 +580,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             } else {
                 valueType = N.typeOf(value.getClass());
 
-                if (ignoreTypeInfo) {
-                    bw.write(XMLConstants.VALUE_ELE_START);
-                } else {
+                if (writeTypeInfo) {
                     bw.write(XMLConstants.START_VALUE_ELE_WITH_TYPE);
                     bw.write(valueType.xmlName());
                     bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                } else {
+                    bw.write(XMLConstants.VALUE_ELE_START);
                 }
 
                 if (valueType.isSerializable()) {
@@ -635,12 +639,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
-            return;
-        }
+        //    if (hasCircularReference(obj, serializedObjects, bw)) {
+        //        return;
+        //    }
 
         final Class<?> cls = type.clazz();
-        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean writeTypeInfo = config.writeTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
@@ -648,12 +652,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(indentation);
         }
 
-        if (ignoreTypeInfo) {
-            bw.write(XMLConstants.ARRAY_ELE_START);
-        } else {
+        if (writeTypeInfo) {
             bw.write(XMLConstants.START_ARRAY_ELE_WITH_TYPE);
             bw.write(N.typeOf(cls).xmlName());
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+        } else {
+            bw.write(XMLConstants.ARRAY_ELE_START);
         }
 
         final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
@@ -672,12 +676,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             } else {
                 eleType = N.typeOf(e.getClass());
 
-                if (ignoreTypeInfo) {
-                    bw.write(XMLConstants.E_ELE_START);
-                } else {
+                if (writeTypeInfo) {
                     bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
                     bw.write(eleType.xmlName());
                     bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                } else {
+                    bw.write(XMLConstants.E_ELE_START);
                 }
 
                 if (eleType.isSerializable()) {
@@ -724,11 +728,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(c, serializedObjects, bw)) {
-            return;
-        }
+        //    if (hasCircularReference(c, serializedObjects, bw)) {
+        //        return;
+        //    }
 
-        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean writeTypeInfo = config.writeTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
@@ -737,28 +741,28 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (type.isList()) {
-            if (ignoreTypeInfo) {
-                bw.write(XMLConstants.LIST_ELE_START);
-            } else {
+            if (writeTypeInfo) {
                 bw.write(XMLConstants.START_LIST_ELE_WITH_TYPE);
                 bw.write(type.xmlName());
                 bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            } else {
+                bw.write(XMLConstants.LIST_ELE_START);
             }
         } else if (type.isSet()) {
-            if (ignoreTypeInfo) {
-                bw.write(XMLConstants.SET_ELE_START);
-            } else {
+            if (writeTypeInfo) {
                 bw.write(XMLConstants.START_SET_ELE_WITH_TYPE);
                 bw.write(type.xmlName());
                 bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            } else {
+                bw.write(XMLConstants.SET_ELE_START);
             }
         } else {
-            if (ignoreTypeInfo) {
-                bw.write(XMLConstants.COLLECTION_ELE_START);
-            } else {
+            if (writeTypeInfo) {
                 bw.write(XMLConstants.START_COLLECTION_ELE_WITH_TYPE);
                 bw.write(type.xmlName());
                 bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            } else {
+                bw.write(XMLConstants.COLLECTION_ELE_START);
             }
         }
 
@@ -778,12 +782,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             } else {
                 eleType = N.typeOf(e.getClass());
 
-                if (ignoreTypeInfo) {
-                    bw.write(XMLConstants.E_ELE_START);
-                } else {
+                if (writeTypeInfo) {
                     bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
                     bw.write(eleType.xmlName());
                     bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                } else {
+                    bw.write(XMLConstants.E_ELE_START);
                 }
 
                 if (eleType.isSerializable()) {
@@ -822,28 +826,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         } else {
             bw.write(XMLConstants.COLLECTION_ELE_END);
         }
-    }
-
-    /**
-     * Checks for circular reference.
-     * @param obj
-     * @param serializedObjects
-     * @param bw
-     *
-     * @return {@code true}, if successful
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw) throws IOException {
-        if (obj != null && serializedObjects != null) {
-            if (serializedObjects.contains(obj)) {
-                bw.write("null");
-                return true;
-            } else {
-                serializedObjects.add(obj);
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -976,8 +958,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @param nodeClasses
      * @return
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
         return (T) readByDOMParser(source, config, nodeClasses.get(source.getNodeName()));
     }
@@ -1291,8 +1273,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         case XMLStreamConstants.CHARACTERS: {
                             text = xmlReader.getText();
 
-                            if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
@@ -1301,7 +1283,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                }
+                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -1426,8 +1408,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 case XMLStreamConstants.CHARACTERS:
                                     text = xmlReader.getText();
 
-                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
@@ -1436,7 +1418,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        }
+                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -1491,8 +1473,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 case XMLStreamConstants.CHARACTERS:
                                     text = xmlReader.getText();
 
-                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
@@ -1501,7 +1483,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        }
+                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -1599,8 +1581,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     case XMLStreamConstants.CHARACTERS: {
                                         text = xmlReader.getText();
 
-                                        if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                            while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                            do {
                                                 if (sb == null) {
                                                     sb = new StringBuilder(text.length() * 2);
                                                     sb.append(text);
@@ -1609,7 +1591,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                                 }
 
                                                 sb.append(xmlReader.getText());
-                                            }
+                                            } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                             if (sb != null && sb.length() > text.length()) {
                                                 text = sb.toString();
@@ -1645,8 +1627,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             case XMLStreamConstants.CHARACTERS: {
                                 text = xmlReader.getText();
 
-                                if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                    while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    do {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
                                             sb.append(text);
@@ -1655,7 +1637,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         }
 
                                         sb.append(xmlReader.getText());
-                                    }
+                                    } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                     if (sb != null && sb.length() > text.length()) {
                                         text = sb.toString();
@@ -1751,8 +1733,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 case XMLStreamConstants.CHARACTERS: {
                                     text = xmlReader.getText();
 
-                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
@@ -1761,7 +1743,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        }
+                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -1796,8 +1778,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         case XMLStreamConstants.CHARACTERS: {
                             text = xmlReader.getText();
 
-                            if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
-                                while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
@@ -1806,7 +1788,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                }
+                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -1849,7 +1831,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and bean types are supported");
+                        + ". Only object array, collection, map and bean types are supported");
         }
     }
 
@@ -2265,7 +2247,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and bean types are supported");
+                        + ". Only object array, collection, map and bean types are supported");
         }
     }
 
@@ -2498,8 +2480,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private int inIgnorePropRefCount = 0;
 
-        @Override
         @SuppressWarnings("unchecked")
+        @Override
         public void startElement(final String namespaceURI, final String localName, final String qName, final Attributes attrs) {
             if (inIgnorePropRefCount > 0) {
                 inIgnorePropRefCount++;
@@ -2862,8 +2844,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             nodeTypeQueue.add(nodeType);
         }
 
-        @Override
         @SuppressWarnings({ "unchecked" })
+        @Override
         public void endElement(final String namespaceURI, final String localName, final String qName) {
             if (inIgnorePropRefCount > 1) {
                 inIgnorePropRefCount--;

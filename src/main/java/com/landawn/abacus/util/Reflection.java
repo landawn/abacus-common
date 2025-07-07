@@ -22,9 +22,34 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Add <a href="https://github.com/EsotericSoftware/reflectasm/blob/master/src/com/esotericsoftware/reflectasm/AccessClassLoader.java">reflectasm</a> library to build a path for better performance.
+ * A utility class that provides simplified reflection operations with improved performance through caching.
+ * This class wraps common reflection tasks like field access, method invocation, and object instantiation
+ * in an easy-to-use fluent API.
+ * 
+ * <p>For better performance, add the <a href="https://github.com/EsotericSoftware/reflectasm">reflectasm</a> 
+ * library to your build path. When available, this class will automatically use ReflectASM for improved
+ * reflection performance.</p>
+ * 
+ * <p>All reflection metadata (fields, constructors, methods) is cached for performance optimization.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Create instance from class name
+ * MyClass obj = Reflection.on("com.example.MyClass")._new();
+ * 
+ * // Access instance fields and methods
+ * Reflection.on(obj)
+ *     .set("name", "John")
+ *     .set("age", 30)
+ *     .invoke("processData", "input");
+ * 
+ * // Get field value
+ * String name = Reflection.on(obj).get("name");
+ * }</pre>
  *
- * @param <T>
+ * @param <T> the type of the target class or object being reflected upon
+ * @author Haiyang Li
+ * @since 0.8
  */
 public final class Reflection<T> {
 
@@ -66,43 +91,87 @@ public final class Reflection<T> {
     }
 
     /**
+     * Creates a Reflection instance for the specified class name.
+     * The class is loaded using the current thread's context class loader.
      *
-     * @param <T>
-     * @param clsName
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Reflection<MyClass> ref = Reflection.on("com.example.MyClass");
+     * MyClass instance = ref._new();
+     * }</pre>
+     *
+     * @param <T> the type of the class
+     * @param clsName the fully qualified name of the class
+     * @return a Reflection instance for the specified class
+     * @throws RuntimeException if the class cannot be found
      */
     public static <T> Reflection<T> on(final String clsName) {
         return on(ClassUtil.forClass(clsName));
     }
 
     /**
+     * Creates a Reflection instance for the specified class.
      *
-     * @param <T>
-     * @param cls
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Reflection<String> ref = Reflection.on(String.class);
+     * String str = ref._new("Hello");
+     * }</pre>
+     *
+     * @param <T> the type of the class
+     * @param cls the class to reflect upon
+     * @return a Reflection instance for the specified class
      */
     public static <T> Reflection<T> on(final Class<T> cls) {
         return new Reflection<>(cls, null);
     }
 
     /**
+     * Creates a Reflection instance for the specified target object.
+     * The class is determined from the runtime type of the object.
      *
-     * @param <T>
-     * @param target
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MyClass obj = new MyClass();
+     * Reflection<MyClass> ref = Reflection.on(obj);
+     * ref.set("field", "value");
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param target the object to reflect upon
+     * @return a Reflection instance for the specified object
      */
     public static <T> Reflection<T> on(final T target) {
         return new Reflection<>((Class<T>) target.getClass(), target);
     }
 
+    /**
+     * Creates a new instance of the reflected class using its no-argument constructor.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MyClass obj = Reflection.on(MyClass.class)._new();
+     * }</pre>
+     *
+     * @return a new Reflection instance wrapping the newly created object
+     * @throws RuntimeException if the class cannot be instantiated
+     */
     public Reflection<T> _new() { //NOSONAR
         return new Reflection<>(cls, N.newInstance(cls));
     }
 
     /**
+     * Creates a new instance of the reflected class using a constructor that matches the given arguments.
+     * The constructor is selected based on the types of the provided arguments.
      *
-     * @param args
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Person person = Reflection.on(Person.class)._new("John", 30).instance();
+     * }</pre>
+     *
+     * @param args the arguments to pass to the constructor
+     * @return a new Reflection instance wrapping the newly created object
+     * @throws RuntimeException if no matching constructor is found or instantiation fails
      */
     public Reflection<T> _new(final Object... args) { //NOSONAR
         if (N.isEmpty(args)) {
@@ -115,15 +184,35 @@ public final class Reflection<T> {
         return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, args));
     }
 
+    /**
+     * Returns the target instance being reflected upon.
+     * Returns null if this Reflection was created from a Class rather than an instance.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MyClass obj = Reflection.on(MyClass.class)._new().instance();
+     * }</pre>
+     *
+     * @return the target instance, or null if reflecting on a class
+     */
     public T instance() {
         return target;
     }
 
     /**
+     * Gets the value of the specified field from the target instance.
+     * If ReflectASM is available, it will be used for better performance.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String name = Reflection.on(person).get("name");
+     * Integer age = Reflection.on(person).get("age");
+     * }</pre>
      *
      * @param <V> the value type
-     * @param fieldName
-     * @return
+     * @param fieldName the name of the field to get
+     * @return the value of the field
+     * @throws RuntimeException if the field doesn't exist or cannot be accessed
      */
     public <V> V get(final String fieldName) {
         if (reflectASM != null) {
@@ -141,10 +230,21 @@ public final class Reflection<T> {
     }
 
     /**
+     * Sets the value of the specified field in the target instance.
+     * If ReflectASM is available, it will be used for better performance.
      *
-     * @param fieldName
-     * @param value
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Reflection.on(person)
+     *     .set("name", "John")
+     *     .set("age", 30)
+     *     .set("active", true);
+     * }</pre>
+     *
+     * @param fieldName the name of the field to set
+     * @param value the value to set
+     * @return this Reflection instance for method chaining
+     * @throws RuntimeException if the field doesn't exist or cannot be accessed
      */
     public Reflection<T> set(final String fieldName, final Object value) {
         if (reflectASM != null) {
@@ -164,11 +264,21 @@ public final class Reflection<T> {
     }
 
     /**
+     * Invokes the specified method on the target instance with the given arguments and returns the result.
+     * The method is selected based on its name and the types of the provided arguments.
+     * If ReflectASM is available, it will be used for better performance.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = Reflection.on(obj).invoke("toString");
+     * Integer sum = Reflection.on(calculator).invoke("add", 5, 3);
+     * }</pre>
      *
      * @param <V> the value type
-     * @param methodName
-     * @param args
-     * @return
+     * @param methodName the name of the method to invoke
+     * @param args the arguments to pass to the method
+     * @return the result of the method invocation
+     * @throws RuntimeException if the method doesn't exist or invocation fails
      */
     public <V> V invoke(final String methodName, final Object... args) {
         if (reflectASM != null) {
@@ -186,10 +296,21 @@ public final class Reflection<T> {
     }
 
     /**
+     * Invokes the specified method on the target instance with the given arguments without returning a result.
+     * This is a convenience method for void methods or when the return value is not needed.
+     * The method is selected based on its name and the types of the provided arguments.
      *
-     * @param methodName
-     * @param args
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Reflection.on(logger)
+     *     .call("debug", "Starting process")
+     *     .call("info", "Process completed");
+     * }</pre>
+     *
+     * @param methodName the name of the method to invoke
+     * @param args the arguments to pass to the method
+     * @return this Reflection instance for method chaining
+     * @throws RuntimeException if the method doesn't exist or invocation fails
      */
     public Reflection<T> call(final String methodName, final Object... args) {
         if (reflectASM != null) {

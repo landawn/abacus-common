@@ -16,21 +16,32 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts two {@code byte}-valued arguments and returns no result.
+ * This is the primitive type specialization of {@link BiConsumer} for {@code byte}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(byte, byte)}.
+ *
+ */
 @FunctionalInterface
 public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param t
-     * @param u
+     * @param t the first input argument
+     * @param u the second input argument
      */
     @Override
     void accept(byte t, byte u);
 
     /**
+     * Returns a composed {@code ByteBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code ByteBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ByteBiConsumer andThen(final ByteBiConsumer after) {
         return (t, u) -> {

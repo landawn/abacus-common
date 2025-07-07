@@ -17,6 +17,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for java.util.OptionalDouble.
+ * This class provides serialization, deserialization, and database access capabilities for OptionalDouble instances.
+ * OptionalDouble is a container that may or may not contain a double value.
+ * Empty optionals are represented as null in serialized form.
+ */
 public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
@@ -25,15 +31,21 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
         super(OPTIONAL_DOUBLE);
     }
 
+    /**
+     * Returns the Class object representing the OptionalDouble type.
+     *
+     * @return OptionalDouble.class
+     */
     @Override
     public Class<OptionalDouble> clazz() {
         return OptionalDouble.class;
     }
 
     /**
-     * Checks if is comparable.
+     * Indicates whether instances of this type implement the Comparable interface.
+     * OptionalDouble values can be compared when both are present.
      *
-     * @return {@code true}, if is comparable
+     * @return true, as OptionalDouble values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -41,9 +53,10 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
-     * Checks if is non quoted csv type.
+     * Indicates whether this type should be written without quotes in CSV format.
+     * Double values are numeric and should not be quoted.
      *
-     * @return {@code true}, if is non quoted csv type
+     * @return true, indicating that OptionalDouble values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -51,9 +64,12 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Converts an OptionalDouble to its string representation.
+     * If the optional is empty or null, returns null.
+     * Otherwise, returns the string representation of the contained double value.
      *
-     * @param x
-     * @return
+     * @param x the OptionalDouble to convert to string
+     * @return the string representation of the double value, or null if empty or null
      */
     @Override
     public String stringOf(final OptionalDouble x) {
@@ -61,9 +77,12 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Parses a string representation into an OptionalDouble.
+     * Empty or null strings result in an empty OptionalDouble.
+     * Non-empty strings are parsed as double values and wrapped in OptionalDouble.
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return OptionalDouble.empty() if the string is null or empty, otherwise OptionalDouble containing the parsed value
      */
     @Override
     public OptionalDouble valueOf(final String str) {
@@ -71,11 +90,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Retrieves an OptionalDouble value from the specified column in a ResultSet.
+     * If the column value is null, returns an empty OptionalDouble.
+     * Otherwise, converts the value to double and wraps it in OptionalDouble.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return OptionalDouble.empty() if the column is null, otherwise OptionalDouble containing the value
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -85,11 +107,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Retrieves an OptionalDouble value from the specified column in a ResultSet using the column label.
+     * If the column value is null, returns an empty OptionalDouble.
+     * Otherwise, converts the value to double and wraps it in OptionalDouble.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return OptionalDouble.empty() if the column is null, otherwise OptionalDouble containing the value
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -99,11 +124,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Sets an OptionalDouble parameter in a PreparedStatement.
+     * If the OptionalDouble is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the double value.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the OptionalDouble to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalDouble x) throws SQLException {
@@ -115,11 +143,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Sets an OptionalDouble parameter in a CallableStatement using a parameter name.
+     * If the OptionalDouble is null or empty, sets the parameter to SQL NULL.
+     * Otherwise, sets the double value.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the OptionalDouble to set
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalDouble x) throws SQLException {
@@ -131,10 +162,12 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Appends the string representation of an OptionalDouble to an Appendable.
+     * Empty optionals are written as "null".
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the OptionalDouble to append
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalDouble x) throws IOException {
@@ -146,11 +179,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Writes the character representation of an OptionalDouble to a CharacterWriter.
+     * Empty optionals are written as null.
+     * Present values are written as numeric values without quotes.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the OptionalDouble to write
+     * @param config the serialization configuration (not used for numeric values)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final OptionalDouble x, final JSONXMLSerializationConfig<?> config) throws IOException {

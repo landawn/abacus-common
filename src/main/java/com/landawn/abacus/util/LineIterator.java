@@ -27,8 +27,6 @@ import java.util.NoSuchElementException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
- * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
- *
  * An Iterator over the lines in a {@code Reader}.
  * <p>
  * {@code LineIterator} holds a reference to an open {@code Reader}.
@@ -46,7 +44,10 @@ import com.landawn.abacus.exception.UncheckedIOException;
  *   }
  * }
  * </pre>
+ * <p>
+ * This class was copied from Apache Commons IO and may be modified.
  *
+ * @see java.io.BufferedReader
  * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
  */
 public final class LineIterator extends ObjIterator<String> implements AutoCloseable {
@@ -61,7 +62,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
 
     /**
      * Constructs an iterator of the lines for a {@code Reader}.
-     *
+     * <p>
+     * The reader will be wrapped in a BufferedReader if it's not already one.
+     * 
      * @param reader the {@code Reader} to read from, not null
      * @throws IllegalArgumentException if the reader is null
      */
@@ -101,6 +104,15 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * <p>
      * If an exception occurs during the creation of the iterator, the
      * underlying stream is closed.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * LineIterator lines = LineIterator.of(new File("data.txt"));
+     * while (lines.hasNext()) {
+     *     System.out.println(lines.next());
+     * }
+     * lines.close();
+     * </pre>
      *
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
@@ -135,6 +147,13 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * <p>
      * If an exception occurs during the creation of the iterator, the
      * underlying stream is closed.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * LineIterator lines = LineIterator.of(new File("data.txt"), StandardCharsets.UTF_8);
+     * lines.forEach(line -> process(line));
+     * lines.close();
+     * </pre>
      *
      * @param file the file to open for input, must not be {@code null}
      * @param encoding the encoding to use, {@code null} means platform default
@@ -161,9 +180,27 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
+     * Returns an Iterator for the lines in an {@code InputStream}, using
+     * the default character encoding.
+     * <p>
+     * {@code LineIterator} holds a reference to the open
+     * {@code InputStream} specified here. When you have finished with
+     * the iterator, you should close the stream to free internal resources.
+     * This can be done by closing the stream directly, or by calling
+     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * try (LineIterator lines = LineIterator.of(inputStream)) {
+     *     while (lines.hasNext()) {
+     *         processLine(lines.next());
+     *     }
+     * }
+     * </pre>
      *
-     * @param input
-     * @return
+     * @param input the {@code InputStream} to read from, not null
+     * @return an Iterator of the lines in the reader, never null
+     * @throws UncheckedIOException if an I/O error occurs
      */
     public static LineIterator of(final InputStream input) {
         return of(input, Charsets.DEFAULT);
@@ -203,43 +240,28 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in an {@code Reader}
+     * Returns an Iterator for the lines in a {@code Reader}.
+     * <p>
+     * {@code LineIterator} holds a reference to the open
+     * {@code Reader} specified here. When you have finished with
+     * the iterator, you should close the reader to free internal resources.
+     * This can be done by closing the reader directly, or by calling
+     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * try (LineIterator lines = LineIterator.of(reader)) {
+     *     lines.stream().filter(line -> line.contains("keyword"))
+     *                   .forEach(System.out::println);
+     * }
+     * </pre>
      *
-     * @param reader
-     * @return
+     * @param reader the {@code Reader} to read from, not null
+     * @return an Iterator of the lines in the reader, never null
      */
     public static LineIterator of(final Reader reader) {
         return new LineIterator(reader);
     }
-
-    //    @SafeVarargs
-    //    public static LineIterator[] of(final Reader... readers) {
-    //        if (N.isEmpty(readers)) {
-    //            return new LineIterator[0];
-    //        }
-    //
-    //        final LineIterator[] iterators = new LineIterator[readers.length];
-    //
-    //        for (int i = 0, len = readers.length; i < len; i++) {
-    //            iterators[i] = new LineIterator(readers[i]);
-    //        }
-    //
-    //        return iterators;
-    //    }
-
-    //    public static List<LineIterator> of(final Collection<? extends Reader> readers) {
-    //        if (N.isEmpty(readers)) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<LineIterator> iterators = new ArrayList<>(readers.size());
-    //
-    //        for (Reader reader : readers) {
-    //            iterators.add(new LineIterator(reader));
-    //        }
-    //
-    //        return iterators;
-    //    }
 
     //-----------------------------------------------------------------------
 
@@ -247,6 +269,15 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * Indicates whether the {@code Reader} has more lines.
      * If there is an {@code IOException} then {@link #close()} will
      * be called on this instance.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * LineIterator it = LineIterator.of(file);
+     * while (it.hasNext()) {
+     *     String line = it.next();
+     *     // process line
+     * }
+     * </pre>
      *
      * @return {@code true} if the Reader has more lines
      * @throws IllegalStateException if an IO exception occurs
@@ -276,9 +307,18 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
 
     /**
      * Returns the next line in the wrapped {@code Reader}.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * LineIterator it = LineIterator.of(file);
+     * while (it.hasNext()) {
+     *     String line = it.next();
+     *     System.out.println(line);
+     * }
+     * </pre>
      *
-     * @return
-     * @throws IllegalArgumentException
+     * @return the next line from the input
+     * @throws IllegalArgumentException if called when there are no more lines
      * @throws NoSuchElementException if there is no line to return
      */
     @Override
@@ -297,6 +337,19 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * lines of a larger file. If you do not close the iterator
      * then the {@code Reader} remains open.
      * This method can safely be called multiple times.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * LineIterator it = LineIterator.of(largeFile);
+     * try {
+     *     // Process only first 100 lines
+     *     for (int i = 0; i < 100 && it.hasNext(); i++) {
+     *         processLine(it.next());
+     *     }
+     * } finally {
+     *     it.close(); // Important to close for large files
+     * }
+     * </pre>
      */
     @Override
     public synchronized void close() {

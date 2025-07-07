@@ -32,15 +32,21 @@ public class RowIdType extends AbstractType<RowId> {
         super(ROW_ID);
     }
 
+    /**
+     * Returns the Class object representing the SQL RowId type.
+     *
+     * @return the Class object for java.sql.RowId.class
+     */
     @Override
     public Class<RowId> clazz() {
         return RowId.class;
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this type is serializable.
+     * SQL RowId types are not serializable as they represent database-specific row identifiers.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -48,9 +54,11 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Converts a RowId object to its string representation.
+     * The string representation is obtained by calling toString() on the RowId object.
      *
-     * @param x
-     * @return
+     * @param x the RowId object to convert
+     * @return the string representation of the RowId, or null if the input is null
      */
     @Override
     public String stringOf(final RowId x) {
@@ -58,10 +66,13 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Creates a RowId object from a string representation.
+     * This operation is not supported for SQL RowId types as they are database-specific
+     * and cannot be reliably reconstructed from a string.
      *
-     * @param str
-     * @return
-     * @throws UnsupportedOperationException
+     * @param str the string to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as RowId cannot be created from string
      */
     @Override
     public RowId valueOf(final String str) throws UnsupportedOperationException {
@@ -69,11 +80,13 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Retrieves a SQL ROWID value from the specified column in the ResultSet.
+     * A ROWID is a unique identifier for a row in a database table.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the RowId value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public RowId get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -81,11 +94,13 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Retrieves a SQL ROWID value from the specified column in the ResultSet.
+     * A ROWID is a unique identifier for a row in a database table.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the RowId value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public RowId get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -93,11 +108,13 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Sets a RowId parameter in a PreparedStatement.
+     * The RowId represents a unique identifier for a row in a database table.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the RowId value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final RowId x) throws SQLException {
@@ -105,11 +122,13 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Sets a RowId parameter in a CallableStatement.
+     * The RowId represents a unique identifier for a row in a database table.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the RowId value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final RowId x) throws SQLException {
@@ -117,11 +136,14 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Writes the character representation of a RowId to the given CharacterWriter.
+     * If the RowId is null, writes "null". Otherwise, writes the string representation
+     * of the RowId obtained from its toString() method.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the RowId to write
+     * @param config the serialization configuration (currently unused for RowId)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final RowId x, final JSONXMLSerializationConfig<?> config) throws IOException {

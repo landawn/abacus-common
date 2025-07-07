@@ -15,120 +15,183 @@
 package com.landawn.abacus.util;
 
 /**
- * {@code R} --- Read; {@code A} --- Add; {@code U} --- Update; {@code D} --- Delete.
+ * Represents different lock modes for database operations, where each mode controls what operations
+ * are permitted or restricted. The lock modes use a bitmask pattern where:
+ * <ul>
+ * <li>{@code R} (Read) - Prevents others from reading by bean ID (queries by condition are still allowed)</li>
+ * <li>{@code A} (Add) - Prevents others from inserting new records</li>
+ * <li>{@code U} (Update) - Prevents others from modifying existing records</li>
+ * <li>{@code D} (Delete) - Prevents others from deleting records</li>
+ * </ul>
+ * 
+ * <p>Lock modes can be combined to create composite locks that restrict multiple operations.
+ * For example, RU prevents both reading by ID and updating.</p>
  *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * LockMode mode = LockMode.RU;  // Prevents read by ID and update
+ * if (mode.isXLockOf(LockMode.R)) {
+ *     // This lock includes read restriction
+ * }
+ * }</pre>
+ *
+ * <p>Note: Some lock modes marked with {@code @Deprecated} are not currently supported.</p>
  */
 public enum LockMode {
     /**
-     * Others can't read by bean id (but can query by condition) if lock on this level.
+     * Read lock mode. When this lock is held, others cannot read by bean ID,
+     * though queries by condition are still permitted.
      */
     R(1),
+
     /**
-     * Others can't add(insert) if lock on this level.
+     * Add lock mode. When this lock is held, others cannot insert new records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     A(2),
+
     /**
-     * Others can't modify(update) if lock on this level.
+     * Update lock mode. When this lock is held, others cannot modify existing records.
      */
     U(4),
+
     /**
-     * Others can't delete if lock on this level.
+     * Delete lock mode. When this lock is held, others cannot delete records.
      */
     D(8),
+
     /**
-     * Others can't read by bean id (but can query by condition) and add(insert) if lock on this level.
+     * Combined Read-Add lock mode. When this lock is held, others cannot read by bean ID
+     * or insert new records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     RA(R.intValue + A.intValue),
+
     /**
-     * Others can't read by bean id (but can query by condition) and modify(update) if lock on this level.
+     * Combined Read-Update lock mode. When this lock is held, others cannot read by bean ID
+     * or modify existing records.
      */
     RU(R.intValue + U.intValue),
+
     /**
-     * Others can't read by bean id (but can query by condition) and delete if lock on this level.
+     * Combined Read-Delete lock mode. When this lock is held, others cannot read by bean ID
+     * or delete records.
      */
     RD(R.intValue + D.intValue),
+
     /**
-     * Others can't add(insert) and modify(update) if lock on this level.
+     * Combined Add-Update lock mode. When this lock is held, others cannot insert new records
+     * or modify existing records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     AU(A.intValue + U.intValue),
+
     /**
-     * Others can't add(insert) and delete if lock on this level.
+     * Combined Add-Delete lock mode. When this lock is held, others cannot insert new records
+     * or delete records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     AD(A.intValue + D.intValue),
+
     /**
-     * Others can't modify(update) and delete if lock on this level.
+     * Combined Update-Delete lock mode. When this lock is held, others cannot modify existing records
+     * or delete records.
      */
     UD(U.intValue + D.intValue),
+
     /**
-     * Others can't read by bean id (but can query by condition), add(insert) and modify(update) if lock on this
-     * level.
+     * Combined Read-Add-Update lock mode. When this lock is held, others cannot read by bean ID,
+     * insert new records, or modify existing records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     RAU(R.intValue + A.intValue + U.intValue),
+
     /**
-     * Others can't read by bean id (but can query by condition), add(insert) and delete if lock on this level.
+     * Combined Read-Add-Delete lock mode. When this lock is held, others cannot read by bean ID,
+     * insert new records, or delete records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     RAD(R.intValue + A.intValue + D.intValue),
+
     /**
-     * Others can't read by bean id (but can query by condition), modify(update) and delete if lock on this level.
+     * Combined Read-Update-Delete lock mode. When this lock is held, others cannot read by bean ID,
+     * modify existing records, or delete records.
      */
     RUD(R.intValue + U.intValue + D.intValue),
+
     /**
-     * Others can't add(insert), modify(update) and delete if lock on this level.
+     * Combined Add-Update-Delete lock mode. When this lock is held, others cannot insert new records,
+     * modify existing records, or delete records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     AUD(A.intValue + U.intValue + D.intValue),
 
     /**
-     * Others read by bean id (but can query by condition), add(insert), modify(update) and delete if lock on this
-     * level.
+     * Combined Read-Add-Update-Delete lock mode. This is the most restrictive lock mode.
+     * When this lock is held, others cannot read by bean ID, insert new records,
+     * modify existing records, or delete records.
      *
-     * @deprecated not supported at present.
+     * @deprecated not supported at present
      */
     @Deprecated
     RAUD(R.intValue + A.intValue + U.intValue + D.intValue);
 
+    /**
+     * The integer value representing this lock mode as a bitmask.
+     */
     private final int intValue;
 
     /**
+     * Constructs a LockMode with the specified integer value.
      *
-     * @param value
+     * @param value the integer value representing this lock mode as a bitmask
      */
     LockMode(final int value) {
         intValue = value;
     }
 
     /**
+     * Returns the integer value of this lock mode. The value is a bitmask where each bit
+     * represents a different lock type (R=1, A=2, U=4, D=8).
      *
-     * @return int
+     * <p>Example:</p>
+     * <pre>{@code
+     * int value = LockMode.RU.intValue(); // Returns 5 (1 + 4)
+     * }</pre>
+     *
+     * @return the integer value of this lock mode
      */
     public int intValue() {
         return intValue;
     }
 
     /**
+     * Returns the LockMode corresponding to the specified integer value. The value should be
+     * a valid combination of the lock mode bits (R=1, A=2, U=4, D=8).
      *
-     * @param intValue
-     * @return LockMode
+     * <p>Example:</p>
+     * <pre>{@code
+     * LockMode mode = LockMode.valueOf(5); // Returns LockMode.RU
+     * LockMode mode2 = LockMode.valueOf(12); // Returns LockMode.UD
+     * }</pre>
+     *
+     * @param intValue the integer value to convert to a LockMode
+     * @return the corresponding LockMode
+     * @throws IllegalArgumentException if the intValue does not correspond to a valid LockMode
      */
     public static LockMode valueOf(final int intValue) {
         switch (intValue) {
@@ -183,10 +246,23 @@ public enum LockMode {
     }
 
     /**
-     * Check if this {@code LockMode} is locked by the specified {@code byLockMode}.
+     * Checks if this LockMode is locked by (is a subset of) the specified LockMode.
+     * This method uses bitwise AND operation to determine if all lock types in this mode
+     * are also present in the specified mode.
      *
-     * @param lockMode
-     * @return boolean
+     * <p>Example:</p>
+     * <pre>{@code
+     * LockMode currentLock = LockMode.R;
+     * LockMode checkLock = LockMode.RU;
+     * boolean isLocked = currentLock.isXLockOf(checkLock); // Returns true
+     * 
+     * LockMode currentLock2 = LockMode.UD;
+     * LockMode checkLock2 = LockMode.U;
+     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2); // Returns true
+     * }</pre>
+     *
+     * @param lockMode the LockMode to check against
+     * @return true if this LockMode's operations are locked by the specified lockMode, false otherwise
      */
     public boolean isXLockOf(final LockMode lockMode) {
         return (intValue & lockMode.intValue) > 0;

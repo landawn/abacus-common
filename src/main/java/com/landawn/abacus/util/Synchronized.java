@@ -15,12 +15,35 @@
 package com.landawn.abacus.util;
 
 /**
- * This class provides a way to perform synchronized operations on a given object.
- * It provides static methods to perform operations like run, call, test, accept, and apply on a given object in a synchronized manner.
- * It also provides instance methods to perform these operations on the object provided at the time of creation of the Synchronized object.
+ * A utility class that provides thread-safe synchronized operations on objects.
+ * This class offers both static methods for one-time synchronized operations and instance methods
+ * for repeated synchronized operations on the same object (mutex).
+ * 
+ * <p>The class is designed to simplify synchronized code blocks by providing a fluent API that handles
+ * the synchronization mechanism internally. It supports various operation types including:
+ * <ul>
+ *   <li>Runnable operations (no return value)</li>
+ *   <li>Callable operations (with return value)</li>
+ *   <li>Predicate operations (boolean tests)</li>
+ *   <li>Consumer operations (accepting the mutex as input)</li>
+ *   <li>Function operations (transforming the mutex)</li>
+ * </ul>
+ * 
+ * <p>All operations are synchronized on the provided mutex object, ensuring thread-safe execution.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * // Static usage
+ * List<String> list = new ArrayList<>();
+ * Synchronized.run(list, () -> list.add("item"));
+ * 
+ * // Instance usage
+ * Synchronized<List<String>> syncList = Synchronized.on(list);
+ * syncList.run(() -> list.add("item"));
+ * String result = syncList.call(() -> list.get(0));
+ * }</pre>
  *
- * @param <T> The type of the object on which the synchronized operations are to be performed.
- * @param <T>
+ * @param <T> The type of the object on which the synchronized operations are to be performed
  */
 @SuppressWarnings("java:S2445")
 public final class Synchronized<T> {
@@ -34,15 +57,25 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Creates a new Synchronized object on the provided {@code mutex}.
+     * Creates a new Synchronized instance for the provided mutex object.
+     * This factory method is the primary way to create a Synchronized instance for repeated
+     * synchronized operations on the same object.
+     * 
+     * <p>The returned Synchronized instance provides instance methods to perform various
+     * synchronized operations on the mutex object.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * Synchronized<Map<String, Integer>> syncMap = Synchronized.on(map);
+     * syncMap.run(() -> map.put("key", 1));
+     * Integer value = syncMap.call(() -> map.get("key"));
+     * }</pre>
      *
-     * This method is useful when you want to perform synchronized operations on a given object.
-     * The returned Synchronized object provides methods to perform operations like run, call, test, accept, and apply on the {@code mutex} in a synchronized manner.
-     *
-     * @param <T> The type of the mutex.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @return A new Synchronized object on the provided {@code mutex}.
-     * @throws IllegalArgumentException if the provided {@code mutex} is {@code null}.
+     * @param <T> The type of the mutex object
+     * @param mutex The object on which synchronized operations will be performed. Must not be null.
+     * @return A new Synchronized instance for the provided mutex
+     * @throws IllegalArgumentException if the provided mutex is null
      */
     public static <T> Synchronized<T> on(final T mutex) throws IllegalArgumentException {
         N.checkArgNotNull(mutex);
@@ -51,17 +84,29 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex}.
+     * Executes the provided runnable command in a synchronized block on the specified mutex.
+     * This static method is useful for one-time synchronized operations where creating
+     * a Synchronized instance would be unnecessary overhead.
+     * 
+     * <p>The command is executed while holding the monitor lock on the mutex object,
+     * ensuring thread-safe execution. Any exception thrown by the command is propagated
+     * to the caller.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> list = new ArrayList<>();
+     * Synchronized.run(list, () -> {
+     *     list.add("item1");
+     *     list.add("item2");
+     * });
+     * }</pre>
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a runnable task that can throw an exception.
-     *
-     * @param <T> The type of the mutex.
-     * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param cmd The runnable task that might throw an exception.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code cmd} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code cmd}.
+     * @param <T> The type of the mutex
+     * @param <E> The type of exception that the command might throw
+     * @param mutex The object to synchronize on. Must not be null.
+     * @param cmd The runnable command to execute. Must not be null.
+     * @throws IllegalArgumentException if either mutex or cmd is null
+     * @throws E if the command throws an exception of type E
      */
     public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -74,19 +119,32 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Executes the provided callable command in a synchronized block on the specified mutex and returns its result.
+     * This static method is useful for one-time synchronized operations that need to return a value.
+     * 
+     * <p>The callable is executed while holding the monitor lock on the mutex object,
+     * ensuring thread-safe execution. The result of the callable is returned to the caller,
+     * and any exception thrown by the callable is propagated.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("count", 0);
+     * Integer result = Synchronized.call(map, () -> {
+     *     int current = map.get("count");
+     *     map.put("count", current + 1);
+     *     return current;
+     * });
+     * }</pre>
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, you need the result of that code, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a callable task that can throw an exception and returns a result.
-     *
-     * @param <T> The type of the mutex.
-     * @param <R> The type of the result.
-     * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param cmd The callable task that might throw an exception and returns a result.
-     * @return The result of the {@code cmd}.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code cmd} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code cmd}.
+     * @param <T> The type of the mutex
+     * @param <R> The type of the result returned by the callable
+     * @param <E> The type of exception that the callable might throw
+     * @param mutex The object to synchronize on. Must not be null.
+     * @param cmd The callable command to execute. Must not be null.
+     * @return The result of the callable command
+     * @throws IllegalArgumentException if either mutex or cmd is null
+     * @throws E if the callable throws an exception of type E
      */
     public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -99,18 +157,26 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Tests the provided predicate in a synchronized block on the specified mutex.
+     * The predicate receives the mutex as its argument and returns a boolean result.
+     * 
+     * <p>This method is useful for performing synchronized conditional checks where the
+     * predicate needs access to the mutex object itself.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> list = new ArrayList<>();
+     * list.add("item");
+     * boolean hasItems = Synchronized.test(list, l -> !l.isEmpty());
+     * }</pre>
      *
-     * This method is useful when you want to test a condition that might throw an exception, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a predicate that can throw an exception and returns a boolean result.
-     *
-     * @param <T> The type of the mutex.
-     * @param <E> The type of the exception that the {@code predicate} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param predicate The predicate that might throw an exception and returns a boolean result.
-     * @return The result of the {@code predicate}.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code predicate} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code predicate}.
+     * @param <T> The type of the mutex
+     * @param <E> The type of exception that the predicate might throw
+     * @param mutex The object to synchronize on and pass to the predicate. Must not be null.
+     * @param predicate The predicate to test. Must not be null.
+     * @return The boolean result of the predicate
+     * @throws IllegalArgumentException if either mutex or predicate is null
+     * @throws E if the predicate throws an exception of type E
      */
     public static <T, E extends Throwable> boolean test(final T mutex, final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -123,20 +189,29 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Tests the provided bi-predicate in a synchronized block on the specified mutex.
+     * The bi-predicate receives both the mutex and an additional argument.
+     * 
+     * <p>This method is useful for performing synchronized conditional checks where the
+     * predicate needs access to both the mutex object and an additional parameter.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("count", 5);
+     * boolean isGreater = Synchronized.test(map, 3, 
+     *     (m, threshold) -> m.get("count") > threshold);
+     * }</pre>
      *
-     * This method is useful when you want to test a condition that might throw an exception, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a bi-predicate that can throw an exception and returns a boolean result.
-     *
-     * @param <T> The type of the mutex.
-     * @param <U> The type of the second argument to the predicate.
-     * @param <E> The type of the exception that the {@code predicate} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param u The second argument to the predicate. This argument should be of type U.
-     * @param predicate The bi-predicate that might throw an exception and returns a boolean result.
-     * @return The result of the {@code predicate}.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code predicate} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code predicate}.
+     * @param <T> The type of the mutex
+     * @param <U> The type of the additional argument
+     * @param <E> The type of exception that the predicate might throw
+     * @param mutex The object to synchronize on and pass as first argument to the predicate. Must not be null.
+     * @param u The additional argument to pass as second argument to the predicate
+     * @param predicate The bi-predicate to test. Must not be null.
+     * @return The boolean result of the bi-predicate
+     * @throws IllegalArgumentException if either mutex or predicate is null
+     * @throws E if the predicate throws an exception of type E
      */
     public static <T, U, E extends Throwable> boolean test(final T mutex, final U u, final Throwables.BiPredicate<? super T, ? super U, E> predicate)
             throws IllegalArgumentException, E {
@@ -150,17 +225,24 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex}.
+     * Executes the provided consumer in a synchronized block on the specified mutex.
+     * The consumer receives the mutex as its argument.
+     * 
+     * <p>This method is useful for performing synchronized operations where the
+     * consumer needs access to the mutex object itself.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * Synchronized.accept(sb, s -> s.append("Hello").append(" World"));
+     * }</pre>
      *
-     * This method is useful when you want to perform an operation that might throw an exception, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a consumer that can throw an exception.
-     *
-     * @param <T> The type of the mutex.
-     * @param <E> The type of the exception that the {@code consumer} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param consumer The consumer that might throw an exception.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code consumer} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code consumer}.
+     * @param <T> The type of the mutex
+     * @param <E> The type of exception that the consumer might throw
+     * @param mutex The object to synchronize on and pass to the consumer. Must not be null.
+     * @param consumer The consumer to execute. Must not be null.
+     * @throws IllegalArgumentException if either mutex or consumer is null
+     * @throws E if the consumer throws an exception of type E
      */
     public static <T, E extends Throwable> void accept(final T mutex, final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -173,19 +255,26 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex} and {@code u}.
+     * Executes the provided bi-consumer in a synchronized block on the specified mutex.
+     * The bi-consumer receives both the mutex and an additional argument.
+     * 
+     * <p>This method is useful for performing synchronized operations where the
+     * consumer needs access to both the mutex object and an additional parameter.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * Synchronized.accept(map, "key", (m, k) -> m.put(k, "value"));
+     * }</pre>
      *
-     * This method is useful when you want to perform an operation that might throw an exception, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a bi-consumer that can throw an exception.
-     *
-     * @param <T> The type of the mutex.
-     * @param <U> The type of the second argument to the consumer.
-     * @param <E> The type of the exception that the {@code consumer} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param u The second argument to the consumer. This argument should be of type U.
-     * @param consumer The bi-consumer that might throw an exception.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code consumer} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code consumer}.
+     * @param <T> The type of the mutex
+     * @param <U> The type of the additional argument
+     * @param <E> The type of exception that the consumer might throw
+     * @param mutex The object to synchronize on and pass as first argument to the consumer. Must not be null.
+     * @param u The additional argument to pass as second argument to the consumer
+     * @param consumer The bi-consumer to execute. Must not be null.
+     * @throws IllegalArgumentException if either mutex or consumer is null
+     * @throws E if the consumer throws an exception of type E
      */
     public static <T, U, E extends Throwable> void accept(final T mutex, final U u, final Throwables.BiConsumer<? super T, ? super U, E> consumer)
             throws IllegalArgumentException, E {
@@ -199,19 +288,26 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code function} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Applies the provided function in a synchronized block on the specified mutex and returns its result.
+     * The function receives the mutex as its argument and transforms it to a result.
+     * 
+     * <p>This method is useful for performing synchronized transformations where the
+     * function needs access to the mutex object itself.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Integer size = Synchronized.apply(list, l -> l.size());
+     * }</pre>
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, you need the result of that code, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a function that can throw an exception and returns a result.
-     *
-     * @param <T> The type of the mutex.
-     * @param <R> The type of the result.
-     * @param <E> The type of the exception that the {@code function} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param function The function that might throw an exception and returns a result.
-     * @return The result of the {@code function}.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code function}.
+     * @param <T> The type of the mutex
+     * @param <R> The type of the result
+     * @param <E> The type of exception that the function might throw
+     * @param mutex The object to synchronize on and pass to the function. Must not be null.
+     * @param function The function to apply. Must not be null.
+     * @return The result of applying the function
+     * @throws IllegalArgumentException if either mutex or function is null
+     * @throws E if the function throws an exception of type E
      */
     public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException, E {
@@ -225,21 +321,30 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code function} in a synchronized manner on the provided {@code mutex} and {@code u}, and returns the result.
+     * Applies the provided bi-function in a synchronized block on the specified mutex and returns its result.
+     * The bi-function receives both the mutex and an additional argument.
+     * 
+     * <p>This method is useful for performing synchronized transformations where the
+     * function needs access to both the mutex object and an additional parameter.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("count", 10);
+     * Integer result = Synchronized.apply(map, 5, 
+     *     (m, increment) -> m.merge("count", increment, Integer::sum));
+     * }</pre>
      *
-     * This method is useful when you want to run a piece of code that might throw an exception, you need the result of that code, and you need to ensure that the execution is synchronized.
-     * It allows you to handle exceptions in a specific way by providing a bi-function that can throw an exception and returns a result.
-     *
-     * @param <T> The type of the mutex.
-     * @param <U> The type of the second argument to the function.
-     * @param <R> The type of the result.
-     * @param <E> The type of the exception that the {@code function} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed.
-     * @param u The second argument to the function. This argument should be of type U.
-     * @param function The bi-function that might throw an exception and returns a result.
-     * @return The result of the {@code function}.
-     * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code function}.
+     * @param <T> The type of the mutex
+     * @param <U> The type of the additional argument
+     * @param <R> The type of the result
+     * @param <E> The type of exception that the function might throw
+     * @param mutex The object to synchronize on and pass as first argument to the function. Must not be null.
+     * @param u The additional argument to pass as second argument to the function
+     * @param function The bi-function to apply. Must not be null.
+     * @return The result of applying the bi-function
+     * @throws IllegalArgumentException if either mutex or function is null
+     * @throws E if the function throws an exception of type E
      */
     public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> function)
             throws E {
@@ -253,12 +358,26 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex}.
+     * Executes the provided runnable command in a synchronized block on this instance's mutex.
+     * This instance method is useful for repeated synchronized operations on the same object.
+     * 
+     * <p>The command is executed while holding the monitor lock on the mutex object,
+     * ensuring thread-safe execution.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> list = new ArrayList<>();
+     * Synchronized<List<String>> syncList = Synchronized.on(list);
+     * syncList.run(() -> {
+     *     list.add("item1");
+     *     list.add("item2");
+     * });
+     * }</pre>
      *
-     * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param cmd The runnable task that might throw an exception.
-     * @throws IllegalArgumentException if the provided {@code cmd} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code cmd}.
+     * @param <E> The type of exception that the command might throw
+     * @param cmd The runnable command to execute. Must not be null.
+     * @throws IllegalArgumentException if cmd is null
+     * @throws E if the command throws an exception of type E
      */
     public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -269,14 +388,25 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Executes the provided callable command in a synchronized block on this instance's mutex and returns its result.
+     * This instance method is useful for repeated synchronized operations on the same object that return values.
+     * 
+     * <p>The callable is executed while holding the monitor lock on the mutex object,
+     * ensuring thread-safe execution.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * Synchronized<Map<String, Integer>> syncMap = Synchronized.on(map);
+     * Integer result = syncMap.call(() -> map.computeIfAbsent("key", k -> 42));
+     * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param cmd The callable task that might throw an exception and returns a result.
-     * @return The result of the {@code cmd}.
-     * @throws IllegalArgumentException if the provided {@code cmd} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code cmd}.
+     * @param <R> The type of the result
+     * @param <E> The type of exception that the callable might throw
+     * @param cmd The callable command to execute. Must not be null.
+     * @return The result of the callable command
+     * @throws IllegalArgumentException if cmd is null
+     * @throws E if the callable throws an exception of type E
      */
     public <R, E extends Throwable> R call(final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -287,13 +417,24 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Tests the provided predicate in a synchronized block on this instance's mutex.
+     * The predicate receives the mutex as its argument and returns a boolean result.
+     * 
+     * <p>This instance method is useful for repeated synchronized conditional checks
+     * on the same object.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> list = new ArrayList<>();
+     * Synchronized<List<String>> syncList = Synchronized.on(list);
+     * boolean isEmpty = syncList.test(l -> l.isEmpty());
+     * }</pre>
      *
-     * @param <E> The type of the exception that the {@code predicate} might throw.
-     * @param predicate The predicate that might throw an exception and returns a boolean result.
-     * @return The result of the {@code predicate}.
-     * @throws IllegalArgumentException if the provided {@code predicate} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code predicate}.
+     * @param <E> The type of exception that the predicate might throw
+     * @param predicate The predicate to test with the mutex as argument. Must not be null.
+     * @return The boolean result of the predicate
+     * @throws IllegalArgumentException if predicate is null
+     * @throws E if the predicate throws an exception of type E
      */
     public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate);
@@ -304,12 +445,23 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex}.
+     * Executes the provided consumer in a synchronized block on this instance's mutex.
+     * The consumer receives the mutex as its argument.
+     * 
+     * <p>This instance method is useful for repeated synchronized operations on the same object
+     * where the consumer needs access to the mutex.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * Synchronized<StringBuilder> syncSb = Synchronized.on(sb);
+     * syncSb.accept(s -> s.append("Hello").append(" World"));
+     * }</pre>
      *
-     * @param <E> The type of the exception that the {@code consumer} might throw.
-     * @param consumer The consumer that might throw an exception.
-     * @throws IllegalArgumentException if the provided {@code consumer} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code consumer}.
+     * @param <E> The type of exception that the consumer might throw
+     * @param consumer The consumer to execute with the mutex as argument. Must not be null.
+     * @throws IllegalArgumentException if consumer is null
+     * @throws E if the consumer throws an exception of type E
      */
     public <E extends Throwable> void accept(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer);
@@ -320,14 +472,25 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Executes the provided {@code function} in a synchronized manner on the provided {@code mutex} and returns the result.
+     * Applies the provided function in a synchronized block on this instance's mutex and returns its result.
+     * The function receives the mutex as its argument and transforms it to a result.
+     * 
+     * <p>This instance method is useful for repeated synchronized transformations on the same object.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("count", 10);
+     * Synchronized<Map<String, Integer>> syncMap = Synchronized.on(map);
+     * Integer doubled = syncMap.apply(m -> m.get("count") * 2);
+     * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param <E> The type of the exception that the {@code function} might throw.
-     * @param function The function that might throw an exception and returns a result.
-     * @return The result of the {@code function}.
-     * @throws IllegalArgumentException if the provided {@code function} is {@code null}.
-     * @throws E if an exception occurs during the execution of the {@code function}.
+     * @param <R> The type of the result
+     * @param <E> The type of exception that the function might throw
+     * @param function The function to apply with the mutex as argument. Must not be null.
+     * @return The result of applying the function
+     * @throws IllegalArgumentException if function is null
+     * @throws E if the function throws an exception of type E
      */
     public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws IllegalArgumentException, E {
         N.checkArgNotNull(function);

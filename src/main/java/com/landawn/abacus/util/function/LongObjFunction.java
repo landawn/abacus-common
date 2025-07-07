@@ -17,25 +17,56 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
- *
+ * Represents a function that accepts a long-valued argument and an object argument, 
+ * and produces a result. This is a two-arity specialization of {@code Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #apply(long, Object)}.
+ * 
+ * <p>The interface extends {@code Throwables.LongObjFunction} with {@code RuntimeException} as the exception type,
+ * making it suitable for use in contexts where checked exceptions are not required.
+ * 
+ * @param <T> the type of the object argument to the function
+ * @param <R> the type of the result of the function
+ * 
+ * @see java.util.function.Function
+ * @see java.util.function.BiFunction
  */
 @FunctionalInterface
 public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, RuntimeException> { // NOSONAR
     /**
+     * Applies this function to the given arguments.
+     * 
+     * <p>This method takes a primitive long value as the first argument and an object of type T
+     * as the second argument, then processes them to produce a result of type R.
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the long-valued first argument
+     * @param u the object second argument of type T
+     * @return the function result of type R
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     R apply(long t, T u);
 
     /**
+     * Returns a composed function that first applies this function to its input,
+     * and then applies the {@code after} function to the result.
+     * 
+     * <p>If evaluation of either function throws an exception, it is relayed to
+     * the caller of the composed function.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * LongObjFunction<String, Integer> lengthPlusLong = (l, s) -> s.length() + (int)l;
+     * Function<Integer, String> intToString = Object::toString;
+     * LongObjFunction<String, String> composed = lengthPlusLong.andThen(intToString);
+     * // composed.apply(5L, "hello") returns "10" (5 + 5 = 10)
+     * }</pre>
      *
-     * @param <V>
-     * @param after
-     * @return
+     * @param <V> the type of output of the {@code after} function, and of the
+     *           composed function
+     * @param after the function to apply after this function is applied
+     * @return a composed function that first applies this function and then
+     *         applies the {@code after} function
      */
     default <V> LongObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (i, t) -> after.apply(apply(i, t));

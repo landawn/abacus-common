@@ -26,9 +26,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Note: Copied from Google Guava under Apache License v2.0
- * <br />
- * <br />
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * An object that measures elapsed time in nanoseconds. It is useful to measure elapsed time using
  * this class instead of direct calls to {@link System#nanoTime} for a few reasons:
@@ -88,8 +86,16 @@ public final class Stopwatch {
 
     /**
      * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createUnstarted();
+     * stopwatch.start();
+     * // ... do something ...
+     * stopwatch.stop();
+     * }</pre>
      *
-     * @return
+     * @return a new stopwatch instance that is not running
      */
     public static Stopwatch createUnstarted() {
         return new Stopwatch();
@@ -97,9 +103,19 @@ public final class Stopwatch {
 
     /**
      * Creates (but does not start) a new stopwatch, using the specified time source.
+     * This is useful for testing or when you need to use an alternative time source.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Ticker mockTicker = new Ticker() {
+     *     private long time = 0;
+     *     public long read() { return time += 1000000; } // Advance 1ms each call
+     * };
+     * Stopwatch stopwatch = Stopwatch.createUnstarted(mockTicker);
+     * }</pre>
      *
-     * @param ticker
-     * @return
+     * @param ticker the time source to use for measuring elapsed time
+     * @return a new stopwatch instance that is not running
      */
     public static Stopwatch createUnstarted(final Ticker ticker) {
         return new Stopwatch(ticker);
@@ -107,8 +123,16 @@ public final class Stopwatch {
 
     /**
      * Creates (and starts) a new stopwatch using {@link System#nanoTime} as its time source.
+     * This is a convenience method equivalent to calling {@code createUnstarted().start()}.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createStarted();
+     * doSomething();
+     * long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+     * }</pre>
      *
-     * @return
+     * @return a new stopwatch instance that is already running
      */
     public static Stopwatch createStarted() {
         return new Stopwatch().start();
@@ -116,9 +140,20 @@ public final class Stopwatch {
 
     /**
      * Creates (and starts) a new stopwatch, using the specified time source.
+     * This is a convenience method equivalent to calling {@code createUnstarted(ticker).start()}.
+     * 
+     * <p>Example usage for Android:</p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createStarted(
+     *     new Ticker() {
+     *         public long read() {
+     *             return android.os.SystemClock.elapsedRealtimeNanos();
+     *         }
+     *     });
+     * }</pre>
      *
-     * @param ticker
-     * @return
+     * @param ticker the time source to use for measuring elapsed time
+     * @return a new stopwatch instance that is already running
      */
     public static Stopwatch createStarted(final Ticker ticker) {
         return new Stopwatch(ticker).start();
@@ -135,18 +170,33 @@ public final class Stopwatch {
     /**
      * Returns {@code true} if {@link #start()} has been called on this stopwatch, and {@link #stop()}
      * has not been called since the last call to {@code start()}.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * if (stopwatch.isRunning()) {
+     *     stopwatch.stop();
+     * }
+     * }</pre>
      *
-     * @return {@code true}, if it's running
+     * @return {@code true} if the stopwatch is currently running, {@code false} otherwise
      */
     public boolean isRunning() {
         return isRunning;
     }
 
     /**
-     * Starts the stopwatch.
+     * Starts the stopwatch. Time measurement begins with this call.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createUnstarted();
+     * stopwatch.start();
+     * // ... timed operation ...
+     * stopwatch.stop();
+     * }</pre>
      *
-     * @return this {@code Stopwatch} instance
-     * @throws IllegalStateException if the stopwatch is already running.
+     * @return this {@code Stopwatch} instance for method chaining
+     * @throws IllegalStateException if the stopwatch is already running
      */
     public Stopwatch start() {
         N.checkState(!isRunning, "This stopwatch is already running.");
@@ -157,10 +207,18 @@ public final class Stopwatch {
 
     /**
      * Stops the stopwatch. Future reads will return the fixed duration that had elapsed up to this
-     * point.
+     * point. Calling {@code elapsed()} after stopping will always return the same duration.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * stopwatch.stop();
+     * Duration duration = stopwatch.elapsed(); // Time when stopped
+     * Thread.sleep(1000);
+     * Duration sameDuration = stopwatch.elapsed(); // Still the same time
+     * }</pre>
      *
-     * @return this {@code Stopwatch} instance
-     * @throws IllegalStateException if the stopwatch is already stopped.
+     * @return this {@code Stopwatch} instance for method chaining
+     * @throws IllegalStateException if the stopwatch is already stopped
      */
     public Stopwatch stop() {
         final long tick = ticker.read();
@@ -172,8 +230,20 @@ public final class Stopwatch {
 
     /**
      * Sets the elapsed time for this stopwatch to zero, and places it in a stopped state.
+     * This is useful for reusing a stopwatch instance.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createStarted();
+     * doFirstOperation();
+     * System.out.println("First: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
+     * 
+     * stopwatch.reset().start();
+     * doSecondOperation();
+     * System.out.println("Second: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
+     * }</pre>
      *
-     * @return this {@code Stopwatch} instance
+     * @return this {@code Stopwatch} instance for method chaining
      */
     public Stopwatch reset() {
         elapsedNanos = 0;
@@ -187,30 +257,66 @@ public final class Stopwatch {
 
     /**
      * Returns the current elapsed time shown on this stopwatch, expressed in the desired time unit,
-     * with any fraction rounded down.
+     * with any fraction rounded down. This method can be called whether the stopwatch is running or stopped.
      *
      * <p><b>Note:</b> the overhead of measurement can be more than a microsecond, so it is generally
-     * not useful to specify {@link TimeUnit#NANOSECONDS} precision here.
+     * not useful to specify {@link TimeUnit#NANOSECONDS} precision here.</p>
      *
      * <p>It is generally not a good idea to use an ambiguous, unitless {@code long} to represent
      * elapsed time. Therefore, we recommend using {@link #elapsed()} instead, which returns a
-     * strongly-typed {@link Duration} instance.
+     * strongly-typed {@link Duration} instance.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long millis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+     * long seconds = stopwatch.elapsed(TimeUnit.SECONDS);
+     * }</pre>
      *
-     * @param desiredUnit
-     * @return
+     * @param desiredUnit the unit of time to express the elapsed time in
+     * @return the elapsed time in the specified unit, rounded down
      */
     public long elapsed(final TimeUnit desiredUnit) {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
     }
 
+    /**
+     * Returns the current elapsed time shown on this stopwatch as a {@link Duration}.
+     * Unlike {@link #elapsed(TimeUnit)}, this method returns a strongly-typed {@code Duration}
+     * instance that preserves nanosecond precision.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Duration elapsed = stopwatch.elapsed();
+     * System.out.println("Elapsed: " + elapsed.toMillis() + " ms");
+     * 
+     * // Can be used with Java 8+ time APIs
+     * if (elapsed.compareTo(Duration.ofSeconds(5)) > 0) {
+     *     System.out.println("Operation took more than 5 seconds");
+     * }
+     * }</pre>
+     *
+     * @return a {@code Duration} representing the elapsed time
+     */
     public Duration elapsed() {
         return Duration.ofNanos(elapsedNanos());
     }
 
     /**
-     *  Returns a string representation of the current elapsed time.
+     * Returns a string representation of the current elapsed time.
+     * The string uses the most appropriate unit and shows up to 4 significant figures.
+     * 
+     * <p>Example outputs:</p>
+     * <ul>
+     *   <li>{@code "38.0 ns"} for 38 nanoseconds</li>
+     *   <li>{@code "1.234 μs"} for 1234 nanoseconds</li>
+     *   <li>{@code "5.678 ms"} for 5678123 nanoseconds</li>
+     *   <li>{@code "1.234 s"} for 1.234 seconds</li>
+     *   <li>{@code "2.500 min"} for 150 seconds</li>
+     *   <li>{@code "1.500 h"} for 90 minutes</li>
+     *   <li>{@code "2.000 d"} for 48 hours</li>
+     * </ul>
      *
-     * @return
+     * @return a string representation of the elapsed time with appropriate unit
      */
     @Override
     public String toString() {
@@ -224,10 +330,20 @@ public final class Stopwatch {
     }
 
     /**
-     * Format compact 4 digits.
+     * Formats a double value to 4 significant figures using scientific notation when appropriate.
+     * This method uses {@code "%.4g"} format which automatically chooses between fixed-point
+     * and exponential notation.
+     * 
+     * <p>Example outputs:</p>
+     * <ul>
+     *   <li>{@code "1.234"} for 1.234</li>
+     *   <li>{@code "1234"} for 1234.0</li>
+     *   <li>{@code "1.234e+06"} for 1234000.0</li>
+     *   <li>{@code "0.001234"} for 0.001234</li>
+     * </ul>
      *
-     * @param value
-     * @return
+     * @param value the value to format
+     * @return the formatted string with up to 4 significant figures
      */
     static String formatCompact4Digits(final double value) {
         return String.format(Locale.ROOT, "%.4g", value);

@@ -2369,7 +2369,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2381,7 +2381,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2407,7 +2407,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2419,7 +2419,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2445,7 +2445,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2457,7 +2457,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2483,7 +2483,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2495,7 +2495,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2521,7 +2521,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2533,7 +2533,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2559,7 +2559,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2571,7 +2571,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2597,7 +2597,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2609,7 +2609,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2635,7 +2635,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2647,7 +2647,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2673,7 +2673,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array within a specified tolerance.
+     * Returns the indices of all occurrences of the specified value in the given array within a specified tolerance.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2685,7 +2685,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array within a specified tolerance, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array within a specified tolerance, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2714,7 +2714,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array.
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2725,7 +2725,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given array, starting from the specified index.
      *
      * @param a The array to be searched.
      * @param valueToFind The value to find in the array.
@@ -2750,7 +2750,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given collection.
+     * Returns the indices of all occurrences of the specified value in the given collection.
      *
      * @param c The collection to be searched.
      * @param valueToFind The value to find in the collection.
@@ -2761,7 +2761,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences of the specified value in the given collection, starting from the specified index.
+     * Returns the indices of all occurrences of the specified value in the given collection, starting from the specified index.
      *
      * @param c The collection to be searched.
      * @param valueToFind The value to find in the collection.
@@ -2805,7 +2805,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences in the given array for which the provided predicate returns {@code true}.
+     * Returns the indices of all occurrences in the given array for which the provided predicate returns {@code true}.
      *
      * @param <T> The type of the elements in the array.
      * @param a The array to be searched.
@@ -2817,7 +2817,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences in the given array for which the provided predicate returns {@code true}, starting from the specified index.
+     * Returns the indices of all occurrences in the given array for which the provided predicate returns {@code true}, starting from the specified index.
      *
      * @param <T> The type of the elements in the array.
      * @param a The array to be searched.
@@ -2843,7 +2843,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences in the given collection for which the provided predicate returns {@code true}.
+     * Returns the indices of all occurrences in the given collection for which the provided predicate returns {@code true}.
      *
      * @param <T> The type of the elements in the collection.
      * @param c The collection to be searched.
@@ -2855,7 +2855,7 @@ public final class Index {
     }
 
     /**
-     * Finds and returns the indices of all occurrences in the given collection for which the provided predicate returns {@code true}, starting from the specified index.
+     * Returns the indices of all occurrences in the given collection for which the provided predicate returns {@code true}, starting from the specified index.
      *
      * @param <T> The type of the elements in the collection.
      * @param c The collection to be searched.

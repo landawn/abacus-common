@@ -17,17 +17,36 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents a function that accepts two arguments and produces a double-valued result.
+ * This is the double-producing primitive specialization for {@link java.util.function.BiFunction}.
+ * 
+ * <p>This interface extends both the Throwables.ToDoubleBiFunction and the standard Java
+ * ToDoubleBiFunction, providing compatibility with both the Abacus framework's error handling
+ * mechanisms and the standard Java functional interfaces.
  *
+ * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object, Object)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
 public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<T, U, RuntimeException>, java.util.function.ToDoubleBiFunction<T, U> { //NOSONAR
 
     /**
+     * Applies this function to the given arguments and returns a double result.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * ToDoubleBiFunction<String, Integer> lengthMultiplier = (str, num) -> str.length() * num;
+     * double result = lengthMultiplier.applyAsDouble("Hello", 2); // returns 10.0
+     * }</pre>
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a primitive double
+     * @throws RuntimeException if any error occurs during function execution
      */
     @Override
     double applyAsDouble(T t, U u);

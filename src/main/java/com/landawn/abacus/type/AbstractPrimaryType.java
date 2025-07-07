@@ -17,8 +17,12 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.N;
 
 /**
+ * Abstract base class for primary types in the type system.
+ * Primary types are fundamental, immutable types that can be directly compared
+ * and converted from objects. This includes primitive wrappers (Integer, Double, etc.),
+ * String, Character, and other basic value types.
  *
- * @param <T>
+ * @param <T> the primary type (e.g., Integer, String, Boolean, Character)
  */
 public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
@@ -27,9 +31,11 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is immutable.
+     * Checks if this type is immutable.
+     * Primary types are always immutable, meaning their values cannot be changed
+     * after creation. This includes all primitive wrappers and String.
      *
-     * @return {@code true}, if is immutable
+     * @return {@code true}, indicating that primary types are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -37,9 +43,11 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is comparable.
+     * Checks if this type is comparable.
+     * Primary types implement natural ordering and can be compared with each other.
+     * This allows them to be used in sorted collections and comparison operations.
      *
-     * @return {@code true}, if is comparable
+     * @return {@code true}, indicating that primary types support comparison
      */
     @Override
     public boolean isComparable() {
@@ -47,9 +55,14 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
+     * Converts an object to this primary type.
+     * This method provides a generic way to convert any object to the primary type
+     * by first converting it to a string representation using the object's actual type,
+     * then parsing that string to create the primary type value.
+     * Returns the default value if the input object is {@code null}.
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert
+     * @return the converted primary type value, or default value if input is {@code null}
      */
     @Override
     public T valueOf(final Object obj) {

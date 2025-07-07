@@ -21,8 +21,17 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for ByteBuffer operations.
+ * This class provides conversion between java.nio.ByteBuffer instances
+ * and their Base64-encoded string representations, enabling storage and
+ * transmission of binary buffer data in text formats.
+ */
 public class ByteBufferType extends AbstractType<ByteBuffer> {
 
+    /**
+     * The type name constant for ByteBuffer type identification.
+     */
     public static final String BYTE_BUFFER = "ByteBuffer";
 
     ByteBufferType() {
@@ -33,15 +42,21 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
         super(ClassUtil.getSimpleClassName(cls));
     }
 
+    /**
+     * Returns the Class object representing the ByteBuffer class.
+     *
+     * @return the Class object for java.nio.ByteBuffer
+     */
     @Override
     public Class<ByteBuffer> clazz() {
         return ByteBuffer.class;
     }
 
     /**
-     * Checks if is byte buffer.
+     * Determines whether this type represents a ByteBuffer.
+     * Always returns true for ByteBufferType instances.
      *
-     * @return {@code true}, if is byte buffer
+     * @return {@code true} indicating this is a byte buffer type
      */
     @Override
     public boolean isByteBuffer() {
@@ -49,9 +64,12 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
+     * Converts a ByteBuffer to its Base64-encoded string representation.
+     * The buffer's content from position 0 to the current position is encoded.
      *
-     * @param x
-     * @return
+     * @param x the ByteBuffer to encode
+     * @return the Base64-encoded string representation of the buffer's content,
+     *         or null if the input is null
      */
     @Override
     public String stringOf(final ByteBuffer x) {
@@ -59,9 +77,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
+     * Converts a Base64-encoded string back to a ByteBuffer.
+     * Creates a ByteBuffer wrapping the decoded byte array with position
+     * set to the array length and limit/capacity set to array length.
      *
-     * @param str
-     * @return
+     * @param str the Base64-encoded string to decode
+     * @return a ByteBuffer containing the decoded data, or null if str is null,
+     *         or an empty buffer if str is empty
+     * @throws IllegalArgumentException if the input string is not valid Base64
      */
     @MayReturnNull
     @Override
@@ -76,10 +99,12 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Byte array of.
+     * Extracts the content of a ByteBuffer as a byte array.
+     * Reads from position 0 to the current position of the buffer,
+     * then resets the position back to its original value.
      *
-     * @param x
-     * @return
+     * @param x the ByteBuffer to extract bytes from
+     * @return a byte array containing the buffer's content from 0 to current position
      */
     public static byte[] byteArrayOf(final ByteBuffer x) {
         final byte[] bytes = new byte[x.position()];
@@ -92,9 +117,12 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
+     * Creates a ByteBuffer from a byte array.
+     * The resulting buffer wraps the input array with position set to the array length,
+     * limit set to array length, and capacity equal to array length.
      *
-     * @param bytes
-     * @return
+     * @param bytes the byte array to wrap in a ByteBuffer
+     * @return a ByteBuffer wrapping the input array with position at the end
      */
     public static ByteBuffer valueOf(final byte[] bytes) {
         return ByteBuffer.wrap(bytes, bytes.length, 0);

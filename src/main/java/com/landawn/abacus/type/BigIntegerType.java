@@ -22,23 +22,39 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for BigInteger operations.
+ * This class provides serialization/deserialization and database operations
+ * for java.math.BigInteger instances. BigInteger values are stored as strings
+ * in the database to preserve precision.
+ */
 public final class BigIntegerType extends NumberType<BigInteger> {
 
+    /**
+     * The type name constant for BigInteger type identification.
+     */
     public static final String BIG_INTEGER = BigInteger.class.getSimpleName();
 
     BigIntegerType() {
         super(BIG_INTEGER);
     }
 
+    /**
+     * Returns the Class object representing the BigInteger class.
+     *
+     * @return the Class object for BigInteger.class
+     */
     @Override
     public Class<BigInteger> clazz() {
         return BigInteger.class;
     }
 
     /**
+     * Converts a BigInteger value to its string representation in base 10.
      *
-     * @param x
-     * @return
+     * @param x the BigInteger value to convert
+     * @return the string representation of the BigInteger in decimal format,
+     *         or null if input is null
      */
     @Override
     public String stringOf(final BigInteger x) {
@@ -46,9 +62,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
+     * Converts a string representation to a BigInteger value.
+     * Parses the string as a base 10 integer.
      *
-     * @param str
-     * @return
+     * @param str the string to parse as a BigInteger in decimal format
+     * @return a new BigInteger parsed from the string, or null if str is null or empty
+     * @throws NumberFormatException if the string cannot be parsed as a valid BigInteger
      */
     @Override
     public BigInteger valueOf(final String str) {
@@ -56,11 +75,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
+     * Retrieves a BigInteger value from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnIndex the column index (1-based) of the BigInteger value
+     * @return the BigInteger value at the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public BigInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -70,11 +90,13 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
+     * Retrieves a BigInteger value from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to retrieve the value from
+     * @param columnLabel the label for the column specified with the SQL AS clause,
+     *                    or the column name if no AS clause was specified
+     * @return the BigInteger value in the specified column, or null if the value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public BigInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -84,11 +106,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
+     * Sets a BigInteger parameter in a PreparedStatement at the specified position.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the BigInteger value to set, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws SQLException {
@@ -96,11 +119,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
+     * Sets a named BigInteger parameter in a CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the BigInteger value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws SQLException {

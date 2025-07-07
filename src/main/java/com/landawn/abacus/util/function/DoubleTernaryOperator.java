@@ -15,16 +15,27 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Throwables.TernaryOperator;
 
+/**
+ * Represents an operation upon three double-valued operands and producing a double-valued result.
+ * This is the primitive type specialization of {@link TernaryOperator} for double.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsDouble(double, double, double)}.
+ *
+ * @see TernaryOperator
+ * @see DoubleBinaryOperator
+ */
 @FunctionalInterface
 public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     double applyAsDouble(double a, double b, double c);

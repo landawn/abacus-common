@@ -26,15 +26,30 @@ public class UUIDType extends AbstractType<UUID> {
         super(UUID);
     }
 
+    /**
+     * Returns the Class object representing the UUID class.
+     * <p>
+     * This method returns {@code UUID.class}, which is the Class object for the
+     * {@link java.util.UUID} class that this UUIDType handles.
+     * </p>
+     *
+     * @return the Class object for UUID.class
+     */
     @Override
     public Class<UUID> clazz() {
         return UUID.class;
     }
 
     /**
+     * Converts a UUID instance to its string representation.
+     * <p>
+     * This method returns the standard string representation of the UUID in the format
+     * "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" where 'x' is a hexadecimal digit.
+     * If the input UUID is null, this method returns null.
+     * </p>
      *
-     * @param x
-     * @return
+     * @param x the UUID instance to convert to string
+     * @return the string representation of the UUID, or null if the input is null
      */
     @Override
     public String stringOf(final UUID x) {
@@ -42,9 +57,16 @@ public class UUIDType extends AbstractType<UUID> {
     }
 
     /**
+     * Converts a string to a UUID instance.
+     * <p>
+     * This method creates a UUID instance from the provided string using {@link UUID#fromString(String)}.
+     * The string must be in the standard UUID format "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+     * where 'x' is a hexadecimal digit. If the string is null or empty, this method returns null.
+     * </p>
      *
-     * @param str
-     * @return
+     * @param str the string to convert to a UUID
+     * @return a UUID instance created from the string, or null if the string is empty
+     * @throws IllegalArgumentException if the string is not in the correct UUID format
      */
     @Override
     public UUID valueOf(final String str) {

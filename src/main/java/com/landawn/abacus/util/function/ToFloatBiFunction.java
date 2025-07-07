@@ -14,14 +14,37 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts two arguments and produces a float-valued result.
+ * This is the float-producing primitive specialization for {@link java.util.function.BiFunction}.
+ *
+ * <p>Unlike the standard Java functional interfaces, this interface does not have a corresponding
+ * class in java.util.function package, as Java only provides int, long, and double specializations.
+ * This interface fills that gap for float primitive type operations.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsFloat(Object, Object)}.
+ *
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
+ */
 @FunctionalInterface
 public interface ToFloatBiFunction<T, U> {
 
     /**
+     * Applies this function to the given arguments and returns a float result.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * ToFloatBiFunction<Integer, Integer> divider = (a, b) -> (float) a / b;
+     * float result = divider.applyAsFloat(10, 3); // returns 3.3333333
+     * 
+     * ToFloatBiFunction<String, Float> multiplier = (str, factor) -> str.length() * factor;
+     * float weighted = multiplier.applyAsFloat("Hello", 1.5f); // returns 7.5
+     * }</pre>
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a primitive float
      */
     float applyAsFloat(T t, U u);
 }

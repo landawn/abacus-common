@@ -25,8 +25,16 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.sql.Timestamp} objects.
+ * This class provides methods to convert between Timestamp objects and their string representations,
+ * as well as methods to interact with JDBC result sets and statements.
+ */
 public class TimestampType extends AbstractDateType<Timestamp> {
 
+    /**
+     * The type name constant for Timestamp type.
+     */
     public static final String TIMESTAMP = Timestamp.class.getSimpleName();
 
     TimestampType() {
@@ -37,15 +45,29 @@ public class TimestampType extends AbstractDateType<Timestamp> {
         super(typeName);
     }
 
+    /**
+     * Returns the Java class that this type handler manages.
+     *
+     * @return {@code Timestamp.class}
+     */
     @Override
     public Class<Timestamp> clazz() {
         return Timestamp.class;
     }
 
     /**
+     * Converts the given object to a Timestamp.
+     * <p>
+     * Conversion rules:
+     * <ul>
+     *   <li>If obj is a Number, creates a Timestamp using the long value as milliseconds since epoch</li>
+     *   <li>If obj is a java.util.Date, creates a Timestamp from the date's time value</li>
+     *   <li>If obj is null, returns null</li>
+     *   <li>Otherwise, converts obj to string and parses it as a Timestamp</li>
+     * </ul>
      *
-     * @param obj
-     * @return
+     * @param obj the object to convert to Timestamp
+     * @return a Timestamp representation of the object, or null if obj is null
      */
     @Override
     public Timestamp valueOf(final Object obj) {
@@ -59,9 +81,17 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Parses the given string into a Timestamp.
+     * <p>
+     * Special handling:
+     * <ul>
+     *   <li>If str is null or empty, returns null</li>
+     *   <li>If str equals "SYS_TIME", returns the current timestamp</li>
+     *   <li>Otherwise, parses the string using the configured date format</li>
+     * </ul>
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a Timestamp parsed from the string, or null if str is empty
      */
     @Override
     public Timestamp valueOf(final String str) {
@@ -69,11 +99,16 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Parses a character array into a Timestamp.
+     * <p>
+     * This method first attempts to parse the character array as a long value representing
+     * milliseconds since epoch. If that fails, it converts the character array to a string
+     * and parses it using the string parsing logic.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf the character array containing the timestamp representation
+     * @param offset the starting position in the character array
+     * @param len the number of characters to parse
+     * @return a Timestamp parsed from the character array, or null if the array is null or length is 0
      */
     @MayReturnNull
     @Override
@@ -94,11 +129,12 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Retrieves a Timestamp value from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based)
+     * @return the Timestamp value at the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -106,11 +142,12 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Retrieves a Timestamp value from the specified column in the ResultSet.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the column label/name
+     * @return the Timestamp value at the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -118,11 +155,12 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Sets a Timestamp parameter in the PreparedStatement.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based)
+     * @param x the Timestamp value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
@@ -130,11 +168,12 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
+     * Sets a named Timestamp parameter in the CallableStatement.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter
+     * @param x the Timestamp value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {

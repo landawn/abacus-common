@@ -30,23 +30,45 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okio.Buffer;
 
+/**
+ * An OkHttp interceptor that logs HTTP requests as cURL commands.
+ * This interceptor captures the details of outgoing HTTP requests and formats them as 
+ * executable cURL commands, which can be useful for debugging and reproducing requests.
+ * 
+ * <p>The interceptor processes the request headers, method, URL, and body content to generate
+ * a complete cURL command that can be executed from the command line.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * OkHttpClient client = new OkHttpClient.Builder()
+ *     .addInterceptor(new CurlInterceptor(curl -> System.out.println(curl)))
+ *     .build();
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ */
 class CurlInterceptor implements Interceptor {
     static final char DEFAULT_QUOTE_CHAR = '\'';
     private final Consumer<? super String> logHandler;
     private final char quoteChar;
 
     /**
-     *
-     * @param logHandler
+     * Creates a new CurlInterceptor with the default single quote character for shell escaping.
+     * 
+     * @param logHandler A consumer function that handles the generated cURL command string.
+     *                   This is typically used to log or store the command.
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {
         this(DEFAULT_QUOTE_CHAR, logHandler);
     }
 
     /**
-     *
-     * @param quoteChar
-     * @param logHandler
+     * Creates a new CurlInterceptor with a specified quote character for shell escaping.
+     * 
+     * @param quoteChar The character to use for quoting values in the cURL command.
+     *                  Can be either single quote (') or double quote (") depending on shell requirements.
+     * @param logHandler A consumer function that handles the generated cURL command string.
+     *                   This is typically used to log or store the command.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) {
         this.logHandler = logHandler;
@@ -54,10 +76,12 @@ class CurlInterceptor implements Interceptor {
     }
 
     /**
-     *
-     * @param chain
-     * @return
-     * @throws IOException
+     * Intercepts the HTTP request and generates a cURL command representation.
+     * This method is called automatically by OkHttp for each request when this interceptor is registered.
+     * 
+     * @param chain The interceptor chain containing the request to be processed
+     * @return The response from the next interceptor in the chain
+     * @throws IOException If an I/O error occurs during request processing
      */
     @Override
     public Response intercept(final Chain chain) throws IOException {
@@ -67,6 +91,19 @@ class CurlInterceptor implements Interceptor {
         return chain.proceed(request);
     }
 
+    /**
+     * Builds a cURL command string from the given HTTP request.
+     * This method extracts all relevant information from the request including:
+     * - HTTP method (GET, POST, PUT, etc.)
+     * - URL
+     * - Headers
+     * - Request body (if present)
+     * 
+     * The generated cURL command can be directly executed in a terminal to reproduce the request.
+     * 
+     * @param request The HTTP request to convert to a cURL command
+     * @throws IOException If an error occurs while reading the request body
+     */
     private void buildCurl(final Request request) throws IOException {
         final Headers headers = request.headers();
         final String httpMethod = request.method();

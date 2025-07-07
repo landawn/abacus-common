@@ -14,6 +14,18 @@
 
 package com.landawn.abacus.util;
 
+/**
+ * A placeholder class for script execution functionality.
+ * 
+ * <p>This class is currently under development and does not contain any implemented functionality.
+ * It is intended to provide script execution capabilities in future releases.
+ * 
+ * <p>The class is marked as final to prevent extension and uses NOSONAR to suppress
+ * SonarQube warnings about the empty class definition.
+ * 
+ * @since 1.0
+ * @see N
+ */
 // TODO Design to be done.
 public final class Script { //NOSONAR
 

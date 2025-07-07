@@ -17,6 +17,31 @@ package com.landawn.abacus.logging;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * Logger implementation that delegates to Java's built-in logging framework (java.util.logging).
+ * 
+ * <p>This implementation maps the Logger interface methods to JDK logging levels as follows:</p>
+ * <ul>
+ *   <li>TRACE → FINEST</li>
+ *   <li>DEBUG → FINE</li>
+ *   <li>INFO → INFO</li>
+ *   <li>WARN → WARNING</li>
+ *   <li>ERROR → SEVERE</li>
+ * </ul>
+ * 
+ * <p>The logger properly handles caller location information by inspecting the stack trace
+ * to determine the actual calling class and method, excluding the logging framework classes.</p>
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * Logger logger = new JDKLogger("com.example.MyClass");
+ * logger.info("Application started");
+ * logger.error("Failed to connect", exception);
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 1.0
+ */
 class JDKLogger extends AbstractLogger {
 
     static final String SELF = JDKLogger.class.getName();
@@ -26,8 +51,11 @@ class JDKLogger extends AbstractLogger {
     private final java.util.logging.Logger loggerImpl;
 
     /**
+     * Constructs a JDKLogger with the specified name.
+     * 
+     * <p>The name is passed directly to the underlying java.util.logging.Logger.</p>
      *
-     * @param name
+     * @param name the name of the logger
      */
     public JDKLogger(final String name) {
         super(name);
@@ -35,9 +63,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is trace enabled.
+     * Checks if TRACE level logging is enabled.
+     * 
+     * <p>In JDK logging, TRACE is mapped to FINEST level.</p>
      *
-     * @return {@code true}, if is trace enabled
+     * @return {@code true} if TRACE level logging is enabled, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -45,8 +75,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at TRACE level.
+     * 
+     * <p>The message is logged at FINEST level in JDK logging.</p>
      *
-     * @param msg
+     * @param msg the message to log
      */
     @Override
     public void trace(final String msg) {
@@ -54,9 +87,12 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at TRACE level with an exception.
+     * 
+     * <p>The message and exception are logged at FINEST level in JDK logging.</p>
      *
-     * @param msg
-     * @param t
+     * @param msg the message to log
+     * @param t the exception to log
      */
     @Override
     public void trace(final String msg, final Throwable t) {
@@ -64,9 +100,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is debug enabled.
+     * Checks if DEBUG level logging is enabled.
+     * 
+     * <p>In JDK logging, DEBUG is mapped to FINE level.</p>
      *
-     * @return {@code true}, if is debug enabled
+     * @return {@code true} if DEBUG level logging is enabled, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -74,8 +112,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at DEBUG level.
+     * 
+     * <p>The message is logged at FINE level in JDK logging.</p>
      *
-     * @param msg
+     * @param msg the message to log
      */
     @Override
     public void debug(final String msg) {
@@ -83,9 +124,12 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at DEBUG level with an exception.
+     * 
+     * <p>The message and exception are logged at FINE level in JDK logging.</p>
      *
-     * @param msg
-     * @param t
+     * @param msg the message to log
+     * @param t the exception to log
      */
     @Override
     public void debug(final String msg, final Throwable t) {
@@ -93,9 +137,9 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is info enabled.
+     * Checks if INFO level logging is enabled.
      *
-     * @return {@code true}, if is info enabled
+     * @return {@code true} if INFO level logging is enabled, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -103,8 +147,9 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at INFO level.
      *
-     * @param msg
+     * @param msg the message to log
      */
     @Override
     public void info(final String msg) {
@@ -112,9 +157,10 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at INFO level with an exception.
      *
-     * @param msg
-     * @param t
+     * @param msg the message to log
+     * @param t the exception to log
      */
     @Override
     public void info(final String msg, final Throwable t) {
@@ -122,9 +168,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if warning leve log is enabled.
+     * Checks if WARN level logging is enabled.
+     * 
+     * <p>In JDK logging, WARN is mapped to WARNING level.</p>
      *
-     * @return {@code true}, if warning leve log is enabled.
+     * @return {@code true} if WARN level logging is enabled, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -132,8 +180,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at WARN level.
+     * 
+     * <p>The message is logged at WARNING level in JDK logging.</p>
      *
-     * @param msg
+     * @param msg the message to log
      */
     @Override
     public void warn(final String msg) {
@@ -141,9 +192,12 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at WARN level with an exception.
+     * 
+     * <p>The message and exception are logged at WARNING level in JDK logging.</p>
      *
-     * @param msg
-     * @param t
+     * @param msg the message to log
+     * @param t the exception to log
      */
     @Override
     public void warn(final String msg, final Throwable t) {
@@ -151,9 +205,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Checks if is error enabled.
+     * Checks if ERROR level logging is enabled.
+     * 
+     * <p>In JDK logging, ERROR is mapped to SEVERE level.</p>
      *
-     * @return {@code true}, if is error enabled
+     * @return {@code true} if ERROR level logging is enabled, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -161,8 +217,11 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at ERROR level.
+     * 
+     * <p>The message is logged at SEVERE level in JDK logging.</p>
      *
-     * @param msg
+     * @param msg the message to log
      */
     @Override
     public void error(final String msg) {
@@ -170,9 +229,12 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at ERROR level with an exception.
+     * 
+     * <p>The message and exception are logged at SEVERE level in JDK logging.</p>
      *
-     * @param msg
-     * @param t
+     * @param msg the message to log
+     * @param t the exception to log
      */
     @Override
     public void error(final String msg, final Throwable t) {
@@ -180,35 +242,45 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
+     * Logs a message at the specified level.
+     * 
+     * <p>This method creates a LogRecord and fills in caller information before
+     * delegating to the JDK logger.</p>
      *
-     * @param level
-     * @param msg
+     * @param level the logging level
+     * @param msg the message to log
      */
     private void log(final Level level, final String msg) {
         log(SELF, level, msg, null);
     }
 
     /**
+     * Logs a message at the specified level with an exception.
+     * 
+     * <p>This method creates a LogRecord and fills in caller information before
+     * delegating to the JDK logger.</p>
      *
-     * @param level
-     * @param msg
-     * @param t
+     * @param level the logging level
+     * @param msg the message to log
+     * @param t the exception to log
      */
     private void log(final Level level, final String msg, final Throwable t) {
         log(SELF, level, msg, t);
     }
 
     /**
-     * Log the message at the specified level with the specified throwable if any.
-     * This method creates a LogRecord and fills in caller date before calling
-     * this instance's JDK14 logger.
+     * Logs a message at the specified level with the specified throwable if any.
+     * 
+     * <p>This method creates a LogRecord and fills in caller data before calling
+     * this instance's JDK logger. The caller information is determined by walking
+     * the stack trace to find the first frame outside of the logging framework.</p>
+     * 
+     * <p>See bug report #13 for more details about why this approach is necessary.</p>
      *
-     * See bug report #13 for more details.
-     *
-     * @param callerFQCN
-     * @param level
-     * @param msg
-     * @param t
+     * @param callerFQCN the fully qualified class name of the caller
+     * @param level the logging level
+     * @param msg the message to log
+     * @param t the exception to log (may be null)
      */
     private void log(final String callerFQCN, final Level level, final String msg, final Throwable t) {
         // millis and thread are filled by the constructor
@@ -222,10 +294,21 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Fill in caller data if possible.
+     * Fills in caller data if possible by examining the stack trace.
+     * 
+     * <p>This method walks the stack trace to find the first frame that is not part
+     * of the logging framework (i.e., not JDKLogger or AbstractLogger), and uses that
+     * frame's class and method information as the caller data.</p>
+     * 
+     * <p>The algorithm:</p>
+     * <ol>
+     *   <li>Find the index of the logging framework class in the stack</li>
+     *   <li>Skip all logging framework frames</li>
+     *   <li>Use the first non-framework frame as the caller</li>
+     * </ol>
      *
-     * @param callerFQCN
-     * @param logRecord The record to update
+     * @param callerFQCN the fully qualified class name to search for in the stack
+     * @param logRecord the LogRecord to update with caller information
      */
     private static void fillCallerData(final String callerFQCN, final LogRecord logRecord) {
         final StackTraceElement[] steArray = new Throwable().getStackTrace();

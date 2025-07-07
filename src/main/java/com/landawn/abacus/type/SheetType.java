@@ -19,13 +19,13 @@ import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-// TODO: Auto-generated Javadoc
-
 /**
+ * Type handler for Sheet, which represents a two-dimensional table structure with row keys,
+ * column keys, and values. This class handles serialization and deserialization of Sheet instances.
  *
- * @param <R>
- * @param <C>
- * @param <E>
+ * @param <R> the row key type
+ * @param <C> the column key type
+ * @param <E> the element/value type
  */
 @SuppressWarnings("java:S2160")
 public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
@@ -36,10 +36,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     private final Type<?>[] parameterTypes;
 
     /**
+     * Constructs a SheetType with the specified type names for row keys, column keys, and values.
      *
-     * @param rowKeyTypeName
-     * @param columnKeyTypeName
-     * @param elementTypeName
+     * @param rowKeyTypeName the type name for row keys
+     * @param columnKeyTypeName the type name for column keys
+     * @param elementTypeName the type name for values/elements
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public SheetType(final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName) {
@@ -51,20 +52,32 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         parameterTypes = new Type[] { TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName) };
     }
 
+    /**
+     * Returns the declaring name of this type, which includes the Sheet class name
+     * and its parameterized types in angle brackets using declaring names.
+     *
+     * @return the declaring name in the format "Sheet<RowType, ColumnType, ElementType>"
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Sheet type.
+     *
+     * @return the Class object for Sheet.class
+     */
     @Override
     public Class<Sheet<R, C, E>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the Type instances for the parameter types of this Sheet.
+     * The array contains three elements: row key type, column key type, and element type.
      *
-     * @return
+     * @return an array with Type instances for row key, column key, and element types
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -72,9 +85,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates whether this type is a generic type.
+     * SheetType is always generic as it is parameterized with three type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true, indicating this is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -82,9 +96,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this type is serializable.
+     * SheetType does not support standard serialization.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -92,9 +107,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Gets the serialization type.
+     * Returns the serialization type for Sheet objects.
      *
-     * @return
+     * @return SerializationType.SHEET
      */
     @Override
     public SerializationType getSerializationType() {
@@ -102,9 +117,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
+     * Converts a Sheet to its JSON string representation.
+     * The sheet structure is serialized maintaining the row-column-value relationships.
      *
-     * @param x
-     * @return
+     * @param x the Sheet to convert to string
+     * @return the JSON string representation of the sheet, or null if the input is null
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -113,9 +130,12 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
+     * Parses a JSON string representation and returns the corresponding Sheet object.
+     * The string should represent a valid sheet structure with row keys, column keys, and values.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return the parsed Sheet object, or null if the input string is null or empty
+     * @throws IllegalArgumentException if the string cannot be parsed as a valid Sheet structure
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -124,14 +144,16 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Gets the type name.
+     * Generates the type name for a Sheet with the specified parameter types.
+     * This method supports both simple class names (for declaring names) and
+     * canonical class names (for full type names).
      *
-     * @param typeClass
-     * @param rowKeyTypeName
-     * @param columnKeyTypeName
-     * @param elementTypeName
-     * @param isDeclaringName
-     * @return
+     * @param typeClass the Sheet class
+     * @param rowKeyTypeName the type name for row keys
+     * @param columnKeyTypeName the type name for column keys
+     * @param elementTypeName the type name for values/elements
+     * @param isDeclaringName whether to use declaring names (true) or full names (false)
+     * @return the formatted type name string
      */
     protected static String getTypeName(final Class<?> typeClass, final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName,
             final boolean isDeclaringName) {

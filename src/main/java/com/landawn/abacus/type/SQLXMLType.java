@@ -28,15 +28,21 @@ public class SQLXMLType extends AbstractType<SQLXML> {
         super(SQL_XML);
     }
 
+    /**
+     * Returns the Class object representing the SQL XML type.
+     *
+     * @return the Class object for java.sql.SQLXML.class
+     */
     @Override
     public Class<SQLXML> clazz() {
         return SQLXML.class;
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether this type is serializable.
+     * SQL XML types are not serializable as they represent database-specific XML data.
      *
-     * @return {@code true}, if is serializable
+     * @return false, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -44,10 +50,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Converts a SQLXML object to its string representation.
+     * This operation is not supported for SQL XML types as they are database-specific
+     * and require special handling for XML data extraction.
      *
-     * @param x
-     * @return
-     * @throws UnsupportedOperationException
+     * @param x the SQLXML object to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as SQLXML cannot be directly converted to string
      */
     @Override
     public String stringOf(final SQLXML x) throws UnsupportedOperationException {
@@ -55,10 +64,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Creates a SQLXML object from a string representation.
+     * This operation is not supported for SQL XML types as they must be created
+     * by the database connection and cannot be instantiated from a string.
      *
-     * @param str
-     * @return
-     * @throws UnsupportedOperationException
+     * @param str the string to convert
+     * @return never returns normally
+     * @throws UnsupportedOperationException always thrown as SQLXML cannot be created from string
      */
     @Override
     public SQLXML valueOf(final String str) throws UnsupportedOperationException {
@@ -66,11 +78,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Retrieves a SQL XML value from the specified column in the ResultSet.
+     * A SQL XML represents XML data stored in the database.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the SQLXML value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public SQLXML get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -78,11 +92,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Retrieves a SQL XML value from the specified column in the ResultSet.
+     * A SQL XML represents XML data stored in the database.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the SQLXML value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public SQLXML get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -90,11 +106,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Sets a SQLXML parameter in a PreparedStatement.
+     * The SQLXML represents XML data to be stored in the database.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the SQLXML value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final SQLXML x) throws SQLException {
@@ -102,11 +120,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Sets a SQLXML parameter in a CallableStatement.
+     * The SQLXML represents XML data to be stored in the database.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the SQLXML value to set as the parameter
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final SQLXML x) throws SQLException {

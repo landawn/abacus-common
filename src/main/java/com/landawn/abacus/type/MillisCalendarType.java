@@ -22,8 +22,16 @@ import java.util.Calendar;
 
 import com.landawn.abacus.util.Dates;
 
+/**
+ * Type handler for {@link Calendar} objects that stores and retrieves them as milliseconds
+ * in the database. This implementation converts between Calendar instances and their
+ * millisecond representation (time since epoch).
+ */
 public class MillisCalendarType extends CalendarType {
 
+    /**
+     * The type name identifier for this Calendar type handler that uses milliseconds.
+     */
     public static final String MILLIS_CALENDAR = "MillisCalendar";
 
     MillisCalendarType() {
@@ -31,11 +39,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
+     * Retrieves a Calendar value from the specified column in the ResultSet.
+     * The method reads a long value representing milliseconds from the database
+     * and converts it to a Calendar instance.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the query results
+     * @param columnIndex the index of the column to retrieve (1-based)
+     * @return a Calendar object created from the milliseconds value, or null if the database value was 0
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -45,11 +56,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
+     * Retrieves a Calendar value from the specified column in the ResultSet.
+     * The method reads a long value representing milliseconds from the database
+     * and converts it to a Calendar instance.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the query results
+     * @param columnLabel the label of the column to retrieve
+     * @return a Calendar object created from the milliseconds value, or null if the database value was 0
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -59,11 +73,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
+     * Sets a Calendar value at the specified parameter index in the PreparedStatement.
+     * The method converts the Calendar to its millisecond representation and stores it
+     * as a long value in the database.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the index of the parameter to set (1-based)
+     * @param x the Calendar value to set, may be null
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
@@ -71,11 +88,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
+     * Sets a Calendar value for the specified parameter name in the CallableStatement.
+     * The method converts the Calendar to its millisecond representation and stores it
+     * as a long value in the database.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Calendar value to set, may be null
+     * @throws SQLException if a database access error occurs or the parameterName is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {

@@ -23,6 +23,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for Float array (Float[]) values.
+ * This class provides serialization, deserialization, and output operations for Float arrays.
+ * It handles proper formatting with brackets, separators, and null value representation.
+ */
 public final class FloatArrayType extends ObjectArrayType<Float> {
 
     FloatArrayType() {
@@ -30,9 +35,14 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
+     * Converts a Float array to its string representation.
+     * The output format is: [element1, element2, ...]
+     * - Null elements are represented as "null"
+     * - Empty arrays return "[]"
+     * - Uses efficient string joining for performance
      *
-     * @param x
-     * @return
+     * @param x the Float array to convert. Can be null.
+     * @return A string representation of the array, or null if input is null
      */
     @MayReturnNull
     @Override
@@ -71,16 +81,21 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
+     * Converts a string representation back to a Float array.
+     * Expects format: [element1, element2, ...]
+     * - "null" strings (4 characters) are converted to null elements
+     * - Empty string or "[]" returns empty array
+     * - Individual elements are parsed as Float values
      *
-     * @param str
-     * @return
+     * @param str the string to parse. Can be null.
+     * @return A Float array parsed from the string, or null if input is null
      */
     @MayReturnNull
     @Override
     public Float[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
         }
 
@@ -102,10 +117,14 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
+     * Appends a Float array to an Appendable output.
+     * The output format is: [element1, element2, ...]
+     * Null elements are represented as "null".
+     * Uses toString() for Float values to ensure proper formatting.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Float array to append. Can be null.
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void appendTo(final Appendable appendable, final Float[] x) throws IOException {
@@ -131,11 +150,15 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
+     * Writes a Float array to a CharacterWriter.
+     * The output format is: [element1, element2, ...]
+     * Null elements are represented as "null".
+     * Uses optimized numeric writing for Float values.
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Float array to write. Can be null.
+     * @param config the serialization configuration (currently unused for Float arrays)
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Float[] x, final JSONXMLSerializationConfig<?> config) throws IOException {

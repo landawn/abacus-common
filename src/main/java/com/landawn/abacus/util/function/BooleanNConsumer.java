@@ -14,19 +14,33 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts a variable number of {@code boolean}-valued arguments and returns no result.
+ * This is the N-arity specialization of {@link BooleanConsumer}.
+ * Unlike most other functional interfaces, {@code BooleanNConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(boolean...)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanNConsumer {
 
     /**
+     * Performs this operation on the given arguments.
+     * The behavior of this operation is generally expected to be side-effecting.
      *
-     * @param args
+     * @param args the input arguments as a variable-length array of {@code boolean} values.
+     *             May be empty but must not be {@code null}.
      */
     void accept(boolean... args);
 
     /**
+     * Returns a composed {@code BooleanNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code BooleanNConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default BooleanNConsumer andThen(final BooleanNConsumer after) {
         return args -> {

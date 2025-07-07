@@ -25,23 +25,40 @@ import java.util.TimeZone;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
+ * Utility class for parsing and formatting dates in ISO8601 format.
+ * 
+ * <p>This class provides fast and GC-friendly methods for handling ISO8601 date/time strings,
+ * making it much more efficient than using SimpleDateFormat, especially when processing
+ * large numbers of date objects.</p>
+ * 
+ * <p>Supported parse format: {@code [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh[:]mm]}</p>
+ * 
+ * <p>Note: This class is adapted from Jackson's date utilities.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Formatting
+ * Date date = new Date();
+ * String iso = ISO8601Util.format(date); // "2023-12-25T10:30:45Z"
+ * String isoWithMillis = ISO8601Util.format(date, true); // "2023-12-25T10:30:45.123Z"
+ * 
+ * // Parsing
+ * Date parsed = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
+ * Date parsed2 = ISO8601Util.parse("20231225T103045Z");
+ * }</pre>
  *
- * Copyright (c) 2017, Jackson Authors/Contributors.
- *
- * Utilities methods for manipulating dates in iso8601 format. This is much, much faster and GC friendly than using SimpleDateFormat so
- * highly suitable if you (un)serialize lots of date objects.
- *
- * Supported parse format: [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh[:]mm]]
- *
- * @see <a href="http://www.w3.org/TR/NOTE-datetime">this specification</a>
+ * @see <a href="http://www.w3.org/TR/NOTE-datetime">W3C NOTE-datetime specification</a>
  */
 final class ISO8601Util {
 
+    /**
+     * The default length of an ISO8601 formatted string with milliseconds and timezone.
+     */
     static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
     /**
-     * Timezone we use for 'Z' in ISO-8601 date/time values: since 2.7
-     * {@link Dates#UTC_TIME_ZONE}; with earlier versions up to 2.7 was {@link Dates#GMT_TIME_ZONE}.
+     * The timezone used for 'Z' suffix in ISO8601 date/time values (UTC timezone).
+     * Since version 2.7, this is {@link Dates#UTC_TIME_ZONE}.
      */
     static final TimeZone TIMEZONE_Z = Dates.UTC_TIME_ZONE;
 
@@ -54,33 +71,51 @@ final class ISO8601Util {
     /* Formatting
     
     /**
-     * Format a date into <i>yyyy-MM-ddThh:mm:ssZ</i> (default timezone, no millisecond precision).
+     * Formats a date into ISO8601 format using default settings.
+     * 
+     * <p>The output format is {@code yyyy-MM-ddThh:mm:ssZ} (no millisecond precision, UTC timezone).</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Date date = new Date();
+     * String formatted = ISO8601Util.format(date); // "2023-12-25T10:30:45Z"
+     * }</pre>
      *
      * @param date the date to format
-     * @return
+     * @return the formatted date string in ISO8601 format
      */
     public static String format(final Date date) {
         return format(date, false, TIMEZONE_Z);
     }
 
     /**
-     * Format a date into <i>yyyy-MM-ddThh:mm:ss[.sss]Z</i> (GMT timezone)
+     * Formats a date into ISO8601 format with optional millisecond precision.
+     * 
+     * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss]Z} (UTC timezone).</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Date date = new Date();
+     * String withMillis = ISO8601Util.format(date, true); // "2023-12-25T10:30:45.123Z"
+     * String noMillis = ISO8601Util.format(date, false); // "2023-12-25T10:30:45Z"
+     * }</pre>
      *
      * @param date the date to format
-     * @param millis {@code true} to include millis precision otherwise false
-     * @return
+     * @param millis {@code true} to include milliseconds, {@code false} otherwise
+     * @return the formatted date string in ISO8601 format
      */
     public static String format(final Date date, final boolean millis) {
         return format(date, millis, TIMEZONE_Z);
     }
 
     /**
-     *
-     * @param date
-     * @param millis
-     * @param tz
-     * @return
-     * @deprecated
+     * Formats a date into ISO8601 format with specified timezone.
+     * 
+     * @param date the date to format
+     * @param millis {@code true} to include milliseconds
+     * @param tz the timezone to use
+     * @return the formatted date string
+     * @deprecated Use {@link #format(Date, boolean, TimeZone, Locale)} instead
      */
     @Deprecated // since 2.9
     public static String format(final Date date, final boolean millis, final TimeZone tz) {
@@ -88,13 +123,23 @@ final class ISO8601Util {
     }
 
     /**
-     * Format date into yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]
+     * Formats a date into ISO8601 format with full control over formatting options.
+     * 
+     * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]}</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Date date = new Date();
+     * TimeZone tz = TimeZone.getTimeZone("America/New_York");
+     * String formatted = ISO8601Util.format(date, true, tz, Locale.US);
+     * // "2023-12-25T10:30:45.123-05:00"
+     * }</pre>
      *
      * @param date the date to format
-     * @param millis {@code true} to include millis precision otherwise false
-     * @param tz timezone to use for the formatting (UTC will produce 'Z')
-     * @param loc
-     * @return
+     * @param millis {@code true} to include milliseconds, {@code false} otherwise
+     * @param tz timezone to use for formatting (UTC produces 'Z', others produce offset)
+     * @param loc locale to use for formatting
+     * @return the formatted date string in ISO8601 format
      */
     public static String format(final Date date, final boolean millis, final TimeZone tz, final Locale loc) {
         final Calendar calendar = new GregorianCalendar(tz, loc);
@@ -124,21 +169,59 @@ final class ISO8601Util {
     /* Parsing
     
     /**
+     * Parses a date from an ISO8601 formatted string.
+     * 
+     * <p>Supported formats include:</p>
+     * <ul>
+     * <li>{@code yyyy-MM-dd}</li>
+     * <li>{@code yyyyMMdd}</li>
+     * <li>{@code yyyy-MM-ddThh:mm:ss}</li>
+     * <li>{@code yyyy-MM-ddThh:mm:ss.sss}</li>
+     * <li>{@code yyyy-MM-ddThh:mm:ssZ}</li>
+     * <li>{@code yyyy-MM-ddThh:mm:ss+hh:mm}</li>
+     * <li>{@code yyyy-MM-ddThh:mm:ss-hh:mm}</li>
+     * </ul>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * Date date1 = ISO8601Util.parse("2023-12-25");
+     * Date date2 = ISO8601Util.parse("2023-12-25T10:30:45Z");
+     * Date date3 = ISO8601Util.parse("2023-12-25T10:30:45.123+05:30");
+     * Date date4 = ISO8601Util.parse("20231225T103045Z");
+     * }</pre>
      *
-     * @param date
-     * @return
+     * @param date the ISO8601 string to parse
+     * @return the parsed Date object
+     * @throws IllegalArgumentException if the date string cannot be parsed
      */
     public static Date parse(final String date) {
         return parse(date, new ParsePosition(0));
     }
 
     /**
-     * Parse a date from ISO-8601 formatted string. It expects a format
-     * [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh:mm]]
+     * Parses a date from an ISO8601 formatted string with parse position tracking.
+     * 
+     * <p>This method allows partial parsing of a string by tracking the parse position.
+     * The position will be updated to indicate where parsing stopped.</p>
+     * 
+     * <p>Supported formats include:</p>
+     * <ul>
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]}</li>
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[hh:mm[:ss[.sss]]|hhmm[ss[.sss]]]}
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[hh:mm[:ss[.sss]]|hhmm[ss[.sss]]][Z|[+-]hh:mm]}</li>
+     * </ul>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * ParsePosition pos = new ParsePosition(0);
+     * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);
+     * int endIndex = pos.getIndex(); // Position after the parsed date
+     * }</pre>
      *
-     * @param date ISO string to parse in the appropriate format.
-     * @param pos The position to start parsing from, updated to where parsing stopped.
-     * @return
+     * @param date the ISO8601 string to parse
+     * @param pos the ParsePosition to start parsing from and update with the end position
+     * @return the parsed Date object
+     * @throws IllegalArgumentException if the date string cannot be parsed or is malformed
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static Date parse(final String date, final ParsePosition pos) {
@@ -293,25 +376,25 @@ final class ISO8601Util {
     }
 
     /**
-     * Check if the expected character exists at the given offset in the value.
+     * Checks if the expected character exists at the given offset in the string.
      *
-     * @param value the string to check at the specified offset
-     * @param offset the offset to look for the expected character
+     * @param value the string to check
+     * @param offset the position to check
      * @param expected the expected character
-     * @return {@code true} if the expected character exists at the given offset
+     * @return {@code true} if the character at offset matches expected
      */
     private static boolean checkOffset(final String value, final int offset, final char expected) {
         return (offset < value.length()) && (value.charAt(offset) == expected);
     }
 
     /**
-     * Parse an integer located between 2 given offsets in a string.
+     * Parses an integer from a substring of the given string.
      *
-     * @param value the string to parse
-     * @param beginIndex the start index for the integer in the string
-     * @param endIndex the end index for the integer in the string
-     * @return
-     * @throws NumberFormatException if the value is not a number
+     * @param value the string containing the integer
+     * @param beginIndex the starting index (inclusive)
+     * @param endIndex the ending index (exclusive)
+     * @return the parsed integer value
+     * @throws NumberFormatException if the substring is not a valid integer
      */
     private static int parseInt(final String value, final int beginIndex, final int endIndex) throws NumberFormatException {
         if (beginIndex < 0 || endIndex > value.length() || beginIndex > endIndex) {
@@ -340,11 +423,11 @@ final class ISO8601Util {
     }
 
     /**
-     * Returns the index of the first character in the string that is not a digit, starting at offset.
+     * Finds the index of the first non-digit character in the string starting from the given offset.
      *
-     * @param string
-     * @param offset
-     * @return
+     * @param string the string to search
+     * @param offset the starting position
+     * @return the index of the first non-digit character, or the string length if all remaining characters are digits
      */
     private static int indexOfNonDigit(final String string, final int offset) {
         for (int i = offset; i < string.length(); i++) {

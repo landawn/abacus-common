@@ -32,8 +32,11 @@ import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Tuple1} objects. This class provides serialization and
+ * deserialization support for Tuple1 instances, which contain a single value.
+ * The serialization format is a JSON array: [value].
  *
- * @param <T1>
+ * @param <T1> the type of the single element in the tuple
  */
 @SuppressWarnings("java:S2160")
 public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
@@ -56,20 +59,31 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
         parameterTypes = new Type[] { type1 };
     }
 
+    /**
+     * Returns the declaring name of this type, which uses simple class names.
+     *
+     * @return the declaring name of this Tuple1 type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Tuple1 type.
+     *
+     * @return the Class object for Tuple1
+     */
     @Override
     public Class<Tuple1<T1>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the parameter types of this generic type.
+     * For Tuple1, this is an array containing a single element type.
      *
-     * @return
+     * @return an array containing the element type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -77,9 +91,9 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true, as Tuple1 is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -87,9 +101,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
+     * Converts a Tuple1 object to its string representation.
+     * The format is a JSON array: [value].
      *
-     * @param x
-     * @return
+     * @param x the Tuple1 object to convert
+     * @return the JSON string representation, or null if x is null
      */
     @Override
     public String stringOf(final Tuple1<T1> x) {
@@ -97,9 +113,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
+     * Creates a Tuple1 object from its string representation.
+     * Expects a JSON array format: [value].
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a Tuple1 object containing the parsed value, or null if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -117,10 +135,12 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
+     * Appends the string representation of a Tuple1 object to the given Appendable.
+     * Writes the format: [value].
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Tuple1 object to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Tuple1<T1> x) throws IOException {
@@ -159,11 +179,13 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
+     * Writes the character representation of a Tuple1 object to the given CharacterWriter.
+     * This method is used for JSON/XML serialization. Writes the format: [value].
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Tuple1 object to write
+     * @param config the serialization configuration for formatting options
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Tuple1<T1> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -184,11 +206,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param t1TypeName
-     * @param isDeclaringName
-     * @return
+     * Generates the type name for a Tuple1 type with the specified element type.
+     * 
+     * @param t1TypeName the name of the element type
+     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @return the generated type name for Tuple1 with the specified element type
      */
     protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

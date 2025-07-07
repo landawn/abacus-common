@@ -18,18 +18,28 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation upon an {@code int}-valued operand and an object-valued operand which produces
+ * an {@code int}-valued result. This is a primitive specialization of {@link java.util.function.BiFunction}
+ * for the case where the first argument and the result are of {@code int} type.
  *
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(int, Object)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @param <T> the type of the object argument to the operator
+ * @see java.util.function.BiFunction
+ * @see IntBinaryOperator
  */
 @Beta
 @FunctionalInterface
 public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeException> { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
      *
-     * @param operand
-     * @param obj
-     * @return
+     * @param operand the {@code int} operand
+     * @param obj the object operand
+     * @return the operator result
      */
     @Override
     int applyAsInt(int operand, T obj);

@@ -16,22 +16,41 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts three char-valued arguments and returns no result.
+ * This is the three-arity specialization of {@link CharConsumer}.
+ * Unlike most other functional interfaces, {@code CharTriConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(char, char, char)}.
+ * 
+ * @see java.util.function.Consumer
+ * @see CharConsumer
+ * @see CharBiConsumer
+ */
 @FunctionalInterface
 public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given char arguments.
+     * This method is expected to operate via side-effects.
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param a the first char input argument
+     * @param b the second char input argument
+     * @param c the third char input argument
      */
     @Override
     void accept(char a, char b, char c);
 
     /**
+     * Returns a composed {@code CharTriConsumer} that performs, in sequence, this operation
+     * followed by the {@code after} operation. If performing either operation throws an exception,
+     * it is relayed to the caller of the composed operation.
+     * 
+     * <p>The three char arguments are passed to both consumers in the same order.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation. Must not be null.
+     * @return a composed {@code CharTriConsumer} that performs in sequence this operation
+     *         followed by the {@code after} operation
      */
     default CharTriConsumer andThen(final CharTriConsumer after) {
         return (a, b, c) -> {

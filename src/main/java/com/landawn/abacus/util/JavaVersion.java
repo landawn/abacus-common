@@ -17,116 +17,281 @@
 package com.landawn.abacus.util;
 
 /**
+ * An enumeration representing all versions of the Java specification.
+ * <p>
+ * This enum provides a comprehensive list of Java versions from Java 0.9 (Android) through Java 25,
+ * plus a special JAVA_RECENT constant that represents the most recent Java version detected at runtime.
+ * The enum mirrors values available from the {@code java.specification.version} system property.
+ * </p>
+ * 
+ * <p>
+ * Each enum constant contains both a float value for numerical comparisons and a string name
+ * that matches the official version designation. The class provides utility methods for version
+ * comparison and parsing version strings.
+ * </p>
+ * 
+ * <p>
+ * <b>Usage Examples:</b>
+ * </p>
+ * <pre>{@code
+ * // Check if current Java version is at least Java 8
+ * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
+ * if (current.atLeast(JavaVersion.JAVA_1_8)) {
+ *     // Use Java 8 features
+ * }
+ * 
+ * // Parse a version string
+ * JavaVersion version = JavaVersion.of("11");
+ * System.out.println(version); // Prints: 11
+ * }</pre>
+ * 
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, under the Apache License 2.0.
  * </p>
  *
- * <p>An enum representing all the versions of the Java specification.
- * This is intended to mirror available values from the
- * <em>java.specification.version</em> System property. </p>
- *
+ * @since 1.0
  */
 public enum JavaVersion {
 
     /**
-     * The Java version reported by Android. This is not an official Java version number.
+     * The Java version reported by Android (0.9).
+     * <p>
+     * This is not an official Java version number but is included for Android compatibility.
+     * Maps to float value 1.5 for comparison purposes.
+     * </p>
      */
     JAVA_0_9(1.5f, "0.9"),
 
     /**
      * Java 1.1.
+     * <p>
+     * Released in February 1997, introduced inner classes, JavaBeans, JDBC, and RMI.
+     * </p>
      */
     JAVA_1_1(1.1f, "1.1"),
 
     /**
      * Java 1.2.
+     * <p>
+     * Released in December 1998, introduced the Collections framework, Swing GUI, and strictfp.
+     * </p>
      */
     JAVA_1_2(1.2f, "1.2"),
 
     /**
      * Java 1.3.
+     * <p>
+     * Released in May 2000, introduced HotSpot JVM, JNDI, and Java Sound.
+     * </p>
      */
     JAVA_1_3(1.3f, "1.3"),
 
     /**
      * Java 1.4.
+     * <p>
+     * Released in February 2002, introduced assert keyword, regular expressions, and NIO.
+     * </p>
      */
     JAVA_1_4(1.4f, "1.4"),
 
     /**
-     * Java 1.5.
+     * Java 1.5 (also known as Java 5).
+     * <p>
+     * Released in September 2004, introduced generics, annotations, autoboxing, and enums.
+     * </p>
      */
     JAVA_1_5(1.5f, "1.5"),
 
     /**
-     * Java 1.6.
+     * Java 1.6 (also known as Java 6).
+     * <p>
+     * Released in December 2006, introduced scripting support, web services, and JDBC 4.0.
+     * </p>
      */
     JAVA_1_6(1.6f, "1.6"),
 
     /**
-     * Java 1.7.
+     * Java 1.7 (also known as Java 7).
+     * <p>
+     * Released in July 2011, introduced try-with-resources, diamond operator, and switch on strings.
+     * </p>
      */
     JAVA_1_7(1.7f, "1.7"),
 
     /**
-     * Java 1.8.
+     * Java 1.8 (also known as Java 8).
+     * <p>
+     * Released in March 2014, introduced lambda expressions, streams API, and default methods.
+     * </p>
      */
     JAVA_1_8(1.8f, "1.8"),
 
+    /**
+     * Java 9.
+     * <p>
+     * Released in September 2017, introduced the module system (Project Jigsaw) and JShell.
+     * </p>
+     */
     JAVA_9(9.0f, "9"),
 
+    /**
+     * Java 10.
+     * <p>
+     * Released in March 2018, introduced local variable type inference (var keyword).
+     * </p>
+     */
     JAVA_10(10.0f, "10"),
 
+    /**
+     * Java 11 (LTS - Long Term Support).
+     * <p>
+     * Released in September 2018, introduced HTTP client API and single-file source execution.
+     * </p>
+     */
     JAVA_11(11.0f, "11"),
 
+    /**
+     * Java 12.
+     * <p>
+     * Released in March 2019, introduced switch expressions (preview) and compact number formatting.
+     * </p>
+     */
     JAVA_12(12.0f, "12"),
 
+    /**
+     * Java 13.
+     * <p>
+     * Released in September 2019, introduced text blocks (preview) and dynamic CDS archives.
+     * </p>
+     */
     JAVA_13(13.0f, "13"),
 
+    /**
+     * Java 14.
+     * <p>
+     * Released in March 2020, introduced records (preview) and pattern matching for instanceof (preview).
+     * </p>
+     */
     JAVA_14(14.0f, "14"),
 
+    /**
+     * Java 15.
+     * <p>
+     * Released in September 2020, introduced sealed classes (preview) and hidden classes.
+     * </p>
+     */
     JAVA_15(15.0f, "15"),
 
+    /**
+     * Java 16.
+     * <p>
+     * Released in March 2021, made records a standard feature and introduced Unix domain socket channels.
+     * </p>
+     */
     JAVA_16(16.0f, "16"),
 
+    /**
+     * Java 17 (LTS - Long Term Support).
+     * <p>
+     * Released in September 2021, made sealed classes standard and introduced pattern matching for switch (preview).
+     * </p>
+     */
     JAVA_17(17.0f, "17"),
 
+    /**
+     * Java 18.
+     * <p>
+     * Released in March 2022, introduced UTF-8 by default and simple web server.
+     * </p>
+     */
     JAVA_18(18.0f, "18"),
 
     /**
      * Java 19.
+     * <p>
+     * Released in September 2022, introduced virtual threads (preview) and structured concurrency (preview).
+     * </p>
      */
     JAVA_19(19.0f, "19"),
 
     /**
      * Java 20.
+     * <p>
+     * Released in March 2023, continued evolution of virtual threads and pattern matching.
+     * </p>
      */
     JAVA_20(20.0f, "20"),
 
     /**
-     * Java 21.
+     * Java 21 (LTS - Long Term Support).
+     * <p>
+     * Released in September 2023, made virtual threads a standard feature and introduced sequenced collections.
+     * </p>
      */
     JAVA_21(21.0f, "21"),
 
     /**
-     * The most recent java version. Mainly introduced to avoid breaking when a new version of Java is used.
+     * Java 22.
+     * <p>
+     * Released in March 2024, introduced unnamed variables and patterns, statements before super(),
+     * and string templates (preview).
+     * </p>
+     */
+    JAVA_22(22.0f, "22"),
+
+    /**
+     * Java 23.
+     * <p>
+     * Released in September 2024, introduced primitive types in patterns, switch expressions,
+     * and instanceof (preview), and module import declarations (preview).
+     * </p>
+     */
+    JAVA_23(23.0f, "23"),
+
+    /**
+     * Java 24.
+     * <p>
+     * Expected release in March 2025. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_24(24.0f, "24"),
+
+    /**
+     * Java 25.
+     * <p>
+     * Expected release in September 2025. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_25(25.0f, "25"),
+
+    /**
+     * The most recent Java version detected at runtime.
+     * <p>
+     * This constant dynamically represents the highest Java version available on the system,
+     * as determined by the {@code java.specification.version} system property. It's primarily
+     * used to avoid breaking when newer versions of Java are released after this enum was defined.
+     * </p>
+     * <p>
+     * If the system property cannot be read, defaults to version 99.0.
+     * </p>
      */
     JAVA_RECENT(maxVersion(), Float.toString(maxVersion()));
 
     /**
-     * The float value.
+     * The float value used for numerical version comparisons.
      */
     private final float value;
 
     /**
-     * The standard name.
+     * The standard version name as a string (e.g., "1.8", "11", "17").
      */
     private final String name;
 
     /**
+     * Constructs a JavaVersion enum constant with the specified float value and name.
      *
-     * @param value the float value
-     * @param name the standard name, not null
+     * @param value the float value for numerical comparisons
+     * @param name the standard version name, not null
      */
     JavaVersion(final float value, final String name) {
         this.value = value;
@@ -136,13 +301,23 @@ public enum JavaVersion {
     //-----------------------------------------------------------------------
 
     /**
-     * <p>Whether this version of Java is at least the version of Java passed in.</p>
+     * Checks whether this Java version is at least as recent as the specified version.
+     * <p>
+     * This method performs a numerical comparison of version values to determine if this
+     * version is equal to or greater than the required version.
+     * </p>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * JavaVersion current = JavaVersion.JAVA_11;
+     * if (current.atLeast(JavaVersion.JAVA_1_8)) {
+     *     System.out.println("Java 8+ features available");
+     * }
+     * }</pre>
      *
-     * <p>For example:<br>
-     *  {@code myVersion.atLeast(JavaVersion.JAVA_1_4)}<p>
-     *
-     * @param requiredVersion the version to check against, not null
-     * @return {@code true} if this version is equal to or greater than the specified version
+     * @param requiredVersion the minimum version to check against, not null
+     * @return {@code true} if this version is equal to or greater than the specified version,
+     *         {@code false} otherwise
      */
     public boolean atLeast(final JavaVersion requiredVersion) {
         return value >= requiredVersion.value;
@@ -151,13 +326,23 @@ public enum JavaVersion {
     //-----------------------------------------------------------------------
 
     /**
-     * <p>Whether this version of Java is at most the version of Java passed in.</p>
+     * Checks whether this Java version is at most as recent as the specified version.
+     * <p>
+     * This method performs a numerical comparison of version values to determine if this
+     * version is equal to or less than the specified version.
+     * </p>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * JavaVersion current = JavaVersion.JAVA_1_7;
+     * if (current.atMost(JavaVersion.JAVA_1_8)) {
+     *     System.out.println("Not using Java 9+ features");
+     * }
+     * }</pre>
      *
-     * <p>For example:<br>
-     *  {@code myVersion.atMost(JavaVersion.JAVA_1_4)}<p>
-     *
-     * @param requiredVersion the version to check against, not null
-     * @return {@code true} if this version is equal to or greater than the specified version
+     * @param requiredVersion the maximum version to check against, not null
+     * @return {@code true} if this version is equal to or less than the specified version,
+     *         {@code false} otherwise
      */
     public boolean atMost(final JavaVersion requiredVersion) {
         return value <= requiredVersion.value;
@@ -227,6 +412,22 @@ public enum JavaVersion {
                 return JAVA_16;
             case "17":
                 return JAVA_17;
+            case "18":
+                return JAVA_18;
+            case "19":
+                return JAVA_19;
+            case "20":
+                return JAVA_20;
+            case "21":
+                return JAVA_21;
+            case "22":
+                return JAVA_22;
+            case "23":
+                return JAVA_23;
+            case "24":
+                return JAVA_24;
+            case "25":
+                return JAVA_25;
             default:
                 final float v = toFloatVersion(versionStr);
                 if ((v - 1.) < 1.) { // then we need to check decimals > .9
@@ -243,9 +444,30 @@ public enum JavaVersion {
     }
 
     /**
+     * Parses a version string and returns the corresponding JavaVersion enum constant.
+     * <p>
+     * This method intelligently handles various version string formats:
+     * </p>
+     * <ul>
+     *   <li>Old format with "1." prefix: "1.5", "1.8" → JAVA_1_5, JAVA_1_8</li>
+     *   <li>Android format: "0.9" → JAVA_0_9</li>
+     *   <li>Modern format: "9", "11", "17" → JAVA_9, JAVA_11, JAVA_17</li>
+     *   <li>With minor versions: "11.0.2" → JAVA_11 (ignores minor/patch versions)</li>
+     * </ul>
+     * 
+     * <p><b>Examples:</b></p>
+     * <pre>{@code
+     * JavaVersion v1 = JavaVersion.of("1.8");     // Returns JAVA_1_8
+     * JavaVersion v2 = JavaVersion.of("11");      // Returns JAVA_11
+     * JavaVersion v3 = JavaVersion.of("17.0.1");  // Returns JAVA_17
+     * 
+     * // Get current Java version
+     * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
+     * }</pre>
      *
-     * @param versionStr
-     * @return
+     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
+     * @return the corresponding JavaVersion enum constant
+     * @throws IllegalArgumentException if the version string cannot be parsed or doesn't match any known Java version
      */
     public static JavaVersion of(final String versionStr) {
         JavaVersion result = null;
@@ -268,11 +490,24 @@ public enum JavaVersion {
     //-----------------------------------------------------------------------
 
     /**
-     * <p>The string value is overridden to return the standard name.</p>
+     * Returns the standard name of this Java version.
+     * <p>
+     * The returned string matches the official version designation:
+     * </p>
+     * <ul>
+     *   <li>For Java 8 and earlier: "1.1", "1.2", ..., "1.8"</li>
+     *   <li>For Java 9 and later: "9", "10", "11", ..., "25"</li>
+     *   <li>For Android: "0.9"</li>
+     *   <li>For JAVA_RECENT: the detected version number as a string</li>
+     * </ul>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * System.out.println(JavaVersion.JAVA_1_8);  // Prints: 1.8
+     * System.out.println(JavaVersion.JAVA_11);   // Prints: 11
+     * }</pre>
      *
-     * <p>For example, {@code "1.5"}.</p>
-     *
-     * @return the name, not null
+     * @return the standard version name, never null
      */
     @Override
     public String toString() {

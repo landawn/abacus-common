@@ -34,17 +34,45 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * The AsyncExecutor class is used to execute tasks asynchronously.
- * It provides methods to execute Runnable and Callable tasks, with options for retrying tasks if they fail.
- * <br />
- * By default, the core pool size is the maximum of 8 and the number of available processors,
- * the maximum pool size is the maximum of 16 and twice the number of available processors.
+ * The AsyncExecutor class provides a convenient way to execute tasks asynchronously
+ * using a configurable thread pool. It supports both Runnable and Callable tasks,
+ * with additional features like retry mechanisms and batch execution.
+ * 
+ * <p>By default, the core pool size is the maximum of 8 and the number of available processors,
+ * and the maximum pool size is the maximum of 16 and twice the number of available processors.
+ * The default keep-alive time is 180 seconds.</p>
+ * 
+ * <p>The executor automatically registers a shutdown hook to ensure proper cleanup
+ * when the JVM exits.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * AsyncExecutor executor = new AsyncExecutor();
+ * 
+ * // Execute a simple task
+ * ContinuableFuture<Void> future = executor.execute(() -> {
+ *     System.out.println("Task executed asynchronously");
+ * });
+ * 
+ * // Execute a task that returns a result
+ * ContinuableFuture<String> resultFuture = executor.execute(() -> {
+ *     return "Task completed";
+ * });
+ * 
+ * // Execute with retry
+ * ContinuableFuture<String> retryFuture = executor.execute(
+ *     () -> performNetworkCall(),
+ *     3, // retry 3 times
+ *     1000, // wait 1 second between retries
+ *     (result, exception) -> exception != null // retry on any exception
+ * );
+ * }</pre>
  *
  * @see ContinuableFuture
  * @see Futures
  * @see Fn
  * @see Fn.Fnn
- *
+ * @since 1.0
  */
 public class AsyncExecutor {
 
@@ -65,22 +93,33 @@ public class AsyncExecutor {
     private volatile Executor executor; //NOSONAR
 
     /**
-     * Constructs an instance of AsyncExecutor with default core pool size, maximum pool size, keep live time, and time unit
-     * It initializes the AsyncExecutor with the default core pool size, maximum pool size, keep live time, and time unit.
-     * The default core pool size is the maximum of 8 and the number of available processors.
-     * The default maximum pool size is the maximum of 16 and twice the number of available processors.
-     * The default keep live time is 180 seconds.
+     * Constructs an AsyncExecutor with default configuration.
+     * 
+     * <p>Default values:</p>
+     * <ul>
+     *   <li>Core pool size: max(8, number of CPU cores)</li>
+     *   <li>Maximum pool size: max(16, 2 * number of CPU cores)</li>
+     *   <li>Keep-alive time: 180 seconds</li>
+     * </ul>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AsyncExecutor executor = new AsyncExecutor();
+     * executor.execute(() -> System.out.println("Hello from async task"));
+     * }</pre>
      */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
     /**
-     * Constructs an instance of AsyncExecutor with the specified core pool size, maximum pool size, keep live time, and time unit.
-     * The core pool size is the number of threads to keep in the pool, even if they are idle.
-     * The maximum pool size is the maximum number of threads to allow in the pool.
-     * The keep live time is when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
-     * The time unit is the time unit for the keepAliveTime argument.
+     * Constructs an AsyncExecutor with specified thread pool configuration.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Create executor with 10 core threads, 20 max threads, 60 second keep-alive
+     * AsyncExecutor executor = new AsyncExecutor(10, 20, 60L, TimeUnit.SECONDS);
+     * }</pre>
      *
      * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle
      * @param maxThreadPoolSize the maximum number of threads to allow in the pool
@@ -102,10 +141,16 @@ public class AsyncExecutor {
     }
 
     /**
-     * Constructs an instance of AsyncExecutor with the specified Executor.
-     * The Executor is used to execute tasks asynchronously.
-     * The core pool size, maximum pool size, keep live time, and time unit of the AsyncExecutor are derived from the provided Executor.
-     * If the Executor is not an instance of ThreadPoolExecutor, default values are used.
+     * Constructs an AsyncExecutor that wraps an existing Executor.
+     * 
+     * <p>If the provided executor is a ThreadPoolExecutor, its configuration
+     * parameters are extracted and used. Otherwise, default values are used.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ExecutorService customExecutor = Executors.newFixedThreadPool(5);
+     * AsyncExecutor asyncExecutor = new AsyncExecutor(customExecutor);
+     * }</pre>
      *
      * @param executor the Executor to be used for executing tasks
      */
@@ -130,6 +175,16 @@ public class AsyncExecutor {
 
     /**
      * Executes the provided command asynchronously.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<Void> future = executor.execute(() -> {
+     *     // Perform some asynchronous work
+     *     processData();
+     * });
+     * 
+     * future.thenRun(() -> System.out.println("Task completed"));
+     * }</pre>
      *
      * @param command the Runnable to be executed asynchronously
      * @return a ContinuableFuture representing the result of the computation
@@ -143,9 +198,20 @@ public class AsyncExecutor {
 
     /**
      * Executes the provided command asynchronously and performs a final action after the command execution.
+     * 
+     * <p>The final action is guaranteed to execute regardless of whether the command
+     * completes successfully or throws an exception.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<Void> future = executor.execute(
+     *     () -> processData(),
+     *     () -> releaseResources() // Always executed
+     * );
+     * }</pre>
      *
      * @param command the Runnable to be executed asynchronously
-     * @param actionInFinal the Runnable to be executed after the command
+     * @param actionInFinal the Runnable to be executed after the command (in a finally block)
      * @return a ContinuableFuture representing the result of the computation
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable actionInFinal) {
@@ -182,9 +248,25 @@ public class AsyncExecutor {
     //    }
 
     /**
-     * Executes a list of provided commands asynchronously.
+     * Executes a list of commands asynchronously.
+     * 
+     * <p>Each command is executed independently and returns its own ContinuableFuture.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Throwables.Runnable<Exception>> tasks = Arrays.asList(
+     *     () -> processFile1(),
+     *     () -> processFile2(),
+     *     () -> processFile3()
+     * );
+     * 
+     * List<ContinuableFuture<Void>> futures = executor.execute(tasks);
+     * 
+     * // Wait for all tasks to complete
+     * Futures.allOf(futures).get();
+     * }</pre>
      *
-     * @param commands the list of Runnable to be executed asynchronously
+     * @param commands the list of Runnable commands to be executed asynchronously
      * @return a list of ContinuableFutures representing the results of the computations
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
@@ -202,7 +284,17 @@ public class AsyncExecutor {
     }
 
     /**
-     * Executes the provided command asynchronously.
+     * Executes the provided Callable command asynchronously.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<String> future = executor.execute(() -> {
+     *     // Perform computation
+     *     return "Result: " + calculateValue();
+     * });
+     * 
+     * String result = future.get();
+     * }</pre>
      *
      * @param <R> the type of the result returned by the Callable
      * @param command the Callable to be executed asynchronously
@@ -213,11 +305,22 @@ public class AsyncExecutor {
     }
 
     /**
-     * Executes the provided command asynchronously and performs a final action after the command execution.
+     * Executes the provided Callable command asynchronously and performs a final action.
+     * 
+     * <p>The final action is guaranteed to execute regardless of whether the command
+     * completes successfully or throws an exception.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<Integer> future = executor.execute(
+     *     () -> computeValue(),
+     *     () -> logCompletion() // Always executed
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the Callable
      * @param command the Callable to be executed asynchronously
-     * @param actionInFinal the Runnable to be executed after the command
+     * @param actionInFinal the Runnable to be executed after the command (in a finally block)
      * @return a ContinuableFuture representing the result of the computation
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actionInFinal) {
@@ -254,10 +357,28 @@ public class AsyncExecutor {
     //    }
 
     /**
-     * Executes a collection of provided commands asynchronously.
+     * Executes a collection of Callable commands asynchronously.
+     * 
+     * <p>Each command is executed independently and returns its own ContinuableFuture.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Callable<Integer>> tasks = Arrays.asList(
+     *     () -> computeValue1(),
+     *     () -> computeValue2(),
+     *     () -> computeValue3()
+     * );
+     * 
+     * List<ContinuableFuture<Integer>> futures = executor.execute(tasks);
+     * 
+     * // Get all results
+     * List<Integer> results = futures.stream()
+     *     .map(ContinuableFuture::get)
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
-     * @param <R> the type of the result returned by the Callable
-     * @param commands the collection of Callable to be executed asynchronously
+     * @param <R> the type of the result returned by the Callables
+     * @param commands the collection of Callable commands to be executed asynchronously
      * @return a list of ContinuableFutures representing the results of the computations
      */
     public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
@@ -275,14 +396,24 @@ public class AsyncExecutor {
     }
 
     /**
-     * Executes the provided command asynchronously with a retry mechanism.
-     * The method retries the execution of the command for a specified number of times if it fails, with a specified interval between retries.
-     * The retryCondition is a Predicate that determines whether to retry the execution based on the exception thrown.
+     * Executes a Runnable command asynchronously with retry mechanism.
+     * 
+     * <p>The command will be retried if it fails and the retry condition is met.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<Void> future = executor.execute(
+     *     () -> sendEmail(),
+     *     3, // retry up to 3 times
+     *     1000, // wait 1 second between retries
+     *     e -> e instanceof IOException // retry only on IOException
+     * );
+     * }</pre>
      *
      * @param action the Runnable to be executed asynchronously
-     * @param retryTimes the number of times to retry the execution if it fails
-     * @param retryIntervalInMillis the interval in milliseconds between retries
-     * @param retryCondition the condition to determine whether to retry the execution based on the exception thrown
+     * @param retryTimes the maximum number of retry attempts
+     * @param retryIntervalInMillis the interval in milliseconds between retry attempts
+     * @param retryCondition the condition to determine whether to retry based on the exception
      * @return a ContinuableFuture representing the result of the computation
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
@@ -294,15 +425,26 @@ public class AsyncExecutor {
     }
 
     /**
-     * Executes the provided command asynchronously with a retry mechanism.
-     * The method retries the execution of the command for a specified number of times if it fails, with a specified interval between retries.
-     * The retryCondition is a BiPredicate that determines whether to retry the execution based on the result and the exception thrown.
+     * Executes a Callable command asynchronously with retry mechanism.
+     * 
+     * <p>The command will be retried if it fails or returns an unsatisfactory result
+     * according to the retry condition.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ContinuableFuture<String> future = executor.execute(
+     *     () -> fetchDataFromAPI(),
+     *     5, // retry up to 5 times
+     *     2000, // wait 2 seconds between retries
+     *     (result, exception) -> exception != null || result == null // retry on exception or null result
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the Callable
      * @param action the Callable to be executed asynchronously
-     * @param retryTimes the number of times to retry the execution if it fails
-     * @param retryIntervalInMillis the interval in milliseconds between retries
-     * @param retryCondition the condition to determine whether to retry the execution based on the result and the exception thrown
+     * @param retryTimes the maximum number of retry attempts
+     * @param retryIntervalInMillis the interval in milliseconds between retry attempts
+     * @param retryCondition the condition to determine whether to retry based on the result and exception
      * @return a ContinuableFuture representing the result of the computation
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,
@@ -314,10 +456,12 @@ public class AsyncExecutor {
     }
 
     /**
+     * Executes a FutureTask asynchronously.
+     * This is a protected method used internally by other execute methods.
      *
-     * @param <R>
-     * @param futureTask
-     * @return
+     * @param <R> the type of the result
+     * @param futureTask the FutureTask to execute
+     * @return a ContinuableFuture wrapping the FutureTask
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
         final Executor executor = getExecutor(); //NOSONAR
@@ -329,9 +473,10 @@ public class AsyncExecutor {
 
     /**
      * Retrieves the executor used by this AsyncExecutor.
-     * If the executor is not initialized, it initializes a new ThreadPoolExecutor with the specified core pool size, maximum pool size,
-     * keep live time, and time unit.
-     * It also adds a shutdown hook to the JVM to ensure the executor is properly shutdown when the JVM exits.
+     * If the executor is not initialized, it creates a new ThreadPoolExecutor
+     * with the configured parameters and registers a shutdown hook.
+     * 
+     * <p>This method is marked as @Internal and is primarily for framework use.</p>
      *
      * @return the Executor used by this AsyncExecutor
      */
@@ -359,22 +504,36 @@ public class AsyncExecutor {
 
     /**
      * Shuts down the executor used by this AsyncExecutor.
-     * This method initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted.
-     * Invocation has no additional effect if already shut down.
-     * This method does not wait for previously submitted tasks to complete execution.
+     * 
+     * <p>This method initiates an orderly shutdown in which previously submitted
+     * tasks are executed, but no new tasks will be accepted.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AsyncExecutor executor = new AsyncExecutor();
+     * // Use executor...
+     * executor.shutdown(); // Gracefully shutdown
+     * }</pre>
      */
     public synchronized void shutdown() {
         shutdown(0, TimeUnit.SECONDS);
     }
 
     /**
-     * Shuts down the executor used by this AsyncExecutor with a specified timeout.
-     * This method initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted.
-     * If the executor is not terminated when the timeout is reached, the method will stop waiting and return.
-     * Invocation has no additional effect if already shut down.
-     * This method does not wait for previously submitted tasks to complete execution beyond the specified timeout.
+     * Shuts down the executor with a specified timeout for termination.
+     * 
+     * <p>This method initiates an orderly shutdown and waits for the specified
+     * duration for tasks to complete. If tasks are still running after the
+     * timeout, the method returns without forcing termination.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AsyncExecutor executor = new AsyncExecutor();
+     * // Use executor...
+     * executor.shutdown(30, TimeUnit.SECONDS); // Wait up to 30 seconds for tasks to complete
+     * }</pre>
      *
-     * @param terminationTimeout the maximum time to wait for the executor to terminate
+     * @param terminationTimeout the maximum time to wait for executor termination
      * @param timeUnit the time unit of the terminationTimeout argument
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
@@ -399,10 +558,31 @@ public class AsyncExecutor {
         }
     }
 
+    /**
+     * Checks if the executor has been terminated.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * if (executor.isTerminated()) {
+     *     System.out.println("Executor has been shut down");
+     * }
+     * }</pre>
+     *
+     * @return true if the executor has been terminated, false otherwise
+     */
     public boolean isTerminated() {
         return executor == null || !(executor instanceof ExecutorService executorService) || executorService.isTerminated();
     }
 
+    /**
+     * Returns a string representation of this AsyncExecutor.
+     * 
+     * <p>The string includes configuration parameters and current state information
+     * such as core pool size, maximum pool size, active count (if available),
+     * keep-alive time, and executor details.</p>
+     *
+     * @return a string representation of this AsyncExecutor
+     */
     @Override
     public String toString() {
         final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";

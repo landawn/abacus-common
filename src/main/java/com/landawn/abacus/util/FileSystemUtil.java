@@ -29,17 +29,38 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
- * Note: it's copied from Apache Commons IO developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or under the Apache License 2.0.
- *
- * General File System utilities.
- * <p>
- * This class provides static utility methods for general file system
- * functions not provided via the JDK {@link java.io.File File} class.
- * <p>
- * The current functions provided are:
+ * General File System utilities for checking disk space.
+ * 
+ * <p>This class provides static utility methods for querying file system
+ * free space by invoking native operating system commands. It supports
+ * Windows, Unix, and POSIX-compliant systems.</p>
+ * 
+ * <p>The class works by executing platform-specific commands:</p>
  * <ul>
- * <li>Get the free space on a drive
+ * <li>Windows: uses 'dir /-c' command</li>
+ * <li>Unix/Linux: uses 'df -k' command</li>
+ * <li>AIX/HP-UX: uses 'df -kP' command</li>
  * </ul>
+ * 
+ * <p><b>Note:</b> This implementation relies on command-line utilities and may not work
+ * on all platforms or configurations. For modern applications, consider using
+ * {@link java.nio.file.FileStore} instead.</p>
+ * 
+ * <p>This class is copied from Apache Commons IO developed at The Apache Software Foundation
+ * under the Apache License 2.0.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Get free space in kilobytes for a specific path
+ * long freeSpaceKb = FileSystemUtil.freeSpaceKb("/home");
+ * System.out.println("Free space: " + freeSpaceKb + " KB");
+ * 
+ * // Get free space for current working directory
+ * long currentDirSpace = FileSystemUtil.freeSpaceKb();
+ * 
+ * // With timeout
+ * long freeSpace = FileSystemUtil.freeSpaceKb("C:\\", 5000);
+ * }</pre>
  *
  * @version $Id: FileSystemUtils.java 1642799 2014-12-02 02:55:39Z sebb $
  */
@@ -104,90 +125,113 @@ final class FileSystemUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Returns the free space on a drive or volume in kilobytes by invoking
-     * the command line.
-     * <pre>
-     * FileSystemUtils.freeSpaceKb("C:");       // Windows
-     * FileSystemUtils.freeSpaceKb("/volume");  // *nix
-     * </pre>
-     * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
-     * <p>
-     * In order to work, you must be running Windows, or have an implementation of
-     * Unix df that supports GNU format when passed -k (or -kP). If you are going
-     * to rely on this code, please check that it works on your OS by running
-     * some simple tests to compare the command line with the output from this class.
-     * If your operating system isn't supported, please raise a JIRA call detailing
-     * the exact result from df -k and as much other detail as possible, thanks.
+     * Returns the free space on a drive or volume in kilobytes.
+     * 
+     * <p>This method invokes the appropriate command line utility based on the
+     * operating system to determine free space. The path must be a valid
+     * file system path on the current platform.</p>
+     * 
+     * <p>Platform-specific behavior:</p>
+     * <ul>
+     * <li>Windows: uses 'dir /-c' on the specified path</li>
+     * <li>Unix/Linux: uses 'df -k' on the specified path</li>
+     * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
+     * </ul>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Windows
+     * long freeKb = FileSystemUtil.freeSpaceKb("C:");
+     * 
+     * // Unix/Linux
+     * long freeKb = FileSystemUtil.freeSpaceKb("/home");
+     * 
+     * // Check if enough space (e.g., 100MB)
+     * if (FileSystemUtil.freeSpaceKb("/tmp") < 100 * 1024) {
+     *     System.err.println("Not enough space!");
+     * }
+     * }</pre>
      *
-     * @param path the path to get free space for, not {@code null}, not empty on Unix
-     * @return
+     * @param path the path to get free space for, not null, not empty on Unix
+     * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException if an error occurred in initialisation
+     * @throws IllegalStateException if an error occurred in initialization or OS not supported
      */
     public static long freeSpaceKb(final String path) throws IOException {
         return freeSpaceKb(path, -1);
     }
 
     /**
-     * Returns the free space on a drive or volume in kilobytes by invoking
-     * the command line.
-     * <pre>
-     * FileSystemUtils.freeSpaceKb("C:");       // Windows
-     * FileSystemUtils.freeSpaceKb("/volume");  // *nix
-     * </pre>
-     * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
-     * <p>
-     * In order to work, you must be running Windows, or have an implementation of
-     * Unix df that supports GNU format when passed -k (or -kP). If you are going
-     * to rely on this code, please check that it works on your OS by running
-     * some simple tests to compare the command line with the output from this class.
-     * If your operating system isn't supported, please raise a JIRA call detailing
-     * the exact result from df -k and as much other detail as possible, thanks.
+     * Returns the free space on a drive or volume in kilobytes with a timeout.
+     * 
+     * <p>This method is similar to {@link #freeSpaceKb(String)} but allows
+     * specifying a timeout for the command execution. This is useful to prevent
+     * hanging on unresponsive file systems.</p>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     // Get free space with 5 second timeout
+     *     long freeKb = FileSystemUtil.freeSpaceKb("C:", 5000);
+     *     System.out.println("Free space: " + freeKb + " KB");
+     * } catch (IOException e) {
+     *     // Handle timeout or other errors
+     *     System.err.println("Failed to get free space: " + e.getMessage());
+     * }
+     * }</pre>
      *
-     * @param path the path to get free space for, not {@code null}, not empty on Unix
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
-     *  is zero or less
-     * @return
+     * @param path the path to get free space for, not null, not empty on Unix
+     * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
+     * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException if an error occurred in initialisation
+     * @throws IllegalStateException if an error occurred in initialization or OS not supported
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
         return INSTANCE.freeSpaceOS(path, OS, true, timeout);
     }
 
     /**
-     * Returns the disk size of the volume which holds the working directory.
-     * <p>
-     * Identical to:
-     * <pre>
+     * Returns the free space in the current working directory in kilobytes.
+     * 
+     * <p>This is equivalent to calling:</p>
+     * <pre>{@code
      * freeSpaceKb(new File(".").getAbsolutePath())
-     * </pre>
+     * }</pre>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * long freeKb = FileSystemUtil.freeSpaceKb();
+     * System.out.println("Current directory free space: " + freeKb + " KB");
+     * }</pre>
      *
-     * @return
+     * @return the amount of free space in the current directory in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialisation
+     * @throws IllegalStateException if an error occurred in initialization
      */
     public static long freeSpaceKb() throws IOException {
         return freeSpaceKb(-1);
     }
 
     /**
-     * Returns the disk size of the volume which holds the working directory.
-     * <p>
-     * Identical to:
-     * <pre>
-     * freeSpaceKb(new File(".").getAbsolutePath())
-     * </pre>
+     * Returns the free space in the current working directory in kilobytes with a timeout.
+     * 
+     * <p>This is equivalent to calling:</p>
+     * <pre>{@code
+     * freeSpaceKb(new File(".").getAbsolutePath(), timeout)
+     * }</pre>
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Get free space in current directory with 3 second timeout
+     * long freeKb = FileSystemUtil.freeSpaceKb(3000);
+     * }</pre>
      *
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
-     *  is zero or less
-     * @return
+     * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
+     * @return the amount of free space in the current directory in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialisation
+     * @throws IllegalStateException if an error occurred in initialization
      */
     public static long freeSpaceKb(final long timeout) throws IOException {
         return freeSpaceKb(new File(".").getAbsolutePath(), timeout);

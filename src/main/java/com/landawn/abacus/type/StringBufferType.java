@@ -14,39 +14,63 @@
 
 package com.landawn.abacus.type;
 
-public class StringBufferType extends AbstractCharSequenceType<StringBuilder> {
+/**
+ * Type handler for {@link StringBuffer} objects. This class provides serialization
+ * and deserialization support for StringBuffer instances. Note that this class
+ * actually handles StringBuffer instances, not StringBuffer, despite its name.
+ */
+public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
+    /**
+     * The type name identifier for StringBuffer type.
+     */
     public static final String STRING_BUFFER = StringBuffer.class.getSimpleName();
 
     StringBufferType() {
         super(STRING_BUFFER);
     }
 
+    /**
+     * Returns the Class object representing the type handled by this type handler.
+     * Note: This returns StringBuffer.class, not StringBuffer.class.
+     *
+     * @return the Class object for StringBuffer
+     */
     @Override
-    public Class<StringBuilder> clazz() {
-        return StringBuilder.class;
+    public Class<StringBuffer> clazz() {
+        return StringBuffer.class;
     }
 
     /**
+     * Converts a StringBuffer object to its string representation.
+     * This method returns the string content of the StringBuffer.
      *
-     * @param x
-     * @return
+     * @param x the StringBuffer object to convert
+     * @return the string representation of the StringBuffer's content, or null if x is null
      */
     @Override
-    public String stringOf(final StringBuilder x) {
+    public String stringOf(final StringBuffer x) {
         return x == null ? null : x.toString();
     }
 
     /**
+     * Creates a StringBuffer object from its string representation.
+     * This method creates a new StringBuffer containing the provided string.
      *
-     * @param str
-     * @return
+     * @param str the string to convert to a StringBuffer
+     * @return a new StringBuffer containing the string content, or null if str is null
      */
     @Override
-    public StringBuilder valueOf(final String str) {
-        return str == null ? null : new StringBuilder(str);
+    public StringBuffer valueOf(final String str) {
+        return str == null ? null : new StringBuffer(str);
     }
 
+    /**
+     * Indicates whether instances of this type are immutable.
+     * StringBuffer instances are mutable, so this returns false.
+     *
+     * @return false, as StringBuffer objects are mutable
+     */
     @Override
     public boolean isImmutable() {
         return false;

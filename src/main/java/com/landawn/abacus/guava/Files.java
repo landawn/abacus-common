@@ -48,15 +48,37 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 
 /**
- * Copied from Google Guava under Apache License v2.
- * The purpose is to provide unified APIs.
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ * 
+ * A utility class that provides unified file operations by wrapping Google Guava's file utilities.
+ * This class serves as a facade to provide consistent APIs for file manipulation, combining
+ * functionality from both {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}.
+ * 
+ * <p>This class offers various file operations including:
+ * <ul>
+ *   <li>Reading and writing files with different character sets</li>
+ *   <li>File comparison and manipulation</li>
+ *   <li>Directory traversal and management</li>
+ *   <li>Memory-mapped file operations</li>
+ *   <li>Path simplification and file extension handling</li>
+ * </ul>
+ * 
+ * <p>All methods in this class are static. The class cannot be instantiated.
+ * 
+ * <p>Example usage:
+ * <pre>{@code
+ * // Read all lines from a file
+ * List<String> lines = Files.readAllLines(new File("data.txt"), StandardCharsets.UTF_8);
+ * 
+ * // Copy a file
+ * Files.copy(new File("source.txt"), new File("dest.txt"));
+ * }</pre>
  *
  * @see java.nio.file.Files
  * @see com.google.common.io.Files
  * @see com.google.common.io.MoreFiles
  * @see com.landawn.abacus.util.IOUtil
  * @see com.landawn.abacus.util.Strings
- *
  */
 public abstract class Files { //NOSONAR
 
@@ -66,14 +88,30 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a buffered reader that reads from a file using the given character set.
+     * This method is a convenience wrapper around {@link com.google.common.io.Files#newReader(File, Charset)}.
+     *
+     * <p>The returned reader will use a default buffer size. The reader should be closed
+     * after use to release system resources.
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#newBufferedReader(java.nio.file.Path, Charset)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * try (BufferedReader reader = Files.newReader(new File("data.txt"), StandardCharsets.UTF_8)) {
+     *     String line;
+     *     while ((line = reader.readLine()) != null) {
+     *         System.out.println(line);
+     *     }
+     * }
+     * }</pre>
      *
      * @param file the file to read from
      * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
      *     helpful predefined constants
      * @return the buffered reader
+     * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,
+     *     or for some other reason cannot be opened for reading
      */
     public static BufferedReader newReader(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newReader(file, charset);
@@ -81,15 +119,30 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a buffered writer that writes to a file using the given character set.
+     * If the file already exists, it will be overwritten. If the file does not exist, it will be created.
+     * This method is a convenience wrapper around {@link com.google.common.io.Files#newWriter(File, Charset)}.
+     *
+     * <p>The returned writer will use a default buffer size. The writer should be closed
+     * after use to ensure all data is written and to release system resources.
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#newBufferedWriter(java.nio.file.Path, Charset,
      * java.nio.file.OpenOption...)}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * try (BufferedWriter writer = Files.newWriter(new File("output.txt"), StandardCharsets.UTF_8)) {
+     *     writer.write("Hello, World!");
+     *     writer.newLine();
+     * }
+     * }</pre>
+     *
      * @param file the file to write to
      * @param charset the charset used to encode the output stream; see {@link StandardCharsets} for
      *     helpful predefined constants
      * @return the buffered writer
+     * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,
+     *     does not exist but cannot be created, or cannot be opened for any other reason
      */
     public static BufferedWriter newWriter(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
@@ -97,7 +150,19 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a new {@link ByteSource} for reading bytes from the given file.
+     * The returned ByteSource is a view of the file that allows for efficient byte-level operations.
      *
+     * <p>This method does not open the file immediately. The file is opened when methods
+     * on the returned ByteSource are called.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * ByteSource source = Files.asByteSource(new File("data.bin"));
+     * byte[] bytes = source.read();
+     * }</pre>
+     *
+     * @param file the file to create a ByteSource for
+     * @return a ByteSource that reads from the given file
      */
     public static ByteSource asByteSource(final File file) {
         return com.google.common.io.Files.asByteSource(file);
@@ -105,11 +170,23 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a view of the given {@code path} as a {@link ByteSource}.
+     * This method provides more control over how the file is accessed through open options.
      *
      * <p>Any {@linkplain OpenOption open options} provided are used when opening streams to the file
      * and may affect the behavior of the returned source and the streams it provides. See {@link
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("data.bin");
+     * ByteSource source = Files.asByteSource(path, StandardOpenOption.READ);
+     * long size = source.size();
+     * }</pre>
+     *
+     * @param path the path to create a ByteSource for
+     * @param options zero or more open options that control how the file is opened
+     * @return a ByteSource that reads from the given path
      */
     public static ByteSource asByteSource(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
@@ -121,6 +198,23 @@ public abstract class Files { //NOSONAR
      * truncated before writing. When the {@link FileWriteMode#APPEND APPEND} mode is provided, writes
      * will append to the end of the file without truncating it.
      *
+     * <p>This method does not open the file immediately. The file is opened when methods
+     * on the returned ByteSink are called.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Overwrite file
+     * ByteSink sink = Files.asByteSink(new File("output.bin"));
+     * sink.write(byteArray);
+     * 
+     * // Append to file
+     * ByteSink appendSink = Files.asByteSink(new File("log.bin"), FileWriteMode.APPEND);
+     * appendSink.write(moreBytes);
+     * }</pre>
+     *
+     * @param file the file to create a ByteSink for
+     * @param modes optional file write modes; if empty, the file will be truncated
+     * @return a ByteSink that writes to the given file
      */
     public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
         return com.google.common.io.Files.asByteSink(file, modes);
@@ -128,6 +222,7 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a view of the given {@code path} as a {@link ByteSink}.
+     * This method provides fine-grained control over how the file is opened for writing.
      *
      * <p>Any {@linkplain OpenOption open options} provided are used when opening streams to the file
      * and may affect the behavior of the returned sink and the streams it provides. See {@link
@@ -135,6 +230,17 @@ public abstract class Files { //NOSONAR
      * equivalent to providing the {@link StandardOpenOption#CREATE CREATE}, {@link
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("output.bin");
+     * ByteSink sink = Files.asByteSink(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+     * sink.write(byteArray);
+     * }</pre>
+     *
+     * @param path the path to create a ByteSink for
+     * @param options zero or more open options that control how the file is opened
+     * @return a ByteSink that writes to the given path
      */
     public static ByteSink asByteSink(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSink(path, options);
@@ -142,8 +248,22 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a new {@link CharSource} for reading character data from the given file using the given
-     * character set.
+     * character set. The returned CharSource is a view of the file that allows for efficient
+     * character-level operations.
      *
+     * <p>This method does not open the file immediately. The file is opened when methods
+     * on the returned CharSource are called.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * CharSource source = Files.asCharSource(new File("text.txt"), StandardCharsets.UTF_8);
+     * String content = source.read();
+     * List<String> lines = source.readLines();
+     * }</pre>
+     *
+     * @param file the file to create a CharSource for
+     * @param charset the character set to use when reading the file
+     * @return a CharSource that reads from the given file using the specified charset
      */
     public static CharSource asCharSource(final File file, final Charset charset) {
         return com.google.common.io.Files.asCharSource(file, charset);
@@ -151,12 +271,26 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a view of the given {@code path} as a {@link CharSource} using the given {@code
-     * charset}.
+     * charset}. This method provides more control over how the file is accessed through open options.
      *
      * <p>Any {@linkplain OpenOption open options} provided are used when opening streams to the file
      * and may affect the behavior of the returned source and the streams it provides. See {@link
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("text.txt");
+     * CharSource source = Files.asCharSource(path, StandardCharsets.UTF_8, StandardOpenOption.READ);
+     * try (BufferedReader reader = source.openBufferedStream()) {
+     *     // Process lines
+     * }
+     * }</pre>
+     *
+     * @param path the path to create a CharSource for
+     * @param charset the character set to use when reading the file
+     * @param options zero or more open options that control how the file is opened
+     * @return a CharSource that reads from the given path using the specified charset
      */
     public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSource(path, charset, options);
@@ -168,6 +302,24 @@ public abstract class Files { //NOSONAR
      * is provided, the file will be truncated before writing. When the {@link FileWriteMode#APPEND
      * APPEND} mode is provided, writes will append to the end of the file without truncating it.
      *
+     * <p>This method does not open the file immediately. The file is opened when methods
+     * on the returned CharSink are called.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Overwrite file
+     * CharSink sink = Files.asCharSink(new File("output.txt"), StandardCharsets.UTF_8);
+     * sink.write("Hello, World!");
+     * 
+     * // Append to file
+     * CharSink appendSink = Files.asCharSink(new File("log.txt"), StandardCharsets.UTF_8, FileWriteMode.APPEND);
+     * appendSink.writeLines(Arrays.asList("Line 1", "Line 2"));
+     * }</pre>
+     *
+     * @param file the file to create a CharSink for
+     * @param charset the character set to use when writing to the file
+     * @param modes optional file write modes; if empty, the file will be truncated
+     * @return a CharSink that writes to the given file using the specified charset
      */
     public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) {
         return com.google.common.io.Files.asCharSink(file, charset, modes);
@@ -175,6 +327,7 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a view of the given {@code path} as a {@link CharSink} using the given {@code charset}.
+     * This method provides fine-grained control over how the file is opened for writing.
      *
      * <p>Any {@linkplain OpenOption open options} provided are used when opening streams to the file
      * and may affect the behavior of the returned sink and the streams it provides. See {@link
@@ -182,17 +335,41 @@ public abstract class Files { //NOSONAR
      * equivalent to providing the {@link StandardOpenOption#CREATE CREATE}, {@link
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("output.txt");
+     * CharSink sink = Files.asCharSink(path, StandardCharsets.UTF_8, 
+     *     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+     * sink.write("Appended text");
+     * }</pre>
+     *
+     * @param path the path to create a CharSink for
+     * @param charset the character set to use when writing to the file
+     * @param options zero or more open options that control how the file is opened
+     * @return a CharSink that writes to the given path using the specified charset
      */
     public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSink(path, charset, options);
     }
 
     /**
-     * To byte array.
+     * Reads all bytes from a file into a byte array.
+     * This method ensures that the file is closed when all bytes have been read
+     * or an I/O error, or other runtime exception, is thrown.
      *
-     * @param file
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * <p>This method is intended for simple cases where it is convenient to read all bytes
+     * into a byte array. It is not intended for reading large files.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * byte[] fileData = Files.toByteArray(new File("image.png"));
+     * }</pre>
+     *
+     * @param file the file to read
+     * @return a byte array containing all bytes from the file
+     * @throws IOException if an I/O error occurs while reading the file
+     * @throws OutOfMemoryError if the file is larger than the available heap space
      */
     public static byte[] toByteArray(final File file) throws IOException {
         return com.google.common.io.Files.toByteArray(file);
@@ -200,13 +377,23 @@ public abstract class Files { //NOSONAR
 
     /**
      * Overwrites a file with the contents of a byte array.
+     * If the file already exists, it will be overwritten. If the file does not exist,
+     * it will be created along with any necessary parent directories.
+     *
+     * <p>This method is equivalent to {@code asByteSink(to).write(from)}.
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#write(java.nio.file.Path, byte[], java.nio.file.OpenOption...)}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
+     * Files.write(data, new File("output.txt"));
+     * }</pre>
+     *
      * @param from the bytes to write
      * @param to the destination file
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs while writing to the file
      */
     public static void write(final byte[] from, final File to) throws IOException {
         com.google.common.io.Files.write(from, to);
@@ -214,8 +401,23 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns {@code true} if the given files exist, are not directories, and contain the same bytes.
+     * This method performs a byte-by-byte comparison of the file contents.
      *
-     * @throws IOException if an I/O error occurs
+     * <p>This method may be faster than reading both files into memory for comparison,
+     * as it can stop reading as soon as a difference is found.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * boolean identical = Files.equal(new File("file1.txt"), new File("file2.txt"));
+     * if (identical) {
+     *     System.out.println("Files are identical");
+     * }
+     * }</pre>
+     *
+     * @param file1 the first file to compare
+     * @param file2 the second file to compare
+     * @return {@code true} if the files contain the same bytes, {@code false} otherwise
+     * @throws IOException if an I/O error occurs while reading either file
      */
     public static boolean equal(final File file1, final File file2) throws IOException { //NOSONAR
         return com.google.common.io.Files.equal(file1, file2);
@@ -223,9 +425,22 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns {@code true} if the files located by the given paths exist, are not directories, and contain
-     * the same bytes.
+     * the same bytes. This method performs a byte-by-byte comparison of the file contents.
      *
-     * @throws IOException if an I/O error occurs
+     * <p>This method may be faster than reading both files into memory for comparison,
+     * as it can stop reading as soon as a difference is found.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path1 = Paths.get("file1.txt");
+     * Path path2 = Paths.get("file2.txt");
+     * boolean identical = Files.equal(path1, path2);
+     * }</pre>
+     *
+     * @param path1 the first path to compare
+     * @param path2 the second path to compare
+     * @return {@code true} if the files contain the same bytes, {@code false} otherwise
+     * @throws IOException if an I/O error occurs while reading either file
      */
     public static boolean equal(final Path path1, final Path path2) throws IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
@@ -233,10 +448,20 @@ public abstract class Files { //NOSONAR
 
     /**
      * Creates an empty file or updates the last updated timestamp on the same as the unix command of
-     * the same name.
+     * the same name. If the file already exists, its last modified time will be updated to the
+     * current time. If the file does not exist, an empty file will be created.
+     *
+     * <p>This method creates parent directories if necessary.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * File file = new File("timestamp.txt");
+     * Files.touch(file);
+     * // File now exists (if it didn't) and has current timestamp
+     * }</pre>
      *
      * @param file the file to create or update
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs while creating or updating the file
      */
     public static void touch(final File file) throws IOException {
         com.google.common.io.Files.touch(file);
@@ -245,9 +470,20 @@ public abstract class Files { //NOSONAR
     /**
      * Like the unix command of the same name, creates an empty file or updates the last modified
      * timestamp of the existing file at the given path to the current system time.
+     * If the file already exists, its last modified time will be updated. If the file does not
+     * exist, an empty file will be created.
      *
-     * @param path
-     * @throws IOException Signals that an I/O exception has occurred.
+     * <p>This method creates parent directories if necessary.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("timestamp.txt");
+     * Files.touch(path);
+     * // File now exists (if it didn't) and has current timestamp
+     * }</pre>
+     *
+     * @param path the path of the file to create or update
+     * @throws IOException if an I/O error occurs while creating or updating the file
      */
     public static void touch(final Path path) throws IOException {
         com.google.common.io.MoreFiles.touch(path);
@@ -276,6 +512,13 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#createTempDirectory}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * File tempDir = Files.createTempDir();
+     * // Use tempDir for temporary operations
+     * // Remember to delete when done
+     * }</pre>
+     *
      * @return the newly created directory
      * @throws IllegalStateException if the directory could not be created, such as if the system does
      *     not support creating temporary directories securely
@@ -302,8 +545,20 @@ public abstract class Files { //NOSONAR
      * this operation fails, it may have succeeded in creating some (but not all) of the necessary
      * parent directories.
      *
+     * <p>This method does nothing if the parent directory already exists. Unlike the similar
+     * {@link File#mkdirs()}, this method throws an exception if the parent directory cannot
+     * be created.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * File file = new File("/path/to/deep/directory/file.txt");
+     * Files.createParentDirs(file);
+     * // Now /path/to/deep/directory/ exists
+     * }</pre>
+     *
+     * @param file the file whose parent directories should be created
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created.
+     *     directories of the specified file could not be created
      */
     public static void createParentDirs(final File file) throws IOException {
         com.google.common.io.Files.createParentDirs(file);
@@ -314,8 +569,20 @@ public abstract class Files { //NOSONAR
      * this operation fails, it may have succeeded in creating some (but not all) of the necessary
      * parent directories. The parent directory is created with the given {@code attrs}.
      *
+     * <p>This method does nothing if the parent directory already exists. File attributes
+     * can be used to set permissions or other properties on the created directories.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("/path/to/deep/directory/file.txt");
+     * Files.createParentDirectories(path);
+     * // Now /path/to/deep/directory/ exists
+     * }</pre>
+     *
+     * @param path the path whose parent directories should be created
+     * @param attrs an optional list of file attributes to set atomically when creating the directories
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created.
+     *     directories of the specified file could not be created
      */
     public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
@@ -323,13 +590,22 @@ public abstract class Files { //NOSONAR
 
     /**
      * Copies all bytes from a file to an output stream.
+     * This method opens the file, copies all bytes to the output stream, and then closes
+     * the file (but not the output stream).
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#copy(java.nio.file.Path, OutputStream)}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * try (FileOutputStream out = new FileOutputStream("backup.bin")) {
+     *     Files.copy(new File("original.bin"), out);
+     * }
+     * }</pre>
+     *
      * @param from the source file
-     * @param to the output stream
-     * @throws IOException if an I/O error occurs
+     * @param to the output stream to write to
+     * @throws IOException if an I/O error occurs while reading from the file or writing to the stream
      */
     public static void copy(final File from, final OutputStream to) throws IOException {
         com.google.common.io.Files.copy(from, to);
@@ -337,6 +613,7 @@ public abstract class Files { //NOSONAR
 
     /**
      * Copies all the bytes from one file to another.
+     * This method will overwrite an existing destination file.
      *
      * <p>Copying is not an atomic operation - in the case of an I/O error, power loss, process
      * termination, or other problems, {@code to} may not be a complete copy of {@code from}. If you
@@ -349,9 +626,16 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...)}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * File source = new File("document.pdf");
+     * File backup = new File("document_backup.pdf");
+     * Files.copy(source, backup);
+     * }</pre>
+     *
      * @param from the source file
      * @param to the destination file
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs during the copy operation
      * @throws IllegalArgumentException if {@code from.equals(to)}
      */
     public static void copy(final File from, final File to) throws IOException {
@@ -363,11 +647,23 @@ public abstract class Files { //NOSONAR
      * different directory. In either case {@code to} must be the target path for the file itself; not
      * just the new name for the file or the path to the new parent directory.
      *
+     * <p>This method attempts to move the file atomically, but falls back to a copy-and-delete
+     * operation if an atomic move is not supported by the file system.
+     *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link java.nio.file.Files#move}.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Rename a file
+     * Files.move(new File("old_name.txt"), new File("new_name.txt"));
+     * 
+     * // Move to different directory
+     * Files.move(new File("file.txt"), new File("archive/file.txt"));
+     * }</pre>
+     *
      * @param from the source file
-     * @param to the destination file
-     * @throws IOException if an I/O error occurs
+     * @param to the destination file (must be the complete target path, not just a directory)
+     * @throws IOException if an I/O error occurs during the move operation
      * @throws IllegalArgumentException if {@code from.equals(to)}
      */
     public static void move(final File from, final File to) throws IOException {
@@ -381,14 +677,25 @@ public abstract class Files { //NOSONAR
      * <p>This method returns a mutable {@code List}. For an {@code ImmutableList}, use {@code
      * Files.asCharSource(file, charset).readLines()}.
      *
+     * <p>This method is intended for simple cases where it is convenient to read all lines
+     * in a single operation. It is not intended for reading large files.
+     *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> lines = Files.readLines(new File("data.txt"), StandardCharsets.UTF_8);
+     * for (String line : lines) {
+     *     System.out.println(line);
+     * }
+     * }</pre>
      *
      * @param file the file to read from
      * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
      *     helpful predefined constants
      * @return a mutable {@link List} containing all the lines
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static List<String> readLines(final File file, final Charset charset) throws IOException {
         return com.google.common.io.Files.readLines(file, charset);
@@ -397,10 +704,20 @@ public abstract class Files { //NOSONAR
     /**
      * Fully maps a file read-only in to memory as per {@link
      * FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}.
+     * This creates a memory-mapped byte buffer that reflects the contents of the file.
      *
      * <p>Files are mapped from offset 0 to its length.
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
+     *
+     * <p>Memory-mapped files can offer significant performance benefits for certain operations,
+     * but they also consume virtual memory space and may not be suitable for all use cases.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * MappedByteBuffer buffer = Files.map(new File("data.bin"));
+     * int firstInt = buffer.getInt();
+     * }</pre>
      *
      * @param file the file to map
      * @return a read-only buffer reflecting {@code file}
@@ -415,14 +732,21 @@ public abstract class Files { //NOSONAR
     /**
      * Fully maps a file in to memory as per {@link
      * FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)} using the requested {@link
-     * MapMode}.
+     * MapMode}. This allows for read-only, read-write, or private (copy-on-write) mappings.
      *
      * <p>Files are mapped from offset 0 to its length.
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Create a read-write mapping
+     * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
+     * buffer.putInt(0, 42); // Write to the beginning of the file
+     * }</pre>
+     *
      * @param file the file to map
-     * @param mode the mode to use when mapping {@code file}
+     * @param mode the mode to use when mapping {@code file} (READ_ONLY, READ_WRITE, or PRIVATE)
      * @return a buffer reflecting {@code file}
      * @throws FileNotFoundException if the {@code file} does not exist
      * @throws IOException if an I/O error occurs
@@ -434,7 +758,8 @@ public abstract class Files { //NOSONAR
 
     /**
      * Maps a file in to memory as per {@link FileChannel#map(java.nio.channels.FileChannel.MapMode,
-     * long, long)} using the requested {@link MapMode}.
+     * long, long)} using the requested {@link MapMode}. This method allows you to specify the
+     * size of the mapping, which can be different from the file's current size.
      *
      * <p>Files are mapped from offset 0 to {@code size}.
      *
@@ -444,8 +769,15 @@ public abstract class Files { //NOSONAR
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Create a new 1MB memory-mapped file
+     * MappedByteBuffer buffer = Files.map(new File("new.bin"), MapMode.READ_WRITE, 1024 * 1024);
+     * }</pre>
+     *
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
+     * @param size the number of bytes to map starting from offset 0
      * @return a buffer reflecting {@code file}
      * @throws IOException if an I/O error occurs
      * @see FileChannel#map(MapMode, long, long)
@@ -471,6 +803,15 @@ public abstract class Files { //NOSONAR
      * the path {@code a/../b}, which {@code simplifyPath} will change to {@code b}. If {@code a} is a
      * symlink to {@code x}, {@code a/../b} may refer to a sibling of {@code x}, rather than the
      * sibling of {@code a} referred to by {@code b}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * String cleaned = Files.simplifyPath("/foo//bar/../baz/./");
+     * // Returns: "/foo/baz"
+     * }</pre>
+     *
+     * @param pathname the path to simplify
+     * @return the simplified path
      */
     public static String simplifyPath(final String pathname) {
         return com.google.common.io.Files.simplifyPath(pathname);
@@ -480,6 +821,15 @@ public abstract class Files { //NOSONAR
      * Returns the file name without its <a
      * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * String name = Files.getNameWithoutExtension("/home/user/document.pdf");
+     * // Returns: "document"
+     * 
+     * String name2 = Files.getNameWithoutExtension("archive.tar.gz");
+     * // Returns: "archive.tar"
+     * }</pre>
      *
      * @param file The name of the file to trim the extension from. This can be either a fully
      *     qualified file name (including a path) or just a file name.
@@ -494,8 +844,15 @@ public abstract class Files { //NOSONAR
      * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
      *
-     * @param path
-     * @return
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("/home/user/document.pdf");
+     * String name = Files.getNameWithoutExtension(path);
+     * // Returns: "document"
+     * }</pre>
+     *
+     * @param path the path whose file name should be extracted without extension
+     * @return the file name without its extension
      */
     public static String getNameWithoutExtension(final Path path) {
         return com.google.common.io.MoreFiles.getNameWithoutExtension(path);
@@ -515,8 +872,20 @@ public abstract class Files { //NOSONAR
      * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
-     * @param fullName
-     * @return
+     * <p>Example usage:
+     * <pre>{@code
+     * String ext1 = Files.getFileExtension("document.pdf");
+     * // Returns: "pdf"
+     * 
+     * String ext2 = Files.getFileExtension("archive.tar.gz");
+     * // Returns: "gz"
+     * 
+     * String ext3 = Files.getFileExtension("README");
+     * // Returns: ""
+     * }</pre>
+     *
+     * @param fullName the file name to extract the extension from
+     * @return the file extension (without the dot), or empty string if none
      */
     public static String getFileExtension(final String fullName) {
         return com.google.common.io.Files.getFileExtension(fullName);
@@ -536,8 +905,15 @@ public abstract class Files { //NOSONAR
      * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
-     * @param path
-     * @return
+     * <p>Example usage:
+     * <pre>{@code
+     * Path path = Paths.get("/home/user/document.pdf");
+     * String ext = Files.getFileExtension(path);
+     * // Returns: "pdf"
+     * }</pre>
+     *
+     * @param path the path whose file extension should be extracted
+     * @return the file extension (without the dot), or empty string if none
      */
     public static String getFileExtension(final Path path) {
         return com.google.common.io.MoreFiles.getFileExtension(path);
@@ -563,6 +939,15 @@ public abstract class Files { //NOSONAR
      * with the following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home",
      * "/home/alice", ...]}
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * Traverser<File> traverser = Files.fileTraverser();
+     * for (File file : traverser.breadthFirst(new File("/home/user"))) {
+     *     System.out.println(file.getPath());
+     * }
+     * }</pre>
+     *
+     * @return a traverser for traversing file trees starting from File objects
      */
     public static Traverser<File> fileTraverser() {
         return com.google.common.io.Files.fileTraverser();
@@ -589,6 +974,15 @@ public abstract class Files { //NOSONAR
      * following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice",
      * ...]}
      *
+     * <p>Example usage:
+     * <pre>{@code
+     * Traverser<Path> traverser = Files.pathTraverser();
+     * for (Path path : traverser.breadthFirst(Paths.get("/home/user"))) {
+     *     System.out.println(path);
+     * }
+     * }</pre>
+     *
+     * @return a traverser for traversing file trees starting from Path objects
      */
     public static Traverser<Path> pathTraverser() {
         return com.google.common.io.MoreFiles.fileTraverser();
@@ -596,9 +990,22 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns an immutable list of paths to the files contained in the given directory.
+     * The returned list does not include the directory itself or any subdirectories.
+     * Hidden files are included in the results.
      *
-     * @param dir
-     * @return
+     * <p>The order of the returned files is not specified and may vary between invocations
+     * or platforms.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * ImmutableList<Path> files = Files.listFiles(Paths.get("/home/user"));
+     * for (Path file : files) {
+     *     System.out.println(file.getFileName());
+     * }
+     * }</pre>
+     *
+     * @param dir the directory whose files should be listed
+     * @return an immutable list of paths to files in the directory
      * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>
      * @throws NotDirectoryException if the file could not be opened because it is not a directory
      *     <i>(optional specific exception)</i>
@@ -630,8 +1037,17 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
-     * @param path
-     * @param options
+     * <p>Example usage:
+     * <pre>{@code
+     * // Safe recursive delete
+     * Files.deleteRecursively(Paths.get("/tmp/old_data"));
+     * 
+     * // Force recursive delete even on insecure file systems
+     * Files.deleteRecursively(Paths.get("/tmp/old_data"), RecursiveDeleteOption.ALLOW_INSECURE);
+     * }</pre>
+     *
+     * @param path the path to delete (file or directory)
+     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}
      * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>
      * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be
      *     guaranteed for the file system and {@link RecursiveDeleteOption#ALLOW_INSECURE} was not
@@ -666,8 +1082,16 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
-     * @param path
-     * @param options
+     * <p>Example usage:
+     * <pre>{@code
+     * // Empty a directory but keep the directory itself
+     * Path tempDir = Paths.get("/tmp/working");
+     * Files.deleteDirectoryContents(tempDir);
+     * // tempDir still exists but is now empty
+     * }</pre>
+     *
+     * @param path the directory whose contents should be deleted
+     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}
      * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>
      * @throws NotDirectoryException if the file at {@code path} is not a directory <i>(optional
      *     specific exception)</i>
@@ -682,10 +1106,21 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a predicate that returns the result of {@link java.nio.file.Files#isDirectory(Path,
-     * LinkOption...)} on input paths with the given link options.
+     * LinkOption...)} on input paths with the given link options. This is useful for filtering
+     * collections of paths.
      *
-     * @param options
-     * @return
+     * <p>Example usage:
+     * <pre>{@code
+     * List<Path> directories = paths.stream()
+     *     .filter(Files.isDirectory())
+     *     .collect(Collectors.toList());
+     * 
+     * // Don't follow symbolic links
+     * Predicate<Path> isRealDir = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
+     * }</pre>
+     *
+     * @param options link options to use when checking if a path is a directory
+     * @return a predicate that tests if a path is a directory
      */
     public static Predicate<Path> isDirectory(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isDirectory(options);
@@ -693,10 +1128,21 @@ public abstract class Files { //NOSONAR
 
     /**
      * Returns a predicate that returns the result of {@link java.nio.file.Files#isRegularFile(Path,
-     * LinkOption...)} on input paths with the given link options.
+     * LinkOption...)} on input paths with the given link options. This is useful for filtering
+     * collections of paths.
      *
-     * @param options
-     * @return
+     * <p>Example usage:
+     * <pre>{@code
+     * List<Path> regularFiles = paths.stream()
+     *     .filter(Files.isRegularFile())
+     *     .collect(Collectors.toList());
+     * 
+     * // Don't follow symbolic links
+     * Predicate<Path> isRealFile = Files.isRegularFile(LinkOption.NOFOLLOW_LINKS);
+     * }</pre>
+     *
+     * @param options link options to use when checking if a path is a regular file
+     * @return a predicate that tests if a path is a regular file
      */
     public static Predicate<Path> isRegularFile(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isRegularFile(options);
@@ -706,7 +1152,15 @@ public abstract class Files { //NOSONAR
      * Reads all bytes from a file into a byte array. The method ensures that the file is closed when
      * all bytes have been read or an I/O error, or other runtime exception, is thrown.
      *
-     * <p> This method is equivalent to: {@link readAllBytes(Path) readAllBytes(path)}.
+     * <p>This method is intended for simple cases where it is convenient to read all bytes
+     * into a byte array. It is not intended for reading large files.
+     *
+     * <p>This method is equivalent to: {@link readAllBytes(Path) readAllBytes(path)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * byte[] data = Files.readAllBytes(new File("image.jpg"));
+     * }</pre>
      *
      * @param   file the file to read from 
      * @return  a byte array containing the content read from the file 
@@ -727,21 +1181,28 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Reads all bytes from a file into a byte array using the given character set. The method ensures
+     * Reads all content from a file into a string using UTF-8 charset. The method ensures
      * that the file is closed when all bytes have been read or an I/O error, or other runtime
      * exception, is thrown.
      *
-     * <p>This method is equivalent to: {@link readAllBytes(Path, Charset) readAllBytes(path, cs)}.
+     * <p>This method is intended for simple cases where it is convenient to read all content
+     * into a string. It is not intended for reading large files.
+     *
+     * <p>This method is equivalent to: {@code readString(file, StandardCharsets.UTF_8)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * String content = Files.readString(new File("config.json"));
+     * }</pre>
      *
      * @param file the file to read from
-     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return a byte array containing the content read from the file
+     * @return a string containing the content read from the file
      * @throws IOException if an I/O error occurs reading from the file
      * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
      * @throws SecurityException In the case of the default provider, and a security manager is
-     * @see #readString(File)
-     * @see java.nio.file.Files#readAllBytes(Path, Charset)
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
+     * @see #readString(File, Charset)
+     * @see java.nio.file.Files#readString(Path)
      * @see IOUtil#readAllToString(File)
      */
     public static String readString(final File file) throws IOException {
@@ -753,7 +1214,15 @@ public abstract class Files { //NOSONAR
      * that the file is closed when all bytes have been read or an I/O error, or other runtime
      * exception, is thrown.
      *
+     * <p>This method is intended for simple cases where it is convenient to read all content
+     * into a string. It is not intended for reading large files.
+     *
      * <p>This method is equivalent to: {@link readString(Path, Charset) readString(path, cs)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * String content = Files.readString(new File("document.txt"), StandardCharsets.ISO_8859_1);
+     * }</pre>
      *
      * @param file the file to read from
      * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
@@ -762,6 +1231,7 @@ public abstract class Files { //NOSONAR
      * @throws IOException if an I/O error occurs reading from the file
      * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
      * @throws SecurityException In the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
      */
@@ -770,23 +1240,36 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Reads all lines from a file. The lines do not include line-termination characters, but do include
+     * Reads all lines from a file using UTF-8 charset. The lines do not include line-termination characters, but do include
      * other leading and trailing whitespace.
      *
      * <p>This method returns a mutable {@code List}. For an {@code ImmutableList}, use {@code
      * Files.asCharSource(file, charset).readLines()}.
      *
+     * <p>This method is intended for simple cases where it is convenient to read all lines
+     * in a single operation. It is not intended for reading large files.
+     *
+     * <p>This method is equivalent to: {@code readAllLines(file, StandardCharsets.UTF_8)}.
+     *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * List<String> lines = Files.readAllLines(new File("data.txt"));
+     * for (String line : lines) {
+     *     processLine(line);
+     * }
+     * }</pre>
      *
      * @param file the file to read from
      * @return a mutable {@link List} containing all the lines
      * @throws IOException if an I/O error occurs
      * @throws SecurityException In the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
      * @see #readAllLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
-     * @see IOUtil#readAllLines(File)
-     */
+     * @see IOUtil#readAllLines(File)        */
     public static List<String> readAllLines(final File file) throws IOException {
         return readAllLines(file, StandardCharsets.UTF_8);
     }
@@ -800,6 +1283,19 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     * 
+    * <p>
+    * Example usage:
+    * <pre>{@code
+    * // Read all lines using a specific charset
+    * List<String> lines = Files.readAllLines(new File("data.csv"), StandardCharsets.ISO_8859_1);
+    * 
+    * // Process each line
+    * for (String line : lines) {
+    *     String[] fields = line.split(",");
+    *     // Process fields
+    * }
+    * }</pre>
      *
      * @param file the file to read from
      * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for

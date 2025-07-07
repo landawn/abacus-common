@@ -21,6 +21,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Type handler for NClobReader objects, providing database interaction capabilities
+ * for handling National Character Large Objects (NCLOB) as Reader streams.
+ * This type automatically converts NCLOB database values to Reader objects and manages
+ * the lifecycle of the NCLOB resources.
+ */
 public class NClobReaderType extends ReaderType {
 
     public static final String NCLOB_READER = "NClobReader";
@@ -30,11 +36,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an NCLOB value from a ResultSet at the specified column index and converts it to a Reader.
+     * The NCLOB resource is automatically freed after obtaining the character stream.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnIndex the column index (1-based) to retrieve the NCLOB from
+     * @return a Reader for the NCLOB character stream, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -43,11 +51,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * Retrieves an NCLOB value from a ResultSet using the specified column label and converts it to a Reader.
+     * The NCLOB resource is automatically freed after obtaining the character stream.
+     * 
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @return a Reader for the NCLOB character stream, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -55,11 +65,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader.
+     * The database will read from the Reader until end-of-file is reached.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the Reader containing the character data to be stored as NCLOB
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
@@ -67,11 +79,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader.
+     * The database will read from the Reader until end-of-file is reached.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Reader containing the character data to be stored as NCLOB
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
@@ -79,12 +93,14 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader with a specified length.
+     * Only the specified number of characters will be read from the Reader.
+     * 
+     * @param stmt the PreparedStatement to set the parameter on
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the Reader containing the character data to be stored as NCLOB
+     * @param sqlTypeOrLength the number of characters in the stream
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -92,12 +108,14 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader with a specified length.
+     * Only the specified number of characters will be read from the Reader.
+     * 
+     * @param stmt the CallableStatement to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the Reader containing the character data to be stored as NCLOB
+     * @param sqlTypeOrLength the number of characters in the stream
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -105,11 +123,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Clob 2 reader.
-     *
-     * @param clob
-     * @return
-     * @throws SQLException the SQL exception
+     * Converts an NCLOB object to a Reader and frees the NCLOB resource.
+     * This method extracts the character stream from the NCLOB and then releases
+     * the NCLOB resources to prevent memory leaks.
+     * 
+     * @param clob the NCLOB to convert to a Reader
+     * @return a Reader for the NCLOB character stream, or null if the input NCLOB is null
+     * @throws SQLException if a database access error occurs while accessing the NCLOB
      */
     static Reader clob2Reader(final NClob clob) throws SQLException {
         Reader reader = null;

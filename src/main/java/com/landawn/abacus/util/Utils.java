@@ -43,7 +43,7 @@ final class Utils {
 
     static final XMLSerializationConfig xscPrettyFormat = XSC.create().prettyFormat(true);
 
-    static final XMLSerializationConfig xscForClone = XSC.create().ignoreTypeInfo(false);
+    static final XMLSerializationConfig xscForClone = XSC.create().writeTypeInfo(true);
 
     static final Type<Boolean> booleanType = N.typeOf(boolean.class);
 

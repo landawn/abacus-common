@@ -16,22 +16,36 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents an operation that accepts three short-valued arguments and returns no result.
+ * This is the three-arity specialization of {@link ShortConsumer}.
+ * Unlike most other functional interfaces, {@code ShortTriConsumer} is expected to operate via side-effects.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(short, short, short)}.
+ * 
+ * @see ShortConsumer
+ * @see ShortBiConsumer
+ */
 @FunctionalInterface
 public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeException> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param a the first input argument
+     * @param b the second input argument
+     * @param c the third input argument
      */
     @Override
     void accept(short a, short b, short c);
 
     /**
+     * Returns a composed {@code ShortTriConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after
-     * @return
+     * @param after the operation to perform after this operation
+     * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortTriConsumer andThen(final ShortTriConsumer after) {
         return (a, b, c) -> {

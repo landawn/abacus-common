@@ -14,8 +14,16 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for {@link String} objects. This class provides the standard
+ * implementation for String type handling in the type system. It extends
+ * AbstractStringType which provides the core functionality for string operations.
+ */
 public class StringType extends AbstractStringType {
 
+    /**
+     * The type name identifier for String type.
+     */
     public static final String STRING = String.class.getSimpleName();
 
     StringType() {

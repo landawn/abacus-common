@@ -31,10 +31,13 @@ import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for {@link Triple} objects. This class provides serialization and
+ * deserialization support for Triple instances, which contain three values (left, middle, right).
+ * The serialization format is a JSON array: [left, middle, right].
  *
- * @param <L>
- * @param <M>
- * @param <R>
+ * @param <L> the type of the left element
+ * @param <M> the type of the middle element
+ * @param <R> the type of the right element
  */
 @SuppressWarnings("java:S2160")
 public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
@@ -63,20 +66,31 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         parameterTypes = new Type[] { leftType, middleType, rightType };
     }
 
+    /**
+     * Returns the declaring name of this type, which uses simple class names.
+     *
+     * @return the declaring name of this Triple type
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the Triple type.
+     *
+     * @return the Class object for Triple
+     */
     @Override
     public Class<Triple<L, M, R>> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns the parameter types of this generic type.
+     * For Triple, this is an array containing three elements: left type, middle type, and right type.
      *
-     * @return
+     * @return an array containing the left, middle, and right types
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -84,9 +98,9 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true, as Triple is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -94,19 +108,23 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     /**
+     * Converts a Triple object to its string representation.
+     * The format is a JSON array: [left, middle, right].
      *
-     * @param x
-     * @return
+     * @param x the Triple object to convert
+     * @return the JSON string representation, or null if x is null
      */
     @Override
     public String stringOf(final Triple<L, M, R> x) {
-        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left, x.middle, x.right), Utils.jsc);
+        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.middle(), x.right()), Utils.jsc);
     }
 
     /**
+     * Creates a Triple object from its string representation.
+     * Expects a JSON array format: [left, middle, right].
      *
-     * @param str
-     * @return
+     * @param str the string to parse
+     * @return a Triple object containing the parsed values, or null if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -126,10 +144,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     /**
+     * Appends the string representation of a Triple object to the given Appendable.
+     * Writes the format: [left, middle, right].
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the Triple object to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final Triple<L, M, R> x) throws IOException {
@@ -143,11 +163,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                 try {
                     bw.write(WD._BRACKET_L);
 
-                    leftType.appendTo(bw, x.left);
+                    leftType.appendTo(bw, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    middleType.appendTo(bw, x.middle);
+                    middleType.appendTo(bw, x.middle());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    rightType.appendTo(bw, x.right);
+                    rightType.appendTo(bw, x.right());
 
                     bw.write(WD._BRACKET_R);
 
@@ -164,11 +184,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             } else {
                 appendable.append(WD._BRACKET_L);
 
-                leftType.appendTo(appendable, x.left);
+                leftType.appendTo(appendable, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
-                middleType.appendTo(appendable, x.middle);
+                middleType.appendTo(appendable, x.middle());
                 appendable.append(ELEMENT_SEPARATOR);
-                rightType.appendTo(appendable, x.right);
+                rightType.appendTo(appendable, x.right());
 
                 appendable.append(WD._BRACKET_R);
             }
@@ -176,11 +196,13 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     /**
+     * Writes the character representation of a Triple object to the given CharacterWriter.
+     * This method is used for JSON/XML serialization. Writes the format: [left, middle, right].
      *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param x the Triple object to write
+     * @param config the serialization configuration for formatting options
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Triple<L, M, R> x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -190,11 +212,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             try {
                 writer.write(WD._BRACKET_L);
 
-                leftType.writeCharacter(writer, x.left, config);
+                leftType.writeCharacter(writer, x.left(), config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                middleType.writeCharacter(writer, x.middle, config);
+                middleType.writeCharacter(writer, x.middle(), config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                rightType.writeCharacter(writer, x.right, config);
+                rightType.writeCharacter(writer, x.right(), config);
 
                 writer.write(WD._BRACKET_R);
 
@@ -205,13 +227,13 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     /**
-     * Gets the type name.
-     *
-     * @param leftTypeName
-     * @param middleTypeName
-     * @param rightTypeName
-     * @param isDeclaringName
-     * @return
+     * Generates the type name for a Triple type with the specified element types.
+     * 
+     * @param leftTypeName the name of the left element type
+     * @param middleTypeName the name of the middle element type
+     * @param rightTypeName the name of the right element type
+     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @return the generated type name for Triple with the specified element types
      */
     protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

@@ -35,21 +35,36 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
         super(LOCAL_DATE);
     }
 
+    /**
+     * Returns the Class object representing the LocalDate type.
+     *
+     * @return The Class object for LocalDate
+     */
     @Override
     public Class<LocalDate> clazz() {
         return LocalDate.class;
     }
 
     /**
+     * Converts a LocalDate object to its string representation.
+     * The string format follows the ISO-8601 standard (yyyy-MM-dd).
      *
-     * @param x
-     * @return
+     * @param x The LocalDate object to convert
+     * @return The string representation of the LocalDate, or null if the input is null
      */
     @Override
     public String stringOf(final LocalDate x) {
         return (x == null) ? null : x.toString();
     }
 
+    /**
+     * Converts an Object to a LocalDate.
+     * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDate using the default zone ID.
+     * Otherwise, the object is converted to a string and parsed.
+     *
+     * @param obj The object to convert to LocalDate
+     * @return The LocalDate representation of the object, or null if the input is null
+     */
     @Override
     public LocalDate valueOf(final Object obj) {
         if (obj instanceof Number) {
@@ -60,9 +75,16 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Parses a string to create a LocalDate object.
+     * The method supports multiple formats:
+     * - Empty string returns null
+     * - "SYS_TIME" returns the current LocalDate
+     * - Numeric strings are treated as milliseconds since epoch
+     * - ISO-8601 formatted strings are parsed directly
      *
-     * @param str
-     * @return
+     * @param str The string to parse
+     * @return The parsed LocalDate object, or null if the input is null or empty
+     * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDate
      */
     @MayReturnNull
     @Override
@@ -87,11 +109,13 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Converts a character array to a LocalDate object.
+     * The character array is first converted to a string, then parsed.
      *
-     * @param cbuf
-     * @param offset
-     * @param len
-     * @return
+     * @param cbuf The character array containing the LocalDate representation
+     * @param offset The starting position in the character array
+     * @param len The number of characters to use
+     * @return The parsed LocalDate object, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -104,11 +128,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Retrieves a LocalDate value from a ResultSet at the specified column index.
+     * First attempts to get the value as a LocalDate object directly. If that fails,
+     * falls back to retrieving it as a java.sql.Date and converting it.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnIndex The column index (1-based) to retrieve the value from
+     * @return The LocalDate value from the ResultSet, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public LocalDate get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -122,11 +149,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Retrieves a LocalDate value from a ResultSet using the specified column name.
+     * First attempts to get the value as a LocalDate object directly. If that fails,
+     * falls back to retrieving it as a java.sql.Date and converting it.
      *
-     * @param rs
-     * @param columnName
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs The ResultSet containing the data
+     * @param columnName The name of the column to retrieve the value from
+     * @return The LocalDate value from the ResultSet, or null if the database value is NULL
+     * @throws SQLException if a database access error occurs or the column name is not found
      */
     @Override
     public LocalDate get(final ResultSet rs, final String columnName) throws SQLException {
@@ -140,11 +170,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Sets a LocalDate parameter in a PreparedStatement at the specified position.
+     * First attempts to set the value as a LocalDate object directly. If that fails,
+     * falls back to setting it as a java.sql.Date.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The PreparedStatement to set the parameter on
+     * @param columnIndex The parameter index (1-based) to set
+     * @param x The LocalDate value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final LocalDate x) throws SQLException {
@@ -156,11 +189,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
+     * Sets a LocalDate parameter in a CallableStatement using the specified parameter name.
+     * First attempts to set the value as a LocalDate object directly. If that fails,
+     * falls back to setting it as a java.sql.Date.
      *
-     * @param stmt
-     * @param columnName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt The CallableStatement to set the parameter on
+     * @param columnName The name of the parameter to set
+     * @param x The LocalDate value to set, or null to set SQL NULL
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String columnName, final LocalDate x) throws SQLException {

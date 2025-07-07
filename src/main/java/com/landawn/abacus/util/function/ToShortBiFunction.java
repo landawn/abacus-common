@@ -14,14 +14,40 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts two arguments and produces a short-valued result.
+ * This is the short-producing primitive specialization for {@link java.util.function.BiFunction}.
+ *
+ * <p>Unlike the standard Java functional interfaces, this interface does not have a corresponding
+ * class in java.util.function package, as Java only provides int, long, and double specializations.
+ * This interface fills that gap for short primitive type operations.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsShort(Object, Object)}.
+ *
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
+ */
 @FunctionalInterface
 public interface ToShortBiFunction<T, U> {
 
     /**
+     * Applies this function to the given arguments and returns a short result.
+     * 
+     * <p>Note: Care should be taken to ensure the result fits within the short range
+     * (-32,768 to 32,767) to avoid overflow.
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * ToShortBiFunction<Integer, Integer> adder = (a, b) -> (short)(a + b);
+     * short sum = adder.applyAsShort(100, 200); // returns 300
+     * 
+     * ToShortBiFunction<String, Integer> charCodeAt = (str, index) -> (short) str.charAt(index);
+     * short charCode = charCodeAt.applyAsShort("Hello", 0); // returns 72 (ASCII code for 'H')
+     * }</pre>
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a primitive short
      */
     short applyAsShort(T t, U u);
 }

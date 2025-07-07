@@ -24,17 +24,36 @@ import com.landawn.abacus.util.function.BooleanPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * A specialized Iterator for primitive boolean values.
+ * This abstract class provides an efficient iteration mechanism for boolean values
+ * without the overhead of boxing/unboxing.
+ * 
+ * <p>This iterator is immutable and provides various utility methods for transformation,
+ * filtering, and conversion operations. It extends ImmutableIterator to ensure that
+ * the remove() operation is not supported.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * boolean[] values = {true, false, true, true, false};
+ * BooleanIterator iter = BooleanIterator.of(values);
+ * 
+ * while (iter.hasNext()) {
+ *     boolean value = iter.nextBoolean();
+ *     System.out.println(value);
+ * }
+ * }</pre>
  *
  * @see ObjIterator
  * @see BiIterator
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- *
+ * @since 1.0
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
+    /** An empty BooleanIterator instance that always returns false for hasNext() */
     public static final BooleanIterator EMPTY = new BooleanIterator() {
         @Override
         public boolean hasNext() {
@@ -47,27 +66,53 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     };
 
+    /**
+     * Returns an empty BooleanIterator.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.empty();
+     * System.out.println(iter.hasNext()); // false
+     * }</pre>
+     *
+     * @return an empty BooleanIterator instance
+     */
     @SuppressWarnings("SameReturnValue")
     public static BooleanIterator empty() {//NOSONAR
         return EMPTY;
     }
 
     /**
+     * Creates a BooleanIterator from a boolean array.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * // Iterates over three boolean values
+     * }</pre>
      *
-     * @param a
-     * @return
+     * @param a the boolean array to create an iterator from
+     * @return a BooleanIterator over the array elements
      */
     public static BooleanIterator of(final boolean... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
+     * Creates a BooleanIterator from a portion of a boolean array.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true, false, true};
+     * BooleanIterator iter = BooleanIterator.of(array, 1, 4);
+     * // Iterates over elements at indices 1, 2, and 3 (false, true, false)
+     * }</pre>
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return a BooleanIterator over the specified range
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -95,12 +140,16 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
             @Override
             public boolean[] toArray() {
-                return N.copyOfRange(a, cursor, toIndex);
+                final boolean[] ret = N.copyOfRange(a, cursor, toIndex);
+                cursor = toIndex; // Mark as exhausted
+                return ret;
             }
 
             @Override
             public BooleanList toList() {
-                return BooleanList.of(N.copyOfRange(a, cursor, toIndex));
+                final BooleanList ret = BooleanList.of(N.copyOfRange(a, cursor, toIndex));
+                cursor = toIndex; // Mark as exhausted
+                return ret;
             }
         };
     }
@@ -108,10 +157,16 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns a BooleanIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the BooleanIterator instance when the first method in the returned {@code BooleanIterator} is called.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.defer(() -> BooleanIterator.of(true, false, true));
+     * // Iterator is not created until first use
+     * }</pre>
      *
-     * @param iteratorSupplier A Supplier that provides the BooleanIterator when needed.
-     * @return A BooleanIterator that is initialized on the first call to hasNext() or nextByte().
-     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
+     * @param iteratorSupplier A Supplier that provides the BooleanIterator when needed
+     * @return A BooleanIterator that is initialized on the first call to hasNext() or nextBoolean()
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -148,11 +203,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Returns an infinite {@code BooleanIterator}.
+     * Returns an infinite {@code BooleanIterator} that generates values using the provided supplier.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Random random = new Random();
+     * BooleanIterator randomBools = BooleanIterator.generate(random::nextBoolean);
+     * // Generates infinite random boolean values
+     * }</pre>
      *
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param supplier the supplier function to generate boolean values
+     * @return an infinite BooleanIterator
+     * @throws IllegalArgumentException if supplier is null
      */
     public static BooleanIterator generate(final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -171,11 +233,22 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * Returns a BooleanIterator that generates values while a condition is true.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AtomicInteger counter = new AtomicInteger(0);
+     * BooleanIterator iter = BooleanIterator.generate(
+     *     () -> counter.get() < 5,
+     *     () -> counter.incrementAndGet() % 2 == 0
+     * );
+     * // Generates 5 boolean values based on even/odd counter
+     * }</pre>
      *
-     * @param hasNext
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param hasNext the supplier that determines if there are more elements
+     * @param supplier the supplier function to generate boolean values
+     * @return a conditional BooleanIterator
+     * @throws IllegalArgumentException if hasNext or supplier is null
      */
     public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -199,10 +272,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     *
-     * @return
+     * Returns the next element as a Boolean object.
+     * 
+     * @return the next boolean value as a Boolean object
      * @throws NoSuchElementException if the iteration has no more elements
-     * @deprecated use {@code nextBoolean()} instead.
+     * @deprecated use {@code nextBoolean()} instead
      */
     @Deprecated
     @Override
@@ -210,13 +284,34 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         return nextBoolean();
     }
 
+    /**
+     * Returns the next boolean value in the iteration.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false);
+     * boolean first = iter.nextBoolean(); // true
+     * boolean second = iter.nextBoolean(); // false
+     * }</pre>
+     *
+     * @return the next boolean value
+     * @throws NoSuchElementException if the iteration has no more elements
+     */
     public abstract boolean nextBoolean();
 
     /**
+     * Skips the specified number of elements in the iteration.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
+     * BooleanIterator skipped = iter.skip(2);
+     * boolean value = skipped.nextBoolean(); // true (third element)
+     * }</pre>
      *
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param n the number of elements to skip
+     * @return a new BooleanIterator with elements skipped
+     * @throws IllegalArgumentException if n is negative
      */
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -261,10 +356,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * Limits the number of elements returned by this iterator.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
+     * BooleanIterator limited = iter.limit(2);
+     * // Will only return the first two elements
+     * }</pre>
      *
-     * @param count
-     * @return
-     * @throws IllegalArgumentException
+     * @param count the maximum number of elements to return
+     * @return a new BooleanIterator limited to the specified count
+     * @throws IllegalArgumentException if count is negative
      */
     public BooleanIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -296,10 +399,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * Filters elements based on the provided predicate.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
+     * BooleanIterator filtered = iter.filter(b -> b == true);
+     * // Will only return true values
+     * }</pre>
      *
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param predicate the predicate to test elements
+     * @return a new BooleanIterator containing only elements that match the predicate
+     * @throws IllegalArgumentException if predicate is null
      */
     public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -339,6 +450,20 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         };
     }
 
+    /**
+     * Returns the first element as an OptionalBoolean, or empty if no elements exist.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false);
+     * OptionalBoolean first = iter.first(); // OptionalBoolean.of(true)
+     * 
+     * BooleanIterator empty = BooleanIterator.empty();
+     * OptionalBoolean none = empty.first(); // OptionalBoolean.empty()
+     * }</pre>
+     *
+     * @return an OptionalBoolean containing the first element, or empty
+     */
     public OptionalBoolean first() {
         if (hasNext()) {
             return OptionalBoolean.of(nextBoolean());
@@ -347,6 +472,19 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     }
 
+    /**
+     * Returns the last element as an OptionalBoolean, or empty if no elements exist.
+     * 
+     * <p>Note: This method consumes the entire iterator.</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * OptionalBoolean last = iter.last(); // OptionalBoolean.of(true)
+     * }</pre>
+     *
+     * @return an OptionalBoolean containing the last element, or empty
+     */
     public OptionalBoolean last() {
         if (hasNext()) {
             boolean next = nextBoolean();
@@ -361,10 +499,35 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     }
 
+    /**
+     * Converts the remaining elements to a boolean array.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * boolean[] array = iter.toArray();
+     * // array contains [true, false, true]
+     * }</pre>
+     *
+     * @return a boolean array containing all remaining elements
+     */
+    @SuppressWarnings("deprecation")
     public boolean[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * Converts the remaining elements to a BooleanList.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * BooleanList list = iter.toList();
+     * // list contains [true, false, true]
+     * }</pre>
+     *
+     * @return a BooleanList containing all remaining elements
+     */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
 
@@ -375,19 +538,53 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         return list;
     }
 
+    /**
+     * Converts this iterator to a Stream of Boolean values.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * long trueCount = iter.stream()
+     *     .filter(b -> b)
+     *     .count(); // Returns 2
+     * }</pre>
+     *
+     * @return a Stream of Boolean values
+     */
     public Stream<Boolean> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * Returns an iterator of IndexedBoolean elements with indices starting from 0.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false);
+     * ObjIterator<IndexedBoolean> indexed = iter.indexed();
+     * // Returns IndexedBoolean{index=0, value=true}, IndexedBoolean{index=1, value=false}
+     * }</pre>
+     *
+     * @return an ObjIterator of IndexedBoolean elements
+     */
     @Beta
     public ObjIterator<IndexedBoolean> indexed() {
         return indexed(0);
     }
 
     /**
+     * Returns an iterator of IndexedBoolean elements with indices starting from the specified value.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false);
+     * ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
+     * // Returns IndexedBoolean{index=10, value=true}, IndexedBoolean{index=11, value=false}
+     * }</pre>
      *
-     * @param startIndex
-     * @return
+     * @param startIndex the starting index value
+     * @return an ObjIterator of IndexedBoolean elements
+     * @throws IllegalArgumentException if startIndex is negative
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed(final long startIndex) {
@@ -413,23 +610,30 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * For each remaining.
+     * For each remaining element, performs the given action.
      *
-     * @param action
-     * @throws IllegalArgumentException
-     * @deprecated
+     * @param action the action to be performed for each element
+     * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing
      */
-    @Override
     @Deprecated
-    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
+    @Override
+    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) {
         super.forEachRemaining(action);
     }
 
     /**
+     * Performs the given action for each remaining element.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * iter.foreachRemaining(System.out::println);
+     * // Prints each boolean value
+     * }</pre>
      *
-     * @param <E>
-     * @param action
-     * @throws E the e
+     * @param <E> the type of exception that the action may throw
+     * @param action the action to be performed for each element
+     * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
@@ -440,11 +644,20 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * Performs the given action for each remaining element, providing the element index.
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * iter.foreachIndexed((index, value) -> 
+     *     System.out.println("Index " + index + ": " + value)
+     * );
+     * }</pre>
      *
-     * @param <E>
-     * @param action
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> the type of exception that the action may throw
+     * @param action the action to be performed for each element with its index
+     * @throws IllegalArgumentException if action is null
+     * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);

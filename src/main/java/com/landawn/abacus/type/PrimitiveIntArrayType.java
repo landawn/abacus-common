@@ -30,22 +30,30 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     public static final String INT_ARRAY = int[].class.getSimpleName();
 
     private final Type<Integer> elementType;
+    private final Type<Integer>[] parameterTypes;
 
     PrimitiveIntArrayType() {
         super(INT_ARRAY);
 
         elementType = TypeFactory.getType(int.class);
+        parameterTypes = new Type[] { elementType };
     }
 
+    /**
+     * Returns the Class object representing the primitive int array type (int[].class).
+     *
+     * @return the Class object for int[] type
+     */
     @Override
     public Class<int[]> clazz() {
         return int[].class;
     }
 
     /**
-     * Gets the element type.
+     * Returns the Type instance for the element type of this array, which is Integer.
+     * This method provides access to the Type representation of individual array elements.
      *
-     * @return
+     * @return the Type instance representing Integer type for array elements
      */
     @Override
     public Type<Integer> getElementType() {
@@ -53,9 +61,24 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
+     * Returns the parameter types associated with this array type.
      *
-     * @param x
-     * @return
+     * @return an array containing the Integer Type that describes the elements of this array type
+     * @see #getElementType()
+     */
+    @Override
+    public Type<Integer>[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    /**
+     * Converts a primitive int array to its string representation.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * For example, an array {1, 2, 3} becomes "[1, 2, 3]".
+     * 
+     * @param x the int array to convert to string
+     * @return the string representation of the array, or null if the input array is null.
+     *         Returns "[]" for empty arrays.
      */
     @MayReturnNull
     @Override
@@ -66,40 +89,25 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 8));
-        //
-        //    sb.append(WD._BRACKET_L);
-        //
-        //    for (int i = 0, len = x.length; i < len; i++) {
-        //        if (i > 0) {
-        //            sb.append(ELEMENT_SEPARATOR);
-        //        }
-        //
-        //        sb.append(x[i]);
-        //    }
-        //
-        //    sb.append(WD._BRACKET_R);
-        //
-        //    final String str = sb.toString();
-        //
-        //    Objectory.recycle(sb);
-        //
-        //    return str;
-
         return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
-     *
-     * @param str
-     * @return
+     * Parses a string representation of an int array and returns the corresponding int array.
+     * The string should contain comma-separated integer values enclosed in square brackets.
+     * For example, "[1, 2, 3]" will be parsed to an int array {1, 2, 3}.
+     * 
+     * @param str the string to parse, expected format is "[value1, value2, ...]"
+     * @return the parsed int array, or null if the input string is null.
+     *         Returns an empty array for empty string or "[]".
+     * @throws NumberFormatException if any element in the string cannot be parsed as an integer
      */
     @MayReturnNull
     @Override
     public int[] valueOf(final String str) {
-        if (str == null) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (str.isEmpty() || STR_FOR_EMPTY_ARRAY.equals(str)) {
+        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_INT_ARRAY;
         }
 
@@ -117,10 +125,13 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
-     *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Appends the string representation of an int array to the given Appendable.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * If the array is null, appends "null".
+     * 
+     * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
+     * @param x the int array to append
+     * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
     public void appendTo(final Appendable appendable, final int[] x) throws IOException {
@@ -142,11 +153,14 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
-     *
-     * @param writer
-     * @param x
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Writes the character representation of an int array to the given CharacterWriter.
+     * This method is optimized for performance when writing to character-based outputs.
+     * The array is formatted as comma-separated values enclosed in square brackets.
+     * 
+     * @param writer the CharacterWriter to write to
+     * @param x the int array to write
+     * @param config the serialization configuration (currently unused for primitive arrays)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final int[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -168,10 +182,13 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
-     * Collection 2 array.
-     *
-     * @param c
-     * @return
+     * Converts a Collection of Integer objects to a primitive int array.
+     * Each element in the collection is unboxed to its primitive int value.
+     * 
+     * @param c the Collection of Integer objects to convert
+     * @return a primitive int array containing all elements from the collection,
+     *         or null if the input collection is null
+     * @throws ClassCastException if any element in the collection is not an Integer
      */
     @MayReturnNull
     @Override
@@ -191,6 +208,15 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
         return a;
     }
 
+    /**
+     * Converts a primitive int array to a Collection by adding all array elements to the provided collection.
+     * Each primitive int value is autoboxed to an Integer object before being added.
+     * 
+     * @param x the int array to convert
+     * @param output the Collection to add the array elements to
+     * @param <E> the type parameter of the output collection
+     * @throws ClassCastException if the output collection cannot accept Integer objects
+     */
     @Override
     public <E> void array2Collection(final int[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
@@ -203,9 +229,12 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
-     *
-     * @param x
-     * @return
+     * Computes and returns the hash code for the given int array.
+     * The hash code is calculated based on the contents of the array using the standard
+     * array hash code algorithm, which considers all elements in the array.
+     * 
+     * @param x the int array to compute hash code for
+     * @return the hash code of the array, or 0 if the array is null
      */
     @Override
     public int hashCode(final int[] x) {
@@ -213,10 +242,13 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     }
 
     /**
-     *
-     * @param x
-     * @param y
-     * @return {@code true}, if successful
+     * Compares two int arrays for equality.
+     * Two arrays are considered equal if they have the same length and contain the same
+     * elements in the same order. Two null references are considered equal.
+     * 
+     * @param x the first int array to compare
+     * @param y the second int array to compare
+     * @return true if the arrays are equal, false otherwise
      */
     @Override
     public boolean equals(final int[] x, final int[] y) {

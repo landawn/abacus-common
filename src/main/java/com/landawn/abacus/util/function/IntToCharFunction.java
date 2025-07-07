@@ -14,15 +14,46 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts an int-valued argument and produces a
+ * char-valued result. This is the {@code int}-to-{@code char} primitive
+ * specialization for {@link java.util.function.Function}.
+ *
+ * <p>This is a functional interface whose functional method is
+ * {@link #applyAsChar(int)}.
+ *
+ * @see java.util.function.Function
+ * @since 1.8
+ */
 @FunctionalInterface
 public interface IntToCharFunction {
 
+    /**
+     * A default implementation that performs a narrowing primitive conversion
+     * from {@code int} to {@code char}. This conversion treats the int value
+     * as a Unicode code point and converts it to the corresponding char value.
+     * Values outside the range of valid char values (0 to 65,535) will be
+     * truncated to fit within the 16-bit char representation.
+     */
     IntToCharFunction DEFAULT = value -> (char) value;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * <p>The function performs a conversion from an {@code int} value to a
+     * {@code char} value. This is typically used to convert Unicode code points
+     * (represented as int values) to their corresponding char representations.
+     * 
+     * <p>Note that {@code char} values in Java are 16-bit unsigned values 
+     * representing Unicode characters in the range from 0 to 65,535 (0xFFFF).
+     * If the input int value is outside this range, only the lower 16 bits
+     * will be used for the conversion.
+     *
+     * @param value the function argument, an int value to be converted to char.
+     *              This is typically a Unicode code point value
+     * @return the function result as a char value. If the input value is outside
+     *         the valid char range (0 to 65,535), the result will be the lower
+     *         16 bits of the input value (equivalent to {@code (char) value})
      */
     char applyAsChar(int value);
 }

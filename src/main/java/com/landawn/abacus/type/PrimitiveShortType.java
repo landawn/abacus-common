@@ -31,6 +31,11 @@ public final class PrimitiveShortType extends AbstractShortType {
         super(SHORT);
     }
 
+    /**
+     * Returns the Class object representing the primitive short type.
+     * 
+     * @return the Class object for short.class
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -38,26 +43,37 @@ public final class PrimitiveShortType extends AbstractShortType {
     }
 
     /**
-     * Checks if is primitive type.
+     * Indicates whether this type represents a primitive type.
+     * For PrimitiveShortType, this always returns true since it represents the primitive short type.
      *
-     * @return {@code true}, if is primitive type
+     * @return true, indicating this is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {
         return true;
     }
 
+    /**
+     * Returns the default value for the primitive short type.
+     * The default value for primitive short is 0.
+     *
+     * @return Short object containing the value 0
+     */
     @Override
     public Short defaultValue() {
         return DEFAULT_VALUE;
     }
 
     /**
+     * Retrieves a short value from the specified column in the ResultSet.
+     * This method handles various data types that can be converted to short,
+     * including direct short values, other numeric types, and string representations.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the short value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
     @MayReturnNull
     @Override
@@ -76,11 +92,15 @@ public final class PrimitiveShortType extends AbstractShortType {
     }
 
     /**
+     * Retrieves a short value from the specified column in the ResultSet.
+     * This method handles various data types that can be converted to short,
+     * including direct short values, other numeric types, and string representations.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @return the short value from the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
     @MayReturnNull
     @Override

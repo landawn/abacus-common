@@ -18,6 +18,11 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for java.util.regex.Pattern objects, providing conversion between Pattern instances
+ * and their string representations. This type allows for seamless serialization and deserialization
+ * of regular expression patterns.
+ */
 public class PatternType extends AbstractType<Pattern> {
 
     public static final String PATTERN = "Pattern";
@@ -26,15 +31,23 @@ public class PatternType extends AbstractType<Pattern> {
         super(PATTERN);
     }
 
+    /**
+     * Returns the Class object representing the Pattern type.
+     *
+     * @return the Class object for java.util.regex.Pattern
+     */
     @Override
     public Class<Pattern> clazz() {
         return Pattern.class;
     }
 
     /**
+     * Converts a Pattern object to its string representation.
+     * Returns the pattern string by calling toString() on the Pattern object.
+     * Returns null if the input Pattern is null.
      *
-     * @param t
-     * @return
+     * @param t the Pattern object to convert
+     * @return the pattern string, or null if the input is null
      */
     @Override
     public String stringOf(final Pattern t) {
@@ -42,9 +55,12 @@ public class PatternType extends AbstractType<Pattern> {
     }
 
     /**
+     * Creates a Pattern object from a string representation.
+     * Compiles the string into a Pattern using Pattern.compile().
+     * Returns null if the input string is null or empty.
      *
-     * @param str
-     * @return
+     * @param str the regular expression string to compile
+     * @return a compiled Pattern object, or null if the input is null or empty
      */
     @Override
     public Pattern valueOf(final String str) {

@@ -66,10 +66,10 @@ import com.landawn.abacus.util.stream.Stream;
 public sealed interface DataSet permits RowDataSet {
 
     /**
-     * Returns an empty immutable {@code DataSet}.
+     * Returns an immutable empty {@code DataSet}.
      * This method can be used when you need an empty DataSet for initialization or comparison purposes.
      *
-     * @return an empty immutable {@code DataSet}
+     * @return an immutable empty {@code DataSet}
      */
     static DataSet empty() {
         return RowDataSet.EMPTY_DATA_SET;

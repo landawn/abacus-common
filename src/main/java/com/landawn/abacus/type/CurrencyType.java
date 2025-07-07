@@ -18,6 +18,11 @@ import java.util.Currency;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Currency values.
+ * This class provides serialization and deserialization for java.util.Currency objects.
+ * Currencies are represented by their ISO 4217 currency codes (e.g., "USD", "EUR", "JPY").
+ */
 public class CurrencyType extends AbstractType<Currency> {
 
     public static final String CURRENCY = Currency.class.getSimpleName();
@@ -26,15 +31,21 @@ public class CurrencyType extends AbstractType<Currency> {
         super(CURRENCY);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing Currency.class
+     */
     @Override
     public Class<Currency> clazz() {
         return Currency.class;
     }
 
     /**
-     * Checks if is immutable.
+     * Indicates whether instances of this type are immutable.
+     * Currency objects are immutable in Java.
      *
-     * @return {@code true}, if is immutable
+     * @return true, indicating Currency objects are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -42,9 +53,11 @@ public class CurrencyType extends AbstractType<Currency> {
     }
 
     /**
+     * Converts a Currency object to its string representation.
+     * Uses the ISO 4217 currency code for serialization.
      *
-     * @param x
-     * @return
+     * @param x the Currency object to convert. Can be null.
+     * @return The ISO 4217 currency code (e.g., "USD"), or null if input is null
      */
     @Override
     public String stringOf(final Currency x) {
@@ -52,9 +65,12 @@ public class CurrencyType extends AbstractType<Currency> {
     }
 
     /**
+     * Converts a string representation back to a Currency object.
+     * The string should be a valid ISO 4217 currency code.
      *
-     * @param str
-     * @return
+     * @param str the ISO 4217 currency code. Can be null or empty.
+     * @return The Currency instance for the specified code, or null if input is null/empty
+     * @throws IllegalArgumentException if the currency code is not a supported ISO 4217 code
      */
     @Override
     public Currency valueOf(final String str) {

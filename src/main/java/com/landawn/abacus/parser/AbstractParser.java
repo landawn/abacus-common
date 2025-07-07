@@ -43,6 +43,10 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.BiMap;
+import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.ImmutableCollection;
 import com.landawn.abacus.util.ImmutableList;
@@ -318,12 +322,43 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     protected static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists() && !file.createNewFile()) {
+        if (!file.exists() && !IOUtil.createIfNotExists(file)) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
     }
 
     protected static Exclusion getExclusion(final SerializationConfig<?> config, final BeanInfo beanInfo) {
         return config.getExclusion() == null ? (beanInfo.jsonXmlSeriExclusion == null ? Exclusion.NULL : beanInfo.jsonXmlSeriExclusion) : config.getExclusion();
+    }
+
+    /**
+     * Checks if an object has already been serialized (circular reference detection).
+     * 
+     * @param obj the object to check
+     * @param serializedObjects set of already serialized objects
+     * @param config the serialization configuration
+     * @param bw the XML writer
+     * @return true if circular reference was found and handled, false otherwise
+     * @throws IOException if an I/O error occurs
+     */
+    protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONXMLSerializationConfig<?> config,
+            @SuppressWarnings("unused") final CharacterWriter bw) throws IOException {
+        final Type<?> type = obj == null ? null : Type.of(obj.getClass());
+        if (obj != null && serializedObjects != null //
+                && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {
+            if (serializedObjects.contains(obj)) {
+                if (config == null || !config.supportCircularReference()) {
+                    throw new ParseException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
+                }
+
+                // bw.write("null");
+
+                return true;
+            } else {
+                serializedObjects.add(obj);
+            }
+        }
+
+        return false;
     }
 }

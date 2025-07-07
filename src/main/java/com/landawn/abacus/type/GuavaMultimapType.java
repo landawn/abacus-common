@@ -40,7 +40,14 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Type handler for Google Guava Multimap implementations.
+ * This class provides serialization and deserialization capabilities for various Guava Multimap types
+ * including ListMultimap, SetMultimap, and their concrete implementations.
+ * Multimaps are serialized as Map<K, Collection<V>> structures.
  *
+ * @param <K> the key type of the multimap
+ * @param <V> the value type of the multimap
+ * @param <T> the multimap type (must extend Multimap<K, V>)
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
@@ -69,20 +76,34 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]).setElementType(parameterTypes[1].getElementType());
     }
 
+    /**
+     * Returns the declaring name of this multimap type.
+     * The declaring name represents the type in a format suitable for type declarations,
+     * using canonical class names with type parameters.
+     *
+     * @return the declaring name of this type (e.g., "com.google.common.collect.Multimap<String, Integer>")
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * Returns the Class object representing the multimap type handled by this type handler.
+     *
+     * @return the Class object for the multimap type
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
     /**
-     * Gets the parameter types.
+     * Returns an array containing the parameter types of this generic multimap type.
+     * For multimap types, this includes the key type and the collection value type.
+     * SetMultimap types return [KeyType, Set<ValueType>], while other multimaps return [KeyType, List<ValueType>].
      *
-     * @return
+     * @return an array containing the key type and collection value type
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -90,9 +111,9 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
-     * Checks if is generic type.
+     * Indicates that this is a generic type with type parameters.
      *
-     * @return {@code true}, if is generic type
+     * @return true as multimap types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -100,9 +121,10 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
-     * Checks if is serializable.
+     * Indicates whether instances of this type can be serialized.
+     * Guava multimaps are serializable through their Map representation.
      *
-     * @return {@code true}, if is serializable
+     * @return true, as multimaps can be serialized
      */
     @Override
     public boolean isSerializable() {
@@ -110,9 +132,12 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
+     * Converts a multimap to its string representation.
+     * The multimap is serialized as a JSON object where each key maps to a collection of values.
+     * Uses the multimap's asMap() view for serialization.
      *
-     * @param x
-     * @return
+     * @param x the multimap to convert to string
+     * @return the JSON string representation of the multimap, or null if the input is null
      */
     @Override
     public String stringOf(final T x) {
@@ -126,9 +151,13 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
+     * Converts a string representation back to a multimap instance.
+     * The string should be in JSON format representing a Map<K, Collection<V>>.
+     * Creates the appropriate multimap implementation based on the type class.
+     * For immutable types, returns an immutable copy of the constructed multimap.
      *
-     * @param str
-     * @return
+     * @param str the JSON string to parse
+     * @return a new multimap instance containing the parsed data, or null if the input is null or empty
      */
     @MayReturnNull
     @Override
@@ -157,6 +186,16 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         return multimap;
     }
 
+    /**
+     * Generates a type name string for a multimap type with the specified key and value types.
+     * The format depends on whether a declaring name or full name is requested.
+     *
+     * @param typeClass the multimap class
+     * @param keyTypeName the name of the key type
+     * @param valueTypeName the name of the value type
+     * @param isDeclaringName true to generate a declaring name, false for the full name
+     * @return the formatted type name (e.g., "Multimap<String, Integer>")
+     */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
@@ -167,6 +206,20 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         }
     }
 
+    /**
+     * Creates a new instance of the appropriate multimap implementation.
+     * Selects the concrete implementation based on the type class:
+     * - ArrayListMultimap for ListMultimap types
+     * - HashMultimap for SetMultimap types
+     * - TreeMultimap for SortedSetMultimap types
+     * - LinkedHashMultimap/LinkedListMultimap for ordered types
+     * Falls back to reflection-based instantiation for custom implementations.
+     *
+     * @param keySize the expected number of keys
+     * @param avgValueSize the expected average number of values per key
+     * @return a new multimap instance
+     * @throws IllegalArgumentException if no suitable constructor or factory method is found
+     */
     private T newInstance(int keySize, final int avgValueSize) {
         if (ArrayListMultimap.class.isAssignableFrom(typeClass) || ImmutableListMultimap.class.isAssignableFrom(typeClass) //
                 || Multimap.class.equals(typeClass) || ImmutableMultimap.class.equals(typeClass)

@@ -20,6 +20,11 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for Float wrapper type.
+ * This class provides functionality to handle Float objects in database operations and type conversions.
+ * It extends AbstractFloatType to inherit common float type handling behavior.
+ */
 public final class FloatType extends AbstractFloatType {
 
     public static final String FLOAT = Float.class.getSimpleName();
@@ -28,6 +33,11 @@ public final class FloatType extends AbstractFloatType {
         super(FLOAT);
     }
 
+    /**
+     * Returns the Class object representing the Float wrapper type.
+     *
+     * @return Float.class
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -35,9 +45,10 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Indicates whether this type represents a primitive wrapper class.
+     * For FloatType, this always returns true as Float is the wrapper class for the primitive float type.
      *
-     * @return {@code true}, if is primitive wrapper
+     * @return true, indicating Float is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -45,11 +56,16 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
+     * Retrieves a Float value from the specified column in a ResultSet.
+     * This method handles null values and type conversions from the database.
+     * If the column value is null, returns null.
+     * If the value is already a Float, returns it directly.
+     * Otherwise, converts the value to Float using appropriate conversion logic.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnIndex the index of the column to read (1-based)
+     * @return the Float value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @MayReturnNull
     @Override
@@ -66,11 +82,16 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
+     * Retrieves a Float value from the specified column in a ResultSet using the column label.
+     * This method handles null values and type conversions from the database.
+     * If the column value is null, returns null.
+     * If the value is already a Float, returns it directly.
+     * Otherwise, converts the value to Float using appropriate conversion logic.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet to read from
+     * @param columnLabel the label of the column to read
+     * @return the Float value from the column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @MayReturnNull
     @Override

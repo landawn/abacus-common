@@ -18,75 +18,175 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- *
- * @param <K> the key type
- * @param <E>
+ * A pool that manages objects associated with keys, similar to a Map but with pooling capabilities.
+ * This interface extends Pool to provide key-based storage and retrieval of poolable objects.
+ * 
+ * <p>KeyedObjectPool is useful when you need to pool objects by category or type, such as:
+ * <ul>
+ *   <li>Database connections per schema or server</li>
+ *   <li>Thread pools per task type</li>
+ *   <li>Cached computations by input parameters</li>
+ *   <li>Resources grouped by tenant or user</li>
+ * </ul>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Map-like interface for key-based access</li>
+ *   <li>Automatic expiration of entries based on age or inactivity</li>
+ *   <li>Memory-based capacity constraints</li>
+ *   <li>Thread-safe operations</li>
+ * </ul>
+ * 
+ * <p>Usage example:
+ * <pre>{@code
+ * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(100);
+ * 
+ * // Store connection by database name
+ * DBConnection conn = new DBConnection("server1");
+ * pool.put("database1", conn);
+ * 
+ * // Retrieve connection
+ * DBConnection borrowed = pool.get("database1");
+ * if (borrowed != null) {
+ *     try {
+ *         // use connection
+ *     } finally {
+ *         pool.put("database1", borrowed); // return to pool
+ *     }
+ * }
+ * }</pre>
+ * 
+ * @param <K> the type of keys maintained by this pool
+ * @param <E> the type of pooled values, must implement Poolable
+ * @see Pool
+ * @see Poolable
+ * @see PoolFactory
  */
 public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
-     * Attempts to add a new element associated with the given key to the pool.
-     *
-     * @param key The key with which the specified element is to be associated.
-     * @param e The element to be added to the pool.
-     * @return {@code true} if the element was successfully added, {@code false} otherwise.
+     * Associates the specified poolable element with the specified key in this pool.
+     * If the pool previously contained a value for the key, the old value is destroyed.
+     * 
+     * <p>The put operation will fail if:
+     * <ul>
+     *   <li>The pool is at capacity and auto-balancing is disabled</li>
+     *   <li>The element has already expired</li>
+     *   <li>The element would exceed memory constraints</li>
+     * </ul>
+     * 
+     * @param key the key with which the specified element is to be associated, must not be null
+     * @param e the element to be associated with the specified key, must not be null
+     * @return {@code true} if the element was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E e);
 
     /**
-     * Attempts to add a new element associated with the given key to the pool.
-     * If the addition fails and autoDestroyOnFailedToPut is {@code true}, the element will be destroyed.
-     *
-     * @param key The key with which the specified element is to be associated.
-     * @param e The element to be added to the pool.
-     * @param autoDestroyOnFailedToPut If {@code true}, the element will be destroyed if it cannot be added to the pool.
-     * @return {@code true} if the element was successfully added, {@code false} otherwise.
+     * Associates the specified element with the specified key in this pool,
+     * with optional automatic destruction on failure.
+     * 
+     * <p>This is a convenience method that ensures proper cleanup if the object cannot be pooled.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * Connection conn = createConnection();
+     * // Connection will be closed if it can't be added to pool
+     * pool.put("db1", conn, true);
+     * }</pre>
+     * 
+     * @param key the key with which the specified element is to be associated, must not be null
+     * @param e the element to be associated with the specified key, must not be null
+     * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
+     * @return {@code true} if the element was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
 
     /**
-     * Retrieves the element associated with the given key from the pool.
-     *
-     * @param key The key whose associated element is to be returned.
-     * @return The element associated with the specified key, or {@code null} if the pool contains no mapping for the key.
+     * Returns the element associated with the specified key, or null if no mapping exists.
+     * The element's activity print is updated to reflect this access.
+     * 
+     * <p>If the retrieved element has expired, it will be destroyed and null will be returned.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * E cached = pool.get("myKey");
+     * if (cached != null) {
+     *     // Use cached object
+     * } else {
+     *     // Create new object and add to pool
+     *     E newObj = createObject();
+     *     pool.put("myKey", newObj);
+     * }
+     * }</pre>
+     * 
+     * @param key the key whose associated element is to be returned
+     * @return the element associated with the key, or null if no mapping exists or element expired
+     * @throws IllegalStateException if the pool has been closed
      */
     E get(K key);
 
     /**
-     * Removes the element associated with the given key from the pool.
-     *
-     * @param key The key whose associated element is to be removed.
-     * @return The element that was associated with the key, or {@code null} if the pool contained no mapping for the key.
+     * Removes and returns the element associated with the specified key.
+     * The element's activity print is updated to reflect this access.
+     * 
+     * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
+     * so it will not be available for future requests unless re-added.
+     * 
+     * @param key the key whose mapping is to be removed from the pool
+     * @return the element previously associated with the key, or null if no mapping existed
+     * @throws IllegalStateException if the pool has been closed
      */
     E remove(K key);
 
     /**
-     * Retrieves the element associated with the given key from the pool without updating the last access time.
-     *
-     * @param key The key whose associated element is to be returned.
-     * @return The element associated with the specified key, or {@code null} if the pool contains no mapping for the key.
+     * Returns the element associated with the specified key without updating access statistics.
+     * This method is useful for monitoring or administrative purposes.
+     * 
+     * <p>If the element has expired, it will be removed and destroyed, and null will be returned.
+     * Unlike {@link #get(Object)}, this method does not update the last access time or access count.
+     * 
+     * @param key the key whose associated element is to be returned
+     * @return the element associated with the key, or null if no mapping exists or element expired
+     * @throws IllegalStateException if the pool has been closed
      */
     E peek(K key);
 
     /**
-     * Retrieves a set of the keys contained in the pool.
-     *
-     * @return A set of the keys contained in the pool.
+     * Returns a Set view of the keys contained in this pool.
+     * The returned set is a snapshot and will not reflect subsequent changes to the pool.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * Set<String> keys = pool.keySet();
+     * for (String key : keys) {
+     *     System.out.println("Pool contains key: " + key);
+     * }
+     * }</pre>
+     * 
+     * @return a set containing all keys currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     Set<K> keySet();
 
     /**
-     * Retrieves a collection of the values contained in the pool.
-     *
-     * @return A collection of the values contained in the pool.
+     * Returns a Collection view of the values contained in this pool.
+     * The returned collection is a snapshot and will not reflect subsequent changes to the pool.
+     * 
+     * @return a collection containing all values currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     Collection<E> values();
 
     /**
-     * Checks if the pool contains an element associated with the given key.
-     *
-     * @param key The key to be checked for presence in the pool.
-     * @return {@code true} if the pool contains an element associated with the specified key, {@code false} otherwise.
+     * Checks if this pool contains a mapping for the specified key.
+     * 
+     * @param key the key whose presence in this pool is to be tested
+     * @return {@code true} if this pool contains a mapping for the specified key, {@code false} otherwise
+     * @throws IllegalStateException if the pool has been closed
      */
     boolean containsKey(K key);
 
@@ -99,18 +199,33 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     //    boolean containsValue(E e);
 
     /**
-     * The Interface MemoryMeasure.
-     *
-     * @param <K> the key type
-     * @param <E>
+     * Interface for measuring the memory size of key-value pairs in the pool.
+     * This allows the pool to enforce memory-based capacity limits.
+     * 
+     * <p>Usage example:
+     * <pre>{@code
+     * MemoryMeasure<String, CachedData> measure = (key, data) -> 
+     *     key.length() * 2 + data.getBytes().length;
+     *     
+     * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
+     *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,
+     *     1024 * 1024 * 500, // 500MB max
+     *     measure
+     * );
+     * }</pre>
+     * 
+     * @param <K> the type of keys
+     * @param <E> the type of values being measured
      */
     interface MemoryMeasure<K, E> {
 
         /**
-         *
-         * @param key
-         * @param e
-         * @return
+         * Calculates the memory size of the given key-value pair in bytes.
+         * The returned value is used to track total memory usage and enforce memory limits.
+         * 
+         * @param key the key part of the pair, never null when called by the pool
+         * @param e the value part of the pair, never null when called by the pool
+         * @return the combined size of the key-value pair in bytes, should be non-negative
          */
         long sizeOf(K key, E e);
     }

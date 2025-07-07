@@ -39,8 +39,39 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * Note: This class contains the methods copied from Apache Commons and Google Guava under Apache License v2.
- *
+ * Utility class for exception handling and conversion.
+ * Provides methods to convert checked exceptions to runtime exceptions, extract stack traces,
+ * find causes, and handle exception messages.
+ * 
+ * <p>This class contains methods copied from Apache Commons and Google Guava under Apache License v2.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Convert checked exception to runtime exception
+ * try {
+ *     someMethodThatThrowsIOException();
+ * } catch (IOException e) {
+ *     throw ExceptionUtil.toRuntimeException(e);
+ * }
+ * 
+ * // Get stack trace as string
+ * try {
+ *     riskyOperation();
+ * } catch (Exception e) {
+ *     String stackTrace = ExceptionUtil.getStackTrace(e);
+ *     logger.error(stackTrace);
+ * }
+ * 
+ * // Find specific cause in exception chain
+ * try {
+ *     databaseOperation();
+ * } catch (Exception e) {
+ *     Optional<SQLException> sqlEx = ExceptionUtil.findCause(e, SQLException.class);
+ *     if (sqlEx.isPresent()) {
+ *         handleSQLException(sqlEx.get());
+ *     }
+ * }
+ * }</pre>
  */
 public final class ExceptionUtil {
 
@@ -85,10 +116,21 @@ public final class ExceptionUtil {
     private static final String UncheckedIOExceptionClassName = UncheckedIOException.class.getSimpleName();
 
     /**
+     * Registers a custom mapper for converting specific exception types to RuntimeException.
+     * This allows customization of how checked exceptions are converted to unchecked exceptions.
      *
-     * @param <E>
-     * @param exceptionClass
-     * @param runtimeExceptionMapper
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Register custom mapper for MyCheckedException
+     * ExceptionUtil.registerRuntimeExceptionMapper(
+     *     MyCheckedException.class,
+     *     e -> new MyRuntimeException(e.getMessage(), e)
+     * );
+     * }</pre>
+     *
+     * @param <E> the type of exception to map
+     * @param exceptionClass the class of the exception to map
+     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
      */
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
             final Function<E, RuntimeException> runtimeExceptionMapper) {
@@ -96,12 +138,24 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Registers a custom mapper for converting specific exception types to RuntimeException,
+     * with an option to force overwrite existing mappings.
      *
-     * @param <E>
-     * @param exceptionClass
-     * @param runtimeExceptionMapper
-     * @param force
-     * @throws IllegalArgumentException
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Force registration even if mapper already exists
+     * ExceptionUtil.registerRuntimeExceptionMapper(
+     *     CustomException.class,
+     *     e -> new CustomRuntimeException(e),
+     *     true  // force overwrite
+     * );
+     * }</pre>
+     *
+     * @param <E> the type of exception to map
+     * @param exceptionClass the class of the exception to map
+     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
+     * @param force if true, overwrites existing mapper; if false, throws exception if mapper exists
+     * @throws IllegalArgumentException if trying to register built-in classes or if mapper already exists and force is false
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
@@ -122,20 +176,42 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}. Otherwise, returns itself.
+     * Converts the specified Exception to a RuntimeException if it's a checked exception.
+     * If it's already a RuntimeException, returns itself.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     Files.readAllLines(path);
+     * } catch (IOException e) {
+     *     throw ExceptionUtil.toRuntimeException(e);
+     *     // Throws UncheckedIOException
+     * }
+     * }</pre>
      *
      * @param e the exception to convert
-     * @return the converted runtime exception
+     * @return the converted runtime exception or the original if already runtime
      */
     public static RuntimeException toRuntimeException(final Exception e) {
         return toRuntimeException(e, false, false);
     }
 
     /**
-     * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}. Otherwise, returns itself.
+     * Converts the specified Exception to a RuntimeException with option to call Thread.interrupt().
+     * Useful when handling InterruptedException to preserve interrupted status.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     Thread.sleep(1000);
+     * } catch (InterruptedException e) {
+     *     throw ExceptionUtil.toRuntimeException(e, true);
+     *     // Converts to UncheckedInterruptedException and calls Thread.interrupt()
+     * }
+     * }</pre>
      *
      * @param e the exception to convert
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
      * @return the converted runtime exception
      */
     public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
@@ -143,8 +219,17 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}.
-     * Otherwise, returns itself.
+     * Converts the specified Throwable to a RuntimeException if it's a checked exception.
+     * If it's already a RuntimeException, returns itself.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     reflectiveOperation();
+     * } catch (Throwable t) {
+     *     throw ExceptionUtil.toRuntimeException(t);
+     * }
+     * }</pre>
      *
      * @param e the throwable to convert
      * @return the converted runtime exception
@@ -154,11 +239,20 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception},
-     * or throw it if it's an {@code Error}. Otherwise, returns itself.
+     * Converts the specified Throwable to a RuntimeException with option to call Thread.interrupt().
+     * If it's an Error and throwIfItIsError is false, wraps it in RuntimeException.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     riskyOperation();
+     * } catch (Throwable t) {
+     *     throw ExceptionUtil.toRuntimeException(t, true);
+     * }
+     * }</pre>
      *
      * @param e the throwable to convert
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
      * @return the converted runtime exception
      */
     public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
@@ -166,13 +260,24 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception},
-     * or throws it if it's an {@code Error}. Otherwise, returns itself.
+     * Converts the specified Throwable to a RuntimeException with full control over behavior.
+     * Provides options to handle InterruptedException and Error cases.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     criticalOperation();
+     * } catch (Throwable t) {
+     *     // Convert to runtime, call interrupt if needed, throw Error as-is
+     *     throw ExceptionUtil.toRuntimeException(t, true, true);
+     * }
+     * }</pre>
      *
      * @param e the throwable to convert
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an {@code InterruptedException}
-     * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
+     * @param throwIfItIsError whether to throw the throwable if it is an Error
      * @return the converted runtime exception
+     * @throws Error if e is an Error and throwIfItIsError is true
      */
     public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
         if (throwIfItIsError && e instanceof Error) {
@@ -215,9 +320,21 @@ public final class ExceptionUtil {
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
     /**
+     * Attempts to extract the original checked exception from a runtime exception wrapper.
+     * This is useful when dealing with wrapped exceptions from reflection or concurrent operations.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     future.get();
+     * } catch (ExecutionException e) {
+     *     Exception original = ExceptionUtil.tryToGetOriginalCheckedException(e);
+     *     // May return the actual cause instead of ExecutionException
+     * }
+     * }</pre>
+     *
+     * @param e the exception to unwrap
+     * @return the original checked exception if found, otherwise returns the input exception
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);
@@ -255,10 +372,22 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Checks if the exception or any of its causes is of the specified type.
      *
-     * @param e
-     * @param targetExceptionType
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     complexDatabaseOperation();
+     * } catch (Exception e) {
+     *     if (ExceptionUtil.hasCause(e, SQLException.class)) {
+     *         handleDatabaseError();
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the exception to check
+     * @param targetExceptionType the exception type to look for
+     * @return true if the exception or any cause is of the specified type
      */
     public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -277,10 +406,22 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Checks if the exception or any of its causes matches the specified predicate.
      *
-     * @param e
-     * @param targetExceptionTester
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     operation();
+     * } catch (Exception e) {
+     *     if (ExceptionUtil.hasCause(e, ex -> ex.getMessage().contains("timeout"))) {
+     *         handleTimeout();
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the exception to check
+     * @param targetExceptionTester the predicate to test each exception in the cause chain
+     * @return true if any exception in the cause chain matches the predicate
      */
     public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -299,9 +440,21 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Checks if the exception or any of its causes is a SQLException or UncheckedSQLException.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     databaseOperation();
+     * } catch (Exception e) {
+     *     if (ExceptionUtil.hasSQLCause(e)) {
+     *         rollbackTransaction();
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the exception to check
+     * @return true if the exception chain contains a SQL-related exception
      */
     public static boolean hasSQLCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -320,9 +473,21 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Checks if the exception or any of its causes is an IOException or UncheckedIOException.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     fileOperation();
+     * } catch (Exception e) {
+     *     if (ExceptionUtil.hasIOCause(e)) {
+     *         handleFileError();
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the exception to check
+     * @return true if the exception chain contains an IO-related exception
      */
     public static boolean hasIOCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -341,9 +506,22 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Checks if the throwable is either NullPointerException or IllegalArgumentException.
+     * Useful for identifying common programming errors.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     validateInput(input);
+     * } catch (Exception e) {
+     *     if (ExceptionUtil.isNullPointerOrIllegalArgumentException(e)) {
+     *         return BAD_REQUEST;
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the throwable to check
+     * @return true if the throwable is NullPointerException or IllegalArgumentException
      */
     @Beta
     public static boolean isNullPointerOrIllegalArgumentException(final Throwable e) {
@@ -351,9 +529,23 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Returns a list containing all exceptions in the cause chain.
+     * The list starts with the given exception and includes all causes.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     complexOperation();
+     * } catch (Exception e) {
+     *     List<Throwable> causes = ExceptionUtil.listCause(e);
+     *     for (Throwable cause : causes) {
+     *         logger.error("Cause: " + cause.getClass().getName());
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param e the starting exception
+     * @return a list of all exceptions in the cause chain
      */
     public static List<Throwable> listCause(final Throwable e) {
         final List<Throwable> list = new ArrayList<>();
@@ -368,10 +560,21 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Returns the specified {@code throwable} if there is no cause found in it ({@code throwable.getCause() == null}).
+     * Returns the first cause in the exception chain (the root cause).
+     * If there is no cause, returns the input throwable itself.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     wrappedOperation();
+     * } catch (Exception e) {
+     *     Throwable root = ExceptionUtil.firstCause(e);
+     *     logger.error("Root cause: " + root.getMessage());
+     * }
+     * }</pre>
+     *
+     * @param e the exception to traverse
+     * @return the root cause or the input if no cause found
      */
     public static Throwable firstCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -386,11 +589,24 @@ public final class ExceptionUtil {
     }
 
     /**
+     * Finds the first occurrence of the specified exception type in the cause chain.
      *
-     * @param <E>
-     * @param e
-     * @param targetExceptionType
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     serviceCall();
+     * } catch (Exception e) {
+     *     Optional<IOException> ioError = ExceptionUtil.findCause(e, IOException.class);
+     *     if (ioError.isPresent()) {
+     *         handleIOError(ioError.get());
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param <E> the type of exception to find
+     * @param e the exception to search through
+     * @param targetExceptionType the class of the exception to find
+     * @return an Optional containing the found exception, or empty if not found
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -409,10 +625,26 @@ public final class ExceptionUtil {
     }
 
     /**
-     * @param <E>
-     * @param e
-     * @param targetExceptionTester
-     * @return
+     * Finds the first exception in the cause chain that matches the specified predicate.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     complexOperation();
+     * } catch (Exception e) {
+     *     Optional<Throwable> timeoutError = ExceptionUtil.findCause(e, 
+     *         ex -> ex.getMessage() != null && ex.getMessage().contains("timeout")
+     *     );
+     *     if (timeoutError.isPresent()) {
+     *         handleTimeout();
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param <E> the type of exception expected
+     * @param e the exception to search through
+     * @param targetExceptionTester the predicate to match exceptions
+     * @return an Optional containing the found exception, or empty if not found
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -434,15 +666,26 @@ public final class ExceptionUtil {
 
     /**
      * Gets the stack trace from a Throwable as a String.
-     *
+     * 
      * <p>The result of this method varies by JDK version as this method
      * uses {@link Throwable#printStackTrace(java.io.PrintWriter)}.
      * On JDK1.3 and earlier, the cause exception will not be shown
      * unless the specified throwable alters printStackTrace.</p>
      *
-     * @param throwable  the {@link Throwable} to be examined, which may be null
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     riskyOperation();
+     * } catch (Exception e) {
+     *     String stackTrace = ExceptionUtil.getStackTrace(e);
+     *     logger.error("Full stack trace:\n" + stackTrace);
+     *     emailAdmin(stackTrace);
+     * }
+     * }</pre>
+     *
+     * @param throwable the {@link Throwable} to be examined, which may be null
      * @return the stack trace as generated by the exception's
-     * {@code printStackTrace(PrintWriter)} method, or an empty String if {@code null} input
+     *         {@code printStackTrace(PrintWriter)} method, or an empty String if {@code null} input
      */
     public static String getStackTrace(final Throwable throwable) {
         if (throwable == null) {
@@ -453,33 +696,44 @@ public final class ExceptionUtil {
         return sw.toString();
     }
 
-    //    /**
-    //     * Gets the error msg.
-    //     *
-    //     * @param e
-    //     * @return
-    //     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    public static String getMessage(Throwable e) {
-    //        return getErrorMessage(e, true);
-    //    }
-
     /**
+     * Gets the error message from an exception.
+     * If the exception has no message, attempts to get the message from its cause.
      *
-     * @param e
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     operation();
+     * } catch (Exception e) {
+     *     String msg = ExceptionUtil.getErrorMessage(e);
+     *     showUserError(msg);
+     * }
+     * }</pre>
+     *
+     * @param e the exception
+     * @return the error message, or the exception class name if no message is available
      */
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);
     }
 
     /**
+     * Gets the error message from an exception with optional exception class name prefix.
+     * For SQLException, includes the error code.
      *
-     * @param e
-     * @param withExceptionClassName
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * try {
+     *     databaseOperation();
+     * } catch (SQLException e) {
+     *     String msg = ExceptionUtil.getErrorMessage(e, true);
+     *     // Returns: "SQLException|1054|Unknown column 'xyz'"
+     * }
+     * }</pre>
+     *
+     * @param e the exception
+     * @param withExceptionClassName if true, prefixes the message with the exception class name
+     * @return the formatted error message
      */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
         String msg = e.getMessage();

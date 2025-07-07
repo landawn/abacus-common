@@ -19,54 +19,67 @@ import org.apache.avro.Schema;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
+/**
+ * Configuration class for Apache Avro deserialization operations.
+ * This class extends DeserializationConfig and adds Avro-specific configuration options,
+ * particularly the Avro schema required for deserialization.
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * Schema schema = new Schema.Parser().parse(schemaString);
+ * AvroDeserializationConfig config = new AvroDeserializationConfig()
+ *     .setSchema(schema)
+ *     .setElementType(Person.class)
+ *     .ignoreUnmatchedProperty(true);
+ * 
+ * List<Person> people = parser.deserialize(inputStream, config, List.class);
+ * }</pre>
+ * 
+ * @author HaiYang Li
+ * @since 0.8
+ */
 public class AvroDeserializationConfig extends DeserializationConfig<AvroDeserializationConfig> {
-
     private Schema schema;
 
+    /**
+     * Creates a new instance of AvroDeserializationConfig with default settings.
+     * Package-private constructor to encourage use of factory methods.
+     */
     AvroDeserializationConfig() {
 
     }
 
     /**
-     * Gets the schema.
+     * Gets the Avro schema used for deserialization.
+     * The schema defines the expected structure of the data to be deserialized.
      *
-     * @return
+     * @return the Avro schema, or null if not set
      */
     public Schema getSchema() {
         return schema;
     }
 
     /**
-     * Sets the schema.
+     * Sets the Avro schema for deserialization.
+     * The schema is required for deserializing data that is not SpecificRecord instances.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * String schemaJson = "{\"type\":\"record\",\"name\":\"User\"," +
+     *     "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
+     *     "{\"name\":\"age\",\"type\":\"int\"}]}";
+     * Schema schema = new Schema.Parser().parse(schemaJson);
+     * config.setSchema(schema);
+     * }</pre>
      *
-     * @param schema
-     * @return
+     * @param schema the Avro schema to use for deserialization
+     * @return this instance for method chaining
      */
     public AvroDeserializationConfig setSchema(final Schema schema) {
         this.schema = schema;
 
         return this;
     }
-
-    //    /**
-    //     *
-    //     * @return
-    //     */
-    //    @Override
-    //    public AvroDeserializationConfig copy() {
-    //        final AvroDeserializationConfig copy = new AvroDeserializationConfig();
-    //
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.setIgnoreUnmatchedProperty(this.isIgnoreUnmatchedProperty());
-    //        copy.setElementType(this.getElementType());
-    //        copy.setPropTypes(this.getPropTypes());
-    //        copy.setMapKeyType(this.getMapKeyType());
-    //        copy.setMapValueType(this.getMapValueType());
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.schema = this.schema;
-    //
-    //        return copy;
-    //    }
 
     @Override
     public int hashCode() {
@@ -77,9 +90,12 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     }
 
     /**
+     * Compares this configuration with another object for equality.
+     * Two configurations are considered equal if they have the same ignored properties,
+     * unmatched property handling, and schema.
      *
-     * @param obj
-     * @return {@code true}, if successful
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override
@@ -101,46 +117,26 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     }
 
     /**
-     * The Class ADC.
+     * Factory class for creating AvroDeserializationConfig instances.
+     * Provides convenient static factory methods for creating configurations.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * AvroDeserializationConfig config = ADC.create()
+     *     .setSchema(mySchema)
+     *     .setElementType(Person.class)
+     *     .ignoreUnmatchedProperty(true);
+     * }</pre>
      */
     public static final class ADC extends AvroDeserializationConfig {
 
+        /**
+         * Creates a new instance of AvroDeserializationConfig with default settings.
+         *
+         * @return a new AvroDeserializationConfig instance
+         */
         public static AvroDeserializationConfig create() {
             return new AvroDeserializationConfig();
-        }
-
-        /**
-         *
-         * @param elementClass
-         * @return
-         * @deprecated to be removed in the future version.
-         */
-        @Deprecated
-        public static AvroDeserializationConfig of(final Class<?> elementClass) {
-            return create().setElementType(elementClass);
-        }
-
-        /**
-         *
-         * @param schema
-         * @return
-         * @deprecated to be removed in the future version.
-         */
-        @Deprecated
-        public static AvroDeserializationConfig of(final Schema schema) {
-            return create().setSchema(schema);
-        }
-
-        /**
-         *
-         * @param elementClass
-         * @param schema
-         * @return
-         * @deprecated to be removed in the future version.
-         */
-        @Deprecated
-        public static AvroDeserializationConfig of(final Class<?> elementClass, final Schema schema) {
-            return create().setElementType(elementClass).setSchema(schema);
         }
     }
 }

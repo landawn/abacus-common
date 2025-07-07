@@ -2942,6 +2942,7 @@ public final class IOUtil {
      */
     public static void write(final char[] chars, final File output) throws IOException {
         if (N.isEmpty(chars)) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -2959,6 +2960,7 @@ public final class IOUtil {
      */
     public static void write(final char[] chars, final Charset charset, final File output) throws IOException {
         if (N.isEmpty(chars)) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -2977,6 +2979,7 @@ public final class IOUtil {
      */
     public static void write(final char[] chars, final int offset, final int count, final File output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -2996,6 +2999,7 @@ public final class IOUtil {
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final File output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -3218,6 +3222,7 @@ public final class IOUtil {
      */
     public static void write(final byte[] bytes, final File output) throws IOException {
         if (N.isEmpty(bytes)) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -3238,6 +3243,7 @@ public final class IOUtil {
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0 && N.len(bytes) >= offset) {
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -3851,6 +3857,7 @@ public final class IOUtil {
      */
     public static void append(final char[] chars, final File targetFile) throws IOException {
         if (N.isEmpty(chars)) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -3868,6 +3875,7 @@ public final class IOUtil {
      */
     public static void append(final char[] chars, final Charset charset, final File targetFile) throws IOException {
         if (N.isEmpty(chars)) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -3890,6 +3898,7 @@ public final class IOUtil {
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0 && N.len(chars) >= offset) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -3913,6 +3922,7 @@ public final class IOUtil {
         N.checkArgNotNegative(count, cs.count);
 
         if (count == 0 && N.len(chars) >= offset) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -4148,6 +4158,7 @@ public final class IOUtil {
      */
     public static void appendLines(final Iterable<?> lines, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -4168,6 +4179,7 @@ public final class IOUtil {
      */
     public static void appendLines(final Iterable<?> lines, final Charset charset, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
+            createNewFileIfNotExists(targetFile);
             return;
         }
 
@@ -4302,9 +4314,8 @@ public final class IOUtil {
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Maps a file into memory, creating a MappedByteBuffer that represents the file's content.
      *
      * @param file The file to be mapped into memory.
@@ -4320,9 +4331,8 @@ public final class IOUtil {
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Fully maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
@@ -4350,9 +4360,8 @@ public final class IOUtil {
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)} using the requested {@link MapMode}.
      *
@@ -4390,9 +4399,8 @@ public final class IOUtil {
     }
 
     /**
-     * Note: copied from Google Guava under Apache License v2.
-     * <br />
-     * <p>
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * 
      * Returns the lexically cleaned form of the path name, <i>usually</i> (but
      * not always) equivalent to the original. The following heuristics are used:
      *
@@ -4441,7 +4449,7 @@ public final class IOUtil {
         }
 
         // put it back together
-        String result = Strings.join(path, '/');
+        String result = Strings.join(path, "/");
 
         if (pathname.charAt(0) == '/') {
             result = "/" + result;
@@ -4617,6 +4625,8 @@ public final class IOUtil {
      */
     public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
+            createIfNotExists(file);
+
             return new FileOutputStream(file);
         } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
@@ -4634,6 +4644,8 @@ public final class IOUtil {
      */
     public static FileOutputStream newFileOutputStream(final File file, final boolean append) throws UncheckedIOException {
         try {
+            createIfNotExists(file);
+
             return new FileOutputStream(file, append);
         } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
@@ -4649,11 +4661,7 @@ public final class IOUtil {
      * @see FileOutputStream#FileOutputStream(String)
      */
     public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
-        try {
-            return new FileOutputStream(name);
-        } catch (final FileNotFoundException e) {
-            throw new UncheckedIOException(e);
-        }
+        return newFileOutputStream(new File(name));
     }
 
     /**
@@ -4699,6 +4707,8 @@ public final class IOUtil {
      */
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
+            createNewFileIfNotExists(file);
+
             return new FileWriter(file, DEFAULT_CHARSET); // NOSONAR
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -4716,6 +4726,8 @@ public final class IOUtil {
      */
     public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
         try {
+            createNewFileIfNotExists(file);
+
             return new FileWriter(file, charset);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -4734,6 +4746,8 @@ public final class IOUtil {
      */
     public static FileWriter newFileWriter(final File file, final Charset charset, final boolean append) throws UncheckedIOException {
         try {
+            createNewFileIfNotExists(file);
+
             return new FileWriter(file, charset, append);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -5418,7 +5432,7 @@ public final class IOUtil {
         N.checkArgNotNull(filter, cs.filter);
 
         checkFileExists(srcFile, true);
-        checkDestDir(destDir);
+        checkDestDirectory(destDir);
 
         srcFile = srcFile.getCanonicalFile();
         destDir = destDir.getCanonicalFile();
@@ -5465,7 +5479,7 @@ public final class IOUtil {
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
         N.checkArgNotNull(filter, cs.filter);
 
-        checkDestDir(destDir);
+        checkDestDirectory(destDir);
 
         final File[] subFiles = srcDir.listFiles();
 
@@ -5495,6 +5509,56 @@ public final class IOUtil {
         // Do this last, as the above has probably affected directory metadata
         if (preserveFileDate) {
             setTimes(srcDir, destDir);
+        }
+    }
+
+    /**
+     * Internal copy file method.
+     *
+     * @param srcFile          the validated source file, must not be {@code null}
+     * @param destFile         the validated destination file, must not be {@code null}
+     * @param preserveFileDate whether to preserve the file date
+     * @throws IOException if an error occurs
+     */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
+    private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
+        if (destFile.exists()) {
+            throw new IOException("The destination file already existed: " + destFile.getAbsolutePath());
+        }
+
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        FileChannel input = null;
+        FileChannel output = null;
+
+        try {
+            fis = IOUtil.newFileInputStream(srcFile);
+            fos = IOUtil.newFileOutputStream(destFile);
+            input = fis.getChannel();
+            output = fos.getChannel();
+
+            final long size = input.size();
+            long pos = 0;
+            long count = 0;
+
+            while (pos < size) {
+                count = ((size - pos) > FILE_COPY_BUFFER_SIZE) ? FILE_COPY_BUFFER_SIZE : (size - pos);
+                pos += output.transferFrom(input, pos, count);
+            }
+        } finally {
+            close(output);
+            close(fos);
+            close(input);
+            close(fis);
+        }
+
+        if (srcFile.length() != destFile.length()) {
+            deleteAllIfExists(destFile);
+            throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
+        }
+
+        if (preserveFileDate && !Files.isSymbolicLink(srcFile.toPath()) && !setTimes(srcFile, destFile)) {
+            throw new IOException("Cannot set the file time.");
         }
     }
 
@@ -5541,9 +5605,7 @@ public final class IOUtil {
      * @param sourceFile The source file to query.
      * @param targetFile The target file or directory to set.
      * @return {@code true} if and only if the operation succeeded;
-     *          {@code false} otherwise
-     * @throws NullPointerException if sourceFile is {@code null}.
-     * @throws NullPointerException if targetFile is {@code null}.
+     *          {@code false} otherwise}.}.
      */
     private static boolean setTimes(final File sourceFile, final File targetFile) {
         Objects.requireNonNull(sourceFile, "sourceFile");
@@ -5565,52 +5627,28 @@ public final class IOUtil {
     }
 
     /**
-     * Internal copy file method.
+     * Copies the contents of a directory to another directory.
+     * <p>
+     * This method copies all files and subdirectories from the source directory to the destination directory.
+     * If the destination directory does not exist, it is created.
+     * </p>
      *
-     * @param srcFile          the validated source file, must not be {@code null}
-     * @param destFile         the validated destination file, must not be {@code null}
-     * @param preserveFileDate whether to preserve the file date
-     * @throws IOException if an error occurs
+     * @param srcDir  the source directory to copy from, must not be {@code null}.
+     * @param destDir the destination directory to copy to, must not be {@code null}.
+     * @throws IOException          if an I/O error occurs or if the source directory does not exist.
      */
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
-        if (destFile.exists()) {
-            throw new IllegalArgumentException("The destination file already existed: " + destFile.getAbsolutePath());
-        }
+    public static void copyDirectory(final File srcDir, final File destDir) throws IOException {
+        checkDirectoryExists(srcDir);
+        checkDestDirectory(destDir);
 
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        FileChannel input = null;
-        FileChannel output = null;
+        final List<File> files = listFiles(srcDir);
 
-        try {
-            fis = IOUtil.newFileInputStream(srcFile);
-            fos = IOUtil.newFileOutputStream(destFile);
-            input = fis.getChannel();
-            output = fos.getChannel();
-
-            final long size = input.size();
-            long pos = 0;
-            long count = 0;
-
-            while (pos < size) {
-                count = ((size - pos) > FILE_COPY_BUFFER_SIZE) ? FILE_COPY_BUFFER_SIZE : (size - pos);
-                pos += output.transferFrom(input, pos, count);
+        if (N.isEmpty(files)) {
+            for (final File file : srcDir.listFiles()) {
+                if (file != null) {
+                    copyToDirectory(file, destDir);
+                }
             }
-        } finally {
-            close(output);
-            close(fos);
-            close(input);
-            close(fis);
-        }
-
-        if (srcFile.length() != destFile.length()) {
-            deleteAllIfExists(destFile);
-            throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
-        }
-
-        if (preserveFileDate && !Files.isSymbolicLink(srcFile.toPath()) && !setTimes(srcFile, destFile)) {
-            throw new IOException("Cannot set the file time.");
         }
     }
 
@@ -5629,8 +5667,7 @@ public final class IOUtil {
      * </p>
      *
      * @param srcFile an existing file to copy, must not be {@code null}.
-     * @param destFile the new file, must not be {@code null}.
-     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @param destFile the new file, must not be {@code null}.}.
      * @throws IOException if source or destination is invalid.
      * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
      * @throws IOException if the output file length is not the same as the input file length after the copy completes.
@@ -5657,8 +5694,7 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
-     * @param preserveFileDate true if the file date of the copy should be the same as the original.
-     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @param preserveFileDate true if the file date of the copy should be the same as the original.}.
      * @throws IOException if source or destination is invalid.
      * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
      * @throws IOException if the output file length is not the same as the input file length after the copy completes
@@ -5678,8 +5714,7 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
-     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
-     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.}.
      * @throws FileNotFoundException if the source does not exist.
      * @throws IllegalArgumentException if source is not a file.
      * @throws IOException if an I/O error occurs.
@@ -5713,8 +5748,7 @@ public final class IOUtil {
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
      * @param preserveFileDate true if the file date of the copy should be the same as the original.
-     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
-     * @throws NullPointerException if any of the given {@link File}s are {@code null}.
+     * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.}.
      * @throws FileNotFoundException if the source does not exist.
      * @throws IllegalArgumentException if {@code srcFile} or {@code destFile} is not a file
      * @throws IOException if the output file length is not the same as the input file length after the copy completes, or if an I/O error occurs, setting the last-modified time didn't succeed or the destination is not writable 
@@ -5750,9 +5784,7 @@ public final class IOUtil {
      *
      * @param input  the {@link File} to read.
      * @param output the {@link OutputStream} to write.
-     * @return the number of bytes copied
-     * @throws NullPointerException if the File is {@code null}.
-     * @throws NullPointerException if the OutputStream is {@code null}.
+     * @return the number of bytes copied}.}.
      * @throws IOException          if an I/O error occurs.
      * @since 2.1
      */
@@ -5900,7 +5932,7 @@ public final class IOUtil {
             throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
         }
 
-        checkDestDir(destDir);
+        checkDestDirectory(destDir);
 
         move(srcFile.toPath(), destDir.toPath().resolve(srcFile.getName()), options);
     }
@@ -6075,25 +6107,59 @@ public final class IOUtil {
         return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
     }
 
-    static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists() && (!file.createNewFile())) { //NOSONAR
-            throw new IOException("Failed to create new file: " + file.getName());
+    static boolean createNewFileIfNotExists(final File file) throws IOException {
+        if (!file.exists()) {
+            try {
+                if (!file.createNewFile()) {
+                    if (file.getParentFile().mkdirs()) {
+                        return file.createNewFile();
+                    }
+                }
+            } catch (final IOException e) {
+                if (!file.exists() && file.getParentFile().mkdirs()) {
+                    return file.createNewFile();
+                }
+
+                throw e;
+            }
+
+            return true;
         }
+
+        return false;
     }
 
     /**
-     * Creates a new file if it does not exist
+     * Creates a new empty file if one doesn't already exist at the specified path.
+     * <p>
+     * This method attempts to create a new file at the path specified by the input File
+     * object, but only if a file or directory doesn't already exist at that location.
+     * If the parent directory doesn't exist, the method will attempt to create it before
+     * creating the file.
+     * 
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * File configFile = new File("/path/to/config.json");
+     * boolean created = IOUtil.createIfNotExists(configFile);
+     * if (created) {
+     *     System.out.println("Created new config file");
+     * } else {
+     *     System.out.println("Config file already exists");
+     * }
+     * }</pre>
      *
-     * @param file The file to be checked and possibly created.
-     * @return {@code false} if the file already exists or if the file could not be created, {@code true} otherwise.
-     * @throws UncheckedIOException if an I/O error occurs.
+     * @param file the File object representing the file to create
+     * @return {@code true} if a new file was created, {@code false} if the file already exists
+     * @throws UncheckedIOException if an I/O error occurs during file creation
+     * @see File#createNewFile()
+     * @see #createNewFileIfNotExists(File)
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static boolean createIfNotExists(final File file) throws UncheckedIOException {
         try {
-            return !file.exists() && file.createNewFile();
+            return createNewFileIfNotExists(file);
         } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+            throw new UncheckedIOException("Failed to create file: " + file.getAbsolutePath(), e);
         }
     }
 
@@ -6474,7 +6540,7 @@ public final class IOUtil {
         }
     }
 
-    static void checkDestDir(final File destDir) throws IOException {
+    static void checkDestDirectory(final File destDir) throws IOException {
         if (destDir == null) {
             throw new IllegalArgumentException("The specified destination directory is null.");
         }
@@ -6567,7 +6633,7 @@ public final class IOUtil {
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    String zipEntryName = parentPath.relativize(dir).toString() + "/";
+                    String zipEntryName = parentPath.relativize(dir) + "/";
                     zipEntryName = zipEntryName.replace('\\', '/');
                     zos.putNextEntry(new ZipEntry(zipEntryName));
                     zos.closeEntry();
@@ -6630,7 +6696,7 @@ public final class IOUtil {
      */
     public static void unzip(final File srcZipFile, final File targetDir) throws IOException {
         checkFileExists(srcZipFile);
-        checkDestDir(targetDir);
+        checkDestDirectory(targetDir);
 
         ZipFile zip = null;
         ZipEntry ze = null;
@@ -6729,7 +6795,7 @@ public final class IOUtil {
      */
     public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws IOException {
         checkFileExists(file);
-        checkDestDir(destDir);
+        checkDestDirectory(destDir);
 
         final int numOfParts = (int) ((file.length() % sizeOfPart) == 0 ? (file.length() / sizeOfPart) : (file.length() / sizeOfPart) + 1);
 

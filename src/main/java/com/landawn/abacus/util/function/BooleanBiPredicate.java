@@ -16,47 +16,90 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * Represents a predicate (boolean-valued function) of two {@code boolean}-valued arguments.
+ * This is the primitive type specialization of {@link BiPredicate} for {@code boolean}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #test(boolean, boolean)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<RuntimeException> { //NOSONAR
 
+    /**
+     * A predicate that always returns {@code true} regardless of the input arguments.
+     */
     BooleanBiPredicate ALWAYS_TRUE = (t, u) -> true;
 
+    /**
+     * A predicate that always returns {@code false} regardless of the input arguments.
+     */
     BooleanBiPredicate ALWAYS_FALSE = (t, u) -> false;
 
+    /**
+     * A predicate that returns {@code true} if both arguments are {@code true}.
+     */
     BooleanBiPredicate BOTH_TRUE = (t, u) -> t && u;
 
+    /**
+     * A predicate that returns {@code true} if both arguments are {@code false}.
+     */
     BooleanBiPredicate BOTH_FALSE = (t, u) -> !t && !u;
 
+    /**
+     * A predicate that returns {@code true} if both arguments are equal.
+     */
     BooleanBiPredicate EQUAL = (t, u) -> t == u;
 
+    /**
+     * A predicate that returns {@code true} if the arguments are not equal.
+     */
     BooleanBiPredicate NOT_EQUAL = (t, u) -> t != u;
 
     /**
+     * Evaluates this predicate on the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first input argument
+     * @param u the second input argument
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(boolean t, boolean u);
 
+    /**
+     * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * @return a predicate that represents the logical negation of this predicate
+     */
     default BooleanBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other}
+     * predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default BooleanBiPredicate and(final BooleanBiPredicate other) {
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
+     * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
+     * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other}
+     * predicate is not evaluated.
      *
-     * @param other
-     * @return
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default BooleanBiPredicate or(final BooleanBiPredicate other) {
         return (t, u) -> test(t, u) || other.test(t, u);

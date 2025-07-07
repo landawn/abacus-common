@@ -19,6 +19,12 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
+/**
+ * Type handler for Character (wrapper class) values.
+ * This class provides database operations and type information for Character objects.
+ * It handles the conversion between database string values and Java Character objects,
+ * extracting the first character from string values when available.
+ */
 public final class CharacterType extends AbstractCharacterType {
 
     public static final String CHARACTER = Character.class.getSimpleName();
@@ -27,15 +33,21 @@ public final class CharacterType extends AbstractCharacterType {
         super(CHARACTER);
     }
 
+    /**
+     * Returns the Java class type handled by this type handler.
+     *
+     * @return The Class object representing Character.class
+     */
     @Override
     public Class<Character> clazz() {
         return Character.class;
     }
 
     /**
-     * Checks if is primitive wrapper.
+     * Indicates whether this type represents a primitive wrapper class.
+     * Since this handles the Character wrapper class (not the primitive char), this returns true.
      *
-     * @return {@code true}, if is primitive wrapper
+     * @return true, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -43,11 +55,14 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
+     * Retrieves a Character value from a ResultSet at the specified column index.
+     * The method reads the value as a String and returns the first character.
+     * If the database value is NULL or an empty string, this method returns null.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the character value
+     * @return The first character of the string value at the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @MayReturnNull
     @Override
@@ -62,11 +77,14 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
+     * Retrieves a Character value from a ResultSet using the specified column label.
+     * The method reads the value as a String and returns the first character.
+     * If the database value is NULL or an empty string, this method returns null.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the character value
+     * @return The first character of the string value in the specified column, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @MayReturnNull
     @Override

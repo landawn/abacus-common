@@ -17,17 +17,29 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * Represents an operation upon two {@code int}-valued operands and producing an {@code int}-valued result.
+ * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code int}.
  *
+ * <p>This interface extends both {@link java.util.function.IntBinaryOperator} and
+ * {@link Throwables.IntBinaryOperator}, providing compatibility with the standard Java functional
+ * interfaces while also supporting the Throwables framework.
+ *
+ * <p>This is a functional interface whose functional method is {@link #applyAsInt(int, int)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ *
+ * @see java.util.function.BinaryOperator
+ * @see java.util.function.IntUnaryOperator
  */
 @FunctionalInterface
 public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator { //NOSONAR
 
     /**
+     * Applies this operator to the given operands.
      *
-     * @param left
-     * @param right
-     * @return
+     * @param left the first operand
+     * @param right the second operand
+     * @return the operator result
      */
     @Override
     int applyAsInt(int left, int right);

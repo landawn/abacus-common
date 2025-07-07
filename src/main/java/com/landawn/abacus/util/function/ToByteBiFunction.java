@@ -14,14 +14,27 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts two arguments and produces a byte-valued result.
+ * This is the {@code byte}-producing primitive specialization for {@link java.util.function.BiFunction}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsByte(Object, Object)}.
+ * 
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
+ * 
+ * @see java.util.function.BiFunction
+ * @see ToByteFunction
+ */
 @FunctionalInterface
 public interface ToByteBiFunction<T, U> {
 
     /**
+     * Applies this function to the given arguments.
      *
-     * @param t
-     * @param u
-     * @return
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result as a byte value
      */
     byte applyAsByte(T t, U u);
 }

@@ -30,6 +30,12 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
+/**
+ * Type handler for CLOB ASCII stream values.
+ * This class provides database operations for handling Character Large Objects (CLOBs)
+ * as ASCII input streams. It extends InputStreamType to handle CLOB data specifically
+ * through ASCII stream representations.
+ */
 public class ClobAsciiStreamType extends InputStreamType {
 
     public static final String CLOB_ASCII_STREAM = "ClobAsciiStream";
@@ -39,11 +45,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Retrieves a CLOB value as an ASCII InputStream from a ResultSet at the specified column index.
      *
-     * @param rs
-     * @param columnIndex
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnIndex the column index (1-based) of the CLOB value
+     * @return An InputStream containing the ASCII representation of the CLOB, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -52,11 +59,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Retrieves a CLOB value as an ASCII InputStream from a ResultSet using the specified column label.
      *
-     * @param rs
-     * @param columnLabel
-     * @return
-     * @throws SQLException the SQL exception
+     * @param rs the ResultSet containing the data
+     * @param columnLabel the label of the column containing the CLOB value
+     * @return An InputStream containing the ASCII representation of the CLOB, or null if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -64,11 +72,13 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream as a parameter in a PreparedStatement.
+     * The stream will be read and stored as CLOB data in ASCII format.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement in which to set the parameter
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the ASCII InputStream to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
@@ -76,11 +86,13 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream as a named parameter in a CallableStatement.
+     * The stream will be read and stored as CLOB data in ASCII format.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement in which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the ASCII InputStream to set. Can be null.
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
@@ -88,12 +100,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream as a parameter in a PreparedStatement with a specified length.
+     * The stream will be read up to the specified length and stored as CLOB data.
      *
-     * @param stmt
-     * @param columnIndex
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the PreparedStatement in which to set the parameter
+     * @param columnIndex the parameter index (1-based) to set
+     * @param x the ASCII InputStream to set. Can be null.
+     * @param sqlTypeOrLength the length of the stream in bytes
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -101,12 +115,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Sets an ASCII InputStream as a named parameter in a CallableStatement with a specified length.
+     * The stream will be read up to the specified length and stored as CLOB data.
      *
-     * @param stmt
-     * @param parameterName
-     * @param x
-     * @param sqlTypeOrLength
-     * @throws SQLException the SQL exception
+     * @param stmt the CallableStatement in which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the ASCII InputStream to set. Can be null.
+     * @param sqlTypeOrLength the length of the stream in bytes
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -114,10 +130,13 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Appends the contents of an ASCII InputStream to an Appendable output.
+     * If the Appendable is a Writer, data is streamed directly for efficiency.
+     * Otherwise, the entire stream is read into a string first.
      *
-     * @param appendable
-     * @param x
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param appendable the Appendable to write to
+     * @param x the ASCII InputStream to append. Can be null.
+     * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
     public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
@@ -133,11 +152,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
+     * Writes the contents of an ASCII InputStream to a CharacterWriter.
+     * The stream is read in chunks using a buffer for efficiency.
+     * If serialization config specifies string quotation, the content is wrapped in quotes.
      *
-     * @param writer
-     * @param t
-     * @param config
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param writer the CharacterWriter to write to
+     * @param t the ASCII InputStream to write. Can be null.
+     * @param config the serialization configuration for quotation settings. Can be null.
+     * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {
@@ -170,11 +192,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Clob 2 ascii stream.
+     * Converts a CLOB to an ASCII InputStream.
+     * This is a utility method used internally to extract ASCII streams from CLOB objects.
      *
-     * @param clob
-     * @return
-     * @throws SQLException the SQL exception
+     * @param clob the CLOB to convert. Can be null.
+     * @return An ASCII InputStream from the CLOB, or null if the CLOB is null
+     * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static InputStream clob2AsciiStream(final Clob clob) throws SQLException {
         if (clob != null) {

@@ -14,18 +14,28 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a {@code boolean}-valued argument and produces a
+ * {@code byte}-valued result. This is the {@code boolean}-to-{@code byte} primitive specialization
+ * for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsByte(boolean)}.
+ *
+ */
 @FunctionalInterface
 public interface BooleanToByteFunction {
 
     /**
-     * Converts a boolean value to a byte: {@code true} to {@code 1} and {@code false} to {@code 0}.
+     * A default function that converts a boolean value to a byte: {@code true} to {@code 1} and {@code false} to {@code 0}.
+     * This follows the common convention of representing boolean values as bytes in many programming contexts.
      */
     BooleanToByteFunction DEFAULT = value -> value ? (byte) 1 : (byte) 0;
 
     /**
+     * Applies this function to the given argument.
      *
-     * @param value
-     * @return
+     * @param value the function argument
+     * @return the function result as a {@code byte}
      */
     byte applyAsByte(boolean value);
 }

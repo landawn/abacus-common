@@ -34,11 +34,14 @@ import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.Splitter.MapSplitter;
 
 /**
  * <p>
@@ -187,6 +190,7 @@ public final class URLEncodedUtil {
     }
 
     private static final int RADIX = 16;
+    private static final MapSplitter PARAMS_SPLITTER = MapSplitter.with(String.valueOf(QP_SEP_A), NAME_VALUE_SEPARATOR).trimResults();
 
     private URLEncodedUtil() {
         // singleton.
@@ -212,7 +216,21 @@ public final class URLEncodedUtil {
      * @return A Map containing parameter names as keys and parameter values as values.
      */
     public static Map<String, String> decode(final String urlQuery, final Charset charset) {
-        final Map<String, String> result = new LinkedHashMap<>();
+        return decode(urlQuery, charset, Suppliers.of(LinkedHashMap::new));
+    }
+
+    /**
+     * Decodes a URL query string into a Map using the provided charset and a custom map supplier.
+     * The keys and values in the Map are the parameter names and values from the URL query string.
+     *
+     * @param <M> The type of the Map to return.
+     * @param urlQuery The URL query string to decode.
+     * @param charset The charset to use for decoding the URL query string.
+     * @param mapSupplier A supplier that provides an instance of the Map to return.
+     * @return A Map containing parameter names as keys and parameter values as values.
+     */
+    public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier) {
+        final M result = mapSupplier.get();
 
         if (Strings.isEmpty(urlQuery)) {
             return result;
@@ -319,7 +337,14 @@ public final class URLEncodedUtil {
      * @param targetType The bean class of the object to decode into.
      * @return An object of type T containing parameter names as keys and parameter values as values.
      */
+    @SuppressWarnings("rawtypes")
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
+        if (Map.class.isAssignableFrom(targetType)) {
+            final Supplier<Map<String, String>> supplier = Suppliers.ofMap((Class) targetType);
+
+            return (T) decode(urlQuery, charset, supplier);
+        }
+
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 
@@ -592,6 +617,14 @@ public final class URLEncodedUtil {
                     output.append(NAME_VALUE_SEPARATOR);
 
                     encodeFormFields(N.stringOf(a[++i]), charset, output);
+                }
+            } else if (parameters instanceof CharSequence source) {
+                final String str = source.toString();
+
+                if (str.contains(NAME_VALUE_SEPARATOR)) {
+                    encode(PARAMS_SPLITTER.split(str), charset, NamingPolicy.NO_CHANGE, output);
+                } else {
+                    encodeFormFields(str, charset, output);
                 }
             } else {
                 encodeFormFields(N.stringOf(parameters), charset, output);

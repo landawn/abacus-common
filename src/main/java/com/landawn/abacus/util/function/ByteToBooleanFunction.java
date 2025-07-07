@@ -14,18 +14,31 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents a function that accepts a byte-valued argument and produces a boolean-valued result.
+ * This is the {@code byte}-to-{@code boolean} primitive specialization for {@link java.util.function.Function}.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(byte)}.
+ * 
+ * @see java.util.function.Function
+ * @see ByteToIntFunction
+ */
 @FunctionalInterface
 public interface ByteToBooleanFunction {
 
     /**
-     * Converts a byte value to a boolean: {@code true} if the value is greater than 0, otherwise {@code false}.
+     * A default implementation that converts a byte value to a boolean.
+     * Returns {@code true} if the byte value is greater than 0, otherwise {@code false}.
+     * This follows the common convention where positive values are considered "true"
+     * and zero or negative values are considered "false".
      */
     ByteToBooleanFunction DEFAULT = value -> value > 0;
 
     /**
+     * Applies this function to the given byte argument and returns a boolean result.
      *
-     * @param value
-     * @return
+     * @param value the byte function argument
+     * @return the boolean function result
      */
     boolean applyAsBoolean(byte value);
 }

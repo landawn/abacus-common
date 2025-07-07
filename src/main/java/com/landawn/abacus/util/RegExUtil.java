@@ -31,7 +31,25 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *
  * <br />
  *
- * <p>Helpers to process Strings using regular expressions.</p>
+ * Utility class providing helper methods for processing Strings using regular expressions.
+ * This class offers a comprehensive set of pre-compiled patterns for common use cases like
+ * finding numbers, dates, emails, URLs, etc., as well as methods for pattern matching,
+ * replacement, splitting, and more.
+ * 
+ * <p>All methods in this class are thread-safe and null-safe unless otherwise specified.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Check if string contains a number
+ * if (RegExUtil.find("Price: $99.99", RegExUtil.NUMBER_FINDER.pattern())) {
+ *     // Found a number
+ * }
+ * 
+ * // Replace all whitespace
+ * String cleaned = RegExUtil.replaceAll("Hello   World", "\\s+", " ");
+ * // Result: "Hello World"
+ * }</pre>
+ * 
  * @see java.util.regex.Pattern
  * @see java.util.regex.Matcher
  * @see com.landawn.abacus.util.Strings
@@ -242,6 +260,13 @@ public final class RegExUtil {
 
     /**
      * Checks if the specified string contains a substring that matches the given regular expression.
+     * This method is equivalent to {@code Pattern.compile(regex).matcher(source).find()}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean hasEmail = RegExUtil.find("Contact: john@example.com", "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * // Returns: true
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression to find
@@ -256,6 +281,14 @@ public final class RegExUtil {
 
     /**
      * Checks if the specified string contains a substring that matches the given regular expression pattern.
+     * This method is more efficient than {@link #find(String, String)} when using the same pattern multiple times.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * boolean hasEmail = RegExUtil.find("Contact: john@example.com", emailPattern);
+     * // Returns: true
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the regular expression pattern to find
@@ -270,6 +303,16 @@ public final class RegExUtil {
 
     /**
      * Checks if the specified string matches the given regular expression.
+     * The entire string must match the pattern (equivalent to anchoring with ^ and $).
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean isInteger = RegExUtil.matches("123", "\\d+");
+     * // Returns: true
+     * 
+     * boolean isPartialMatch = RegExUtil.matches("abc123", "\\d+");
+     * // Returns: false (entire string must match)
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression to match
@@ -285,6 +328,15 @@ public final class RegExUtil {
 
     /**
      * Checks if the specified string matches the given regular expression pattern.
+     * The entire string must match the pattern. This method is more efficient than
+     * {@link #matches(String, String)} when using the same pattern multiple times.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern datePattern = RegExUtil.DATE_MATCHER;
+     * boolean isDate = RegExUtil.matches("2023-12-25", datePattern);
+     * // Returns: true
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the regular expression pattern to match
@@ -299,7 +351,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes each substring of the source string that matches the given regular expression.</p>
+     * Removes each substring of the source string that matches the given regular expression.
+     * This is equivalent to {@code replaceAll(source, regex, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeAll("Hello123World456", "\\d+");
+     * // Returns: "HelloWorld"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -313,7 +372,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes each substring of the source string that matches the given regular expression pattern.</p>
+     * Removes each substring of the source string that matches the given regular expression pattern.
+     * This is equivalent to {@code replaceAll(source, pattern, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeAll("Hello   World", RegExUtil.WHITESPACE_FINDER);
+     * // Returns: "HelloWorld"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param pattern the regular expression to which this string is to be matched
@@ -327,7 +393,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes the first substring of the source string that matches the given regular expression.</p>
+     * Removes the first substring of the source string that matches the given regular expression.
+     * This is equivalent to {@code replaceFirst(source, regex, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeFirst("Hello123World456", "\\d+");
+     * // Returns: "HelloWorld456"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -342,7 +415,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes the first substring of the source string that matches the given regular expression pattern.</p>
+     * Removes the first substring of the source string that matches the given regular expression pattern.
+     * This is equivalent to {@code replaceFirst(source, pattern, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeFirst("Hello   World   !", RegExUtil.WHITESPACE_FINDER);
+     * // Returns: "HelloWorld   !"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -357,7 +437,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes the last substring of the source string that matches the given regular expression.</p>
+     * Removes the last substring of the source string that matches the given regular expression.
+     * This is equivalent to {@code replaceLast(source, regex, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeLast("Hello123World456", "\\d+");
+     * // Returns: "Hello123World"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -372,7 +459,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Removes the last substring of the source string that matches the given regular expression pattern.</p>
+     * Removes the last substring of the source string that matches the given regular expression pattern.
+     * This is equivalent to {@code replaceLast(source, pattern, "")}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.removeLast("Hello   World   !", RegExUtil.WHITESPACE_FINDER);
+     * // Returns: "Hello   World!"
+     * }</pre>
      *
      * @param source source string to remove from, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -387,8 +481,8 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the given replacement.
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
@@ -396,6 +490,11 @@ public final class RegExUtil {
      *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}</li>
      * </ul>
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("Hello   World", "\\s+", " ");
+     * // Returns: "Hello World"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -411,15 +510,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the matched substring.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code source.replaceAll(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("hello world", "\\b\\w", match -> match.toUpperCase());
+     * // Returns: "Hello World"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -435,15 +533,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the start and end indices of the match.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code source.replaceAll(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("abc123def", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -459,13 +556,15 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression pattern with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression pattern with the given replacement.
+     * This method is more efficient than {@link #replaceAll(String, String, String)} when using the same pattern multiple times.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(source).replaceAll(replacement)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\s+");
+     * String result = RegExUtil.replaceAll("Hello   World", pattern, " ");
+     * // Returns: "Hello World"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -486,14 +585,15 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the matched substring.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\b\\w");
+     * String result = RegExUtil.replaceAll("hello world", pattern, match -> match.toUpperCase());
+     * // Returns: "Hello World"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression to which this string is to be matched
@@ -513,14 +613,15 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.</p>
+     * Replaces each substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the start and end indices of the match.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacer)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceAll("abc123def", pattern, (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression to which this string is to be matched
@@ -540,7 +641,13 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     * Replaces the first substring of the source string that matches the given regular expression with the given replacement.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceFirst("Hello123World456", "\\d+", "XXX");
+     * // Returns: "HelloXXXWorld456"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -560,7 +667,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     * Replaces the first substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the matched substring.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceFirst("hello world", "\\b\\w", match -> match.toUpperCase());
+     * // Returns: "Hello world"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -576,7 +690,14 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression with the given replacement.</p>
+     * Replaces the first substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the start and end indices of the match.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceFirst("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def456"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
@@ -592,13 +713,15 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacement.</p>
+     * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacement.
+     * This method is more efficient than {@link #replaceFirst(String, String, String)} when using the same pattern multiple times.
      *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(source).replaceFirst(replacement)}</li>
-     * </ul>
-     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceFirst("Hello123World456", pattern, "XXX");
+     * // Returns: "HelloXXXWorld456"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -618,13 +741,16 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.</p>
-     *
+     * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
      * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(source).replaceFirst(replacer)}</li>
-     * </ul>
+     * {@code pattern.matcher(source).replaceFirst(replacer)}
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\b\\w");
+     * String result = RegExUtil.replaceFirst("hello world", pattern, match -> match.toUpperCase());
+     * // Returns: "Hello world"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -644,13 +770,16 @@ public final class RegExUtil {
     }
 
     /**
-     * <p>Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.</p>
-     *
+     * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
      * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code pattern.matcher(source).replaceFirst(replacer)}</li>
-     * </ul>
+     * {@code pattern.matcher(source).replaceFirst(replacer)}
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceFirst("abc123def456", pattern, (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def456"
+     * }</pre>
      *
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
@@ -670,11 +799,18 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     * This method finds the rightmost match in the string and replaces only that occurrence.
      *
-     * @param source
-     * @param regex
-     * @param replacement
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceLast("Hello123World456", "\\d+", "XXX");
+     * // Returns: "Hello123WorldXXX"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param regex the regular expression pattern to search for
+     * @param replacement the replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see Matcher#replaceFirst(String)
@@ -687,10 +823,17 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * The replacer function receives the matched substring and returns the replacement string.
      *
-     * @param source
-     * @param regex
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceLast("hello world hello", "hello", match -> match.toUpperCase());
+     * // Returns: "hello world HELLO"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param regex the regular expression pattern to search for
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
@@ -704,10 +847,17 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * The replacer function receives the start and end indices of the match and returns the replacement string.
      *
-     * @param source
-     * @param regex
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceLast("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc123def[9-12]"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param regex the regular expression pattern to search for
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
@@ -725,11 +875,18 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
      *
-     * @param source
-     * @param pattern
-     * @param replacement
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceLast("Hello123World456", pattern, "XXX");
+     * // Returns: "Hello123WorldXXX"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param pattern the pre-compiled regular expression pattern to search for
+     * @param replacement the replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see Matcher#replaceFirst(String)
@@ -761,10 +918,17 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
      *
-     * @param source
-     * @param pattern
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("hello");
+     * String result = RegExUtil.replaceLast("hello world hello", pattern, match -> match.toUpperCase());
+     * // Returns: "hello world HELLO"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param pattern the pre-compiled regular expression pattern to search for
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
@@ -797,10 +961,17 @@ public final class RegExUtil {
     }
 
     /**
-     * Searches the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
      *
-     * @param source
-     * @param pattern
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceLast("abc123def456", pattern, (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc123def[9-12]"
+     * }</pre>
+     *
+     * @param source the source string to search in
+     * @param pattern the pre-compiled regular expression pattern to search for
      * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
@@ -835,6 +1006,15 @@ public final class RegExUtil {
     /**
      * Counts the number of occurrences of the specified pattern in the given string.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int count = RegExUtil.countMatches("Hello World", "l");
+     * // Returns: 3
+     * 
+     * int digitCount = RegExUtil.countMatches("abc123def456", "\\d+");
+     * // Returns: 2 (two groups of digits)
+     * }</pre>
+     *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression pattern to be counted
      * @return the number of occurrences of the specified pattern in the string, or 0 if the input source string is {@code null} or empty
@@ -852,6 +1032,14 @@ public final class RegExUtil {
 
     /**
      * Counts the number of occurrences of the specified pattern in the given string.
+     * This method is more efficient than {@link #countMatches(String, String)} when using the same pattern multiple times.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * int count = RegExUtil.countMatches("abc123def456ghi789", pattern);
+     * // Returns: 3
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the regular expression pattern to be counted
@@ -878,6 +1066,14 @@ public final class RegExUtil {
 
     /**
      * Finds all the occurrences of the specified pattern in the given string.
+     * Returns a stream of {@link MatchResult} objects representing each match found.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Stream<MatchResult> matches = RegExUtil.matchResults("abc123def456", "\\d+");
+     * matches.forEach(match -> System.out.println(match.group())); 
+     * // Prints: 123, 456
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression pattern to be counted
@@ -897,6 +1093,15 @@ public final class RegExUtil {
 
     /**
      * Finds all the occurrences of the specified pattern in the given string.
+     * Returns a stream of {@link MatchResult} objects representing each match found.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\b\\w+@\\w+\\.\\w+\\b");
+     * Stream<MatchResult> matches = RegExUtil.matchResults("Contact: john@example.com, jane@test.org", pattern);
+     * matches.forEach(match -> System.out.println(match.group()));
+     * // Prints: john@example.com, jane@test.org
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the regular expression pattern to be counted
@@ -916,6 +1121,13 @@ public final class RegExUtil {
 
     /**
      * Finds all the occurrences of the specified pattern in the given string and returns a stream of start indices.
+     * This is useful when you need to know the positions where matches occur in the string.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * IntStream indices = RegExUtil.matchIndices("Hello World", "l");
+     * // Returns stream of: 2, 3, 9 (positions of 'l' in the string)
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression pattern to be counted
@@ -937,6 +1149,14 @@ public final class RegExUtil {
 
     /**
      * Finds all the occurrences of the specified pattern in the given string and returns a stream of start indices.
+     * This is useful when you need to know the positions where matches occur in the string.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * IntStream indices = RegExUtil.matchIndices("abc123def456ghi", pattern);
+     * // Returns stream of: 3, 9 (starting positions of number sequences)
+     * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the regular expression pattern to be counted
@@ -959,6 +1179,15 @@ public final class RegExUtil {
     /**
      * Splits the given string into an array of strings based on the specified regular expression.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] parts = RegExUtil.split("one,two,three", ",");
+     * // Returns: ["one", "two", "three"]
+     * 
+     * String[] words = RegExUtil.split("Hello   World", "\\s+");
+     * // Returns: ["Hello", "World"]
+     * }</pre>
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param regex the regular expression to split by
@@ -983,6 +1212,13 @@ public final class RegExUtil {
     /**
      * Splits the given string into an array of strings based on the specified regular expression with a limit.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     * The limit parameter controls the number of times the pattern is applied and therefore affects the length of the resulting array.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] parts = RegExUtil.split("one,two,three,four", ",", 3);
+     * // Returns: ["one", "two", "three,four"]
+     * }</pre>
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param regex the regular expression to split by
@@ -1008,6 +1244,14 @@ public final class RegExUtil {
     /**
      * Splits the given string into an array of strings based on the specified regular expression pattern.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     * This method is more efficient than {@link #split(String, String)} when using the same pattern multiple times.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\s+");
+     * String[] words = RegExUtil.split("Hello   World   Java", pattern);
+     * // Returns: ["Hello", "World", "Java"]
+     * }</pre>
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param pattern the regular expression pattern to split by
@@ -1032,6 +1276,14 @@ public final class RegExUtil {
     /**
      * Splits the given string into an array of strings based on the specified regular expression pattern with a limit.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     * The limit parameter controls the number of times the pattern is applied.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile(",");
+     * String[] parts = RegExUtil.split("a,b,c,d", pattern, 3);
+     * // Returns: ["a", "b", "c,d"]
+     * }</pre>
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param pattern the regular expression pattern to split by
@@ -1057,6 +1309,14 @@ public final class RegExUtil {
     /** 
      * Splits the given string into an array of lines, using the default line separator.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     * This method handles all types of line breaks (CR, LF, CRLF, etc.) across different platforms.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "Line 1\nLine 2\r\nLine 3";
+     * String[] lines = RegExUtil.splitToLines(text);
+     * // Returns: ["Line 1", "Line 2", "Line 3"]
+     * }</pre>
      *
      * @param source the string to be split into lines, may be {@code null} or empty
      * @return an array of strings computed by splitting the source string into lines 
@@ -1076,6 +1336,14 @@ public final class RegExUtil {
     /** 
      * Splits the given string into an array of lines, with a specified limit on the number of lines.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
+     * The limit parameter controls how many lines are returned.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "Line 1\nLine 2\nLine 3\nLine 4";
+     * String[] lines = RegExUtil.splitToLines(text, 3);
+     * // Returns: ["Line 1", "Line 2", "Line 3\nLine 4"]
+     * }</pre>
      *
      * @param source the string to be split into lines, may be {@code null} or empty
      * @param limit the result threshold. A non-positive limit indicates no limit.

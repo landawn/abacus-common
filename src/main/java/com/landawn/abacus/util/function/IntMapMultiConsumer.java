@@ -14,13 +14,25 @@
 
 package com.landawn.abacus.util.function;
 
+/**
+ * Represents an operation that accepts an int-valued argument and an IntConsumer, 
+ * and returns no result. This functional interface is used to implement a one-to-many
+ * transformation operation, similar to flatMap. The IntConsumer parameter can be 
+ * invoked multiple times to pass multiple values downstream.
+ * 
+ * <p>This is a functional interface whose functional method is {@link #accept(double, java.util.function.IntConsumer)}.
+ *
+ * @see java.util.stream.DoubleStream.IntMapMultiConsumer
+ */
 @FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR
 
     /**
+     * Performs this operation on the given argument, providing zero or more result values to the
+     * given {@code IntConsumer}.
      *
-     * @param value
-     * @param ic
+     * @param value the input value
+     * @param ic the {@code IntConsumer} to which the mapped values should be passed
      */
     @Override
     void accept(int value, java.util.function.IntConsumer ic);
