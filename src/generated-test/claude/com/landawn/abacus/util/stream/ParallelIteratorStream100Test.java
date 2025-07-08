@@ -308,7 +308,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     public void testFlattMap() {
         Function<Integer, String[]> mapper = n -> new String[] { "P" + n, "Q" + n };
 
-        List<String> result = stream.limit(2).flattMap(mapper).toList();
+        List<String> result = stream.limit(2).flattmap(mapper).toList();
 
         assertHaveSameElements(Arrays.asList("P1", "Q1", "P2", "Q2"), result);
     }

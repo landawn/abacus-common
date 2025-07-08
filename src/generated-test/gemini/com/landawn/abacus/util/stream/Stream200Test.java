@@ -341,7 +341,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testFlattmapJdkStream() {
-        List<Integer> result = Stream.of(1, 2).flattmap(x -> java.util.stream.Stream.of(x, x + 1)).toList();
+        List<Integer> result = Stream.of(1, 2).flattMap(x -> java.util.stream.Stream.of(x, x + 1)).toList();
         assertEquals(Arrays.asList(1, 2, 2, 3), result);
     }
 

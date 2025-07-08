@@ -106,7 +106,7 @@ public class AbstractIntStream101Test extends TestBase {
 
     @Test
     public void testFlattmap() {
-        IntStream result = stream.flattmap(x -> java.util.stream.IntStream.of(x, x * 2));
+        IntStream result = stream.flattMap(x -> java.util.stream.IntStream.of(x, x * 2));
         int[] array = result.toArray();
         Assertions.assertArrayEquals(new int[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 }, array);
     }
@@ -120,7 +120,7 @@ public class AbstractIntStream101Test extends TestBase {
 
     @Test
     public void testFlattMapToObj() {
-        Stream<String> result = stream.flattMapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
+        Stream<String> result = stream.flattmapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
         String[] array = result.toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] { "1", "2", "2", "4", "3", "6", "4", "8", "5", "10" }, array);
     }

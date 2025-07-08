@@ -115,7 +115,7 @@ public class AbstractCharStream101Test extends TestBase {
     public void testFlattMapToObj() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
         CharFunction<String[]> mapper = c -> new String[] { String.valueOf(c), String.valueOf(Character.toUpperCase(c)) };
-        List<String> result = stream.flattMapToObj(mapper).toList();
+        List<String> result = stream.flattmapToObj(mapper).toList();
         assertEquals(Arrays.asList("a", "A", "b", "B"), result);
     }
 

@@ -1438,7 +1438,6 @@ public class AbstractStream100Test extends TestBase {
         assertTrue(duration >= 150); // 3 items * 50ms = 150ms minimum
     }
 
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

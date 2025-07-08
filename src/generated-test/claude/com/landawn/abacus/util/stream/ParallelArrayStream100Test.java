@@ -293,11 +293,11 @@ public class ParallelArrayStream100Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flattMap() should flatten arrays")
+        @DisplayName("flattmap() should flatten arrays")
         public void testFlattMapArray() {
             Function<Integer, Integer[]> duplicate = x -> new Integer[] { x, x };
 
-            List<Integer> result = stream.limit(3).flattMap(duplicate).toList();
+            List<Integer> result = stream.limit(3).flattmap(duplicate).toList();
 
             assertTrue(N.isEqualCollection(Arrays.asList(1, 1, 2, 2, 3, 3), result));
         }

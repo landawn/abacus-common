@@ -789,7 +789,7 @@ public class Stream102Test extends TestBase {
 
     @Test
     public void testFlattMap() {
-        Stream<Integer> flattMapped = stream.flattMap(n -> new Integer[] { n, n * 10 });
+        Stream<Integer> flattMapped = stream.flattmap(n -> new Integer[] { n, n * 10 });
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50), flattMapped.toList());
     }
 

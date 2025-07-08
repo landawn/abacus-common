@@ -314,7 +314,7 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testFlattMap() {
         Stream<String> stream = Stream.of(new String[] { "ab", "cd" });
-        List<Character> result = stream.flattMap(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
+        List<Character> result = stream.flattmap(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
         assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
     }
 

@@ -182,14 +182,14 @@ public class AbstractStream102Test extends TestBase {
     @Test
     public void testFlattMap() {
         stream = createStream(1, 2, 3);
-        Stream<Integer> result = stream.flattMap(i -> new Integer[] { i, i * 10 });
+        Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
     }
 
     @Test
     public void testFlattmap() {
         stream = createStream(1, 2, 3);
-        Stream<Integer> result = stream.flattmap(i -> java.util.stream.Stream.of(i, i * 10));
+        Stream<Integer> result = stream.flattMap(i -> java.util.stream.Stream.of(i, i * 10));
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
     }
 

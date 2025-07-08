@@ -174,11 +174,11 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("C1", "D1", "C2", "D2"), result);
     }
 
-    // Test for flattMapToObj(ByteFunction<T[]> mapper)
+    // Test for flattmapToObj(ByteFunction<T[]> mapper)
     @Test
     public void testFlattMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2 });
-        List<String> result = byteStream.flattMapToObj(b -> new String[] { "E" + b, "F" + b }).toList();
+        List<String> result = byteStream.flattmapToObj(b -> new String[] { "E" + b, "F" + b }).toList();
         assertEquals(Arrays.asList("E1", "F1", "E2", "F2"), result);
     }
 

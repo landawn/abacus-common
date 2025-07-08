@@ -1297,10 +1297,10 @@ public class FloatStream101Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flattMapToObj() should flatten array to object stream")
+        @DisplayName("flattmapToObj() should flatten array to object stream")
         public void testFlattMapToObj() {
             FloatStream stream = createFloatStream(1.0f, 2.0f);
-            Stream<String> result = stream.flattMapToObj(f -> new String[] { String.valueOf(f), String.valueOf(f * 2) });
+            Stream<String> result = stream.flattmapToObj(f -> new String[] { String.valueOf(f), String.valueOf(f * 2) });
             String[] array = result.toArray(String[]::new);
             assertArrayEquals(new String[] { "1.0", "2.0", "2.0", "4.0" }, array);
         }

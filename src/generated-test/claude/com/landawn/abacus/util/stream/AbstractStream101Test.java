@@ -61,6 +61,7 @@ public class AbstractStream101Test extends TestBase {
         // Empty method to be implemented
         return Stream.of(iter);
     }
+
     @Test
     public void testJoinByRangeWithCollector() {
         List<Integer> left = Arrays.asList(1, 5, 10);

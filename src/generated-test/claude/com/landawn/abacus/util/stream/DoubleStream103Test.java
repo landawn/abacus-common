@@ -202,7 +202,7 @@ public class DoubleStream103Test extends TestBase {
         DoubleStream stream = createDoubleStream(1.0, 2.0);
         DoubleFunction<java.util.stream.DoubleStream> mapper = x -> java.util.stream.DoubleStream.of(x, x * 3);
 
-        double[] result = stream.flattmap(mapper).toArray();
+        double[] result = stream.flattMap(mapper).toArray();
         assertArrayEquals(new double[] { 1.0, 3.0, 2.0, 6.0 }, result, 0.0001);
     }
 
@@ -256,7 +256,7 @@ public class DoubleStream103Test extends TestBase {
         DoubleStream stream = createDoubleStream(1.0, 2.0);
         DoubleFunction<String[]> mapper = x -> new String[] { "X" + x, "Y" + x };
 
-        List<String> result = stream.flattMapToObj(mapper).toList();
+        List<String> result = stream.flattmapToObj(mapper).toList();
         assertEquals(Arrays.asList("X1.0", "Y1.0", "X2.0", "Y2.0"), result);
     }
 

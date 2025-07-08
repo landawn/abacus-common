@@ -555,7 +555,7 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testFlattMapToObjWithArray() {
             // Note the 'tt' in flattMap, which is distinct from flatmap
-            String[] result = FloatStream.of(1f, 2f).flattMapToObj(f -> new String[] { "val=" + f }).toArray(String[]::new);
+            String[] result = FloatStream.of(1f, 2f).flattmapToObj(f -> new String[] { "val=" + f }).toArray(String[]::new);
             assertArrayEquals(new String[] { "val=1.0", "val=2.0" }, result);
         }
 

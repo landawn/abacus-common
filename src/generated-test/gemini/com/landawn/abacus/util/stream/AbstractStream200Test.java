@@ -140,7 +140,7 @@ public class AbstractStream200Test extends TestBase {
     @Test
     public void test_flattMap_array() {
         List<Integer> result = Stream.of("1,2", "3,4")
-                .flattMap(s -> s.split(","))
+                .flattmap(s -> s.split(","))
                 .map(i -> Numbers.toInt(i)) // Just to make it compile with generic type
                 .toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
@@ -148,7 +148,7 @@ public class AbstractStream200Test extends TestBase {
 
     @Test
     public void test_flattmap_jdkStream() {
-        List<Integer> result = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4)).flattmap(Collection::stream).toList();
+        List<Integer> result = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4)).flattMap(Collection::stream).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 

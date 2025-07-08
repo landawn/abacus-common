@@ -495,7 +495,7 @@ public class ByteStream102Test extends TestBase {
     @Test
     public void testFlattMapToObj() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
-        Stream<String> stringStream = stream.flattMapToObj(b -> new String[] { String.valueOf(b), "x" + b });
+        Stream<String> stringStream = stream.flattmapToObj(b -> new String[] { String.valueOf(b), "x" + b });
         List<String> result = stringStream.toList();
         assertEquals(Arrays.asList("1", "x1", "2", "x2", "3", "x3"), result);
     }

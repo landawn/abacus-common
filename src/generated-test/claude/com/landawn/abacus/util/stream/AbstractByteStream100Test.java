@@ -175,7 +175,7 @@ public class AbstractByteStream100Test extends TestBase {
     @Test
     public void testFlattMapToObj() {
         ByteFunction<String[]> mapper = value -> new String[] { "" + value, "" + (value * 2) };
-        Stream<String> result = stream.flattMapToObj(mapper);
+        Stream<String> result = stream.flattmapToObj(mapper);
         assertEquals(Arrays.asList("1", "2", "2", "4", "3", "6", "4", "8", "5", "10"), result.toList());
     }
 

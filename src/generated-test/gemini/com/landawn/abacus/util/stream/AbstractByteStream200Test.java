@@ -85,8 +85,8 @@ public class AbstractByteStream200Test extends TestBase {
     }
 
     @Test
-    public void flattMapToObj() {
-        List<Byte> result = stream.flattMapToObj(b -> new Byte[] { b, b }).toList();
+    public void flattmapToObj() {
+        List<Byte> result = stream.flattmapToObj(b -> new Byte[] { b, b }).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3, (byte) 2, (byte) 2), result);
     }
 

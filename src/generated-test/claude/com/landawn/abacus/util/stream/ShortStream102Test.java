@@ -466,9 +466,9 @@ public class ShortStream102Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test flattMapToObj() with array")
+    @DisplayName("Test flattmapToObj() with array")
     public void testFlattMapToObjArray() {
-        Stream<String> flattened = stream.flattMapToObj(n -> new String[] { "A" + n, "B" + n });
+        Stream<String> flattened = stream.flattmapToObj(n -> new String[] { "A" + n, "B" + n });
         List<String> result = flattened.toList();
         assertEquals(Arrays.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"), result);
     }

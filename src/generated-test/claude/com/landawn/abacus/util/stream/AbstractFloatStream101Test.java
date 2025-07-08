@@ -118,7 +118,7 @@ public class AbstractFloatStream101Test extends TestBase {
 
     @Test
     public void testFlattMapToObj() {
-        Stream<String> result = stream.flattMapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
+        Stream<String> result = stream.flattmapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
         List<String> list = result.toList();
         assertEquals(Arrays.asList("1.0", "2.0", "2.0", "4.0", "3.0", "6.0", "4.0", "8.0", "5.0", "10.0"), list);
     }

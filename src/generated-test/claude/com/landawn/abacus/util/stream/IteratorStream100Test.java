@@ -270,7 +270,7 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testFlattMap() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        List<Integer> result = stream.flattMap(x -> new Integer[] { x, x * 10 }).toList();
+        List<Integer> result = stream.flattmap(x -> new Integer[] { x, x * 10 }).toList();
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
     }
 

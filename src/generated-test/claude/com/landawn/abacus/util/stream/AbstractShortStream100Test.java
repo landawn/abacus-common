@@ -135,11 +135,11 @@ public class AbstractShortStream100Test extends TestBase {
 
     @Test
     public void testFlattMapToObj() {
-        Stream<String> result = createShortStream(new short[] { 1, 2, 3 }).flattMapToObj(v -> new String[] { String.valueOf(v), String.valueOf(v * 10) });
+        Stream<String> result = createShortStream(new short[] { 1, 2, 3 }).flattmapToObj(v -> new String[] { String.valueOf(v), String.valueOf(v * 10) });
         assertArrayEquals(new String[] { "1", "10", "2", "20", "3", "30" }, result.toArray());
 
         // Test with empty arrays
-        result = createShortStream(new short[] { 1, 2, 3 }).flattMapToObj(v -> new String[] {});
+        result = createShortStream(new short[] { 1, 2, 3 }).flattmapToObj(v -> new String[] {});
         assertArrayEquals(new String[] {}, result.toArray());
     }
 
