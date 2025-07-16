@@ -88,10 +88,6 @@ import com.landawn.abacus.parser.XMLDeserializationConfig;
 import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Fnn;
-import com.landawn.abacus.util.Fn.IntFunctions;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -145,7 +141,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.Iterables
@@ -2573,7 +2569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #merge(Collection, BiFunction, IntFunction)
      */
     public static <T> List<T> concat(final Collection<? extends Iterable<? extends T>> c) {
-        return concat(c, Factory.ofList());
+        return concat(c, IntFunctions.ofList());
     }
 
     /**
@@ -2999,7 +2995,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         Returns an empty List if the input {@code Iterable} is {@code null} or empty.
      */
     public static <T> List<T> flatten(final Iterable<? extends Iterable<? extends T>> c) {
-        return flatten(c, Factory.ofList());
+        return flatten(c, IntFunctions.ofList());
     }
 
     /**
@@ -19919,7 +19915,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>();
         }
 
-        return filter(a, filter, Factory.ofList());
+        return filter(a, filter, IntFunctions.ofList());
     }
 
     /**
@@ -19957,7 +19953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) throws IndexOutOfBoundsException {
-        return filter(a, fromIndex, toIndex, filter, Factory.ofList());
+        return filter(a, fromIndex, toIndex, filter, IntFunctions.ofList());
     }
 
     /**
@@ -20009,7 +20005,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IndexOutOfBoundsException {
-        return filter(c, fromIndex, toIndex, filter, Factory.ofList());
+        return filter(c, fromIndex, toIndex, filter, IntFunctions.ofList());
     }
 
     /**
@@ -20082,7 +20078,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final Iterable<? extends T> c, final Predicate<? super T> filter) {
-        return filter(c, filter, Factory.ofList());
+        return filter(c, filter, IntFunctions.ofList());
     }
 
     /**
@@ -20124,7 +20120,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        return filter(iter, filter, Factory.ofList());
+        return filter(iter, filter, IntFunctions.ofList());
     }
 
     /**
@@ -21395,7 +21391,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R> List<R> map(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper)
             throws IndexOutOfBoundsException {
-        return map(a, fromIndex, toIndex, mapper, Factory.ofList());
+        return map(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21453,7 +21449,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper)
             throws IndexOutOfBoundsException {
-        return map(c, fromIndex, toIndex, mapper, Factory.ofList());
+        return map(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21526,7 +21522,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A list containing the transformed elements, or an empty list if the input iterable is {@code null} or empty.
      */
     public static <T, R> List<R> map(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper) {
-        return map(c, mapper, Factory.ofList());
+        return map(c, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21576,7 +21572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterators#map(Iterator, Function)
      */
     public static <T, R> List<R> map(final Iterator<? extends T> iter, final Function<? super T, ? extends R> mapper) {
-        return map(iter, mapper, Factory.ofList());
+        return map(iter, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21676,7 +21672,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
             final Function<? super T, ? extends Collection<? extends R>> mapper) {
-        return flatMap(a, fromIndex, toIndex, mapper, Factory.ofList());
+        return flatMap(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21738,7 +21734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Function<? super T, ? extends Collection<? extends R>> mapper) throws IndexOutOfBoundsException {
-        return flatMap(c, fromIndex, toIndex, mapper, Factory.ofList());
+        return flatMap(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21817,7 +21813,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A list containing the transformed elements, or an empty list if the input iterable is {@code null} or empty.
      */
     public static <T, R> List<R> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper) {
-        return flatMap(c, mapper, Factory.ofList());
+        return flatMap(c, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21870,7 +21866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterators#flatMap(Iterator, Function)
      */
     public static <T, R> List<R> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Collection<? extends R>> mapper) {
-        return flatMap(iter, mapper, Factory.ofList());
+        return flatMap(iter, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -21929,7 +21925,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, U, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends U>> mapper,
             final Function<? super U, ? extends Collection<? extends R>> mapper2) {
 
-        return flatMap(a, mapper, mapper2, Factory.ofList());
+        return flatMap(a, mapper, mapper2, IntFunctions.ofList());
     }
 
     /**
@@ -21999,7 +21995,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, U, R> List<R> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends U>> mapper,
             final Function<? super U, ? extends Collection<? extends R>> mapper2) {
 
-        return flatMap(c, mapper, mapper2, Factory.ofList());
+        return flatMap(c, mapper, mapper2, IntFunctions.ofList());
     }
 
     /**
@@ -22069,7 +22065,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, U, R> List<R> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper,
             final Function<? super U, ? extends Collection<? extends R>> mapper2) {
 
-        return flatMap(iter, mapper, mapper2, Factory.ofList());
+        return flatMap(iter, mapper, mapper2, IntFunctions.ofList());
     }
 
     /**
@@ -22171,7 +22167,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
     //            final Function<? super T, ? extends R[]> mapper) {
-    //        return flatmap(a, fromIndex, toIndex, mapper, Factory.ofList());
+    //        return flatmap(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     //    }
     //
     //    /**
@@ -22224,7 +22220,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
     //            final Function<? super T, ? extends R[]> mapper) {
-    //        return flatmap(c, fromIndex, toIndex, mapper, Factory.ofList());
+    //        return flatmap(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     //    }
     //
     //    /**
@@ -22295,7 +22291,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends R[]> mapper) //NOSONAR
     //    {
-    //        return flatmap(c, mapper, Factory.<R> ofList());
+    //        return flatmap(c, mapper, IntFunctions.<R> ofList());
     //    }
     //
     //    /**
@@ -22701,7 +22697,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
     //            final Function<? super T, ? extends R[]> mapper) {
-    //        return flatmap(a, fromIndex, toIndex, mapper, Factory.ofList());
+    //        return flatmap(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     //    }
     //
     //    /**
@@ -22754,7 +22750,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
     //            final Function<? super T, ? extends R[]> mapper) {
-    //        return flatmap(c, fromIndex, toIndex, mapper, Factory.ofList());
+    //        return flatmap(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     //    }
     //
     //    /**
@@ -22825,7 +22821,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     */
     //    public static <T, R> List<R> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends R[]> mapper) //NOSONAR
     //    {
-    //        return flatmap(c, mapper, Factory.<R> ofList());
+    //        return flatmap(c, mapper, IntFunctions.<R> ofList());
     //    }
     //
     //    /**
@@ -22875,7 +22871,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Beta
     public static <T, R> List<R> mapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper, final Predicate<? super R> filter) {
-        return mapAndFilter(c, mapper, filter, Factory.ofList());
+        return mapAndFilter(c, mapper, filter, IntFunctions.ofList());
     }
 
     /**
@@ -22937,7 +22933,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Beta
     public static <T, R> List<R> filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter, final Function<? super T, ? extends R> mapper) {
-        return filterAndMap(c, filter, mapper, Factory.ofList());
+        return filterAndMap(c, filter, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -22997,7 +22993,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, R> List<R> flatMapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper,
             final Predicate<? super R> filter) {
-        return flatMapAndFilter(c, mapper, filter, Factory.ofList());
+        return flatMapAndFilter(c, mapper, filter, IntFunctions.ofList());
     }
 
     /**
@@ -23064,7 +23060,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, R> List<R> filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
             final Function<? super T, ? extends Collection<? extends R>> mapper) {
-        return filterAndFlatMap(c, filter, mapper, Factory.ofList());
+        return filterAndFlatMap(c, filter, mapper, IntFunctions.ofList());
     }
 
     /**
@@ -24587,7 +24583,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return merge(N.asList(a, b), nextSelector, Factory.ofList());
+        return merge(N.asList(a, b), nextSelector, IntFunctions.ofList());
     }
 
     /**
@@ -24601,7 +24597,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #concat(Collection, IntFunction)
      */
     public static <T> List<T> merge(final Collection<? extends Iterable<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return merge(c, nextSelector, Factory.ofList());
+        return merge(c, nextSelector, IntFunctions.ofList());
     }
 
     /**
@@ -25634,7 +25630,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a pair of lists, where the first list contains the first elements and the second list contains the second elements
      */
     public static <T, A, B> Pair<List<A>, List<B>> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
-        return unzip(c, unzip, Factory.ofList());
+        return unzip(c, unzip, IntFunctions.ofList());
     }
 
     /**
@@ -25721,7 +25717,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Deprecated
     public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
-        return unzipp(c, unzip, Factory.ofList());
+        return unzipp(c, unzip, IntFunctions.ofList());
     }
 
     /**

@@ -1769,11 +1769,66 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The boolean value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A boolean array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static boolean[] repeat(final boolean element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final boolean[] a = new boolean[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**
+     * Generates a new boolean array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new boolean array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] original = {true, false, true};
+     * boolean[] repeated = Array.repeat(original, 3);
+     * // Result: {true, false, true, true, false, true, true, false, true}
+     *
+     * boolean[] single = {false};
+     * boolean[] multiplied = Array.repeat(single, 5);
+     * // Result: {false, false, false, false, false}
+     *
+     * // Edge case: empty array
+     * boolean[] empty = {};
+     * boolean[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input boolean array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new boolean array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @see #repeat(boolean, int)
+     */
+    public static boolean[] repeat(final boolean[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_BOOLEAN_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final boolean[] ret = new boolean[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1782,11 +1837,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The char value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A char array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static char[] repeat(final char element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final char[] a = new char[n];
         N.fill(a, element);
         return a;
+    }
+
+    /** 
+     * Generates a new char array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new char array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] original = {'a', 'b', 'c'};
+     * char[] repeated = Array.repeat(original, 3);
+     * // Result: {'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c'}
+     *
+     * char[] single = {'x'};
+     * char[] multiplied = Array.repeat(single, 5);
+     * // Result: {'x', 'x', 'x', 'x', 'x'}
+     *
+     * // Edge case: empty array
+     * char[] empty = {};
+     * char[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input char array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new char array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static char[] repeat(final char[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_CHAR_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final char[] ret = new char[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1795,11 +1904,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The byte value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A byte array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static byte[] repeat(final byte element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final byte[] a = new byte[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**
+     * Generates a new byte array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new byte array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * byte[] original = {1, 2, 3};
+     * byte[] repeated = Array.repeat(original, 3);
+     * // Result: {1, 2, 3, 1, 2, 3, 1, 2, 3}
+     *
+     * byte[] single = {0};
+     * byte[] multiplied = Array.repeat(single, 5);
+     * // Result: {0, 0, 0, 0, 0}
+     *
+     * // Edge case: empty array
+     * byte[] empty = {};
+     * byte[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input byte array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new byte array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static byte[] repeat(final byte[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_BYTE_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final byte[] ret = new byte[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1808,11 +1971,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The short value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A short array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static short[] repeat(final short element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final short[] a = new short[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**     
+     * Generates a new short array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new short array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * short[] original = {1, 2, 3};
+     * short[] repeated = Array.repeat(original, 3);
+     * // Result: {1, 2, 3, 1, 2, 3, 1, 2, 3}
+     *
+     * short[] single = {0};
+     * short[] multiplied = Array.repeat(single, 5);
+     * // Result: {0, 0, 0, 0, 0}
+     *
+     * // Edge case: empty array
+     * short[] empty = {};
+     * short[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input short array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new short array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static short[] repeat(final short[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_SHORT_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final short[] ret = new short[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1821,11 +2038,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The integer value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return An integer array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static int[] repeat(final int element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final int[] a = new int[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**     
+     * Generates a new integer array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new integer array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] original = {1, 2, 3};
+     * int[] repeated = Array.repeat(original, 3);
+     * // Result: {1, 2, 3, 1, 2, 3, 1, 2, 3}
+     *
+     * int[] single = {0};
+     * int[] multiplied = Array.repeat(single, 5);
+     * // Result: {0, 0, 0, 0, 0}
+     *
+     * // Edge case: empty array
+     * int[] empty = {};
+     * int[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input integer array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new integer array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static int[] repeat(final int[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_INT_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final int[] ret = new int[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1834,11 +2105,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The long value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A long array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static long[] repeat(final long element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final long[] a = new long[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**     
+     * Generates a new long array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new long array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long[] original = {1L, 2L, 3L};
+     * long[] repeated = Array.repeat(original, 3);
+     * // Result: {1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L}
+     *
+     * long[] single = {0L};
+     * long[] multiplied = Array.repeat(single, 5);
+     * // Result: {0L, 0L, 0L, 0L, 0L}
+     *
+     * // Edge case: empty array
+     * long[] empty = {};
+     * long[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input long array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new long array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static long[] repeat(final long[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_LONG_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final long[] ret = new long[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1847,11 +2172,63 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The float value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A float array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static float[] repeat(final float element, final int n) {
         final float[] a = new float[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**     
+     * Generates a new float array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new float array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * float[] original = {1.1f, 2.2f, 3.3f};
+     * float[] repeated = Array.repeat(original, 3);
+     * // Result: {1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f}
+     *
+     * float[] single = {0.0f};
+     * float[] multiplied = Array.repeat(single, 5);
+     * // Result: {0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+     *
+     * // Edge case: empty array
+     * float[] empty = {};
+     * float[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input float array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new float array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static float[] repeat(final float[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_FLOAT_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final float[] ret = new float[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1860,11 +2237,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The double value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A double array of length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if n is negative
      */
     public static double[] repeat(final double element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final double[] a = new double[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**     
+     * Generates a new double array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new double array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * double[] original = {1.1, 2.2, 3.3};
+     * double[] repeated = Array.repeat(original, 3);
+     * // Result: {1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 2.2, 3.3}
+     *
+     * double[] single = {0.0};
+     * double[] multiplied = Array.repeat(single, 5);
+     * // Result: {0.0, 0.0, 0.0, 0.0, 0.0}
+     *
+     * // Edge case: empty array
+     * double[] empty = {};
+     * double[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input double array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new double array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static double[] repeat(final double[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_DOUBLE_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final double[] ret = new double[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1873,11 +2304,65 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The String value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A String array of length <i>n</i> with all elements set to <i>element</i>.
+     * @@throws IllegalArgumentException if n is negative
      */
     public static String[] repeat(final String element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final String[] a = new String[n];
         N.fill(a, element);
         return a;
+    }
+
+    /**
+     * Generates a new String array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new String array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] original = {"a", "b", "c"};
+     * String[] repeated = Array.repeat(original, 3);
+     * // Result: {"a", "b", "c", "a", "b", "c", "a", "b", "c"}
+     *
+     * String[] single = {"x"};
+     * String[] multiplied = Array.repeat(single, 5);
+     * // Result: {"x", "x", "x", "x", "x"}
+     *
+     * // Edge case: empty array
+     * String[] empty = {};
+     * String[] result = Array.repeat(empty, 10);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param a the input String array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @return a new String array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static String[] repeat(final String[] a, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return N.EMPTY_STRING_ARRAY;
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final String[] ret = new String[(int) len];
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1888,12 +2373,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if the specified <i>element</i> is {@code null}.
-     * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
+     * @throws IllegalArgumentException <i>element</i> is {@code null} or {@code n} is negative.
+     * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} 
+     *  because this method throws NullPointerException when element is {@code null}
+     * @see #repeat(Object, int, Class)
+     * @see #repeatNonNull(Object, int)
      */
     @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws IllegalArgumentException {
         N.checkArgNotNull(element, cs.element);
+        N.checkArgNotNegative(n, cs.n);
 
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);
@@ -1909,11 +2398,67 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param n The length of the array to be generated.
      * @param elementClass The class of the elements in the array.
      * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) {
+        N.checkArgNotNegative(n, cs.n);
+
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
         return a;
+    }
+
+    /**
+     * Generates a new array by repeating the input array a specified number of times.
+     *
+     * <p>This method creates a new array where the input array is repeated consecutively
+     * for the specified number of times. The resulting array will have a length equal to the
+     * original array length multiplied by the repetition count.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Integer[] original = {1, 2, 3};
+     * Integer[] repeated = Array.repeat(original, 3, Integer.class);
+     * // Result: {1, 2, 3, 1, 2, 3, 1, 2, 3}
+     *
+     * Integer[] single = {0};
+     * Integer[] multiplied = Array.repeat(single, 5, Integer.class);
+     * // Result: {0, 0, 0, 0, 0}
+     *
+     * // Edge case: empty array
+     * Integer[] empty = {};
+     * Integer[] result = Array.repeat(empty, 10, Integer.class);
+     * // Result: {} (empty array)
+     * }</pre>
+     *
+     * @param <T> The type of the elements in the array.
+     * @param a the input array to be repeated
+     * @param n the number of times to repeat the array (must be non-negative)
+     * @param elementClass The class of the elements in the array.
+     * @return a new array containing the input array repeated n times
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     */
+    public static <T> T[] repeat(final T[] a, final int n, final Class<? extends T> elementClass) {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (N.isEmpty(a)) {
+            return Array.newInstance(elementClass, 0);
+        }
+
+        final int aLen = a.length;
+        final long len = aLen * (long) n;
+
+        if (len > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("overflow");
+        }
+
+        final T[] ret = N.newArray(elementClass, (int) len);
+
+        for (int i = 0; i < n; i++) {
+            N.copy(a, 0, ret, i * aLen, aLen);
+        }
+
+        return ret;
     }
 
     /**
@@ -1925,10 +2470,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if the specified {@code element} is {@code null}.
+     * @throws IllegalArgumentException if <i>element</i> is {@code null} or if <i>n</i> is negative.
      */
     public static <T> T[] repeatNonNull(final T element, final int n) throws IllegalArgumentException {
         N.checkArgNotNull(element, cs.element);
+        N.checkArgNotNegative(n, cs.n);
 
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);

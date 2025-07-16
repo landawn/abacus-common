@@ -44,15 +44,15 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.ImmutableMap;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Seq;
+import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -676,7 +676,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testSplitByChunkSizeAndSupplier() {
-        List<Set<Integer>> result = Stream.of(1, 2, 3, 4, 5).split(2, Factory.ofLinkedHashSet()).toList();
+        List<Set<Integer>> result = Stream.of(1, 2, 3, 4, 5).split(2, IntFunctions.ofLinkedHashSet()).toList();
         assertEquals(Arrays.asList(N.asLinkedHashSet(1, 2), N.asLinkedHashSet(3, 4), N.asLinkedHashSet(5)), result);
     }
 
@@ -1974,6 +1974,7 @@ public class Stream200Test extends TestBase {
         List<Integer> merged = Stream.merge(list1, list2, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7), merged);
     }
+
 
     @Test
     public void testParallelZip() throws InterruptedException {

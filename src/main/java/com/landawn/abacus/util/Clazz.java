@@ -1220,6 +1220,7 @@ public final class Clazz {
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) ConcurrentHashMap.class;
     }
+
     /**
      * Returns a Class reference for {@code BiMap} with unspecified key and value types.
      * BiMap is a bidirectional map that preserves the uniqueness of its values as well as that of its keys.

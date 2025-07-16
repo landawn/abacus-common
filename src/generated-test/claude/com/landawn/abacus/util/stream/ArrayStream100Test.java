@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u;
 import com.landawn.abacus.util.u.Optional;
 
@@ -347,7 +347,7 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testSplitWithCollectionSupplier() {
         Stream<Integer> stream = Stream.of(integerArray);
-        List<Set<Integer>> result = stream.split(3, Factory.ofSet()).toList();
+        List<Set<Integer>> result = stream.split(3, IntFunctions.ofSet()).toList();
         assertEquals(4, result.size());
         assertTrue(result.get(0).contains(1));
         assertTrue(result.get(0).contains(2));
@@ -391,7 +391,7 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testSliding() {
         Stream<Integer> stream = Stream.of(integerArray);
-        List<List<Integer>> result = stream.sliding(3, 2, Factory.ofList()).toList();
+        List<List<Integer>> result = stream.sliding(3, 2, IntFunctions.ofList()).toList();
         assertTrue(result.size() > 0);
         assertEquals(3, result.get(0).size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));

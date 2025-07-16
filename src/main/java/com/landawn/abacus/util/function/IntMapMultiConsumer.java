@@ -19,8 +19,6 @@ package com.landawn.abacus.util.function;
  * and returns no result. This functional interface is used to implement a one-to-many
  * transformation operation, similar to flatMap. The IntConsumer parameter can be 
  * invoked multiple times to pass multiple values downstream.
- * 
- * <p>This is a functional interface whose functional method is {@link #accept(double, java.util.function.IntConsumer)}.
  *
  * @see java.util.stream.DoubleStream.IntMapMultiConsumer
  */

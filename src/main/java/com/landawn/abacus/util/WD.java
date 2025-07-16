@@ -763,6 +763,12 @@ public final class WD {
     public static final String GROUP_BY = "GROUP BY";
 
     /**
+     * SQL PARTITION BY clause: {@code "PARTITION BY"}.
+     * Used in window functions to define partitions.
+     */
+    public static final String PARTITION_BY = "PARTITION BY";
+
+    /**
      * SQL HAVING keyword: {@code "HAVING"}.
      * Used to filter grouped results.
      */
@@ -959,6 +965,12 @@ public final class WD {
      * Tests for non-existence of rows.
      */
     public static final String NOT_EXISTS = "NOT EXISTS";
+
+    /**
+     * SQL NOT LIKE clause: {@code "NOT LIKE"}.
+     * Tests for pattern matching with negation.
+     */
+    public static final String NOT_LIKE = "NOT LIKE";
 
     /**
      * SQL FROM keyword: {@code "FROM"}.

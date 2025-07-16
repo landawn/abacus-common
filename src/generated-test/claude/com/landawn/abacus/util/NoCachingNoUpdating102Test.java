@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 
 public class NoCachingNoUpdating102Test extends TestBase {
@@ -105,7 +104,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
     public void testDisposableArrayToCollection() {
         String[] original = {"one", "two", "three"};
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
-        LinkedList<String> linkedList = array.toCollection(Factory.ofLinkedList());
+        LinkedList<String> linkedList = array.toCollection(IntFunctions.ofLinkedList());
         Assertions.assertEquals(3, linkedList.size());
         Assertions.assertEquals("one", linkedList.get(0));
         Assertions.assertEquals("two", linkedList.get(1));
@@ -1555,7 +1554,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
         original.add("one");
         original.add("two");
         NoCachingNoUpdating.DisposableDeque<String> deque = NoCachingNoUpdating.DisposableDeque.wrap(original);
-        LinkedList<String> linkedList = deque.toCollection(Factory.ofLinkedList());
+        LinkedList<String> linkedList = deque.toCollection(IntFunctions.ofLinkedList());
         Assertions.assertEquals(2, linkedList.size());
         Assertions.assertEquals("one", linkedList.get(0));
         Assertions.assertEquals("two", linkedList.get(1));

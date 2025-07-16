@@ -89,7 +89,7 @@ public class BooleanList101Test extends TestBase {
 
     @Test
     public void testRepeatWithNegativeLength() {
-        assertThrows(NegativeArraySizeException.class, () -> BooleanList.repeat(true, -1));
+        assertThrows(IllegalArgumentException.class, () -> BooleanList.repeat(true, -1));
     }
 
     // ========== Capacity and Growth Tests ==========

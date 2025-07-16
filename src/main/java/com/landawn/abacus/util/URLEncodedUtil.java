@@ -40,7 +40,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Splitter.MapSplitter;
 
 /**

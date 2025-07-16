@@ -33,7 +33,6 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.Difference.KeyValueDifference;
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.function.TriPredicate;
 
 /**
@@ -2011,9 +2010,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 leftOnly.addAll(a);
             } else {
                 final Map<K, Map<? extends K1, ? extends V1>> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(),
-                        Factory.ofLinkedHashMap());
+                        IntFunctions.ofLinkedHashMap());
                 final Map<K, Map<? extends K2, ? extends V2>> beanMapB = N.toMap(b, idExtractor2, Fn.identity(), Fn.throwingMerger(),
-                        Factory.ofLinkedHashMap());
+                        IntFunctions.ofLinkedHashMap());
 
                 Map<K1, V1> mapA = null;
                 Map<K2, V2> mapB = null;
@@ -2884,8 +2883,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             } else if (N.isEmpty(b)) {
                 leftOnly.addAll(a);
             } else {
-                final Map<K, T1> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(), Factory.ofLinkedHashMap());
-                final Map<K, T2> beanMapB = N.toMap(b, idExtractor2, Fn.identity(), Fn.throwingMerger(), Factory.ofLinkedHashMap());
+                final Map<K, T1> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
+                final Map<K, T2> beanMapB = N.toMap(b, idExtractor2, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
                 T1 beanA = null;
                 T2 beanB = null;
                 boolean areEqual = false;

@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 
@@ -469,7 +468,7 @@ public class Multimap100Test extends TestBase {
         multimap.put("b", 1);
         multimap.put("a", 2);
 
-        ListMultimap<Integer, String> inverted = multimap.inverse(Factory.ofListMultimap());
+        ListMultimap<Integer, String> inverted = multimap.inverse(IntFunctions.ofListMultimap());
 
         assertEquals(2, inverted.size());
         assertTrue(inverted.get(1).contains("a"));
@@ -708,7 +707,7 @@ public class Multimap100Test extends TestBase {
         multimap.putMany("key1", Arrays.asList(1, 2));
         multimap.putMany("key2", Arrays.asList(3, 4));
 
-        TreeMap<String, List<Integer>> map = multimap.toMap(Factory.ofTreeMap());
+        TreeMap<String, List<Integer>> map = multimap.toMap(IntFunctions.ofTreeMap());
         assertEquals(2, map.size());
         assertEquals("key1", map.firstKey());
     }

@@ -39,7 +39,6 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
@@ -77,7 +76,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Enumerations
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N

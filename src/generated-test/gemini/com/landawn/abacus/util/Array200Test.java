@@ -494,7 +494,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new String[] { "hi", "hi", "hi" }, Array.repeat("hi", 3));
 
         assertArrayEquals(new int[0], Array.repeat(5, 0));
-        assertThrows(NegativeArraySizeException.class, () -> Array.repeat(5, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(5, -1));
     }
 
     @Test
@@ -509,7 +509,7 @@ public class Array200Test extends TestBase {
         // assertThrows(IllegalArgumentException.class, () -> Array.repeat(null, 3));
         // This would throw NullPointerException due to element.getClass() if N.checkArgNotNull isn't effective
         // Based on code, N.checkArgNotNull will throw IllegalArgumentException
-        assertArrayEquals(new String[] { null, null, null }, Array.repeat(null, 3));
+        assertArrayEquals(new String[] { null, null, null }, Array.repeat((String) null, 3));
     }
 
     @Test
@@ -522,7 +522,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new String[] { "test", "test" }, strResult);
 
         // Test with null element
-        Integer[] nullResult = Array.repeat(null, 3, Integer.class);
+        Integer[] nullResult = Array.repeat((Integer) null, 3, Integer.class);
         assertArrayEquals(new Integer[] { null, null, null }, nullResult);
 
         Object[] objResult = Array.repeat("String", 2, Object.class); // element is String, array is Object[]

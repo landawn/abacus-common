@@ -19,39 +19,39 @@ public abstract class TestBase {
     public static final char[] NULL_CHAR_ARRAY = "null".toCharArray();;
 
     public static void assertHaveSameElements(boolean[] expected, boolean[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(char[] expected, char[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(byte[] expected, byte[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(short[] expected, short[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(int[] expected, int[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(long[] expected, long[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(float[] expected, float[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static void assertHaveSameElements(double[] expected, double[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static <T> void assertHaveSameElements(T[] expected, T[] actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     public static <T> void assertHaveSameElements(Collection<? extends T> expected, T[] actual) {
@@ -59,7 +59,7 @@ public abstract class TestBase {
     }
 
     public static <T> void assertHaveSameElements(Collection<? extends T> expected, Collection<? extends T> actual) {
-        assertTrue(N.haveSameElements(expected, actual), "Expected: " + expected + ", Actual: " + actual);
+        assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
     }
 
     protected static <T> Type<T> createType(Class<T> typeClass) {

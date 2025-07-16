@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.Fn.Factory;
 
 /**
  * The PrimitiveList is an abstract class that represents a list of primitive data types.
@@ -1253,7 +1252,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
      */
     public Set<B> toSet(final int fromIndex, final int toIndex) {
-        return toCollection(fromIndex, toIndex, Factory.ofSet());
+        return toCollection(fromIndex, toIndex, IntFunctions.ofSet());
     }
 
     /**
@@ -1452,7 +1451,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return an IntFunction that creates List instances with the given capacity
      */
     protected <T> IntFunction<List<T>> createListSupplier() {
-        return Factory.ofList();
+        return IntFunctions.ofList();
     }
 
     /**
@@ -1464,7 +1463,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return an IntFunction that creates Set instances with the given capacity
      */
     protected <T> IntFunction<Set<T>> createSetSupplier() {
-        return Factory.ofSet();
+        return IntFunctions.ofSet();
     }
 
     /**
@@ -1477,7 +1476,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return an IntFunction that creates Map instances with the given capacity
      */
     protected <K, V> IntFunction<Map<K, V>> createMapSupplier() {
-        return Factory.ofMap();
+        return IntFunctions.ofMap();
     }
 
     /**
@@ -1489,7 +1488,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return an IntFunction that creates Multiset instances with the given capacity
      */
     protected <T> IntFunction<Multiset<T>> createMultisetSupplier() {
-        return Factory.ofMultiset();
+        return IntFunctions.ofMultiset();
     }
 
     /**

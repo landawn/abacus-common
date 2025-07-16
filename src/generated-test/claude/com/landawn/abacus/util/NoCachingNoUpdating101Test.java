@@ -25,7 +25,6 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableBooleanArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableByteArray;
@@ -504,7 +503,7 @@ public class NoCachingNoUpdating101Test extends TestBase {
         assertEquals(Integer.valueOf(3), iter.next());
 
         // Test with TreeSet for sorting
-        TreeSet<Integer> treeSet = array.toCollection(Factory.ofTreeSet());
+        TreeSet<Integer> treeSet = array.toCollection(IntFunctions.ofTreeSet());
         assertEquals(3, treeSet.size());
         assertEquals(Integer.valueOf(1), treeSet.first());
         assertEquals(Integer.valueOf(3), treeSet.last());

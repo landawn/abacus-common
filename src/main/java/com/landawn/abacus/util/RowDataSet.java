@@ -64,7 +64,6 @@ import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -2073,10 +2072,10 @@ public final class RowDataSet implements DataSet, Cloneable {
             final Class<?> componentType = rowClass.getComponentType();
             return cc -> N.newArray(componentType, cc);
         } else if (rowType.isCollection()) {
-            return (IntFunction<T>) Factory.ofCollection((Class<Collection>) rowClass);
+            return (IntFunction<T>) IntFunctions.ofCollection((Class<Collection>) rowClass);
 
         } else if (rowType.isMap()) {
-            return (IntFunction<T>) Factory.ofMap((Class<Map>) rowClass);
+            return (IntFunction<T>) IntFunctions.ofMap((Class<Map>) rowClass);
         } else {
             throw new IllegalArgumentException(
                     "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");

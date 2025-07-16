@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.IntFunctions;
 
 public class N103Test extends TestBase {
 
@@ -453,7 +453,7 @@ public class N103Test extends TestBase {
 
     @Test
     public void testFlatMapWithSupplier() {
-        Set<Character> result = N.flatMap(new String[] { "ab", "cd", "ef" }, s -> Arrays.asList(s.charAt(0), s.charAt(1)), Factory.ofSet());
+        Set<Character> result = N.flatMap(new String[] { "ab", "cd", "ef" }, s -> Arrays.asList(s.charAt(0), s.charAt(1)), IntFunctions.ofSet());
         assertEquals(new HashSet<>(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f')), result);
     }
 
@@ -484,7 +484,7 @@ public class N103Test extends TestBase {
     @Test
     public void testFlatMapTwice() {
         List<Integer> result = N.flatMap(new String[] { "1,2", "3,4" }, s -> Arrays.asList(s.split(",")),
-                str -> Arrays.asList(Integer.parseInt(String.valueOf(str))), Factory.ofList());
+                str -> Arrays.asList(Integer.parseInt(String.valueOf(str))), IntFunctions.ofList());
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 

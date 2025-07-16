@@ -28,8 +28,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.ImmutableSet;
@@ -41,6 +40,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
+import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u;
 
 
@@ -696,7 +696,7 @@ public class EntryStream101Test extends TestBase {
     @Test
     public void testSlidingAndSplitWithCollectionSupplier() {
         // Test sliding with collection supplier
-        List<LinkedList<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).sliding(2, Factory.ofLinkedList()).toList();
+        List<LinkedList<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).sliding(2, IntFunctions.ofLinkedList()).toList();
 
         assertEquals(3, windows.size());
         assertTrue(windows.get(0) instanceof LinkedList);

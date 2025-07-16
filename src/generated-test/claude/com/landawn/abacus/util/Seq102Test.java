@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Fnn;
-import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -1477,7 +1475,7 @@ public class Seq102Test extends TestBase {
     public void testSplitBySizeWithCollectionSupplier() throws Exception {
         // Test with HashSet
         Seq<String, Exception> seq = Seq.of("a", "b", "c", "d", "e");
-        List<Set<String>> chunks = seq.split(2, Factory.ofSet()).toList();
+        List<Set<String>> chunks = seq.split(2, IntFunctions.ofSet()).toList();
         assertEquals(3, chunks.size());
         assertEquals(new HashSet<>(Arrays.asList("a", "b")), chunks.get(0));
         assertEquals(new HashSet<>(Arrays.asList("c", "d")), chunks.get(1));

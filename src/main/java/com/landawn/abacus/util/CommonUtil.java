@@ -104,8 +104,6 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Builder.ComparisonBuilder;
 import com.landawn.abacus.util.Fn.BiPredicates;
-import com.landawn.abacus.util.Fn.IntFunctions;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -133,7 +131,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  *
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.Iterables

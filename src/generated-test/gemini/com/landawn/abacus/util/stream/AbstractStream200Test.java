@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.ListMultimap;
@@ -34,6 +33,7 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
+import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;

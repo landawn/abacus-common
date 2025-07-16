@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Suppliers;
 // Import other static methods from N as needed or call them via N.methodName
 import com.landawn.abacus.util.function.IntPredicate;
 
@@ -206,11 +205,11 @@ public class N203Test extends TestBase {
         Set<String> result = N.filter(arr, s -> s.length() == 3, size -> new HashSet<>());
         assertEquals(Set.of("one", "two"), result);
 
-        List<String> listResult = N.filter(arr, s -> s.length() > 3, Fn.Factory.ofList());
+        List<String> listResult = N.filter(arr, s -> s.length() > 3, IntFunctions.ofList());
         assertEquals(List.of("three", "four"), listResult);
 
-        assertTrue(N.filter((String[]) null, STRING_NOT_EMPTY, Fn.Factory.ofList()).isEmpty());
-        assertTrue(N.filter(new String[0], STRING_NOT_EMPTY, Fn.Factory.ofSet()).isEmpty());
+        assertTrue(N.filter((String[]) null, STRING_NOT_EMPTY, IntFunctions.ofList()).isEmpty());
+        assertTrue(N.filter(new String[0], STRING_NOT_EMPTY, IntFunctions.ofSet()).isEmpty());
 
     }
 
@@ -228,10 +227,10 @@ public class N203Test extends TestBase {
         Set<Integer> resultSet = N.filter(arr, 0, 4, IS_EVEN_INTEGER, size -> new HashSet<>());
         assertEquals(Set.of(2, 4), resultSet);
 
-        List<Integer> resultList = N.filter(arr, 3, 5, x -> x % 2 != 0, Fn.Factory.ofList());
+        List<Integer> resultList = N.filter(arr, 3, 5, x -> x % 2 != 0, IntFunctions.ofList());
         assertEquals(List.of(5), resultList);
 
-        assertTrue(N.filter(arr, 1, 1, IS_EVEN_INTEGER, Fn.Factory.ofList()).isEmpty());
+        assertTrue(N.filter(arr, 1, 1, IS_EVEN_INTEGER, IntFunctions.ofList()).isEmpty());
     }
 
     @Test
@@ -555,7 +554,7 @@ public class N203Test extends TestBase {
         String[] arr = { "a", "bb", "a" };
         Set<Integer> expected = Set.of(1, 2);
         assertEquals(expected, N.map(arr, String::length, size -> new HashSet<>()));
-        assertTrue(N.map((String[]) null, String::length, Fn.Factory.ofList()).isEmpty());
+        assertTrue(N.map((String[]) null, String::length, IntFunctions.ofList()).isEmpty());
     }
 
     @Test
@@ -636,7 +635,7 @@ public class N203Test extends TestBase {
         String[] arr = { "ab", "ca" };
         // Supplier for Set to test distinct flatmapped elements
         Set<String> expected = Set.of("a", "b", "c");
-        assertEquals(expected, N.flatMap(arr, N203Test::splitToChars, Fn.Factory.ofSet()));
+        assertEquals(expected, N.flatMap(arr, N203Test::splitToChars, IntFunctions.ofSet()));
     }
 
     @Test
@@ -676,7 +675,7 @@ public class N203Test extends TestBase {
     @Test
     public void testFlatMapIterableWithSupplier() {
         Iterable<String> iter = Arrays.asList("one", "too");
-        assertEquals(Set.of("o", "n", "e", "t"), N.flatMap(iter, N203Test::splitToChars, Fn.Factory.ofSet()));
+        assertEquals(Set.of("o", "n", "e", "t"), N.flatMap(iter, N203Test::splitToChars, IntFunctions.ofSet()));
     }
 
     @Test
@@ -688,7 +687,7 @@ public class N203Test extends TestBase {
     @Test
     public void testFlatMapIteratorWithSupplier() {
         Iterator<String> iter = Arrays.asList("hi", "bib").iterator();
-        assertEquals(Set.of("h", "i", "b"), N.flatMap(iter, N203Test::splitToChars, Fn.Factory.ofSet()));
+        assertEquals(Set.of("h", "i", "b"), N.flatMap(iter, N203Test::splitToChars, IntFunctions.ofSet()));
     }
 
     @Test

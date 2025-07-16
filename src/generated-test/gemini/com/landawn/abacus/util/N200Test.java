@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.IntFunction;
 
@@ -1278,7 +1278,7 @@ public class N200Test extends TestBase {
         Iterable<String> iterB = Arrays.asList("c", "d");
         Collection<Iterable<String>> collOfIters = Arrays.asList(iterA, iterB);
 
-        IntFunction<LinkedList<String>> supplier = Factory.ofLinkedList();
+        IntFunction<LinkedList<String>> supplier = IntFunctions.ofLinkedList();
         LinkedList<String> result = N.concat(collOfIters, supplier);
 
         assertEquals(Arrays.asList("a", "b", "c", "d"), result);

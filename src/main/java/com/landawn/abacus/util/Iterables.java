@@ -86,7 +86,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N
@@ -2664,8 +2664,8 @@ public final class Iterables {
      * @see N#fill(Object[], int, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
-     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
-     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
+     * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
@@ -2691,8 +2691,8 @@ public final class Iterables {
      * @see N#fill(Object[], int, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
-     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
-     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
+     * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
@@ -2722,8 +2722,8 @@ public final class Iterables {
      * @see N#padRight(Collection, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
-     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
-     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
+     * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) throws IllegalArgumentException {
@@ -2751,8 +2751,8 @@ public final class Iterables {
      * @see N#padRight(Collection, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
-     * @see Fn.Suppliers#of(com.landawn.abacus.util.function.Supplier)
-     * @see Fn.Suppliers#of(Object, com.landawn.abacus.util.function.Function)
+     * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)

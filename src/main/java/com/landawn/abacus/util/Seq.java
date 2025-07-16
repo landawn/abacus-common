@@ -79,9 +79,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Fnn;
-import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -3605,6 +3602,61 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
+     * Transforms each element of this sequence using the provided mapper function,
+     * which returns an array of new elements for each element. The resulting arrays
+     * are then flattened into a single sequence.
+     * This is an intermediate operation that does not consume the sequence.
+     *
+     * <p>This is similar to flatMap but works with arrays instead of sequences.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Seq<Integer, Exception> numbers = Seq.of(1, 2, 3);
+     * Seq<Integer, Exception> result = numbers.flattmap(n -> new Integer[]{n, n * 10});
+     * // Result: [1, 10, 2, 20, 3, 30]
+     * 
+     * Seq<String, Exception> words = Seq.of("Hello", "World");
+     * Seq<Character, Exception> chars = words.flattmap(s -> s.chars()
+     *     .mapToObj(c -> (char) c)
+     *     .toArray(Character[]::new));
+     * // Result: ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
+     * }</pre>
+     *
+     * @param <R> the type of the elements in the new sequence
+     * @param mapper the function to apply to each element, which returns an array of new elements
+     * @return a new sequence containing the flattened elements
+     * @throws IllegalStateException if the sequence is already closed
+     */
+    @IntermediateOp
+    public <R> Seq<R, E> flattmap(final Throwables.Function<? super T, R[], ? extends E> mapper) { //NOSONAR
+        assertNotClosed();
+
+        return create(new Throwables.Iterator<>() {
+            private R[] a = null;
+            private Iterator<? extends R> cur = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
+                    a = mapper.apply(elements.next());
+                    cur = N.isEmpty(a) ? null : ObjIterator.of(a);
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return cur.next();
+            }
+        }, closeHandlers);
+    }
+
+    /**
      * Transforms the non-null elements of this sequence using the provided mapper function,
      * which returns a collection of new elements for each non-null element.
      * The resulting collections are then flattened into a single sequence.
@@ -4363,9 +4415,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new sequence containing Map.Entry objects where each key maps to a single merged value
      * @throws IllegalStateException if the sequence is already closed
      * @see Collectors#toMap(Function, Function, BinaryOperator)
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -5830,7 +5882,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public Seq<List<T>, E> split(final int chunkSize) throws IllegalStateException {
-        return split(chunkSize, Factory.ofList());
+        return split(chunkSize, IntFunctions.ofList());
     }
 
     /**
@@ -6438,7 +6490,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public Seq<List<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
-        return sliding(windowSize, increment, Factory.ofList());
+        return sliding(windowSize, increment, IntFunctions.ofList());
     }
 
     //    /**
@@ -6450,7 +6502,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     //     */
     //    @IntermediateOp
     //    public Seq<Set<T>, E> slidingToSet(final int windowSize, final int increment) {
-    //        return sliding(windowSize, increment, Factory.<T> ofSet());
+    //        return sliding(windowSize, increment, IntFunctions.<T> ofSet());
     //    }
 
     /**
@@ -10678,9 +10730,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -10719,9 +10771,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -10760,9 +10812,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
      * @throws E4 if an exception occurs during merging
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> Map<K, V> toMap(
@@ -10806,9 +10858,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
      * @throws E4 if an exception occurs during merging
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception, E4 extends Exception> M toMap(
@@ -10862,9 +10914,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -10904,9 +10956,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E2 if an exception occurs during key extraction
      * @throws E3 if an exception occurs during value extraction
      * @throws E4 if an exception occurs during merging
-     * @see Fn.Fnn#throwingMerger()
-     * @see Fn.Fnn#replacingMerger()
-     * @see Fn.Fnn#ignoringMerger()
+     * @see Fnn#throwingMerger()
+     * @see Fnn#replacingMerger()
+     * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(

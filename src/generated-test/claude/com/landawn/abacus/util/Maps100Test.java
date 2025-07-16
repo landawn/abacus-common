@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -1347,7 +1347,7 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("John");
 
-        Map<String, Object> map = Maps.bean2Map(bean, Factory.ofLinkedHashMap());
+        Map<String, Object> map = Maps.bean2Map(bean, IntFunctions.ofLinkedHashMap());
         assertTrue(map instanceof LinkedHashMap);
         assertEquals("John", map.get("name"));
     }
@@ -1372,7 +1372,7 @@ public class Maps100Test extends TestBase {
         bean.setName("John");
         bean.setAge(30);
 
-        Map<String, Object> map = Maps.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, Factory.ofMap());
+        Map<String, Object> map = Maps.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertEquals("John", map.get("NAME"));
         assertEquals(30, map.get("AGE"));
     }
@@ -1931,10 +1931,10 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("Test");
 
-        Map<String, Object> lowerUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, Factory.ofMap());
+        Map<String, Object> lowerUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(lowerUnderscoreMap.containsKey("name"));
 
-        Map<String, Object> upperUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, Factory.ofMap());
+        Map<String, Object> upperUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(upperUnderscoreMap.containsKey("NAME"));
     }
 

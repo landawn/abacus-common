@@ -793,7 +793,7 @@ public class Array101Test extends TestBase {
         Assertions.assertArrayEquals(new String[]{"world", "world", "world"}, array);
         
         // Test with null element
-        String[] nullArray = Array.repeat(null, 2, String.class);
+        String[] nullArray = Array.repeat((String) null, 2, String.class);
         Assertions.assertArrayEquals(new String[]{null, null}, nullArray);
     }
     

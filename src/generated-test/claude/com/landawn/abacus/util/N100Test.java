@@ -20,7 +20,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.function.IntBiFunction;
 
 public class N100Test extends TestBase {
@@ -1103,7 +1103,7 @@ public class N100Test extends TestBase {
         List<String> b = Arrays.asList("b");
         List<String> c = Arrays.asList("c", "d");
         List<Iterable<String>> iterables = Arrays.asList(a, b, c);
-        Set<String> result = N.concat(iterables, Factory.ofSet());
+        Set<String> result = N.concat(iterables, IntFunctions.ofSet());
         assertEquals(new HashSet<>(Arrays.asList("a", "b", "c", "d")), result);
     }
 

@@ -71,7 +71,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * @see ContinuableFuture
  * @see Futures
  * @see Fn
- * @see Fn.Fnn
+ * @see Fnn
  * @since 1.0
  */
 public class AsyncExecutor {
