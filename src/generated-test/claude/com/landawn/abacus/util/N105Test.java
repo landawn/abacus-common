@@ -1,6 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +59,7 @@ public class N105Test extends TestBase {
     public void testSumInt_Collection() {
         assertEquals(5, N.sumInt(Arrays.asList(1, 2, 3, 4), 1, 3));
         assertEquals(10, N.sumInt(Arrays.asList(1, 2, 3, 4), 1, 3, x -> x * 2));
+        assertEquals(10, N.sumInt(N.asLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2));
     }
 
     @Test
@@ -85,6 +89,7 @@ public class N105Test extends TestBase {
     public void testSumLong_Collection() {
         assertEquals(5L, N.sumLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3));
         assertEquals(10L, N.sumLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3, x -> x * 2));
+        assertEquals(10L, N.sumLong(N.asLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2));
     }
 
     @Test
@@ -107,6 +112,7 @@ public class N105Test extends TestBase {
     public void testSumDouble_Collection() {
         assertEquals(5.0, N.sumDouble(Arrays.asList(1.0, 2.0, 3.0, 4.0), 1, 3), 0.001);
         assertEquals(10.0, N.sumDouble(Arrays.asList(1.0, 2.0, 3.0, 4.0), 1, 3, x -> x * 2), 0.001);
+        assertEquals(10.0, N.sumDouble(N.asLinkedHashSet(1.0, 2.0, 3.0, 4.0), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -144,6 +150,7 @@ public class N105Test extends TestBase {
     public void testAverageInt_Collection() {
         assertEquals(2.5, N.averageInt(Arrays.asList(1, 2, 3, 4), 1, 3), 0.001);
         assertEquals(5.0, N.averageInt(Arrays.asList(1, 2, 3, 4), 1, 3, x -> x * 2), 0.001);
+        assertEquals(5.0, N.averageInt(N.asLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -166,6 +173,7 @@ public class N105Test extends TestBase {
     public void testAverageLong_Collection() {
         assertEquals(2.5, N.averageLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3), 0.001);
         assertEquals(5.0, N.averageLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3, x -> x * 2), 0.001);
+        assertEquals(5.0, N.averageLong(N.asLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -746,11 +754,20 @@ public class N105Test extends TestBase {
         assertEquals(Arrays.asList(3, 4), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 2));
         assertEquals(Arrays.asList(3, 2), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 2, Comparator.reverseOrder()));
 
+        assertEquals(Arrays.asList(3, 4, 5), N.top(Arrays.asList(1, 2, 3, null, 4, 5), 3));
+        assertEquals(Arrays.asList(3, 4, 5), N.top(N.asLinkedHashSet(1, 2, 3, null, 4, 5), 3));
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), N.top(Arrays.asList(1, 2, 3, 4, 5), 0, 5, 6, Comparator.reverseOrder()));
+        assertEquals(Arrays.asList(2, 3, 4), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 6, Comparator.reverseOrder()));
+
         // keepEncounterOrder
         assertEquals(Arrays.asList(5, 4), N.top(Arrays.asList(1, 5, 3, 4, 2), 2, true));
         assertEquals(Arrays.asList(5, 4), N.top(Arrays.asList(1, 5, 3, 4, 2), 2, Comparator.naturalOrder(), true));
         assertEquals(Arrays.asList(5, 4), N.top(Arrays.asList(1, 5, 3, 4, 2), 1, 4, 2, true));
         assertEquals(Arrays.asList(5, 4), N.top(Arrays.asList(1, 5, 3, 4, 2), 1, 4, 2, Comparator.naturalOrder(), true));
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), N.top(Arrays.asList(1, 2, 3, 4, 5), 0, 5, 6, Comparator.reverseOrder(), true));
+        assertEquals(Arrays.asList(2, 3, 4), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 6, Comparator.reverseOrder(), true));
     }
 
     @Test
@@ -1361,4 +1378,313 @@ public class N105Test extends TestBase {
             assertFalse(error, "Thread safety issue detected");
         }
     }
+
+    private static final Predicate<String> STRING_NOT_EMPTY = s -> s != null && !s.isEmpty();
+    private static final Predicate<String> STRING_HAS_LETTER_A = s -> s != null && s.contains("a");
+
+    @Test
+    public void testFilterCollectionWithRangeAndSupplier() {
+        List<String> list = Arrays.asList("a", "b", "aa", "bb", "aaa");
+        Set<String> resultSet = N.filter(list, 1, 5, s -> s.contains("a") && s.length() > 1, HashSet::new);
+        assertEquals(Set.of("aa", "aaa"), resultSet);
+
+        resultSet = N.filter(N.newLinkedHashSet(list), 1, 5, s -> s.contains("a") && s.length() > 1, HashSet::new);
+        assertEquals(Set.of("aa", "aaa"), resultSet);
+        assertTrue(N.filter(list, 1, 1, STRING_NOT_EMPTY, ArrayList::new).isEmpty());
+    }
+
+    @Test
+    public void testMapToCollection() {
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new char[] { 'h', 'w' }, N.mapToChar(list, s -> s.charAt(0)));
+
+            assertArrayEquals(new char[] { 'h', 'w' }, N.mapToChar(N.newLinkedHashSet(list), s -> s.charAt(0)));
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new byte[] { 104, 119 }, N.mapToByte(list, s -> (byte) s.charAt(0)));
+            assertArrayEquals(new byte[] { 104, 119 }, N.mapToByte(N.newLinkedHashSet(list), s -> (byte) s.charAt(0)));
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new short[] { 104, 119 }, N.mapToShort(list, s -> (short) s.charAt(0)));
+            assertArrayEquals(new short[] { 104, 119 }, N.mapToShort(N.newLinkedHashSet(list), s -> (short) s.charAt(0)));
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new int[] { 104, 119 }, N.mapToInt(list, s -> (int) s.charAt(0)));
+            assertArrayEquals(new int[] { 104, 119 }, N.mapToInt(N.newLinkedHashSet(list), s -> (int) s.charAt(0)));
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new long[] { 104L, 119L }, N.mapToLong(list, s -> (long) s.charAt(0)));
+            assertArrayEquals(new long[] { 104L, 119L }, N.mapToLong(N.newLinkedHashSet(list), s -> (long) s.charAt(0)));
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new float[] { 104.0f, 119.0f }, N.mapToFloat(list, s -> (float) s.charAt(0)), 0.001f);
+            assertArrayEquals(new float[] { 104.0f, 119.0f }, N.mapToFloat(N.newLinkedHashSet(list), s -> (float) s.charAt(0)), 0.001f);
+        }
+        {
+            List<String> list = Arrays.asList("hello", "world");
+            assertArrayEquals(new double[] { 104.0, 119.0 }, N.mapToDouble(list, s -> (double) s.charAt(0)), 0.001);
+            assertArrayEquals(new double[] { 104.0, 119.0 }, N.mapToDouble(N.newLinkedHashSet(list), s -> (double) s.charAt(0)), 0.001);
+        }
+    }
+
+    @Test
+    public void testFlatMapCollectionWithRangeAndSupplier() {
+        List<String> list = Arrays.asList("key", "lock", "lol");
+        Set<Character> expected = N.asSet('l', 'o', 'c', 'k');
+        assertEquals(expected, N.flatMap(list, 1, 3, s -> N.toList(s.toCharArray()), HashSet::new));
+        assertEquals(expected, N.flatMap(N.newLinkedHashSet(list), 1, 3, s -> N.toList(s.toCharArray()), HashSet::new));
+    }
+
+    @Test
+    public void test_distinct() {
+        Iterable<String> iter = createIterable("hello", "world", "hello");
+        List<String> expected = N.asList("hello", "world");
+        assertEquals(expected, N.distinct(iter));
+        expected = N.asList("hello", "world");
+        assertEquals(expected, N.distinctBy(N.asLinkedList("hello", "hello", "world", "hello"), 0, 3, Fn.identity()));
+    }
+
+    @Test
+    public void testZipIterablesWithDefaults() {
+
+        {
+            Iterable<String> a = N.asList("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
+            assertEquals(List.of("xa", "yb", "zA"), result);
+        }
+
+        {
+            Iterable<String> a = N.asList("x", "y", "z");
+            Iterable<String> b = createIterable("a", "b");
+            List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
+            assertEquals(List.of("xa", "yb", "zA"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
+            assertEquals(List.of("xa", "yb", "zA"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = createIterable("a", "b");
+            List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
+            assertEquals(List.of("xa", "yb", "zA"), result);
+        }
+    }
+
+    @Test
+    public void testZipIterablesWithDefaults3() {
+
+        {
+            Iterable<String> a = N.asList("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            Iterable<String> c = N.asList("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            Iterable<String> c = N.asList("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = createIterable("a", "b");
+            Iterable<String> c = N.asList("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = createIterable("a", "b");
+            Iterable<String> c = createIterable("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+        {
+            Iterable<String> a = createIterable("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            Iterable<String> c = createIterable("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+        {
+            Iterable<String> a = N.asList("x", "y", "z");
+            Iterable<String> b = N.asList("a", "b");
+            Iterable<String> c = createIterable("1");
+            List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
+            assertEquals(List.of("xa1", "yb0", "zA0"), result);
+        }
+
+    }
+
+    @Test
+    public void testGroupByCollectionWithRangeAndMapSupplier() {
+        {
+            List<String> list = Arrays.asList("one", "two", "three", "four", "five");
+            TreeMap<Character, List<String>> result = N.groupBy(list, 1, 4, s -> s.charAt(0), TreeMap::new);
+            assertEquals(List.of("four"), result.get('f'));
+            assertEquals(List.of("two", "three"), result.get('t'));
+        }
+        {
+            List<String> list = N.asLinkedList("one", "two", "three", "four", "five");
+            TreeMap<Character, List<String>> result = N.groupBy(list, 1, 4, s -> s.charAt(0), TreeMap::new);
+            assertEquals(List.of("four"), result.get('f'));
+            assertEquals(List.of("two", "three"), result.get('t'));
+        }
+    }
+
+    @Test
+    public void forEach_iterables_triConsumer_shortCircuit() throws Exception {
+        List<String> l1 = Arrays.asList("a", "b", "c");
+        List<Integer> l2 = Arrays.asList(1, 2, 3, 4);
+        List<Boolean> l3 = Arrays.asList(true, false); // Shortest
+        List<String> result = new ArrayList<>();
+        N.forEach(l1, l2, l3, (s, i, bool) -> result.add(s + i + bool));
+
+        assertEquals(Arrays.asList("a1true", "b2false"), result);
+    }
+
+    @Test
+    public void test_forEach_01() throws Exception {
+        {
+            String[] a = N.asArray("a", "b", "c");
+            String[] b = N.asArray("1", "2", "3", "4");
+            List<String> result = new ArrayList<>();
+            N.forEach(a, b, "X", "0", (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("a1", "b2", "c3", "X4"), result);
+        }
+        {
+            List<String> a = Arrays.asList("a", "b", "c");
+            List<String> b = Arrays.asList("1", "2", "3", "4");
+            List<String> result = new ArrayList<>();
+            N.forEach(a, b, "X", "0", (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("a1", "b2", "c3", "X4"), result);
+        }
+        {
+            List<String> a = Arrays.asList("a", "b", "c");
+            List<String> b = Arrays.asList("1", "2", "3", "4");
+            List<String> result = new ArrayList<>();
+            N.forEach(a.iterator(), b.iterator(), "X", "0", (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("a1", "b2", "c3", "X4"), result);
+        }
+
+        {
+            String[] a = N.asArray("a", "b", "c");
+            String[] b = N.asArray("1", "2", "3", "4");
+            Boolean[] c = N.asArray(true, false);
+            List<String> result = new ArrayList<>();
+            N.forEach(a, b, c, "X", "0", false, (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("a1true", "b2false", "c3false", "X4false"), result);
+        }
+
+        {
+            List<String> a = Arrays.asList("a", "b", "c");
+            List<String> b = Arrays.asList("1", "2", "3", "4");
+            List<Boolean> c = N.asList(true, false);
+            List<String> result = new ArrayList<>();
+            N.forEach(a, b, c, "X", "0", false, (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("a1true", "b2false", "c3false", "X4false"), result);
+        }
+
+        {
+            List<String> a = Arrays.asList("a", "b", "c");
+            List<String> b = Arrays.asList("1", "2", "3", "4");
+            List<Boolean> c = N.asList(true, false);
+            List<String> result = new ArrayList<>();
+            N.forEach(a.iterator(), b.iterator(), c.iterator(), "X", "0", false, (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("a1true", "b2false", "c3false", "X4false"), result);
+        }
+    }
+
+    @Test
+    public void test_forEachNonNull() throws Exception {
+        {
+            String[] a = N.asArray("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> result.add(e));
+
+            assertEquals(Arrays.asList("a", "b", "c"), result);
+        }
+        {
+            String[] a = N.asArray("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> N.asList(e, e), (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
+        }
+        {
+            String[] a = N.asArray("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> N.asList(e, e), e -> N.asList(e), (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> result.add(e));
+
+            assertEquals(Arrays.asList("a", "b", "c"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> N.asList(e, e), (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a, e -> N.asList(e, e), e -> N.asList(e), (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a.iterator(), e -> result.add(e));
+
+            assertEquals(Arrays.asList("a", "b", "c"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a.iterator(), e -> N.asList(e, e), (s, i) -> result.add(s + i));
+
+            assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
+        }
+        {
+            List<String> a = N.asList("a", null, "b", null, "c");
+            List<String> result = new ArrayList<>();
+            N.forEachNonNull(a.iterator(), e -> N.asList(e, e), e -> N.asList(e), (s, i, j) -> result.add(s + i + j));
+
+            assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
+        }
+    }
+
 }

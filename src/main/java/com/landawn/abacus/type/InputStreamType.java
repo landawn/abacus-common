@@ -35,7 +35,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for InputStream and its subclasses.
@@ -111,7 +110,9 @@ public class InputStreamType extends AbstractType<InputStream> {
      */
     @Override
     public String stringOf(final InputStream x) {
-        return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
+        // return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
+
+        return x == null ? null : IOUtil.readAllToString(x);
     }
 
     /**
@@ -131,11 +132,11 @@ public class InputStreamType extends AbstractType<InputStream> {
 
         if (bytesConstructor != null) {
             //noinspection PrimitiveArrayArgumentToVarargsMethod
-            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, Strings.base64Decode(str)); //NOSONAR
+            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, str.getBytes()); //NOSONAR
         } else if (streamConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(Strings.base64Decode(str)));
+            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(str.getBytes()));
         } else {
-            return new ByteArrayInputStream(Strings.base64Decode(str));
+            return new ByteArrayInputStream(str.getBytes());
         }
     }
 
@@ -291,10 +292,10 @@ public class InputStreamType extends AbstractType<InputStream> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config == null) || (config.getStringQuotation() == 0)) {
-                writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
+                writer.write(stringOf(t));
             } else {
                 writer.write(config.getStringQuotation());
-                writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
+                writer.write(stringOf(t));
                 writer.write(config.getStringQuotation());
             }
         }

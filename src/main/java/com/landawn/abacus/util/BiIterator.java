@@ -139,8 +139,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super K, ? super V, E> action) throws NoSuchElementException, E {
-                // N.checkArgNotNull(action);
-
                 final Map.Entry<K, V> entry = iter.next();
 
                 action.accept(entry.getKey(), entry.getValue());
@@ -148,7 +146,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super K, ? super V> action) {
-
                 Map.Entry<K, V> entry = null;
 
                 while (iter.hasNext()) {
@@ -159,7 +156,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
-
                 Map.Entry<K, V> entry = null;
 
                 while (iter.hasNext()) {
@@ -170,7 +166,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super K, ? super V, ? extends R> mapper) {
-
                 return new ObjIterator<>() {
                     private Map.Entry<K, V> entry = null;
 
@@ -249,8 +244,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
-                // N.checkArgNotNull(action);
-
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -264,8 +257,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                while (hasNextFlag || hasNext.getAsBoolean()) {
+                    hasNextFlag = false; // Reset for the next call
 
-                while (hasNext.getAsBoolean()) {
                     output.accept(tmp);
 
                     action.accept(tmp.left(), tmp.right());
@@ -275,7 +269,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
 
-                while (hasNext.getAsBoolean()) {
+                while (hasNextFlag || hasNext.getAsBoolean()) {
+                    hasNextFlag = false; // Reset for the next call
+
                     output.accept(tmp);
 
                     action.accept(tmp.left(), tmp.right());
@@ -284,10 +280,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-
                 return new ObjIterator<>() {
-                    private boolean hasNextFlag = false;
-
                     @Override
                     public boolean hasNext() {
                         if (!hasNextFlag) {
@@ -355,8 +348,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
-                // N.checkArgNotNull(action);
-
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -368,7 +359,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
-
                 while (cursor.value() < toIndex) {
                     output.accept(cursor.getAndIncrement(), tmp);
 
@@ -378,7 +368,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-
                 while (cursor.value() < toIndex) {
                     output.accept(cursor.getAndIncrement(), tmp);
 
@@ -388,7 +377,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -520,8 +508,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
-                // N.checkArgNotNull(action);
-
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -533,26 +519,26 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                while (hasNextFlag || (iterA.hasNext() && iterB.hasNext())) {
+                    hasNextFlag = false; // Reset for the next call
 
-                while (iterA.hasNext() && iterB.hasNext()) {
                     action.accept(iterA.next(), iterB.next());
                 }
             }
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                while (hasNextFlag || (iterA.hasNext() && iterB.hasNext())) {
+                    hasNextFlag = false; // Reset for the next call
 
-                while (iterA.hasNext() && iterB.hasNext()) {
                     action.accept(iterA.next(), iterB.next());
                 }
+
             }
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-
                 return new ObjIterator<>() {
-                    private boolean hasNextFlag = false;
-
                     @Override
                     public boolean hasNext() {
                         if (!hasNextFlag) {
@@ -620,8 +606,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
-                // N.checkArgNotNull(action);
-
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -633,26 +617,25 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                while (hasNextFlag || (iter1.hasNext() || iter2.hasNext())) {
+                    hasNextFlag = false; // Reset for the next call
 
-                while (iter1.hasNext() || iter2.hasNext()) {
                     action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
                 }
             }
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                while (hasNextFlag || (iter1.hasNext() || iter2.hasNext())) {
+                    hasNextFlag = false; // Reset for the next call
 
-                while (iter1.hasNext() || iter2.hasNext()) {
                     action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
                 }
             }
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-
                 return new ObjIterator<>() {
-                    private boolean hasNextFlag = false;
-
                     @Override
                     public boolean hasNext() {
                         if (!hasNextFlag) {
@@ -714,11 +697,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             return BiIterator.empty();
         }
 
-        final BooleanSupplier hasNext = iter::hasNext;
+        final BooleanSupplier booleanSupplier = iter::hasNext;
 
         final Consumer<Pair<A, B>> output = out -> unzipFunc.accept(iter.next(), out);
 
-        return BiIterator.generate(hasNext, output);
+        return BiIterator.generate(booleanSupplier, output);
     }
 
     /**
@@ -918,8 +901,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-                N.checkArgNotNull(mapper, cs.mapper);
-
                 if (cnt > 0) {
                     return iter.<R> map(mapper).limit(cnt);
                 } else {
@@ -944,50 +925,50 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             private final Pair<A, B> next = new Pair<>();
             private final Throwables.BiConsumer<A, B, RuntimeException> setNext = next::set;
 
-            private boolean hasNext = false;
+            private boolean hasNextFlag = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNext) {
+                if (!hasNextFlag) {
                     while (iter.hasNext()) {
                         iter.next(setNext);
 
                         if (predicate.test(next.left(), next.right())) {
-                            hasNext = true;
+                            hasNextFlag = true;
                             break;
                         }
                     }
                 }
 
-                return hasNext;
+                return hasNextFlag;
             }
 
             @Override
             public Pair<A, B> next() {
-                if (!hasNext && !hasNext()) {
+                if (!hasNextFlag && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                hasNext = false;
+                hasNextFlag = false;
 
                 return next.copy();
             }
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
-                if (!hasNext && !hasNext()) {
+                if (!hasNextFlag && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                hasNext = false;
+                hasNextFlag = false;
 
                 action.accept(next.left(), next.right());
             }
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
-                while (hasNext()) {
-                    hasNext = false;
+                while (hasNextFlag || hasNext()) {
+                    hasNextFlag = false;
 
                     action.accept(next.left(), next.right());
                 }
@@ -995,8 +976,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-                while (hasNext()) {
-                    hasNext = false;
+                while (hasNextFlag || hasNext()) {
+                    hasNextFlag = false;
 
                     action.accept(next.left(), next.right());
                 }
@@ -1004,32 +985,30 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-                N.checkArgNotNull(mapper, cs.mapper);
-
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
-                        if (!hasNext) {
+                        if (!hasNextFlag) {
                             while (iter.hasNext()) {
                                 iter.next(setNext);
 
                                 if (predicate.test(next.left(), next.right())) {
-                                    hasNext = true;
+                                    hasNextFlag = true;
                                     break;
                                 }
                             }
                         }
 
-                        return hasNext;
+                        return hasNextFlag;
                     }
 
                     @Override
                     public R next() {
-                        if (!hasNext && !hasNext()) {
+                        if (!hasNextFlag && !hasNext()) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        hasNext = false;
+                        hasNextFlag = false;
 
                         return mapper.apply(next.left(), next.right());
                     }
@@ -1097,8 +1076,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a Stream containing the elements produced by the mapper function
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-        N.checkArgNotNull(mapper, cs.mapper);
-
         return Stream.of(map(mapper));
     }
 

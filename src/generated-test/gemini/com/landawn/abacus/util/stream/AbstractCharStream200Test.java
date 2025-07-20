@@ -880,7 +880,7 @@ public class AbstractCharStream200Test extends TestBase {
         Map<Percentage, Character> percentileMap = percentiles.get();
 
         // assertEquals(N.asList(97, 98, 99, 100, 101), percentileMap.values().stream().sorted().map(c -> (int) c).collect(Collectors.toList()));
-        assertEquals(35, percentileMap.values().size());
+        assertEquals(43, percentileMap.values().size());
 
         // Test with empty stream
         Optional<Map<Percentage, Character>> emptyPercentiles = CharStream.of(new char[] {}).percentiles();
@@ -903,7 +903,7 @@ public class AbstractCharStream200Test extends TestBase {
         assertTrue(percentiles.isPresent());
         Map<Percentage, Character> percentileMap = percentiles.get();
         // assertEquals(N.asList(97, 98, 99, 100, 101), percentileMap.values().stream().sorted().map(c -> (int) c).collect(Collectors.toList()));
-        assertEquals(35, percentileMap.size());
+        assertEquals(43, percentileMap.size());
 
         // Test with empty stream
         summaryPair = CharStream.of(new char[] {}).summarizeAndPercentiles();

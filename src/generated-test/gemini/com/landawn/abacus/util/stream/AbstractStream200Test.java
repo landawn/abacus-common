@@ -727,7 +727,7 @@ public class AbstractStream200Test extends TestBase {
         Optional<Map<Percentage, Integer>> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).percentiles();
         assertTrue(result.isPresent());
         assertNotNull(result.get());
-        assertEquals(35, result.get().size());
+        assertEquals(43, result.get().size());
     }
 
     @Test

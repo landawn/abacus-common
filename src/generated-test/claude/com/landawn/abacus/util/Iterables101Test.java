@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.RandomAccess;
@@ -27,6 +28,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -1431,5 +1433,610 @@ public class Iterables101Test extends TestBase {
             assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 2, 6));
             assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 3, 2));
         }
+    }
+
+    // Tests for firstNonNull(T, T)
+    @Test
+    public void testFirstNonNull_TwoParams_BothNull() {
+        String result = Iterables.firstNonNull(null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_TwoParams_FirstNonNull() {
+        String result = Iterables.firstNonNull("first", null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_TwoParams_SecondNonNull() {
+        String result = Iterables.firstNonNull(null, "second");
+        Assertions.assertEquals("second", result);
+    }
+
+    @Test
+    public void testFirstNonNull_TwoParams_BothNonNull() {
+        String result = Iterables.firstNonNull("first", "second");
+        Assertions.assertEquals("first", result);
+    }
+
+    // Tests for firstNonNull(T, T, T)
+    @Test
+    public void testFirstNonNull_ThreeParams_AllNull() {
+        String result = Iterables.firstNonNull(null, null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_ThreeParams_FirstNonNull() {
+        String result = Iterables.firstNonNull("first", null, null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_ThreeParams_SecondNonNull() {
+        String result = Iterables.firstNonNull(null, "second", null);
+        Assertions.assertEquals("second", result);
+    }
+
+    @Test
+    public void testFirstNonNull_ThreeParams_ThirdNonNull() {
+        String result = Iterables.firstNonNull(null, null, "third");
+        Assertions.assertEquals("third", result);
+    }
+
+    @Test
+    public void testFirstNonNull_ThreeParams_AllNonNull() {
+        String result = Iterables.firstNonNull("first", "second", "third");
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_ThreeParams_SecondAndThirdNonNull() {
+        String result = Iterables.firstNonNull(null, "second", "third");
+        Assertions.assertEquals("second", result);
+    }
+
+    // Tests for firstNonNull(T...)
+    @Test
+    public void testFirstNonNull_Varargs_NullArray() {
+        String result = Iterables.firstNonNull((String[]) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_EmptyArray() {
+        String result = Iterables.firstNonNull(new String[0]);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_AllNull() {
+        String result = Iterables.firstNonNull(null, null, null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_FirstNonNull() {
+        String result = Iterables.firstNonNull("first", null, null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_MiddleNonNull() {
+        String result = Iterables.firstNonNull(null, null, "middle", null, null);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_LastNonNull() {
+        String result = Iterables.firstNonNull(null, null, null, "last");
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Varargs_MultipleNonNull() {
+        String result = Iterables.firstNonNull(null, "first", "second", null, "third");
+        Assertions.assertEquals("first", result);
+    }
+
+    // Tests for firstNonNull(Iterable)
+    @Test
+    public void testFirstNonNull_Iterable_Null() {
+        String result = Iterables.firstNonNull((Iterable<String>) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterable_Empty() {
+        List<String> list = Collections.emptyList();
+        String result = Iterables.firstNonNull(list);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterable_AllNull() {
+        List<String> list = Arrays.asList(null, null, null);
+        String result = Iterables.firstNonNull(list);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterable_FirstNonNull() {
+        List<String> list = Arrays.asList("first", null, null);
+        String result = Iterables.firstNonNull(list);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterable_MiddleNonNull() {
+        List<String> list = Arrays.asList(null, null, "middle", null);
+        String result = Iterables.firstNonNull(list);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterable_MultipleNonNull() {
+        List<String> list = Arrays.asList(null, "first", "second", null);
+        String result = Iterables.firstNonNull(list);
+        Assertions.assertEquals("first", result);
+    }
+
+    // Tests for firstNonNull(Iterator)
+    @Test
+    public void testFirstNonNull_Iterator_Null() {
+        String result = Iterables.firstNonNull((Iterator<String>) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterator_Empty() {
+        Iterator<String> iter = Collections.<String> emptyList().iterator();
+        String result = Iterables.firstNonNull(iter);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterator_AllNull() {
+        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
+        String result = Iterables.firstNonNull(iter);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterator_FirstNonNull() {
+        Iterator<String> iter = Arrays.asList("first", null, null).iterator();
+        String result = Iterables.firstNonNull(iter);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterator_MiddleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, null, "middle", null).iterator();
+        String result = Iterables.firstNonNull(iter);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testFirstNonNull_Iterator_MultipleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, "first", "second", null).iterator();
+        String result = Iterables.firstNonNull(iter);
+        Assertions.assertEquals("first", result);
+    }
+
+    // Tests for firstNonNullOrDefault(Iterable, T)
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
+        String result = Iterables.firstNonNullOrDefault((Iterable<String>) null, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_EmptyReturnsDefault() {
+        List<String> list = Collections.emptyList();
+        String result = Iterables.firstNonNullOrDefault(list, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_AllNullReturnsDefault() {
+        List<String> list = Arrays.asList(null, null, null);
+        String result = Iterables.firstNonNullOrDefault(list, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_FirstNonNull() {
+        List<String> list = Arrays.asList("first", null, null);
+        String result = Iterables.firstNonNullOrDefault(list, "default");
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_MiddleNonNull() {
+        List<String> list = Arrays.asList(null, null, "middle", null);
+        String result = Iterables.firstNonNullOrDefault(list, "default");
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterable_NullDefaultThrowsException() {
+        List<String> list = Arrays.asList("test");
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Iterables.firstNonNullOrDefault(list, null);
+        });
+    }
+
+    // Tests for firstNonNullOrDefault(Iterator, T)
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
+        String result = Iterables.firstNonNullOrDefault((Iterator<String>) null, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_EmptyReturnsDefault() {
+        Iterator<String> iter = Collections.<String> emptyList().iterator();
+        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_AllNullReturnsDefault() {
+        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
+        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_FirstNonNull() {
+        Iterator<String> iter = Arrays.asList("first", null, null).iterator();
+        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_MiddleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, null, "middle", null).iterator();
+        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testFirstNonNullOrDefault_Iterator_NullDefaultThrowsException() {
+        Iterator<String> iter = Arrays.asList("test").iterator();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Iterables.firstNonNullOrDefault(iter, null);
+        });
+    }
+
+    // Tests for lastNonNull(T, T)
+    @Test
+    public void testLastNonNull_TwoParams_BothNull() {
+        String result = Iterables.lastNonNull(null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_TwoParams_FirstNonNull() {
+        String result = Iterables.lastNonNull("first", null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testLastNonNull_TwoParams_SecondNonNull() {
+        String result = Iterables.lastNonNull(null, "second");
+        Assertions.assertEquals("second", result);
+    }
+
+    @Test
+    public void testLastNonNull_TwoParams_BothNonNull() {
+        String result = Iterables.lastNonNull("first", "second");
+        Assertions.assertEquals("second", result);
+    }
+
+    // Tests for lastNonNull(T, T, T)
+    @Test
+    public void testLastNonNull_ThreeParams_AllNull() {
+        String result = Iterables.lastNonNull(null, null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_ThreeParams_FirstNonNull() {
+        String result = Iterables.lastNonNull("first", null, null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testLastNonNull_ThreeParams_SecondNonNull() {
+        String result = Iterables.lastNonNull(null, "second", null);
+        Assertions.assertEquals("second", result);
+    }
+
+    @Test
+    public void testLastNonNull_ThreeParams_ThirdNonNull() {
+        String result = Iterables.lastNonNull(null, null, "third");
+        Assertions.assertEquals("third", result);
+    }
+
+    @Test
+    public void testLastNonNull_ThreeParams_AllNonNull() {
+        String result = Iterables.lastNonNull("first", "second", "third");
+        Assertions.assertEquals("third", result);
+    }
+
+    @Test
+    public void testLastNonNull_ThreeParams_FirstAndSecondNonNull() {
+        String result = Iterables.lastNonNull("first", "second", null);
+        Assertions.assertEquals("second", result);
+    }
+
+    // Tests for lastNonNull(T...)
+    @Test
+    public void testLastNonNull_Varargs_NullArray() {
+        String result = Iterables.lastNonNull((String[]) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_EmptyArray() {
+        String result = Iterables.lastNonNull(new String[0]);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_AllNull() {
+        String result = Iterables.lastNonNull(null, null, null, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_FirstNonNull() {
+        String result = Iterables.lastNonNull("first", null, null);
+        Assertions.assertEquals("first", result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_MiddleNonNull() {
+        String result = Iterables.lastNonNull(null, null, "middle", null, null);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_LastNonNull() {
+        String result = Iterables.lastNonNull(null, null, null, "last");
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNull_Varargs_MultipleNonNull() {
+        String result = Iterables.lastNonNull(null, "first", "second", null, "third");
+        Assertions.assertEquals("third", result);
+    }
+
+    // Tests for lastNonNull(Iterable)
+    @Test
+    public void testLastNonNull_Iterable_Null() {
+        String result = Iterables.lastNonNull((Iterable<String>) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_Empty() {
+        List<String> list = Collections.emptyList();
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_AllNull() {
+        List<String> list = Arrays.asList(null, null, null);
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_LastNonNull() {
+        List<String> list = Arrays.asList(null, null, "last");
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_MiddleNonNull() {
+        List<String> list = Arrays.asList(null, "middle", null, null);
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_MultipleNonNull() {
+        List<String> list = Arrays.asList(null, "first", "second", null);
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertEquals("second", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_RandomAccessList() {
+        // Test with ArrayList (RandomAccess)
+        ArrayList<String> list = new ArrayList<>();
+        list.add(null);
+        list.add("first");
+        list.add(null);
+        list.add("last");
+        list.add(null);
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_NonRandomAccessList() {
+        // Test with LinkedList (non-RandomAccess)
+        List<String> list = new LinkedList<>();
+        list.add(null);
+        list.add("first");
+        list.add(null);
+        list.add("last");
+        list.add(null);
+        String result = Iterables.lastNonNull(list);
+        Assertions.assertEquals("last", result);
+    }
+
+    // Tests for lastNonNull(Iterator)
+    @Test
+    public void testLastNonNull_Iterator_Null() {
+        String result = Iterables.lastNonNull((Iterator<String>) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterator_Empty() {
+        Iterator<String> iter = Collections.<String> emptyList().iterator();
+        String result = Iterables.lastNonNull(iter);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterator_AllNull() {
+        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
+        String result = Iterables.lastNonNull(iter);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterator_LastNonNull() {
+        Iterator<String> iter = Arrays.asList(null, null, "last").iterator();
+        String result = Iterables.lastNonNull(iter);
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterator_MiddleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, "middle", null, null).iterator();
+        String result = Iterables.lastNonNull(iter);
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testLastNonNull_Iterator_MultipleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, "first", "second", null, "third").iterator();
+        String result = Iterables.lastNonNull(iter);
+        Assertions.assertEquals("third", result);
+    }
+
+    // Tests for lastNonNullOrDefault(Iterable, T)
+    @Test
+    public void testLastNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
+        String result = Iterables.lastNonNullOrDefault((Iterable<String>) null, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterable_EmptyReturnsDefault() {
+        List<String> list = Collections.emptyList();
+        String result = Iterables.lastNonNullOrDefault(list, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterable_AllNullReturnsDefault() {
+        List<String> list = Arrays.asList(null, null, null);
+        String result = Iterables.lastNonNullOrDefault(list, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterable_LastNonNull() {
+        List<String> list = Arrays.asList(null, null, "last");
+        String result = Iterables.lastNonNullOrDefault(list, "default");
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterable_MiddleNonNull() {
+        List<String> list = Arrays.asList(null, "middle", null, null);
+        String result = Iterables.lastNonNullOrDefault(list, "default");
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterable_NullDefaultThrowsException() {
+        List<String> list = Arrays.asList("test");
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Iterables.lastNonNullOrDefault(list, null);
+        });
+    }
+
+    // Tests for lastNonNullOrDefault(Iterator, T)
+    @Test
+    public void testLastNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
+        String result = Iterables.lastNonNullOrDefault((Iterator<String>) null, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterator_EmptyReturnsDefault() {
+        Iterator<String> iter = Collections.<String> emptyList().iterator();
+        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterator_AllNullReturnsDefault() {
+        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
+        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("default", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterator_LastNonNull() {
+        Iterator<String> iter = Arrays.asList(null, null, "last").iterator();
+        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("last", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterator_MiddleNonNull() {
+        Iterator<String> iter = Arrays.asList(null, "middle", null, null).iterator();
+        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        Assertions.assertEquals("middle", result);
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Iterator_NullDefaultThrowsException() {
+        Iterator<String> iter = Arrays.asList("test").iterator();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Iterables.lastNonNullOrDefault(iter, null);
+        });
+    }
+
+    // Additional tests for different types
+    @Test
+    public void testFirstNonNull_WithIntegers() {
+        Integer result = Iterables.firstNonNull(null, 42, 100);
+        Assertions.assertEquals(42, result);
+    }
+
+    @Test
+    public void testLastNonNull_WithIntegers() {
+        Integer result = Iterables.lastNonNull(10, null, 42);
+        Assertions.assertEquals(42, result);
+    }
+
+    @Test
+    public void testFirstNonNull_WithCustomObjects() {
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        Object result = Iterables.firstNonNull(null, obj1, obj2);
+        Assertions.assertSame(obj1, result);
+    }
+
+    @Test
+    public void testLastNonNull_WithCustomObjects() {
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        Object result = Iterables.lastNonNull(obj1, null, obj2);
+        Assertions.assertSame(obj2, result);
     }
 }

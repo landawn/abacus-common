@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -1585,6 +1584,11 @@ public class Seq102Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), split.get(0).toList());
         assertEquals(Arrays.asList(4, 5), split.get(1).toList());
 
+        seq = Seq.of(1, 2, 3, 4, 5);
+        split = seq.splitAt(3).skip(1).toList();
+        assertEquals(1, split.size());
+        assertEquals(Arrays.asList(4, 5), split.get(0).toList());
+
         // Test split at beginning
         seq = Seq.of(1, 2, 3);
         split = seq.splitAt(0).toList();
@@ -1622,6 +1626,11 @@ public class Seq102Test extends TestBase {
         assertEquals(2, split.size());
         assertEquals(Arrays.asList(1, 2, 3), split.get(0).toList());
         assertEquals(Arrays.asList(4, 5), split.get(1).toList());
+
+        seq = Seq.of(1, 2, 3, 4, 5);
+        split = seq.splitAt(n -> n > 3).skip(1).toList();
+        assertEquals(1, split.size());
+        assertEquals(Arrays.asList(4, 5), split.get(0).toList());
 
         // Test no match
         seq = Seq.of(1, 2, 3);

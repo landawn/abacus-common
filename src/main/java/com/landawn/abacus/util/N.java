@@ -5859,11 +5859,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 list.set(i, generator.apply(i));
             }
         } else {
-            final ListIterator<T> itr = list.listIterator();
+            final ListIterator<T> iter = list.listIterator();
             final MutableInt idx = MutableInt.of(0);
 
             for (int i = 0; i < size; i++) {
-                itr.set(generator.apply(idx.getAndIncrement()));
+                iter.next();
+                iter.set(generator.apply(idx.getAndIncrement()));
             }
         }
     }
@@ -5988,7 +5989,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         return copy;
     }
-
+ 
     /**
      * Creates a copy of the given array and replaces all elements in the copy using the provided {@code UnaryOperator}.
      * If the specified array is {@code null}, returns {@code null}.

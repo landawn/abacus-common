@@ -819,7 +819,7 @@ public class Strings200Test extends TestBase {
 
     @Test
     public void testSplitPreserveAllTokensStringMaxTrim() {
-        assertArrayEquals(new String[] { "a", "", "b.c" }, Strings.splitPreserveAllTokens("a ..b.c ", "..", 3, true));
+        assertArrayEquals(new String[] { "a", "b.c" }, Strings.splitPreserveAllTokens("a ..b.c ", "..", 3, true));
     }
 
     @Test

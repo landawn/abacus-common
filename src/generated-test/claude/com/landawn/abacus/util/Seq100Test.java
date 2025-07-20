@@ -1691,16 +1691,40 @@ public class Seq100Test extends TestBase {
 
     @Test
     public void testTransform() throws Exception {
-        List<String> result = Seq.of(1, 2, 3).transform(seq -> seq.map(x -> x * 2).map(Object::toString)).toList();
+        {
+            List<String> result = Seq.of(1, 2, 3).transform(seq -> seq.map(x -> x * 2).map(Object::toString)).toList();
 
-        assertEquals(Arrays.asList("2", "4", "6"), result);
+            assertEquals(Arrays.asList("2", "4", "6"), result);
+        }
+
+        {
+            List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString)).skip(1).toList();
+
+            assertEquals(Arrays.asList("4", "6"), result);
+        }
+
+        {
+            assertEquals(3, Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString)).count());
+        }
     }
 
     @Test
     public void testTransformBDeferred() throws Exception {
-        List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).toList();
+        {
+            List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).toList();
 
-        assertEquals(Arrays.asList("2", "4", "6"), result);
+            assertEquals(Arrays.asList("2", "4", "6"), result);
+        }
+
+        {
+            List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).skip(1).toList();
+
+            assertEquals(Arrays.asList("4", "6"), result);
+        }
+
+        {
+            assertEquals(3, Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).count());
+        }
     }
 
     @Test
@@ -2623,13 +2647,35 @@ public class Seq100Test extends TestBase {
 
     @Test
     public void testSps() {
-        Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3, 4);
+        {
+            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3, 4);
 
-        Seq<Integer, RuntimeException> result = seq.sps(stream -> stream.filter(i -> i % 2 == 0));
+            Seq<Integer, RuntimeException> result = seq.sps(stream -> stream.filter(i -> i % 2 == 0));
 
-        assertNotNull(result);
-        List<Integer> filtered = result.toList();
-        assertTrue(Arrays.asList(2, 4).containsAll(filtered));
+            assertNotNull(result);
+            List<Integer> filtered = result.toList();
+            assertTrue(Arrays.asList(2, 4).containsAll(filtered));
+        }
+
+        {
+            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3, 4);
+
+            Seq<Integer, RuntimeException> result = seq.sps(stream -> stream.filter(i -> i % 2 == 0)).skip(1);
+
+            assertNotNull(result);
+            List<Integer> filtered = result.toList();
+            assertTrue(Arrays.asList(4).containsAll(filtered));
+        }
+
+        {
+
+            assertEquals(2, Seq.<Integer, RuntimeException> of(1, 2, 3, 4).sps(stream -> stream.filter(i -> i % 2 == 0)).count());
+            assertEquals(1, Seq.<Integer, RuntimeException> of(1, 2, 3, 4).sps(stream -> stream.filter(i -> i % 2 == 0)).skip(1).count());
+
+            assertEquals(4, Seq.<Integer, RuntimeException> of(1, 2, 3, 4).transformB(s -> s).count());
+            assertEquals(3, Seq.<Integer, RuntimeException> of(1, 2, 3, 4).transformB(s -> s).skip(1).count());
+        }
+
     }
 
     @Test

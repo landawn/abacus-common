@@ -1369,6 +1369,45 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
+    public void testToArray_01() {
+        {
+            Collection<String> list = N.asLinkedHashSet("a", "b", "c", "d", "e");
+            assertArrayEquals(new Object[] { "b", "c", "d" }, N.toArray(list, 1, 4));
+            assertArrayEquals(new Object[] { "b", "c", "d" }, N.toArray(list, 1, 4, new String[1]));
+            assertArrayEquals(new Object[] { "b", "c", "d" }, N.toArray(list, 1, 4, String[]::new));
+            assertArrayEquals(new Object[] { "b", "c", "d" }, N.toArray(list, 1, 4, String[].class));
+        }
+        {
+            Collection<Boolean> c = N.asLinkedList(true, true, false, null, true);
+            assertArrayEquals(new boolean[] { true, false, false }, N.toBooleanArray(c, 1, 4, false));
+        }
+        {
+            Collection<Byte> c = N.asLinkedList((byte) 1, (byte) 2, (byte) 3, null, (byte) 4);
+            assertArrayEquals(new byte[] { 2, 3, 0 }, N.toByteArray(c, 1, 4, (byte) 0));
+        }
+        {
+            Collection<Short> c = N.asLinkedList((short) 1, (short) 2, (short) 3, null, (short) 4);
+            assertArrayEquals(new short[] { 2, 3, 0 }, N.toShortArray(c, 1, 4, (short) 0));
+        }
+        {
+            Collection<Integer> c = N.asLinkedList(1, 2, 3, null, 4);
+            assertArrayEquals(new int[] { 2, 3, 0 }, N.toIntArray(c, 1, 4, 0));
+        }
+        {
+            Collection<Long> c = N.asLinkedList(1L, 2L, 3L, null, 4L);
+            assertArrayEquals(new long[] { 2L, 3L, 0L }, N.toLongArray(c, 1, 4, 0L));
+        }
+        {
+            Collection<Float> c = N.asLinkedList(1.0f, 2.0f, 3.0f, null, 4.0f);
+            assertArrayEquals(new float[] { 2.0f, 3.0f, 0.0f }, N.toFloatArray(c, 1, 4, 0.0f));
+        }
+        {
+            Collection<Double> c = N.asLinkedList(1.0d, 2.0d, 3.0d, null, 4.0d);
+            assertArrayEquals(new double[] { 2.0d, 3.0d, 0.0d }, N.toDoubleArray(c, 1, 4, 0.0d));
+        }
+    }
+
+    @Test
     public void testToArray_WithTargetArray() {
         List<String> list = Arrays.asList("a", "b", "c");
 

@@ -280,7 +280,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     }
 
     int[] checkColumnNames(final Collection<String> columnNames) throws IllegalArgumentException {
-        if (N.isEmpty(columnNames)) {
+        if (N.isEmpty(columnNames) && N.notEmpty(_columnNameList)) {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
 
@@ -3573,6 +3573,9 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(final String keyColumnName, final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Class<?> rowType) {
+        checkColumnName(keyColumnName);
+        checkColumnNames(aggregateOnColumnNames);
+
         final List<Object> keyColumn = getColumn(keyColumnName);
         final List<Object> valueColumn = toList(aggregateOnColumnNames, rowType);
 

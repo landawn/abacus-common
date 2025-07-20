@@ -1409,16 +1409,35 @@ public class DataSet100Test extends TestBase {
 
     @Test
     public void testPaginate() {
-        Paginated<DataSet> paginated = dataSet.paginate(2);
+        {
+            Paginated<DataSet> paginated = dataSet.paginate(2);
 
-        assertEquals(3, paginated.totalPages());
-        assertEquals(2, paginated.pageSize());
+            assertEquals(3, paginated.totalPages());
+            assertEquals(2, paginated.pageSize());
 
-        DataSet page1 = paginated.firstPage().get();
-        assertEquals(2, page1.size());
+            DataSet page1 = paginated.firstPage().get();
+            assertEquals(2, page1.size());
 
-        DataSet page3 = paginated.lastPage().get();
-        assertEquals(1, page3.size());
+            DataSet page3 = paginated.lastPage().get();
+            assertEquals(1, page3.size());
+        }
+
+        {
+            Paginated<DataSet> paginated = dataSet.paginate(2);
+
+            assertEquals(3, paginated.totalPages());
+            assertEquals(2, paginated.pageSize());
+
+            Iterator<DataSet> iter = paginated.iterator();
+
+            DataSet page1 = iter.next();
+            assertEquals(2, page1.size());
+
+            iter.next();
+
+            DataSet page3 = iter.next();
+            assertEquals(1, page3.size());
+        }
     }
 
     @Test

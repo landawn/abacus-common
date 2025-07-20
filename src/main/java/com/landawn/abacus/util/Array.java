@@ -553,14 +553,42 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns a fixed-size list backed by the specified array if it's not {@code null} or empty, otherwise an immutable/unmodifiable empty list is returned.
+     * Returns a fixed-size list backed by the specified array if it's not {@code null} or empty, 
+     * otherwise an immutable/unmodifiable empty list is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * <p>This method provides a null-safe wrapper around {@link Arrays#asList(Object...)} that
+     * handles empty and null arrays gracefully by returning an empty list instead of a list
+     * backed by an empty array. This can help avoid potential issues with list operations
+     * on empty arrays.</p>
+     *
+     * <p>The returned list is:</p>
+     * <ul>
+     *   <li>Fixed-size - cannot be resized (no add/remove operations)</li>
+     *   <li>Backed by the original array - changes to the list affect the array and vice versa</li>
+     *   <li>Immutable empty list if the input array is null or empty</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * List<String> list = Array.asList(array);
+     * list.set(0, "x"); // Modifies both list and original array
+     * 
+     * String[] emptyArray = {};
+     * List<String> emptyList = Array.asList(emptyArray); // Returns empty list
+     * 
+     * String[] nullArray = null;
+     * List<String> nullList = Array.asList(nullArray); // Returns empty list
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array and returned list
+     * @param a the array to be converted to a list. Can be null or empty.
+     * @return a fixed-size list backed by the specified array, or an empty list if the array is null or empty
      * @see Arrays#asList(Object...)
      * @see N#asList(Object...)
      * @see List#of(Object...)
+     * @see N#emptyList()
+     * @since 1.0
      */
     @SafeVarargs
     @NullSafe
@@ -569,7 +597,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of booleans
      * @return the same input array
@@ -579,7 +607,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of characters
      * @return the same input array
@@ -589,7 +617,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of bytes
      * @return the same input array
@@ -599,7 +627,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of shorts
      * @return the same input array
@@ -609,7 +637,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of integers
      * @return the same input array
@@ -619,7 +647,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of longs
      * @return the same input array
@@ -629,7 +657,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of floats
      * @return the same input array
@@ -639,7 +667,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of doubles
      * @return the same input array
@@ -649,7 +677,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param a the input array of strings
      * @return the same input array
@@ -660,7 +688,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     //    /**
-    //     * Returns the input array.
+    //     * Returns the input array as-is without any modification or copying.
     //     *
     //     * @param <T>
     //     * @param a
@@ -672,7 +700,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     //    }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the elements in the array
      * @param a the input array
@@ -685,7 +713,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the elements in the array
      * @param a the input array
@@ -698,7 +726,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the elements in the array
      * @param a the input array
@@ -711,7 +739,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the elements in the array
      * @param a the input array
@@ -724,7 +752,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns the input array.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the elements in the array
      * @param a the input array
@@ -2175,6 +2203,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if n is negative
      */
     public static float[] repeat(final float element, final int n) {
+        N.checkArgNotNegative(n, cs.n);
+
         final float[] a = new float[n];
         N.fill(a, element);
         return a;
@@ -2378,6 +2408,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *  because this method throws NullPointerException when element is {@code null}
      * @see #repeat(Object, int, Class)
      * @see #repeatNonNull(Object, int)
+     * @see N#repeat(Object, int)
      */
     @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws IllegalArgumentException {
@@ -2399,6 +2430,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param elementClass The class of the elements in the array.
      * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>n</i> is negative.
+     * @see N#repeat(Object, int)
      */
     public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) {
         N.checkArgNotNegative(n, cs.n);

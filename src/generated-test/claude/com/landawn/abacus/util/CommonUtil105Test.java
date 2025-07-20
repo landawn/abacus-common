@@ -425,6 +425,50 @@ public class CommonUtil105Test extends TestBase {
     }
 
     @Test
+    public void testCompareArraysWithRange_01() {
+        {
+            byte[] a1 = { 1, 2, 3, 4 };
+            byte[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+        {
+            short[] a1 = { 1, 2, 3, 4 };
+            short[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+        {
+
+            int[] a1 = { 1, 2, 3, 4 };
+            int[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+        {
+
+            long[] a1 = { 1, 2, 3, 4 };
+            long[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+        {
+
+            float[] a1 = { 1, 2, 3, 4 };
+            float[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+        {
+
+            double[] a1 = { 1, 2, 3, 4 };
+            double[] a2 = { 5, 2, 3, 6 };
+
+            assertEquals(0, N.compare(a1, 1, a2, 1, 2));
+        }
+    }
+
+    @Test
     public void testCompareCollections() {
         List<String> list1 = Arrays.asList("a", "b", "c");
         List<String> list2 = Arrays.asList("a", "b", "c");

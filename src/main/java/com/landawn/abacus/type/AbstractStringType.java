@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -27,6 +28,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -118,6 +120,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     public String valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (obj instanceof Reader reader) {
+            return IOUtil.readAllToString(reader);
         } else if (obj instanceof Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length());

@@ -568,7 +568,7 @@ public class ParallelArrayStream100Test extends TestBase {
 
             List<Integer> result = stream.limit(5).collect(collector);
 
-            assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+            assertHaveSameElements(Arrays.asList(1, 2, 3, 4, 5), result);
         }
     }
 

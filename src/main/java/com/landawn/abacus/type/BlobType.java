@@ -33,8 +33,15 @@ public class BlobType extends AbstractType<Blob> {
      */
     public static final String BLOB = Blob.class.getSimpleName();
 
+    private final Class<Blob> clazz;
+
     BlobType() {
+        this(Blob.class);
+    }
+
+    BlobType(Class<? extends Blob> clazz) {
         super(BLOB);
+        this.clazz = (Class<Blob>) clazz;
     }
 
     /**
@@ -44,7 +51,7 @@ public class BlobType extends AbstractType<Blob> {
      */
     @Override
     public Class<Blob> clazz() {
-        return Blob.class;
+        return clazz;
     }
 
     /**

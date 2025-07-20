@@ -534,9 +534,11 @@ sealed class CommonUtil permits N {
      * @param index a user-supplied index identifying an element of an array, list or string
      * @param size the size of that array, list or string
      * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @throws IllegalArgumentException if {@code size} is negative
-     * @deprecated Use {@link #checkElementIndex(int, int)} instead
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @deprecated Use {@link #checkElementIndex(int, int)} or {@link #checkPositionIndex(int, int)} instead
+     * @see #checkElementIndex(int, int)
+     * @see #checkPositionIndex(int, int)
      */
     @Deprecated
     public static int checkIndex(final int index, final int size) {
@@ -552,8 +554,8 @@ sealed class CommonUtil permits N {
      * @param index a user-supplied index identifying an element of an array, list or string
      * @param size the size of that array, list or string
      * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      */
     public static int checkElementIndex(final int index, final int size) {
         return checkElementIndex(index, size, "index");
@@ -569,11 +571,15 @@ sealed class CommonUtil permits N {
      * @param size the size of that array, list or string
      * @param desc the text to use to describe this index in an error message
      * @return the value of {@code index}
-     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      */
     public static int checkElementIndex(final int index, final int size, final String desc) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
+        if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        }
+
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(badElementIndex(index, size, desc));
         }
@@ -2733,6 +2739,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @return the {@code non-null} object reference that was validated}
+     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2754,6 +2761,7 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated}
+     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2779,6 +2787,7 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated}
+     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -13589,11 +13598,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the input array as is.
+     * Returns the input array as-is without any modification or copying.
      *
      * @param <T> the type of the array elements
      * @param a the input array
      * @return the input array
+     * @see Arrays#asList(Object[])
+     * @see N#copyOf(Object[], int)
+     * @see N#asList(Object[])
      */
     @SafeVarargs
     public static <T> T[] asArray(final T... a) {
@@ -14329,8 +14341,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements. And it's not backed by the specified array.
+     * Returns a modifiable {@code List} containing the elements from the specified array.
      * If the specified array is {@code null} or empty, an empty {@code List} is returned.
+     *
+     * <p>This method creates a new {@code ArrayList} and populates it with all elements from the
+     * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
+     * modifiable list that is not backed by the original array, meaning modifications to the returned
+     * list will not affect the original array and vice versa.</p>
      *
      * @param <T> the type of elements in the list
      * @param a the array of elements to be placed in the List
@@ -14346,11 +14363,7 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        final List<T> list = new ArrayList<>(a.length);
-
-        list.addAll(Array.asList(a));
-
-        return list;
+        return new ArrayList<>(Array.asList(a));
     }
 
     /**
@@ -14488,7 +14501,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code List} is returned.
+     * If the specified array is {@code null} or empty, an empty {@code List} is returned
+     * 
+     * <p>This method creates a new {@code LinkedList} and populates it with all elements from the
+     * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
+     * modifiable list that is not backed by the original array, meaning modifications to the returned
+     * list will not affect the original array and vice versa.</p>
      *
      * @param <T> the type of elements in the list
      * @param a the array of elements to be placed in the List
@@ -14711,11 +14729,7 @@ sealed class CommonUtil permits N {
             return newHashSet();
         }
 
-        final Set<T> set = newHashSet(a.length);
-
-        set.addAll(Array.asList(a));
-
-        return set;
+        return new HashSet<>(Array.asList(a));
     }
 
     /**
@@ -14866,11 +14880,7 @@ sealed class CommonUtil permits N {
             return newLinkedHashSet();
         }
 
-        final Set<T> set = newLinkedHashSet(a.length);
-
-        set.addAll(Array.asList(a));
-
-        return set;
+        return new LinkedHashSet<>(Array.asList(a));
     }
 
     /**
@@ -17000,11 +17010,12 @@ sealed class CommonUtil permits N {
      * @param c the iterable from which to retrieve the element
      * @param index the position of the element to retrieve
      * @return the element at the specified position in the iterable
-     * @throws IllegalArgumentException if the iterable is null
-     * @throws IndexOutOfBoundsException if the index is out of range
+     * @throws IllegalArgumentException if the iterable is null or the index is negative
+     * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable or Iterator
      */
     public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, cs.c);
+        N.checkArgNotNegative(index, cs.index);
 
         if (c instanceof Collection) {
             checkElementIndex(index, ((Collection<T>) c).size());
@@ -17024,11 +17035,12 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterator
-     * @throws IllegalArgumentException if the Iterator is null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterator)
+     * @throws IllegalArgumentException if the Iterator is null or the index is negative
+     * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable or Iterator
      */
     public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(iter, cs.iter);
+        N.checkArgNotNegative(index, cs.index);
 
         while (index-- > 0 && iter.hasNext()) {
             iter.next();
@@ -22239,6 +22251,7 @@ sealed class CommonUtil permits N {
      * @param n the number of times to repeat the value
      * @return a list containing the repeated values
      * @throws IllegalArgumentException if the specified number of repetitions is negative
+     * @see Array#repeat(Object, int, Class)
      * @see Iterators#repeat(Object, int)
      * @see Collections#nCopies(int, Object)
      */

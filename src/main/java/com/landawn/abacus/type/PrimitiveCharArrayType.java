@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
@@ -175,6 +177,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     public char[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (obj instanceof Reader reader) {
+            return IOUtil.readAllChars(reader);
         } else if (obj instanceof Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length()).toCharArray();

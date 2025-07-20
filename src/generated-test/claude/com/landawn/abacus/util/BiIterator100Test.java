@@ -267,16 +267,64 @@ public class BiIterator100Test extends TestBase {
     @Test
     @DisplayName("Test skip elements")
     public void testSkip() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        map.put("d", 4);
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("a", 1);
+            map.put("b", 2);
+            map.put("c", 3);
+            map.put("d", 4);
 
-        BiIterator<String, Integer> iter = BiIterator.of(map).skip(2);
+            BiIterator<String, Integer> iter = BiIterator.of(map).skip(2);
 
-        List<Pair<String, Integer>> remaining = iter.toList();
-        assertEquals(2, remaining.size());
+            List<Pair<String, Integer>> remaining = iter.toList();
+            assertEquals(2, remaining.size());
+        }
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("a", 1);
+            map.put("b", 2);
+            map.put("c", 3);
+            map.put("d", 4);
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).skip(2);
+
+            List<String> result = new ArrayList<>();
+
+            while (iter.hasNext()) {
+                Pair<String, Integer> pair = iter.next();
+                result.add(pair.left() + ":" + pair.right());
+            }
+            assertEquals(Arrays.asList("c:3", "d:4"), result);
+        }
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("a", 1);
+            map.put("b", 2);
+            map.put("c", 3);
+            map.put("d", 4);
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).skip(2);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining((k, v) -> result.add(k + ":" + v));
+            assertEquals(Arrays.asList("c:3", "d:4"), result);
+        }
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("a", 1);
+            map.put("b", 2);
+            map.put("c", 3);
+            map.put("d", 4);
+
+            Iterator<String> iter = BiIterator.of(map).skip(2).map((k, v) -> k + ":" + v);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining(result::add);
+            assertEquals(Arrays.asList("c:3", "d:4"), result);
+        }
+
     }
 
     @Test
@@ -299,15 +347,77 @@ public class BiIterator100Test extends TestBase {
     @Test
     @DisplayName("Test limit elements")
     public void testLimit() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        for (int i = 0; i < 10; i++) {
-            map.put("key" + i, i);
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            for (int i = 0; i < 10; i++) {
+                map.put("key" + i, i);
+            }
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).limit(3);
+
+            List<Pair<String, Integer>> limited = iter.toList();
+            assertEquals(3, limited.size());
+        }
+        {
+
+            Map<String, Integer> map = new LinkedHashMap<>();
+            for (int i = 0; i < 10; i++) {
+                map.put("key" + i, i);
+            }
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).limit(3);
+
+            List<String> result = new ArrayList<>();
+
+            while (iter.hasNext()) {
+                Pair<String, Integer> pair = iter.next();
+                result.add(pair.left() + ":" + pair.right());
+            }
+            assertEquals(Arrays.asList("key0:0", "key1:1", "key2:2"), result);
         }
 
-        BiIterator<String, Integer> iter = BiIterator.of(map).limit(3);
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            for (int i = 0; i < 10; i++) {
+                map.put("key" + i, i);
+            }
 
-        List<Pair<String, Integer>> limited = iter.toList();
-        assertEquals(3, limited.size());
+            BiIterator<String, Integer> iter = BiIterator.of(map).limit(3);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining((k, v) -> result.add(k + ":" + v));
+            assertEquals(Arrays.asList("key0:0", "key1:1", "key2:2"), result);
+        }
+
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            for (int i = 0; i < 10; i++) {
+                map.put("key" + i, i);
+            }
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).limit(3);
+
+            List<String> result = new ArrayList<>();
+
+            iter.foreachRemaining((k, v) -> result.add(k + ":" + v));
+            assertEquals(Arrays.asList("key0:0", "key1:1", "key2:2"), result);
+        }
+
+        {
+
+            Map<String, Integer> map = new LinkedHashMap<>();
+            for (int i = 0; i < 10; i++) {
+                map.put("key" + i, i);
+            }
+
+            Iterator<String> iter = BiIterator.of(map).limit(3).map((k, v) -> k + ":" + v);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining(e -> result.add(e));
+            assertEquals(Arrays.asList("key0:0", "key1:1", "key2:2"), result);
+        }
     }
 
     @Test
@@ -330,17 +440,59 @@ public class BiIterator100Test extends TestBase {
     @Test
     @DisplayName("Test filter with predicate")
     public void testFilter() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("one", 1);
-        map.put("two", 2);
-        map.put("three", 3);
-        map.put("four", 4);
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("one", 1);
+            map.put("two", 2);
+            map.put("three", 3);
+            map.put("four", 4);
 
-        BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0);
+            BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0);
 
-        List<Pair<String, Integer>> evens = iter.toList();
-        assertEquals(2, evens.size());
-        assertTrue(evens.stream().allMatch(p -> p.right() % 2 == 0));
+            List<Pair<String, Integer>> evens = iter.toList();
+            assertEquals(2, evens.size());
+            assertTrue(evens.stream().allMatch(p -> p.right() % 2 == 0));
+        }
+
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("one", 1);
+            map.put("two", 2);
+            map.put("three", 3);
+            map.put("four", 4);
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0);
+
+            List<String> result = new ArrayList<>();
+            iter.forEachRemaining((k, v) -> result.add(k + ":" + v));
+            assertEquals(Arrays.asList("two:2", "four:4"), result);
+        }
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("one", 1);
+            map.put("two", 2);
+            map.put("three", 3);
+            map.put("four", 4);
+
+            BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0);
+
+            List<String> result = new ArrayList<>();
+            iter.foreachRemaining((k, v) -> result.add(k + ":" + v));
+            assertEquals(Arrays.asList("two:2", "four:4"), result);
+        }
+        {
+            Map<String, Integer> map = new LinkedHashMap<>();
+            map.put("one", 1);
+            map.put("two", 2);
+            map.put("three", 3);
+            map.put("four", 4);
+
+            Iterator<String> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0).map((k, v) -> k + ":" + v);
+
+            List<String> result = new ArrayList<>();
+            iter.forEachRemaining(result::add);
+            assertEquals(Arrays.asList("two:2", "four:4"), result);
+        }
     }
 
     @Test

@@ -1,10 +1,10 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -1407,9 +1407,26 @@ public class N101Test extends TestBase {
 
     @Test
     public void testUpdateAllList() throws Exception {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        N.updateAll(list, String::toUpperCase);
-        assertEquals(Arrays.asList("A", "B", "C", "D"), list);
+        {
+            List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+            N.updateAll(list, String::toUpperCase);
+            assertEquals(Arrays.asList("A", "B", "C", "D"), list);
+        }
+        {
+            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            N.updateAll(list, Strings::toUpperCase);
+            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+        }
+        {
+            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            N.setAll(list, i -> Strings.toUpperCase(list.get(i)));
+            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+        }
+        {
+            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            N.setAll(list, (i, e) -> Strings.toUpperCase((char) (list.get(i) + e - e)));
+            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+        }
     }
 
     // Tests for copyThenSetAll with IntObjFunction

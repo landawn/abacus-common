@@ -20,7 +20,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.AbstractMap;
@@ -1006,6 +1009,12 @@ public final class TypeFactory {
                     type = new BeanType(cls);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = TypeAttrParser.newInstance(cls, typeName);
+                } else if (NClob.class.isAssignableFrom(cls)) {
+                    type = new NClobType(cls);
+                } else if (Clob.class.isAssignableFrom(cls)) {
+                    type = new ClobType(cls);
+                } else if (Blob.class.isAssignableFrom(cls)) {
+                    type = new BlobType(cls);
                 } else if (Object[].class.isAssignableFrom(cls)) {
                     type = new ObjectArrayType(cls);
                 } else {

@@ -1335,7 +1335,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 @Override
                 public long count() {
-                    return count;
+                    return count - cnt;
                 }
             };
         } else {
@@ -1368,7 +1368,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 @Override
                 public long count() {
-                    return count;
+                    return count - cnt;
                 }
             };
         }
@@ -6859,7 +6859,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public boolean hasNext() throws E {
                 if (!skipped) {
                     skipped = true;
-                    advance(n);
+                    elements.advance(n);
                 }
 
                 return elements.hasNext();
@@ -6869,7 +6869,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public T next() throws E {
                 if (!skipped) {
                     skipped = true;
-                    advance(n);
+                    elements.advance(n);
                 }
 
                 return elements.next();
@@ -7028,6 +7028,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 cnt++;
                 return elements.next();
+            }
+
+            @Override
+            public void advance(final long n) throws E {
+                if (n > 0) {
+                    elements.advance(N.min(n, maxSize - cnt));
+
+                    cnt = n >= maxSize - cnt ? maxSize : cnt + n;
+                }
             }
 
         }, sorted, cmp, closeHandlers);

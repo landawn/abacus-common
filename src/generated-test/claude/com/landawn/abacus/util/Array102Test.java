@@ -1741,4 +1741,963 @@ public class Array102Test extends TestBase {
             }
         }
     }
+
+    // Tests for repeat(boolean element, int n)
+    @Test
+    public void testRepeatBooleanElement() {
+        // Test normal case
+        boolean[] result = Array.repeat(true, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertTrue(result[i]);
+        }
+
+        // Test with false
+        result = Array.repeat(false, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertFalse(result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(true, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(false, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertFalse(result[0]);
+    }
+
+    @Test
+    public void testRepeatBooleanElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(true, -1);
+        });
+    }
+
+    // Tests for repeat(boolean[] a, int n)
+    @Test
+    public void testRepeatBooleanArray() {
+        // Test normal case
+        boolean[] original = { true, false, true };
+        boolean[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        boolean[] expected = { true, false, true, true, false, true, true, false, true };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        boolean[] single = { false };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertFalse(result[i]);
+        }
+
+        // Test empty array
+        boolean[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatBooleanArrayNegativeN() {
+        boolean[] array = { true, false };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatBooleanArrayOverflow() {
+        boolean[] array = new boolean[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(char element, int n)
+    @Test
+    public void testRepeatCharElement() {
+        // Test normal case
+        char[] result = Array.repeat('a', 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals('a', result[i]);
+        }
+
+        // Test with different character
+        result = Array.repeat('Z', 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals('Z', result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat('x', 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat('1', 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals('1', result[0]);
+    }
+
+    @Test
+    public void testRepeatCharElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat('a', -1);
+        });
+    }
+
+    // Tests for repeat(char[] a, int n)
+    @Test
+    public void testRepeatCharArray() {
+        // Test normal case
+        char[] original = { 'a', 'b', 'c' };
+        char[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        char[] expected = { 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c' };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        char[] single = { 'x' };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals('x', result[i]);
+        }
+
+        // Test empty array
+        char[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatCharArrayNegativeN() {
+        char[] array = { 'a', 'b' };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatCharArrayOverflow() {
+        char[] array = new char[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(byte element, int n)
+    @Test
+    public void testRepeatByteElement() {
+        // Test normal case
+        byte[] result = Array.repeat((byte) 5, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals((byte) 5, result[i]);
+        }
+
+        // Test with negative byte
+        result = Array.repeat((byte) -128, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals((byte) -128, result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat((byte) 0, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat((byte) 127, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals((byte) 127, result[0]);
+    }
+
+    @Test
+    public void testRepeatByteElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat((byte) 1, -1);
+        });
+    }
+
+    // Tests for repeat(byte[] a, int n)
+    @Test
+    public void testRepeatByteArray() {
+        // Test normal case
+        byte[] original = { 1, 2, 3 };
+        byte[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        byte[] expected = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        byte[] single = { 0 };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals((byte) 0, result[i]);
+        }
+
+        // Test empty array
+        byte[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatByteArrayNegativeN() {
+        byte[] array = { 1, 2 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatByteArrayOverflow() {
+        byte[] array = new byte[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(short element, int n)
+    @Test
+    public void testRepeatShortElement() {
+        // Test normal case
+        short[] result = Array.repeat((short) 100, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals((short) 100, result[i]);
+        }
+
+        // Test with negative short
+        result = Array.repeat((short) -32768, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals((short) -32768, result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat((short) 0, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat((short) 32767, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals((short) 32767, result[0]);
+    }
+
+    @Test
+    public void testRepeatShortElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat((short) 1, -1);
+        });
+    }
+
+    // Tests for repeat(short[] a, int n)
+    @Test
+    public void testRepeatShortArray() {
+        // Test normal case
+        short[] original = { 1, 2, 3 };
+        short[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        short[] expected = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        short[] single = { 0 };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals((short) 0, result[i]);
+        }
+
+        // Test empty array
+        short[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatShortArrayNegativeN() {
+        short[] array = { 1, 2 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatShortArrayOverflow() {
+        short[] array = new short[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(int element, int n)
+    @Test
+    public void testRepeatIntElement() {
+        // Test normal case
+        int[] result = Array.repeat(42, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(42, result[i]);
+        }
+
+        // Test with negative int
+        result = Array.repeat(-2147483648, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals(-2147483648, result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(0, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(2147483647, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(2147483647, result[0]);
+    }
+
+    @Test
+    public void testRepeatIntElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(1, -1);
+        });
+    }
+
+    // Tests for repeat(int[] a, int n)
+    @Test
+    public void testRepeatIntArray() {
+        // Test normal case
+        int[] original = { 1, 2, 3 };
+        int[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        int[] expected = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        int[] single = { 0 };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(0, result[i]);
+        }
+
+        // Test empty array
+        int[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatIntArrayNegativeN() {
+        int[] array = { 1, 2 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatIntArrayOverflow() {
+        int[] array = new int[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(long element, int n)
+    @Test
+    public void testRepeatLongElement() {
+        // Test normal case
+        long[] result = Array.repeat(1000000000L, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(1000000000L, result[i]);
+        }
+
+        // Test with negative long
+        result = Array.repeat(Long.MIN_VALUE, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals(Long.MIN_VALUE, result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(0L, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(Long.MAX_VALUE, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Long.MAX_VALUE, result[0]);
+    }
+
+    @Test
+    public void testRepeatLongElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(1L, -1);
+        });
+    }
+
+    // Tests for repeat(long[] a, int n)
+    @Test
+    public void testRepeatLongArray() {
+        // Test normal case
+        long[] original = { 1L, 2L, 3L };
+        long[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        long[] expected = { 1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        long[] single = { 0L };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(0L, result[i]);
+        }
+
+        // Test empty array
+        long[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+    }
+
+    @Test
+    public void testRepeatLongArrayNegativeN() {
+        long[] array = { 1L, 2L };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatLongArrayOverflow() {
+        long[] array = new long[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(float element, int n)
+    @Test
+    public void testRepeatFloatElement() {
+        // Test normal case
+        float[] result = Array.repeat(3.14f, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(3.14f, result[i], 0.0001f);
+        }
+
+        // Test with negative float
+        result = Array.repeat(-Float.MAX_VALUE, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals(-Float.MAX_VALUE, result[i], 0.0001f);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(0.0f, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(Float.MAX_VALUE, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Float.MAX_VALUE, result[0], 0.0001f);
+    }
+
+    @Test
+    public void testRepeatFloatElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(1.0f, -1);
+        });
+    }
+
+    // Tests for repeat(float[] a, int n)
+    @Test
+    public void testRepeatFloatArray() {
+        // Test normal case
+        float[] original = { 1.1f, 2.2f, 3.3f };
+        float[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        float[] expected = { 1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f };
+        Assertions.assertArrayEquals(expected, result, 0.0001f);
+
+        // Test single element array
+        float[] single = { 0.0f };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(0.0f, result[i], 0.0001f);
+        }
+
+        // Test empty array
+        float[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result, 0.0001f);
+    }
+
+    @Test
+    public void testRepeatFloatArrayNegativeN() {
+        float[] array = { 1.0f, 2.0f };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatFloatArrayOverflow() {
+        float[] array = new float[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(double element, int n)
+    @Test
+    public void testRepeatDoubleElement() {
+        // Test normal case
+        double[] result = Array.repeat(3.14159, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(3.14159, result[i], 0.00001);
+        }
+
+        // Test with negative double
+        result = Array.repeat(-Double.MAX_VALUE, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals(-Double.MAX_VALUE, result[i], 0.00001);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(0.0, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(Double.MAX_VALUE, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Double.MAX_VALUE, result[0], 0.00001);
+    }
+
+    @Test
+    public void testRepeatDoubleElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(1.0, -1);
+        });
+    }
+
+    // Tests for repeat(double[] a, int n)
+    @Test
+    public void testRepeatDoubleArray() {
+        // Test normal case
+        double[] original = { 1.1, 2.2, 3.3 };
+        double[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        double[] expected = { 1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 2.2, 3.3 };
+        Assertions.assertArrayEquals(expected, result, 0.00001);
+
+        // Test single element array
+        double[] single = { 0.0 };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(0.0, result[i], 0.00001);
+        }
+
+        // Test empty array
+        double[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result, 0.00001);
+    }
+
+    @Test
+    public void testRepeatDoubleArrayNegativeN() {
+        double[] array = { 1.0, 2.0 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatDoubleArrayOverflow() {
+        double[] array = new double[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(String element, int n)
+    @Test
+    public void testRepeatStringElement() {
+        // Test normal case
+        String[] result = Array.repeat("hello", 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals("hello", result[i]);
+        }
+
+        // Test with empty string
+        result = Array.repeat("", 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertEquals("", result[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat("test", 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat("single", 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals("single", result[0]);
+
+        // Test with null element
+        result = Array.repeat((String) null, 3);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertNull(result[i]);
+        }
+    }
+
+    @Test
+    public void testRepeatStringElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat("test", -1);
+        });
+    }
+
+    // Tests for repeat(String[] a, int n)
+    @Test
+    public void testRepeatStringArray() {
+        // Test normal case
+        String[] original = { "a", "b", "c" };
+        String[] result = Array.repeat(original, 3);
+        Assertions.assertEquals(9, result.length);
+        String[] expected = { "a", "b", "c", "a", "b", "c", "a", "b", "c" };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        String[] single = { "x" };
+        result = Array.repeat(single, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals("x", result[i]);
+        }
+
+        // Test empty array
+        String[] empty = {};
+        result = Array.repeat(empty, 10);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1);
+        Assertions.assertArrayEquals(original, result);
+
+        // Test array with null elements
+        String[] withNulls = { "a", null, "c" };
+        result = Array.repeat(withNulls, 2);
+        Assertions.assertEquals(6, result.length);
+        String[] expectedWithNulls = { "a", null, "c", "a", null, "c" };
+        Assertions.assertArrayEquals(expectedWithNulls, result);
+    }
+
+    @Test
+    public void testRepeatStringArrayNegativeN() {
+        String[] array = { "a", "b" };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1);
+        });
+    }
+
+    @Test
+    public void testRepeatStringArrayOverflow() {
+        String[] array = new String[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2);
+        });
+    }
+
+    // Tests for repeat(T element, int n) - deprecated generic method
+    @Test
+    public void testRepeatGenericElement() {
+        // Test with Integer
+        Integer[] result = Array.repeat(Integer.valueOf(42), 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(Integer.valueOf(42), result[i]);
+        }
+
+        // Test with custom object
+        TestObject testObj = new TestObject("test");
+        TestObject[] objResult = Array.repeat(testObj, 3);
+        Assertions.assertEquals(3, objResult.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertSame(testObj, objResult[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(Integer.valueOf(100), 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(Integer.valueOf(200), 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Integer.valueOf(200), result[0]);
+    }
+
+    @Test
+    public void testRepeatGenericElementNullElement() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat((Integer) null, 5);
+        });
+    }
+
+    @Test
+    public void testRepeatGenericElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(42, -1);
+        });
+    }
+
+    // Tests for repeat(T element, int n, Class<? extends T> elementClass)
+    @Test
+    public void testRepeatGenericElementWithClass() {
+        // Test with Integer
+        Integer[] result = Array.repeat(42, 5, Integer.class);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(Integer.valueOf(42), result[i]);
+        }
+
+        // Test with null element
+        result = Array.repeat((Integer) null, 3, Integer.class);
+        Assertions.assertEquals(3, result.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertNull(result[i]);
+        }
+
+        // Test with custom object
+        TestObject testObj = new TestObject("test");
+        TestObject[] objResult = Array.repeat(testObj, 3, TestObject.class);
+        Assertions.assertEquals(3, objResult.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertSame(testObj, objResult[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeat(100, 0, Integer.class);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeat(200, 1, Integer.class);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Integer.valueOf(200), result[0]);
+    }
+
+    @Test
+    public void testRepeatGenericElementWithClassNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(42, -1, Integer.class);
+        });
+    }
+
+    // Tests for repeat(T[] a, int n, Class<? extends T> elementClass)
+    @Test
+    public void testRepeatGenericArrayWithClass() {
+        // Test normal case
+        Integer[] original = { 1, 2, 3 };
+        Integer[] result = Array.repeat(original, 3, Integer.class);
+        Assertions.assertEquals(9, result.length);
+        Integer[] expected = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+        Assertions.assertArrayEquals(expected, result);
+
+        // Test single element array
+        Integer[] single = { 0 };
+        result = Array.repeat(single, 5, Integer.class);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(Integer.valueOf(0), result[i]);
+        }
+
+        // Test empty array
+        Integer[] empty = {};
+        result = Array.repeat(empty, 10, Integer.class);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 0
+        result = Array.repeat(original, 0, Integer.class);
+        Assertions.assertEquals(0, result.length);
+
+        // Test n = 1
+        result = Array.repeat(original, 1, Integer.class);
+        Assertions.assertArrayEquals(original, result);
+
+        // Test with custom objects
+        TestObject[] objArray = { new TestObject("a"), new TestObject("b") };
+        TestObject[] objResult = Array.repeat(objArray, 2, TestObject.class);
+        Assertions.assertEquals(4, objResult.length);
+        Assertions.assertEquals(objArray[0], objResult[0]);
+        Assertions.assertEquals(objArray[1], objResult[1]);
+        Assertions.assertEquals(objArray[0], objResult[2]);
+        Assertions.assertEquals(objArray[1], objResult[3]);
+    }
+
+    @Test
+    public void testRepeatGenericArrayWithClassNegativeN() {
+        Integer[] array = { 1, 2 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, -1, Integer.class);
+        });
+    }
+
+    @Test
+    public void testRepeatGenericArrayWithClassOverflow() {
+        Integer[] array = new Integer[Integer.MAX_VALUE / 2 + 1];
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeat(array, 2, Integer.class);
+        });
+    }
+
+    // Tests for repeatNonNull(T element, int n)
+    @Test
+    public void testRepeatNonNullElement() {
+        // Test with Integer
+        Integer[] result = Array.repeatNonNull(42, 5);
+        Assertions.assertEquals(5, result.length);
+        for (int i = 0; i < 5; i++) {
+            Assertions.assertEquals(Integer.valueOf(42), result[i]);
+        }
+
+        // Test with custom object
+        TestObject testObj = new TestObject("test");
+        TestObject[] objResult = Array.repeatNonNull(testObj, 3);
+        Assertions.assertEquals(3, objResult.length);
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertSame(testObj, objResult[i]);
+        }
+
+        // Test with n = 0
+        result = Array.repeatNonNull(100, 0);
+        Assertions.assertEquals(0, result.length);
+
+        // Test with n = 1
+        result = Array.repeatNonNull(200, 1);
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(Integer.valueOf(200), result[0]);
+    }
+
+    @Test
+    public void testRepeatNonNullElementNullElement() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeatNonNull(null, 5);
+        });
+    }
+
+    @Test
+    public void testRepeatNonNullElementNegativeN() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Array.repeatNonNull(42, -1);
+        });
+    }
+
+    // Helper class for testing
+    private static class TestObject {
+        private final String value;
+
+        public TestObject(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null || getClass() != obj.getClass())
+                return false;
+            TestObject that = (TestObject) obj;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+    }
 }

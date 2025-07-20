@@ -632,7 +632,7 @@ public final class HttpSettings {
      * }</pre>
      */
     public HttpSettings copy() {
-        return new HttpSettings().setConnectionTimeout(connectionTimeout)
+        final HttpSettings copy = new HttpSettings().setConnectionTimeout(connectionTimeout)
                 .setReadTimeout(readTimeout)
                 .setSSLSocketFactory(sslSocketFactory)
                 .setProxy(proxy)
@@ -640,8 +640,13 @@ public final class HttpSettings {
                 .doInput(doInput)
                 .doOutput(doOutput)
                 .isOneWayRequest(isOneWayRequest)
-                .setContentFormat(contentFormat)
-                .headers(headers == null ? null : headers.copy());
+                .setContentFormat(contentFormat);
+
+        if (headers != null) {
+            copy.headers(headers.copy());
+        }
+
+        return copy;
     }
 
     /**

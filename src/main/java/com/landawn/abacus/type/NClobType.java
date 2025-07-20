@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.exception.UncheckedSQLException;
+
 /**
  * Type handler for {@link NClob} (National Character Large Object) objects, providing
  * database interaction capabilities for handling large Unicode text data.
@@ -30,8 +32,15 @@ public class NClobType extends AbstractType<NClob> {
 
     public static final String NCLOB = NClob.class.getSimpleName();
 
+    private final Class<NClob> clazz;
+
     NClobType() {
+        this(NClob.class);
+    }
+
+    NClobType(Class<? extends NClob> clazz) {
         super(NCLOB);
+        this.clazz = (Class<NClob>) clazz;
     }
 
     /**
@@ -41,7 +50,7 @@ public class NClobType extends AbstractType<NClob> {
      */
     @Override
     public Class<NClob> clazz() {
-        return NClob.class;
+        return clazz;
     }
 
     /**
@@ -55,7 +64,21 @@ public class NClobType extends AbstractType<NClob> {
      */
     @Override
     public String stringOf(final NClob x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        if (x == null) {
+            return null;
+        }
+
+        try {
+            return x.getSubString(1, (int) x.length());
+        } catch (final SQLException e) {
+            throw new UncheckedSQLException(e);
+        } finally {
+            try {
+                x.free();
+            } catch (final SQLException e) {
+                throw new UncheckedSQLException(e); //NOSONAR
+            }
+        }
     }
 
     /**

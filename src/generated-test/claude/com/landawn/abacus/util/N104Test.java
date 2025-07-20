@@ -1,11 +1,11 @@
 package com.landawn.abacus.util;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -379,10 +379,46 @@ public class N104Test extends TestBase {
 
     @Test
     public void testForEachWithFlatMapper() {
-        String[] array = { "ab", "cd", "ef" };
-        List<Character> result = new ArrayList<>();
-        N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+        {
+            String[] array = { "ab", "cd", "ef" };
+            List<Character> result = new ArrayList<>();
+            N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+        }
+        {
+            List<String> list = N.asList("ab", "cd", "ef");
+            List<Character> result = new ArrayList<>();
+            N.forEach(list, s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+        }
+        {
+            List<String> list = N.asList("ab", "cd", "ef");
+            List<Character> result = new ArrayList<>();
+            N.forEach(list.iterator(), s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+        }
+    }
+
+    @Test
+    public void testForEachWithFlatMapper3() {
+        {
+            String[] array = { "ab", "cd", "ef" };
+            List<Character> result = new ArrayList<>();
+            N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), e -> N.asList(e, e), (s, c, x) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'e', 'e', 'f', 'f'), result);
+        }
+        {
+            List<String> list = N.asList("ab", "cd", "ef");
+            List<Character> result = new ArrayList<>();
+            N.forEach(list, s -> Arrays.asList(s.charAt(0), s.charAt(1)), e -> N.asList(e, e), (s, c, x) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'e', 'e', 'f', 'f'), result);
+        }
+        {
+            List<String> list = N.asList("ab", "cd", "ef");
+            List<Character> result = new ArrayList<>();
+            N.forEach(list.iterator(), s -> Arrays.asList(s.charAt(0), s.charAt(1)), e -> N.asList(e, e), (s, c, x) -> result.add(c));
+            assertEquals(Arrays.asList('a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'e', 'e', 'f', 'f'), result);
+        }
     }
 
     @Test
@@ -1062,6 +1098,134 @@ public class N104Test extends TestBase {
     }
 
     @Test
+    public void testRunInParallelMultiple_01() {
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            assertEquals(1, c2.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(1, c2.get());
+            // assertEquals(1, c3.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+            AtomicInteger c4 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(1, c2.get());
+            // assertEquals(1, c3.get());
+            // assertEquals(1, c4.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+            AtomicInteger c4 = new AtomicInteger(0);
+            AtomicInteger c5 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet, c5::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            //  assertEquals(1, c2.get());
+            // assertEquals(1, c3.get());
+            // assertEquals(1, c4.get());
+            // assertEquals(1, c5.get());
+        }
+    }
+
+    @Test
+    public void testRunInParallelMultiple_02() {
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(1, c2.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(0, c2.get());
+            // assertEquals(0, c3.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+            AtomicInteger c4 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(0, c2.get());
+            // assertEquals(0, c3.get());
+            // assertEquals(0, c4.get());
+        }
+        {
+            AtomicInteger c1 = new AtomicInteger(0);
+            AtomicInteger c2 = new AtomicInteger(0);
+            AtomicInteger c3 = new AtomicInteger(0);
+            AtomicInteger c4 = new AtomicInteger(0);
+            AtomicInteger c5 = new AtomicInteger(0);
+
+            // Test with 5 runnables
+            assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+                throw new RuntimeException("");
+            }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet, c5::incrementAndGet));
+
+            assertEquals(0, c1.get());
+            // assertEquals(1, c2.get());
+            // assertEquals(1, c3.get());
+            // assertEquals(1, c4.get());
+            // assertEquals(1, c5.get());
+        }
+    }
+
+    @Test
     public void testTryOrDefaultWithSupplier() {
         {
             String result1 = N.tryOrDefaultIfExceptionOccurred(() -> "success", () -> "default");
@@ -1291,6 +1455,125 @@ public class N104Test extends TestBase {
     }
 
     @Test
+    public void testForEachPair_1() {
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "b-c", "c-d", "d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c, 2, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "c-d", "e-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c, 3, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "d-e"), result);
+        }
+
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c.iterator(), (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "b-c", "c-d", "d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c.iterator(), 2, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "c-d", "e-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachPair(c.iterator(), 3, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
+            assertEquals(Arrays.asList("a-b", "d-e"), result);
+        }
+    }
+
+    @Test
+    public void testForEachTrip_1() {
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "b-c-d", "c-d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, 2, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "c-d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, 3, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "d-e-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, 4, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "e-null-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, 5, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c, 6, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c"), result);
+        }
+
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "b-c-d", "c-d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), 2, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "c-d-e"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), 3, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "d-e-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), 4, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c", "e-null-null"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), 5, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c"), result);
+        }
+        {
+            List<String> c = N.asList("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEachTriple(c.iterator(), 6, (i, j, k) -> result.add(i + "-" + (j != null ? j : "null") + "-" + (k != null ? k : "null")));
+            assertEquals(Arrays.asList("a-b-c"), result);
+        }
+
+    }
+
+    @Test
     public void testForEachTripleWithLargeStep() {
         Integer[] array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         List<String> result = new ArrayList<>();
@@ -1306,6 +1589,82 @@ public class N104Test extends TestBase {
         assertEquals("d", result.get(3));
         assertEquals("c", result.get(2));
         assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testForEachIndexe_01() {
+        {
+            List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list, 3, 1, result::put);
+            assertEquals("d", result.get(3));
+            assertEquals("c", result.get(2));
+            assertEquals(2, result.size());
+        }
+        {
+            Collection<String> list = N.asLinkedHashSet("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list, 1, 3, result::put);
+            assertEquals("b", result.get(1));
+            assertEquals("c", result.get(2));
+            assertEquals(2, result.size());
+        }
+        {
+            Collection<String> list = N.asLinkedHashSet("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list, 3, 1, result::put);
+            assertEquals("d", result.get(3));
+            assertEquals("c", result.get(2));
+            assertEquals(2, result.size());
+        }
+        {
+            Collection<String> list = N.asLinkedList("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list, 3, 1, result::put);
+            assertEquals("d", result.get(3));
+            assertEquals("c", result.get(2));
+            assertEquals(2, result.size());
+        }
+        {
+            Collection<String> list = N.asLinkedList("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list.iterator(), result::put);
+            assertEquals("a", result.get(0));
+            assertEquals("b", result.get(1));
+            assertEquals("c", result.get(2));
+            assertEquals("d", result.get(3));
+            assertEquals("e", result.get(4));
+            assertEquals(5, result.size());
+        }
+        {
+            Collection<String> list = N.asLinkedList("a", "b", "c", "d", "e");
+            Map<Integer, String> result = new HashMap<>();
+            N.forEachIndexed(list.iterator(), result::put);
+            assertEquals("a", result.get(0));
+            assertEquals("b", result.get(1));
+            assertEquals("c", result.get(2));
+            assertEquals("d", result.get(3));
+            assertEquals("e", result.get(4));
+            assertEquals(5, result.size());
+
+            Map<Integer, String> result2 = new HashMap<>();
+            N.forEachIndexed(result, (i, e) -> result2.put(e.getKey() + 1, e.getValue()));
+            assertEquals("a", result2.get(1));
+            assertEquals("b", result2.get(2));
+            assertEquals("c", result2.get(3));
+            assertEquals("d", result2.get(4));
+            assertEquals("e", result2.get(5));
+            assertEquals(5, result2.size());
+
+            Map<Integer, String> result3 = new HashMap<>();
+            N.forEachIndexed(result, (i, k, v) -> result3.put(k + 1, v));
+            assertEquals("a", result3.get(1));
+            assertEquals("b", result3.get(2));
+            assertEquals("c", result3.get(3));
+            assertEquals("d", result3.get(4));
+            assertEquals("e", result3.get(5));
+            assertEquals(5, result3.size());
+        }
     }
 
     @Test
@@ -1404,6 +1763,23 @@ public class N104Test extends TestBase {
         Collection<Callable<Object>> commands = Arrays.asList(() -> "string", () -> 42, () -> true, () -> null);
 
         List<ContinuableFuture<Object>> futures = N.asyncExecute(commands);
+        List<Object> results = new ArrayList<>();
+        for (ContinuableFuture<Object> future : futures) {
+            results.add(future.get());
+        }
+
+        assertEquals(4, results.size());
+        assertEquals("string", results.get(0));
+        assertEquals(42, results.get(1));
+        assertEquals(true, results.get(2));
+        assertNull(results.get(3));
+    }
+
+    @Test
+    public void testAsyncExecute_01() throws Exception {
+        Collection<Callable<Object>> commands = Arrays.asList(() -> "string", () -> 42, () -> true, () -> null);
+
+        List<ContinuableFuture<Object>> futures = N.asyncExecute(commands, Executors.newFixedThreadPool(6));
         List<Object> results = new ArrayList<>();
         for (ContinuableFuture<Object> future : futures) {
             results.add(future.get());
@@ -1683,10 +2059,18 @@ public class N104Test extends TestBase {
 
     @Test
     public void testForEachWithDescendingIterator() {
-        LinkedList<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        List<String> result = new ArrayList<>();
-        N.forEach(list, 4, 1, result::add);
-        assertEquals(Arrays.asList("e", "d", "c"), result);
+        {
+            List<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+            List<String> result = new ArrayList<>();
+            N.forEach(list, 4, 1, result::add);
+            assertEquals(Arrays.asList("e", "d", "c"), result);
+        }
+        {
+            Collection<String> list = N.asLinkedHashSet("a", "b", "c", "d", "e");
+            List<String> result = new ArrayList<>();
+            N.forEach(list, 4, 1, result::add);
+            assertEquals(Arrays.asList("e", "d", "c"), result);
+        }
     }
 
     @Test

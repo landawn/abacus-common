@@ -508,6 +508,15 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
+     * Converts this {@code Duration} to {@code java.time.Duration}.
+     * 
+     * @return a {@code java.time.Duration} with the same milliseconds.
+     */
+    public java.time.Duration toJdkDuration() {
+        return java.time.Duration.ofMillis(milliseconds);
+    }
+
+    /**
      * Compares this duration to another duration based on their length.
      * <p>
      * The comparison is based on the total length of the durations in milliseconds.

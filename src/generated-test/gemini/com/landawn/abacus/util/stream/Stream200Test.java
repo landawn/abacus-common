@@ -58,7 +58,6 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.ToIntFunction;
 
-
 public class Stream200Test extends TestBase {
 
     // Helper to get a List from a Stream for assertions
@@ -1974,7 +1973,6 @@ public class Stream200Test extends TestBase {
         List<Integer> merged = Stream.merge(list1, list2, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7), merged);
     }
-
 
     @Test
     public void testParallelZip() throws InterruptedException {

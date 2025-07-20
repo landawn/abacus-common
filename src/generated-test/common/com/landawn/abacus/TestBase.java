@@ -4,13 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Iterators;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.TriIterator;
+import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.TypeReference;
 
 @Tag("base-test")
@@ -60,6 +66,50 @@ public abstract class TestBase {
 
     public static <T> void assertHaveSameElements(Collection<? extends T> expected, Collection<? extends T> actual) {
         assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));
+    }
+
+    public static <T> Iterable<T> createIterable(final T... a) {
+        return new Iterable<>() {
+            @Override
+            public java.util.Iterator<T> iterator() {
+                return N.asList(a).iterator();
+            }
+        };
+    }
+
+    public static <T> Iterable<T> createIterable(final Collection<? extends T> c) {
+        return new Iterable<>() {
+            @Override
+            public java.util.Iterator<T> iterator() {
+                return (Iterator<T>) c.iterator();
+            }
+        };
+    }
+
+    public static <A, B> BiIterator<A, B> createBiIterator(final Iterable<Pair<A, B>> iterable) {
+        if (iterable == null) {
+            return BiIterator.empty();
+        }
+
+        final Iterator<Pair<A, B>> iter = iterable.iterator();
+
+        return BiIterator.of(Iterators.map(iter, e -> N.newEntry(e.left(), e.right())));
+    }
+
+    public static <A, B, C> TriIterator<A, B, C> createTriIterator(final Iterable<Triple<A, B, C>> iterable) {
+        if (iterable == null) {
+            return TriIterator.empty();
+        }
+
+        final Iterator<Triple<A, B, C>> iter = iterable.iterator();
+
+        return TriIterator.generate(() -> iter.hasNext(), t -> {
+            final Triple<A, B, C> e = iter.next();
+            N.println(e);
+            t.setLeft(e.left());
+            t.setMiddle(e.middle());
+            t.setRight(e.right());
+        });
     }
 
     protected static <T> Type<T> createType(Class<T> typeClass) {

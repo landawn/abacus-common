@@ -3869,7 +3869,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirst(null, *, *);            // returns null
      * replaceFirst("", *, *);              // returns ""
      * replaceFirst("any", null, *);        // returns "any"
-     * replaceFirst("any", *, null);        // returns "any"
+     * replaceFirst("any", *, null);        // returns "ny"
      * replaceFirst("any", "", *);          // returns "any"
      * replaceFirst("aba", "a", null);      // returns "ba"
      * replaceFirst("aba", "a", "");        // returns "ba"
@@ -3933,7 +3933,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param target The string to be replaced. It can be {@code null}.
      * @param replacement The string to replace the target string. It can be {@code null}.
      * @return A new string with the first occurrence of the target string replaced with the replacement string.
-     *         If the input string, target string, or replacement string is {@code null}, the method returns the original string.
+     *         If the input string or target string is {@code null}, the method returns the original string.
      * @deprecated Use {@link #replaceFirst(String, String, String)} instead
      */
     @Deprecated
@@ -3969,7 +3969,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceLast(null, *, *);            // returns null
      * replaceLast("", *, *);              // returns ""
      * replaceLast("any", null, *);        // returns "any"
-     * replaceLast("any", *, null);        // returns "any"
+     * replaceLast("any", a, null);        // returns "ny"
      * replaceLast("any", "", *);          // returns "any"
      * replaceLast("aba", "a", null);      // returns "ab"
      * replaceLast("aba", "a", "");        // returns "ab"
@@ -4201,6 +4201,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, final boolean ignoreCase) {
+        N.checkPositionIndex(fromIndex, N.len(str));
+
         // TODO
         //    if (replacement == null) {
         //        throw new IllegalArgumentException("Replacement can't be null");
@@ -5000,6 +5002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * splitPreserveAllTokens("ab:cd:ef", ":");      // returns ["ab", "cd", "ef"]
      * splitPreserveAllTokens("ab:cd:ef:", ":");     // returns ["ab", "cd", "ef", ""]
      * splitPreserveAllTokens(":cd:ef", ":");        // returns ["", "cd", "ef"]
+     * splitPreserveAllTokens("a::b::c", "::")       // returns ["a", "b", "c"]
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5219,22 +5222,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.isEmpty()) {
             return preserveAllTokens ? new String[] { EMPTY } : N.EMPTY_STRING_ARRAY;
+        } else if (max == 1) {
+            final String[] result = { str };
+
+            if (trim) {
+                trim(result);
+            }
+
+            return result;
         }
 
-        if (N.len(delimiter) == 1) {
+        final int delimiterLength = N.len(delimiter);
+
+        if (delimiterLength == 1) {
             return splitWorker(str, delimiter.charAt(0), max, trim, preserveAllTokens);
         }
 
         final int len = str.length();
         final List<String> substrs = new ArrayList<>();
 
-        int sizePlus1 = 1;
         int i = 0;
-        int start = 0;
-        boolean match = false;
-        boolean lastMatch = false;
 
-        if (delimiter == null) {
+        if (delimiterLength == 0) {
+            int start = 0;
+            boolean match = false;
+            boolean lastMatch = false;
+            int sizePlus1 = 1;
             // Null separator means use whitespace
             while (i < len) {
                 if (Character.isWhitespace(str.charAt(i))) {
@@ -5254,30 +5267,46 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 match = true;
                 i++;
             }
+
+            if (match || (preserveAllTokens && lastMatch)) {
+                substrs.add(str.substring(start, i));
+            }
         } else {
             // standard case
-            while (i < len) {
-                if (delimiter.indexOf(str.charAt(i)) >= 0) {
-                    if (match || preserveAllTokens) {
-                        lastMatch = true;
-                        if (sizePlus1++ == max) {
-                            i = len;
-                            lastMatch = false;
-                        }
-                        substrs.add(str.substring(start, i));
-                        match = false;
-                    }
-                    start = ++i;
-                    continue;
-                }
-                lastMatch = false;
-                match = true;
-                i++;
-            }
-        }
+            int idx = -1;
 
-        if (match || preserveAllTokens && lastMatch) {
-            substrs.add(str.substring(start, i));
+            while (i <= len - delimiterLength) {
+                if ((idx = str.indexOf(delimiter, i)) < 0) {
+                    break;
+                }
+
+                if (idx > i) {
+                    substrs.add(str.substring(i, idx));
+                } else if (preserveAllTokens) {
+                    substrs.add(EMPTY);
+                }
+
+                if (substrs.size() == max - 1) {
+                    if (preserveAllTokens || idx + delimiterLength < len) {
+                        substrs.add(str.substring(idx + delimiterLength));
+                    }
+
+                    i = len; // end the loop
+                    idx = -1; // reset idx to avoid adding another substring
+
+                    break;
+                }
+
+                i = idx + delimiterLength;
+            }
+
+            if (idx < 0 || i < len) {
+                if (i < len) {
+                    substrs.add(str.substring(i, len));
+                } else if (preserveAllTokens) {
+                    substrs.add(EMPTY);
+                }
+            }
         }
 
         final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
@@ -5389,7 +5418,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the trimmed string, {@code null} if null String input
      */
     public static String trim(final String str) {
-        return isEmpty(str) || (str.charAt(0) != ' ' && str.charAt(str.length() - 1) != ' ') ? str : str.trim();
+        return isEmpty(str) || (!Character.isWhitespace(str.charAt(0)) && !Character.isWhitespace(str.charAt(str.length() - 1))) ? str : str.trim();
     }
 
     /**
@@ -9532,7 +9561,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>{@code
-     * smallestLastIndexOfAll("Hello World", "o", "World");      // returns 4 or 6
+     * smallestLastIndexOfAll("Hello World", "o", "World");      // returns 6
      * smallestLastIndexOfAll("Hello Hello", "Hello", "o");      // returns 7
      * smallestLastIndexOfAll("test", "xyz", "abc");             // returns -1
      * smallestLastIndexOfAll(null, "test");                     // returns -1
@@ -9561,7 +9590,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>{@code
-     * smallestLastIndexOfAll("Hello World", 10, "o", "World");    // returns 4 or 6
+     * smallestLastIndexOfAll("Hello World", 10, "o", "World");    // returns 6
      * smallestLastIndexOfAll("Hello World", 5, "o", "World");     // returns 4
      * smallestLastIndexOfAll("Hello World", 3, "o", "World");     // returns -1
      * smallestLastIndexOfAll("test", -1, "test");                 // returns -1
@@ -9614,8 +9643,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>{@code
-     * largestLastIndexOfAll("Hello World", "o", "World");       // returns 7 or 6
-     * largestLastIndexOfAll("Hello Hello", "Hello", "e");       // returns 8 or 6
+     * largestLastIndexOfAll("Hello World", "o", "World");       // returns 7
+     * largestLastIndexOfAll("Hello Hello", "Hello", "e");       // returns 8
      * largestLastIndexOfAll("test", "xyz", "abc");              // returns -1
      * largestLastIndexOfAll(null, "test");                      // returns -1
      * }</pre>
@@ -9643,8 +9672,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>{@code
-     * largestLastIndexOfAll("Hello World", 10, "o", "World");     // returns 7 or 6
-     * largestLastIndexOfAll("Hello World", 6, "o", "World");      // returns 6 or 4
+     * largestLastIndexOfAll("Hello World", 10, "o", "World");     // returns 7
+     * largestLastIndexOfAll("Hello World", 6, "o", "World");      // returns 6
      * largestLastIndexOfAll("Hello World", 3, "o", "H");          // returns 0
      * largestLastIndexOfAll("test", -1, "test");                  // returns -1
      * }</pre>
@@ -12032,7 +12061,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>{@code
-     * substring("a-b-c-d", '-', 7);          // returns "-c" (last '-' before index 6)
+     * substring("a-b-c-d", '-', 7);          // returns "-d" (last '-' before index 6)
      * substring("hello world", ' ', 11);     // returns " world"
      * substring("test", 'x', 4);             // returns null (delimiter not found)
      * substring("test", 't', -1);            // returns null (negative index)
@@ -18275,11 +18304,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param overlay the String to overlay, which may be null
      * @param start the position to start overlaying at
      * @param end the position to stop overlaying before
-     * @return overlayed String, {@code ""} if {@code null} String input
+     * @return overlayed String, or {@code overlay} if {@code null} String input
      * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str
+     * @deprecated replaced by {@code replace(String, int, int, String)}
      * @see #replace(String, int, int, String)
      * @see N#replaceRange(String, int, int, String)
-     * @deprecated replaced by {@code replace(String, int, int, String)}
      */
     @Deprecated
     public static String overlay(final String str, final String overlay, final int start, final int end) throws IndexOutOfBoundsException {

@@ -1,19 +1,29 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.function.TriConsumer;
+import com.landawn.abacus.util.function.TriFunction;
 
 public class Iterators104Test extends TestBase {
 
@@ -303,5 +313,391 @@ public class Iterators104Test extends TestBase {
         Iterators.forEach(iterators, (Throwables.Consumer<Integer, Exception>) result::add);
 
         Assertions.assertEquals(Arrays.asList(1, 2), result);
+    }
+
+    @Test
+    public void testConcatBiIterator_EmptyArray() {
+        BiIterator<String, Integer> result = Iterators.concat(new BiIterator[0]);
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, () -> result.next());
+    }
+
+    @Test
+    public void testConcatBiIterator_SingleIterator() {
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        pairs.add(Pair.of("a", 1));
+        pairs.add(Pair.of("b", 2));
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs);
+        BiIterator<String, Integer> result = Iterators.concat(iter1);
+
+        assertTrue(result.hasNext());
+        assertEquals(Pair.of("a", 1), result.next());
+        assertTrue(result.hasNext());
+        assertEquals(Pair.of("b", 2), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatBiIterator_MultipleIterators() {
+        List<Pair<String, Integer>> pairs1 = new ArrayList<>();
+        pairs1.add(Pair.of("a", 1));
+        pairs1.add(Pair.of("b", 2));
+
+        List<Pair<String, Integer>> pairs2 = new ArrayList<>();
+        pairs2.add(Pair.of("c", 3));
+        pairs2.add(Pair.of("d", 4));
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs1);
+        BiIterator<String, Integer> iter2 = createBiIterator(pairs2);
+        BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
+
+        assertTrue(result.hasNext());
+        assertEquals(Pair.of("a", 1), result.next());
+        assertEquals(Pair.of("b", 2), result.next());
+        assertEquals(Pair.of("c", 3), result.next());
+        assertEquals(Pair.of("d", 4), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatBiIterator_WithEmptyIterators() {
+        List<Pair<String, Integer>> pairs1 = new ArrayList<>();
+        pairs1.add(Pair.of("a", 1));
+
+        List<Pair<String, Integer>> emptyPairs = new ArrayList<>();
+
+        List<Pair<String, Integer>> pairs2 = new ArrayList<>();
+        pairs2.add(Pair.of("b", 2));
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs1);
+        BiIterator<String, Integer> emptyIter = createBiIterator(emptyPairs);
+        BiIterator<String, Integer> iter2 = createBiIterator(pairs2);
+        BiIterator<String, Integer> result = Iterators.concat(iter1, emptyIter, iter2);
+
+        assertTrue(result.hasNext());
+        assertEquals(Pair.of("a", 1), result.next());
+        assertTrue(result.hasNext());
+        assertEquals(Pair.of("b", 2), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatBiIterator_NextWithAction() {
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        pairs.add(Pair.of("a", 1));
+        pairs.add(Pair.of("b", 2));
+
+        BiIterator<String, Integer> iter = createBiIterator(pairs);
+        BiIterator<String, Integer> result = Iterators.concat(iter);
+
+        List<String> keys = new ArrayList<>();
+        List<Integer> values = new ArrayList<>();
+
+        result.next((k, v) -> {
+            keys.add(k);
+            values.add(v);
+        });
+
+        assertEquals(1, keys.size());
+        assertEquals("a", keys.get(0));
+        assertEquals(1, values.get(0));
+    }
+
+    @Test
+    public void testConcatBiIterator_ForEachRemaining() {
+        List<Pair<String, Integer>> pairs1 = new ArrayList<>();
+        pairs1.add(Pair.of("a", 1));
+        pairs1.add(Pair.of("b", 2));
+
+        List<Pair<String, Integer>> pairs2 = new ArrayList<>();
+        pairs2.add(Pair.of("c", 3));
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs1);
+        BiIterator<String, Integer> iter2 = createBiIterator(pairs2);
+        BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
+
+        List<String> keys = new ArrayList<>();
+        List<Integer> values = new ArrayList<>();
+
+        BiConsumer<String, Integer> action = (k, v) -> {
+            keys.add(k);
+            values.add(v);
+        };
+
+        result.forEachRemaining(action);
+
+        assertEquals(3, keys.size());
+        assertEquals(List.of("a", "b", "c"), keys);
+        assertEquals(List.of(1, 2, 3), values);
+    }
+
+    @Test
+    public void testConcatBiIterator_Map() {
+        List<Pair<String, Integer>> pairs1 = new ArrayList<>();
+        pairs1.add(Pair.of("a", 1));
+        pairs1.add(Pair.of("b", 2));
+
+        List<Pair<String, Integer>> pairs2 = new ArrayList<>();
+        pairs2.add(Pair.of("c", 3));
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs1);
+        BiIterator<String, Integer> iter2 = createBiIterator(pairs2);
+        BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
+
+        BiFunction<String, Integer, String> mapper = (k, v) -> k + v;
+        ObjIterator<String> mapped = result.map(mapper);
+
+        assertTrue(mapped.hasNext());
+        assertEquals("a1", mapped.next());
+        assertEquals("b2", mapped.next());
+        assertEquals("c3", mapped.next());
+        assertFalse(mapped.hasNext());
+    }
+
+    @Test
+    public void testConcatBiIterator_MapWithEmptyIterators() {
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        pairs.add(Pair.of("a", 1));
+
+        List<Pair<String, Integer>> emptyPairs = new ArrayList<>();
+
+        BiIterator<String, Integer> iter1 = createBiIterator(pairs);
+        BiIterator<String, Integer> emptyIter = createBiIterator(emptyPairs);
+        BiIterator<String, Integer> result = Iterators.concat(iter1, emptyIter);
+
+        BiFunction<String, Integer, String> mapper = (k, v) -> k + v;
+        ObjIterator<String> mapped = result.map(mapper);
+
+        assertTrue(mapped.hasNext());
+        assertEquals("a1", mapped.next());
+        assertFalse(mapped.hasNext());
+        assertThrows(NoSuchElementException.class, () -> mapped.next());
+    }
+
+    @Test
+    public void testConcatTriIterator_EmptyArray() {
+        TriIterator<String, Integer, Double> result = Iterators.concat(new TriIterator[0]);
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, () -> result.next());
+    }
+
+    @Test
+    public void testConcatTriIterator_SingleIterator() {
+        List<Triple<String, Integer, Double>> triples = new ArrayList<>();
+        triples.add(Triple.of("a", 1, 1.1));
+        triples.add(Triple.of("b", 2, 2.2));
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1);
+
+        assertTrue(result.hasNext());
+        assertEquals(Triple.of("a", 1, 1.1), result.next());
+        assertTrue(result.hasNext());
+        assertEquals(Triple.of("b", 2, 2.2), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatTriIterator_MultipleIterators() {
+        List<Triple<String, Integer, Double>> triples1 = new ArrayList<>();
+        triples1.add(Triple.of("a", 1, 1.1));
+        triples1.add(Triple.of("b", 2, 2.2));
+
+        List<Triple<String, Integer, Double>> triples2 = new ArrayList<>();
+        triples2.add(Triple.of("c", 3, 3.3));
+        triples2.add(Triple.of("d", 4, 4.4));
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples1);
+        TriIterator<String, Integer, Double> iter2 = createTriIterator(triples2);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1, iter2);
+
+        assertTrue(result.hasNext());
+        assertEquals(Triple.of("a", 1, 1.1), result.next());
+        assertEquals(Triple.of("b", 2, 2.2), result.next());
+        assertEquals(Triple.of("c", 3, 3.3), result.next());
+        assertEquals(Triple.of("d", 4, 4.4), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatTriIterator_WithEmptyIterators() {
+        List<Triple<String, Integer, Double>> triples1 = new ArrayList<>();
+        triples1.add(Triple.of("a", 1, 1.1));
+
+        List<Triple<String, Integer, Double>> emptyTriples = new ArrayList<>();
+
+        List<Triple<String, Integer, Double>> triples2 = new ArrayList<>();
+        triples2.add(Triple.of("b", 2, 2.2));
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples1);
+        TriIterator<String, Integer, Double> emptyIter = createTriIterator(emptyTriples);
+        TriIterator<String, Integer, Double> iter2 = createTriIterator(triples2);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1, emptyIter, iter2);
+
+        assertTrue(result.hasNext());
+        assertEquals(Triple.of("a", 1, 1.1), result.next());
+        assertTrue(result.hasNext());
+        assertEquals(Triple.of("b", 2, 2.2), result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatTriIterator_NextWithAction() {
+        List<Triple<String, Integer, Double>> triples = new ArrayList<>();
+        triples.add(Triple.of("a", 1, 1.1));
+        triples.add(Triple.of("b", 2, 2.2));
+
+        TriIterator<String, Integer, Double> iter = createTriIterator(triples);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter);
+
+        List<String> first = new ArrayList<>();
+        List<Integer> second = new ArrayList<>();
+        List<Double> third = new ArrayList<>();
+
+        result.next((a, b, c) -> {
+            first.add(a);
+            second.add(b);
+            third.add(c);
+        });
+
+        assertEquals(1, first.size());
+        assertEquals("a", first.get(0));
+        assertEquals(1, second.get(0));
+        assertEquals(1.1, third.get(0));
+    }
+
+    @Test
+    public void testConcatTriIterator_ForEachRemaining() {
+        List<Triple<String, Integer, Double>> triples1 = new ArrayList<>();
+        triples1.add(Triple.of("a", 1, 1.1));
+        triples1.add(Triple.of("b", 2, 2.2));
+
+        List<Triple<String, Integer, Double>> triples2 = new ArrayList<>();
+        triples2.add(Triple.of("c", 3, 3.3));
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples1);
+        TriIterator<String, Integer, Double> iter2 = createTriIterator(triples2);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1, iter2);
+
+        List<String> first = new ArrayList<>();
+        List<Integer> second = new ArrayList<>();
+        List<Double> third = new ArrayList<>();
+
+        TriConsumer<String, Integer, Double> action = (a, b, c) -> {
+            first.add(a);
+            second.add(b);
+            third.add(c);
+        };
+
+        result.forEachRemaining(action);
+
+        assertEquals(3, first.size());
+        assertEquals(List.of("a", "b", "c"), first);
+        assertEquals(List.of(1, 2, 3), second);
+        assertEquals(List.of(1.1, 2.2, 3.3), third);
+    }
+
+    @Test
+    public void testConcatTriIterator_Map() {
+        List<Triple<String, Integer, Double>> triples1 = new ArrayList<>();
+        triples1.add(Triple.of("a", 1, 1.1));
+        triples1.add(Triple.of("b", 2, 2.2));
+
+        List<Triple<String, Integer, Double>> triples2 = new ArrayList<>();
+        triples2.add(Triple.of("c", 3, 3.3));
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples1);
+        TriIterator<String, Integer, Double> iter2 = createTriIterator(triples2);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1, iter2);
+
+        TriFunction<String, Integer, Double, String> mapper = (a, b, c) -> a + b + c;
+        ObjIterator<String> mapped = result.map(mapper);
+
+        assertTrue(mapped.hasNext());
+        assertEquals("a11.1", mapped.next());
+        assertEquals("b22.2", mapped.next());
+        assertEquals("c33.3", mapped.next());
+        assertFalse(mapped.hasNext());
+    }
+
+    @Test
+    public void testConcatTriIterator_MapWithEmptyIterators() {
+        List<Triple<String, Integer, Double>> triples = new ArrayList<>();
+        triples.add(Triple.of("a", 1, 1.1));
+
+        List<Triple<String, Integer, Double>> emptyTriples = new ArrayList<>();
+
+        TriIterator<String, Integer, Double> iter1 = createTriIterator(triples);
+        TriIterator<String, Integer, Double> emptyIter = createTriIterator(emptyTriples);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter1, emptyIter);
+
+        TriFunction<String, Integer, Double, String> mapper = (a, b, c) -> a + b + c;
+        ObjIterator<String> mapped = result.map(mapper);
+
+        assertTrue(mapped.hasNext());
+        assertEquals("a11.1", mapped.next());
+        assertFalse(mapped.hasNext());
+        assertThrows(NoSuchElementException.class, () -> mapped.next());
+    }
+
+    @Test
+    public void testConcatBiIterator_HasNextMultipleCalls() {
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        pairs.add(Pair.of("a", 1));
+
+        BiIterator<String, Integer> iter = createBiIterator(pairs);
+        BiIterator<String, Integer> result = Iterators.concat(iter);
+
+        // Multiple hasNext calls should not consume elements
+        assertTrue(result.hasNext());
+        assertTrue(result.hasNext());
+        assertTrue(result.hasNext());
+
+        assertEquals(Pair.of("a", 1), result.next());
+        assertFalse(result.hasNext());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatTriIterator_HasNextMultipleCalls() {
+        List<Triple<String, Integer, Double>> triples = new ArrayList<>();
+        triples.add(Triple.of("a", 1, 1.1));
+
+        TriIterator<String, Integer, Double> iter = createTriIterator(triples);
+        TriIterator<String, Integer, Double> result = Iterators.concat(iter);
+
+        // Multiple hasNext calls should not consume elements
+        assertTrue(result.hasNext());
+        assertTrue(result.hasNext());
+        assertTrue(result.hasNext());
+
+        assertEquals(Triple.of("a", 1, 1.1), result.next());
+        assertFalse(result.hasNext());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testConcatBiIterator_AllEmptyIterators() {
+        BiIterator<String, Integer> empty1 = BiIterator.empty();
+        BiIterator<String, Integer> empty2 = BiIterator.empty();
+        BiIterator<String, Integer> empty3 = BiIterator.empty();
+
+        BiIterator<String, Integer> result = Iterators.concat(empty1, empty2, empty3);
+
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, () -> result.next());
+    }
+
+    @Test
+    public void testConcatTriIterator_AllEmptyIterators() {
+        TriIterator<String, Integer, Double> empty1 = TriIterator.empty();
+        TriIterator<String, Integer, Double> empty2 = TriIterator.empty();
+        TriIterator<String, Integer, Double> empty3 = TriIterator.empty();
+
+        TriIterator<String, Integer, Double> result = Iterators.concat(empty1, empty2, empty3);
+
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, () -> result.next());
     }
 }

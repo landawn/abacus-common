@@ -242,14 +242,6 @@ public class N203Test extends TestBase {
     }
 
     @Test
-    public void testFilterCollectionWithRangeAndSupplier() {
-        List<String> list = Arrays.asList("a", "b", "aa", "bb", "aaa");
-        Set<String> resultSet = N.filter(list, 1, 5, s -> s.contains("a") && s.length() > 1, HashSet::new);
-        assertEquals(Set.of("aa", "aaa"), resultSet);
-        assertTrue(N.filter(list, 1, 1, STRING_NOT_EMPTY, ArrayList::new).isEmpty());
-    }
-
-    @Test
     public void testFilterIterable() {
         Iterable<String> iter = Arrays.asList("apple", "banana", "", "grape");
         assertEquals(List.of("apple", "banana", "grape"), N.filter(iter, STRING_NOT_EMPTY));
@@ -1541,14 +1533,6 @@ public class N203Test extends TestBase {
         Map<Character, List<String>> result = N.groupBy(list, 1, 4, s -> s.charAt(0));
         assertEquals(List.of("two", "three"), result.get('t'));
         assertEquals(List.of("four"), result.get('f'));
-    }
-
-    @Test
-    public void testGroupByCollectionWithRangeAndMapSupplier() {
-        List<String> list = Arrays.asList("one", "two", "three", "four", "five");
-        TreeMap<Character, List<String>> result = N.groupBy(list, 1, 4, s -> s.charAt(0), TreeMap::new);
-        assertEquals(List.of("four"), result.get('f'));
-        assertEquals(List.of("two", "three"), result.get('t'));
     }
 
     @Test

@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -27,6 +28,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
@@ -178,6 +180,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     public byte[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (obj instanceof InputStream is) {
+            return IOUtil.readAllBytes(is);
         } else if (obj instanceof Blob blob) {
             try {
                 return blob.getBytes(1, (int) blob.length());

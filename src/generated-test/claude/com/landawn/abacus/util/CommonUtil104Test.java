@@ -611,16 +611,27 @@ public class CommonUtil104Test extends TestBase {
 
     @Test
     public void testToCollection_Iterable() {
-        List<String> source = Arrays.asList("a", "b", "c");
-        Set<String> set = N.toCollection(source, size -> new HashSet<>(size));
-        assertEquals(3, set.size());
-        assertTrue(set.contains("a"));
-        assertTrue(set.contains("b"));
-        assertTrue(set.contains("c"));
+        {
+            List<String> source = Arrays.asList("a", "b", "c");
+            Set<String> set = N.toCollection(source, size -> new HashSet<>(size));
+            assertEquals(3, set.size());
+            assertTrue(set.contains("a"));
+            assertTrue(set.contains("b"));
+            assertTrue(set.contains("c"));
 
-        // Empty iterable
-        Set<String> emptySet = N.toCollection(new ArrayList<String>(), size -> new HashSet<>(size));
-        assertTrue(emptySet.isEmpty());
+            // Empty iterable
+            Set<String> emptySet = N.toCollection(new ArrayList<String>(), size -> new HashSet<>(size));
+            assertTrue(emptySet.isEmpty());
+        }
+        {
+            Iterable<String> source = createIterable("a", "b", "c");
+            Set<String> set = N.toCollection(source, size -> new HashSet<>(size));
+            assertEquals(3, set.size());
+            assertTrue(set.contains("a"));
+            assertTrue(set.contains("b"));
+            assertTrue(set.contains("c"));
+        }
+
     }
 
     @Test

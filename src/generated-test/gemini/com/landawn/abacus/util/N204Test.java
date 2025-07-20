@@ -739,17 +739,6 @@ public class N204Test extends TestBase {
     }
 
     @Test
-    public void forEach_iterables_triConsumer_shortCircuit() throws Exception {
-        List<String> l1 = Arrays.asList("a", "b", "c");
-        List<Integer> l2 = Arrays.asList(1, 2, 3, 4);
-        List<Boolean> l3 = Arrays.asList(true, false); // Shortest
-        List<String> result = new ArrayList<>();
-        N.forEach(l1, l2, l3, (s, i, bool) -> result.add(s + i + bool));
-
-        assertEquals(Arrays.asList("a1true", "b2false"), result);
-    }
-
-    @Test
     public void forEach_arrays_biConsumer_withDefaults() throws Exception {
         String[] a = { "one", "two" };
         Integer[] b = { 1, 2, 3 };

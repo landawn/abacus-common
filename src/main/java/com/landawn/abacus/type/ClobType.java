@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.exception.UncheckedSQLException;
+
 /**
  * Type handler for CLOB (Character Large Object) values.
  * This class provides database operations for handling CLOB objects directly.
@@ -30,8 +32,15 @@ public class ClobType extends AbstractType<Clob> {
 
     public static final String CLOB = Clob.class.getSimpleName();
 
+    private final Class<Clob> clazz;
+
     ClobType() {
+        this(Clob.class);
+    }
+
+    ClobType(Class<? extends Clob> clazz) {
         super(CLOB);
+        this.clazz = (Class<Clob>) clazz;
     }
 
     /**
@@ -41,7 +50,7 @@ public class ClobType extends AbstractType<Clob> {
      */
     @Override
     public Class<Clob> clazz() {
-        return Clob.class;
+        return clazz;
     }
 
     /**
@@ -54,7 +63,21 @@ public class ClobType extends AbstractType<Clob> {
      */
     @Override
     public String stringOf(final Clob x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        if (x == null) {
+            return null;
+        }
+
+        try {
+            return x.getSubString(1, (int) x.length());
+        } catch (final SQLException e) {
+            throw new UncheckedSQLException(e);
+        } finally {
+            try {
+                x.free();
+            } catch (final SQLException e) {
+                throw new UncheckedSQLException(e); //NOSONAR
+            }
+        }
     }
 
     /**

@@ -129,25 +129,80 @@ public class Seq103Test extends TestBase {
     @Test
     public void testSliding_WindowSizeIncrementAndCollectionSupplier() throws Exception {
         // Test with custom collection and increment
-        Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new);
-        List<Set<Integer>> result = seq.toList();
+        {
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new);
+            List<Set<Integer>> result = seq.toList();
 
-        assertEquals(3, result.size());
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), result.get(0));
-        assertEquals(new HashSet<>(Arrays.asList(3, 4, 5)), result.get(1));
-        assertEquals(new HashSet<>(Arrays.asList(5, 6)), result.get(2));
+            assertEquals(3, result.size());
+            assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), result.get(0));
+            assertEquals(new HashSet<>(Arrays.asList(3, 4, 5)), result.get(1));
+            assertEquals(new HashSet<>(Arrays.asList(5, 6)), result.get(2));
+        }
+        {
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new);
+            List<Set<Integer>> result = seq.toList();
+
+            assertEquals(2, result.size());
+            assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), result.get(0));
+            assertEquals(new HashSet<>(Arrays.asList(4, 5, 6)), result.get(1));
+        }
+        {
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new);
+            List<Set<Integer>> result = seq.skip(1).toList();
+
+            assertEquals(2, result.size());
+            assertEquals(new HashSet<>(Arrays.asList(3, 4, 5)), result.get(0));
+            assertEquals(new HashSet<>(Arrays.asList(5, 6)), result.get(1));
+        }
+        {
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new);
+            List<Set<Integer>> result = seq.skip(1).toList();
+
+            assertEquals(1, result.size());
+            assertEquals(new HashSet<>(Arrays.asList(4, 5, 6)), result.get(0));
+        }
+
+        {
+            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, HashSet::new).count());
+            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new).count());
+
+            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new).count());
+        }
     }
 
     @Test
     public void testSliding_WindowSizeIncrementAndCollector() throws Exception {
-        // Test with collector and increment
-        Seq<String, Exception> seq = Seq.of("a", "b", "c", "d", "e").sliding(2, 2, Collectors.joining("-"));
-        List<String> result = seq.toList();
+        {
 
-        assertEquals(3, result.size());
-        assertEquals("a-b", result.get(0));
-        assertEquals("c-d", result.get(1));
-        assertEquals("e", result.get(2));
+            // Test with collector and increment 
+            List<String> result = Seq.of("a", "b", "c", "d", "e").sliding(2, 2, Collectors.joining("-")).toList();
+            assertEquals(3, result.size());
+            assertEquals("a-b", result.get(0));
+            assertEquals("c-d", result.get(1));
+            assertEquals("e", result.get(2));
+
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 1, Collectors.joining("-")).skip(2).toList();
+            assertEquals(2, result.size());
+            assertEquals("c-d", result.get(0));
+            assertEquals("d-e", result.get(1));
+
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 3, Collectors.joining("-")).toList();
+            assertEquals(2, result.size());
+            assertEquals("a-b", result.get(0));
+            assertEquals("d-e", result.get(1));
+
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 3, Collectors.joining("-")).skip(1).toList();
+            assertEquals(1, result.size());
+            assertEquals("d-e", result.get(0));
+        }
+
+        {
+            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, Collectors.joining("-")).count());
+            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, 2, Collectors.joining("-")).count());
+
+            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, 3, Collectors.joining("-")).count());
+        }
+
     }
 
     @Test

@@ -1,8 +1,8 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -185,14 +185,111 @@ public class TriIterator100Test extends TestBase {
 
     @Test
     public void testZipIterators() {
-        Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
-        Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
-        Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
 
-        TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3);
+            TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3);
 
-        List<Triple<String, Integer, Double>> result = triIter.toList();
-        assertEquals(2, result.size()); // Limited by shortest iterator
+            List<Triple<String, Integer, Double>> result = triIter.toList();
+            assertEquals(2, result.size()); // Limited by shortest iterator
+        }
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+
+            TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3, "X", 0, 0.0);
+
+            List<String> result = new ArrayList<>();
+            while (triIter.hasNext()) {
+                Triple<String, Integer, Double> triple = triIter.next();
+                result.add(triple.left() + ":" + triple.middle() + ":" + triple.right());
+            }
+
+            assertEquals(4, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:0:3.3", result.get(2));
+            assertEquals("X:0:4.4", result.get(3));
+        }
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+
+            TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3, "X", 0, 0.0);
+
+            List<String> result = new ArrayList<>();
+
+            triIter.forEachRemaining(triple -> {
+                result.add(triple.left() + ":" + triple.middle() + ":" + triple.right());
+            });
+
+            assertEquals(4, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:0:3.3", result.get(2));
+            assertEquals("X:0:4.4", result.get(3));
+        }
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+
+            TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3, "X", 0, 0.0);
+
+            List<String> result = new ArrayList<>();
+
+            triIter.forEachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(4, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:0:3.3", result.get(2));
+            assertEquals("X:0:4.4", result.get(3));
+        }
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+
+            TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3, "X", 0, 0.0);
+
+            List<String> result = new ArrayList<>();
+
+            triIter.foreachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(4, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:0:3.3", result.get(2));
+            assertEquals("X:0:4.4", result.get(3));
+        }
+        {
+            Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
+            Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+            Iterator<Double> iter3 = Arrays.asList(1.1, 2.2, 3.3, 4.4).iterator();
+
+            Iterator<String> triIter = TriIterator.zip(iter1, iter2, iter3, "X", 0, 0.0).map((a, b, c) -> a + ":" + b + ":" + c);
+
+            List<String> result = new ArrayList<>();
+
+            while (triIter.hasNext()) {
+                result.add(triIter.next());
+            }
+
+            assertEquals(4, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:0:3.3", result.get(2));
+            assertEquals("X:0:4.4", result.get(3));
+        }
     }
 
     @Test
@@ -252,18 +349,96 @@ public class TriIterator100Test extends TestBase {
 
     @Test
     public void testSkip() {
-        String[] arr1 = { "a", "b", "c", "d", "e" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5 };
-        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
 
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(2);
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(2);
 
-        List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(3, result.size());
+            List<Triple<String, Integer, Double>> result = iter.toList();
+            assertEquals(3, result.size());
 
-        assertEquals("c", result.get(0).left());
-        assertEquals(Integer.valueOf(3), result.get(0).middle());
-        assertEquals(3.3, result.get(0).right(), 0.001);
+            assertEquals("c", result.get(0).left());
+            assertEquals(Integer.valueOf(3), result.get(0).middle());
+            assertEquals(3.3, result.get(0).right(), 0.001);
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(2);
+
+            List<String> result = new ArrayList<>();
+            while (iter.hasNext()) {
+                Triple<String, Integer, Double> triple = iter.next();
+                result.add(triple.left() + ":" + triple.middle() + ":" + triple.right());
+            }
+            assertEquals(3, result.size());
+            assertEquals("c:3:3.3", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+            assertEquals("e:5:5.5", result.get(2));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(2);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("c:3:3.3", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+            assertEquals("e:5:5.5", result.get(2));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(2);
+
+            List<String> result = new ArrayList<>();
+
+            iter.foreachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("c:3:3.3", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+            assertEquals("e:5:5.5", result.get(2));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            Iterator<String> iter = TriIterator.zip(arr1, arr2, arr3).skip(2).map((a, b, c) -> a + ":" + b + ":" + c);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining(e -> {
+                result.add(e);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("c:3:3.3", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+            assertEquals("e:5:5.5", result.get(2));
+        }
+
     }
 
     @Test
@@ -279,17 +454,93 @@ public class TriIterator100Test extends TestBase {
 
     @Test
     public void testLimit() {
-        String[] arr1 = { "a", "b", "c", "d", "e" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5 };
-        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
 
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).limit(3);
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).limit(3);
 
-        List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(3, result.size());
+            List<Triple<String, Integer, Double>> result = iter.toList();
+            assertEquals(3, result.size());
 
-        assertEquals("a", result.get(0).left());
-        assertEquals("c", result.get(2).left());
+            assertEquals("a", result.get(0).left());
+            assertEquals("c", result.get(2).left());
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).limit(3);
+
+            List<String> result = new ArrayList<>();
+            while (iter.hasNext()) {
+                Triple<String, Integer, Double> triple = iter.next();
+                result.add(triple.left() + ":" + triple.middle() + ":" + triple.right());
+            }
+            assertEquals(3, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:3:3.3", result.get(2));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).limit(3);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:3:3.3", result.get(2));
+        }
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).limit(3);
+
+            List<String> result = new ArrayList<>();
+
+            iter.foreachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:3:3.3", result.get(2));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            Iterator<String> iter = TriIterator.zip(arr1, arr2, arr3).limit(3).map((a, b, c) -> a + ":" + b + ":" + c);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining(e -> {
+                result.add(e);
+            });
+
+            assertEquals(3, result.size());
+            assertEquals("a:1:1.1", result.get(0));
+            assertEquals("b:2:2.2", result.get(1));
+            assertEquals("c:3:3.3", result.get(2));
+        }
     }
 
     @Test
@@ -305,22 +556,101 @@ public class TriIterator100Test extends TestBase {
 
     @Test
     public void testFilter() {
-        String[] arr1 = { "a", "b", "c", "d", "e" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5 };
-        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
 
-        TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+            TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
 
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate);
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate);
 
-        List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(2, result.size());
+            List<Triple<String, Integer, Double>> result = iter.toList();
+            assertEquals(2, result.size());
 
-        assertEquals("b", result.get(0).left());
-        assertEquals(Integer.valueOf(2), result.get(0).middle());
+            assertEquals("b", result.get(0).left());
+            assertEquals(Integer.valueOf(2), result.get(0).middle());
 
-        assertEquals("d", result.get(1).left());
-        assertEquals(Integer.valueOf(4), result.get(1).middle());
+            assertEquals("d", result.get(1).left());
+            assertEquals(Integer.valueOf(4), result.get(1).middle());
+        }
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate);
+
+            List<String> result = new ArrayList<>();
+            while (iter.hasNext()) {
+                Triple<String, Integer, Double> triple = iter.next();
+                result.add(triple.left() + ":" + triple.middle() + ":" + triple.right());
+            }
+            assertEquals(2, result.size());
+            assertEquals("b:2:2.2", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+        }
+
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(2, result.size());
+            assertEquals("b:2:2.2", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+        }
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+
+            TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate);
+
+            List<String> result = new ArrayList<>();
+
+            iter.foreachRemaining((a, b, c) -> {
+                result.add(a + ":" + b + ":" + c);
+            });
+
+            assertEquals(2, result.size());
+            assertEquals("b:2:2.2", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+        }
+        {
+            String[] arr1 = { "a", "b", "c", "d", "e" };
+            Integer[] arr2 = { 1, 2, 3, 4, 5 };
+            Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+            TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+
+            Iterator<String> iter = TriIterator.zip(arr1, arr2, arr3).filter(predicate).map((a, b, c) -> a + ":" + b + ":" + c);
+
+            List<String> result = new ArrayList<>();
+
+            iter.forEachRemaining(e -> {
+                result.add(e);
+            });
+
+            assertEquals(2, result.size());
+            assertEquals("b:2:2.2", result.get(0));
+            assertEquals("d:4:4.4", result.get(1));
+        }
+
     }
 
     @Test
