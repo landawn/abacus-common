@@ -216,6 +216,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
                 N.copy(a, cursor, output, 0, toIndex - cursor);
 
+                cursor = toIndex; // Move cursor to the end after copying.
+
                 return output;
             }
 

@@ -78,7 +78,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -103,7 +102,6 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Builder.ComparisonBuilder;
-import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -138,9 +136,10 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index
  * @see com.landawn.abacus.util.Median
- * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
+ * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.Beans
  * @see com.landawn.abacus.util.IOUtil
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
@@ -2739,7 +2738,6 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @return the {@code non-null} object reference that was validated}
-     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2761,7 +2759,6 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated}
-     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -2787,7 +2784,6 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated}
-     * @throws NullPointerException if the object reference is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3594,11 +3590,10 @@ sealed class CommonUtil permits N {
      * @param propNamesToCompare the collection of property names to compare, must not be null or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
+     * @deprecated Use {@link Beans#equalsByProps(Object,Object,Collection<String>)} instead
      */
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
-        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
-
-        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
+        return Beans.equalsByProps(bean1, bean2, propNamesToCompare);
     }
 
     /**
@@ -3608,21 +3603,10 @@ sealed class CommonUtil permits N {
      * @param bean2 the second bean to compare, must not be null
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if no common property is found
+     * @deprecated Use {@link Beans#equalsByCommonProps(Object,Object)} instead
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
-        checkArgNotNull(bean1);
-        checkArgNotNull(bean2);
-        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
-
-        final List<String> propNamesToCompare = new ArrayList<>(ClassUtil.getPropNameList(bean1.getClass()));
-        propNamesToCompare.retainAll(ClassUtil.getPropNameList(bean2.getClass()));
-
-        if (isEmpty(propNamesToCompare)) {
-            throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
-        }
-
-        return equalsByProps(bean1, bean2, propNamesToCompare);
+        return Beans.equalsByCommonProps(bean1, bean2);
     }
 
     /** 
@@ -4222,7 +4206,7 @@ sealed class CommonUtil permits N {
             while (iter.hasNext()) {
                 ret = 31 * ret + hashCodeEverything(iter.next());
             }
-        } else if (ClassUtil.isBeanClass(obj.getClass())) {
+        } else if (Beans.isBeanClass(obj.getClass())) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(obj.getClass());
 
             for (final PropInfo propInfo : beanInfo.propInfoList) {
@@ -7810,16 +7794,16 @@ sealed class CommonUtil permits N {
 
         if (targetType.isBean()) {
             if (srcType.isBean()) {
-                return copy(srcObj, targetType.clazz());
+                return Beans.copy(srcObj, targetType.clazz());
             } else if (srcType.isMap()) {
-                return Maps.map2Bean((Map<String, Object>) srcObj, targetType.clazz());
+                return Beans.map2Bean((Map<String, Object>) srcObj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
                     final Map<String, Object> result = newMap((Class<Map>) targetType.clazz());
-                    Maps.bean2Map(srcObj, result);
+                    Beans.bean2Map(srcObj, result);
                     return (T) result;
                 } catch (final Exception e) {
                     // ignore.
@@ -8037,785 +8021,6 @@ sealed class CommonUtil permits N {
     }
 
     //    /**
-    //     * Checks if is bean.
-    //     *
-    //     * @param cls
-    //     * @return true, if is bean
-    //     * @see ClassUtil#isBeanClass(Class)
-    //     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
-    //     */
-    //    @Deprecated
-    //    public static boolean isBeanClass(final Class<?> cls) {
-    //        return ClassUtil.isBeanClass(cls);
-    //    }
-
-    private static final Set<Class<?>> notKryoCompatible = newConcurrentHashSet();
-
-    /**
-     * Clones the given object.
-     * The object must be serializable and deserializable through {@code Kryo} or {@code JSON}.
-     *
-     * @param <T>
-     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
-     * @return {@code null} if {@code bean} is {@code null}
-     */
-    @MayReturnNull
-    @SuppressWarnings("unchecked")
-    public static <T> T clone(final T obj) {
-        if (obj == null) {
-            return null; // NOSONAR
-        }
-
-        return (T) clone(obj, obj.getClass());
-    }
-
-    /**
-     * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
-     *
-     * @param <T>
-     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
-     * @param targetType
-     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T clone(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        checkArgNotNull(targetType, cs.targetType);
-
-        if (obj == null) {
-            if (ClassUtil.isBeanClass(targetType)) {
-                return copy(null, targetType);
-            } else {
-                return newInstance(targetType);
-            }
-        }
-
-        final Class<?> srcCls = obj.getClass();
-        Object copy = null;
-
-        if (Utils.kryoParser != null && targetType.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
-            try {
-                copy = Utils.kryoParser.clone(obj);
-            } catch (final Exception e) {
-                notKryoCompatible.add(srcCls);
-
-                // ignore.
-            }
-        }
-
-        if (copy == null) {
-            final String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
-            copy = Utils.abacusXMLParser.deserialize(xml, targetType);
-        }
-
-        return (T) copy;
-    }
-
-    /**
-     * Returns a copy of the given source bean.
-     *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @return a new instance of the same class with the same properties copied from the source bean, or {@code null} if the source bean is {@code null}
-     */
-    @MayReturnNull
-    @SuppressWarnings("unchecked")
-    public static <T> T copy(final T sourceBean) {
-        if (sourceBean == null) {
-            return null; // NOSONAR
-        }
-
-        return copy(sourceBean, (Class<T>) sourceBean.getClass());
-    }
-
-    /**
-     * Returns a copy of the given source bean with selected properties.
-     *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @param selectPropNames the collection of property names to be copied
-     * @return a new instance of the same class with the selected properties copied from the source bean, or {@code null} if the source bean is {@code null}
-     */
-    @MayReturnNull
-    public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) {
-        if (sourceBean == null) {
-            return null; // NOSONAR
-        }
-
-        return copy(sourceBean, selectPropNames, (Class<T>) sourceBean.getClass());
-    }
-
-    /**
-     * Returns a copy of the given source bean with properties filtered by the specified predicate.
-     *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @param propFilter the predicate to filter properties to be copied
-     * @return a new instance of the same class with the filtered properties copied from the source bean, or {@code null} if the source bean is {@code null}
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    @MayReturnNull
-    public static <T> T copy(final T sourceBean, final BiPredicate<? super String, ?> propFilter) {
-        if (sourceBean == null) {
-            return null; // NOSONAR
-        }
-
-        return copy(sourceBean, propFilter, (Class<T>) sourceBean.getClass());
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
-     */
-    public static <T> T copy(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
-        return copy(sourceBean, (Collection<String>) null, targetType);
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean with selected properties.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param selectPropNames the collection of property names to be copied
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
-     */
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
-            throws IllegalArgumentException {
-        return copy(sourceBean, selectPropNames, Fn.identity(), targetType);
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean with selected properties.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param selectPropNames the collection of property names to be copied
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
-            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        checkArgNotNull(targetType, cs.targetType);
-
-        if (sourceBean != null) {
-            final Class<?> srcCls = sourceBean.getClass();
-
-            if (selectPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (final Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, selectPropNames, propNameConverter, Fn.selectFirst(), targetBeanInfo);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, filtered by the specified predicate.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
-            throws IllegalArgumentException {
-        return copy(sourceBean, propFilter, Fn.identity(), targetType);
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, filtered by the specified predicate.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
-            final Class<? extends T> targetType) throws IllegalArgumentException {
-        checkArgNotNull(targetType, cs.targetType);
-
-        if (sourceBean != null) {
-            final Class<?> srcCls = sourceBean.getClass();
-
-            if (propFilter == BiPredicates.alwaysTrue() && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (final Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, propFilter, propNameConverter, Fn.selectFirst(), targetBeanInfo);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, except the properties specified in the {@code ignoredPropNames} set.
-     *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy
-     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
-     * @param ignoredPropNames the set of property names to be ignored during copying
-     * @param targetType the class of the target type
-     * @return a new instance of the target type, even if the source bean is {@code null}
-     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        checkArgNotNull(targetType, cs.targetType);
-
-        if (sourceBean != null) {
-            final Class<?> srcCls = sourceBean.getClass();
-
-            if (ignoredPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (final Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BeanInfo targetBeanInfo) throws IllegalArgumentException {
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-
-        Object propValue = null;
-
-        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                propValue = propInfo.getPropValue(sourceBean);
-
-                if (notNullOrDefault(propValue)) {
-                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    private static final BinaryOperator<?> DEFAULT_MERGE_FUNC = (a, b) -> a == null ? b : a;
-
-    /**
-     * Merges the properties from the source object into the target object.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null);
-    }
-
-    /**
-     * Merges the properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
-    }
-
-    /**
-     * Merges the properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null, propNameConverter, mergeFunc);
-    }
-
-    /**
-     * Merges the selected properties from the source object into the target object.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param selectPropNames The collection of property names to be merged.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, selectPropNames, Fn.identity());
-    }
-
-    /**
-     * Merges the selected properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param selectPropNames The collection of property names to be merged.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, selectPropNames, Fn.identity(), mergeFunc);
-    }
-
-    /**
-     * Merges the selected properties from the source object into the target object.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param selectPropNames The collection of property names to be merged.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
-            final Function<String, String> propNameConverter) throws IllegalArgumentException {
-        checkArgNotNull(targetBean, cs.targetBean);
-
-        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, DEFAULT_MERGE_FUNC, ParserUtil.getBeanInfo(targetBean.getClass()));
-    }
-
-    /**
-     * Merges the selected properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param selectPropNames The collection of property names to be merged.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
-            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        checkArgNotNull(targetBean, cs.targetBean);
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-
-        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, mergeFunc, targetBeanInfo);
-    }
-
-    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames,
-            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-        final boolean ignoreUnmatchedProperty = selectPropNames == null;
-
-        Object propValue = null;
-        String targetPropName = null;
-        PropInfo targetPropInfo = null;
-
-        if (selectPropNames == null) {
-            for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-                if (isIdentityPropNameConverter) {
-                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                } else {
-                    targetPropName = propNameConverter.apply(propInfo.name);
-
-                    if (propInfo.name.equals(targetPropName)) {
-                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                    } else {
-                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
-                    }
-                }
-
-                if (targetPropInfo == null) {
-                    //    if (!ignoreUnmatchedProperty) {
-                    //        throw new IllegalArgumentException(
-                    //                "No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    //    }
-                } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        } else {
-            PropInfo propInfo = null;
-
-            for (final String propName : selectPropNames) {
-                propInfo = srcBeanInfo.getPropInfo(propName);
-
-                if (isIdentityPropNameConverter) {
-                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                } else {
-                    targetPropName = propNameConverter.apply(propInfo.name);
-
-                    if (propInfo.name.equals(targetPropName)) {
-                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                    } else {
-                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
-                    }
-                }
-
-                if (targetPropInfo == null) {
-                    //noinspection ConstantValue
-                    if (!ignoreUnmatchedProperty) { //NOSONAR
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
-                    }
-                } else {
-                    propValue = srcBeanInfo.getPropValue(sourceBean, propName);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Merges the filtered properties from the source object into the target object,
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, DEFAULT_MERGE_FUNC);
-    }
-
-    /**
-     * Merges the filtered properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object after merging.
-     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
-     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, Fn.identity(), mergeFunc);
-    }
-
-    /**
-     * Merges the filtered properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object after merging.
-     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
-     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
-            final Function<String, String> propNameConverter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, propNameConverter, DEFAULT_MERGE_FUNC);
-    }
-
-    /**
-     * Merges the filtered properties from the source object into the target object using the specified merge function.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object after merging.
-     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
-     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
-     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if targetBean is {@code null}.
-     * @see BiPredicates#alwaysTrue()
-     * @see Fn#identity()
-     * @see Fn#selectFirst()
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
-            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        checkArgNotNull(targetBean, cs.targetBean);
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-
-        return merge(sourceBean, targetBean, propFilter, propNameConverter, mergeFunc, targetBeanInfo);
-    }
-
-    private static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter,
-            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BiPredicate<? super String, Object> objPropFilter = (BiPredicate<? super String, Object>) propFilter;
-        final BinaryOperator<Object> objPropMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        Object propValue = null;
-        PropInfo targetPropInfo = null;
-        String targetPropName = null;
-
-        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceBean);
-
-            if (objPropFilter.test(propInfo.name, propValue)) {
-                if (isIdentityPropNameConverter) {
-                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                } else {
-                    targetPropName = propNameConverter.apply(propInfo.name);
-
-                    if (propInfo.name.equals(targetPropName)) {
-                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-                    } else {
-                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
-                    }
-                }
-
-                if (targetPropInfo == null) {
-                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                }
-
-                targetPropInfo.setPropValue(targetBean, objPropMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Merges the properties from the source object into the target object, except the properties specified in the {@code ignoredPropNames} set.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
-     * @param ignoredPropNames The set of property names to be ignored during merging.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, DEFAULT_MERGE_FUNC);
-    }
-
-    /**
-     * Merges the properties from the source object into the target object using the specified merge function, except the properties specified in the {@code ignoredPropNames} set.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
-     * @param ignoredPropNames The set of property names to be ignored during merging.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The specified target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        checkArgNotNull(targetBean, cs.targetBean);
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        PropInfo targetPropInfo = null;
-        Object propValue = null;
-
-        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    }
-                } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Erases the properties of the given bean object.
-     *
-     * This method sets the properties specified by the property names to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
-     *
-     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
-     * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
-     */
-    public static void erase(final Object bean, final String... propNames) {
-        if (bean == null || isEmpty(propNames)) {
-            return;
-        }
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
-
-        for (final String propName : propNames) {
-            beanInfo.setPropValue(bean, propName, null);
-        }
-    }
-
-    /**
-     * Erases the properties of the given bean object.
-     *
-     * This method sets the properties specified by the property names to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
-     *
-     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
-     * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
-     */
-    public static void erase(final Object bean, final Collection<String> propNames) {
-        if (bean == null || isEmpty(propNames)) {
-            return;
-        }
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
-
-        for (final String propName : propNames) {
-            beanInfo.setPropValue(bean, propName, null);
-        }
-    }
-
-    //    /**
     //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
     //     *
     //     * @param bool
@@ -8861,132 +8066,6 @@ sealed class CommonUtil permits N {
     //
     //        return bool.booleanValue() ? "yes" : "no";
     //    }
-
-    /**
-     * Erases all the properties of the given bean object.
-     *
-     * This method sets all properties of the bean object to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
-     *
-     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
-     */
-    public static void eraseAll(final Object bean) {
-        if (bean == null) {
-            return;
-        }
-
-        final Class<?> cls = bean.getClass();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
-
-        for (final PropInfo propInfo : beanInfo.propInfoList) {
-            propInfo.setPropValue(bean, null);
-        }
-    }
-
-    /**
-     * Retrieves the property names of the given bean class.
-     *
-     * @param beanClass the class of the bean whose property names are to be retrieved.
-     * @return an ImmutableList of strings representing the property names of the given bean class.
-     * @see ClassUtil#getPropNameList(Class)
-     */
-    public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
-        return ClassUtil.getPropNameList(beanClass);
-    }
-
-    /**
-     * Retrieves the property names of the given bean class excluding the specified property names.
-     *
-     * @param beanClass the class of the bean whose property names are to be retrieved.
-     * @param propNameToExclude a set of property names to be excluded from the returned list.
-     * @return a List of strings representing the property names of the given bean class excluding the specified property names.
-     * @see ClassUtil#getPropNames(Class, Set)
-     * @see ClassUtil#getPropNames(Class, Collection)
-     */
-    public static List<String> getPropNames(final Class<?> beanClass, final Set<String> propNameToExclude) {
-        return ClassUtil.getPropNames(beanClass, propNameToExclude);
-    }
-
-    /**
-     * Retrieves the property names of the given bean object.
-     *
-     * @param bean The bean object whose property names are to be retrieved.
-     * @return A list of strings representing the property names of the given bean object.
-     * @see ClassUtil#getPropNameList(Class)
-     * @see ClassUtil#getPropNames(Object, Predicate)
-     * @see ClassUtil#getPropNames(Object, BiPredicate)
-     */
-    public static List<String> getPropNames(final Object bean) {
-        checkArgNotNull(bean, cs.bean);
-
-        return getPropNames(bean.getClass());
-    }
-
-    static final BiPredicate<String, Object> NON_PROP_VALUE = (propName, propValue) -> propValue != null;
-
-    /**
-     * Retrieves the property names of the given bean object.
-     *
-     * @param bean The bean object whose property names are to be retrieved.
-     * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
-     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
-     * @see ClassUtil#getPropNameList(Class)
-     * @see ClassUtil#getPropNames(Object, Predicate)
-     * @see ClassUtil#getPropNames(Object, BiPredicate)
-     */
-    public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
-        if (ignoreNullValue) {
-            return ClassUtil.getPropNames(bean, NON_PROP_VALUE);
-        } else {
-            return getPropNames(bean);
-        }
-    }
-
-    /**
-     * Retrieves the value of the specified property from the given bean object.
-     *
-     * @param <T> The type of the property value.
-     * @param bean The bean object from which the property value is to be retrieved.
-     * @param propName The name of the property whose value is to be retrieved.
-     * @return The value of the specified property of the given bean object.
-     * @see ClassUtil#getPropValue(Object, String)
-     * @see BeanInfo#getPropValue(Object, String)
-     */
-    public static <T> T getPropValue(final Object bean, final String propName) {
-        return ClassUtil.getPropValue(bean, propName);
-    }
-
-    /**
-     * Retrieves the value of the specified property from the given bean object.
-     *
-     * @param <T> The type of the property value.
-     * @param bean The bean object from which the property value is to be retrieved.
-     * @param propName The name of the property whose value is to be retrieved.
-     * @param ignoreUnmatchedProperty If {@code true}, the method will not throw an exception if the property does not exist in the bean object.
-     * @return The value of the specified property of the given bean object.
-     * @see ClassUtil#getPropValue(Object, String, boolean)
-     * @see BeanInfo#getPropValue(Object, String)
-     */
-    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
-        return ClassUtil.getPropValue(bean, propName, ignoreUnmatchedProperty);
-    }
-
-    /**
-     * Sets the value of the specified property in the given bean object.
-     * <br />
-     * Refer to setPropValue(Method, Object, Object).
-     *
-     * @param bean The bean object in which the property value is to be set.
-     * @param propName The name of the property whose value is to be set. The property name is case-insensitive.
-     * @param propValue The new value to be set for the specified property in the given bean object.
-     * @see ClassUtil#setPropValue(Object, String, Object)
-     * @see BeanInfo#setPropValue(Object, String, Object)
-     * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
-     */
-    @Deprecated
-    public static void setPropValue(final Object bean, final String propName, final Object propValue) {
-        ClassUtil.setPropValue(bean, propName, propValue, false);
-    }
 
     /**
      * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
@@ -9426,18 +8505,6 @@ sealed class CommonUtil permits N {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
-    }
-
-    /**
-     * Creates a new instance of the specified bean class.
-     *
-     * @param <T> the type of the object to be created
-     * @param targetType the class of the object to be created
-     * @return a new instance of the specified class
-     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
-     */
-    public static <T> T newBean(final Class<T> targetType) {
-        return newInstance(targetType);
     }
 
     /**
@@ -10693,8 +9760,8 @@ sealed class CommonUtil permits N {
 
         final Class<?> cls = firstElement.getClass();
 
-        if (ClassUtil.isBeanClass(cls)) {
-            final List<String> columnNames = ClassUtil.getPropNameList(cls);
+        if (Beans.isBeanClass(cls)) {
+            final List<String> columnNames = Beans.getPropNameList(cls);
             return newDataSet(columnNames, rows, properties);
         } else if (firstElement instanceof Map) {
             final List<String> columnNames = newArrayList(((Map<String, Object>) firstElement).keySet());
@@ -10889,7 +9956,7 @@ sealed class CommonUtil permits N {
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rowList A 2D array of objects representing the data in the DataSet. Each subarray is a row.
+     * @param rows A 2D array of objects representing the data in the DataSet. Each subarray is a row.
      * @return A new DataSet with the specified column names and rows.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
      * @see DataSet#rows(Collection, Object[][])
@@ -10897,7 +9964,7 @@ sealed class CommonUtil permits N {
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rowList) throws IllegalArgumentException {
+    public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rows) throws IllegalArgumentException {
         checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rowList)) {
@@ -10905,13 +9972,20 @@ sealed class CommonUtil permits N {
         //        return newEmptyDataSet();
         //    }
 
-        if (isEmpty(rowList)) {
+        if (isEmpty(rows)) {
             return newEmptyDataSet(columnNames);
         }
 
-        checkArgument(size(columnNames) == len(rowList[0]), "length of 'columnNames' is not equals to length of 'rowList[0]'");
+        final int coumnCount = size(columnNames);
 
-        return newDataSet(columnNames, asList(rowList));
+        for (int i = 0; i < rows.length; i++) {
+            if (len(rows[i]) != coumnCount) {
+                throw new IllegalArgumentException(
+                        "length of 'columnNames' is not equals to length of 'rowList[" + i + "]': " + coumnCount + " != " + len(rows[i]));
+            }
+        }
+
+        return newDataSet(columnNames, asList(rows));
     }
 
     /**
@@ -13631,8 +12705,8 @@ sealed class CommonUtil permits N {
         if (a.length == 1) {
             if (a[0] instanceof Map) {
                 m.putAll((Map<K, V>) a[0]);
-            } else if (ClassUtil.isBeanClass(a[0].getClass())) {
-                Maps.bean2Map(a[0], (Map<String, Object>) m);
+            } else if (Beans.isBeanClass(a[0].getClass())) {
+                Beans.bean2Map(a[0], (Map<String, Object>) m);
             } else {
                 throw new IllegalArgumentException(
                         "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
@@ -16648,53 +15722,13 @@ sealed class CommonUtil permits N {
      * @param propNamesToCompare the collection of property names to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null
-     * @deprecated call {@code getPropValue} by reflection APIs during comparing or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
+     * @deprecated Use {@link Beans#compareByProps(Object,Object,Collection<String>)} instead
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
      */
     @Deprecated
-    @SuppressWarnings("rawtypes")
     public static int compareByProps(@NotNull final Object bean1, @NotNull final Object bean2, final Collection<String> propNamesToCompare) {
-        checkArgNotNull(propNamesToCompare);
-        checkArgNotNull(bean1);
-        checkArgNotNull(bean2);
-        checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
-
-        final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
-        final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
-
-        PropInfo propInfo1 = null;
-        PropInfo propInfo2 = null;
-        int ret = 0;
-
-        for (final String propName : propNamesToCompare) {
-            propInfo1 = beanInfo1.getPropInfo(propName);
-
-            if (propInfo1 != null) {
-                propInfo2 = beanInfo2.getPropInfo(propInfo1);
-
-                if (propInfo2 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + bean2.getClass() + " by name: " + propName);
-                }
-            } else {
-                propInfo2 = beanInfo2.getPropInfo(propName);
-
-                if (propInfo2 != null) {
-                    propInfo1 = beanInfo1.getPropInfo(propInfo2);
-                }
-
-                if (propInfo1 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + bean1.getClass() + " by name: " + propName);
-                }
-            }
-
-            if ((ret = compare(propInfo1.getPropValue(bean1), (Comparable) propInfo2.getPropValue(bean2))) != 0) {
-                return ret;
-            }
-        }
-
-        return 0;
+        return Beans.compareByProps(bean1, bean2, propNamesToCompare);
     }
 
     /**
@@ -18651,10 +17685,9 @@ sealed class CommonUtil permits N {
      * @param b the second collection to compare, may be {@code null}
      * @return {@code true} if both collections contain the same elements with the same frequencies,
      *         {@code false} otherwise
-     * @see #haveSameElements(Collection, Collection)
-     * @see #haveSameElements(Iterable, Iterable)
-     * @see #isProperSubCollection(Collection, Collection)
-     * @see #isSubCollection(Collection, Collection)
+     * @see #haveSameElements(Object[], Object[])
+     * @see N#isProperSubCollection(Collection, Collection)
+     * @see N#isSubCollection(Collection, Collection)
      */
     public static boolean haveSameElements(final Collection<?> a, final Collection<?> b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
@@ -18667,11 +17700,7 @@ sealed class CommonUtil permits N {
             return false;
         }
 
-        final Multiset<Object> multiset = newMultiset(len);
-
-        for (Object e : a) {
-            multiset.add(e);
-        }
+        final Multiset<Object> multiset = newMultiset(a);
 
         for (Object e : b) {
             if (!multiset.remove(e)) {
@@ -22114,9 +21143,10 @@ sealed class CommonUtil permits N {
      *
      * @param bean the bean object with getter/setter methods to be filled with random values
      * @throws IllegalArgumentException if the specified bean is {@code null} or the bean class is not a valid JavaBean
+     * @deprecated Use {@link Beans#fill(Object)} instead
      */
     public static void fill(final Object bean) throws IllegalArgumentException {
-        TestUtil.fill(bean);
+        Beans.fill(bean);
     }
 
     /**
@@ -22126,9 +21156,10 @@ sealed class CommonUtil permits N {
      * @param beanClass the class of the bean to be filled
      * @return a new instance of the specified bean class with properties filled with random values
      * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
+     * @deprecated Use {@link Beans#fill(Class<? extends T>)} instead
      */
     public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
-        return TestUtil.fill(beanClass);
+        return Beans.fill(beanClass);
     }
 
     /**
@@ -22139,9 +21170,10 @@ sealed class CommonUtil permits N {
      * @param count the number of instances to create and fill
      * @return a list of new instances of the specified bean class with properties filled with random values
      * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
+     * @deprecated Use {@link Beans#fill(Class<? extends T>,int)} instead
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
-        return TestUtil.fill(beanClass, count);
+        return Beans.fill(beanClass, count);
     }
 
     //    /**

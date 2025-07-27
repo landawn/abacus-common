@@ -45,7 +45,7 @@ public class Util100Test extends TestBase {
     @Test
     public void testFillObject() {
         TestBean bean = new TestBean();
-        TestUtil.fill(bean);
+        Beans.fill(bean);
         
         // Verify all properties are filled
         Assertions.assertNotNull(bean.getName());
@@ -56,13 +56,13 @@ public class Util100Test extends TestBase {
         Assertions.assertNotNull(bean.getNested().getValue());
         
         // Test with null should throw exception
-        Assertions.assertThrows(IllegalArgumentException.class, () -> TestUtil.fill(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.fill(null));
     }
 
     @Test
     public void testFillObjectWithPropNames() {
         TestBean bean = new TestBean();
-        TestUtil.fill(bean, Arrays.asList("name", "age"));
+        Beans.fill(bean, Arrays.asList("name", "age"));
         
         // Verify only specified properties are filled
         Assertions.assertNotNull(bean.getName());
@@ -74,12 +74,12 @@ public class Util100Test extends TestBase {
         
         // Test with null bean
         Assertions.assertThrows(IllegalArgumentException.class, 
-            () -> TestUtil.fill(null, Arrays.asList("name")));
+                () -> Beans.fill(null, Arrays.asList("name")));
     }
 
     @Test
     public void testFillClass() {
-        TestBean bean = TestUtil.fill(TestBean.class);
+        TestBean bean = Beans.fill(TestBean.class);
         
         Assertions.assertNotNull(bean);
         Assertions.assertNotNull(bean.getName());
@@ -89,12 +89,12 @@ public class Util100Test extends TestBase {
         Assertions.assertNotNull(bean.getNested().getValue());
         
         // Test with null class
-        Assertions.assertThrows(IllegalArgumentException.class, () -> TestUtil.fill(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.fill(null));
     }
 
     @Test
     public void testFillClassWithCount() {
-        List<TestBean> beans = TestUtil.fill(TestBean.class, 5);
+        List<TestBean> beans = Beans.fill(TestBean.class, 5);
         
         Assertions.assertEquals(5, beans.size());
         
@@ -108,21 +108,21 @@ public class Util100Test extends TestBase {
         }
         
         // Test with zero count
-        List<TestBean> emptyList = TestUtil.fill(TestBean.class, 0);
+        List<TestBean> emptyList = Beans.fill(TestBean.class, 0);
         Assertions.assertTrue(emptyList.isEmpty());
         
         // Test with negative count
         Assertions.assertThrows(IllegalArgumentException.class, 
-            () -> TestUtil.fill(TestBean.class, -1));
+                () -> Beans.fill(TestBean.class, -1));
         
         // Test with null class
         Assertions.assertThrows(IllegalArgumentException.class, 
-            () -> TestUtil.fill(null, 5));
+                () -> Beans.fill(null, 5));
     }
 
     @Test
     public void testFillClassWithPropNames() {
-        TestBean bean = TestUtil.fill(TestBean.class, Arrays.asList("name", "active"));
+        TestBean bean = Beans.fill(TestBean.class, Arrays.asList("name", "active"));
         
         Assertions.assertNotNull(bean);
         Assertions.assertNotNull(bean.getName());
@@ -134,7 +134,7 @@ public class Util100Test extends TestBase {
         Assertions.assertNull(bean.getNested());
         
         // Test with empty prop list
-        TestBean emptyBean = TestUtil.fill(TestBean.class, Arrays.asList());
+        TestBean emptyBean = Beans.fill(TestBean.class, Arrays.asList());
         Assertions.assertNotNull(emptyBean);
         Assertions.assertNull(emptyBean.getName());
         Assertions.assertEquals(0, emptyBean.getAge());
@@ -142,7 +142,7 @@ public class Util100Test extends TestBase {
 
     @Test
     public void testFillClassWithPropNamesAndCount() {
-        List<TestBean> beans = TestUtil.fill(TestBean.class, 
+        List<TestBean> beans = Beans.fill(TestBean.class,
             Arrays.asList("name", "age"), 3);
         
         Assertions.assertEquals(3, beans.size());
@@ -158,7 +158,7 @@ public class Util100Test extends TestBase {
         }
         
         // Test with zero count
-        List<TestBean> emptyList = TestUtil.fill(TestBean.class, 
+        List<TestBean> emptyList = Beans.fill(TestBean.class,
             Arrays.asList("name"), 0);
         Assertions.assertTrue(emptyList.isEmpty());
     }
@@ -166,7 +166,7 @@ public class Util100Test extends TestBase {
     @Test
     public void testFillWithDifferentTypes() {
         // Create a bean with various property types
-        TestBean bean = TestUtil.fill(TestBean.class);
+        TestBean bean = Beans.fill(TestBean.class);
         
         // String should be a UUID substring
         Assertions.assertNotNull(bean.getName());
@@ -192,17 +192,17 @@ public class Util100Test extends TestBase {
     public void testFillNonBeanClass() {
         // Test with non-bean class (no getter/setter)
         Assertions.assertThrows(IllegalArgumentException.class, 
-            () -> TestUtil.fill(String.class));
+                () -> Beans.fill(String.class));
         
         Assertions.assertThrows(IllegalArgumentException.class, 
-            () -> TestUtil.fill(Integer.class));
+                () -> Beans.fill(Integer.class));
     }
 
     @Test
     public void testFillMultipleTimes() {
         // Verify randomness - filled values should be different
-        TestBean bean1 = TestUtil.fill(TestBean.class);
-        TestBean bean2 = TestUtil.fill(TestBean.class);
+        TestBean bean1 = Beans.fill(TestBean.class);
+        TestBean bean2 = Beans.fill(TestBean.class);
         
         // Names should be different (UUID based)
         Assertions.assertNotEquals(bean1.getName(), bean2.getName());
@@ -218,7 +218,7 @@ public class Util100Test extends TestBase {
         // Fill with non-existent property should be handled gracefully
         // The implementation might throw an exception or ignore invalid names
         try {
-            TestUtil.fill(bean, Arrays.asList("nonExistentProperty"));
+            Beans.fill(bean, Arrays.asList("nonExistentProperty"));
             // If no exception, that's also acceptable behavior
         } catch (Exception e) {
             // Expected if implementation validates property names
@@ -255,7 +255,7 @@ public class Util100Test extends TestBase {
 
     @Test
     public void testFillNumberTypes() {
-        NumberBean bean = TestUtil.fill(NumberBean.class);
+        NumberBean bean = Beans.fill(NumberBean.class);
         
         Assertions.assertNotNull(bean.getIntegerValue());
         Assertions.assertNotNull(bean.getLongValue());

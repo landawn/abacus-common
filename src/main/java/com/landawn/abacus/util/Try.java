@@ -441,7 +441,7 @@ public final class Try<T extends AutoCloseable> {
     /**
      * Executes the callable with conditional exception handling and a default value.
      * 
-     * <p>Similar to {@link #call(Callable, Predicate, Supplier)} but with an immediate default value
+     * <p>Similar to {@link #call(java.util.concurrent.Callable, Predicate, Supplier)} but with an immediate default value
      * instead of a supplier.</p>
      * 
      * <p><b>Usage example:</b></p>

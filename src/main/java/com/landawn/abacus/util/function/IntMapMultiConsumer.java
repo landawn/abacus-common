@@ -20,7 +20,7 @@ package com.landawn.abacus.util.function;
  * transformation operation, similar to flatMap. The IntConsumer parameter can be 
  * invoked multiple times to pass multiple values downstream.
  *
- * @see java.util.stream.DoubleStream.IntMapMultiConsumer
+ * @see java.util.stream.IntStream.IntMapMultiConsumer
  */
 @FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR

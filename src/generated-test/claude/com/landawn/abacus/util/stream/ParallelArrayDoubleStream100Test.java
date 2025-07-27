@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -596,8 +595,8 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         DoubleStream streamWithCloseHandler = parallelStream.onClose(() -> closeCalled.set(true));
 
-        // onClose should return a new stream
-        assertNotSame(parallelStream, streamWithCloseHandler);
+        // onClose should return the same stream
+        assertSame(parallelStream, streamWithCloseHandler);
 
         // Close handler should be called when stream is closed
         streamWithCloseHandler.close();

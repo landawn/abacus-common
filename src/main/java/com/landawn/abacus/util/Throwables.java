@@ -440,8 +440,10 @@ public final class Throwables {
                 }
 
                 @Override
-                public void advance(final long n) throws IllegalArgumentException, E {
-                    N.checkArgNotNegative(n, cs.n);
+                public void advance(final long n) throws E {
+                    if (n <= 0) {
+                        return;
+                    }
 
                     if (!isInitialized) {
                         init();
@@ -603,12 +605,13 @@ public final class Throwables {
          * Advances the iterator by skipping the specified number of elements.
          * If n is greater than the number of remaining elements, the iterator will be positioned at the end.
          *
-         * @param n the number of elements to skip, must be non-negative
-         * @throws IllegalArgumentException if n is negative
+         * @param n the number of elements to skip, must be non-negative 
          * @throws E if an exception occurs while advancing the iterator
          */
-        public void advance(long n) throws IllegalArgumentException, E {
-            N.checkArgNotNegative(n, cs.n);
+        public void advance(long n) throws E {
+            if (n <= 0) {
+                return;
+            }
 
             while (n-- > 0 && hasNext()) {
                 next();

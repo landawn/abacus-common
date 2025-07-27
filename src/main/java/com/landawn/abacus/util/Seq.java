@@ -61,6 +61,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
 
@@ -208,7 +209,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     private final Throwables.Iterator<T, E> elements;
     private final boolean sorted;
     private final Comparator<? super T> cmp;
-    private final Deque<LocalRunnable> closeHandlers;
+    private Deque<LocalRunnable> closeHandlers;
     private boolean isClosed = false;
 
     Seq(final Throwables.Iterator<? extends T, ? extends E> iter) {
@@ -251,7 +252,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <br />
      * @implNote
-     * This is equivalent to: {@code Seq.just(supplier).flatMap(Throwables.Supplier::get)}.
+     * This is equivalent to: {@code Seq.just(supplier).flatMap(Supplier::get)}.
      *
      * @param <T> the type of elements in the sequence
      * @param <E> the type of exception that the sequence operations can throw
@@ -259,12 +260,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a lazily populated {@code Seq}
      * @throws IllegalArgumentException if the supplier is null
      */
-    public static <T, E extends Exception> Seq<T, E> defer(final Throwables.Supplier<? extends Seq<? extends T, ? extends E>, ? extends E> supplier)
-            throws IllegalArgumentException {
+    public static <T, E extends Exception> Seq<T, E> defer(final Supplier<? extends Seq<? extends T, ? extends E>> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        //noinspection resource
-        return Seq.<Throwables.Supplier<? extends Seq<? extends T, ? extends E>, ? extends E>, E> just(supplier).flatMap(Throwables.Supplier::get);
+        final Supplier<? extends Seq<? extends T, ? extends E>> s = Fn.memoize(supplier);
+        return Seq.<Supplier<? extends Seq<? extends T, ? extends E>>, E> just(s).flatMap(Supplier::get).onClose(() -> s.get().close());
     }
 
     /**
@@ -1325,11 +1325,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 @Override
-                public void advance(long n) throws IllegalArgumentException {
-                    if (n > 0) {
-                        while (n-- > 0 && cursor < totalSize) {
-                            cursor = cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize;
-                        }
+                public void advance(long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
+                    while (n-- > 0 && cursor < totalSize) {
+                        cursor = cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize;
                     }
                 }
 
@@ -1358,11 +1360,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 @Override
-                public void advance(long n) throws IllegalArgumentException {
-                    if (n > 0) {
-                        while (n-- > 0 && cursor < totalSize) {
-                            cursor = cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize;
-                        }
+                public void advance(long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
+                    while (n-- > 0 && cursor < totalSize) {
+                        cursor = cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize;
                     }
                 }
 
@@ -1958,7 +1962,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         Returns an empty sequence if either iterator is {@code null} or empty
      * @throws IllegalArgumentException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Throwables.BiFunction)
-     * @see N#zip(Iterator, Iterator, BiFunction)
+     * @see Iterators#zip(Iterable, Iterable, BiFunction) 
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1999,7 +2003,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         Returns an empty sequence if any iterator is {@code null} or empty
      * @throws IllegalArgumentException if zipFunction is {@code null}
      * @see #zip(Iterator, Iterator, Throwables.BiFunction)
-     * @see N#zip(Iterator, Iterator, Iterator, TriFunction)
+     * @see Iterators#zip(Iterator, Iterator, Iterator, TriFunction) 
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -5940,8 +5944,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException, E {
-                checkArgNotNegative(n, cs.n);
+            public void advance(final long n) throws E {
+                if (n <= 0) {
+                    return;
+                }
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
@@ -6007,8 +6013,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException, E {
-                checkArgNotNegative(n, cs.n);
+            public void advance(final long n) throws E {
+                if (n <= 0) {
+                    return;
+                }
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
@@ -6618,10 +6626,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException, E {
-                checkArgNotNegative(n, cs.n);
-
-                if (n == 0) {
+            public void advance(final long n) throws E {
+                if (n <= 0) {
                     return;
                 }
 
@@ -6780,10 +6786,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException, E {
-                checkArgNotNegative(n, cs.n);
-
-                if (n == 0) {
+            public void advance(final long n) throws E {
+                if (n <= 0) {
                     return;
                 }
 
@@ -7232,7 +7236,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     init();
                 }
 
-                return to - cursor; //NOSONAR
+                final long ret = to - cursor;
+                cursor = to; // consume all elements
+                return ret;
             }
 
             @Override
@@ -7252,7 +7258,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             //        b = b.length >= to - cursor ? b : (A[]) N.newArray(b.getClass().getComponentType(), to - cursor);
             //
             //        N.copy(aar, cursor, b, 0, to - cursor);
-            //
+            //        cursor = to;
             //        return b;
             //    }
 
@@ -7777,9 +7783,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return sorted(cmpToUse);
     }
 
-    private Seq<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
-        assertNotClosed();
-
+    private Seq<T, E> lazyLoad(final UnaryOperator<Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
         return create(new Throwables.Iterator<>() {
             private boolean initialized = false;
             private T[] aar;
@@ -7818,8 +7822,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException, E {
-                checkArgNotNegative(n, cs.n);
+            public void advance(final long n) throws E {
+                if (n <= 0) {
+                    return;
+                }
 
                 if (!initialized) {
                     init();
@@ -8373,7 +8379,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Zips this sequence with the given collection using the provided zip function and default values.
      * <p>This is an intermediate operation that combines corresponding elements from this sequence and the given
-     * collection using the specified function. Unlike {@link #zipWith(Collection, BiFunction)}, this method
+     * collection using the specified function. Unlike {@link #zipWith(Collection, Throwables.BiFunction)}, this method
      * continues until both inputs are exhausted, using the provided default values when one input runs out.</p>
      * 
      * <p>Example:
@@ -8441,7 +8447,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Zips this sequence with two collections using the provided zip function and default values.
      * <p>This is an intermediate operation that combines corresponding elements from this sequence and two
-     * collections using the specified function. Unlike {@link #zipWith(Collection, Collection, TriFunction)},
+     * collections using the specified function. Unlike {@link #zipWith(Collection, Collection, Throwables.TriFunction)},
      * this method continues until all inputs are exhausted, using the provided default values when an input runs out.</p>
      * 
      * <p>Example:
@@ -8511,7 +8517,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Zips this sequence with the given sequence using the provided zip function and default values.
      * <p>This is an intermediate operation that combines corresponding elements from two sequences using the
-     * specified function. Unlike {@link #zipWith(Seq, BiFunction)}, this method continues until both sequences
+     * specified function. Unlike {@link #zipWith(Seq, Throwables.BiFunction)}, this method continues until both sequences
      * are exhausted, using the provided default values when one sequence runs out.</p>
      * 
      * <p>Example:
@@ -8580,7 +8586,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Zips this sequence with two other sequences using the provided zip function and default values.
      * <p>This is an intermediate operation that combines corresponding elements from three sequences using the
-     * specified function. Unlike {@link #zipWith(Seq, Seq, TriFunction)}, this method continues until all
+     * specified function. Unlike {@link #zipWith(Seq, Seq, Throwables.TriFunction)}, this method continues until all
      * sequences are exhausted, using the provided default values when a sequence runs out.</p>
      * 
      * <p>Example:
@@ -14122,7 +14128,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     next = iter.next();
                     cls = next.getClass();
 
-                    if (ClassUtil.isBeanClass(cls)) {
+                    if (Beans.isBeanClass(cls)) {
                         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
                         if (N.isEmpty(headers)) {
@@ -14557,7 +14563,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(transfer, cs.transfer);
 
-        //    final Throwables.Supplier<Seq<TT, EE>, EE> delayInitializer = () -> transfer.apply(this);
+        //    final Supplier<Seq<TT, EE>> delayInitializer = () -> transfer.apply(this);
         //
         //    return Seq.defer(delayInitializer);
 
@@ -14588,7 +14594,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         //        assertNotClosed();
         //        checkArgNotNull(transfer, "transfer");
         //
-        //        final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> Seq.from(transfer.apply(this.unchecked()));
+        //        final Supplier<Seq<U, E>> delayInitializer = () -> Seq.from(transfer.apply(this.unchecked()));
         //
         //        return Seq.defer(delayInitializer);
 
@@ -14621,7 +14627,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
-            final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> create(transfer.apply(this.stream()), true);
+            final Supplier<Seq<U, E>> delayInitializer = () -> create(transfer.apply(this.stream()), true);
             return Seq.defer(delayInitializer);
         } else {
             return create(transfer.apply(this.stream()), true);
@@ -15045,22 +15051,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Registers a close handler to be invoked when this sequence is closed. The close handler
-     * will be executed when the sequence is closed, either explicitly by calling {@link #close()}
-     * or automatically when a terminal operation completes.
-     * 
-     * <p>This method can be called multiple times to register multiple close handlers. All registered
-     * handlers are invoked in the order they were added (first-added, first-invoked) when the sequence
-     * is closed. Each handler is guaranteed to be executed at most once, even if {@link #close()} is
-     * called multiple times.</p>
+     * Registers a close handler to be invoked when the sequence is closed.
+     * This method can be called multiple times to register multiple handlers.
+     * Handlers are invoked in the order they were added (first-added, first-invoked).
      * 
      * <p>Close handlers are typically used to release resources, close connections, or perform cleanup
      * operations that should happen when the sequence processing is complete. This is particularly
      * useful when working with sequences that wrap external resources like files, network connections,
-     * or database cursors.</p>
-     * 
-     * <p>If the provided close handler is null or an empty handler, this method returns the current
-     * sequence unchanged for efficiency.</p>
+     * or database cursors.</p> 
      * 
      * <p>Example usage:</p>
      * <pre>{@code
@@ -15085,8 +15083,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param closeHandler the Runnable to be executed when the sequence is closed. If null or
      *                     empty, the sequence is returned unchanged
-     * @return a sequence with the close handler registered. This may be the same sequence instance
-     *         if the handler is null or empty, or a new sequence with the handler added
+     * @return a sequence with the close handler registered. This may be the same sequence instance.
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified closeHandler is null (though null is handled
      *                                  gracefully by returning the sequence unchanged)
@@ -15120,7 +15117,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
         });
 
-        return create(elements, newCloseHandlers);
+        this.closeHandlers = newCloseHandlers;
+
+        return this;
     }
 
     /**

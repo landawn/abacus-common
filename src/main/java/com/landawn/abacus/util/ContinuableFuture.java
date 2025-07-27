@@ -608,7 +608,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * or providing immediate fallback values.
      * 
      * <p>Note that this method still throws exceptions if the future is done but completed
-     * exceptionally. Use {@link #gett()} with {@link Result#orElse(Object)} for exception-safe
+     * exceptionally. Use {@link #gett()} with {@link Result#orElseThrow()} for exception-safe
      * immediate value retrieval.
      * 
      * <p><b>Example:</b>
@@ -632,7 +632,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param defaultValue the value to return if the computation is not yet complete
      * @return the computed result if complete, otherwise the defaultValue
-     * @throws CancellationException if the computation was cancelled
+     * @throws CancellationException if the computation was canceled
      * @throws ExecutionException if the computation threw an exception
      * @throws InterruptedException if the current thread was interrupted while checking
      */

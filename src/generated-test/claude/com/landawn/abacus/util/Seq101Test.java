@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
@@ -64,7 +65,7 @@ public class Seq101Test extends TestBase {
     @Test
     public void testDefer() throws Exception {
         // Test with supplier that returns a sequence
-        Throwables.Supplier<Seq<Integer, Exception>, Exception> supplier = () -> Seq.of(1, 2, 3);
+        Supplier<Seq<Integer, Exception>> supplier = () -> Seq.of(1, 2, 3);
         Seq<Integer, Exception> seq = Seq.defer(supplier);
         List<Integer> result = seq.toList();
         Assertions.assertEquals(Arrays.asList(1, 2, 3), result);

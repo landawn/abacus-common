@@ -630,11 +630,11 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = ClassUtil.formalizePropName(propNode.getNodeName());
+            propName = Beans.formalizePropName(propNode.getNodeName());
             newKeySet.add(propName);
 
             typeAttr = XmlUtil.getAttribute(propNode, TYPE);
-            propSetMethod = ClassUtil.getPropSetMethod(targetClass, propName);
+            propSetMethod = Beans.getPropSetMethod(targetClass, propName);
 
             if (XmlUtil.isTextElement(propNode)) {
                 if (Strings.isEmpty(typeAttr)) {
@@ -688,7 +688,7 @@ public final class PropertiesUtil {
                         propValue = N.newInstance(parameterType);
                     }
 
-                    ClassUtil.setPropValue(properties, propSetMethod, propValue);
+                    Beans.setPropValue(properties, propSetMethod, propValue);
                 }
             }
         }
@@ -1085,7 +1085,7 @@ public final class PropertiesUtil {
                 className = Strings.capitalize(root.getNodeName());
             }
 
-            final String classFilePath = ClassUtil.makePackageFolder(srcPath, packageName);
+            final String classFilePath = ClassUtil.makeFolderForPackage(srcPath, packageName);
             final File classFile = new File(classFilePath + className + ".java");
 
             IOUtil.deleteIfExists(classFile);
@@ -1161,7 +1161,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = ClassUtil.formalizePropName(childNode.getNodeName());
+                propName = Beans.formalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName)) {
                     continue;
@@ -1196,7 +1196,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = ClassUtil.formalizePropName(childNode.getNodeName());
+                propName = Beans.formalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName)) {
                     continue;
@@ -1256,7 +1256,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = ClassUtil.formalizePropName(childNode.getNodeName());
+                propName = Beans.formalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName) || Strings.isNotEmpty(XmlUtil.getAttribute(childNode, TYPE))) {
                     continue;
@@ -1409,7 +1409,7 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = ClassUtil.formalizePropName(childNode.getNodeName());
+            propName = Beans.formalizePropName(childNode.getNodeName());
 
             if (propNameSet.contains(propName) || ((childNode.getChildNodes().getLength() > 1) && hasDuplicatedPropName(childNode))) {
                 return true;
@@ -1441,7 +1441,7 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = ClassUtil.formalizePropName(childNode.getNodeName());
+            propName = Beans.formalizePropName(childNode.getNodeName());
 
             if (propNameSet.contains(propName)) {
                 duplicatedPropNameSet.add(propName);

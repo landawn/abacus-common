@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -292,11 +292,11 @@ public final class Numbers {
     static final BigInteger BIG_INTEGER_WITH_MAX_FLOAT_VALUE = BIG_DECIMAL_WITH_MAX_FLOAT_VALUE.toBigInteger();
     static final BigInteger BIG_INTEGER_WITH_MAX_DOUBLE_VALUE = BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE.toBigInteger();
 
-    private static final Map<Class<?>, Map<Class<?>, Function<Number, Number>>> numberConverterFuncMap = new HashMap<>();
+    private static final Map<Class<?>, Map<Class<?>, UnaryOperator<Number>>> numberConverterFuncMap = new HashMap<>();
 
     static {
-        Map<Class<?>, Function<Number, Number>> temp = new HashMap<>();
-        temp.put(byte.class, Fn.identity());
+        Map<Class<?>, UnaryOperator<Number>> temp = new HashMap<>();
+        temp.put(byte.class, UnaryOperator.identity());
 
         temp.put(short.class, it -> {
             final short value = it.shortValue();
@@ -377,7 +377,7 @@ public final class Numbers {
 
         temp = new HashMap<>();
         temp.put(byte.class, Number::shortValue);
-        temp.put(short.class, Fn.identity());
+        temp.put(short.class, UnaryOperator.identity());
 
         temp.put(int.class, it -> {
             final int value = it.intValue();
@@ -448,7 +448,7 @@ public final class Numbers {
 
         temp.put(byte.class, Number::intValue);
         temp.put(short.class, Number::intValue);
-        temp.put(int.class, Fn.identity());
+        temp.put(int.class, UnaryOperator.identity());
 
         temp.put(long.class, it -> {
             final long value = it.longValue();
@@ -509,7 +509,7 @@ public final class Numbers {
         temp.put(byte.class, Number::longValue);
         temp.put(short.class, Number::longValue);
         temp.put(int.class, Number::longValue);
-        temp.put(long.class, Fn.identity());
+        temp.put(long.class, UnaryOperator.identity());
 
         temp.put(float.class, it -> {
             if (Float.compare(it.floatValue(), Long.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Long.MIN_VALUE) < 0) {
@@ -561,7 +561,7 @@ public final class Numbers {
         temp.put(int.class, Number::floatValue);
         temp.put(long.class, Number::floatValue);
 
-        temp.put(float.class, Fn.identity());
+        temp.put(float.class, UnaryOperator.identity());
 
         temp.put(double.class, it -> {
             final Double num = (Double) it;
@@ -611,7 +611,7 @@ public final class Numbers {
         temp.put(int.class, Number::doubleValue);
         temp.put(long.class, Number::doubleValue);
         temp.put(float.class, it -> Double.parseDouble(it.toString()));
-        temp.put(double.class, Fn.identity());
+        temp.put(double.class, UnaryOperator.identity());
 
         temp.put(BigInteger.class, it -> {
             final BigInteger bigInteger = (BigInteger) it;
@@ -646,7 +646,7 @@ public final class Numbers {
         temp.put(long.class, it -> BigInteger.valueOf(it.longValue()));
         temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()).toBigInteger());
         temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()).toBigInteger());
-        temp.put(BigInteger.class, Fn.identity());
+        temp.put(BigInteger.class, UnaryOperator.identity());
         temp.put(BigDecimal.class, it -> ((BigDecimal) it).toBigInteger());
 
         numberConverterFuncMap.put(BigInteger.class, temp);
@@ -661,7 +661,7 @@ public final class Numbers {
         temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()));
         temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()));
         temp.put(BigInteger.class, it -> new BigDecimal((BigInteger) it));
-        temp.put(BigDecimal.class, Fn.identity());
+        temp.put(BigDecimal.class, UnaryOperator.identity());
 
         numberConverterFuncMap.put(BigDecimal.class, temp);
 
@@ -726,8 +726,8 @@ public final class Numbers {
             return N.defaultValueOf(targetType);
         }
 
-        final Map<Class<?>, Function<Number, Number>> temp = numberConverterFuncMap.get(targetType);
-        final Function<Number, Number> func = temp == null ? null : temp.get(value.getClass());
+        final Map<Class<?>, UnaryOperator<Number>> temp = numberConverterFuncMap.get(targetType);
+        final UnaryOperator<Number> func = temp == null ? null : temp.get(value.getClass());
 
         if (func != null) {
             return (T) func.apply(value);
@@ -813,8 +813,8 @@ public final class Numbers {
             return targetType.defaultValue();
         }
 
-        final Map<Class<?>, Function<Number, Number>> temp = numberConverterFuncMap.get(targetType.clazz());
-        final Function<Number, Number> func = temp == null ? null : temp.get(value.getClass());
+        final Map<Class<?>, UnaryOperator<Number>> temp = numberConverterFuncMap.get(targetType.clazz());
+        final UnaryOperator<Number> func = temp == null ? null : temp.get(value.getClass());
 
         if (func != null) {
             return (T) func.apply(value);

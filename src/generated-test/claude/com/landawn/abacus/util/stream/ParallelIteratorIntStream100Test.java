@@ -671,8 +671,8 @@ public class ParallelIteratorIntStream100Test extends TestBase {
 
         IntStream streamWithCloseHandler = parallelStream.onClose(() -> closeCalled.set(true));
 
-        // onClose should return a new stream
-        assertNotSame(parallelStream, streamWithCloseHandler);
+        // onClose should return the same stream
+        assertSame(parallelStream, streamWithCloseHandler);
 
         // Close handler should be called when stream is closed
         streamWithCloseHandler.close();

@@ -38,7 +38,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted set</li>
- * <li>{@link #of(...)} - creates sets with specific elements</li>
+ * <li>{@link #of(Object[])} - creates sets with specific elements</li>
  * <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  * <li>{@link #wrap(SortedSet)} - wraps an existing sorted set (changes to the underlying set will be reflected)</li>
  * </ul>

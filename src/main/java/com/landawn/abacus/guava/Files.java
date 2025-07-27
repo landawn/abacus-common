@@ -1155,7 +1155,7 @@ public abstract class Files { //NOSONAR
      * <p>This method is intended for simple cases where it is convenient to read all bytes
      * into a byte array. It is not intended for reading large files.
      *
-     * <p>This method is equivalent to: {@link readAllBytes(Path) readAllBytes(path)}.
+     * <p>This method is equivalent to: {@link java.nio.file.Files#readAllBytes(Path)}.
      *
      * <p>Example usage:
      * <pre>{@code
@@ -1217,7 +1217,7 @@ public abstract class Files { //NOSONAR
      * <p>This method is intended for simple cases where it is convenient to read all content
      * into a string. It is not intended for reading large files.
      *
-     * <p>This method is equivalent to: {@link readString(Path, Charset) readString(path, cs)}.
+     * <p>This method is equivalent to: {@link java.nio.file.Files#readString(Path, Charset)}.
      *
      * <p>Example usage:
      * <pre>{@code
@@ -1229,7 +1229,7 @@ public abstract class Files { //NOSONAR
      *     helpful predefined constants
      * @return a string containing the content read from the file
      * @throws IOException if an I/O error occurs reading from the file
-     * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
+     * @throws OutOfMemoryError if the file is extremely large, for example, larger than {@code 2GB}
      * @throws SecurityException In the case of the default provider, and a security manager is
      *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
      * @see java.nio.file.Files#readString(Path, Charset)

@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -174,7 +175,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     /**
      * Writes a float value to a CharacterWriter with optional configuration.
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes 0.0f instead of {@code null}. Uses {@link IOUtil#write(float, CharacterWriter)}
+     * writes 0.0f instead of {@code null}. Uses {@link IOUtil#write(char, Writer)}
      * for efficient float writing.
      *
      * @param writer the CharacterWriter to write to

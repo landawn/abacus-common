@@ -230,7 +230,7 @@ public final class CodeGenerationUtil {
                 .append(LINE_SEPARATOR)
                 .append(LINE_SEPARATOR); //
 
-        for (final String propName : ClassUtil.getPropNameList(entityClass)) {
+        for (final String propName : Beans.getPropNameList(entityClass)) {
 
             sb.append("        /** Property(field) name {@code \"")
                     .append(propName)
@@ -458,7 +458,7 @@ public final class CodeGenerationUtil {
                 final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                 String newPropName = null;
 
-                for (final String propName : ClassUtil.getPropNameList(cls)) {
+                for (final String propName : Beans.getPropNameList(cls)) {
                     newPropName = propNameConverter.apply(cls, propName);
 
                     if (Strings.isEmpty(newPropName)) {
@@ -551,7 +551,7 @@ public final class CodeGenerationUtil {
                     String newPropName = null;
                     String propNameInLowerCaseWithUnderscore = null;
 
-                    for (final String propName : ClassUtil.getPropNameList(cls)) {
+                    for (final String propName : Beans.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
 
                         if (Strings.isEmpty(newPropName)) {
@@ -657,7 +657,7 @@ public final class CodeGenerationUtil {
                     String newPropName = null;
                     String propNameInUpperCaseWithUnderscore = null;
 
-                    for (final String propName : ClassUtil.getPropNameList(cls)) {
+                    for (final String propName : Beans.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
 
                         if (Strings.isEmpty(newPropName)) {
@@ -767,15 +767,15 @@ public final class CodeGenerationUtil {
                         String newPropName = null;
                         String funcPropName = null;
 
-                        for (final String propName : ClassUtil.getPropNameList(cls)) {
+                        for (final String propName : Beans.getPropNameList(cls)) {
                             newPropName = propNameConverter.apply(cls, propName);
 
-                            if (ClassUtil.getPropGetMethod(cls, propName) == null) {
+                            if (Beans.getPropGetMethod(cls, propName) == null) {
                                 continue;
                             }
 
                             //noinspection DataFlowIssue
-                            funcPropName = propFunc.apply(cls, ClassUtil.getPropGetMethod(cls, propName).getReturnType(), newPropName);
+                            funcPropName = propFunc.apply(cls, Beans.getPropGetMethod(cls, propName).getReturnType(), newPropName);
 
                             if (Strings.isEmpty(funcPropName)) {
                                 continue;

@@ -53,6 +53,7 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Holder;
@@ -1141,7 +1142,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if (!ClassUtil.isBeanClass(targetClass)) {
+                if (!Beans.isBeanClass(targetClass)) {
                     if ((propType != null) && propType.isBean()) {
                         targetClass = propType.clazz();
                     } else {
@@ -1910,7 +1911,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if (!ClassUtil.isBeanClass(typeClass)) {
+                if (!Beans.isBeanClass(typeClass)) {
                     if ((propType != null) && propType.isBean()) {
                         typeClass = propType.clazz();
                     } else {
@@ -2252,7 +2253,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     private static void checkBeanType(final String nodeName, final Class<?> inputClass, final Class<?> targetClass) {
-        if (!ClassUtil.isBeanClass(targetClass)) {
+        if (!Beans.isBeanClass(targetClass)) {
             throw new ParseException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
         }
     }
@@ -2345,8 +2346,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
             }
 
-            if ((nodeClass == null) && !nodeName.equalsIgnoreCase(ClassUtil.formalizePropName(nodeName))) {
-                nodeClass = getClassByNodeName(ClassUtil.formalizePropName(nodeName), cls);
+            if ((nodeClass == null) && !nodeName.equalsIgnoreCase(Beans.formalizePropName(nodeName))) {
+                nodeClass = getClassByNodeName(Beans.formalizePropName(nodeName), cls);
             }
 
             if (nodeClass == null) {
@@ -2554,7 +2555,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     typeClass = hasPropTypes ? config.getValueTypeClass(beanOrPropName, typeClass) : typeClass;
 
                     if (typeClass == null || !N.typeOf(typeClass).isBean()) {
-                        if ((eleType != null) && ClassUtil.isBeanClass(eleType.clazz())) {
+                        if ((eleType != null) && Beans.isBeanClass(eleType.clazz())) {
                             typeClass = eleType.clazz();
                         } else {
                             if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(beanOrPropName)) {

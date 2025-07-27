@@ -237,7 +237,7 @@ public class CommonUtil103Test extends TestBase {
 
     @Test
     public void testNewBean() {
-        TestBean bean = N.newBean(TestBean.class);
+        TestBean bean = Beans.newBean(TestBean.class);
         assertNotNull(bean);
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());

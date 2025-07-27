@@ -45,7 +45,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Returns the Class object representing the AtomicInteger class.
      *
-     * @return the Class object for AtomicInteger.class
+     * @return the Class object for {@code AtomicInteger}
      */
     @Override
     public Class<AtomicInteger> clazz() {

@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Stateful;
@@ -803,7 +804,7 @@ public final class Fnn {
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that throws an exception for any merge operation
-     * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
+     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
         return BinaryOperators.THROWING_MERGER;
@@ -816,7 +817,7 @@ public final class Fnn {
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the first operand
-     * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
+     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
         return BinaryOperators.IGNORING_MERGER;
@@ -829,7 +830,7 @@ public final class Fnn {
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the second operand
-     * @see java.util.stream.Collectors#toMap(Function, Function, BinaryOperator)
+     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
         return BinaryOperators.REPLACING_MERGER;

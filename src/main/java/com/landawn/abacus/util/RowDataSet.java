@@ -2175,7 +2175,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> List<T> toEntities(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
             final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
+        N.checkArgument(Beans.isBeanClass(rowType), "{} is not a bean class", rowType);
 
         return toList(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
     }
@@ -2208,7 +2208,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Collection<String> selectPropNames,
             final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
+        N.checkArgument(Beans.isBeanClass(rowType), "{} is not a bean class", rowType);
         N.checkArgNotEmpty(idPropNames, "idPropNames can't be null or empty or No id property defined in bean class: " + rowType);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
@@ -8413,7 +8413,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
             final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
+        N.checkArgument(Beans.isBeanClass(rowType), "{} is not a bean class", rowType);
 
         return stream(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
     }
@@ -8463,8 +8463,10 @@ public final class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 checkConcurrentModification();
 
@@ -8552,8 +8554,10 @@ public final class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 checkConcurrentModification();
 
@@ -8614,8 +8618,10 @@ public final class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 checkConcurrentModification();
 
@@ -8677,8 +8683,10 @@ public final class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 checkConcurrentModification();
 

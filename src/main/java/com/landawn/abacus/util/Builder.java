@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -3337,11 +3338,11 @@ public class Builder<T> {
      * @param <T> the type of objects being compared
      * @param left the first object to compare
      * @param right the second object to compare
-     * @param func the function that determines equality
+     * @param predicate the predicate to check equality, must not be null
      * @return a new EquivalenceBuilder for method chaining
      */
-    public static <T> EquivalenceBuilder equals(final T left, final T right, final BiFunction<? super T, ? super T, Boolean> func) {
-        return new EquivalenceBuilder().equals(left, right, func);
+    public static <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate) {
+        return new EquivalenceBuilder().equals(left, right, predicate);
     }
 
     /**
@@ -4285,16 +4286,15 @@ public class Builder<T> {
          * @param <T> the type of objects being compared
          * @param left the first object to compare
          * @param right the second object to compare
-         * @param func the function to determine equality, must not be null
+         * @param predicate the predicate to check equality, must not be null
          * @return this EquivalenceBuilder instance for method chaining
-         * @throws IllegalArgumentException if func is null
+         * @throws IllegalArgumentException if predicate is null
          */
-        public <T> EquivalenceBuilder equals(final T left, final T right, final BiFunction<? super T, ? super T, Boolean> func)
-                throws IllegalArgumentException {
-            N.checkArgNotNull(func, cs.func);
+        public <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate) throws IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (result) {
-                result = func.apply(left, right);
+                result = predicate.test(left, right);
             }
 
             return this;

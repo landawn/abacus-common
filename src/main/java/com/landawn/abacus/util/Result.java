@@ -269,7 +269,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      */
     @Deprecated
     public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
-        if (exception == null) {
+        if (this.exception == null) {
             return value;
         } else {
             throw exception;

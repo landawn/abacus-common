@@ -35,7 +35,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable map</li>
- * <li>{@link #of(...)} - creates maps with specific key-value pairs</li>
+ * <li>{@link #of(Object, Object)} - creates maps with specific key-value pairs</li>
  * <li>{@link #copyOf(Map)} - creates a defensive copy from another map</li>
  * <li>{@link #wrap(Map)} - wraps an existing map (changes to the underlying map will be reflected)</li>
  * <li>{@link #builder()} - provides a builder for constructing immutable maps</li>

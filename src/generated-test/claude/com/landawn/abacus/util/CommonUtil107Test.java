@@ -683,20 +683,20 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillBean() {
         TestBean bean = new TestBean();
-        N.fill(bean);
+        Beans.fill(bean);
         // Cannot verify exact values as they're random, but check not null
         Assertions.assertNotNull(bean);
     }
 
     @Test
     public void testFillBeanClass() {
-        TestBean bean = N.fill(TestBean.class);
+        TestBean bean = Beans.fill(TestBean.class);
         Assertions.assertNotNull(bean);
     }
 
     @Test
     public void testFillBeanClassWithCount() {
-        List<TestBean> beans = N.fill(TestBean.class, 3);
+        List<TestBean> beans = Beans.fill(TestBean.class, 3);
         Assertions.assertEquals(3, beans.size());
         for (TestBean bean : beans) {
             Assertions.assertNotNull(bean);

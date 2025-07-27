@@ -1721,7 +1721,7 @@ public final class CSVUtil {
                     return Stream.empty();
                 }
 
-                final boolean isBean = ClassUtil.isBeanClass(targetType);
+                final boolean isBean = Beans.isBeanClass(targetType);
                 final BeanInfo beanInfo = isBean ? ParserUtil.getBeanInfo(targetType) : null;
 
                 final String[] titles = headerParser.apply(line);

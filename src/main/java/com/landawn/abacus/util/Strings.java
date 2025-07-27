@@ -3143,7 +3143,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return A Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toPascalCase(final String str) {
-        return toPascalCase(str, WD._UNDERSCORE);
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        String[] substrs = null;
+        int idx = str.indexOf('_');
+
+        if (idx < 0) {
+            idx = str.indexOf('-');
+        }
+
+        if (idx >= 0) {
+            substrs = RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR);
+        }
+
+        return toPascalCase(str, idx, substrs);
     }
 
     /**
@@ -3177,14 +3192,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        if (str.indexOf(splitChar) >= 0) {
-            final String[] substrs = Strings.split(str, splitChar);
+        String[] substrs = null;
+        final int idx = str.indexOf(splitChar);
+
+        if (idx >= 0) {
+            substrs = Strings.split(str, splitChar);
+        }
+
+        return toPascalCase(str, idx, substrs);
+    }
+
+    private static String toPascalCase(final String str, final int firstSplitorIndex, final String[] substrs) {
+        if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
             try {
                 for (final String substr : substrs) {
                     if (isNotEmpty(substr)) {
                         sb.append(substr.toLowerCase());
+
                         sb.setCharAt(sb.length() - substr.length(), Character.toUpperCase(substr.charAt(0)));
                     }
                 }
@@ -3193,17 +3219,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } finally {
                 Objectory.recycle(sb);
             }
+        } else {
+            return Character.isLowerCase(str.charAt(0)) ? str.substring(0, 1).toUpperCase() + str.substring(1) : str;
         }
-
-        if (Character.isLowerCase(str.charAt(0))) {
-            if (str.length() == 1) {
-                return str.toUpperCase();
-            } else {
-                return str.substring(0, 1).toUpperCase() + str.substring(1);
-            }
-        }
-
-        return str;
     }
 
     /**

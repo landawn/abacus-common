@@ -499,7 +499,13 @@ public class Strings100Test extends TestBase {
         assertNull(Strings.toCamelCase(null));
         assertEquals("", Strings.toCamelCase(""));
         assertEquals("firstName", Strings.toCamelCase("first_name"));
+        assertEquals("firstName", Strings.toCamelCase("firstName"));
         assertEquals("firstName", Strings.toCamelCase("FIRST_NAME"));
+        assertEquals("firstName", Strings.toCamelCase("FirstName"));
+        assertEquals("first", Strings.toCamelCase("FIRST"));
+        assertEquals("first", Strings.toCamelCase("first"));
+        assertEquals("first", Strings.toCamelCase("First"));
+        assertEquals("id", Strings.toCamelCase("_id"));
     }
 
     @Test
@@ -509,6 +515,12 @@ public class Strings100Test extends TestBase {
         assertEquals("", Strings.toPascalCase(""));
         assertEquals("FirstName", Strings.toPascalCase("first_name"));
         assertEquals("FirstName", Strings.toPascalCase("firstName"));
+        assertEquals("FirstName", Strings.toPascalCase("FIRST_NAME"));
+        assertEquals("FirstName", Strings.toPascalCase("FirstName"));
+        assertEquals("FIRST", Strings.toPascalCase("FIRST"));
+        assertEquals("First", Strings.toPascalCase("first"));
+        assertEquals("First", Strings.toPascalCase("First"));
+        assertEquals("Id", Strings.toPascalCase("_id"));
     }
 
     @Test

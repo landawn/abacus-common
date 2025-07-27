@@ -174,16 +174,50 @@ public class AbstractStream103Test extends TestBase {
 
     @Test
     public void testFlatmap() {
-        stream = createStream(1, 2, 3);
-        Stream<Integer> result = stream.flatmap(i -> Arrays.asList(i, i * 10));
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        {
+            stream = createStream(1, 2, 3);
+            Stream<Integer> result = stream.flatmap(i -> Arrays.asList(i, i * 10));
+            assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3);
+            Stream<Integer> result = stream.parallel().flatmap(i -> Arrays.asList(i, i * 10));
+            assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3).map(e -> e);
+            Stream<Integer> result = stream.flatmap(i -> Arrays.asList(i, i * 10));
+            assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3).map(e -> e);
+            Stream<Integer> result = stream.parallel().flatmap(i -> Arrays.asList(i, i * 10));
+            assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
     }
 
     @Test
     public void testFlattMap() {
-        stream = createStream(1, 2, 3);
-        Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        {
+            stream = createStream(1, 2, 3);
+            Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
+            assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3);
+            Stream<Integer> result = stream.parallel().flattmap(i -> new Integer[] { i, i * 10 });
+            assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3).map(e -> e);
+            Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
+            assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
+        {
+            stream = createStream(1, 2, 3).map(e -> e);
+            Stream<Integer> result = stream.parallel().flattmap(i -> new Integer[] { i, i * 10 });
+            assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
+        }
     }
 
     @Test
@@ -709,11 +743,20 @@ public class AbstractStream103Test extends TestBase {
 
     @Test
     public void testGroupByToEntry() {
-        stream = createStream(1, 2, 3, 4);
-        EntryStream<Integer, List<Integer>> result = stream.groupByToEntry(i -> i % 2);
-        Map<Integer, List<Integer>> map = result.toMap();
-        assertEquals(Arrays.asList(2, 4), map.get(0));
-        assertEquals(Arrays.asList(1, 3), map.get(1));
+        {
+            stream = createStream(1, 2, 3, 4);
+            EntryStream<Integer, List<Integer>> result = stream.groupByToEntry(i -> i % 2);
+            Map<Integer, List<Integer>> map = result.toMap();
+            assertEquals(Arrays.asList(2, 4), map.get(0));
+            assertEquals(Arrays.asList(1, 3), map.get(1));
+        }
+        {
+            stream = createStream(1, 2, 3, 4);
+            EntryStream<Integer, List<Integer>> result = stream.groupByToEntry(i -> i % 2, Fn.identity(), Collectors.toList());
+            Map<Integer, List<Integer>> map = result.toMap();
+            assertEquals(Arrays.asList(2, 4), map.get(0));
+            assertEquals(Arrays.asList(1, 3), map.get(1));
+        }
     }
 
     @Test
@@ -1845,6 +1888,7 @@ public class AbstractStream103Test extends TestBase {
         assertTrue(result.contains("1"));
         assertTrue(result.contains("]"));
     }
+
 
     @Test
     public void testCrossJoin() {

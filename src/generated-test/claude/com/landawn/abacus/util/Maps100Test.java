@@ -1257,14 +1257,14 @@ public class Maps100Test extends TestBase {
         map.put("age", 30);
         map.put("active", true);
 
-        TestBean bean = Maps.map2Bean(map, TestBean.class);
+        TestBean bean = Beans.map2Bean(map, TestBean.class);
         assertNotNull(bean);
         assertEquals("John", bean.getName());
         assertEquals(30, bean.getAge());
         assertTrue(bean.isActive());
 
         // Test with null map
-        assertNull(Maps.map2Bean((Map) null, TestBean.class));
+        assertNull(Beans.map2Bean((Map) null, TestBean.class));
     }
 
     @Test
@@ -1275,13 +1275,13 @@ public class Maps100Test extends TestBase {
         map.put("unknownProperty", "value");
 
         // Test ignoring null properties
-        TestBean bean1 = Maps.map2Bean(map, true, true, TestBean.class);
+        TestBean bean1 = Beans.map2Bean(map, true, true, TestBean.class);
         assertEquals("John", bean1.getName());
         assertEquals(0, bean1.getAge()); // Primitive int defaults to 0
 
         // Test not ignoring unmatched properties (should throw exception)
         try {
-            Maps.map2Bean(map, false, false, TestBean.class);
+            Beans.map2Bean(map, false, false, TestBean.class);
             fail("Should throw exception for unmatched property");
         } catch (Exception e) {
             // Expected
@@ -1295,7 +1295,7 @@ public class Maps100Test extends TestBase {
         map.put("age", 30);
         map.put("active", true);
 
-        TestBean bean = Maps.map2Bean(map, Arrays.asList("name", "age"), TestBean.class);
+        TestBean bean = Beans.map2Bean(map, Arrays.asList("name", "age"), TestBean.class);
         assertEquals("John", bean.getName());
         assertEquals(30, bean.getAge());
         assertFalse(bean.isActive()); // Not selected, should be default value
@@ -1312,7 +1312,7 @@ public class Maps100Test extends TestBase {
         map2.put("age", 25);
 
         List<Map<String, Object>> maps = Arrays.asList(map1, map2);
-        List<TestBean> beans = Maps.map2Bean(maps, TestBean.class);
+        List<TestBean> beans = Beans.map2Bean(maps, TestBean.class);
 
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
@@ -1320,7 +1320,7 @@ public class Maps100Test extends TestBase {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Maps.map2Bean(maps, N.asList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.map2Bean(maps, N.asList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());
@@ -1336,7 +1336,7 @@ public class Maps100Test extends TestBase {
         bean.setAge(30);
         bean.setActive(true);
 
-        Map<String, Object> map = Maps.bean2Map(bean);
+        Map<String, Object> map = Beans.bean2Map(bean);
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
         assertEquals(true, map.get("active"));
@@ -1347,7 +1347,7 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("John");
 
-        Map<String, Object> map = Maps.bean2Map(bean, IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.bean2Map(bean, IntFunctions.ofLinkedHashMap());
         assertTrue(map instanceof LinkedHashMap);
         assertEquals("John", map.get("name"));
     }
@@ -1359,7 +1359,7 @@ public class Maps100Test extends TestBase {
         bean.setAge(30);
         bean.setActive(true);
 
-        Map<String, Object> map = Maps.bean2Map(bean, Arrays.asList("name", "age"));
+        Map<String, Object> map = Beans.bean2Map(bean, Arrays.asList("name", "age"));
         assertEquals(2, map.size());
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
@@ -1372,7 +1372,7 @@ public class Maps100Test extends TestBase {
         bean.setName("John");
         bean.setAge(30);
 
-        Map<String, Object> map = Maps.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertEquals("John", map.get("NAME"));
         assertEquals(30, map.get("AGE"));
     }
@@ -1383,10 +1383,10 @@ public class Maps100Test extends TestBase {
         bean.setName("John");
         bean.setNullableField(null);
 
-        Map<String, Object> map1 = Maps.bean2Map(bean, true);
+        Map<String, Object> map1 = Beans.bean2Map(bean, true);
         assertFalse(map1.containsKey("nullableField"));
 
-        Map<String, Object> map2 = Maps.bean2Map(bean, false);
+        Map<String, Object> map2 = Beans.bean2Map(bean, false);
         assertTrue(map2.containsKey("nullableField"));
         assertNull(map2.get("nullableField"));
     }
@@ -1399,7 +1399,7 @@ public class Maps100Test extends TestBase {
         bean.setActive(true);
 
         Set<String> ignored = new HashSet<>(Arrays.asList("age", "active"));
-        Map<String, Object> map = Maps.bean2Map(bean, false, ignored);
+        Map<String, Object> map = Beans.bean2Map(bean, false, ignored);
 
         assertEquals(3, map.size()); // name + nullableField + nestedBean
         assertEquals("John", map.get("name"));
@@ -1417,7 +1417,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Maps.deepBean2Map(bean);
+            Map<String, Object> map = Beans.deepBean2Map(bean);
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1432,7 +1432,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Maps.deepBean2Map(bean, N.asList("name", "nestedBean"));
+            Map<String, Object> map = Beans.deepBean2Map(bean, N.asList("name", "nestedBean"));
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1452,7 +1452,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Maps.bean2FlatMap(bean);
+            Map<String, Object> flatMap = Beans.bean2FlatMap(bean);
             assertEquals("John", flatMap.get("name"));
             assertEquals(30, flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));
@@ -1467,7 +1467,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Maps.bean2FlatMap(bean, N.asList("name", "nestedBean"));
+            Map<String, Object> flatMap = Beans.bean2FlatMap(bean, N.asList("name", "nestedBean"));
             assertEquals("John", flatMap.get("name"));
             assertNull(flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));
@@ -1638,7 +1638,7 @@ public class Maps100Test extends TestBase {
         bean.setStringList(Arrays.asList("a", "b", "c"));
         bean.setIntArray(new int[] { 1, 2, 3 });
 
-        Map<String, Object> map = Maps.bean2Map(bean);
+        Map<String, Object> map = Beans.bean2Map(bean);
         assertNotNull(map.get("date"));
         assertEquals(bean.getBigDecimal(), map.get("bigDecimal"));
         assertEquals(bean.getStringList(), map.get("stringList"));
@@ -1654,7 +1654,7 @@ public class Maps100Test extends TestBase {
         nestedMap.put("value", "NestedValue");
         map.put("nestedBean", nestedMap);
 
-        TestBean bean = Maps.map2Bean(map, TestBean.class);
+        TestBean bean = Beans.map2Bean(map, TestBean.class);
         assertEquals("Parent", bean.getName());
         assertNotNull(bean.getNestedBean());
         assertEquals("NestedValue", bean.getNestedBean().getValue());
@@ -1931,10 +1931,10 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("Test");
 
-        Map<String, Object> lowerUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> lowerUnderscoreMap = Beans.bean2Map(bean, (Collection<String>) null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(lowerUnderscoreMap.containsKey("name"));
 
-        Map<String, Object> upperUnderscoreMap = Maps.bean2Map(bean, (Collection<String>) null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> upperUnderscoreMap = Beans.bean2Map(bean, (Collection<String>) null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(upperUnderscoreMap.containsKey("NAME"));
     }
 
@@ -1949,14 +1949,14 @@ public class Maps100Test extends TestBase {
         bean2.setReference(bean1);
 
         // This should work for shallow conversion
-        Map<String, Object> map = Maps.bean2Map(bean1);
+        Map<String, Object> map = Beans.bean2Map(bean1);
         assertEquals("Bean1", map.get("name"));
         assertEquals(bean2, map.get("reference"));
 
         // Deep conversion might have issues with circular references
         // The implementation doesn't handle this, so we document the behavior
         try {
-            Maps.deepBean2Map(bean1);
+            Beans.deepBean2Map(bean1);
             // If it doesn't throw StackOverflowError, it might have some protection
         } catch (StackOverflowError e) {
             // Expected behavior with circular references

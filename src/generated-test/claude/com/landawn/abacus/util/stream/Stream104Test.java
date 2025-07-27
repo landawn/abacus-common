@@ -1943,4 +1943,5 @@ public class Stream104Test extends TestBase {
         assertEquals(N.asList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).toList());
         assertEquals(N.asList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
     }
+
 }

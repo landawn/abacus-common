@@ -594,8 +594,8 @@ public final class URLEncodedUtil {
 
                     encodeFormFields(N.stringOf(entry.getValue()), charset, output);
                 }
-            } else if (ClassUtil.isBeanClass(parameters.getClass())) {
-                encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
+            } else if (Beans.isBeanClass(parameters.getClass())) {
+                encode(Beans.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
             } else if (parameters instanceof Object[] a) {
                 if (0 != (a.length % 2)) {
                     throw new IllegalArgumentException(

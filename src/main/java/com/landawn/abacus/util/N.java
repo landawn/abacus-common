@@ -148,9 +148,11 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index
  * @see com.landawn.abacus.util.Median
- * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
+ * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.Beans
+ * @see com.landawn.abacus.util.IOUtil
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
  * @see java.util.Collections
@@ -5989,7 +5991,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         return copy;
     }
- 
+
     /**
      * Creates a copy of the given array and replaces all elements in the copy using the provided {@code UnaryOperator}.
      * If the specified array is {@code null}, returns {@code null}.
@@ -22867,8 +22869,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper the function to apply to each element
      * @param filter the predicate to apply to each mapped element
      * @return a list of elements that have been mapped and filtered. An empty list is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R> List<R> mapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper, final Predicate<? super R> filter) {
@@ -22892,8 +22894,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to each mapped element
      * @param supplier the supplier used to create the returned collection
      * @return a collection of elements that have been mapped and filtered. An empty collection created by the specified {@code supplier} is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R, C extends Collection<R>> C mapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper,
@@ -22929,8 +22931,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to each element
      * @param mapper the function to apply to each filtered element
      * @return a list of elements that have been filtered and mapped. An empty list is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R> List<R> filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter, final Function<? super T, ? extends R> mapper) {
@@ -22954,8 +22956,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper the function to apply to each filtered element
      * @param supplier the supplier used to create the returned collection
      * @return a collection of elements that have been filtered and mapped. An empty collection created by the specified {@code supplier} is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R, C extends Collection<R>> C filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
@@ -22988,8 +22990,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper the function to apply to each element, which returns a collection of results
      * @param filter the predicate to apply to each element of the resulting collections
      * @return a list of elements that have been flat-mapped and filtered. An empty list is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R> List<R> flatMapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper,
@@ -23014,8 +23016,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to each element of the resulting collections
      * @param supplier the supplier used to create the returned collection
      * @return a collection of elements that have been flat-mapped and filtered. An empty collection created by the specified {@code supplier} is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R, C extends Collection<R>> C flatMapAndFilter(final Iterable<? extends T> c,
@@ -23055,8 +23057,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to apply to each element to determine if it should be included
      * @param mapper the function to apply to each filtered element, which returns a collection of results
      * @return a list of elements that have been filtered and flat-mapped. An empty list is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R> List<R> filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
@@ -23081,8 +23083,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper the function to apply to each filtered element, which returns a collection of results
      * @param supplier the supplier used to create the returned collection
      * @return a collection of elements that have been filtered and flat-mapped. An empty collection created by the specified {@code supplier} is returned if the input iterable is {@code null} or empty.
-     * @see Factory#ofList()
-     * @see Factory#ofSet()
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     @Beta
     public static <T, R, C extends Collection<R>> C filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,

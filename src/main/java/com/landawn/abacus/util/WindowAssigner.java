@@ -33,7 +33,6 @@ package com.landawn.abacus.util;
  *
  * @author Haiyang Li
  * @since 5.3.0
- * @see Stream#window(WindowAssigner)
  */
 public abstract class WindowAssigner {
 

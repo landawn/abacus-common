@@ -10,8 +10,10 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
@@ -849,6 +851,57 @@ public class DoubleStream104Test extends TestBase {// Test 1: filter(DoublePredi
         assertArrayEquals(new double[] { 4, 3, 2, 1 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toArray(), 0.0);
         assertEquals(N.asList(5.0, 4.0, 3.0, 2.0, 1.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toList());
         assertEquals(N.asList(4.0, 3.0, 2.0, 1.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterTop() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).skip(1).toArray(), 0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).top(5, Comparators.naturalOrder()).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).skip(1).toArray(), 0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).skip(1).toList());
+    }
+
+    // Test  : ifEmpty() - returns DoubleStream
+    @Test
+    public void testStreamCreatedAfterIfEmpty() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toList());
+    }
+
+    // Test 38: appendIfEmpty() - returns DoubleStream
+    @Test
+    public void testStreamCreatedAfterAppendIfEmpty() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(), 0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(),
+                0.0);
+        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toList());
+        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
     }
 
     // Test 39: rotated(int) - returns DoubleStream

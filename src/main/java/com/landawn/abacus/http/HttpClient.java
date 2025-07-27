@@ -1248,9 +1248,7 @@ public final class HttpClient {
 
                     return null;
                 } else {
-                    if (resultClass == null) {
-                        return null; // refer to isOneWayRequest.
-                    } else if (resultClass.equals(HttpResponse.class)) {
+                    if (resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(_url, sentRequestAtMillis, System.currentTimeMillis(), statusCode, connection.getResponseMessage(),
                                 respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
                     } else {

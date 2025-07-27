@@ -1831,7 +1831,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingBeanByProps(final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         N.checkArgNotNull(propNamesToCompare, cs.propNamesToCompare);
 
-        return (a, b) -> N.compareByProps(a, b, propNamesToCompare);
+        return (a, b) -> Beans.compareByProps(a, b, propNamesToCompare);
     }
 
     /**

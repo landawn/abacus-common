@@ -45,7 +45,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Returns the Class object representing the AtomicLong class.
      *
-     * @return the Class object for AtomicLong.class
+     * @return the Class object for {@code AtomicLong}
      */
     @Override
     public Class<AtomicLong> clazz() {

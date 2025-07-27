@@ -557,8 +557,8 @@ public class CommonUtil201Test extends TestBase {
 
         // Based on the provided N.java, equalsByProps relies on N.compareByProps.
         // We can test the argument checking.
-        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, Collections.emptyList()));
-        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, null)); // Assuming N.checkArgNotEmpty handles this
+        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, null)); // Assuming N.checkArgNotEmpty handles this
 
         // Test with a direct (but incomplete) simulation of how equalsByProps might work if compareByProps were simple:
         // This is NOT testing the provided N.equalsByProps fully, but the concept.
@@ -584,8 +584,8 @@ public class CommonUtil201Test extends TestBase {
         // assertFalse(N.equalsByCommonProps(beanA1, beanB)); // if N.equalsByProps works fully
 
         // Test argument checks (assuming N.checkArgNotNull, N.checkArgument, N.isEmpty work)
-        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(null, beanA2));
-        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(beanA1, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(null, beanA2));
+        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(beanA1, null));
 
         // If ClassUtil.isBeanClass or getPropNameList are not set up, this will fail.
         // Or if no common props are found.

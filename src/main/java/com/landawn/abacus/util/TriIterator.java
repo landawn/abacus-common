@@ -65,15 +65,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         @Override
-        public void forEachRemaining(final TriConsumer action) throws IllegalArgumentException {
+        public void forEachRemaining(final TriConsumer action) {
+            // It's empty. Nothing to do.
         }
 
         @Override
-        public void foreachRemaining(final Throwables.TriConsumer action) throws IllegalArgumentException {
+        public void foreachRemaining(final Throwables.TriConsumer action) {
+            // It's empty. Nothing to do.
         }
 
         @Override
-        public ObjIterator map(final TriFunction mapper) throws IllegalArgumentException {
+        public ObjIterator map(final TriFunction mapper) {
             return ObjIterator.empty();
         }
     };

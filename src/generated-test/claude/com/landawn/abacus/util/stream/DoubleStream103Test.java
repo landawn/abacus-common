@@ -90,10 +90,24 @@ public class DoubleStream103Test extends TestBase {
 
     @Test
     public void test_distinct() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
 
-        double[] result = stream.sorted().distinct().toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+            double[] result = stream.sorted().distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
+        {
+            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
+
+            double[] result = stream.distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
+        {
+            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
+
+            double[] result = stream.filter(e -> true).distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
     }
 
     @Test
@@ -128,6 +142,18 @@ public class DoubleStream103Test extends TestBase {
         }
         {
             DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+
+            Multiset<Double> result = stream.toMultiset(Suppliers.ofMultiset());
+            assertEquals(Multiset.of(1.0, 2.0, 3.0, 4.0, 5.0), result);
+        }
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).map(e -> e);
+
+            Multiset<Double> result = stream.toMultiset();
+            assertEquals(Multiset.of(1.0, 2.0, 3.0, 4.0, 5.0), result);
+        }
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).map(e -> e);
 
             Multiset<Double> result = stream.toMultiset(Suppliers.ofMultiset());
             assertEquals(Multiset.of(1.0, 2.0, 3.0, 4.0, 5.0), result);

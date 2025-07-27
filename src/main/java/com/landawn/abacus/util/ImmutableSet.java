@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  *   <li>{@link #empty()} - returns an empty set</li>
- *   <li>{@link #of(...)} - creates sets with specific elements</li>
+ *   <li>{@link #of(Object[])} - creates sets with specific elements</li>
  *   <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  *   <li>{@link #wrap(Set)} - wraps an existing set (changes to the underlying set will be reflected)</li>
  *   <li>{@link #builder()} - provides a builder for constructing sets incrementally</li>

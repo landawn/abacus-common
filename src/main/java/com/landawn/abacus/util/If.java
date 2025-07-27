@@ -61,7 +61,7 @@ public final class If {
 
     private static final If FALSE = new If(false);
 
-    private final boolean b;
+    final boolean b; // change to package-private for testing purposes
 
     If(final boolean b) {
         this.b = b;

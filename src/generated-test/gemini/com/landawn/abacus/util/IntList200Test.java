@@ -566,7 +566,7 @@ public class IntList200Test extends TestBase {
 
     @Test
     public void testShuffle() {
-        IntList list1 = IntList.of(1, 2, 3, 4, 5);
+        IntList list1 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         IntList list2 = list1.copy();
         list1.shuffle();
         // It's possible for a shuffle to result in the same order, but unlikely for a larger list

@@ -60,7 +60,7 @@ public enum JavaVersion {
      * Maps to float value 1.5 for comparison purposes.
      * </p>
      */
-    JAVA_0_9(1.5f, "0.9"),
+    JAVA_ANDROID_0_9(1.5f, "0.9"),
 
     /**
      * Java 1.1.
@@ -265,6 +265,118 @@ public enum JavaVersion {
     JAVA_25(25.0f, "25"),
 
     /**
+     * Java 26.
+     * <p>
+     * Expected release in March 2026. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_26(26.0f, "26"),
+
+    /**
+     * Java 27.
+     * <p>
+     * Expected release in September 2026. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_27(27.0f, "27"),
+
+    /**
+     * Java 28.
+     * <p>
+     * Expected release in March 2027. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_28(28.0f, "28"),
+
+    /**
+     * Java 29.
+     * <p>
+     * Expected release in September 2027. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_29(29.0f, "29"),
+
+    /**
+     * Java 30.
+     * <p>
+     * Expected release in March 2028. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_30(30.0f, "30"),
+
+    /**
+     * Java 31.
+     * <p>
+     * Expected release in September 2028. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_31(31.0f, "31"),
+
+    /**
+     * Java 32.
+     * <p>
+     * Expected release in March 2029. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_32(32.0f, "32"),
+
+    /**
+     * Java 33.
+     * <p>
+     * Expected release in September 2029. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_33(33.0f, "33"),
+
+    /**
+     * Java 34.
+     * <p>
+     * Expected release in March 2030. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_34(34.0f, "34"),
+
+    /**
+     * Java 35.
+     * <p>
+     * Expected release in September 2030. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_35(35.0f, "35"),
+
+    /**
+     * Java 36.
+     * <p>
+     * Expected release in March 2031. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_36(36.0f, "36"),
+
+    /**
+     * Java 37.
+     * <p>
+     * Expected release in September 2031. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_37(37.0f, "37"),
+
+    /**
+     * Java 38.
+     * <p>
+     * Expected release in March 2032. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_38(38.0f, "38"),
+
+    /**
+     * Java 39.
+     * <p>
+     * Expected release in September 2032. Features are subject to change until official release.
+     * </p>
+     */
+    JAVA_39(39.0f, "39"),
+
+    /**
      * The most recent Java version detected at runtime.
      * <p>
      * This constant dynamically represents the highest Java version available on the system,
@@ -363,21 +475,41 @@ public enum JavaVersion {
     }
 
     /**
-     * Transforms the given string with a Java version number to the
-     * corresponding constant of this enumeration class. This method is used
-     * internally.
+     * Gets a JavaVersion enum constant by parsing the provided version string.
+     * <p>
+     * This method handles various Java version string formats including:
+     * </p>
+     * <ul>
+     *   <li>Legacy format: "1.1" through "1.8"</li>
+     *   <li>Modern format: "9" through "39"</li>
+     *   <li>Alternative format for Java 5-8: "5", "6", "7", "8"</li>
+     *   <li>Version strings with dots: extracts major version number</li>
+     * </ul>
      *
-     * @param versionStr the Java version as string
-     * @return the corresponding enumeration constant or <b>null</b> if the
-     * version is unknown
+     * <p>For versions above 39, returns {@code JAVA_RECENT}. For complex version
+     * strings with multiple dots, recursively parses the major version portion.</p>
+     *
+     * <p><b>Examples:</b></p>
+     * <pre>{@code
+     * JavaVersion.get("1.8");     // Returns JAVA_1_8
+     * JavaVersion.get("8");       // Returns JAVA_1_8
+     * JavaVersion.get("11");      // Returns JAVA_11
+     * JavaVersion.get("17.0.1");  // Returns JAVA_17
+     * JavaVersion.get("50");      // Returns JAVA_RECENT (for versions > 39)
+     * }</pre>
+     *
+     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
+     * @return the corresponding JavaVersion enum constant, or JAVA_RECENT for versions > 39
+     * @throws IllegalArgumentException if the version string is null, invalid, or unrecognized
      */
     static JavaVersion get(final String versionStr) {
         if (versionStr == null) {
-            return null;
+            throw new IllegalArgumentException("Invalid Java version: " + versionStr);
         }
+
         switch (versionStr) {
             case "0.9":
-                return JAVA_0_9;
+                return JAVA_ANDROID_0_9;
             case "1.1":
                 return JAVA_1_1;
             case "1.2":
@@ -387,12 +519,16 @@ public enum JavaVersion {
             case "1.4":
                 return JAVA_1_4;
             case "1.5":
+            case "5":
                 return JAVA_1_5;
             case "1.6":
+            case "6":
                 return JAVA_1_6;
             case "1.7":
+            case "7":
                 return JAVA_1_7;
             case "1.8":
+            case "8":
                 return JAVA_1_8;
             case "9":
                 return JAVA_9;
@@ -428,18 +564,48 @@ public enum JavaVersion {
                 return JAVA_24;
             case "25":
                 return JAVA_25;
+            case "26":
+                return JAVA_26;
+            case "27":
+                return JAVA_27;
+            case "28":
+                return JAVA_28;
+            case "29":
+                return JAVA_29;
+            case "30":
+                return JAVA_30;
+            case "31":
+                return JAVA_31;
+            case "32":
+                return JAVA_32;
+            case "33":
+                return JAVA_33;
+            case "34":
+                return JAVA_34;
+            case "35":
+                return JAVA_35;
+            case "36":
+                return JAVA_36;
+            case "37":
+                return JAVA_37;
+            case "38":
+                return JAVA_38;
+            case "39":
+                return JAVA_39;
             default:
-                final float v = toFloatVersion(versionStr);
-                if ((v - 1.) < 1.) { // then we need to check decimals > .9
-                    final int firstComma = Math.max(versionStr.indexOf('.'), versionStr.indexOf(','));
-                    final int end = Math.max(versionStr.length(), versionStr.indexOf(',', firstComma));
-                    if (Float.parseFloat(versionStr.substring(firstComma + 1, end)) > .9f) {
-                        return JAVA_RECENT;
-                    }
-                } else if (v > 10) {
+                if ((versionStr.startsWith("1.") || versionStr.startsWith("0.")) && versionStr.indexOf('.', 2) > 0) {
+                    return get(versionStr.substring(0, versionStr.indexOf('.', 2)));
+                } else if (versionStr.indexOf('.') > 0) {
+                    return get(versionStr.substring(0, versionStr.indexOf('.')));
+                }
+
+                float v = toFloatVersion(versionStr);
+
+                if (v > 39) {
                     return JAVA_RECENT;
                 }
-                return null;
+
+                throw new IllegalArgumentException("Invalid Java version: " + versionStr);
         }
     }
 
@@ -470,6 +636,10 @@ public enum JavaVersion {
      * @throws IllegalArgumentException if the version string cannot be parsed or doesn't match any known Java version
      */
     public static JavaVersion of(final String versionStr) {
+        if (Strings.isEmpty(versionStr)) {
+            throw new IllegalArgumentException("Invalid Java version: " + versionStr);
+        }
+
         JavaVersion result = null;
 
         if (versionStr.startsWith("1.") || versionStr.startsWith("0.")) {
@@ -484,7 +654,6 @@ public enum JavaVersion {
         }
 
         return result;
-
     }
 
     //-----------------------------------------------------------------------
@@ -528,21 +697,36 @@ public enum JavaVersion {
     }
 
     /**
-     * Parses a float value from a String.
+     * Converts a Java version string to its float representation.
+     * <p>
+     * Handles version strings in different formats:
+     * </p>
+     * <ul>
+     *   <li>Dotted format: "1.8" → 1.8, "11.0.2" → 11.0</li>
+     *   <li>Simple format: "17" → 17.0</li>
+     * </ul>
+     * 
+     * <p>For dotted versions, only the first two components are used.
+     * Returns -1 if the version string cannot be parsed.</p>
      *
-     * @param value the String to parse.
-     * @return the float value represented by the string or -1 if the given String cannot be parsed.
+     * @param value the version string to convert
+     * @return the float representation of the version, or -1 if parsing fails
+     * @throws IllegalArgumentException if the version string format is completely invalid
      */
     private static float toFloatVersion(final String value) {
-        final int defaultReturnValue = -1;
-        if (value.contains(".")) {
-            final String[] toParse = value.split("\\.");
-            if (toParse.length >= 2) {
-                return Numbers.toFloat(toParse[0] + '.' + toParse[1], defaultReturnValue);
+        try {
+            final int defaultReturnValue = -1;
+            if (value.contains(".")) {
+                final String[] toParse = value.split("\\.");
+                if (toParse.length >= 2) {
+                    return Numbers.toFloat(toParse[0] + '.' + toParse[1], defaultReturnValue);
+                }
+            } else {
+                return Numbers.toFloat(value, defaultReturnValue);
             }
-        } else {
-            return Numbers.toFloat(value, defaultReturnValue);
+            return defaultReturnValue;
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid Java version: " + value, e);
         }
-        return defaultReturnValue;
     }
 }

@@ -833,21 +833,21 @@ public class Maps200Test extends TestBase {
     @Test
     public void testBean2Map_simple() {
         SimpleBean bean = new SimpleBean(1, "test");
-        Map<String, Object> map = Maps.bean2Map(bean);
+        Map<String, Object> map = Beans.bean2Map(bean);
         assertEquals(Map.of("id", 1, "value", "test"), map);
     }
 
     @Test
     public void testMap2Bean_simple() {
         Map<String, Object> map = Map.of("id", 10, "value", "hello", "extra", "ignored");
-        SimpleBean bean = Maps.map2Bean(map, SimpleBean.class); // ignoreUnmatchedProperty is true by default
+        SimpleBean bean = Beans.map2Bean(map, SimpleBean.class); // ignoreUnmatchedProperty is true by default
         assertEquals(10, bean.id);
         assertEquals("hello", bean.value);
 
         Map<String, Object> mapNoMatch = Map.of("id", 20, "value", "world", "extraField", "data");
-        // SimpleBean beanNoMatch = Maps.map2Bean(mapNoMatch, false, false, SimpleBean.class); // ignoreUnmatched=false
+        // SimpleBean beanNoMatch = Beans.map2Bean(mapNoMatch, false, false, SimpleBean.class); // ignoreUnmatched=false
         // Current mock BeanInfo.setPropValue will throw if ignoreUnmatched is false and field not found
-        assertThrows(IllegalArgumentException.class, () -> Maps.map2Bean(mapNoMatch, false, false, SimpleBean.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.map2Bean(mapNoMatch, false, false, SimpleBean.class));
 
     }
 
@@ -855,7 +855,7 @@ public class Maps200Test extends TestBase {
     public void testDeepBean2Map() {
         Address address = new Address("NY", "10001");
         Person person = new Person("John", 30, address);
-        Map<String, Object> map = Maps.deepBean2Map(person);
+        Map<String, Object> map = Beans.deepBean2Map(person);
 
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
@@ -869,7 +869,7 @@ public class Maps200Test extends TestBase {
     public void testBean2FlatMap() {
         Address address = new Address("LA", "90001");
         Person person = new Person("Jane", 25, address);
-        Map<String, Object> flatMap = Maps.bean2FlatMap(person);
+        Map<String, Object> flatMap = Beans.bean2FlatMap(person);
 
         assertEquals("Jane", flatMap.get("name"));
         assertEquals(25, flatMap.get("age"));

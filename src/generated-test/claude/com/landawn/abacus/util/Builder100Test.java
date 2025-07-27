@@ -1,12 +1,12 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -488,7 +488,7 @@ public class Builder100Test extends TestBase {
 
     @Test
     public void testEquivalenceBuilderWithFunction() {
-        BiFunction<String, String, Boolean> caseInsensitive = (s1, s2) -> s1.equalsIgnoreCase(s2);
+        BiPredicate<String, String> caseInsensitive = (s1, s2) -> s1.equalsIgnoreCase(s2);
 
         assertTrue(Builder.equals("Hello", "HELLO", caseInsensitive).result());
         assertFalse(Builder.equals("Hello", "World", caseInsensitive).result());

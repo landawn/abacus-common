@@ -339,10 +339,18 @@ public class DoubleStream101Test extends TestBase {
 
     @Test
     public void testTopWithComparator() {
-        DoubleStream stream = createDoubleStream(5.0, 2.0, 8.0, 1.0, 9.0, 3.0);
-        Comparator<Double> reverseComparator = (a, b) -> Double.compare(b, a);
-        double[] result = stream.top(3, reverseComparator).toArray();
-        assertArrayEquals(new double[] { 3.0, 1.0, 2.0 }, result, 0.0001);
+        {
+            DoubleStream stream = createDoubleStream(5.0, 2.0, 8.0, 1.0, 9.0, 3.0);
+            Comparator<Double> reverseComparator = (a, b) -> Double.compare(b, a);
+            double[] result = stream.top(3, reverseComparator).toArray();
+            assertArrayEquals(new double[] { 3.0, 1.0, 2.0 }, result, 0.0001);
+        }
+        {
+            DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
+            Comparator<Double> reverseComparator = (a, b) -> Double.compare(b, a);
+            double[] result = stream.map(e -> e).top(5, reverseComparator).toArray();
+            assertArrayEquals(new double[] { 3.0, 1.0, 2.0 }, result, 0.0001);
+        }
     }
 
     @Test

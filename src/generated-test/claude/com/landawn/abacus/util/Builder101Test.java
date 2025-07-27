@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -314,17 +315,17 @@ public class Builder101Test extends TestBase {
         // Test that equivalence builder short-circuits on first false
         boolean[] evaluated = { false, false, false };
 
-        BiFunction<String, String, Boolean> tracker1 = (a, b) -> {
+        BiPredicate<String, String> tracker1 = (a, b) -> {
             evaluated[0] = true;
             return true;
         };
 
-        BiFunction<String, String, Boolean> tracker2 = (a, b) -> {
+        BiPredicate<String, String> tracker2 = (a, b) -> {
             evaluated[1] = true;
             return false;
         };
 
-        BiFunction<String, String, Boolean> tracker3 = (a, b) -> {
+        BiPredicate<String, String> tracker3 = (a, b) -> {
             evaluated[2] = true;
             return true;
         };

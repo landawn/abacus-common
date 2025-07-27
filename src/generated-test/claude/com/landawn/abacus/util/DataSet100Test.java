@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -90,6 +92,354 @@ public class DataSet100Test extends TestBase {
         invalidColumns.add(Arrays.asList("A", "B", "C", "D")); // Different size
 
         assertThrows(IllegalArgumentException.class, () -> new RowDataSet(Arrays.asList("col1", "col2"), invalidColumns));
+    }
+
+    @Test
+    @DisplayName("Should create DataSet with valid column names and rows")
+    public void testCreateDataSetWithValidData() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "age");
+        Object[][] rows = { { 1, "John", 25 }, { 2, "Jane", 30 }, { 3, "Bob", 35 } };
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size());
+        assertEquals(3, dataSet.columnNameList().size());
+        assertTrue(dataSet.columnNameList().containsAll(columnNames));
+    }
+
+    @Test
+    @DisplayName("Should create empty DataSet with column names but no rows")
+    public void testCreateDataSetWithEmptyRows() {
+        Collection<String> columnNames = Arrays.asList("id", "name");
+        Object[][] rows = {};
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(0, dataSet.size());
+        assertEquals(2, dataSet.columnNameList().size());
+        assertTrue(dataSet.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should create DataSet with single column")
+    public void testCreateDataSetWithSingleColumn() {
+        Collection<String> columnNames = Collections.singletonList("value");
+        Object[][] rows = { { "test1" }, { "test2" } };
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(2, dataSet.size());
+        assertEquals(1, dataSet.columnNameList().size());
+        assertEquals("value", dataSet.columnNameList().get(0));
+    }
+
+    @Test
+    @DisplayName("Should handle null values in rows")
+    public void testCreateDataSetWithNullValues() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "score");
+        Object[][] rows = { { 1, "John", null }, { null, "Jane", 95.5 }, { 3, null, 87.2 } };
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size());
+        assertTrue(dataSet.isNull(0, 2)); // First row, third column
+        assertTrue(dataSet.isNull(1, 0)); // Second row, first column
+        assertTrue(dataSet.isNull(2, 1)); // Third row, second column
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for mismatched column count")
+    public void testThrowsExceptionForMismatchedColumnCount() {
+        Collection<String> columnNames = Arrays.asList("id", "name");
+        Object[][] rows = { { 1, "John", 25 }, // 3 values but only 2 columns
+                { 2, "Jane" } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.rows(columnNames, rows);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for null column names")
+    public void testThrowsExceptionForNullColumnNames() {
+        Object[][] rows = { { 1, "John" } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.rows(null, rows);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for empty column names")
+    public void testThrowsExceptionForEmptyColumnNames() {
+        Collection<String> columnNames = Collections.emptyList();
+        Object[][] rows = { { 1, "John" } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.rows(columnNames, rows);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for duplicate column names")
+    public void testThrowsExceptionForDuplicateColumnNames() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "id");
+        Object[][] rows = { { 1, "John", 25 } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.rows(columnNames, rows);
+        });
+    }
+
+    @Test
+    @DisplayName("Should handle different data types in columns")
+    public void testCreateDataSetWithMixedDataTypes() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "active", "score", "date");
+        Object[][] rows = { { 1, "John", true, 95.5, new Date() }, { 2L, "Jane", false, 87, null } };
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(2, dataSet.size());
+        assertEquals(5, dataSet.columnNameList().size());
+    }
+
+    @Test
+    @DisplayName("Should handle jagged arrays with consistent column count")
+    public void testCreateDataSetWithJaggedButConsistentRows() {
+        Collection<String> columnNames = Arrays.asList("col1", "col2");
+        Object[][] rows = { new Object[] { 1, "a" }, new Object[] { 2, "b" }, new Object[] { 3, "c" } };
+
+        DataSet dataSet = DataSet.rows(columnNames, rows);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size());
+        assertEquals(2, dataSet.columnNameList().size());
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for inconsistent row lengths")
+    public void testThrowsExceptionForInconsistentRowLengths() {
+        Collection<String> columnNames = Arrays.asList("col1", "col2", "col3");
+        Object[][] rows = { { 1, "a", true }, { 2, "b" }, // Missing third column
+                { 3, "c", false } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.rows(columnNames, rows);
+        });
+    }
+
+    @Test
+    @DisplayName("Should create DataSet with valid column names and columns")
+    public void testCreateDataSetWithValidColumnsData2() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "age");
+        Object[][] columns = { { 1, 2, 3 }, // id column
+                { "John", "Jane", "Bob" }, // name column
+                { 25, 30, 35 } // age column
+        };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size()); // 3 rows
+        assertEquals(3, dataSet.columnNameList().size()); // 3 columns
+        assertTrue(dataSet.columnNameList().containsAll(columnNames));
+
+        // Verify data is properly transposed
+        assertEquals(1, (Integer) dataSet.absolute(0).get("id"));
+        assertEquals("John", dataSet.absolute(0).get("name"));
+        assertEquals(25, (Integer) dataSet.absolute(0).get("age"));
+    }
+
+    @Test
+    @DisplayName("Should create empty DataSet with column names but empty columns")
+    public void testCreateDataSetWithEmptyColumns() {
+        Collection<String> columnNames = Arrays.asList("id", "name");
+        Object[][] columns = { {}, // empty id column
+                {} // empty name column
+        };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(0, dataSet.size());
+        assertEquals(2, dataSet.columnNameList().size());
+        assertTrue(dataSet.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should create DataSet with single column")
+    public void testCreateDataSetWithSingleColumn2() {
+        Collection<String> columnNames = Collections.singletonList("value");
+        Object[][] columns = { { "test1", "test2", "test3" } };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size());
+        assertEquals(1, dataSet.columnNameList().size());
+        assertEquals("value", dataSet.columnNameList().get(0));
+        assertEquals("test1", dataSet.absolute(0).get("value"));
+        assertEquals("test2", dataSet.absolute(1).get("value"));
+        assertEquals("test3", dataSet.absolute(2).get("value"));
+    }
+
+    @Test
+    @DisplayName("Should handle null values in columns")
+    public void testCreateDataSetWithNullValues2() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "score");
+        Object[][] columns = { { 1, null, 3 }, // id column with null
+                { "John", "Jane", null }, // name column with null
+                { null, 95.5, 87.2 } // score column with null
+        };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(3, dataSet.size());
+        assertTrue(dataSet.isNull(1, 0)); // Second row, first column (id)
+        assertTrue(dataSet.isNull(2, 1)); // Third row, second column (name)
+        assertTrue(dataSet.isNull(0, 2)); // First row, third column (score)
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when columnNames length differs from columns length")
+    public void testThrowsExceptionForMismatchedColumnCount2() {
+        Collection<String> columnNames = Arrays.asList("id", "name"); // 2 columns
+        Object[][] columns = { { 1, 2, 3 }, // id column
+                { "John", "Jane", "Bob" }, // name column  
+                { 25, 30, 35 } // extra age column - 3 columns total
+        };
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.columns(columnNames, columns);
+        });
+
+        assertTrue(exception.getMessage().contains("length of 'columnNames' is not equal to the length"));
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for null column names")
+    public void testThrowsExceptionForNullColumnNames2() {
+        Object[][] columns = { { 1, 2 }, { "John", "Jane" } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.columns(null, columns);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for inconsistent column lengths")
+    public void testThrowsExceptionForInconsistentColumnLengths() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "age");
+        Object[][] columns = { { 1, 2, 3 }, // 3 elements
+                { "John", "Jane" }, // 2 elements - inconsistent!
+                { 25, 30, 35 } // 3 elements
+        };
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.columns(columnNames, columns);
+        });
+
+        assertTrue(exception.getMessage().contains("size of the sub-collection in 'columns' is not equal"));
+    }
+
+    @Test
+    @DisplayName("Should handle different data types in same column")
+    public void testCreateDataSetWithMixedDataTypesInColumn() {
+        Collection<String> columnNames = Arrays.asList("mixed", "numbers");
+        Object[][] columns = { { "string", 123, true, null }, // mixed types column
+                { 1, 2.5, 3L, 4.0f } // numeric types column
+        };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(4, dataSet.size());
+        assertEquals(2, dataSet.columnNameList().size());
+
+        // Verify mixed types are preserved
+        assertEquals("string", dataSet.absolute(0).get("mixed"));
+        assertEquals(123, (Integer) dataSet.absolute(1).get("mixed"));
+        assertEquals(true, dataSet.absolute(2).get("mixed"));
+        assertTrue(dataSet.isNull(3, 0));
+    }
+
+    @Test
+    @DisplayName("Should create DataSet with empty column names collection")
+    public void testCreateDataSetWithEmptyColumnNamesCollection() {
+        Collection<String> columnNames = Collections.emptyList();
+        Object[][] columns = {};
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(0, dataSet.size());
+        assertEquals(0, dataSet.columnNameList().size());
+        assertTrue(dataSet.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should handle single row of data across multiple columns")
+    public void testCreateDataSetWithSingleRow() {
+        Collection<String> columnNames = Arrays.asList("col1", "col2", "col3");
+        Object[][] columns = { { "a" }, // single value in col1
+                { "b" }, // single value in col2
+                { "c" } // single value in col3
+        };
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(1, dataSet.size());
+        assertEquals(3, dataSet.columnNameList().size());
+        assertEquals("a", dataSet.absolute(0).get("col1"));
+        assertEquals("b", dataSet.absolute(0).get("col2"));
+        assertEquals("c", dataSet.absolute(0).get("col3"));
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for duplicate column names")
+    public void testThrowsExceptionForDuplicateColumnNames2() {
+        Collection<String> columnNames = Arrays.asList("id", "name", "id"); // duplicate "id"
+        Object[][] columns = { { 1, 2, 3 }, { "John", "Jane", "Bob" }, { 25, 30, 35 } };
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DataSet.columns(columnNames, columns);
+        });
+    }
+
+    @Test
+    @DisplayName("Should handle large dataset with many rows")
+    public void testCreateDataSetWithManyRows() {
+        Collection<String> columnNames = Arrays.asList("index", "squared");
+        Object[][] columns = new Object[2][];
+
+        // Create columns with 1000 rows each
+        Object[] indexColumn = new Object[1000];
+        Object[] squaredColumn = new Object[1000];
+
+        for (int i = 0; i < 1000; i++) {
+            indexColumn[i] = i;
+            squaredColumn[i] = i * i;
+        }
+
+        columns[0] = indexColumn;
+        columns[1] = squaredColumn;
+
+        DataSet dataSet = DataSet.columns(columnNames, columns);
+
+        assertNotNull(dataSet);
+        assertEquals(1000, dataSet.size());
+        assertEquals(2, dataSet.columnNameList().size());
+        assertEquals(0, (Integer) dataSet.absolute(0).get("index"));
+        assertEquals(0, (Integer) dataSet.absolute(0).get("squared"));
+        assertEquals(999, (Integer) dataSet.absolute(999).get("index"));
+        assertEquals(998001, (Integer) dataSet.absolute(999).get("squared")); // 999^2
     }
 
     @Test

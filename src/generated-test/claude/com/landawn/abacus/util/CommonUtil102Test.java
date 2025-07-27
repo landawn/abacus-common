@@ -44,14 +44,14 @@ public class CommonUtil102Test extends TestBase {
     public void testAnyEmpty_TwoMaps() {
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
-        
+
         assertTrue(N.anyEmpty(null, map2));
         assertTrue(N.anyEmpty(map1, null));
         assertTrue(N.anyEmpty(map1, map2));
-        
+
         map1.put("key", "value");
         assertTrue(N.anyEmpty(map1, map2));
-        
+
         map2.put("key2", "value2");
         assertFalse(N.anyEmpty(map1, map2));
     }
@@ -61,16 +61,16 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
         Map<String, String> map3 = new HashMap<>();
-        
+
         assertTrue(N.anyEmpty(null, map2, map3));
         assertTrue(N.anyEmpty(map1, null, map3));
         assertTrue(N.anyEmpty(map1, map2, null));
         assertTrue(N.anyEmpty(map1, map2, map3));
-        
+
         map1.put("key1", "value1");
         map2.put("key2", "value2");
         assertTrue(N.anyEmpty(map1, map2, map3));
-        
+
         map3.put("key3", "value3");
         assertFalse(N.anyEmpty(map1, map2, map3));
     }
@@ -115,18 +115,18 @@ public class CommonUtil102Test extends TestBase {
     public void testAnyBlank_Iterable() {
         assertFalse(N.anyBlank((Iterable<CharSequence>) null));
         assertFalse(N.anyBlank(new ArrayList<CharSequence>()));
-        
+
         List<CharSequence> list = new ArrayList<>();
         list.add("test");
         assertFalse(N.anyBlank(list));
-        
+
         list.add(null);
         assertTrue(N.anyBlank(list));
-        
+
         list.clear();
         list.add("");
         assertTrue(N.anyBlank(list));
-        
+
         list.clear();
         list.add(" ");
         assertTrue(N.anyBlank(list));
@@ -162,12 +162,12 @@ public class CommonUtil102Test extends TestBase {
     public void testAllNull_Iterable() {
         assertTrue(N.allNull((Iterable<?>) null));
         assertTrue(N.allNull(new ArrayList<>()));
-        
+
         List<Object> list = new ArrayList<>();
         list.add(null);
         list.add(null);
         assertTrue(N.allNull(list));
-        
+
         list.add("test");
         assertFalse(N.allNull(list));
     }
@@ -211,12 +211,12 @@ public class CommonUtil102Test extends TestBase {
     public void testAllEmpty_CharSequenceIterable() {
         assertTrue(N.allEmpty((Iterable<? extends CharSequence>) null));
         assertTrue(N.allEmpty(new ArrayList<CharSequence>()));
-        
+
         List<CharSequence> list = new ArrayList<>();
         list.add(null);
         list.add("");
         assertTrue(N.allEmpty(list));
-        
+
         list.add("test");
         assertFalse(N.allEmpty(list));
     }
@@ -263,11 +263,11 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(N.allEmpty((Map<?, ?>) null, (Map<?, ?>) null));
         assertTrue(N.allEmpty(new HashMap<>(), new HashMap<>()));
         assertTrue(N.allEmpty((Map<?, ?>) null, new HashMap<>()));
-        
+
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
         assertTrue(N.allEmpty(map1, map2));
-        
+
         map1.put("key", "value");
         assertFalse(N.allEmpty(map1, map2));
         assertFalse(N.allEmpty(map2, map1));
@@ -277,12 +277,12 @@ public class CommonUtil102Test extends TestBase {
     public void testAllEmpty_ThreeMaps() {
         assertTrue(N.allEmpty((Map<?, ?>) null, (Map<?, ?>) null, (Map<?, ?>) null));
         assertTrue(N.allEmpty(new HashMap<>(), new HashMap<>(), new HashMap<>()));
-        
+
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
         Map<String, String> map3 = new HashMap<>();
         assertTrue(N.allEmpty(map1, map2, map3));
-        
+
         map1.put("key", "value");
         assertFalse(N.allEmpty(map1, map2, map3));
     }
@@ -329,13 +329,13 @@ public class CommonUtil102Test extends TestBase {
     public void testAllBlank_CharSequenceIterable() {
         assertTrue(N.allBlank((Iterable<? extends CharSequence>) null));
         assertTrue(N.allBlank(new ArrayList<CharSequence>()));
-        
+
         List<CharSequence> list = new ArrayList<>();
         list.add(null);
         list.add("");
         list.add(" ");
         assertTrue(N.allBlank(list));
-        
+
         list.add("test");
         assertFalse(N.allBlank(list));
     }
@@ -353,7 +353,7 @@ public class CommonUtil102Test extends TestBase {
         List<String> emptyList = N.nullToEmpty(nullList);
         assertNotNull(emptyList);
         assertTrue(emptyList.isEmpty());
-        
+
         List<String> list = new ArrayList<>();
         list.add("test");
         assertSame(list, N.nullToEmpty(list));
@@ -365,7 +365,7 @@ public class CommonUtil102Test extends TestBase {
         Set<String> emptySet = N.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
-        
+
         Set<String> set = new HashSet<>();
         set.add("test");
         assertSame(set, N.nullToEmpty(set));
@@ -377,7 +377,7 @@ public class CommonUtil102Test extends TestBase {
         SortedSet<String> emptySet = N.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
-        
+
         SortedSet<String> set = new TreeSet<>();
         set.add("test");
         assertSame(set, N.nullToEmpty(set));
@@ -389,7 +389,7 @@ public class CommonUtil102Test extends TestBase {
         NavigableSet<String> emptySet = N.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
-        
+
         NavigableSet<String> set = new TreeSet<>();
         set.add("test");
         assertSame(set, N.nullToEmpty(set));
@@ -401,7 +401,7 @@ public class CommonUtil102Test extends TestBase {
         Collection<String> emptyCollection = N.nullToEmpty(nullCollection);
         assertNotNull(emptyCollection);
         assertTrue(emptyCollection.isEmpty());
-        
+
         Collection<String> collection = new ArrayList<>();
         collection.add("test");
         assertSame(collection, N.nullToEmpty(collection));
@@ -413,7 +413,7 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> emptyMap = N.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
-        
+
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");
         assertSame(map, N.nullToEmpty(map));
@@ -425,7 +425,7 @@ public class CommonUtil102Test extends TestBase {
         SortedMap<String, String> emptyMap = N.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
-        
+
         SortedMap<String, String> map = new TreeMap<>();
         map.put("key", "value");
         assertSame(map, N.nullToEmpty(map));
@@ -437,7 +437,7 @@ public class CommonUtil102Test extends TestBase {
         NavigableMap<String, String> emptyMap = N.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
-        
+
         NavigableMap<String, String> map = new TreeMap<>();
         map.put("key", "value");
         assertSame(map, N.nullToEmpty(map));
@@ -449,7 +449,7 @@ public class CommonUtil102Test extends TestBase {
         Iterator<String> emptyIterator = N.nullToEmpty(nullIterator);
         assertNotNull(emptyIterator);
         assertFalse(emptyIterator.hasNext());
-        
+
         Iterator<String> iterator = Arrays.asList("test").iterator();
         assertSame(iterator, N.nullToEmpty(iterator));
     }
@@ -460,7 +460,7 @@ public class CommonUtil102Test extends TestBase {
         ListIterator<String> emptyIterator = N.nullToEmpty(nullIterator);
         assertNotNull(emptyIterator);
         assertFalse(emptyIterator.hasNext());
-        
+
         ListIterator<String> iterator = Arrays.asList("test").listIterator();
         assertSame(iterator, N.nullToEmpty(iterator));
     }
@@ -475,8 +475,8 @@ public class CommonUtil102Test extends TestBase {
         assertArrayEquals(new long[0], N.nullToEmpty((long[]) null));
         assertArrayEquals(new float[0], N.nullToEmpty((float[]) null), 0.0f);
         assertArrayEquals(new double[0], N.nullToEmpty((double[]) null), 0.0);
-        
-        boolean[] boolArray = {true, false};
+
+        boolean[] boolArray = { true, false };
         assertSame(boolArray, N.nullToEmpty(boolArray));
     }
 
@@ -491,8 +491,8 @@ public class CommonUtil102Test extends TestBase {
         assertArrayEquals(new java.sql.Timestamp[0], N.nullToEmpty((java.sql.Timestamp[]) null));
         assertArrayEquals(new Calendar[0], N.nullToEmpty((Calendar[]) null));
         assertArrayEquals(new Object[0], N.nullToEmpty((Object[]) null));
-        
-        String[] strArray = {"test1", "test2"};
+
+        String[] strArray = { "test1", "test2" };
         assertSame(strArray, N.nullToEmpty(strArray));
     }
 
@@ -502,8 +502,8 @@ public class CommonUtil102Test extends TestBase {
         Integer[] emptyArray = N.nullToEmpty(nullArray, Integer[].class);
         assertNotNull(emptyArray);
         assertEquals(0, emptyArray.length);
-        
-        Integer[] array = {1, 2, 3};
+
+        Integer[] array = { 1, 2, 3 };
         assertSame(array, N.nullToEmpty(array, Integer[].class));
     }
 
@@ -513,8 +513,8 @@ public class CommonUtil102Test extends TestBase {
         String[] result = N.nullToEmptyForEach(nullArray);
         assertNotNull(result);
         assertEquals(0, result.length);
-        
-        String[] arrayWithNulls = {"test", null, "test2", null};
+
+        String[] arrayWithNulls = { "test", null, "test2", null };
         String[] converted = N.nullToEmptyForEach(arrayWithNulls);
         assertEquals("test", converted[0]);
         assertEquals("", converted[1]);
@@ -528,42 +528,42 @@ public class CommonUtil102Test extends TestBase {
         ImmutableCollection<String> emptyColl = N.nullToEmpty(nullColl);
         assertNotNull(emptyColl);
         assertTrue(emptyColl.isEmpty());
-        
+
         ImmutableList<String> nullList = null;
         ImmutableList<String> emptyList = N.nullToEmpty(nullList);
         assertNotNull(emptyList);
         assertTrue(emptyList.isEmpty());
-        
+
         ImmutableSet<String> nullSet = null;
         ImmutableSet<String> emptySet = N.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
-        
+
         ImmutableSortedSet<String> nullSortedSet = null;
         ImmutableSortedSet<String> emptySortedSet = N.nullToEmpty(nullSortedSet);
         assertNotNull(emptySortedSet);
         assertTrue(emptySortedSet.isEmpty());
-        
+
         ImmutableNavigableSet<String> nullNavSet = null;
         ImmutableNavigableSet<String> emptyNavSet = N.nullToEmpty(nullNavSet);
         assertNotNull(emptyNavSet);
         assertTrue(emptyNavSet.isEmpty());
-        
+
         ImmutableMap<String, String> nullMap = null;
         ImmutableMap<String, String> emptyMap = N.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
-        
+
         ImmutableSortedMap<String, String> nullSortedMap = null;
         ImmutableSortedMap<String, String> emptySortedMap = N.nullToEmpty(nullSortedMap);
         assertNotNull(emptySortedMap);
         assertTrue(emptySortedMap.isEmpty());
-        
+
         ImmutableNavigableMap<String, String> nullNavMap = null;
         ImmutableNavigableMap<String, String> emptyNavMap = N.nullToEmpty(nullNavMap);
         assertNotNull(emptyNavMap);
         assertTrue(emptyNavMap.isEmpty());
-        
+
         ImmutableBiMap<String, String> nullBiMap = null;
         ImmutableBiMap<String, String> emptyBiMap = N.nullToEmpty(nullBiMap);
         assertNotNull(emptyBiMap);
@@ -576,37 +576,37 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(true, N.defaultIfNull(Boolean.TRUE));
         assertEquals(true, N.defaultIfNull((Boolean) null, true));
         assertEquals(false, N.defaultIfNull(Boolean.FALSE, true));
-        
+
         assertEquals('\0', N.defaultIfNull((Character) null));
         assertEquals('a', N.defaultIfNull(Character.valueOf('a')));
         assertEquals('b', N.defaultIfNull((Character) null, 'b'));
         assertEquals('a', N.defaultIfNull(Character.valueOf('a'), 'b'));
-        
+
         assertEquals((byte) 0, N.defaultIfNull((Byte) null));
         assertEquals((byte) 5, N.defaultIfNull(Byte.valueOf((byte) 5)));
         assertEquals((byte) 10, N.defaultIfNull((Byte) null, (byte) 10));
         assertEquals((byte) 5, N.defaultIfNull(Byte.valueOf((byte) 5), (byte) 10));
-        
+
         assertEquals((short) 0, N.defaultIfNull((Short) null));
         assertEquals((short) 5, N.defaultIfNull(Short.valueOf((short) 5)));
         assertEquals((short) 10, N.defaultIfNull((Short) null, (short) 10));
         assertEquals((short) 5, N.defaultIfNull(Short.valueOf((short) 5), (short) 10));
-        
+
         assertEquals(0, N.defaultIfNull((Integer) null));
         assertEquals(5, N.defaultIfNull(Integer.valueOf(5)));
         assertEquals(10, N.defaultIfNull((Integer) null, 10));
         assertEquals(5, N.defaultIfNull(Integer.valueOf(5), 10));
-        
+
         assertEquals(0L, N.defaultIfNull((Long) null));
         assertEquals(5L, N.defaultIfNull(Long.valueOf(5L)));
         assertEquals(10L, N.defaultIfNull((Long) null, 10L));
         assertEquals(5L, N.defaultIfNull(Long.valueOf(5L), 10L));
-        
+
         assertEquals(0f, N.defaultIfNull((Float) null), 0.0f);
         assertEquals(5f, N.defaultIfNull(Float.valueOf(5f)), 0.0f);
         assertEquals(10f, N.defaultIfNull((Float) null, 10f), 0.0f);
         assertEquals(5f, N.defaultIfNull(Float.valueOf(5f), 10f), 0.0f);
-        
+
         assertEquals(0d, N.defaultIfNull((Double) null), 0.0);
         assertEquals(5d, N.defaultIfNull(Double.valueOf(5d)), 0.0);
         assertEquals(10d, N.defaultIfNull((Double) null, 10d), 0.0);
@@ -618,7 +618,7 @@ public class CommonUtil102Test extends TestBase {
         String nullStr = null;
         assertEquals("default", N.defaultIfNull(nullStr, "default"));
         assertEquals("test", N.defaultIfNull("test", "default"));
-        
+
         assertThrows(NullPointerException.class, () -> N.defaultIfNull(nullStr, null));
     }
 
@@ -627,7 +627,7 @@ public class CommonUtil102Test extends TestBase {
         String nullStr = null;
         assertEquals("default", N.defaultIfNull(nullStr, Fn.s(() -> "default")));
         assertEquals("test", N.defaultIfNull("test", Fn.s(() -> "default")));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfNull(nullStr, () -> null));
     }
 
@@ -636,7 +636,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals("default", N.defaultIfEmpty("", "default"));
         assertEquals("default", N.defaultIfEmpty(null, "default"));
         assertEquals("test", N.defaultIfEmpty("test", "default"));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", ""));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", (String) null));
     }
@@ -646,7 +646,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals("default", N.defaultIfEmpty("", Fn.s(Fn.s(() -> "default"))));
         assertEquals("default", N.defaultIfEmpty((String) null, Fn.s(() -> "default")));
         assertEquals("test", N.defaultIfEmpty("test", Fn.s(() -> "default")));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", () -> ""));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", () -> null));
     }
@@ -657,7 +657,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals("default", N.defaultIfBlank(" ", "default"));
         assertEquals("default", N.defaultIfBlank(null, "default"));
         assertEquals("test", N.defaultIfBlank("test", "default"));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", " "));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", (String) null));
     }
@@ -668,7 +668,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals("default", N.defaultIfBlank(" ", Fn.s(() -> "default")));
         assertEquals("default", N.defaultIfBlank(null, Fn.s(() -> "default")));
         assertEquals("test", N.defaultIfBlank("test", Fn.s(() -> "default")));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", () -> " "));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", () -> null));
     }
@@ -677,13 +677,13 @@ public class CommonUtil102Test extends TestBase {
     public void testDefaultIfEmpty_Collection() {
         List<String> emptyList = new ArrayList<>();
         List<String> defaultList = Arrays.asList("default");
-        
+
         assertEquals(defaultList, N.defaultIfEmpty(emptyList, defaultList));
         assertEquals(defaultList, N.defaultIfEmpty(null, defaultList));
-        
+
         List<String> list = Arrays.asList("test");
         assertEquals(list, N.defaultIfEmpty(list, defaultList));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyList, new ArrayList<>()));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyList, null));
     }
@@ -693,14 +693,14 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> emptyMap = new HashMap<>();
         Map<String, String> defaultMap = new HashMap<>();
         defaultMap.put("key", "value");
-        
+
         assertEquals(defaultMap, N.defaultIfEmpty(emptyMap, defaultMap));
         assertEquals(defaultMap, N.defaultIfEmpty(null, defaultMap));
-        
+
         Map<String, String> map = new HashMap<>();
         map.put("test", "value");
         assertEquals(map, N.defaultIfEmpty(map, defaultMap));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyMap, new HashMap<>()));
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyMap, null));
     }
@@ -725,7 +725,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(null, N.defaultValueOf(Double.class));
         assertEquals(null, N.defaultValueOf(String.class));
         assertEquals(null, N.defaultValueOf(Object.class));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null));
     }
 
@@ -747,7 +747,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(null, N.defaultValueOf(Float.class, false));
         assertEquals(0d, N.defaultValueOf(Double.class, true), 0.0);
         assertEquals(null, N.defaultValueOf(Double.class, false));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null, true));
     }
 
@@ -756,11 +756,11 @@ public class CommonUtil102Test extends TestBase {
         Type<String> stringType = N.typeOf("java.lang.String");
         assertNotNull(stringType);
         assertEquals(String.class, stringType.clazz());
-        
+
         Type<Integer> intType = N.typeOf("int");
         assertNotNull(intType);
         assertEquals(int.class, intType.clazz());
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.typeOf((String) null));
     }
 
@@ -769,11 +769,11 @@ public class CommonUtil102Test extends TestBase {
         Type<String> stringType = N.typeOf(String.class);
         assertNotNull(stringType);
         assertEquals(String.class, stringType.clazz());
-        
+
         Type<Integer> intType = N.typeOf(int.class);
         assertNotNull(intType);
         assertEquals(int.class, intType.clazz());
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.typeOf((Class<?>) null));
     }
 
@@ -781,31 +781,31 @@ public class CommonUtil102Test extends TestBase {
     public void testStringOf_Primitives() {
         assertEquals("true", N.stringOf(true));
         assertEquals("false", N.stringOf(false));
-        
+
         assertEquals("a", N.stringOf('a'));
         assertEquals("A", N.stringOf('A'));
         assertEquals("0", N.stringOf('0'));
-        
+
         assertEquals("0", N.stringOf((byte) 0));
         assertEquals("127", N.stringOf((byte) 127));
         assertEquals("-128", N.stringOf((byte) -128));
-        
+
         assertEquals("0", N.stringOf((short) 0));
         assertEquals("32767", N.stringOf(Short.MAX_VALUE));
         assertEquals("-32768", N.stringOf(Short.MIN_VALUE));
-        
+
         assertEquals("0", N.stringOf(0));
         assertEquals("2147483647", N.stringOf(Integer.MAX_VALUE));
         assertEquals("-2147483648", N.stringOf(Integer.MIN_VALUE));
-        
+
         assertEquals("0", N.stringOf(0L));
         assertEquals("9223372036854775807", N.stringOf(Long.MAX_VALUE));
         assertEquals("-9223372036854775808", N.stringOf(Long.MIN_VALUE));
-        
+
         assertEquals("0.0", N.stringOf(0.0f));
         assertEquals("3.14", N.stringOf(3.14f));
         assertEquals("-3.14", N.stringOf(-3.14f));
-        
+
         assertEquals("0.0", N.stringOf(0.0d));
         assertEquals("3.14159", N.stringOf(3.14159d));
         assertEquals("-3.14159", N.stringOf(-3.14159d));
@@ -817,7 +817,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals("123", N.stringOf(Integer.valueOf(123)));
         assertEquals("true", N.stringOf(Boolean.TRUE));
         assertNull(N.stringOf(null));
-        
+
         java.util.Date date = new java.util.Date(0);
         String dateStr = N.stringOf(date);
         assertNotNull(dateStr);
@@ -830,10 +830,10 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(Double.valueOf(3.14), N.valueOf("3.14", Double.class));
         assertEquals(Boolean.TRUE, N.valueOf("true", Boolean.class));
         assertEquals("test", N.valueOf("test", String.class));
-        
+
         assertEquals(0, N.valueOf(null, int.class));
         assertEquals(null, N.valueOf(null, Integer.class));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.valueOf("test", null));
     }
 
@@ -881,24 +881,24 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(0, N.convert(null, int.class));
         assertEquals(null, N.convert(null, Integer.class));
         assertEquals(null, N.convert(null, String.class));
-        
+
         // String conversions
         assertEquals(Integer.valueOf(123), N.convert("123", Integer.class));
         assertEquals(Long.valueOf(123L), N.convert("123", Long.class));
         assertEquals(Double.valueOf(3.14), N.convert("3.14", Double.class));
         assertEquals(Boolean.TRUE, N.convert("true", Boolean.class));
-        
+
         // Number conversions
         assertEquals(Integer.valueOf(123), N.convert(123L, Integer.class));
         assertEquals(Long.valueOf(123L), N.convert(123, Long.class));
         assertEquals(Float.valueOf(3.14f), N.convert(3.14d, Float.class));
         assertEquals(Double.valueOf(3.14d), N.convert(3.14f, Double.class));
-        
+
         // Boolean conversions
         assertEquals(true, N.convert(1, boolean.class));
         assertEquals(false, N.convert(0, boolean.class));
         assertEquals(true, N.convert(5L, Boolean.class));
-        
+
         // Character conversions
         assertEquals(Character.valueOf('A'), N.convert(65, Character.class));
         assertEquals(Integer.valueOf(65), N.convert('A', Integer.class));
@@ -910,24 +910,24 @@ public class CommonUtil102Test extends TestBase {
         List<String> strList = Arrays.asList("1", "2", "3");
         List<String> convertedList = N.convert(strList, List.class);
         assertEquals(strList, convertedList);
-        
+
         // Set to Set
         Set<String> strSet = new HashSet<>(Arrays.asList("1", "2", "3"));
         Set<String> convertedSet = N.convert(strSet, Set.class);
         assertEquals(strSet, convertedSet);
-        
+
         // Array to Collection
-        String[] strArray = {"1", "2", "3"};
+        String[] strArray = { "1", "2", "3" };
         Collection<String> collection = N.convert(strArray, Collection.class);
         assertEquals(3, collection.size());
         assertTrue(collection.contains("1"));
         assertTrue(collection.contains("2"));
         assertTrue(collection.contains("3"));
-        
+
         // Collection to Array
         List<String> list = Arrays.asList("1", "2", "3");
         String[] array = N.convert(list, String[].class);
-        assertArrayEquals(new String[]{"1", "2", "3"}, array);
+        assertArrayEquals(new String[] { "1", "2", "3" }, array);
     }
 
     @Test
@@ -948,7 +948,7 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(new java.sql.Timestamp(timestamp), N.convert(timestamp, java.sql.Timestamp.class));
         assertEquals(new java.sql.Date(timestamp), N.convert(timestamp, java.sql.Date.class));
         assertEquals(new java.sql.Time(timestamp), N.convert(timestamp, java.sql.Time.class));
-        
+
         // Date to Long conversion
         java.util.Date date = new java.util.Date(timestamp);
         assertEquals(Long.valueOf(timestamp), N.convert(date, Long.class));
@@ -959,9 +959,9 @@ public class CommonUtil102Test extends TestBase {
         Type<Integer> intType = N.typeOf(int.class);
         assertEquals(Integer.valueOf(123), N.convert("123", intType));
         assertEquals(0, N.convert(null, intType));
-        
+
         Type<List> listType = N.typeOf(List.class);
-        String[] array = {"1", "2", "3"};
+        String[] array = { "1", "2", "3" };
         List<String> list = N.convert(array, listType);
         assertEquals(3, list.size());
     }
@@ -973,26 +973,26 @@ public class CommonUtil102Test extends TestBase {
         Nullable<String> strResult = N.castIfAssignable(str, String.class);
         assertTrue(strResult.isPresent());
         assertEquals("test", strResult.get());
-        
+
         Integer num = 123;
         Nullable<Number> numResult = N.castIfAssignable(num, Number.class);
         assertTrue(numResult.isPresent());
         assertEquals(123, numResult.get());
-        
+
         // Failed casts
         Nullable<Integer> failedCast = N.castIfAssignable("test", Integer.class);
         assertFalse(failedCast.isPresent());
-        
+
         // Null handling
         Nullable<String> nullResult = N.castIfAssignable(null, String.class);
         assertTrue(nullResult.isPresent());
         assertNull(nullResult.get());
-        
+
         // Primitive type handling
         Nullable<Integer> primitiveResult = N.castIfAssignable(123, int.class);
         assertTrue(primitiveResult.isPresent());
         assertEquals(123, primitiveResult.get());
-        
+
         Nullable<Integer> nullPrimitiveResult = N.castIfAssignable(null, int.class);
         assertFalse(nullPrimitiveResult.isPresent());
     }
@@ -1003,7 +1003,7 @@ public class CommonUtil102Test extends TestBase {
         Nullable<String> strResult = N.castIfAssignable("test", strType);
         assertTrue(strResult.isPresent());
         assertEquals("test", strResult.get());
-        
+
         Type<Integer> intType = N.typeOf(Integer.class);
         Nullable<Integer> failedCast = N.castIfAssignable("test", intType);
         assertFalse(failedCast.isPresent());
@@ -1015,13 +1015,13 @@ public class CommonUtil102Test extends TestBase {
         List<String> list = new ArrayList<>();
         list.add("test1");
         list.add("test2");
-        
-        List<String> cloned = N.clone(list);
+
+        List<String> cloned = Beans.clone(list);
         assertNotSame(list, cloned);
         assertEquals(list, cloned);
-        
+
         // Null handling
-        assertNull(N.clone((Object) null));
+        assertNull(Beans.clone((Object) null));
     }
 
     @Test
@@ -1030,17 +1030,17 @@ public class CommonUtil102Test extends TestBase {
         List<String> list = new ArrayList<>();
         list.add("test1");
         list.add("test2");
-        
-        ArrayList<String> cloned = N.clone(list, ArrayList.class);
+
+        ArrayList<String> cloned = Beans.clone(list, ArrayList.class);
         assertNotSame(list, cloned);
         assertEquals(list, cloned);
         assertTrue(cloned instanceof ArrayList);
-        
+
         // Clone null to bean type
-        TestBean bean = N.clone(null, TestBean.class);
+        TestBean bean = Beans.clone(null, TestBean.class);
         assertNotNull(bean);
-        
-        assertThrows(IllegalArgumentException.class, () -> N.clone("test", null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.clone("test", null));
     }
 
     @Test
@@ -1048,14 +1048,14 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("test");
         source.setValue(123);
-        
-        TestBean copy = N.copy(source);
+
+        TestBean copy = Beans.copy(source);
         assertNotNull(copy);
         assertNotSame(source, copy);
         assertEquals("test", copy.getName());
         assertEquals(123, copy.getValue());
-        
-        assertNull(N.copy((TestBean) null));
+
+        assertNull(Beans.copy((TestBean) null));
     }
 
     @Test
@@ -1063,13 +1063,13 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("test");
         source.setValue(123);
-        
-        TestBean copy = N.copy(source, Arrays.asList("name"));
+
+        TestBean copy = Beans.copy(source, Arrays.asList("name"));
         assertNotNull(copy);
         assertEquals("test", copy.getName());
         assertEquals(0, copy.getValue()); // Not copied
-        
-        assertNull(N.copy(null, Arrays.asList("name")));
+
+        assertNull(Beans.copy(null, Arrays.asList("name")));
     }
 
     @Test
@@ -1077,14 +1077,14 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("test");
         source.setValue(123);
-        
+
         BiPredicate<String, Object> filter = (name, value) -> "name".equals(name);
-        TestBean copy = N.copy(source, filter);
+        TestBean copy = Beans.copy(source, filter);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
         assertEquals(0, copy.getValue()); // Filtered out
-        
-        assertNull(N.copy(null, filter));
+
+        assertNull(Beans.copy(null, filter));
     }
 
     @Test
@@ -1092,15 +1092,15 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("test");
         source.setValue(123);
-        
-        TestBean2 copy = N.copy(source, TestBean2.class);
+
+        TestBean2 copy = Beans.copy(source, TestBean2.class);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
-        
-        TestBean2 nullCopy = N.copy(null, TestBean2.class);
+
+        TestBean2 nullCopy = Beans.copy(null, TestBean2.class);
         assertNotNull(nullCopy);
-        
-        assertThrows(IllegalArgumentException.class, () -> N.copy(source, (Class<TestBean>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, (Class<TestBean>) null));
     }
 
     @Test
@@ -1108,18 +1108,18 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("test");
         source.setValue(123);
-        
-        TestBean2 copy = N.copy(source, true, null, TestBean2.class);
+
+        TestBean2 copy = Beans.copy(source, true, null, TestBean2.class);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
-        
+
         Set<String> ignoredProps = new HashSet<>();
         ignoredProps.add("name");
-        TestBean2 copy2 = N.copy(source, true, ignoredProps, TestBean2.class);
+        TestBean2 copy2 = Beans.copy(source, true, ignoredProps, TestBean2.class);
         assertNotNull(copy2);
         assertNull(copy2.getName());
-        
-        assertThrows(IllegalArgumentException.class, () -> N.copy(source, true, null, null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, true, null, null));
     }
 
     @Test
@@ -1127,16 +1127,16 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("source");
         source.setValue(100);
-        
+
         TestBean target = new TestBean();
         target.setName("target");
         target.setValue(200);
-        
-        N.merge(source, target);
+
+        Beans.merge(source, target);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
-        
-        assertThrows(IllegalArgumentException.class, () -> N.merge(source, null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null));
     }
 
     @Test
@@ -1144,17 +1144,17 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("source");
         source.setValue(100);
-        
+
         TestBean target = new TestBean();
         target.setName("target");
         target.setValue(200);
-        
+
         BinaryOperator<Object> mergeFunc = (src, tgt) -> src != null ? src : tgt;
-        N.merge(source, target, mergeFunc);
+        Beans.merge(source, target, mergeFunc);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
-        
-        assertThrows(IllegalArgumentException.class, () -> N.merge(source, null, mergeFunc));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, mergeFunc));
     }
 
     @Test
@@ -1162,16 +1162,16 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("source");
         source.setValue(100);
-        
+
         TestBean target = new TestBean();
         target.setName("target");
         target.setValue(200);
-        
-        N.merge(source, target, Arrays.asList("name"));
+
+        Beans.merge(source, target, Arrays.asList("name"));
         assertEquals("source", target.getName());
         assertEquals(200, target.getValue()); // Not merged
-        
-        assertThrows(IllegalArgumentException.class, () -> N.merge(source, null, Arrays.asList("name")));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, Arrays.asList("name")));
     }
 
     @Test
@@ -1179,17 +1179,17 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("source");
         source.setValue(100);
-        
+
         TestBean target = new TestBean();
         target.setName("target");
         target.setValue(200);
-        
+
         BiPredicate<String, Object> filter = (name, value) -> "name".equals(name);
-        N.merge(source, target, filter);
+        Beans.merge(source, target, filter);
         assertEquals("source", target.getName());
         assertEquals(200, target.getValue()); // Filtered out
-        
-        assertThrows(IllegalArgumentException.class, () -> N.merge(source, null, filter));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, filter));
     }
 
     @Test
@@ -1197,25 +1197,25 @@ public class CommonUtil102Test extends TestBase {
         TestBean source = new TestBean();
         source.setName("source");
         source.setValue(100);
-        
+
         TestBean target = new TestBean();
         target.setName("target");
         target.setValue(200);
-        
-        N.merge(source, target, true, null);
+
+        Beans.merge(source, target, true, null);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
-        
+
         Set<String> ignoredProps = new HashSet<>();
         ignoredProps.add("name");
         TestBean target2 = new TestBean();
         target2.setName("target");
         target2.setValue(200);
-        N.merge(source, target2, true, ignoredProps);
+        Beans.merge(source, target2, true, ignoredProps);
         assertEquals("target", target2.getName()); // Ignored
         assertEquals(100, target2.getValue());
-        
-        assertThrows(IllegalArgumentException.class, () -> N.merge(source, null, true, null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, true, null));
     }
 
     @Test
@@ -1223,18 +1223,18 @@ public class CommonUtil102Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(123);
-        
-        N.erase(bean, "name");
+
+        Beans.erase(bean, "name");
         assertNull(bean.getName());
         assertEquals(123, bean.getValue());
-        
+
         bean.setName("test");
-        N.erase(bean, "name", "value");
+        Beans.erase(bean, "name", "value");
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
-        
-        N.erase(null, "name"); // Should not throw
-        N.erase(bean); // Empty array, should not throw
+
+        Beans.erase(null, "name"); // Should not throw
+        Beans.erase(bean); // Empty array, should not throw
     }
 
     @Test
@@ -1242,18 +1242,18 @@ public class CommonUtil102Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(123);
-        
-        N.erase(bean, Arrays.asList("name"));
+
+        Beans.erase(bean, Arrays.asList("name"));
         assertNull(bean.getName());
         assertEquals(123, bean.getValue());
-        
+
         bean.setName("test");
-        N.erase(bean, Arrays.asList("name", "value"));
+        Beans.erase(bean, Arrays.asList("name", "value"));
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
-        
-        N.erase(null, Arrays.asList("name")); // Should not throw
-        N.erase(bean, new ArrayList<>()); // Empty collection, should not throw
+
+        Beans.erase(null, Arrays.asList("name")); // Should not throw
+        Beans.erase(bean, new ArrayList<>()); // Empty collection, should not throw
     }
 
     @Test
@@ -1261,66 +1261,56 @@ public class CommonUtil102Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(123);
-        
-        N.eraseAll(bean);
+
+        Beans.eraseAll(bean);
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
-        
-        N.eraseAll(null); // Should not throw
+
+        Beans.eraseAll(null); // Should not throw
     }
 
     @Test
     public void testGetPropNames_Class() {
-        ImmutableList<String> propNames = N.getPropNames(TestBean.class);
+        ImmutableList<String> propNames = Beans.getPropNameList(TestBean.class);
         assertNotNull(propNames);
         assertTrue(propNames.contains("name"));
         assertTrue(propNames.contains("value"));
-        
-        assertThrows(IllegalArgumentException.class, () -> N.getPropNames((Class<?>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropNameList((Class<?>) null));
     }
 
     @Test
     public void testGetPropNames_ClassWithExclude() {
         Set<String> exclude = new HashSet<>();
         exclude.add("name");
-        
-        List<String> propNames = N.getPropNames(TestBean.class, exclude);
+
+        List<String> propNames = Beans.getPropNames(TestBean.class, exclude);
         assertNotNull(propNames);
         assertFalse(propNames.contains("name"));
         assertTrue(propNames.contains("value"));
-        
-        assertThrows(IllegalArgumentException.class, () -> N.getPropNames(null, exclude));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropNames(null, exclude));
     }
 
-    @Test
-    public void testGetPropNames_Object() {
-        TestBean bean = new TestBean();
-        List<String> propNames = N.getPropNames(bean);
-        assertNotNull(propNames);
-        assertTrue(propNames.contains("name"));
-        assertTrue(propNames.contains("value"));
-        
-        assertThrows(IllegalArgumentException.class, () -> N.getPropNames((Object) null));
-    }
 
     @Test
     public void testGetPropNames_ObjectWithIgnoreNull() {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(0);
-        
-        List<String> propNames = N.getPropNames(bean, false);
+
+        List<String> propNames = Beans.getPropNames(bean, false);
         assertNotNull(propNames);
         assertTrue(propNames.contains("name"));
         assertTrue(propNames.contains("value"));
-        
-        List<String> nonNullPropNames = N.getPropNames(bean, true);
+
+        List<String> nonNullPropNames = Beans.getPropNames(bean, true);
         assertNotNull(nonNullPropNames);
         assertTrue(nonNullPropNames.contains("name"));
         assertTrue(nonNullPropNames.contains("value"));
-        
+
         bean.setName(null);
-        List<String> nonNullPropNames2 = N.getPropNames(bean, true);
+        List<String> nonNullPropNames2 = Beans.getPropNames(bean, true);
         assertFalse(nonNullPropNames2.contains("name"));
         assertTrue(nonNullPropNames2.contains("value"));
     }
@@ -1330,38 +1320,38 @@ public class CommonUtil102Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(123);
-        
-        assertEquals("test", N.getPropValue(bean, "name"));
-        assertEquals(123, (Integer) N.getPropValue(bean, "value"));
-        
-        assertThrows(NullPointerException.class, () -> N.getPropValue(null, "name"));
+
+        assertEquals("test", Beans.getPropValue(bean, "name"));
+        assertEquals(123, (Integer) Beans.getPropValue(bean, "value"));
+
+        assertThrows(NullPointerException.class, () -> Beans.getPropValue(null, "name"));
     }
 
     @Test
     public void testGetPropValue_WithIgnoreUnmatched() {
         TestBean bean = new TestBean();
         bean.setName("test");
-        
-        assertEquals("test", N.getPropValue(bean, "name", false));
-        assertEquals("test", N.getPropValue(bean, "name", true));
-        
-        assertThrows(RuntimeException.class, () -> N.getPropValue(bean, "nonExistent", false));
-        assertNull(N.getPropValue(bean, "nonExistent", true));
-        
-        assertThrows(NullPointerException.class, () -> N.getPropValue(null, "name", true));
+
+        assertEquals("test", Beans.getPropValue(bean, "name", false));
+        assertEquals("test", Beans.getPropValue(bean, "name", true));
+
+        assertThrows(RuntimeException.class, () -> Beans.getPropValue(bean, "nonExistent", false));
+        assertNull(Beans.getPropValue(bean, "nonExistent", true));
+
+        assertThrows(NullPointerException.class, () -> Beans.getPropValue(null, "name", true));
     }
 
     @Test
     public void testSetPropValue() {
         TestBean bean = new TestBean();
-        
-        N.setPropValue(bean, "name", "newName");
+
+        Beans.setPropValue(bean, "name", "newName");
         assertEquals("newName", bean.getName());
-        
-        N.setPropValue(bean, "value", 999);
+
+        Beans.setPropValue(bean, "value", 999);
         assertEquals(999, bean.getValue());
-        
-        assertThrows(NullPointerException.class, () -> N.setPropValue(null, "name", "value"));
+
+        assertThrows(NullPointerException.class, () -> Beans.setPropValue(null, "name", "value"));
     }
 
     @Test
@@ -1373,24 +1363,24 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testNegate_BooleanArray() {
-        boolean[] array = {true, false, true, false};
+        boolean[] array = { true, false, true, false };
         N.negate(array);
-        assertArrayEquals(new boolean[]{false, true, false, true}, array);
-        
+        assertArrayEquals(new boolean[] { false, true, false, true }, array);
+
         boolean[] emptyArray = {};
         N.negate(emptyArray); // Should not throw
-        
+
         N.negate((boolean[]) null); // Should not throw
     }
 
     @Test
     public void testNegate_BooleanArrayRange() {
-        boolean[] array = {true, false, true, false, true};
+        boolean[] array = { true, false, true, false, true };
         N.negate(array, 1, 4);
-        assertArrayEquals(new boolean[]{true, true, false, true, true}, array);
-        
+        assertArrayEquals(new boolean[] { true, true, false, true, true }, array);
+
         N.negate(array, 0, 0); // Empty range, should not throw
-        
+
         assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, 0, 6));
         assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, 3, 2));
@@ -1404,10 +1394,10 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(list.contains(TestEnum.ONE));
         assertTrue(list.contains(TestEnum.TWO));
         assertTrue(list.contains(TestEnum.THREE));
-        
+
         // Test caching
         assertSame(list, N.enumListOf(TestEnum.class));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.enumListOf(null));
     }
 
@@ -1419,10 +1409,10 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(set.contains(TestEnum.ONE));
         assertTrue(set.contains(TestEnum.TWO));
         assertTrue(set.contains(TestEnum.THREE));
-        
+
         // Test caching
         assertSame(set, N.enumSetOf(TestEnum.class));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.enumSetOf(null));
     }
 
@@ -1437,10 +1427,10 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(TestEnum.ONE, map.getByValue("ONE"));
         assertEquals(TestEnum.TWO, map.getByValue("TWO"));
         assertEquals(TestEnum.THREE, map.getByValue("THREE"));
-        
+
         // Test caching
         assertSame(map, N.enumMapOf(TestEnum.class));
-        
+
         assertThrows(IllegalArgumentException.class, () -> N.enumMapOf(null));
     }
 
@@ -1450,7 +1440,7 @@ public class CommonUtil102Test extends TestBase {
         Collection<String> unmodifiable = N.unmodifiableCollection(nullCollection);
         assertNotNull(unmodifiable);
         assertTrue(unmodifiable.isEmpty());
-        
+
         List<String> list = new ArrayList<>();
         list.add("test");
         Collection<String> unmodifiableList = N.unmodifiableCollection(list);
@@ -1464,45 +1454,45 @@ public class CommonUtil102Test extends TestBase {
     public static class TestBean {
         private String name;
         private int value;
-        
+
         public String getName() {
             return name;
         }
-        
+
         public void setName(String name) {
             this.name = name;
         }
-        
+
         public int getValue() {
             return value;
         }
-        
+
         public void setValue(int value) {
             this.value = value;
         }
     }
-    
+
     public static class TestBean2 {
         private String name;
         private String description;
-        
+
         public String getName() {
             return name;
         }
-        
+
         public void setName(String name) {
             this.name = name;
         }
-        
+
         public String getDescription() {
             return description;
         }
-        
+
         public void setDescription(String description) {
             this.description = description;
         }
     }
-    
+
     enum TestEnum {
         ONE, TWO, THREE
     }

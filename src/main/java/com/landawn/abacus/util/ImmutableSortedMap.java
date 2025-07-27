@@ -32,8 +32,8 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted map</li>
- * <li>{@link #of(...)} - creates maps with specific key-value pairs</li>
- * <li>{@link #copyOf(SortedMap)} - creates a defensive copy from another sorted map</li>
+ * <li>{@link #of(Object, Object)} - creates maps with specific key-value pairs</li>
+ * <li>{@link #copyOf(Map)} - creates a defensive copy from another sorted map</li>
  * <li>{@link #wrap(SortedMap)} - wraps an existing sorted map (changes to the underlying map will be reflected)</li>
  * </ul>
  * </p>
@@ -404,7 +404,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * 
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * SortedMap will be visible through the returned ImmutableSortedMap, which violates the
-     * immutability contract. Use {@link #copyOf(SortedMap)} for a true immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Map)} for a true immutable copy.</p>
      * 
      * <p>Example:
      * <pre>{@code

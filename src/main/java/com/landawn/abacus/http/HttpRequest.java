@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -171,7 +172,7 @@ public final class HttpRequest {
         checkSettings();
 
         if (httpSettings != null) {
-            N.merge(settings, httpSettings);
+            Beans.merge(settings, httpSettings);
         }
 
         return this;

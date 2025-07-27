@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import com.landawn.abacus.util.*;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileStream;
@@ -43,13 +44,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.ByteArrayOutputStream;
-import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.Maps;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Parser implementation for Apache Avro format serialization and deserialization.
@@ -233,7 +227,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     final Collection<Object> c = (Collection<Object>) obj;
 
                     for (final Object e : c) {
-                        if (e != null && (e instanceof Map || ClassUtil.isBeanClass(e.getClass()) || e instanceof GenericRecord)) {
+                        if (e != null && (e instanceof Map || Beans.isBeanClass(e.getClass()) || e instanceof GenericRecord)) {
                             isMapOrBean = true;
                             break;
                         }
@@ -290,7 +284,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         final Type<Object> type = N.typeOf(cls);
 
         if (type.isBean()) {
-            return toGenericRecord(Maps.bean2Map(obj), schema);
+            return toGenericRecord(Beans.bean2Map(obj), schema);
         } else if (type.isMap()) {
             final Map<String, Object> m = (Map<String, Object>) obj;
             final Record localRecord = new Record(schema);

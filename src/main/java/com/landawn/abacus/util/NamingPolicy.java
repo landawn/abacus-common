@@ -58,6 +58,17 @@ public enum NamingPolicy {
     LOWER_CAMEL_CASE(Strings::toCamelCase),
 
     /**
+     * Upper camel case naming policy (e.g., "MyVariableName").
+     * 
+     * <p>This policy converts strings to UpperCamelCase format where each word starts
+     * with an uppercase letter and words are joined without any separators. This is
+     * commonly used in Java class names.</p>
+     * 
+     * <p>Example: "user_name" → "UserName", "first-name" → "FirstName"</p>
+     */
+    UPPER_CAMEL_CASE(Strings::toPascalCase),
+
+    /**
      * Lower case with underscore naming policy (e.g., "my_variable_name").
      * 
      * <p>This policy converts strings to snake_case format where all letters are

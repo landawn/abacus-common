@@ -1,12 +1,13 @@
 package com.landawn.abacus.util.stream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.DoubleBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -18,8 +19,9 @@ import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
@@ -549,6 +551,17 @@ public class DoubleStream100Test extends TestBase {
                 .toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d, 7.0d, 8.0d, 9.0d }, result);
 
+    }
+
+    @Test
+    public void testTransform() {
+        List<Integer> callOrder = new ArrayList<>();
+        DoubleStream stream = createDoubleStream(1, 2, 3).onClose(() -> callOrder.add(1)).onClose(() -> callOrder.add(2)).onClose(() -> callOrder.add(3));
+
+        DoubleStream.defer(() -> stream).close();
+
+        // Handlers are invoked in the order they were added (first-added, first-invoked).
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), callOrder);
     }
 
 }

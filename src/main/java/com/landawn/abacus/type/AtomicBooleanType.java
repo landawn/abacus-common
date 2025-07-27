@@ -44,7 +44,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Returns the Class object representing the AtomicBoolean class.
      *
-     * @return the Class object for AtomicBoolean.class
+     * @return the Class object for {@code AtomicBoolean}
      */
     @Override
     public Class<AtomicBoolean> clazz() {

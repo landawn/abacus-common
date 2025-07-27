@@ -177,7 +177,7 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static JSONObject wrap(final Object bean) {
-        return new JSONObject(bean instanceof Map ? (Map<String, Object>) bean : Maps.deepBean2Map(bean, true));
+        return new JSONObject(bean instanceof Map ? (Map<String, Object>) bean : Beans.deepBean2Map(bean, true));
     }
 
     /**

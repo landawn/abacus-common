@@ -20,7 +20,7 @@ import java.util.Map;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.N;
 
 /**
@@ -502,7 +502,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         if (beanClass == null) {
             beanInfoForValueTypes = null;
         } else {
-            N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class", beanClass);
+            N.checkArgument(Beans.isBeanClass(beanClass), "{} is not a valid bean class", beanClass);
 
             beanInfoForValueTypes = ParserUtil.getBeanInfo(beanClass);
         }

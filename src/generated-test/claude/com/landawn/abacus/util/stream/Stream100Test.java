@@ -1020,7 +1020,7 @@ public class Stream100Test extends TestBase {
             assertHaveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength.toList());
             // Test distinctBy with merge function
             Stream<String> stringsForMerge = createStream("a", "bb", "ccc", "dd", "e");
-            Stream<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> a + "+" + b);
+            Stream<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> Stream.of(a, b).sorted().join("+"));
             assertHaveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged.toList());
         }
     }

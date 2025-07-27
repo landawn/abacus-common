@@ -323,13 +323,13 @@ public class CommonUtil101Test extends TestBase {
         TestBean bean3 = new TestBean("test", 20);
 
         // Test with matching properties
-        Assertions.assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name", "value")));
+        Assertions.assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "value")));
 
         // Test with non-matching properties
-        Assertions.assertFalse(N.equalsByProps(bean1, bean3, Arrays.asList("value")));
+        Assertions.assertFalse(Beans.equalsByProps(bean1, bean3, Arrays.asList("value")));
 
         // Test empty properties
-        Assertions.assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, Collections.emptyList()));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, Collections.emptyList()));
     }
 
     @Data
@@ -354,11 +354,11 @@ public class CommonUtil101Test extends TestBase {
         Bean2 bean2 = new Bean2();
 
         // Test with common properties
-        Assertions.assertTrue(N.equalsByCommonProps(bean1, bean2));
+        Assertions.assertTrue(Beans.equalsByCommonProps(bean1, bean2));
 
         // Test null arguments
-        Assertions.assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(null, bean2));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(bean1, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(null, bean2));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(bean1, null));
     }
 
     @Test

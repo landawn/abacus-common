@@ -2452,11 +2452,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            if (bean1 != null && !ClassUtil.isBeanClass(bean1.getClass())) {
+            if (bean1 != null && !Beans.isBeanClass(bean1.getClass())) {
                 throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
-            if (bean2 != null && !ClassUtil.isBeanClass(bean2.getClass())) {
+            if (bean2 != null && !Beans.isBeanClass(bean2.getClass())) {
                 throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
@@ -2473,16 +2473,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Maps.bean2Map(bean2, true, ClassUtil.getDiffIgnoredPropNames(bean2.getClass()), rightOnly);
+                        Beans.bean2Map(bean2, true, Beans.getDiffIgnoredPropNames(bean2.getClass()), rightOnly);
                     }
                 } else if (bean2 == null) {
-                    Maps.bean2Map(bean1, true, ClassUtil.getDiffIgnoredPropNames(bean1.getClass()), leftOnly);
+                    Beans.bean2Map(bean1, true, Beans.getDiffIgnoredPropNames(bean1.getClass()), leftOnly);
                 } else {
                     final Class<?> bean1Class = bean1.getClass();
                     final Class<?> bean2Class = bean2.getClass();
                     final Set<String> ignoredPropNamesForNullValues = new HashSet<>();
-                    final ImmutableSet<String> diffIgnoredPropNamesForBean1 = ClassUtil.getDiffIgnoredPropNames(bean1Class);
-                    final ImmutableSet<String> diffIgnoredPropNamesForBean2 = ClassUtil.getDiffIgnoredPropNames(bean2Class);
+                    final ImmutableSet<String> diffIgnoredPropNamesForBean1 = Beans.getDiffIgnoredPropNames(bean1Class);
+                    final ImmutableSet<String> diffIgnoredPropNamesForBean2 = Beans.getDiffIgnoredPropNames(bean2Class);
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1Class);
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2Class);
                     Object val1 = null;
@@ -2537,10 +2537,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Maps.bean2Map(bean2, propNamesToCompare, rightOnly);
+                        Beans.bean2Map(bean2, propNamesToCompare, rightOnly);
                     }
                 } else if (bean2 == null) {
-                    Maps.bean2Map(bean1, propNamesToCompare, leftOnly);
+                    Beans.bean2Map(bean1, propNamesToCompare, leftOnly);
                 } else {
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
@@ -2859,11 +2859,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final Class<T1> clsA = N.isEmpty(a) ? null : (Class<T1>) N.firstOrNullIfEmpty(a).getClass();
             final Class<T2> clsB = N.isEmpty(b) ? null : (Class<T2>) N.firstOrNullIfEmpty(b).getClass();
 
-            if (clsA != null && !ClassUtil.isBeanClass(clsA)) {
+            if (clsA != null && !Beans.isBeanClass(clsA)) {
                 throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
-            if (clsB != null && !ClassUtil.isBeanClass(clsB)) {
+            if (clsB != null && !Beans.isBeanClass(clsB)) {
                 throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
@@ -2894,7 +2894,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
                     if (beanMapB.containsKey(entry.getKey())) {
                         beanB = beanMapB.get(entry.getKey());
-                        areEqual = isEmptyPropNamesToCompare ? N.equals(beanA, beanB) : N.equalsByProps(beanA, beanB, propNamesToCompare);
+                        areEqual = isEmptyPropNamesToCompare ? N.equals(beanA, beanB) : Beans.equalsByProps(beanA, beanB, propNamesToCompare);
 
                         if (areEqual) {
                             common.add(beanA);

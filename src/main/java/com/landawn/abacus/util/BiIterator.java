@@ -66,10 +66,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
         @Override
         public void forEachRemaining(final BiConsumer action) {
+            // It's empty. Nothing to do.
         }
 
         @Override
         public void foreachRemaining(final Throwables.BiConsumer action) {
+            // It's empty. Nothing to do.
         }
 
         @Override

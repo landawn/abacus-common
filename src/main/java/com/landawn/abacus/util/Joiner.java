@@ -2480,7 +2480,7 @@ public final class Joiner implements Closeable {
 
         final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
+        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
@@ -2541,14 +2541,14 @@ public final class Joiner implements Closeable {
 
         final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
+        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
-        for (final String propName : ClassUtil.getPropNameList(cls)) {
+        for (final String propName : Beans.getPropNameList(cls)) {
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
                 continue;
             }
@@ -2609,14 +2609,14 @@ public final class Joiner implements Closeable {
 
         final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
+        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
         final BiPredicate<? super String, Object> filterToUse = (BiPredicate<? super String, Object>) filter;
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
-        for (final String propName : ClassUtil.getPropNameList(cls)) {
+        for (final String propName : Beans.getPropNameList(cls)) {
             propValue = beanInfo.getPropValue(bean, propName);
 
             if (!filterToUse.test(propName, propValue)) {

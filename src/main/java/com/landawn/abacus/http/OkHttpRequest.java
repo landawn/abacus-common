@@ -34,8 +34,8 @@ import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Charsets;
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -620,7 +620,7 @@ public final class OkHttpRequest {
         }
 
         final Class<?> cls = formBodyByBean.getClass();
-        N.checkArgument(ClassUtil.isBeanClass(cls), "{} is not a bean class with getter/setter methods", cls);
+        N.checkArgument(Beans.isBeanClass(cls), "{} is not a bean class with getter/setter methods", cls);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         final FormBody.Builder formBodyBuilder = new FormBody.Builder();

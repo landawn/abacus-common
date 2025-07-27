@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
@@ -737,7 +738,7 @@ public final class Fn {
      *
      * @param c the collection of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
-     * @see IOUtil#closeAll(Collection)
+     * @see IOUtil#closeAll(Iterable) 
      */
     public static Runnable closeAll(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -812,7 +813,7 @@ public final class Fn {
      *
      * @param c the collection of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
-     * @see IOUtil#closeAllQuietly(Collection)
+     * @see IOUtil#closeAllQuietly(Iterable) 
      */
     public static Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -1244,7 +1245,7 @@ public final class Fn {
      * @param equalsFunction the function to test equality
      * @return a Function that creates Wrapper objects with custom behavior
      * @throws IllegalArgumentException if hashFunction or equalsFunction is null
-     * @see Wrapper#of(Object, ToIntFunction, BiPredicate)
+     * @see Wrapper#of(Object, java.util.function.ToIntFunction, java.util.function.BiPredicate)
      */
     public static <T> Function<T, Wrapper<T>> wrap(final java.util.function.ToIntFunction<? super T> hashFunction,
             final java.util.function.BiPredicate<? super T, ? super T> equalsFunction) throws IllegalArgumentException {
@@ -1298,7 +1299,7 @@ public final class Fn {
      * @param <L> the left element type
      * @param <R> the right element type
      * @return a Function that extracts the left element from Pair objects
-     * @see Pair#left
+     * @see Pair#left()
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, L> left() {
@@ -1311,7 +1312,7 @@ public final class Fn {
      * @param <L> the left element type
      * @param <R> the right element type
      * @return a Function that extracts the right element from Pair objects
-     * @see Pair#right
+     * @see Pair#right()
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, R> right() {
@@ -1366,7 +1367,7 @@ public final class Fn {
      * @param keyExtractor the function to extract keys from values
      * @return a Function that creates Map.Entry objects
      * @deprecated replaced by {@code Fn#entryByKeyMapper(Function)}
-     * @see #entryByKeyMapper(Function)
+     * @see #entryByKeyMapper(java.util.function.Function)
      */
     @Deprecated
     public static <K, V> Function<V, Map.Entry<K, V>> entry(final java.util.function.Function<? super V, K> keyExtractor) {
@@ -1679,7 +1680,7 @@ public final class Fn {
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
 
-        return t -> clazz.cast(t);
+        return clazz::cast;
     }
 
     /**
@@ -2097,7 +2098,6 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is contained in the specified collection.
-     * Returns false if the collection is empty.
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
@@ -2115,11 +2115,10 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is not contained in the specified collection.
-     * Returns true if the collection is empty.
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
-     * @return a Predicate that tests for non-membership in collection
+     * @return a Predicate that tests for non-membership in a collection
      * @throws IllegalArgumentException if c is null
      * @see Collection#contains(Object)
      */
@@ -4514,7 +4513,7 @@ public final class Fn {
      * @param <R> the type of the result of the function
      * @param function the function to return
      * @return the function unchanged
-     * @see #f(Object, BiFunction)
+     * @see #f(Object, java.util.function.BiFunction) 
      * @see #f(Object, Object, TriFunction)
      */
     @Beta
@@ -4563,7 +4562,7 @@ public final class Fn {
      * @return a function that applies the input as the third argument to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
      * @see #f(Function)
-     * @see #f(Object, BiFunction)
+     * @see #f(Object, java.util.function.BiFunction) 
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) throws IllegalArgumentException {
@@ -5428,8 +5427,7 @@ public final class Fn {
      * @param biPredicate the bi-predicate to apply with the fixed first argument
      * @return a synchronized predicate that applies the input as the second argument to the bi-predicate
      * @throws IllegalArgumentException if the mutex or biPredicate is null
-     * @see #sp(Object, Predicate)
-     * @see #sp(Object, BiPredicate)
+     * @see #sp(Object, java.util.function.Predicate) 
      */
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -5456,7 +5454,6 @@ public final class Fn {
      * @param biPredicate the bi-predicate to be wrapped with synchronization
      * @return a bi-predicate that delegates to the given bi-predicate within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or biPredicate is null
-     * @see #sp(Object, Predicate)
      * @see #sp(Object, TriPredicate)
      */
     @Beta
@@ -5484,8 +5481,8 @@ public final class Fn {
      * @param triPredicate the tri-predicate to be wrapped with synchronization
      * @return a tri-predicate that delegates to the given tri-predicate within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or triPredicate is null
-     * @see #sp(Object, Predicate)
-     * @see #sp(Object, BiPredicate)
+     * @see #sp(Object, java.util.function.Predicate) 
+     * @see #sp(Object, java.util.function.BiPredicate)
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> sp(final Object mutex, final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
@@ -5538,8 +5535,7 @@ public final class Fn {
      * @param biConsumer the bi-consumer to apply with the fixed first argument
      * @return a synchronized consumer that applies the input as the second argument to the bi-consumer
      * @throws IllegalArgumentException if the mutex or biConsumer is null
-     * @see #sc(Object, Consumer)
-     * @see #sc(Object, BiConsumer)
+     * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
     public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
@@ -5565,8 +5561,7 @@ public final class Fn {
      * @param biConsumer the bi-consumer to be wrapped with synchronization
      * @return a bi-consumer that delegates to the given bi-consumer within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or biConsumer is null
-     * @see #sc(Object, Consumer)
-     * @see #sp(Object, TriConsumer)
+     * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
@@ -5593,17 +5588,17 @@ public final class Fn {
      * @param triConsumer the tri-consumer to be wrapped with synchronization  
      * @return a tri-consumer that delegates to the given tri-consumer within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or triConsumer is null
-     * @see #sc(Object, Consumer)
-     * @see #sc(Object, BiConsumer)
+     * @see #sc(Object, java.util.function.Consumer) 
+     * @see #sc(Object, java.util.function.BiConsumer) 
      */
     @Beta
-    public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<A, B, C> triPredicate) throws IllegalArgumentException {
+    public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<A, B, C> triConsumer) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
-        N.checkArgNotNull(triPredicate, cs.TriConsumer);
+        N.checkArgNotNull(triConsumer, cs.TriConsumer);
 
         return (a, b, c) -> {
             synchronized (mutex) {
-                triPredicate.accept(a, b, c);
+                triConsumer.accept(a, b, c);
             }
         };
     }
@@ -5649,8 +5644,7 @@ public final class Fn {
      * @param biFunction the bi-function to apply with the fixed first argument
      * @return a synchronized function that applies the input as the second argument to the bi-function
      * @throws IllegalArgumentException if the mutex or biFunction is null
-     * @see #sf(Object, Function)
-     * @see #sf(Object, BiFunction)
+     * @see #sf(Object, java.util.function.Function) 
      */
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -5678,7 +5672,7 @@ public final class Fn {
      * @param biFunction the bi-function to be wrapped with synchronization
      * @return a bi-function that delegates to the given bi-function within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or biFunction is null
-     * @see #sf(Object, Function)
+     * @see #sf(Object, java.util.function.Function) 
      * @see #sf(Object, TriFunction)
      */
     @Beta
@@ -5707,8 +5701,8 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param triFunction the tri-function to be wrapped with synchronization
      * @return a tri-function that delegates to the given tri-function within a synchronized block on the mutex
-     * @see #sf(Object, Function)
-     * @see #sf(Object, BiFunction)
+     * @see #sf(Object, java.util.function.Function) 
+     * @see #sf(Object, java.util.function.BiFunction) 
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<A, B, C, R> triFunction) {
@@ -5732,8 +5726,8 @@ public final class Fn {
      * @param action the consumer to convert to a function
      * @return a function that executes the consumer and returns null
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(Consumer, Object)
-     * @see #f2c(Function)
+     * @see #c2f(java.util.function.Consumer, Object) 
+     * @see #f2c(java.util.function.Function) 
      */
     @Beta
     public static <T> Function<T, Void> c2f(final java.util.function.Consumer<? super T> action) throws IllegalArgumentException {
@@ -5757,8 +5751,8 @@ public final class Fn {
      * @param valueToReturn the value to return after the consumer executes
      * @return a function that executes the consumer and returns the specified value
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(Consumer)
-     * @see #f2c(Function)
+     * @see #c2f(java.util.function.Consumer) 
+     * @see #f2c(java.util.function.Function) 
      */
     @Beta
     public static <T, R> Function<T, R> c2f(final java.util.function.Consumer<? super T> action, final R valueToReturn) throws IllegalArgumentException {
@@ -5781,8 +5775,8 @@ public final class Fn {
      * @param action the bi-consumer to convert to a bi-function
      * @return a bi-function that executes the bi-consumer and returns null
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(BiConsumer, Object)
-     * @see #f2c(BiFunction)
+     * @see #c2f(java.util.function.BiConsumer, Object) 
+     * @see #f2c(java.util.function.Function) 
      */
     @Beta
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) throws IllegalArgumentException {
@@ -5807,8 +5801,8 @@ public final class Fn {
      * @param valueToReturn the value to return after the bi-consumer executes
      * @return a bi-function that executes the bi-consumer and returns the specified value
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(BiConsumer)
-     * @see #f2c(BiFunction)
+     * @see #c2f(java.util.function.Consumer) 
+     * @see #f2c(java.util.function.BiFunction) 
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> c2f(final java.util.function.BiConsumer<? super T, ? super U> action, final R valueToReturn)
@@ -5884,7 +5878,7 @@ public final class Fn {
      * @param func the function to convert to a consumer
      * @return a consumer that executes the function and discards its return value
      * @throws IllegalArgumentException if the func is null
-     * @see #c2f(Consumer)
+     * @see #c2f(java.util.function.Consumer) 
      */
     @Beta
     public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) throws IllegalArgumentException {
@@ -5904,7 +5898,7 @@ public final class Fn {
      * @param func the bi-function to convert to a bi-consumer
      * @return a bi-consumer that executes the bi-function and discards its return value
      * @throws IllegalArgumentException if the func is null
-     * @see #c2f(BiConsumer)
+     * @see #c2f(java.util.function.BiConsumer) 
      */
     @Beta
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) throws IllegalArgumentException {
@@ -6054,7 +6048,7 @@ public final class Fn {
      * @param runnable the runnable to convert to a callable
      * @return a callable that executes the runnable and returns null
      * @throws IllegalArgumentException if the runnable is null
-     * @see #r2c(Runnable, Object)
+     * @see #r2c(java.lang.Runnable, Object) 
      * @see #c2r(Callable)
      */
     public static Callable<Void> r2c(final java.lang.Runnable runnable) throws IllegalArgumentException {
@@ -6077,7 +6071,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the runnable executes
      * @return a callable that executes the runnable and returns the specified value
      * @throws IllegalArgumentException if the runnable is null
-     * @see #r2c(Runnable)
+     * @see #r2c(java.lang.Runnable) 
      * @see #c2r(Callable)
      */
     public static <R> Callable<R> r2c(final java.lang.Runnable runnable, final R valueToReturn) throws IllegalArgumentException {
@@ -6099,7 +6093,7 @@ public final class Fn {
      * @param callable the callable to convert to a runnable
      * @return a runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
-     * @see #r2c(Runnable)
+     * @see #r2c(java.lang.Runnable) 
      */
     public static <R> Runnable c2r(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -6165,7 +6159,7 @@ public final class Fn {
      * @param callable the Java callable to convert to a runnable
      * @return a Java runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
-     * @see #r2c(Runnable)
+     * @see #r2c(java.lang.Runnable) 
      */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);

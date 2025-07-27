@@ -117,7 +117,6 @@ import com.landawn.abacus.util.function.IntFunction;
  * @see java.util.function.IntFunction
  * @see java.util.Collection
  * @see java.util.Map
- * @see IntFunctions.Factory
  */
 @SuppressWarnings({ "java:S1694" })
 public final class IntFunctions {
@@ -1052,7 +1051,7 @@ public final class IntFunctions {
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
                 ret = ofIdentityHashMap();
-            } else if (ConcurrentHashMap.class.isAssignableFrom(targetType)) {
+            } else if (ConcurrentHashMap.class.isAssignableFrom(targetType) || ConcurrentMap.class.equals(targetType)) {
                 ret = ofConcurrentHashMap();
             } else if (BiMap.class.isAssignableFrom(targetType)) {
                 ret = ofBiMap();

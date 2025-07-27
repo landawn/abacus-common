@@ -4458,7 +4458,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return a;
         };
 
-        final Function<Pair<T, List<T>>, List<T>> finisher = a -> a.right();
+        final Function<Pair<T, List<T>>, List<T>> finisher = Pair::right;
 
         return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -6446,7 +6446,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} implementing the cascaded group-by operation
-     * @see java.util.stream.Collectors#groupingBy(Function, Collector, Supplier)
+     * @see java.util.stream.Collectors#groupingBy(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
@@ -6591,7 +6591,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty concurrent map into which the results will be inserted
      * @return a concurrent {@code Collector} implementing the cascaded group-by operation
-     * @see java.util.stream.Collectors#groupingByConcurrent(Function, Collector, Supplier)
+     * @see java.util.stream.Collectors#groupingByConcurrent(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {

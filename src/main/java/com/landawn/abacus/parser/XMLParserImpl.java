@@ -47,6 +47,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -2497,10 +2498,10 @@ final class XMLParserImpl extends AbstractXMLParser {
         Type<?> propEleType = null;
 
         if (propType.clazz().isArray()
-                && (ClassUtil.isBeanClass(propType.getElementType().clazz()) || Map.class.isAssignableFrom(propType.getElementType().clazz()))) {
+                && (Beans.isBeanClass(propType.getElementType().clazz()) || Map.class.isAssignableFrom(propType.getElementType().clazz()))) {
             propEleType = propType.getElementType();
         } else if (propType.getParameterTypes().length == 1
-                && (ClassUtil.isBeanClass(propType.getParameterTypes()[0].clazz()) || Map.class.isAssignableFrom(propType.getParameterTypes()[0].clazz()))) {
+                && (Beans.isBeanClass(propType.getParameterTypes()[0].clazz()) || Map.class.isAssignableFrom(propType.getParameterTypes()[0].clazz()))) {
             propEleType = propType.getParameterTypes()[0];
         } else {
             propEleType = N.typeOf(Map.class);

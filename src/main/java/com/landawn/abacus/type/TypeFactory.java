@@ -42,6 +42,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.EntityId;
@@ -1005,7 +1006,7 @@ public final class TypeFactory {
                     }
                 } else if (Number.class.isAssignableFrom(cls)) {
                     type = new NumberType(cls);
-                } else if (ClassUtil.isBeanClass(cls) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(cls))) {
+                } else if (Beans.isBeanClass(cls) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(cls))) {
                     type = new BeanType(cls);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = TypeAttrParser.newInstance(cls, typeName);

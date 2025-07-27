@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  *   <li>{@link #empty()} - returns an empty ImmutableBiMap</li>
- *   <li>{@link #of(...)} - creates an ImmutableBiMap with the specified key-value pairs</li>
+ *   <li>{@link #of(Object, Object)} - creates an ImmutableBiMap with the specified key-value pairs</li>
  *   <li>{@link #copyOf(BiMap)} - creates a defensive copy from another BiMap</li>
  *   <li>{@link #wrap(BiMap)} - wraps an existing BiMap (changes to the underlying map will be reflected)</li>
  * </ul>

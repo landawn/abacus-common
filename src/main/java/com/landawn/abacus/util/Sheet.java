@@ -2755,15 +2755,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -2832,15 +2836,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -2912,8 +2920,10 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(final long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, cs.n);
+                    public void advance(final long n) {
+                        if (n <= 0) {
+                            return;
+                        }
 
                         columnIndex = n < columnLength - columnIndex ? columnIndex + (int) n : columnLength;
                     }
@@ -2926,8 +2936,10 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 rowIndex = n < toRowIndex - rowIndex ? rowIndex + (int) n : toRowIndex;
             }
@@ -2999,8 +3011,10 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 columnIndex = n < toColumnIndex - columnIndex ? columnIndex + (int) n : toColumnIndex;
             }
@@ -3233,15 +3247,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -3310,15 +3328,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -3392,8 +3414,10 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(final long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, cs.n);
+                    public void advance(final long n) {
+                        if (n <= 0) {
+                            return;
+                        }
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
                     }
@@ -3406,15 +3430,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -3472,15 +3500,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -3554,8 +3586,10 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(final long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, cs.n);
+                    public void advance(final long n) {
+                        if (n <= 0) {
+                            return;
+                        }
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
                     }
@@ -3570,15 +3604,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
@@ -3636,15 +3674,19 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(final long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, cs.n);
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
 
             @Override
             public long count() {
-                return toIndex - cursor; //NOSONAR
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
             }
         });
     }
