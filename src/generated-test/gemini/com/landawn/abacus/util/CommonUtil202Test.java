@@ -100,7 +100,7 @@ public class CommonUtil202Test extends TestBase {
         // Mocking ClassUtil behavior for tests.
         // In a real scenario, ClassUtil would provide these.
         public static List<String> getPropNames() {
-            // In a real test, this would come from a mocked ClassUtil.getPropNameList(TestBean.class)
+            // In a real test, this would come from a mocked Beans.getPropNameList(TestBean.class)
             return Arrays.asList("name", "age", "salary", "active", "nestedBean", "tags", "attributes");
         }
 

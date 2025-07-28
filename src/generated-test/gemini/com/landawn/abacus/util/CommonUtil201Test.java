@@ -577,7 +577,7 @@ public class CommonUtil201Test extends TestBase {
         TestBean beanB = new TestBean("DifferentName", 25, 60000, false);
 
         // To test this properly, ClassUtil needs to be functional or mocked.
-        // Assuming ClassUtil.getPropNameList(TestBean.class) returns ("name", "age", "salary", "active")
+        // Assuming Beans.getPropNameList(TestBean.class) returns ("name", "age", "salary", "active")
         // and that N.equalsByProps works.
 
         // assertTrue(N.equalsByCommonProps(beanA1, beanA2)); // if N.equalsByProps works fully
