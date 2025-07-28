@@ -4855,11 +4855,11 @@ public final class Beans {
     //     * @param cls
     //     * @return true, if is bean
     //     * @see ClassUtil#isBeanClass(Class)
-    //     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
+    //     * @deprecated replaced by {@code Beans.isBeanClass(Class)}
     //     */
     //    @Deprecated
     //    public static boolean isBeanClass(final Class<?> cls) {
-    //        return ClassUtil.isBeanClass(cls);
+    //        return Beans.isBeanClass(cls);
     //    }
 
     private static final BinaryOperator<?> DEFAULT_MERGE_FUNC = (a, b) -> a == null ? b : a;
@@ -5829,12 +5829,12 @@ public final class Beans {
         Type<Object> type = null;
         Class<?> parameterClass = null;
         Object propValue = null;
-
+    
         for (final String propName : propNamesToFill) {
             propInfo = beanInfo.getPropInfo(propName);
             parameterClass = propInfo.clazz;
             type = propInfo.jsonXmlType;
-
+    
             if (String.class.equals(parameterClass)) {
                 propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
@@ -5862,36 +5862,9 @@ public final class Beans {
             } else {
                 propValue = type.defaultValue();
             }
-
+    
             propInfo.setPropValue(bean, propValue);
         }
-    }
-
-    /**
-     * Compares the properties of two beans to determine if they are equal.
-     *
-     * <p>This method compares only the specified properties of the two bean objects.
-     * Properties are compared using their equals() method. If all specified properties
-     * are equal, the method returns true.</p>
-     *
-     * <p><b>Usage example:</b></p>
-     * <pre>{@code
-     * User user1 = new User("John", 25, "john@example.com");
-     * User user2 = new User("John", 30, "john@example.com");
-     * boolean equal = Beans.equalsByProps(user1, user2, Arrays.asList("name", "email"));
-     * // Returns true because name and email are equal, age is not compared
-     * }</pre>
-     *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
-     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
-     */
-    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
-        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
-
-        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
     }
 
     /**
@@ -5919,15 +5892,42 @@ public final class Beans {
         N.checkArgNotNull(bean2);
         checkBeanClass(bean1.getClass());
         checkBeanClass(bean2.getClass());
-
+    
         final List<String> propNamesToCompare = new ArrayList<>(getPropNameList(bean1.getClass()));
         propNamesToCompare.retainAll(getPropNameList(bean2.getClass()));
-
+    
         if (N.isEmpty(propNamesToCompare)) {
             throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
         }
-
+    
         return equalsByProps(bean1, bean2, propNamesToCompare);
+    }
+
+    /**
+     * Compares the properties of two beans to determine if they are equal.
+     *
+     * <p>This method compares only the specified properties of the two bean objects.
+     * Properties are compared using their equals() method. If all specified properties
+     * are equal, the method returns true.</p>
+     *
+     * <p><b>Usage example:</b></p>
+     * <pre>{@code
+     * User user1 = new User("John", 25, "john@example.com");
+     * User user2 = new User("John", 30, "john@example.com");
+     * boolean equal = Beans.equalsByProps(user1, user2, Arrays.asList("name", "email"));
+     * // Returns true because name and email are equal, age is not compared
+     * }</pre>
+     *
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
+     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
+     */
+    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
+        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
+
+        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
     }
 
     /**

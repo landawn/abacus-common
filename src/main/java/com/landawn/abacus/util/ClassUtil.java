@@ -155,13 +155,13 @@ import com.landawn.abacus.util.u.OptionalShort;
  * 
  * // Get property value
  * Object bean = new MyBean();
- * String name = ClassUtil.getPropValue(bean, "name");
+ * String name = Beans.getPropValue(bean, "name");
  * 
  * // Set property value
- * ClassUtil.setPropValue(bean, "name", "John");
+ * Beans.setPropValue(bean, "name", "John");
  * 
  * // Get all property names
- * List<String> propNames = ClassUtil.getPropNameList(MyBean.class);
+ * List<String> propNames = Beans.getPropNameList(MyBean.class);
  * }</pre>
  * 
  * @author HaiYang Li

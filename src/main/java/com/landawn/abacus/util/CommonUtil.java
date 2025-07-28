@@ -9840,7 +9840,7 @@ sealed class CommonUtil permits N {
         //        if (type.isMap()) {
         //            columnNames = new ArrayList<>(((Map<String, Object>) firstElement).keySet());
         //        } else if (type.isBean()) {
-        //            columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
+        //            columnNames = new ArrayList<>(Beans.getPropNameList(cls));
         //        } else {
         //            //    if (type.isArray()) {
         //            //        final Object[] a = (Object[]) firstNonNullRow;
