@@ -210,6 +210,7 @@ public final class CSVUtil {
      *
      * @param parser the Function to set as the CSV header parser, must not be null
      * @throws IllegalArgumentException if the parser is null
+     * @see #resetCSVHeaderParser()
      */
     public static void setCSVHeaderParser(final Function<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, cs.parser);
@@ -232,6 +233,7 @@ public final class CSVUtil {
      *
      * @param parser the BiConsumer to set as the CSV line parser, must not be null
      * @throws IllegalArgumentException if the parser is null
+     * @see #resetCSVLineParser()
      */
     public static void setCSVLineParser(final BiConsumer<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, cs.parser);
@@ -280,6 +282,8 @@ public final class CSVUtil {
      * }</pre>
      *
      * @return the current CSV header parser as a Function that takes a String and returns a String array
+     * @see #setCSVHeaderParser(Function)
+     * @see #resetCSVHeaderParser()
      */
     public static Function<String, String[]> getCurrentHeaderParser() {
         return csvHeaderParser_TL.get();
@@ -297,6 +301,8 @@ public final class CSVUtil {
      * }</pre>
      *
      * @return the current CSV line parser as a BiConsumer that takes a String and a String array
+     * @see #setCSVLineParser(BiConsumer)
+     * @see #resetCSVLineParser()
      */
     public static BiConsumer<String, String[]> getCurrentLineParser() {
         return csvLineParser_TL.get();
@@ -312,6 +318,8 @@ public final class CSVUtil {
      * // Write CSV with backslash escaping
      * CSVUtil.resetEscapeCharForWrite(); // Reset to default
      * }</pre>
+     * 
+     * @see #resetEscapeCharForWrite()
      */
     public static void setEscapeCharToBackSlashForWrite() {
         isBackSlashEscapeCharForWrite_TL.set(true);
@@ -1643,7 +1651,7 @@ public final class CSVUtil {
         try {
             reader = IOUtil.newFileReader(source);
 
-            return stream(reader, selectColumnNames, offset, count, rowFilter, true, targetType);
+            return stream(reader, selectColumnNames, offset, count, rowFilter, targetType, true);
         } catch (final Exception e) {
             if (reader != null) {
                 IOUtil.closeQuietly(reader);
@@ -1658,13 +1666,13 @@ public final class CSVUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @param targetType the Class of the target type
+     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
      */
-    public static <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType) {
-        return stream(source, null, closeReaderWhenStreamIsClosed, targetType);
+    public static <T> Stream<T> stream(final Reader source, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed) {
+        return stream(source, null, targetType, closeReaderWhenStreamIsClosed);
     }
 
     /**
@@ -1673,14 +1681,14 @@ public final class CSVUtil {
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
      * @param selectColumnNames a Collection of column names to select
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @param targetType the Class of the target type
+     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
      */
-    public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final boolean closeReaderWhenStreamIsClosed,
-            final Class<? extends T> targetType) {
-        return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), closeReaderWhenStreamIsClosed, targetType);
+    public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final Class<? extends T> targetType,
+            final boolean closeReaderWhenStreamIsClosed) {
+        return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), targetType, closeReaderWhenStreamIsClosed);
     }
 
     /**
@@ -1692,13 +1700,13 @@ public final class CSVUtil {
      * @param offset the number of lines to skip from the beginning
      * @param count the maximum number of lines to read
      * @param rowFilter a Predicate to filter the lines
-     * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @param targetType the Class of the target type
+     * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, of if the target type is {@code null} or not supported.
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
-            final Predicate<? super String[]> rowFilter, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType)
+            final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed)
             throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgNotNull(targetType, cs.targetType);
@@ -1931,7 +1939,7 @@ public final class CSVUtil {
         try {
             reader = IOUtil.newFileReader(source);
 
-            return stream(reader, selectColumnNames, offset, count, rowFilter, true, rowMapper);
+            return stream(reader, selectColumnNames, offset, count, rowFilter, rowMapper, true);
         } catch (final Exception e) {
             if (reader != null) {
                 IOUtil.closeQuietly(reader);
@@ -1946,14 +1954,15 @@ public final class CSVUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @param rowMapper converts the row data to the target type
      *      The first parameter is the column names, the second parameter is the row data. 
+     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
      */
-    public static <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed,
-            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper) {
-        return stream(source, null, closeReaderWhenStreamIsClosed, rowMapper);
+    public static <T> Stream<T> stream(final Reader source,
+            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
+            final boolean closeReaderWhenStreamIsClosed) {
+        return stream(source, null, rowMapper, closeReaderWhenStreamIsClosed);
     }
 
     /**
@@ -1962,15 +1971,16 @@ public final class CSVUtil {
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
      * @param selectColumnNames a Collection of column names to select
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @param rowMapper converts the row data to the target type
      *      The first parameter is the column names, the second parameter is the row data. 
+     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
      */
-    public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final boolean closeReaderWhenStreamIsClosed,
-            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper) {
-        return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), closeReaderWhenStreamIsClosed, rowMapper);
+    public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames,
+            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
+            final boolean closeReaderWhenStreamIsClosed) {
+        return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowMapper, closeReaderWhenStreamIsClosed);
     }
 
     /**
@@ -1982,16 +1992,16 @@ public final class CSVUtil {
      * @param offset the number of lines to skip from the beginning
      * @param count the maximum number of lines to read
      * @param rowFilter a Predicate to filter the lines
-     * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @param rowMapper converts the row data to the target type
      *      The first parameter is the column names, the second parameter is the row data. 
+     * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, of if the target type is {@code null} or not supported.
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
-            final Predicate<? super String[]> rowFilter, final boolean closeReaderWhenStreamIsClosed,
-            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper)
-            throws IllegalArgumentException {
+            final Predicate<? super String[]> rowFilter,
+            final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
+            final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         //noinspection resource
@@ -2086,4 +2096,258 @@ public final class CSVUtil {
             }
         });
     }
+
+    /**
+     * Converts a CSV file to JSON format with all columns included.
+     * This is a convenience method that converts the entire CSV file to JSON format
+     * without column selection or type specification.
+     *
+     * <p>The CSV file's first line is treated as column headers, and all subsequent
+     * lines are converted to JSON objects with string values. The output JSON will
+     * be an array of objects where each object represents a CSV row.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert employees.csv to employees.json
+     * CSVUtil.csv2json(
+     *     new File("data/employees.csv"),
+     *     new File("output/employees.json")
+     * );
+     * }</pre>
+     *
+     * <p>Example CSV input:</p>
+     * <pre>
+     * Name,Age,Department
+     * John,30,Engineering
+     * Jane,25,Marketing
+     * </pre>
+     *
+     * <p>Example JSON output:</p>
+     * <pre>{@code
+     * [
+     *   {"Name":"John","Age":"30","Department":"Engineering"},
+     *   {"Name":"Jane","Age":"25","Department":"Marketing"}
+     * ]
+     * }</pre>
+     *
+     * @param csvFile the source CSV file to convert
+     * @param jsonFile the destination JSON file to create
+     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @throws UncheckedIOException if an I/O error occurs during file operations
+     * @see #csv2json(File, Collection, File)
+     * @see #csv2json(File, Collection, File, Class)
+     */
+    public static void csv2json(final File csvFile, final File jsonFile) throws UncheckedIOException {
+        csv2json(csvFile, null, jsonFile);
+    }
+
+    /**
+     * Converts a CSV file to JSON format with selected columns.
+     * This method allows you to specify which columns from the CSV file should be
+     * included in the JSON output. All values are treated as strings in the output.
+     *
+     * <p>The CSV file's first line is treated as column headers. Only the columns
+     * specified in {@code selectColumnNames} will be included in the JSON output.
+     * If {@code selectColumnNames} is null, all columns will be included.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert only specific columns from employees.csv to JSON
+     * CSVUtil.csv2json(
+     *     new File("data/employees.csv"),
+     *     Arrays.asList("Name", "Department"),
+     *     new File("output/employees_filtered.json")
+     * );
+     * }</pre>
+     *
+     * <p>Example CSV input:</p>
+     * <pre>
+     * Name,Age,Department,Salary
+     * John,30,Engineering,75000
+     * Jane,25,Marketing,65000
+     * </pre>
+     *
+     * <p>Example JSON output (with selected columns "Name", "Department"):</p>
+     * <pre>{@code
+     * [
+     *   {"Name":"John","Department":"Engineering"},
+     *   {"Name":"Jane","Department":"Marketing"}
+     * ]
+     * }</pre>
+     *
+     * @param csvFile the source CSV file to convert
+     * @param selectColumnNames the collection of column names to include in JSON output, 
+     *                         null to include all columns
+     * @param jsonFile the destination JSON file to create
+     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @throws UncheckedIOException if an I/O error occurs during file operations
+     * @see #csv2json(File, File)
+     * @see #csv2json(File, Collection, File, Class)
+     */
+    public static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile) throws UncheckedIOException {
+        csv2json(csvFile, selectColumnNames, jsonFile, null, true);
+    }
+
+    /**
+     * Converts a CSV file to JSON format with selected columns and type conversion.
+     * This method allows you to specify which columns to include and provides type conversion
+     * based on a bean class definition. Values are converted from strings to their appropriate
+     * types as defined by the bean class properties.
+     *
+     * <p>The CSV file's first line is treated as column headers. Only the columns
+     * specified in {@code selectColumnNames} will be included in the JSON output.
+     * The {@code beanClassForTypeWriting} parameter defines how each column should be
+     * typed in the JSON output - properties of the bean class determine the target types.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * public class Employee {
+     *     private String name;
+     *     private Integer age;
+     *     private String department;
+     *     // getters and setters...
+     * }
+     *
+     * // Convert with type conversion - age will be numeric in JSON
+     * CSVUtil.csv2json(
+     *     new File("data/employees.csv"),
+     *     Arrays.asList("name", "age", "department"),
+     *     new File("output/employees_typed.json"),
+     *     Employee.class
+     * );
+     * }</pre>
+     *
+     * <p>Example CSV input:</p>
+     * <pre>
+     * name,age,department,salary
+     * John,30,Engineering,75000
+     * Jane,25,Marketing,65000
+     * </pre>
+     *
+     * <p>Example JSON output (with selected columns and type conversion):</p>
+     * <pre>{@code
+     * [
+     *   {"name":"John","age":30,"department":"Engineering"},
+     *   {"name":"Jane","age":25,"department":"Marketing"}
+     * ]
+     * }</pre>
+     *
+     * @param csvFile the source CSV file to convert
+     * @param selectColumnNames the collection of column names to include in JSON output,
+     *                         null to include all columns
+     * @param jsonFile the destination JSON file to create
+     * @param beanClassForTypeWriting the bean class defining property types for conversion,
+     *                               null to treat all values as strings
+     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @throws UncheckedIOException if an I/O error occurs during file operations
+     * @see #csv2json(File, File)
+     * @see #csv2json(File, Collection, File)
+     */
+    public static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting)
+            throws UncheckedIOException {
+        csv2json(csvFile, selectColumnNames, jsonFile, beanClassForTypeWriting, false);
+    }
+
+    private static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting,
+            final boolean canBeanClassForTypeWritingBeNull) throws UncheckedIOException {
+        if (beanClassForTypeWriting == null && !canBeanClassForTypeWritingBeNull) {
+            throw new IllegalArgumentException("'beanClassForTypeWriting' can't be null.");
+        }
+
+        try (final BufferedReader reader = IOUtil.newBufferedReader(csvFile); //
+                final BufferedJSONWriter writer = Objectory.createBufferedJSONWriter(IOUtil.newFileWriter(jsonFile))) {
+            final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
+            final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
+
+            String line = reader.readLine();
+
+            if (line == null) {
+                return;
+            }
+
+            final Type<Object> strType = Type.of(String.class);
+
+            final String[] titles = headerParser.apply(line);
+            final int columnCount = titles.length;
+            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+                    || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
+            final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
+            final boolean[] isColumnSelected = new boolean[columnCount];
+
+            if (noSelectColumnNamesSpecified) {
+                N.fill(isColumnSelected, true);
+            } else {
+                for (int i = 0; i < columnCount; i++) {
+                    if (selectPropNameSet.remove(titles[i])) {
+                        isColumnSelected[i] = true;
+                    }
+                }
+
+                if (N.notEmpty(selectPropNameSet)) {
+                    throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
+                }
+            }
+
+            final Type<Object>[] columnType = new Type[columnCount];
+
+            if (beanClassForTypeWriting == null) {
+                Arrays.fill(columnType, strType);
+            } else {
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClassForTypeWriting);
+
+                for (int i = 0; i < columnCount; i++) {
+                    final PropInfo propInfo = beanInfo.getPropInfo(titles[i]);
+
+                    if (propInfo == null || propInfo.type.equals(strType)) {
+                        columnType[i] = strType;
+                    } else {
+                        columnType[i] = propInfo.type;
+                    }
+                }
+            }
+
+            final String[] rowData = new String[columnCount];
+
+            boolean firstRow = true;
+            writer.write("[\n");
+
+            while ((line = reader.readLine()) != null) {
+                if (!firstRow) {
+                    writer.write(",\n");
+                } else {
+                    firstRow = false;
+                }
+
+                lineParser.accept(line, rowData);
+
+                writer.write("{");
+                boolean firstColumn = true;
+
+                for (int i = 0; i < columnCount; i++) {
+                    if (isColumnSelected[i]) {
+                        if (!firstColumn) {
+                            writer.write(",");
+                        } else {
+                            firstColumn = false;
+                        }
+
+                        writer.write("\"");
+                        writer.write(titles[i]);
+                        writer.write("\":");
+                        if (columnType[i] == strType) {
+                            columnType[i].writeCharacter(writer, rowData[i], config);
+                        } else {
+                            columnType[i].writeCharacter(writer, columnType[i].valueOf(rowData[i]), config);
+                        }
+                    }
+                }
+                writer.write("}");
+            }
+
+            writer.write("\n]");
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 }

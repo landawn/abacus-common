@@ -3883,22 +3883,6 @@ public final class Beans {
      * // snakeCase: {first_name=John, home_address.city=NYC}
      * }</pre>
      *
-     * @implSpec
-     * <code>
-     *  Beans.bean2FlatMap(new User("John", new Address("New York"))) ==> {"name"="John", "address.city"="New York"};
-     *  <br />
-     *  // with the below bean classes
-     *  <br />
-     *  public static class User {
-     *     private String name;
-     *     private Address address;
-     *  }
-     *  <br/>
-     *  public static class Address {
-     *      private String city;
-     *  }
-     * </code>
-     *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a flat map.
      * @param selectPropNames A collection of property names to be included in the resulting map. If this is empty, all properties are included.

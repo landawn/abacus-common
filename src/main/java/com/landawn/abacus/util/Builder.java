@@ -4582,6 +4582,32 @@ public class Builder<T> {
         public boolean result() {
             return result;
         }
+
+        /**
+         * Returns the result of the equivalence chain.
+         * This method is an alias for {@link #result()} and provides a more descriptive
+         * name for checking equality results.
+         *
+         * <p>Returns true if and only if all comparisons in the chain returned true.
+         * If any comparison returned false, this method returns false.</p>
+         *
+         * <p><strong>Example:</strong></p>
+         * <pre>{@code
+         * boolean areEqual = Builder.equals(obj1.getName(), obj2.getName())
+         *                           .equals(obj1.getAge(), obj2.getAge())
+         *                           .isEquals();
+         *
+         * if (areEqual) {
+         *     // Objects are considered equal based on compared fields
+         * }
+         * }</pre>
+         *
+         * @return true if all values compared are equal, false otherwise
+         * @see #result()
+         */
+        public boolean isEquals() {
+            return result;
+        }
     }
 
     /**

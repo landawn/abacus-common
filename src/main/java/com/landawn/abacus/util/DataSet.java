@@ -389,6 +389,24 @@ public sealed interface DataSet permits RowDataSet {
     //        throw new UnsupportedOperationException();
     //    }
 
+    //    /**
+    //     * Retrieves the value at the specified row and column name in the DataSet.
+    //     * <br />
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * @param <T> the type of the value to be returned.
+    //     * @param rowIndex the index of the row.
+    //     * @param columnName the name of the column.
+    //     * @return the value at the specified row and column name.
+    //     * @throws IndexOutOfBoundsException if the specified row index is out of bounds.
+    //     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+    //     * @deprecated Use {@link #get(int, int)} instead for better performance.
+    //     */
+    //    default <T> T get(int rowIndex, String columnName) throws IndexOutOfBoundsException {
+    //        return get(rowIndex, getColumnIndex(columnName));
+    //    }
+
     /**
      * Sets the value at the specified row and column index in the DataSet.
      *
@@ -400,6 +418,21 @@ public sealed interface DataSet permits RowDataSet {
      */
     void set(int rowIndex, int columnIndex, Object element) throws IllegalStateException, IndexOutOfBoundsException;
 
+    //    /**
+    //     * Sets the value at the specified row and column name in the DataSet.
+    //     *
+    //     * @param rowIndex the index of the row.
+    //     * @param columnName the name of the column.
+    //     * @param element the new value to be set at the specified row and column name.
+    //     * @throws IllegalStateException if the DataSet is frozen (read-only).
+    //     * @throws IndexOutOfBoundsException if the specified row index is out of bounds.
+    //     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+    //     * @deprecated Use {@link #set(int, int, Object)} instead for better performance.
+    //     */
+    //    default void set(int rowIndex, String columnName, Object element) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
+    //        set(rowIndex, getColumnIndex(columnName), element);
+    //    }
+
     /**
      * Checks if the value at the specified row and column index in the DataSet is {@code null}.
      *
@@ -409,6 +442,20 @@ public sealed interface DataSet permits RowDataSet {
      * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
     boolean isNull(int rowIndex, int columnIndex) throws IndexOutOfBoundsException;
+
+    //    /**
+    //     * Checks if the value at the specified row and column name in the DataSet is {@code null}.
+    //     *
+    //     * @param rowIndex the index of the row.
+    //     * @param columnName the name of the column.
+    //     * @return {@code true} if the value at the specified row and column name is {@code null}, {@code false} otherwise.
+    //     * @throws IndexOutOfBoundsException if the specified row index is out of bounds.
+    //     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+    //     * @deprecated Use {@link #isNull(int, int)} instead for better performance.
+    //     */
+    //    default boolean isNull(int rowIndex, String columnName) throws IndexOutOfBoundsException, IllegalArgumentException {
+    //        return isNull(rowIndex, getColumnIndex(columnName));
+    //    }
 
     /**
      * Retrieves the value at the specified column index in the DataSet for the current row.

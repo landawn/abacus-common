@@ -31,6 +31,8 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.function.TriConsumer;
 
+import lombok.Data;
+
 /**
  * Unit tests for CSVUtil class.
  */
@@ -344,7 +346,7 @@ public class CSVUtil100Test extends TestBase {
     @DisplayName("Test stream from Reader")
     public void testStreamFromReader() throws IOException {
         try (Reader reader = new StringReader(testCsvContent)) {
-            List<TestBean> beans = CSVUtil.stream(reader, true, TestBean.class).toList();
+            List<TestBean> beans = CSVUtil.stream(reader, TestBean.class, true).toList();
 
             assertEquals(5, beans.size());
             assertEquals("John", beans.get(0).name);
@@ -457,7 +459,41 @@ public class CSVUtil100Test extends TestBase {
         CSVUtil.resetCSVLineParser();
     }
 
+    @Test
+    @DisplayName("Test csv2json")
+    public void test_csv2json() {
+        N.println(IOUtil.readAllToString(testCsvFile));
+
+        {
+            DataSet dataSet = CSVUtil.loadCSV(testCsvFile, TestBean.class);
+            File jsonFile = tempDir.resolve("test.json").toFile();
+            CSVUtil.csv2json(testCsvFile, jsonFile);
+            assertTrue(jsonFile.exists());
+            assertTrue(jsonFile.length() > 0);
+
+            List<TestBean> records = N.fromJson(jsonFile, Type.ofList(TestBean.class));
+            assertEquals(5, records.size());
+            assertEquals(dataSet.toList(TestBean.class), records);
+
+            N.println(IOUtil.readAllToString(jsonFile));
+        }
+        {
+            DataSet dataSet = CSVUtil.loadCSV(testCsvFile, TestBean.class);
+            File jsonFile = tempDir.resolve("test.json").toFile();
+            CSVUtil.csv2json(testCsvFile, null, jsonFile, TestBean.class);
+            assertTrue(jsonFile.exists());
+            assertTrue(jsonFile.length() > 0);
+
+            List<TestBean> records = N.fromJson(jsonFile, Type.ofList(TestBean.class));
+            assertEquals(5, records.size());
+            assertEquals(dataSet.toList(TestBean.class), records);
+
+            N.println(IOUtil.readAllToString(jsonFile));
+        }
+    }
+
     // Test bean classes
+    @Data
     public static class TestBean {
         public Integer id;
         public String name;
@@ -468,6 +504,7 @@ public class CSVUtil100Test extends TestBase {
         }
     }
 
+    @Data
     public static class Person {
         public String name;
         public int age;
