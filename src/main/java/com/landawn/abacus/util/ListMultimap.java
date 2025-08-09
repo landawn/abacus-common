@@ -592,7 +592,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     public ListMultimap<E, K> inverse() {
         final ListMultimap<K, E> multimap = this;
         //noinspection rawtypes
-        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
+        final ListMultimap<E, K> result = new ListMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, List<E>> entry : multimap.entrySet()) {
@@ -600,13 +600,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
                 if (N.notEmpty(c)) {
                     for (final E e : c) {
-                        res.put(e, entry.getKey());
+                        result.put(e, entry.getKey());
                     }
                 }
             }
         }
 
-        return res;
+        return result;
     }
 
     /**

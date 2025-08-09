@@ -3592,6 +3592,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
      * @deprecated Use {@link Beans#equalsByProps(Object,Object,Collection<String>)} instead
      */
+    @Deprecated
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         return Beans.equalsByProps(bean1, bean2, propNamesToCompare);
     }
@@ -3605,6 +3606,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if no common property is found
      * @deprecated Use {@link Beans#equalsByCommonProps(Object,Object)} instead
      */
+    @Deprecated
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         return Beans.equalsByCommonProps(bean1, bean2);
     }
@@ -3619,6 +3621,7 @@ sealed class CommonUtil permits N {
      * @deprecated Use {@link N#isEqualCollection(Collection, Collection)} instead.
      * @see N#isEqualCollection(Collection, Collection)
      */
+    @Deprecated
     @SuppressWarnings("unused")
     public static boolean equalsCollection(final Collection<?> a, final Collection<?> b) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Please use N.isEqualCollection(Collection, Collection)");
@@ -14867,7 +14870,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
-                return a[i] > b[i] ? 1 : -1;
+                return a[i] > b[j] ? 1 : -1;
             }
         }
 
@@ -14931,7 +14934,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
-                return a[i] > b[i] ? 1 : -1;
+                return a[i] > b[j] ? 1 : -1;
             }
         }
 
@@ -15043,7 +15046,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
-                return a[i] > b[i] ? 1 : -1;
+                return a[i] > b[j] ? 1 : -1;
             }
         }
 
@@ -15155,7 +15158,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
-                return a[i] > b[i] ? 1 : -1;
+                return a[i] > b[j] ? 1 : -1;
             }
         }
 
@@ -15267,7 +15270,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
-                return a[i] > b[i] ? 1 : -1;
+                return a[i] > b[j] ? 1 : -1;
             }
         }
 
@@ -21145,6 +21148,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified bean is {@code null} or the bean class is not a valid JavaBean
      * @deprecated Use {@link Beans#fill(Object)} instead
      */
+    @Deprecated
     public static void fill(final Object bean) throws IllegalArgumentException {
         Beans.fill(bean);
     }
@@ -21158,6 +21162,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
      * @deprecated Use {@link Beans#fill(Class<? extends T>)} instead
      */
+    @Deprecated
     public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
         return Beans.fill(beanClass);
     }
@@ -21172,6 +21177,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
      * @deprecated Use {@link Beans#fill(Class<? extends T>,int)} instead
      */
+    @Deprecated
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         return Beans.fill(beanClass, count);
     }

@@ -131,7 +131,7 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Seq<T, E extends Exception> implements AutoCloseable, Immutable {
     private static final Logger logger = LoggerFactory.getLogger(Seq.class);
 
-    private static final int BATCH_SIZE_FOR_FLUSH = 200;
+    private static final int BATCH_SIZE_FOR_FLUSH = 1000;
 
     private static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;
 
@@ -13931,8 +13931,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been closed
      * @throws IOException if an I/O error occurs while writing to the file
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -13966,8 +13966,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been closed
      * @throws IOException if an I/O error occurs while writing to the file
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -14000,8 +14000,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been closed
      * @throws IOException if an I/O error occurs while writing to the stream
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -14035,8 +14035,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been closed
      * @throws IOException if an I/O error occurs while writing to the stream
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -14069,8 +14069,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been closed
      * @throws IOException if an I/O error occurs while writing
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
@@ -14102,8 +14102,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if csvHeaders is empty
      * @throws IOException if an I/O error occurs while writing
      * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setCSVHeaderParser(Function)
-     * @see CSVUtil#setCSVLineParser(BiConsumer)
+     * @see CSVUtil#setHeaderParser(Function)
+     * @see CSVUtil#setLineParser(BiConsumer)
      * @see CSVUtil#setEscapeCharToBackSlashForWrite()
      * @see CSVUtil#resetEscapeCharForWrite()
      * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)

@@ -19,6 +19,26 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated method or type uses lazy evaluation strategy.
+ * Lazy evaluation defers computation until the result is actually needed,
+ * which can improve performance by avoiding unnecessary calculations.
+ * 
+ * <p>When applied to a method, it indicates that the method's computation
+ * is deferred until the result is accessed. When applied to a type, it indicates
+ * that the entire type or its operations follow lazy evaluation patterns.</p>
+ * 
+ * <p>Lazy evaluation is commonly used in:</p>
+ * <ul>
+ *   <li>Stream operations that don't execute until a terminal operation</li>
+ *   <li>Suppliers that compute values on demand</li>
+ *   <li>Collections that generate elements as needed</li>
+ *   <li>Properties that are calculated when first accessed</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @since 2020
+ */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LazyEvaluation {

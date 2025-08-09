@@ -379,9 +379,11 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
      * @return The result of the {@code cmd} or the default value if an exception occurs.
+     * @see #call(java.util.concurrent.Callable, Supplier)
      * @see Throwables#call(Throwables.Callable, Object)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -467,9 +469,12 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
      * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      * @see Throwables#call(Throwables.Callable, Predicate, Object)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final R defaultValue) {
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate,
+            final R defaultValue) {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.Predicate);
 
@@ -661,8 +666,10 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd the function that operates on the managed resource and returns a result
      * @param defaultValue the value to return if an exception occurs
      * @return the result from the command or the default value if an exception occurs
+     * @see #call(Throwables.Function, Supplier)
      */
-    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
         } catch (final Exception e) {
@@ -736,9 +743,11 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue the value to return for matching exceptions
      * @return the result from the command or the default value if a matching exception occurs
      * @throws RuntimeException if an exception occurs that doesn't match the predicate
+     * @see #call(Throwables.Function, Predicate, Supplier)
      */
-    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
-            final R defaultValue) {
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
+            final Predicate<? super Exception> predicate, final R defaultValue) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
         } catch (final Exception e) {

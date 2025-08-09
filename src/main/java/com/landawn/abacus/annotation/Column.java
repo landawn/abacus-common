@@ -21,6 +21,17 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * Specifies that a field should be mapped to a database column with optional column name configuration.
+ * This annotation is used in ORM mapping to explicitly define the relationship between entity fields
+ * and database columns.
+ * 
+ * <p>By default, the field name is used as the column name. Use the {@link #name()} attribute
+ * to specify a different column name.</p>
+ * 
+ * @author HaiYang Li
+ * @since 2018
+ */
 @Documented
 @Target(value = { FIELD })
 @Retention(RUNTIME)
@@ -29,11 +40,17 @@ public @interface Column {
     /**
      * Use {@code name} to specify attribute explicitly
      *
-     * @return
+     * @return the column name value (deprecated)
      * @deprecated use {@code name} to specify attribute explicitly.
      */
     @Deprecated
     String value() default "";
 
+    /**
+     * The name of the database column this field maps to.
+     * If not specified, the field name is used as the column name.
+     * 
+     * @return the column name, empty string to use field name as default
+     */
     String name() default "";
 }

@@ -93,7 +93,7 @@ import com.landawn.abacus.util.stream.Stream;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  * <br />
- * There are only {@code offset/count/len} parameters in the methods defined in class {@codeIOUtil}, no {@code fromIndex/startIndex} and {toIndex/endIndex} parameters.
+ * There are only {@code offset/count/len} parameters in the methods defined in class {@code IOUtil}, no {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters.
  *
  * @version $Revision: 0.8 $
  * @see java.nio.file.Files
@@ -398,7 +398,7 @@ public final class IOUtil {
      * </pre>
      *
      * @param timeout The timeout amount in milliseconds or no timeout if the value is zero or less
-     * @return
+     * @return The amount of free disk space available in kilobytes
      * @throws UncheckedIOException  if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialization
      */
@@ -430,7 +430,7 @@ public final class IOUtil {
      * the exact result from df -k and as much other detail as possible, thanks.
      *
      * @param path the path to get free space for, not {@code null}, not empty on Unix
-     * @return
+     * @return The amount of free disk space available in kilobytes for the specified path
      * @throws UncheckedIOException     if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException    if an error occurred in initialization
@@ -463,10 +463,10 @@ public final class IOUtil {
      * @param path    the path to get free space for, not {@code null}, not empty on Unix
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *                is zero or less
-     * @return
+     * @return The amount of free disk space available in kilobytes for the specified path
      * @throws UncheckedIOException     if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException    if an error occurred in initialisation
+     * @throws IllegalStateException    if an error occurred in initialization
      */
     public static long freeDiskSpaceKb(final String path, final long timeout) throws UncheckedIOException {
         try {
@@ -5837,8 +5837,9 @@ public final class IOUtil {
      */
     public static void copyURLToFile(final URL source, final File destination, final int connectionTimeout, final int readTimeout) throws IOException {
         InputStream is = null;
+        URLConnection connection = null;
         try {
-            final URLConnection connection = source.openConnection();
+            connection = source.openConnection();
             connection.setConnectTimeout(connectionTimeout);
             connection.setReadTimeout(readTimeout);
             is = connection.getInputStream();
@@ -5846,6 +5847,7 @@ public final class IOUtil {
             write(is, destination);
         } finally {
             close(is);
+            close(connection);
         }
     }
 
@@ -6723,20 +6725,22 @@ public final class IOUtil {
 
                 os = IOUtil.newFileOutputStream(getAbsolutePath(targetDir, ze.getName()));
 
-                is = zip.getInputStream(ze);
+                try {
+                    is = zip.getInputStream(ze);
 
-                int count = 0;
+                    int count = 0;
 
-                while (EOF != (count = read(is, buf, 0, bufLength))) {
-                    os.write(buf, 0, count);
+                    while (EOF != (count = read(is, buf, 0, bufLength))) {
+                        os.write(buf, 0, count);
+                    }
+
+                    os.flush();
+                } finally {
+                    closeQuietly(is);
+                    is = null;
+                    close(os);
+                    os = null;
                 }
-
-                os.flush();
-
-                closeQuietly(is);
-                is = null;
-                close(os);
-                os = null;
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -8439,13 +8443,23 @@ public final class IOUtil {
         InputStream is = null;
 
         if (source.getName().endsWith(GZ)) {
-            is = new GZIPInputStream(IOUtil.newFileInputStream(source));
+            final FileInputStream fis = IOUtil.newFileInputStream(source);
+            try {
+                is = new GZIPInputStream(fis);
+            } catch (IOException e) {
+                close(fis);
+                throw e;
+            }
         } else if (source.getName().endsWith(ZIP)) {
             final ZipFile zf = new ZipFile(source);
-
-            final ZipEntry ze = zf.entries().nextElement();
-            is = zf.getInputStream(ze);
-            outputZipFile.setValue(zf);
+            try {
+                final ZipEntry ze = zf.entries().nextElement();
+                is = zf.getInputStream(ze);
+                outputZipFile.setValue(zf);
+            } catch (IOException e) {
+                close(zf);
+                throw e;
+            }
         } else {
             is = IOUtil.newFileInputStream(source);
         }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://uk.co.jemos.integration.xml/large-file" xmlns:tns="http://uk.co.jemos.integration.xml/large-file" elementFormDefault="qualified">
+
+    <complexType name="PersonType">
+        <sequence>
+            <element name="id" type="int"></element>
+            <element name="firstName" type="string"></element>
+            <element name="lastName" type="string"></element>
+            <element name="address1" type="string"></element>
+            <element name="postCode" type="string"></element>
+            <element name="city" type="string"></element>
+            <element name="country" type="string"></element>
+            <element name="birthday" type="dateTime"></element>
+        </sequence>
+        <attribute name="active" type="boolean" use="required" />
+    </complexType>
+
+    <complexType name="PersonsType">
+        <sequence>
+            <element name="person" type="tns:PersonType" maxOccurs="unbounded" minOccurs="1"></element>
+        </sequence>
+    </complexType>
+
+    <element name="persons" type="tns:PersonsType">
+    </element>
+</schema>

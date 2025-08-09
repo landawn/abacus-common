@@ -2258,9 +2258,16 @@ public class ContinuableFuture<T> implements Future<T> {
 
             private void delay() {
                 if (!isDelayed) {
-                    isDelayed = true;
-
-                    N.sleepUninterruptibly(delayInMillis - (System.currentTimeMillis() - startTime));
+                    synchronized (this) {
+                        if (!isDelayed) {
+                            isDelayed = true;
+                            long elapsedTime = System.currentTimeMillis() - startTime;
+                            long remainingDelay = delayInMillis - elapsedTime;
+                            if (remainingDelay > 0) {
+                                N.sleepUninterruptibly(remainingDelay);
+                            }
+                        }
+                    }
                 }
             }
         }, null, executor) {

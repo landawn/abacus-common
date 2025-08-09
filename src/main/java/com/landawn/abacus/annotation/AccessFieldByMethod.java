@@ -21,10 +21,25 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that fields should be accessed via methods rather than direct field access.
+ * This annotation can be applied to types, methods, or fields to control field access behavior.
+ * 
+ * <p>When applied to a type, all fields within that type will be accessed via methods.
+ * When applied to a method or field specifically, only that element's access behavior is affected.</p>
+ * 
+ * @author HaiYang Li
+ * @since 2019
+ */
 @Documented
 @Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
 @Retention(RUNTIME)
 public @interface AccessFieldByMethod {
 
+    /**
+     * Optional value to specify additional configuration for field access behavior.
+     * 
+     * @return the configuration value, empty string by default
+     */
     String value() default "";
 }

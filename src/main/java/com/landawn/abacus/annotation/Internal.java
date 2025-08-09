@@ -20,6 +20,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated element is for internal use only and should not be used
+ * by external code or client applications. Internal APIs may change without notice
+ * and are not considered part of the public API contract.
+ * 
+ * <p>This annotation serves as documentation to discourage external usage and
+ * can be used by IDEs or build tools to generate warnings when internal APIs are accessed
+ * from outside the intended scope.</p>
+ * 
+ * <p>Elements marked with this annotation may:</p>
+ * <ul>
+ *   <li>Change or be removed in any release without deprecation</li>
+ *   <li>Have incomplete or missing documentation</li>
+ *   <li>Not follow the same stability guarantees as public APIs</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @since 2015
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })

@@ -344,8 +344,8 @@ public final class Beans {
             final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = builderMap.get(
-                cls);
+        Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = builderMap
+                .get(cls);
 
         if (builderInfo == null) {
             Method buildMethod = null;
@@ -398,8 +398,8 @@ public final class Beans {
             // ignore
         }
 
-        if (builderMethod == null || builderMethod.getParameterCount() != 0 || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(
-                builderMethod.getModifiers()))) {
+        if (builderMethod == null || builderMethod.getParameterCount() != 0
+                || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(builderMethod.getModifiers()))) {
             try {
                 builderMethod = cls.getDeclaredMethod("newBuilder");
             } catch (final Exception e) {
@@ -407,8 +407,8 @@ public final class Beans {
             }
         }
 
-        if (builderMethod == null || builderMethod.getParameterCount() != 0 || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(
-                builderMethod.getModifiers()))) {
+        if (builderMethod == null || builderMethod.getParameterCount() != 0
+                || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(builderMethod.getModifiers()))) {
             try {
                 builderMethod = cls.getDeclaredMethod("createBuilder");
             } catch (final Exception e) {
@@ -416,8 +416,8 @@ public final class Beans {
             }
         }
 
-        if (builderMethod == null || builderMethod.getParameterCount() != 0 || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(
-                builderMethod.getModifiers()))) {
+        if (builderMethod == null || builderMethod.getParameterCount() != 0
+                || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(builderMethod.getModifiers()))) {
             return null;
         }
 
@@ -433,8 +433,8 @@ public final class Beans {
             // ignore
         }
 
-        if (buildMethod == null || buildMethod.getParameterCount() != 0 || !Modifier.isPublic(buildMethod.getModifiers()) || !beanClass.isAssignableFrom(
-                buildMethod.getReturnType())) {
+        if (buildMethod == null || buildMethod.getParameterCount() != 0 || !Modifier.isPublic(buildMethod.getModifiers())
+                || !beanClass.isAssignableFrom(buildMethod.getReturnType())) {
             try {
                 buildMethod = builderClass.getDeclaredMethod("create");
             } catch (final Exception e) {
@@ -442,8 +442,8 @@ public final class Beans {
             }
         }
 
-        if (buildMethod == null || buildMethod.getParameterCount() != 0 || !Modifier.isPublic(buildMethod.getModifiers()) || !beanClass.isAssignableFrom(
-                buildMethod.getReturnType())) {
+        if (buildMethod == null || buildMethod.getParameterCount() != 0 || !Modifier.isPublic(buildMethod.getModifiers())
+                || !beanClass.isAssignableFrom(buildMethod.getReturnType())) {
             return null;
         }
 
@@ -668,8 +668,8 @@ public final class Beans {
                 propName = field.getName();
             }
 
-            if (Strings.isEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2) || (
-                    (methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
+            if (Strings.isEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
+                    || ((methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
                 final String newName = methodName.substring(methodName.startsWith(IS) ? 2 : 3);
                 field = getDeclaredField(getSetMethod.getDeclaringClass(), Strings.uncapitalize(newName));
 
@@ -1002,8 +1002,8 @@ public final class Beans {
             return true;
         }
 
-        final String propName = methodName.substring(
-                methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
+        final String propName = methodName
+                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
 
         return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
@@ -1021,8 +1021,8 @@ public final class Beans {
 
         final String mn = method.getName();
 
-        return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null) && (N.isEmpty(
-                method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
+        return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
+                && (N.isEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
     }
 
     /**
@@ -1034,10 +1034,12 @@ public final class Beans {
      */
     private static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
-            return (instance != null) && ((registeredXMLBindingClassList.getOrDefault(cls, false) || N.anyMatch(cls.getAnnotations(), Beans::isXmlTypeAnno))
-                    || (N.anyMatch(method.getAnnotations(), Beans::isXmlElementAnno) || (field != null && N.anyMatch(field.getAnnotations(),
-                    Beans::isXmlElementAnno)))) && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(
-                    method.getReturnType())) && (ClassUtil.invokeMethod(instance, method) != null);
+            return (instance != null)
+                    && ((registeredXMLBindingClassList.getOrDefault(cls, false) || N.anyMatch(cls.getAnnotations(), Beans::isXmlTypeAnno))
+                            || (N.anyMatch(method.getAnnotations(), Beans::isXmlElementAnno)
+                                    || (field != null && N.anyMatch(field.getAnnotations(), Beans::isXmlElementAnno))))
+                    && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
+                    && (ClassUtil.invokeMethod(instance, method) != null);
         } catch (final Exception e) {
             return false;
         }
@@ -1071,17 +1073,18 @@ public final class Beans {
         inputPropName = inputPropName.trim();
 
         return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
-                || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod) || (inputPropName.startsWith(GET)
-                && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod)) || (inputPropName.startsWith(SET) && inputPropName.substring(3)
-                .equalsIgnoreCase(propNameByMethod)) || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod)) || (
-                inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
+                || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
+                || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
     }
 
     private static boolean isSetMethod(final Method method) {
         final String mn = method.getName();
 
-        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1 && (
-                void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
+        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
+                && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
                 && !nonGetSetMethodName.contains(mn);
     }
 
@@ -1159,8 +1162,8 @@ public final class Beans {
                             .sortedBy(method -> method.getName().length())
                             .last()
                             .ifPresentOrElse(method -> fieldGetMethodList.add(Tuple.of(field, method)), () -> {
-                                if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(
-                                        field.getModifiers())) {
+                                if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
+                                        && !Modifier.isFinal(field.getModifiers())) {
                                     fieldGetMethodList.add(Tuple.of(field, null));
                                 }
                             });
@@ -1225,8 +1228,8 @@ public final class Beans {
 
                                 //NOSONAR
                             }
-                        } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(
-                                field.getModifiers())) {
+                        } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
+                                && !Modifier.isFinal(field.getModifiers())) {
                             propName = field.getName();
                             propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
 
@@ -1345,8 +1348,8 @@ public final class Beans {
                 final Map<String, Method> builderPropSetMethodMap = new LinkedHashMap<>();
 
                 for (final Method method : builderClass.getMethods()) {
-                    if (Modifier.isPublic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass()) && method.getParameterCount() == 1 && (
-                            void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
+                    if (Modifier.isPublic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass()) && method.getParameterCount() == 1
+                            && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
                         propName = getPropNameByMethod(method);
                         builderPropSetMethodMap.put(propName, method);
                     }
@@ -1374,8 +1377,8 @@ public final class Beans {
         final Class<?> declaringClass = getMethod.getDeclaringClass();
         final String getMethodName = getMethod.getName();
 
-        final String setMethodName =
-                SET + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
+        final String setMethodName = SET
+                + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
 
         Method setMethod = ClassUtil.lookupDeclaredMethod(declaringClass, setMethodName, getMethod.getReturnType());
 
@@ -1383,8 +1386,9 @@ public final class Beans {
             setMethod = ClassUtil.lookupDeclaredMethod(declaringClass, getMethodName, getMethod.getReturnType());
         }
 
-        return ((setMethod != null) && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType()
-                .isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod : null;
+        return ((setMethod != null)
+                && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
+                        : null;
     }
 
     /**
@@ -3447,8 +3451,8 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
-        final boolean isLowerCamelCaseOrNoChange =
-                keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
@@ -3717,8 +3721,8 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
-        final boolean isLowerCamelCaseOrNoChange =
-                keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
@@ -4261,8 +4265,8 @@ public final class Beans {
 
     private static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
-        final boolean isLowerCamelCaseOrNoChange =
-                keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final boolean isNullParentPropName = (parentPropName == null);
@@ -5457,8 +5461,7 @@ public final class Beans {
                 if (targetPropInfo == null) {
                     //noinspection ConstantValue
                     if (!ignoreUnmatchedProperty) { //NOSONAR
-                        throw new IllegalArgumentException(
-                                "No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
                     }
                 } else {
                     propValue = srcBeanInfo.getPropValue(sourceBean, propName);
@@ -5813,12 +5816,12 @@ public final class Beans {
         Type<Object> type = null;
         Class<?> parameterClass = null;
         Object propValue = null;
-    
+
         for (final String propName : propNamesToFill) {
             propInfo = beanInfo.getPropInfo(propName);
             parameterClass = propInfo.clazz;
             type = propInfo.jsonXmlType;
-    
+
             if (String.class.equals(parameterClass)) {
                 propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
@@ -5846,7 +5849,7 @@ public final class Beans {
             } else {
                 propValue = type.defaultValue();
             }
-    
+
             propInfo.setPropValue(bean, propValue);
         }
     }
@@ -5876,14 +5879,14 @@ public final class Beans {
         N.checkArgNotNull(bean2);
         checkBeanClass(bean1.getClass());
         checkBeanClass(bean2.getClass());
-    
+
         final List<String> propNamesToCompare = new ArrayList<>(getPropNameList(bean1.getClass()));
         propNamesToCompare.retainAll(getPropNameList(bean2.getClass()));
-    
+
         if (N.isEmpty(propNamesToCompare)) {
             throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
         }
-    
+
         return equalsByProps(bean1, bean2, propNamesToCompare);
     }
 

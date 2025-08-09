@@ -165,7 +165,7 @@ public class AsyncExecutor {
     }
 
     private static int getMaximumPoolSize(final Executor executor) {
-        return executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor) executor).getMaximumPoolSize() : DEFAULT_CORE_POOL_SIZE;
+        return executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor) executor).getMaximumPoolSize() : DEFAULT_MAX_THREAD_POOL_SIZE;
     }
 
     private static long getKeepAliveTime(final Executor executor) {
@@ -494,7 +494,13 @@ public class AsyncExecutor {
 
                     executor = threadPoolExecutor;
 
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(120, TimeUnit.SECONDS)));
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        try {
+                            shutdown(120, TimeUnit.SECONDS);
+                        } catch (Exception e) {
+                            logger.warn("Error during shutdown: " + e.getMessage(), e);
+                        }
+                    }));
                 }
             }
         }

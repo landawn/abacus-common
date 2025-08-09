@@ -6124,7 +6124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final char last = str.charAt(lastIdx);
 
         if (last == CHAR_LF) {
-            if (str.charAt(lastIdx - 1) == CHAR_CR) {
+            if (lastIdx > 0 && str.charAt(lastIdx - 1) == CHAR_CR) {
                 lastIdx--;
             }
         } else if (last != CHAR_CR) {
@@ -8335,6 +8335,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is null or empty, or if the character array is null or empty.</p>
+     * 
+     * <p>Note: Use the {@code indexOf(String, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -8355,6 +8357,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
      * @see #indexOfAny(String, int, char...)
+     * @see #indexOf(String, int)
      */
     public static int indexOfAny(final String str, final char... valuesToFind) {
         return indexOfAny(str, 0, valuesToFind);
@@ -8370,6 +8373,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is null or empty, or if the character array is null or empty.</p>
+     * 
+     * <p>Note: Use the {@code indexOf(String, int, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -8390,8 +8395,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
      * @see #indexOfAny(String, char...)
+     * @see #indexOf(String, int, int)
      */
     public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
+        // public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) { // indexOfAny is ambiguous both method indexOfAny(java.lang.String,int,char...) in com.landawn.abacus.util.Strings and method indexOfAny(java.lang.String,int,java.lang.String...)
         fromIndex = Math.max(0, fromIndex);
 
         checkInputChars(valuesToFind, cs.valuesToFind, true);
@@ -8436,6 +8443,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
      * is null, or if the substring array is null or empty. Empty substrings in the array are ignored.</p>
+     * 
+     * <p>Note: Use the {@code indexOf(String, String)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -8456,6 +8465,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
      * @see #indexOfAny(String, int, String...)
+     * @see #indexOf(String, String)
      */
     public static int indexOfAny(final String str, final String... valuesToFind) {
         return indexOfAny(str, 0, valuesToFind);
@@ -8471,6 +8481,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
      * is null, or if the substring array is null or empty. Empty substrings in the array are ignored.</p>
+     * 
+     * <p>Note: Use the {@code indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -8491,6 +8503,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return The index of the first occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String...)
+     * @see #indexOf(String, String, int)
      */
     public static int indexOfAny(final String str, int fromIndex, final String... valuesToFind) {
         fromIndex = Math.max(0, fromIndex);
@@ -18389,7 +18402,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
      */
     public static char parseChar(final String str) {
-        return Strings.isEmpty(str) ? CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
+        if (Strings.isEmpty(str)) {
+            return CHAR_ZERO;
+        } else if (str.length() == 1) {
+            return str.charAt(0);
+        } else {
+            int intValue = Integer.parseInt(str);
+            if (intValue < Character.MIN_VALUE || intValue > Character.MAX_VALUE) {
+                throw new IllegalArgumentException("Integer value out of char range: " + intValue);
+            }
+            return (char) intValue;
+        }
     }
 
     /**

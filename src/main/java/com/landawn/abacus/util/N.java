@@ -1934,6 +1934,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(a) ? EMPTY_BOOLEAN_ARRAY : a.clone();
         }
 
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+        }
+
         final boolean[] c = new boolean[a.length + b.length];
 
         copy(a, 0, c, 0, a.length);
@@ -1998,6 +2002,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
         } else if (isEmpty(b)) {
             return isEmpty(a) ? EMPTY_CHAR_ARRAY : a.clone();
+        }
+
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
         }
 
         final char[] c = new char[a.length + b.length];
@@ -2066,6 +2074,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(a) ? EMPTY_BYTE_ARRAY : a.clone();
         }
 
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+        }
+
         final byte[] c = new byte[a.length + b.length];
 
         copy(a, 0, c, 0, a.length);
@@ -2130,6 +2142,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
         } else if (isEmpty(b)) {
             return isEmpty(a) ? EMPTY_SHORT_ARRAY : a.clone();
+        }
+
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
         }
 
         final short[] c = new short[a.length + b.length];
@@ -2198,6 +2214,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(a) ? EMPTY_INT_ARRAY : a.clone();
         }
 
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+        }
+
         final int[] c = new int[a.length + b.length];
 
         copy(a, 0, c, 0, a.length);
@@ -2262,6 +2282,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
         } else if (isEmpty(b)) {
             return isEmpty(a) ? EMPTY_LONG_ARRAY : a.clone();
+        }
+
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
         }
 
         final long[] c = new long[a.length + b.length];
@@ -2330,6 +2354,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(a) ? EMPTY_FLOAT_ARRAY : a.clone();
         }
 
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+        }
+
         final float[] c = new float[a.length + b.length];
 
         copy(a, 0, c, 0, a.length);
@@ -2394,6 +2422,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
         } else if (isEmpty(b)) {
             return isEmpty(a) ? EMPTY_DOUBLE_ARRAY : a.clone();
+        }
+
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
         }
 
         final double[] c = new double[a.length + b.length];
@@ -2463,6 +2495,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isEmpty(b) ? a : b.clone();
         } else if (isEmpty(b)) {
             return a.clone();
+        }
+
+        if (a.length > Integer.MAX_VALUE - b.length) {
+            throw new IllegalArgumentException("Combined array length exceeds maximum array size");
         }
 
         final T[] c = newArray(a.getClass().getComponentType(), a.length + b.length);
@@ -31717,51 +31753,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes the given {@code Callable} and returns the result.
-     * If an exception occurs during the execution, the provided default value is returned.
-     *
-     * @param <R> the type of the result
-     * @param cmd the {@code Callable} to be executed
-     * @param defaultIfExceptionOccurred the default value to return if an exception occurs
-     * @return the result of the {@code Callable} or the default value if an exception occurs
-     * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
-     * @see Try#call(Throwables.Function, Supplier)
-     */
-    @Beta
-    public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
-        try {
-            return cmd.call();
-        } catch (final Exception e) {
-            return defaultIfExceptionOccurred;
-        }
-    }
-
-    /**
-     * Executes the given function with the provided initial value and returns the result.
-     * If an exception occurs during the execution, the provided default value is returned.
-     *
-     * @param <T> the type of the initial value
-     * @param <R> the type of the result
-     * @param init the initial value to be passed to the function
-     * @param func the function to be executed
-     * @param defaultIfExceptionOccurred the default value to return if an exception occurs
-     * @return the result of the function or the default value if an exception occurs
-     * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
-     * @see Try#call(Throwables.Function, Supplier)
-     */
-    @Beta
-    public static <T, R> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func,
-            final R defaultIfExceptionOccurred) {
-        try {
-            return func.apply(init);
-        } catch (final Exception e) {
-            return defaultIfExceptionOccurred;
-        }
-    }
-
-    /**
-     * Executes the given {@code Callable} and returns the result.
      * If an exception occurs during the execution, the result from the provided supplier is returned.
      *
      * @param <R> the type of the result
@@ -31778,6 +31769,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return cmd.call();
         } catch (final Exception e) {
             return supplierForDefaultIfExceptionOccurred.get();
+        }
+    }
+
+    /**
+     * Executes the given {@code Callable} and returns the result.
+     * If an exception occurs during the execution, the provided default value is returned.
+     *
+     * @param <R> the type of the result
+     * @param cmd the {@code Callable} to be executed
+     * @param defaultIfExceptionOccurred the default value to return if an exception occurs
+     * @return the result of the {@code Callable} or the default value if an exception occurs
+     * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
+     * @see Try#call(Throwables.Function, Supplier)
+     */
+    @Beta
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
+        try {
+            return cmd.call();
+        } catch (final Exception e) {
+            return defaultIfExceptionOccurred;
         }
     }
 
@@ -31802,6 +31816,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return func.apply(init);
         } catch (final Exception e) {
             return supplierForDefaultIfExceptionOccurred.get();
+        }
+    }
+
+    /**
+     * Executes the given function with the provided initial value and returns the result.
+     * If an exception occurs during the execution, the provided default value is returned.
+     *
+     * @param <T> the type of the initial value
+     * @param <R> the type of the result
+     * @param init the initial value to be passed to the function
+     * @param func the function to be executed
+     * @param defaultIfExceptionOccurred the default value to return if an exception occurs
+     * @return the result of the function or the default value if an exception occurs
+     * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
+     * @see Try#call(Throwables.Function, Supplier)
+     */
+    @Beta
+    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
+    public static <T, R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final T init,
+            final Throwables.Function<? super T, ? extends R, ? extends Exception> func, final R defaultIfExceptionOccurred) {
+        try {
+            return func.apply(init);
+        } catch (final Exception e) {
+            return defaultIfExceptionOccurred;
         }
     }
 

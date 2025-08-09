@@ -1,0 +1,203 @@
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Mar 09, 2014 10:02:30 PM com.landawn.abacus.logging.JDKLogger log
+INFO: Failed to initialize SLF4J Logger
+1.7.0_51
+xml======================================================================
+<xBean><typeBoolean>true</typeBoolean><typeBoolean2>false</typeBoolean2><typeChar>-</typeChar><typeByte>0</typeByte><typeShort>2</typeShort><typeInt>2147483647</typeInt><typeLong>-9223372036854775808</typeLong><typeLong2>9223372036854775807</typeLong2><typeFloat>1.0903549</typeFloat><typeDouble>3.934593059323134E11</typeDouble><typeString>&lt;&lt;&gt;&gt;dfe&lt;&gt;afe&gt;&lt;alfeji'slfjeio;;ajfd: lsajfei { asjfei } fjeiw [fjei ]safejioae : &amp;dakf&#xd; sfeij 黎jei \d\tskfjei &quot;:24e92d6f516c440db18bc2839843735b</typeString><typeDate>1394427751163</typeDate><typeSqlDate>1394427751163</typeSqlDate><typeSqlTimestamp>1394427751163</typeSqlTimestamp><weekDay>FRIDAY</weekDay><firstName>34cb981cf9cd4375bf6f0e6aff7af1c5</firstName><middleName>5a8b69593992470d86e6abe912bc9994</middleName><lastName>75c27e8191a84e7c9345b3b36db92b81</lastName></xBean>
+josn======================================================================
+{"typeBoolean":true,"typeBoolean2":false,"typeChar":"-","typeByte":0,"typeShort":2,"typeInt":2147483647,"typeLong":-9223372036854775808,"typeLong2":9223372036854775807,"typeFloat":1.0903549,"typeDouble":3.934593059323134E11,"typeString":"<<>>dfe<>afe><alfeji'slfjeio;;ajfd: lsajfei { asjfei } fjeiw [fjei ]safejioae : &dakf\r sfeij 黎jei \\d\\tskfjei \":24e92d6f516c440db18bc2839843735b","typeDate":1394427751163,"typeSqlDate":1394427751163,"typeSqlTimestamp":1394427751163,"weekDay":FRIDAY,"firstName":"34cb981cf9cd4375bf6f0e6aff7af1c5","middleName":"5a8b69593992470d86e6abe912bc9994","lastName":"75c27e8191a84e7c9345b3b36db92b81"}
+FastJSON======================================================================
+{"firstName":"34cb981cf9cd4375bf6f0e6aff7af1c5","lastName":"75c27e8191a84e7c9345b3b36db92b81","middleName":"5a8b69593992470d86e6abe912bc9994","typeBoolean":true,"typeBoolean2":false,"typeByte":0,"typeChar":"-","typeDate":1394427751163,"typeDouble":3.934593059323134E11,"typeFloat":1.0903549,"typeInt":2147483647,"typeLong":-9223372036854775808,"typeLong2":9223372036854775807,"typeShort":2,"typeSqlDate":1394427751163,"typeSqlTimestamp":1394427751163,"typeString":"<<>>dfe<>afe><alfeji'slfjeio;;ajfd: lsajfei { asjfei } fjeiw [fjei ]safejioae : &dakf\r sfeij 黎jei \\d\\tskfjei \":24e92d6f516c440db18bc2839843735b","weekDay":"FRIDAY"}
+Jackson======================================================================
+{"typeBoolean":true,"typeBoolean2":false,"typeChar":"-","typeByte":0,"typeShort":2,"typeInt":2147483647,"typeLong":-9223372036854775808,"typeLong2":9223372036854775807,"typeFloat":1.0903549,"typeDouble":3.934593059323134E11,"typeString":"<<>>dfe<>afe><alfeji'slfjeio;;ajfd: lsajfei { asjfei } fjeiw [fjei ]safejioae : &dakf\r sfeij 黎jei \\d\\tskfjei \":24e92d6f516c440db18bc2839843735b","typeDate":1394427751163,"typeSqlDate":"2014-03-09","typeSqlTimestamp":1394427751163,"weekDay":"FRIDAY","firstName":"34cb981cf9cd4375bf6f0e6aff7af1c5","middleName":"5a8b69593992470d86e6abe912bc9994","lastName":"75c27e8191a84e7c9345b3b36db92b81"}
+Gson======================================================================
+{"typeBoolean":true,"typeBoolean2":false,"typeChar":"-","typeByte":0,"typeShort":2,"typeInt":2147483647,"typeLong":-9223372036854775808,"typeLong2":9223372036854775807,"typeFloat":1.0903549,"typeDouble":3.934593059323134E11,"typeString":"\u003c\u003c\u003e\u003edfe\u003c\u003eafe\u003e\u003calfeji\u0027slfjeio;;ajfd: lsajfei { asjfei } fjeiw [fjei ]safejioae : \u0026dakf\r sfeij 黎jei \\d\\tskfjei \":24e92d6f516c440db18bc2839843735b","typeDate":"Mar 9, 2014 10:02:31 PM","typeSqlDate":"Mar 9, 2014","typeSqlTimestamp":"Mar 9, 2014 10:02:31 PM","weekDay":"FRIDAY","firstName":"34cb981cf9cd4375bf6f0e6aff7af1c5","middleName":"5a8b69593992470d86e6abe912bc9994","lastName":"75c27e8191a84e7c9345b3b36db92b81"}
+kryo======================================================================
+AQEzNGNiOTgxY2Y5Y2Q0Mzc1YmY2ZjBlNmFmZjdhZjFjtQE3NWMyN2U4MTkxYTg0ZTdjOTM0NWIzYjM2ZGI5MmI4sQE1YThiNjk1OTM5OTI0NzBkODZlNmFiZTkxMmJjOTk5tAEBAAAALQEAamF2YS51dGlsLkRhdOUB+9X70sooQlbnACNzFA8/i5DA/v///w////////////8B/v//////////AAIBAWphdmEuc3FsLkRhdOUB+9X70sooAQJqYXZhLnNxbC5UaW1lc3RhbfAB+9X70sooAdACPDw+PmRmZTw+YWZlPjxhbGZlamknc2xmamVpbzs7YWpmZDogbHNhamZlaSB7IGFzamZlaSB9IGZqZWl3IFtmamVpIF1zYWZlamlvYWUgOiAmZGFrZg0gc2ZlaWog6buOamVpIFxkXHRza2ZqZWkgIjoyNGU5MmQ2ZjUxNmM0NDBkYjE4YmMyODM5ODQzNzM1YgEG
+======================================================================
+
+
+
+
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:34.782
+endTime:   2014-03-09 22:02:35.265
+totalElapsedTime: 483
+
+maxMethodTime(executeByJSONWithBigBean): 47
+minMethodTime(executeByJSONWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONWithBigBean,  0.0228,     0,          47,         16,         15,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:38.48
+endTime:   2014-03-09 22:02:38.667
+totalElapsedTime: 187
+
+maxMethodTime(executeByJSONWithBigBean): 16
+minMethodTime(executeByJSONWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONWithBigBean,  0.0073,     0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:41.804
+endTime:   2014-03-09 22:02:41.975
+totalElapsedTime: 171
+
+maxMethodTime(executeByJSONWithBigBean): 16
+minMethodTime(executeByJSONWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONWithBigBean,  0.007,      0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:45.081
+endTime:   2014-03-09 22:02:45.299
+totalElapsedTime: 218
+
+maxMethodTime(executeByJSONReaderWithBigBean): 31
+minMethodTime(executeByJSONReaderWithBigBean): 0
+
+<method name>,                   <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONReaderWithBigBean,  0.0083,     0,          31,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:48.405
+endTime:   2014-03-09 22:02:48.545
+totalElapsedTime: 140
+
+maxMethodTime(executeByJSONReaderWithBigBean): 16
+minMethodTime(executeByJSONReaderWithBigBean): 0
+
+<method name>,                   <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONReaderWithBigBean,  0.0044,     0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:51.635
+endTime:   2014-03-09 22:02:51.791
+totalElapsedTime: 156
+
+maxMethodTime(executeByJSONReaderWithBigBean): 16
+minMethodTime(executeByJSONReaderWithBigBean): 0
+
+<method name>,                   <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJSONReaderWithBigBean,  0.0052,     0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:54.881
+endTime:   2014-03-09 22:02:55.583
+totalElapsedTime: 702
+
+maxMethodTime(executeByFastJSONWithBigBean): 171
+minMethodTime(executeByFastJSONWithBigBean): 0
+
+<method name>,                 <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByFastJSONWithBigBean,  0.0491,     0,          171,        124,        16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:02:58.704
+endTime:   2014-03-09 22:02:58.906
+totalElapsedTime: 202
+
+maxMethodTime(executeByFastJSONWithBigBean): 47
+minMethodTime(executeByFastJSONWithBigBean): 0
+
+<method name>,                 <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByFastJSONWithBigBean,  0.0093,     0,          47,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:03:02.012
+endTime:   2014-03-09 22:03:02.152
+totalElapsedTime: 140
+
+maxMethodTime(executeByFastJSONWithBigBean): 16
+minMethodTime(executeByFastJSONWithBigBean): 0
+
+<method name>,                 <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByFastJSONWithBigBean,  0.005,      0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:03:05.258
+endTime:   2014-03-09 22:03:06.084
+totalElapsedTime: 826
+
+maxMethodTime(executeByJacksonWithBigBean): 312
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  0.0445,     0,          312,        47,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:03:09.221
+endTime:   2014-03-09 22:03:09.486
+totalElapsedTime: 265
+
+maxMethodTime(executeByJacksonWithBigBean): 47
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  0.0146,     0,          47,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-03-09 22:03:12.592
+endTime:   2014-03-09 22:03:12.779
+totalElapsedTime: 187
+
+maxMethodTime(executeByJacksonWithBigBean): 16
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  0.0065,     0,          16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================

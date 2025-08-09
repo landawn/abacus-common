@@ -1708,13 +1708,13 @@ public final class Multiset<E> implements Collection<E> {
 
         Arrays.sort(entries, cmp);
 
-        final Map<E, Integer> sortedValues = N.newLinkedHashMap(distinctElementSize);
+        final Map<E, Integer> resultMap = N.newLinkedHashMap(distinctElementSize);
 
         for (final Map.Entry<E, MutableInt> entry : entries) {
-            sortedValues.put(entry.getKey(), entry.getValue().value());
+            resultMap.put(entry.getKey(), entry.getValue().value());
         }
 
-        return sortedValues;
+        return resultMap;
     }
 
     /**

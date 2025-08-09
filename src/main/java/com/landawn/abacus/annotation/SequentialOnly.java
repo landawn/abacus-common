@@ -20,6 +20,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated method or type must be executed sequentially
+ * and does not support parallel execution. This annotation documents that the
+ * implementation is not thread-safe and requires sequential access to maintain correctness.
+ * 
+ * <p>When applied to a method, it indicates that the method must not be called
+ * from multiple threads simultaneously. When applied to a type, it indicates that
+ * the type's operations must be executed sequentially.</p>
+ * 
+ * <p>This annotation is used to mark:</p>
+ * <ul>
+ *   <li>Stream operations that cannot be parallelized</li>
+ *   <li>Stateful operations that require sequential processing</li>
+ *   <li>Algorithms that depend on processing order</li>
+ *   <li>Non-thread-safe utility methods</li>
+ * </ul>
+ * 
+ * @see ParallelSupported
+ * @author HaiYang Li
+ * @since 2018
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.METHOD, ElementType.TYPE })

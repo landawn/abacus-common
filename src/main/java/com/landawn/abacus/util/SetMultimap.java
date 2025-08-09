@@ -566,7 +566,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     public SetMultimap<E, K> inverse() {
         final SetMultimap<K, E> multimap = this;
         //noinspection rawtypes
-        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
+        final SetMultimap<E, K> result = new SetMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
@@ -574,13 +574,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
                 if (N.notEmpty(c)) {
                     for (final E e : c) {
-                        res.put(e, entry.getKey());
+                        result.put(e, entry.getKey());
                     }
                 }
             }
         }
 
-        return res;
+        return result;
     }
 
     /**

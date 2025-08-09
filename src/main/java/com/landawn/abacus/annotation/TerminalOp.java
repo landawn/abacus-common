@@ -21,8 +21,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Terminal operation.
+ * Marks a method as a terminal operation in stream-like or pipeline processing.
+ * Terminal operations consume the stream or pipeline and produce a final result,
+ * triggering the execution of any pending intermediate operations.
+ * 
+ * <p>This annotation is used for documentation purposes and to indicate methods that:</p>
+ * <ul>
+ *   <li>Consume the entire stream or pipeline</li>
+ *   <li>Produce a final result or side effect</li>
+ *   <li>Trigger execution of lazy intermediate operations</li>
+ *   <li>Cannot be chained with other operations</li>
+ * </ul>
+ * 
+ * <p>Examples of terminal operations include collect, reduce, forEach, findFirst, etc.</p>
+ * 
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
+ * @see IntermediateOp
+ * @author HaiYang Li
+ * @since 2018
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

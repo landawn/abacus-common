@@ -1,0 +1,2384 @@
+JAXBBindingTest.testPerformance, SVN:1439. JDK1.7
+
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:30:24.435
+endTime:   2014-02-02 22:30:45.694
+totalElapsedTime: 21259
+
+maxMethodTime(executeByJAXB): 1360
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.3148,     0,          1360,       526,        233,        5,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:30:49.159
+endTime:   2014-02-02 22:31:09.45
+totalElapsedTime: 20291
+
+maxMethodTime(executeByJAXB): 304
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.2526,     0,          304,        263,        240,        4,          2,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:31:12.909
+endTime:   2014-02-02 22:31:30.3
+totalElapsedTime: 17391
+
+maxMethodTime(executeByJAXB): 300
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.0391,     0,          300,        262,        158,        3,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:31:33.838
+endTime:   2014-02-02 22:32:39.68
+totalElapsedTime: 65842
+
+maxMethodTime(executeByJackson): 505
+minMethodTime(executeByJackson): 1
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  4.8734,     1,          505,        255,        73,         18,         8,          6,          3,          3,          2,          2,          2,          2,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:32:42.817
+endTime:   2014-02-02 22:33:41.674
+totalElapsedTime: 58857
+
+maxMethodTime(executeByJackson): 98
+minMethodTime(executeByJackson): 1
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  4.2299,     1,          98,         45,         24,         13,         7,          6,          3,          3,          2,          2,          2,          2,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:33:44.765
+endTime:   2014-02-02 22:34:41.178
+totalElapsedTime: 56413
+
+maxMethodTime(executeByJackson): 37
+minMethodTime(executeByJackson): 2
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  4.1577,     2,          37,         24,         17,         12,         7,          5,          3,          3,          2,          2,          2,          2,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:34:44.268
+endTime:   2014-02-02 22:34:47.776
+totalElapsedTime: 3508
+
+maxMethodTime(executeByJIBX): 563
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1887,     0,          563,        147,        19,         1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:34:50.879
+endTime:   2014-02-02 22:34:52.742
+totalElapsedTime: 1863
+
+maxMethodTime(executeByJIBX): 9
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.067,      0,          9,          4,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:34:55.847
+endTime:   2014-02-02 22:34:57.865
+totalElapsedTime: 2018
+
+maxMethodTime(executeByJIBX): 49
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.0707,     0,          49,         8,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:00.964
+endTime:   2014-02-02 22:35:04.199
+totalElapsedTime: 3235
+
+maxMethodTime(executeByAbacus): 357
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.1416,     0,          357,        114,        9,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:07.317
+endTime:   2014-02-02 22:35:08.563
+totalElapsedTime: 1246
+
+maxMethodTime(executeByAbacus): 10
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.057,      0,          10,         1,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:11.643
+endTime:   2014-02-02 22:35:13.752
+totalElapsedTime: 2109
+
+maxMethodTime(executeByAbacus): 35
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.066,      0,          35,         2,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:16.855
+endTime:   2014-02-02 22:35:22.632
+totalElapsedTime: 5777
+
+maxMethodTime(executeByXStream): 267
+minMethodTime(executeByXStream): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXStream,  0.28,       0,          267,        113,        9,          1,          1,          1,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:25.755
+endTime:   2014-02-02 22:35:30.263
+totalElapsedTime: 4508
+
+maxMethodTime(executeByXStream): 15
+minMethodTime(executeByXStream): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXStream,  0.2042,     0,          15,         8,          1,          1,          1,          1,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=10000
+startTime: 2014-02-02 22:35:33.36
+endTime:   2014-02-02 22:35:37.844
+totalElapsedTime: 4484
+
+maxMethodTime(executeByXStream): 20
+minMethodTime(executeByXStream): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXStream,  0.2046,     0,          20,         9,          1,          1,          1,          1,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:35:40.94
+endTime:   2014-02-02 22:36:50.126
+totalElapsedTime: 69186
+
+maxMethodTime(executeByJAXBWithBigBean): 2193
+minMethodTime(executeByJAXBWithBigBean): 93
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  673.77,     93,         2193,       2193,       2193,       1891,       796,        692,        622,        501,        463,        183,        93,         93,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:36:53.371
+endTime:   2014-02-02 22:37:57.792
+totalElapsedTime: 64421
+
+maxMethodTime(executeByJAXBWithBigBean): 4286
+minMethodTime(executeByJAXBWithBigBean): 175
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  632.3975,   175,        4286,       4286,       4286,       2229,       689,        664,        618,        485,        461,        187,        175,        175,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:38:02.888
+endTime:   2014-02-02 22:39:08.849
+totalElapsedTime: 65961
+
+maxMethodTime(executeByJAXBWithBigBean): 3009
+minMethodTime(executeByJAXBWithBigBean): 177
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  646.765,    177,        3009,       3009,       3009,       2555,       717,        684,        625,        486,        465,        183,        177,        177,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:39:12.99
+endTime:   2014-02-02 22:39:42.414
+totalElapsedTime: 29424
+
+maxMethodTime(executeByJacksonWithBigBean): 1329
+minMethodTime(executeByJacksonWithBigBean): 121
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  236.2725,   121,        1329,       1329,       1329,       544,        340,        307,        225,        138,        127,        123,        121,        121,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:39:45.485
+endTime:   2014-02-02 22:40:13.037
+totalElapsedTime: 27552
+
+maxMethodTime(executeByJacksonWithBigBean): 426
+minMethodTime(executeByJacksonWithBigBean): 121
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  223.3775,   121,        426,        426,        426,        382,        320,        286,        222,        136,        126,        123,        121,        121,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:40:16.091
+endTime:   2014-02-02 22:40:43.233
+totalElapsedTime: 27142
+
+maxMethodTime(executeByJacksonWithBigBean): 412
+minMethodTime(executeByJacksonWithBigBean): 121
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  222.0275,   121,        412,        412,        412,        378,        319,        287,        222,        130,        126,        123,        121,        121,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:40:46.282
+endTime:   2014-02-02 22:41:42.871
+totalElapsedTime: 56589
+
+maxMethodTime(executeByAbacusWithBigBean): 7452
+minMethodTime(executeByAbacusWithBigBean): 175
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  554.3638,   175,        7452,       7452,       7452,       604,        545,        525,        490,        462,        445,        181,        175,        175,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:41:46.062
+endTime:   2014-02-02 22:42:25.351
+totalElapsedTime: 39289
+
+maxMethodTime(executeByAbacusWithBigBean): 687
+minMethodTime(executeByAbacusWithBigBean): 94
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  389.0625,   94,         687,        687,        687,        585,        428,        401,        381,        363,        355,        215,        94,         94,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=8; loops=100
+startTime: 2014-02-02 22:42:28.473
+endTime:   2014-02-02 22:43:05.839
+totalElapsedTime: 37366
+
+maxMethodTime(executeByAbacusWithBigBean): 443
+minMethodTime(executeByAbacusWithBigBean): 94
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  369.6312,   94,         443,        443,        443,        408,        393,        387,        373,        357,        349,        225,        94,         94,         
+
+================================================================================
+
+
+
+JAXBBindingTest.testPerformance, SVN:1446. JDK1.7
+
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:56:59.837
+endTime:   2014-02-05 22:57:14.189
+totalElapsedTime: 14352
+
+maxMethodTime(executeByJAXB): 546
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.0505,     0,          546,        265,        140,        16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:57:17.435
+endTime:   2014-02-05 22:57:28.167
+totalElapsedTime: 10732
+
+maxMethodTime(executeByJAXB): 156
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.7869,     0,          156,        156,        125,        16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:57:31.304
+endTime:   2014-02-05 22:57:41.787
+totalElapsedTime: 10483
+
+maxMethodTime(executeByJAXB): 156
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.7774,     0,          156,        156,        140,        16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:57:45.127
+endTime:   2014-02-05 22:58:29.649
+totalElapsedTime: 44522
+
+maxMethodTime(executeByJackson): 281
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.8558,     0,          281,        156,        47,         16,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:58:32.745
+endTime:   2014-02-05 22:59:12.634
+totalElapsedTime: 39889
+
+maxMethodTime(executeByJackson): 32
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.4162,     0,          32,         31,         16,         16,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:59:15.709
+endTime:   2014-02-05 22:59:55.318
+totalElapsedTime: 39609
+
+maxMethodTime(executeByJackson): 31
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.3872,     0,          31,         16,         16,         16,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 22:59:58.392
+endTime:   2014-02-05 23:00:00.498
+totalElapsedTime: 2106
+
+maxMethodTime(executeByAbacus): 546
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.1394,     0,          546,        140,        16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 23:00:03.619
+endTime:   2014-02-05 23:00:04.555
+totalElapsedTime: 936
+
+maxMethodTime(executeByAbacus): 16
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0544,     0,          16,         16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-05 23:00:07.676
+endTime:   2014-02-05 23:00:08.628
+totalElapsedTime: 952
+
+maxMethodTime(executeByAbacus): 31
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0551,     0,          31,         16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:00:11.749
+endTime:   2014-02-05 23:00:47.426
+totalElapsedTime: 35677
+
+maxMethodTime(executeByJAXBWithBigBean): 1061
+minMethodTime(executeByJAXBWithBigBean): 93
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  341.405,    93,         1061,       1061,       1061,       920,        437,        406,        312,        250,        218,        94,         93,         93,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:00:50.765
+endTime:   2014-02-05 23:01:24.274
+totalElapsedTime: 33509
+
+maxMethodTime(executeByJAXBWithBigBean): 561
+minMethodTime(executeByJAXBWithBigBean): 109
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  320.64,     109,        561,        561,        561,        500,        436,        406,        297,        249,        203,        125,        109,        109,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:01:27.598
+endTime:   2014-02-05 23:02:01.356
+totalElapsedTime: 33758
+
+maxMethodTime(executeByJAXBWithBigBean): 546
+minMethodTime(executeByJAXBWithBigBean): 94
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  328.0417,   94,         546,        546,        546,        514,        422,        406,        312,        265,        234,        109,        94,         94,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:02:04.665
+endTime:   2014-02-05 23:02:24.523
+totalElapsedTime: 19858
+
+maxMethodTime(executeByJacksonWithBigBean): 1061
+minMethodTime(executeByJacksonWithBigBean): 62
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  171.365,    62,         1061,       1061,       1061,       405,        250,        218,        141,        124,        109,        78,         62,         62,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:02:27.582
+endTime:   2014-02-05 23:02:46.349
+totalElapsedTime: 18767
+
+maxMethodTime(executeByJacksonWithBigBean): 358
+minMethodTime(executeByJacksonWithBigBean): 62
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  157.2033,   62,         358,        358,        358,        343,        234,        203,        125,        110,        109,        62,         62,         62,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:02:49.392
+endTime:   2014-02-05 23:03:07.769
+totalElapsedTime: 18377
+
+maxMethodTime(executeByJacksonWithBigBean): 422
+minMethodTime(executeByJacksonWithBigBean): 62
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  158.6283,   62,         422,        422,        422,        297,        234,        203,        125,        124,        109,        94,         62,         62,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:03:10.827
+endTime:   2014-02-05 23:03:42.279
+totalElapsedTime: 31452
+
+maxMethodTime(executeByAbacusWithBigBean): 4370
+minMethodTime(executeByAbacusWithBigBean): 109
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  302.68,     109,        4370,       4370,       4370,       546,        297,        296,        265,        234,        203,        125,        109,        109,        
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:03:45.467
+endTime:   2014-02-05 23:04:12.954
+totalElapsedTime: 27487
+
+maxMethodTime(executeByAbacusWithBigBean): 374
+minMethodTime(executeByAbacusWithBigBean): 93
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  269.4017,   93,         374,        374,        374,        328,        296,        281,        266,        265,        249,        141,        93,         93,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-05 23:04:16.079
+endTime:   2014-02-05 23:04:43.488
+totalElapsedTime: 27409
+
+maxMethodTime(executeByAbacusWithBigBean): 437
+minMethodTime(executeByAbacusWithBigBean): 94
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  268.3933,   94,         437,        437,        437,        343,        296,        281,        266,        250,        234,        156,        94,         94,         
+
+================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:52:54.816
+endTime:   2014-02-06 13:53:09.362
+totalElapsedTime: 14546
+
+maxMethodTime(executeByJAXB): 598
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.0357,     0,          598,        381,        140,        4,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:53:12.618
+endTime:   2014-02-06 13:53:23.413
+totalElapsedTime: 10795
+
+maxMethodTime(executeByJAXB): 155
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.8155,     0,          155,        147,        140,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:53:26.53
+endTime:   2014-02-06 13:53:37.183
+totalElapsedTime: 10653
+
+maxMethodTime(executeByJAXB): 156
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.8002,     0,          156,        152,        145,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:53:40.519
+endTime:   2014-02-06 13:54:25.554
+totalElapsedTime: 45035
+
+maxMethodTime(executeByJackson): 399
+minMethodTime(executeByJackson): 1
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.8163,     1,          399,        161,        49,         12,         6,          5,          3,          2,          2,          2,          1,          1,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:54:28.654
+endTime:   2014-02-06 13:55:08.197
+totalElapsedTime: 39543
+
+maxMethodTime(executeByJackson): 56
+minMethodTime(executeByJackson): 1
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.4082,     1,          56,         23,         13,         9,          5,          5,          3,          2,          2,          2,          1,          1,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:55:11.274
+endTime:   2014-02-06 13:55:50.89
+totalElapsedTime: 39616
+
+maxMethodTime(executeByJackson): 24
+minMethodTime(executeByJackson): 1
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  3.3436,     1,          24,         18,         13,         9,          5,          5,          3,          2,          2,          2,          1,          1,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:55:53.967
+endTime:   2014-02-06 13:55:56.21
+totalElapsedTime: 2243
+
+maxMethodTime(executeByAbacus): 386
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.1521,     0,          386,        161,        8,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:55:59.328
+endTime:   2014-02-06 13:56:00.244
+totalElapsedTime: 916
+
+maxMethodTime(executeByAbacus): 4
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0531,     0,          4,          3,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-06 13:56:03.36
+endTime:   2014-02-06 13:56:04.277
+totalElapsedTime: 917
+
+maxMethodTime(executeByAbacus): 3
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0516,     0,          3,          1,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:56:07.392
+endTime:   2014-02-06 13:56:44.906
+totalElapsedTime: 37514
+
+maxMethodTime(executeByJAXBWithBigBean): 1442
+minMethodTime(executeByJAXBWithBigBean): 97
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  348.6017,   97,         1442,       1442,       1442,       1247,       463,        406,        320,        229,        191,        100,        97,         97,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:56:48.708
+endTime:   2014-02-06 13:57:24.626
+totalElapsedTime: 35918
+
+maxMethodTime(executeByJAXBWithBigBean): 1927
+minMethodTime(executeByJAXBWithBigBean): 93
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  340.53,     93,         1927,       1927,       1927,       1443,       439,        408,        303,        245,        208,        120,        93,         93,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:57:28.157
+endTime:   2014-02-06 13:58:03.671
+totalElapsedTime: 35514
+
+maxMethodTime(executeByJAXBWithBigBean): 2415
+minMethodTime(executeByJAXBWithBigBean): 94
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  335.6083,   94,         2415,       2415,       2415,       553,        436,        407,        302,        241,        204,        104,        94,         94,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:58:07.898
+endTime:   2014-02-06 13:58:28.375
+totalElapsedTime: 20477
+
+maxMethodTime(executeByJacksonWithBigBean): 1161
+minMethodTime(executeByJacksonWithBigBean): 68
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  183.1383,   68,         1161,       1161,       1161,       401,        244,        223,        179,        124,        122,        73,         68,         68,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:58:31.432
+endTime:   2014-02-06 13:58:50.698
+totalElapsedTime: 19266
+
+maxMethodTime(executeByJacksonWithBigBean): 382
+minMethodTime(executeByJacksonWithBigBean): 67
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  166.8883,   67,         382,        382,        382,        313,        230,        217,        134,        123,        121,        74,         67,         67,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:58:53.747
+endTime:   2014-02-06 13:59:12.829
+totalElapsedTime: 19082
+
+maxMethodTime(executeByJacksonWithBigBean): 342
+minMethodTime(executeByJacksonWithBigBean): 76
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  172.7867,   76,         342,        342,        342,        294,        228,        219,        165,        123,        122,        119,        76,         76,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:59:15.881
+endTime:   2014-02-06 13:59:47.131
+totalElapsedTime: 31250
+
+maxMethodTime(executeByAbacusWithBigBean): 4310
+minMethodTime(executeByAbacusWithBigBean): 98
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  303.8967,   98,         4310,       4310,       4310,       382,        303,        290,        268,        247,        224,        103,        98,         98,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 13:59:50.313
+endTime:   2014-02-06 14:00:16.905
+totalElapsedTime: 26592
+
+maxMethodTime(executeByAbacusWithBigBean): 405
+minMethodTime(executeByAbacusWithBigBean): 91
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  260.5433,   91,         405,        405,        405,        325,        284,        275,        262,        251,        241,        158,        91,         91,         
+
+================================================================================
+
+================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-06 14:00:20.018
+endTime:   2014-02-06 14:00:46.688
+totalElapsedTime: 26670
+
+maxMethodTime(executeByAbacusWithBigBean): 343
+minMethodTime(executeByAbacusWithBigBean): 92
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  261.76,     92,         343,        343,        343,        315,        283,        277,        264,        253,        242,        166,        92,         92,         
+
+================================================================================
+
+
+
+
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:09.397
+endTime:   2014-02-07 16:01:12.412
+totalElapsedTime: 3015
+
+maxMethodTime(executeByAbacus): 550
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.1494,     0,          550,        67,         6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:15.652
+endTime:   2014-02-07 16:01:16.577
+totalElapsedTime: 925
+
+maxMethodTime(executeByAbacus): 16
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0542,     0,          16,         7,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:19.657
+endTime:   2014-02-07 16:01:20.508
+totalElapsedTime: 851
+
+maxMethodTime(executeByAbacus): 8
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0506,     0,          8,          1,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:23.62
+endTime:   2014-02-07 16:01:37.004
+totalElapsedTime: 13384
+
+maxMethodTime(executeByJAXB): 465
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.9614,     0,          465,        291,        149,        4,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:40.195
+endTime:   2014-02-07 16:01:50.944
+totalElapsedTime: 10749
+
+maxMethodTime(executeByJAXB): 157
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.7888,     0,          157,        155,        146,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:01:54.124
+endTime:   2014-02-07 16:02:04.749
+totalElapsedTime: 10625
+
+maxMethodTime(executeByJAXB): 163
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.7647,     0,          163,        161,        152,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:08.123
+endTime:   2014-02-07 16:02:10.594
+totalElapsedTime: 2471
+
+maxMethodTime(executeByJackson): 703
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.1566,     0,          703,        140,        6,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:13.707
+endTime:   2014-02-07 16:02:14.763
+totalElapsedTime: 1056
+
+maxMethodTime(executeByJackson): 31
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0633,     0,          31,         13,         1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:17.83
+endTime:   2014-02-07 16:02:18.771
+totalElapsedTime: 941
+
+maxMethodTime(executeByJackson): 8
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0557,     0,          8,          6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:21.835
+endTime:   2014-02-07 16:02:24.406
+totalElapsedTime: 2571
+
+maxMethodTime(executeByJIBX): 511
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1557,     0,          511,        93,         12,         1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:27.494
+endTime:   2014-02-07 16:02:28.543
+totalElapsedTime: 1049
+
+maxMethodTime(executeByJIBX): 9
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.0623,     0,          9,          6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-07 16:02:31.615
+endTime:   2014-02-07 16:02:32.681
+totalElapsedTime: 1066
+
+maxMethodTime(executeByJIBX): 7
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.0624,     0,          7,          6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:02:35.748
+endTime:   2014-02-07 16:03:06.745
+totalElapsedTime: 30997
+
+maxMethodTime(executeByAbacusWithBigBean): 4044
+minMethodTime(executeByAbacusWithBigBean): 95
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  304.4583,   95,         4044,       4044,       4044,       548,        297,        286,        269,        255,        242,        163,        95,         95,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:03:09.927
+endTime:   2014-02-07 16:03:38.325
+totalElapsedTime: 28398
+
+maxMethodTime(executeByAbacusWithBigBean): 450
+minMethodTime(executeByAbacusWithBigBean): 95
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  273.2533,   95,         450,        450,        450,        416,        331,        305,        272,        245,        211,        153,        95,         95,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:03:41.434
+endTime:   2014-02-07 16:04:08.762
+totalElapsedTime: 27328
+
+maxMethodTime(executeByAbacusWithBigBean): 450
+minMethodTime(executeByAbacusWithBigBean): 104
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  264.3217,   104,        450,        450,        450,        346,        295,        285,        270,        251,        217,        119,        104,        104,        
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:04:11.833
+endTime:   2014-02-07 16:04:47.971
+totalElapsedTime: 36138
+
+maxMethodTime(executeByJAXBWithBigBean): 1454
+minMethodTime(executeByJAXBWithBigBean): 85
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  346.5883,   85,         1454,       1454,       1454,       1274,       446,        415,        290,        250,        208,        154,        85,         85,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:04:51.453
+endTime:   2014-02-07 16:05:27.942
+totalElapsedTime: 36489
+
+maxMethodTime(executeByJAXBWithBigBean): 2377
+minMethodTime(executeByJAXBWithBigBean): 88
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  345.01,     88,         2377,       2377,       2377,       1410,       462,        426,        292,        252,        222,        99,         88,         88,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:05:31.353
+endTime:   2014-02-07 16:06:06.077
+totalElapsedTime: 34724
+
+maxMethodTime(executeByJAXBWithBigBean): 2553
+minMethodTime(executeByJAXBWithBigBean): 110
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  335.5667,   110,        2553,       2553,       2553,       611,        446,        422,        283,        246,        213,        127,        110,        110,        
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:06:09.512
+endTime:   2014-02-07 16:06:29.57
+totalElapsedTime: 20058
+
+maxMethodTime(executeByJacksonWithBigBean): 356
+minMethodTime(executeByJacksonWithBigBean): 82
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  172.41,     82,         356,        356,        356,        325,        252,        221,        136,        121,        119,        94,         82,         82,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:06:32.715
+endTime:   2014-02-07 16:06:51.83
+totalElapsedTime: 19115
+
+maxMethodTime(executeByJacksonWithBigBean): 378
+minMethodTime(executeByJacksonWithBigBean): 64
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  164.92,     64,         378,        378,        378,        288,        225,        215,        136,        120,        118,        71,         64,         64,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:06:54.92
+endTime:   2014-02-07 16:07:15.548
+totalElapsedTime: 20628
+
+maxMethodTime(executeByJacksonWithBigBean): 642
+minMethodTime(executeByJacksonWithBigBean): 66
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  176.015,    66,         642,        642,        642,        323,        250,        221,        163,        121,        119,        76,         66,         66,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:07:18.626
+endTime:   2014-02-07 16:07:39.867
+totalElapsedTime: 21241
+
+maxMethodTime(executeByJIBXWithBigBean): 375
+minMethodTime(executeByJIBXWithBigBean): 66
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  187.5417,   66,         375,        375,        375,        327,        262,        245,        155,        134,        131,        76,         66,         66,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:07:42.952
+endTime:   2014-02-07 16:08:04.593
+totalElapsedTime: 21641
+
+maxMethodTime(executeByJIBXWithBigBean): 413
+minMethodTime(executeByJIBXWithBigBean): 65
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  187.7383,   65,         413,        413,        413,        363,        270,        249,        153,        135,        131,        67,         65,         65,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-07 16:08:07.673
+endTime:   2014-02-07 16:08:30.027
+totalElapsedTime: 22354
+
+maxMethodTime(executeByJIBXWithBigBean): 389
+minMethodTime(executeByJIBXWithBigBean): 66
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  201.195,    66,         389,        389,        389,        363,        270,        257,        218,        137,        134,        75,         66,         66,         
+
+========================================================================================================================
+
+
+
+
+
+
+
+
+
+Windows 7/JDK 1.7_51
+
+SVN: 1649
+
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:13.705
+endTime:   2014-02-17 09:58:16.507
+totalElapsedTime: 2802
+
+maxMethodTime(executeByAbacus): 517
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.1723,     0,          517,        95,         17,         1,          1,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:19.72
+endTime:   2014-02-17 09:58:20.641
+totalElapsedTime: 921
+
+maxMethodTime(executeByAbacus): 15
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.054,      0,          15,         7,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:23.719
+endTime:   2014-02-17 09:58:24.593
+totalElapsedTime: 874
+
+maxMethodTime(executeByAbacus): 7
+minMethodTime(executeByAbacus): 0
+
+<method name>,    <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacus,  0.0525,     0,          7,          1,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:27.704
+endTime:   2014-02-17 09:58:40.77
+totalElapsedTime: 13066
+
+maxMethodTime(executeByJAXB): 635
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.9474,     0,          635,        443,        145,        3,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:44.01
+endTime:   2014-02-17 09:58:54.608
+totalElapsedTime: 10598
+
+maxMethodTime(executeByJAXB): 155
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.775,      0,          155,        153,        146,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:58:57.775
+endTime:   2014-02-17 09:59:08.346
+totalElapsedTime: 10571
+
+maxMethodTime(executeByJAXB): 167
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  0.7992,     0,          167,        160,        151,        2,          1,          1,          1,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:11.701
+endTime:   2014-02-17 09:59:13.947
+totalElapsedTime: 2246
+
+maxMethodTime(executeByJackson): 237
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.1456,     0,          237,        87,         11,         1,          1,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:17.031
+endTime:   2014-02-17 09:59:18.443
+totalElapsedTime: 1412
+
+maxMethodTime(executeByJackson): 39
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0857,     0,          39,         6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:21.509
+endTime:   2014-02-17 09:59:22.848
+totalElapsedTime: 1339
+
+maxMethodTime(executeByJackson): 12
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0799,     0,          12,         6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:25.909
+endTime:   2014-02-17 09:59:28.824
+totalElapsedTime: 2915
+
+maxMethodTime(executeByJIBX): 267
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1348,     0,          267,        89,         5,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:31.938
+endTime:   2014-02-17 09:59:33.088
+totalElapsedTime: 1150
+
+maxMethodTime(executeByJIBX): 8
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.0682,     0,          8,          5,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=10000
+startTime: 2014-02-17 09:59:36.153
+endTime:   2014-02-17 09:59:37.282
+totalElapsedTime: 1129
+
+maxMethodTime(executeByJIBX): 9
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.068,      0,          9,          6,          1,          1,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 09:59:40.342
+endTime:   2014-02-17 10:00:09.606
+totalElapsedTime: 29264
+
+maxMethodTime(executeByAbacusWithBigBean): 3759
+minMethodTime(executeByAbacusWithBigBean): 116
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  288.6867,   116,        3759,       3759,       3759,       721,        288,        268,        245,        233,        226,        167,        116,        116,        
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:00:12.771
+endTime:   2014-02-17 10:00:39.601
+totalElapsedTime: 26830
+
+maxMethodTime(executeByAbacusWithBigBean): 405
+minMethodTime(executeByAbacusWithBigBean): 85
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  261.495,    85,         405,        405,        405,        341,        303,        287,        261,        241,        232,        114,        85,         85,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:00:42.71
+endTime:   2014-02-17 10:01:07.605
+totalElapsedTime: 24895
+
+maxMethodTime(executeByAbacusWithBigBean): 339
+minMethodTime(executeByAbacusWithBigBean): 87
+
+<method name>,               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusWithBigBean,  242.335,    87,         339,        339,        339,        306,        269,        263,        248,        229,        201,        144,        87,         87,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:01:10.687
+endTime:   2014-02-17 10:01:45.905
+totalElapsedTime: 35218
+
+maxMethodTime(executeByJAXBWithBigBean): 1355
+minMethodTime(executeByJAXBWithBigBean): 83
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  334.525,    83,         1355,       1355,       1355,       1242,       458,        420,        287,        238,        202,        112,        83,         83,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:01:49.655
+endTime:   2014-02-17 10:02:23.564
+totalElapsedTime: 33909
+
+maxMethodTime(executeByJAXBWithBigBean): 1806
+minMethodTime(executeByJAXBWithBigBean): 84
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  326.895,    84,         1806,       1806,       1806,       1454,       441,        411,        277,        236,        197,        135,        84,         84,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:02:27.649
+endTime:   2014-02-17 10:03:01.221
+totalElapsedTime: 33572
+
+maxMethodTime(executeByJAXBWithBigBean): 1769
+minMethodTime(executeByJAXBWithBigBean): 81
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  319.4,      81,         1769,       1769,       1769,       1664,       439,        407,        270,        224,        175,        115,        81,         81,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:03:04.65
+endTime:   2014-02-17 10:03:21.795
+totalElapsedTime: 17145
+
+maxMethodTime(executeByJacksonWithBigBean): 430
+minMethodTime(executeByJacksonWithBigBean): 54
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  145.2333,   54,         430,        430,        430,        319,        221,        191,        119,        105,        103,        57,         54,         54,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:03:24.928
+endTime:   2014-02-17 10:03:42.599
+totalElapsedTime: 17671
+
+maxMethodTime(executeByJacksonWithBigBean): 330
+minMethodTime(executeByJacksonWithBigBean): 54
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  151.5783,   54,         330,        330,        330,        290,        210,        198,        135,        106,        104,        62,         54,         54,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:03:45.682
+endTime:   2014-02-17 10:04:02.705
+totalElapsedTime: 17023
+
+maxMethodTime(executeByJacksonWithBigBean): 325
+minMethodTime(executeByJacksonWithBigBean): 54
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  144.6317,   54,         325,        325,        325,        278,        206,        189,        118,        106,        104,        55,         54,         54,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:04:05.792
+endTime:   2014-02-17 10:04:28.409
+totalElapsedTime: 22617
+
+maxMethodTime(executeByJIBXWithBigBean): 411
+minMethodTime(executeByJIBXWithBigBean): 102
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  196.3117,   102,        411,        411,        411,        375,        269,        257,        160,        139,        136,        128,        102,        102,        
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:04:31.508
+endTime:   2014-02-17 10:04:53.543
+totalElapsedTime: 22035
+
+maxMethodTime(executeByJIBXWithBigBean): 394
+minMethodTime(executeByJIBXWithBigBean): 70
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  192.285,    70,         394,        394,        394,        374,        277,        252,        155,        138,        136,        71,         70,         70,         
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=100
+startTime: 2014-02-17 10:04:56.622
+endTime:   2014-02-17 10:05:18.47
+totalElapsedTime: 21848
+
+maxMethodTime(executeByJIBXWithBigBean): 398
+minMethodTime(executeByJIBXWithBigBean): 73
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  193.975,    73,         398,        398,        398,        352,        270,        259,        161,        138,        136,        79,         73,         73,         
+
+========================================================================================================================
+
+
+
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:16:51.299
+endTime:   2014-10-29 14:17:16.635
+totalElapsedTime: 25336
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 1654
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0776,     0,          1654,       62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:17:20.536
+endTime:   2014-10-29 14:17:44.637
+totalElapsedTime: 24101
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 250
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0725,     0,          250,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:17:48.457
+endTime:   2014-10-29 14:18:12.248
+totalElapsedTime: 23791
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 156
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0735,     0,          156,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:18:15.932
+endTime:   2014-10-29 14:18:56.731
+totalElapsedTime: 40799
+
+maxMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 297
+minMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 0
+
+<method name>,                              <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithSimpleBean,  0.1246,     0,          297,        109,        31,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:19:00.432
+endTime:   2014-10-29 14:19:39.56
+totalElapsedTime: 39128
+
+maxMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 218
+minMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 0
+
+<method name>,                              <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithSimpleBean,  0.1237,     0,          218,        94,         32,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:19:43.233
+endTime:   2014-10-29 14:20:23.095
+totalElapsedTime: 39862
+
+maxMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 234
+minMethodTime(executeByAbacusXMLDOMParserWithSimpleBean): 0
+
+<method name>,                              <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithSimpleBean,  0.1234,     0,          234,        109,        16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:21:51.409
+endTime:   2014-10-29 14:22:16.17
+totalElapsedTime: 24761
+
+maxMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 156
+minMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 0
+
+<method name>,                               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithSimpleBean,  0.0749,     0,          156,        63,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:22:19.776
+endTime:   2014-10-29 14:22:44.284
+totalElapsedTime: 24508
+
+maxMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 140
+minMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 0
+
+<method name>,                               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithSimpleBean,  0.0765,     0,          140,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:22:47.996
+endTime:   2014-10-29 14:23:12.739
+totalElapsedTime: 24743
+
+maxMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 156
+minMethodTime(executeByAbacusXMLStAXParserWithSimpleBean): 0
+
+<method name>,                               <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithSimpleBean,  0.0737,     0,          156,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:23:16.419
+endTime:   2014-10-29 14:28:51.786
+totalElapsedTime: 335367
+
+maxMethodTime(executeByJAXB): 2932
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.0571,     0,          2932,       359,        31,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:28:55.843
+endTime:   2014-10-29 14:34:29.999
+totalElapsedTime: 334156
+
+maxMethodTime(executeByJAXB): 437
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.042,      0,          437,        359,        16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:34:34.271
+endTime:   2014-10-29 14:40:11.021
+totalElapsedTime: 336750
+
+maxMethodTime(executeByJAXB): 407
+minMethodTime(executeByJAXB): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXB,  1.0561,     0,          407,        359,        16,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:40:15.094
+endTime:   2014-10-29 14:40:42.508
+totalElapsedTime: 27414
+
+maxMethodTime(executeByJackson): 328
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0824,     0,          328,        109,        16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:40:46.332
+endTime:   2014-10-29 14:41:12.451
+totalElapsedTime: 26119
+
+maxMethodTime(executeByJackson): 172
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0805,     0,          172,        78,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:41:16.149
+endTime:   2014-10-29 14:41:42.064
+totalElapsedTime: 25915
+
+maxMethodTime(executeByJackson): 187
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.0767,     0,          187,        94,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:41:45.888
+endTime:   2014-10-29 14:42:45.43
+totalElapsedTime: 59542
+
+maxMethodTime(executeByJIBX): 686
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1951,     0,          686,        47,         16,         15,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:42:49.427
+endTime:   2014-10-29 14:43:48.146
+totalElapsedTime: 58719
+
+maxMethodTime(executeByJIBX): 156
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1909,     0,          156,        32,         16,         15,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-10-29 14:43:52.078
+endTime:   2014-10-29 14:44:50.957
+totalElapsedTime: 58879
+
+maxMethodTime(executeByJIBX): 93
+minMethodTime(executeByJIBX): 0
+
+<method name>,  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBX,  0.1905,     0,          93,         46,         16,         15,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:44:54.883
+endTime:   2014-10-29 14:46:01.435
+totalElapsedTime: 66552
+
+maxMethodTime(executeByXMLParserWithBigBean): 187
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  2.0453,     0,          187,        125,        109,        62,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:46:04.728
+endTime:   2014-10-29 14:47:09.619
+totalElapsedTime: 64891
+
+maxMethodTime(executeByXMLParserWithBigBean): 406
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  1.9927,     0,          406,        140,        109,        47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:47:13.069
+endTime:   2014-10-29 14:48:15.46
+totalElapsedTime: 62391
+
+maxMethodTime(executeByXMLParserWithBigBean): 359
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  1.9476,     0,          359,        141,        95,         47,         1,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:48:18.661
+endTime:   2014-10-29 14:50:02.113
+totalElapsedTime: 103452
+
+maxMethodTime(executeByAbacusXMLDOMParserWithBigBean): 281
+minMethodTime(executeByAbacusXMLDOMParserWithBigBean): 0
+
+<method name>,                           <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithBigBean,  3.2644,     0,          281,        140,        109,        62,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:50:05.309
+endTime:   2014-10-29 14:51:51.758
+totalElapsedTime: 106449
+
+maxMethodTime(executeByAbacusXMLDOMParserWithBigBean): 281
+minMethodTime(executeByAbacusXMLDOMParserWithBigBean): 0
+
+<method name>,                           <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithBigBean,  3.2674,     0,          281,        188,        109,        63,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:51:54.973
+endTime:   2014-10-29 14:53:38.843
+totalElapsedTime: 103870
+
+maxMethodTime(executeByAbacusXMLDOMParserWithBigBean): 453
+minMethodTime(executeByAbacusXMLDOMParserWithBigBean): 0
+
+<method name>,                           <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLDOMParserWithBigBean,  3.2162,     0,          453,        187,        109,        62,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:57:06.029
+endTime:   2014-10-29 14:58:08.358
+totalElapsedTime: 62329
+
+maxMethodTime(executeByAbacusXMLStAXParserWithBigBean): 218
+minMethodTime(executeByAbacusXMLStAXParserWithBigBean): 0
+
+<method name>,                            <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithBigBean,  1.9323,     0,          218,        141,        109,        47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:58:11.541
+endTime:   2014-10-29 14:59:17.168
+totalElapsedTime: 65627
+
+maxMethodTime(executeByAbacusXMLStAXParserWithBigBean): 905
+minMethodTime(executeByAbacusXMLStAXParserWithBigBean): 0
+
+<method name>,                            <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithBigBean,  1.9204,     0,          905,        156,        94,         47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 14:59:20.352
+endTime:   2014-10-29 15:00:23.823
+totalElapsedTime: 63471
+
+maxMethodTime(executeByAbacusXMLStAXParserWithBigBean): 203
+minMethodTime(executeByAbacusXMLStAXParserWithBigBean): 0
+
+<method name>,                            <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByAbacusXMLStAXParserWithBigBean,  1.992,      0,          203,        125,        94,         47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:00:27.024
+endTime:   2014-10-29 15:03:37.607
+totalElapsedTime: 190583
+
+maxMethodTime(executeByJAXBWithBigBean): 1936
+minMethodTime(executeByJAXBWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  5.6096,     0,          1936,       515,        374,        63,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:03:41.477
+endTime:   2014-10-29 15:06:39.01
+totalElapsedTime: 177533
+
+maxMethodTime(executeByJAXBWithBigBean): 562
+minMethodTime(executeByJAXBWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  5.3998,     0,          562,        455,        374,        62,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:06:43.145
+endTime:   2014-10-29 15:09:39.123
+totalElapsedTime: 175978
+
+maxMethodTime(executeByJAXBWithBigBean): 546
+minMethodTime(executeByJAXBWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJAXBWithBigBean,  5.3028,     0,          546,        468,        374,        62,         16,         15,         0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:09:42.509
+endTime:   2014-10-29 15:10:16.286
+totalElapsedTime: 33777
+
+maxMethodTime(executeByJacksonWithBigBean): 202
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  1.0674,     0,          202,        125,        93,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:10:19.531
+endTime:   2014-10-29 15:10:53.243
+totalElapsedTime: 33712
+
+maxMethodTime(executeByJacksonWithBigBean): 281
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  1.0329,     0,          281,        156,        94,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:10:56.427
+endTime:   2014-10-29 15:11:29.742
+totalElapsedTime: 33315
+
+maxMethodTime(executeByJacksonWithBigBean): 218
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  1.0494,     0,          218,        140,        93,         16,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:11:32.926
+endTime:   2014-10-29 15:12:53.285
+totalElapsedTime: 80359
+
+maxMethodTime(executeByJIBXWithBigBean): 281
+minMethodTime(executeByJIBXWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  2.4896,     0,          281,        171,        109,        62,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:12:56.453
+endTime:   2014-10-29 15:14:17.83
+totalElapsedTime: 81377
+
+maxMethodTime(executeByJIBXWithBigBean): 265
+minMethodTime(executeByJIBXWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  2.57,       0,          265,        156,        109,        62,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-10-29 15:14:21.014
+endTime:   2014-10-29 15:15:43.432
+totalElapsedTime: 82418
+
+maxMethodTime(executeByJIBXWithBigBean): 312
+minMethodTime(executeByJIBXWithBigBean): 0
+
+<method name>,             <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJIBXWithBigBean,  2.5692,     0,          312,        171,        109,        62,         15,         0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+
+
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:23:38.759
+endTime:   2014-11-26 11:23:59.85
+totalElapsedTime: 21091
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 1045
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0662,     0,          1045,       47,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:24:04.516
+endTime:   2014-11-26 11:24:24.152
+totalElapsedTime: 19636
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 140
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0608,     0,          140,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:24:28.74
+endTime:   2014-11-26 11:24:49.077
+totalElapsedTime: 20337
+
+maxMethodTime(executeByXMLParserWithSimpleBean): 125
+minMethodTime(executeByXMLParserWithSimpleBean): 0
+
+<method name>,                     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithSimpleBean,  0.0633,     0,          125,        62,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:24:53.575
+endTime:   2014-11-26 11:25:26.537
+totalElapsedTime: 32962
+
+maxMethodTime(executeByJackson): 390
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.1004,     0,          390,        93,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:25:31.218
+endTime:   2014-11-26 11:26:02.755
+totalElapsedTime: 31537
+
+maxMethodTime(executeByJackson): 188
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.1,        0,          188,        78,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=300000
+startTime: 2014-11-26 11:26:07.295
+endTime:   2014-11-26 11:26:39.798
+totalElapsedTime: 32503
+
+maxMethodTime(executeByJackson): 406
+minMethodTime(executeByJackson): 0
+
+<method name>,     <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJackson,  0.1004,     0,          406,        78,         16,         0,          0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:26:44.481
+endTime:   2014-11-26 11:27:36.82
+totalElapsedTime: 52339
+
+maxMethodTime(executeByXMLParserWithBigBean): 156
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  1.6358,     0,          156,        110,        78,         46,         1,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:27:40.988
+endTime:   2014-11-26 11:28:33.048
+totalElapsedTime: 52060
+
+maxMethodTime(executeByXMLParserWithBigBean): 218
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  1.6678,     0,          218,        141,        63,         47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:28:37.199
+endTime:   2014-11-26 11:29:29.34
+totalElapsedTime: 52141
+
+maxMethodTime(executeByXMLParserWithBigBean): 359
+minMethodTime(executeByXMLParserWithBigBean): 0
+
+<method name>,                  <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByXMLParserWithBigBean,  1.6336,     0,          359,        125,        63,         47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:29:33.49
+endTime:   2014-11-26 11:30:37.215
+totalElapsedTime: 63725
+
+maxMethodTime(executeByJacksonWithBigBean): 219
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  2.0635,     0,          219,        110,        94,         62,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:30:41.382
+endTime:   2014-11-26 11:31:45.267
+totalElapsedTime: 63885
+
+maxMethodTime(executeByJacksonWithBigBean): 172
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  1.9979,     0,          172,        110,        63,         62,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================
+
+========================================================================================================================
+(unit: milliseconds)
+threadNum=6; loops=30000
+startTime: 2014-11-26 11:31:49.417
+endTime:   2014-11-26 11:32:53.596
+totalElapsedTime: 64179
+
+maxMethodTime(executeByJacksonWithBigBean): 156
+minMethodTime(executeByJacksonWithBigBean): 0
+
+<method name>,                <avg time>, <min time>, <max time>, <0.01% >=>, <0.1% >=>,  <1% >=>,    <10% >=>,   <20% >=>,   <50% >=>,   <80% >=>,   <90% >=>,   <99% >=>,   <99.9% >=>, <99.99% >=>
+executeByJacksonWithBigBean,  2.0106,     0,          156,        125,        94,         47,         0,          0,          0,          0,          0,          0,          0,          0,          
+
+========================================================================================================================

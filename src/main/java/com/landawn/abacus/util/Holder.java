@@ -50,6 +50,8 @@ public final class Holder<T> implements Mutable {
 
     /**
      * Constructs a new Holder with the specified initial value.
+     * This constructor is package-private and intended for internal use.
+     * Use {@link #of(Object)} to create new Holder instances.
      *
      * @param value the initial value to be held by this Holder, may be {@code null}
      */

@@ -487,7 +487,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple2.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
+        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
     };
 
     static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
@@ -495,7 +495,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple2.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
+        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
     };
 
     static final Supplier<long[]> AveragingLong_Supplier = () -> new long[2];
@@ -547,7 +547,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple2.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
+        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
     };
 
     static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
@@ -555,7 +555,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple2.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
+        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
     };
 
     static final Supplier<KahanSummation> AveragingDouble_Supplier = KahanSummation::new;

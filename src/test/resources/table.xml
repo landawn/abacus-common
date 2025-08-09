@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<table name="acl_user_group_relationship">
+	<column isAutoIncrement="true" isCaseSensitive="false" isNullable="false" isPrimaryKey="true" isReadOnly="false"
+		isSearchable="true" isUnique="true" isWritable="true" javaType="java.lang.Long" jdbcType="BIGINT(20)" name="id"
+		sqlType="-5" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="false" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.lang.String" jdbcType="VARCHAR(64)" name="user_gui" sqlType="12" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="false" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.lang.String" jdbcType="VARCHAR(64)" name="group_gui" sqlType="12" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="true" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.lang.String" jdbcType="VARCHAR(1024)" name="description" sqlType="12" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="false" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.lang.Integer" jdbcType=" NUMBER(38,0)" name="status" sqlType="4" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="false" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.sql.Timestamp" jdbcType="TIMESTAMP(19)" name="last_update_time" sqlType="93" />
+	<column isAutoIncrement="false" isCaseSensitive="false" isNullable="false" isReadOnly="false" isSearchable="true"
+		isWritable="true" javaType="java.sql.Timestamp" jdbcType="TIMESTAMP(19)" name="create_time" sqlType="93" />
+</table>

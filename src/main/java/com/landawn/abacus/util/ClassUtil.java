@@ -1856,6 +1856,7 @@ public final class ClassUtil {
      * @return {@code true} if the specified class is a bean class, {@code false} otherwise
      * @deprecated Use {@link Beans#isBeanClass(Class<?>)} instead
      */
+    @Deprecated
     public static boolean isBeanClass(final Class<?> cls) {
         return Beans.isBeanClass(cls);
     }
@@ -1867,6 +1868,7 @@ public final class ClassUtil {
      * @return {@code true} if the specified class is a record class, {@code false} otherwise
      * @deprecated Use {@link Beans#isRecordClass(Class<?>)} instead
      */
+    @Deprecated
     public static boolean isRecordClass(final Class<?> cls) {
         return Beans.isRecordClass(cls);
     }

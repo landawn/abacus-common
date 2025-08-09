@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>6.3.5</version>
+	<version>6.3.6</version>
 	<packaging>jar</packaging> 
 	<name>abacus-common</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>6.3.4</version>
+			<version>6.3.5</version>
 			<scope>provided</scope>
 		</dependency>
 		
@@ -168,17 +168,26 @@
 			<version>4.0.4</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi</artifactId>
-		    <version>5.4.1</version>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.4.1</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi-ooxml</artifactId>
-		    <version>5.4.1</version>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.27.1</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -292,31 +301,53 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
-		</dependency> 
-		
+		</dependency>
+
 		<dependency>
-		    <groupId>org.mockito</groupId>
-		    <artifactId>mockito-core</artifactId>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite-api</artifactId>
+			<version>1.13.4</version> <!-- Use version matching your Jupiter version -->
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JUnit Platform Suite runtime (processes @Suite/@Select* annotations) -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite</artifactId>
+			<version>1.13.4</version>
+			<scope>test</scope>
+
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<version>${mockito.version}</version>
-		    <scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.mockito</groupId>
-		    <artifactId>mockito-junit-jupiter</artifactId>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>${mockito.version}</version>
-		    <scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-		  <groupId>com.squareup.okhttp3</groupId>
-		  <artifactId>mockwebserver</artifactId>
-		  <version>4.12.0</version> <!-- use latest stable version -->
-		  <scope>test</scope>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver</artifactId>
+			<version>4.12.0</version> <!-- use latest stable version -->
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.assertj</groupId>
-		    <artifactId>assertj-core</artifactId>
-		    <version>3.27.3</version>
-		    <scope>test</scope>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.27.3</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -338,16 +369,6 @@
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.3.0</version>
 				<configuration>
-					<excludes>
-						<exclude>com/landawn/abacus/util/ClassUtil.java</exclude>
-						<exclude>
-							com/landawn/abacus/util/stream/Abstract*Stream.java</exclude>
-						<exclude>
-							com/landawn/abacus/util/stream/*Array*Stream.java</exclude>
-						<exclude>
-							com/landawn/abacus/util/stream/*Iterator*Stream.java</exclude>
-						<exclude>com/landawn/abacus/util/stream/*IteratorEx.java</exclude>
-					</excludes>
 				</configuration>
 
 				<executions>
@@ -388,32 +409,52 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.3</version>
+				<configuration>
+					<includes>
+						<include>**/AbacusCommonUnitSuite.java</include>
+					</includes>
+					<useModulePath>false</useModulePath>
+					<testFailureIgnore>true</testFailureIgnore> <!-- set to false if you want failures to fail the build -->
+					<argLine>
+          				-Dfile.encoding=UTF-8
+						--add-opens java.base/java.lang=ALL-UNNAMED
+						--add-opens java.base/java.lang.reflect=ALL-UNNAMED
+						--add-opens java.base/java.io=ALL-UNNAMED
+						--add-opens java.base/sun.nio.ch=ALL-UNNAMED
+						--add-opens java.base/java.nio=ALL-UNNAMED
+						--add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+						--add-exports java.base/sun.nio.ch=ALL-UNNAMED
+						--add-exports jdk.unsupported/sun.misc=ALL-UNNAMED
+					</argLine>
+				</configuration>
+			</plugin>
 
-	        <plugin>
-	          <groupId>org.sonatype.central</groupId>
-	          <artifactId>central-publishing-maven-plugin</artifactId>
-	          <version>0.8.0</version>
-	          <extensions>true</extensions>
-	          <configuration>
-	             <publishingServerId>central</publishingServerId>
-	             <autoPublish>true</autoPublish>
-	          </configuration>
-	        </plugin>
-
-		    <plugin>
-		      <groupId>org.apache.maven.plugins</groupId>
-		      <artifactId>maven-gpg-plugin</artifactId>
-		      <version>3.1.0</version>
-		      <executions>
-		        <execution>
-		          <id>sign-artifacts</id>
-		          <phase>verify</phase> <!-- or deploy -->
-		          <goals>
-		            <goal>sign</goal>
-		          </goals>
-		        </execution>
-		      </executions>
-		    </plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<!-- Prepare agent in all modules via inheritance -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<!-- Generate a single aggregated report at the parent -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

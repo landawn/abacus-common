@@ -159,6 +159,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @deprecated This method is deprecated in favor of the more concise {@link #left()} method.
      * @see #left()
      */
+    @Deprecated
     public L getLeft() {
         return left;
     }
@@ -188,6 +189,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @deprecated This method is deprecated in favor of the more concise {@link #middle()} method.
      * @see #middle()
      */
+    @Deprecated
     public M getMiddle() {
         return middle;
     }
@@ -217,6 +219,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @deprecated This method is deprecated in favor of the more concise {@link #right()} method.
      * @see #right()
      */
+    @Deprecated
     public R getRight() {
         return right;
     }

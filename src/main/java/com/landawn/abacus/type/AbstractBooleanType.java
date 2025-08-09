@@ -146,10 +146,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Retrieves a boolean value from a ResultSet at the specified column index.
+     * Note: This method uses rs.getBoolean() which returns false for SQL NULL values.
+     * Therefore, SQL NULL values are converted to Boolean.valueOf(false), not null.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the boolean value at the specified column
+     * @return the boolean value at the specified column, or Boolean.valueOf(false) if the value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -159,10 +161,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Retrieves a boolean value from a ResultSet using the specified column label.
+     * Note: This method uses rs.getBoolean() which returns false for SQL NULL values.
+     * Therefore, SQL NULL values are converted to Boolean.valueOf(false), not null.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the boolean value at the specified column
+     * @return the boolean value at the specified column, or Boolean.valueOf(false) if the value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override

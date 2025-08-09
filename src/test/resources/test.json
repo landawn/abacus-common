@@ -1,0 +1,32 @@
+{
+    "typeBoolean": true,
+    "typeBoolean2": false,
+    "typeChar": "\"",
+    "typeByte": 0,
+    "typeShort": 17,
+    "typeInt": 101010,
+    "typeLong": 9090990909,
+    "typeLong2": 202,
+    "typeFloat": 101.090355,
+    "typeDouble": 3.9345565932313446E10,
+    "typeString": "<<>>dfe<>afe><alfeji'slfj/ei\\o;;aj//fd:///// lsaj\\\\fei { asjfei } fjeiw [fjei ]safejioae : &dakf sfeij 黎jei \\d\\tskfjei \":6f0234e1-3564-4d82-a40c-63b89a10e8af",
+    "typeDate": 1723904595657,
+    "typeSqlTimestamp": 1723904595659,
+    "weekDay": "FRIDAY",
+    "firstName": "be6daf03-64ef-4455-b2c2-b27aef7c0e7e",
+    "middleName": "9612fdd0-71ba-432e-b91e-dece51a39554",
+    "lastName": "991c02b6-f01c-4993-955e-5f9d4ddd0be2",
+    "persons": [
+        {
+            "id": 1010164891,
+            "firstName": "80db3df8-55e2-4f4b-90d4-2ef3508a6265><\"<//> ' \"",
+            "lastName": "80db3df8-55e2-4f4b-90d4-2ef3508a6265",
+            "address1": "80db3df8-55e2-4f4b-90d4-2ef3508a6265",
+            "postCode": "80db3df8-55e2-4f4b-90d4-2ef3508a6265",
+            "city": "80db3df8-55e2-4f4b-90d4-2ef3508a6265",
+            "country": "80db3df8-55e2-4f4b-90d4-2ef3508a6265",
+            "birthday": 1723904595661,
+            "active": true
+        }
+    ]
+}

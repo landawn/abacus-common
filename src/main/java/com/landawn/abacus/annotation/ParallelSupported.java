@@ -20,6 +20,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated method or type supports parallel execution.
+ * This annotation documents that the implementation is thread-safe and can be
+ * executed concurrently without synchronization issues.
+ * 
+ * <p>When applied to a method, it indicates that the method can be safely called
+ * from multiple threads simultaneously. When applied to a type, it indicates that
+ * the entire type and its operations support parallel execution.</p>
+ * 
+ * <p>This annotation is particularly useful for:</p>
+ * <ul>
+ *   <li>Stream operations that can be parallelized</li>
+ *   <li>Collection operations that support concurrent access</li>
+ *   <li>Algorithms that can be executed in parallel</li>
+ *   <li>Thread-safe utility methods</li>
+ * </ul>
+ * 
+ * @see SequentialOnly
+ * @author HaiYang Li
+ * @since 2018
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.METHOD, ElementType.TYPE })

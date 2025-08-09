@@ -298,10 +298,11 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with an exception using a supplier.
      * 
-     * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      * @param supplier the supplier that provides the message
      * @param t the exception to log
+     * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      */
+    @Deprecated
     @Override
     public void trace(final Supplier<String> supplier, final Throwable t) {
         if (isTraceEnabled()) {
@@ -524,10 +525,11 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with an exception using a supplier.
      * 
-     * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      * @param supplier the supplier that provides the message
      * @param t the exception to log
+     * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      */
+    @Deprecated
     @Override
     public void debug(final Supplier<String> supplier, final Throwable t) {
         if (isDebugEnabled()) {
@@ -750,10 +752,11 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with an exception using a supplier.
      * 
-     * @deprecated Use {@link #info(Throwable, Supplier)} instead
      * @param supplier the supplier that provides the message
      * @param t the exception to log
+     * @deprecated Use {@link #info(Throwable, Supplier)} instead
      */
+    @Deprecated
     @Override
     public void info(final Supplier<String> supplier, final Throwable t) {
         if (isInfoEnabled()) {
@@ -976,10 +979,11 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with an exception using a supplier.
      * 
-     * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      * @param supplier the supplier that provides the message
      * @param t the exception to log
+     * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      */
+    @Deprecated
     @Override
     public void warn(final Supplier<String> supplier, final Throwable t) {
         if (isWarnEnabled()) {
@@ -1202,10 +1206,11 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with an exception using a supplier.
      * 
-     * @deprecated Use {@link #error(Throwable, Supplier)} instead
      * @param supplier the supplier that provides the message
      * @param t the exception to log
+     * @deprecated Use {@link #error(Throwable, Supplier)} instead
      */
+    @Deprecated
     @Override
     public void error(final Supplier<String> supplier, final Throwable t) {
         if (isErrorEnabled()) {

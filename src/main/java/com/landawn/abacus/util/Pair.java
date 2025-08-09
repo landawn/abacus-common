@@ -203,6 +203,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @deprecated This method is deprecated in favor of the more concise {@link #left()} method.
      * @see #left()
      */
+    @Deprecated
     public L getLeft() {
         return left;
     }
@@ -231,6 +232,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @deprecated This method is deprecated in favor of the more concise {@link #right()} method.
      * @see #right()
      */
+    @Deprecated
     public R getRight() {
         return right;
     }

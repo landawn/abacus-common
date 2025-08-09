@@ -19,6 +19,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated type or method represents mutable data or operations.
+ * Mutable types are those whose state can be modified after construction,
+ * and mutable methods are those that may modify the state of the object.
+ * 
+ * <p>This annotation serves as documentation and can be used by static analysis tools
+ * to verify mutability contracts and detect potential issues with concurrent access
+ * or state modifications.</p>
+ * 
+ * <p>When applied to a type, it indicates that instances of this type are mutable.
+ * When applied to a method, it indicates that the method may modify the object's state.</p>
+ * 
+ * <p>This annotation is the conceptual opposite of {@link Immutable} and can be used
+ * to explicitly document mutability where it might not be obvious.</p>
+ * 
+ * @see Immutable
+ * @author HaiYang Li
+ * @since 2020
+ */
 @Documented
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.CLASS)

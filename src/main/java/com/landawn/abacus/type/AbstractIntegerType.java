@@ -109,10 +109,12 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Retrieves an integer value from a ResultSet at the specified column index.
+     * Note: This method uses rs.getInt() which returns 0 for SQL NULL values.
+     * Therefore, SQL NULL values are converted to Integer.valueOf(0), not null.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the integer value at the specified column
+     * @return the integer value at the specified column, or Integer.valueOf(0) if the value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -122,10 +124,12 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Retrieves an integer value from a ResultSet using the specified column label.
+     * Note: This method uses rs.getInt() which returns 0 for SQL NULL values.
+     * Therefore, SQL NULL values are converted to Integer.valueOf(0), not null.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the integer value at the specified column
+     * @return the integer value at the specified column, or Integer.valueOf(0) if the value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override

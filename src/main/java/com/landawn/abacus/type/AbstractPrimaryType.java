@@ -70,6 +70,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
             return defaultValue();
         }
 
+        if (obj instanceof String) {
+            return valueOf((String) obj);
+        }
+
         return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
     }
 }

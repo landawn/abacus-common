@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><jdbc><password>admin</password><driver>com.mysql.jdbc.Driver</driver><user>root</user><url>jdbc:mysql://localhost:3306/abacustest</url></jdbc>

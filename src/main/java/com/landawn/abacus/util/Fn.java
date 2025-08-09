@@ -905,6 +905,7 @@ public final class Fn {
      * @deprecated Use {@link #emptyConsumer()} instead.
      * @see #emptyConsumer()
      */
+    @Deprecated
     public static <T> Consumer<T> doNothing() {
         return EMPTY_CONSUMER;
     }

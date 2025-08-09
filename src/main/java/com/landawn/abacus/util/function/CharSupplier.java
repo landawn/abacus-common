@@ -40,7 +40,10 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * Each invocation returns a new random char value within the valid Unicode range.
      * The randomness is provided by {@code Util.RAND_CHAR.nextInt() % Util.CHAR_MOD}.
      */
-    CharSupplier RANDOM = () -> (char) Math.abs(Util.RAND_CHAR.nextInt() % Util.CHAR_MOD);
+    CharSupplier RANDOM = () -> {
+        int value = Util.RAND_CHAR.nextInt() % Util.CHAR_MOD;
+        return (char) (value < 0 ? value + Util.CHAR_MOD : value);
+    };
 
     /**
      * Gets a char result.

@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,6 +86,8 @@ public final class CSVUtil {
     static final Splitter lineSplitter = Splitter.with(',').trimResults();
 
     static final CSVParser csvParser = new CSVParser();
+
+    static final int BATCH_SIZE_FOR_FLUSH = 1000;
 
     /**
      * Default CSV header parser function that uses the internal CSVParser.
@@ -203,16 +206,16 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * // Use JSON format for headers in current thread
-     * CSVUtil.setCSVHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
+     * CSVUtil.setHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
      * DataSet ds = CSVUtil.loadCSV(file); // Will use JSON parser
-     * CSVUtil.resetCSVHeaderParser(); // Reset to default
+     * CSVUtil.resetHeaderParser(); // Reset to default
      * }</pre>
      *
      * @param parser the Function to set as the CSV header parser, must not be null
      * @throws IllegalArgumentException if the parser is null
-     * @see #resetCSVHeaderParser()
+     * @see #resetHeaderParser()
      */
-    public static void setCSVHeaderParser(final Function<String, String[]> parser) throws IllegalArgumentException {
+    public static void setHeaderParser(final Function<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, cs.parser);
 
         csvHeaderParser_TL.set(parser);
@@ -226,16 +229,16 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * // Use splitter for simple CSV files in current thread
-     * CSVUtil.setCSVLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
+     * CSVUtil.setLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
      * DataSet ds = CSVUtil.loadCSV(file); // Will use splitter parser
-     * CSVUtil.resetCSVLineParser(); // Reset to default
+     * CSVUtil.resetLineParser(); // Reset to default
      * }</pre>
      *
      * @param parser the BiConsumer to set as the CSV line parser, must not be null
      * @throws IllegalArgumentException if the parser is null
-     * @see #resetCSVLineParser()
+     * @see #resetLineParser()
      */
-    public static void setCSVLineParser(final BiConsumer<String, String[]> parser) throws IllegalArgumentException {
+    public static void setLineParser(final BiConsumer<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, cs.parser);
 
         csvLineParser_TL.set(parser);
@@ -247,12 +250,12 @@ public final class CSVUtil {
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * CSVUtil.setCSVHeaderParser(customParser);
+     * CSVUtil.setHeaderParser(customParser);
      * // ... use custom parser
-     * CSVUtil.resetCSVHeaderParser(); // Back to default
+     * CSVUtil.resetHeaderParser(); // Back to default
      * }</pre>
      */
-    public static void resetCSVHeaderParser() {
+    public static void resetHeaderParser() {
         csvHeaderParser_TL.set(defaultCsvHeaderParser);
     }
 
@@ -262,18 +265,18 @@ public final class CSVUtil {
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * CSVUtil.setCSVLineParser(customParser);
+     * CSVUtil.setLineParser(customParser);
      * // ... use custom parser
-     * CSVUtil.resetCSVLineParser(); // Back to default
+     * CSVUtil.resetLineParser(); // Back to default
      * }</pre>
      */
-    public static void resetCSVLineParser() {
+    public static void resetLineParser() {
         csvLineParser_TL.set(defaultCsvLineParser);
     }
 
     /**
      * Returns the CSV header parser currently active in the current thread.
-     * This will be either a custom parser set via setCSVHeaderParser() or the default parser.
+     * This will be either a custom parser set via setHeaderParser() or the default parser.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
@@ -282,8 +285,8 @@ public final class CSVUtil {
      * }</pre>
      *
      * @return the current CSV header parser as a Function that takes a String and returns a String array
-     * @see #setCSVHeaderParser(Function)
-     * @see #resetCSVHeaderParser()
+     * @see #setHeaderParser(Function)
+     * @see #resetHeaderParser()
      */
     public static Function<String, String[]> getCurrentHeaderParser() {
         return csvHeaderParser_TL.get();
@@ -291,7 +294,7 @@ public final class CSVUtil {
 
     /**
      * Returns the CSV line parser currently active in the current thread.
-     * This will be either a custom parser set via setCSVLineParser() or the default parser.
+     * This will be either a custom parser set via setLineParser() or the default parser.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
@@ -301,8 +304,8 @@ public final class CSVUtil {
      * }</pre>
      *
      * @return the current CSV line parser as a BiConsumer that takes a String and a String array
-     * @see #setCSVLineParser(BiConsumer)
-     * @see #resetCSVLineParser()
+     * @see #setLineParser(BiConsumer)
+     * @see #resetLineParser()
      */
     public static BiConsumer<String, String[]> getCurrentLineParser() {
         return csvLineParser_TL.get();
@@ -2132,13 +2135,14 @@ public final class CSVUtil {
      *
      * @param csvFile the source CSV file to convert
      * @param jsonFile the destination JSON file to create
+     * @return the number of rows written to the JSON file
      * @throws IllegalArgumentException if csvFile or jsonFile is null
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csv2json(File, Collection, File)
      * @see #csv2json(File, Collection, File, Class)
      */
-    public static void csv2json(final File csvFile, final File jsonFile) throws UncheckedIOException {
-        csv2json(csvFile, null, jsonFile);
+    public static long csv2json(final File csvFile, final File jsonFile) throws UncheckedIOException {
+        return csv2json(csvFile, null, jsonFile);
     }
 
     /**
@@ -2179,13 +2183,14 @@ public final class CSVUtil {
      * @param selectColumnNames the collection of column names to include in JSON output, 
      *                         null to include all columns
      * @param jsonFile the destination JSON file to create
+     * @return the number of rows written to the JSON file
      * @throws IllegalArgumentException if csvFile or jsonFile is null
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csv2json(File, File)
      * @see #csv2json(File, Collection, File, Class)
      */
-    public static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile) throws UncheckedIOException {
-        csv2json(csvFile, selectColumnNames, jsonFile, null, true);
+    public static long csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile) throws UncheckedIOException {
+        return csv2json(csvFile, selectColumnNames, jsonFile, null, true);
     }
 
     /**
@@ -2238,31 +2243,32 @@ public final class CSVUtil {
      * @param jsonFile the destination JSON file to create
      * @param beanClassForTypeWriting the bean class defining property types for conversion,
      *                               null to treat all values as strings
+     * @return the number of rows written to the JSON file                              
      * @throws IllegalArgumentException if csvFile or jsonFile is null
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csv2json(File, File)
      * @see #csv2json(File, Collection, File)
      */
-    public static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting)
+    public static long csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting)
             throws UncheckedIOException {
-        csv2json(csvFile, selectColumnNames, jsonFile, beanClassForTypeWriting, false);
+        return csv2json(csvFile, selectColumnNames, jsonFile, beanClassForTypeWriting, false);
     }
 
-    private static void csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting,
+    private static long csv2json(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile, final Class<?> beanClassForTypeWriting,
             final boolean canBeanClassForTypeWritingBeNull) throws UncheckedIOException {
         if (beanClassForTypeWriting == null && !canBeanClassForTypeWritingBeNull) {
             throw new IllegalArgumentException("'beanClassForTypeWriting' can't be null.");
         }
 
         try (final BufferedReader reader = IOUtil.newBufferedReader(csvFile); //
-                final BufferedJSONWriter writer = Objectory.createBufferedJSONWriter(IOUtil.newFileWriter(jsonFile))) {
+                final BufferedJSONWriter bw = Objectory.createBufferedJSONWriter(IOUtil.newFileWriter(jsonFile))) {
             final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
             final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
 
             String line = reader.readLine();
 
             if (line == null) {
-                return;
+                return 0;
             }
 
             final Type<Object> strType = Type.of(String.class);
@@ -2306,45 +2312,181 @@ public final class CSVUtil {
                 }
             }
 
+            long cnt = 0;
             final String[] rowData = new String[columnCount];
 
             boolean firstRow = true;
-            writer.write("[\n");
+            bw.write("[\n");
 
             while ((line = reader.readLine()) != null) {
                 if (!firstRow) {
-                    writer.write(",\n");
+                    bw.write(",\n");
                 } else {
                     firstRow = false;
                 }
 
                 lineParser.accept(line, rowData);
 
-                writer.write("{");
+                bw.write("{");
                 boolean firstColumn = true;
 
                 for (int i = 0; i < columnCount; i++) {
                     if (isColumnSelected[i]) {
                         if (!firstColumn) {
-                            writer.write(",");
+                            bw.write(",");
                         } else {
                             firstColumn = false;
                         }
 
-                        writer.write("\"");
-                        writer.write(titles[i]);
-                        writer.write("\":");
+                        bw.write("\"");
+                        bw.write(titles[i]);
+                        bw.write("\":");
                         if (columnType[i] == strType) {
-                            columnType[i].writeCharacter(writer, rowData[i], config);
+                            columnType[i].writeCharacter(bw, rowData[i], config);
                         } else {
-                            columnType[i].writeCharacter(writer, columnType[i].valueOf(rowData[i]), config);
+                            columnType[i].writeCharacter(bw, columnType[i].valueOf(rowData[i]), config);
                         }
                     }
                 }
-                writer.write("}");
+
+                bw.write("}");
+
+                if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                    bw.flush();
+                }
             }
 
-            writer.write("\n]");
+            bw.write("\n]");
+
+            return cnt;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Converts a JSON file to CSV format with all columns included.
+     * This is a convenience method that converts the entire JSON file to CSV format
+     * without header selection.
+     *
+     * <p>The JSON file must contain an array of objects where each object represents a row.
+     * The first object's properties will be used as CSV headers.</p> 
+     *
+     * @param jsonFile the source JSON file to convert
+     * @param csvFile the destination CSV file to create
+     * @return the number of rows written to the CSV file (including header row)
+     * @throws IllegalArgumentException if jsonFile or csvFile is null
+     * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
+     * @see #json2csv(File, Collection, File)
+     */
+    public static long json2csv(final File jsonFile, final File csvFile) throws UncheckedIOException {
+        return json2csv(jsonFile, null, csvFile);
+    }
+
+    /**
+     * Converts a JSON file to CSV format with optional header selection.
+     * This method reads a JSON file containing an array of objects and converts it to CSV format.
+     * Each JSON object becomes a row in the CSV file, with object properties becoming columns.
+     *
+     * <p>The JSON file must contain an array of objects where each object represents a row.
+     * If {@code selectCsvHeaders} is provided, only those properties will be included as columns
+     * in the CSV output. If {@code selectCsvHeaders} is null or empty, all properties from the
+     * first JSON object will be used as headers.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert with specific headers
+     * CSVUtil.json2csv(
+     *     new File("data/employees.json"),
+     *     Arrays.asList("name", "age", "department"),
+     *     new File("output/employees.csv")
+     * );
+     * }</pre>
+     *
+     * <p>Example JSON input:</p>
+     * <pre>{@code
+     * [
+     *   {"name":"John","age":30,"department":"Engineering","salary":75000},
+     *   {"name":"Jane","age":25,"department":"Marketing","salary":65000}
+     * ]
+     * }</pre>
+     *
+     * <p>Example CSV output (with selected headers "name", "age", "department"):</p>
+     * <pre>
+     * "name","age","department"
+     * "John",30,"Engineering"
+     * "Jane",25,"Marketing"
+     * </pre>
+     *
+     * @param jsonFile the source JSON file to convert
+     * @param selectCsvHeaders the collection of property names to include as CSV headers,
+     *                        null or empty to include all properties from the first object
+     * @param csvFile the destination CSV file to create
+     * @return the number of rows written to the CSV file (including header row)
+     * @throws IllegalArgumentException if jsonFile or csvFile is null
+     * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
+     * @see #json2csv(File, File)
+     */
+    public static long json2csv(final File jsonFile, final Collection<String> selectCsvHeaders, final File csvFile) throws UncheckedIOException {
+        try (final Stream<Map<String, Object>> strem = jsonParser.stream(jsonFile, Type.ofMap(String.class, Object.class)); //
+                final BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(IOUtil.newFileWriter(csvFile))) {
+            final List<Object> headers = N.newArrayList(selectCsvHeaders);
+
+            final char separator = WD._COMMA;
+            Map<String, Object> row = null;
+            long cnt = 0;
+
+            @SuppressWarnings({ "resource", "deprecation" })
+            final Iterator<Map<String, Object>> iter = strem.iterator();
+
+            if (iter.hasNext()) {
+                cnt++;
+                row = iter.next();
+
+                if (N.isEmpty(headers)) {
+                    headers.addAll(row.keySet());
+                }
+
+                final int headSize = headers.size();
+
+                for (int i = 0; i < headSize; i++) {
+                    if (i > 0) {
+                        bw.write(separator);
+                    }
+
+                    writeField(bw, null, headers.get(i));
+                }
+
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                for (int i = 0; i < headSize; i++) {
+                    if (i > 0) {
+                        bw.write(separator);
+                    }
+
+                    writeField(bw, null, row.get(headers.get(i)));
+                }
+
+                while (iter.hasNext()) {
+                    row = iter.next();
+
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    for (int i = 0; i < headSize; i++) {
+                        if (i > 0) {
+                            bw.write(separator);
+                        }
+
+                        writeField(bw, null, row.get(headers.get(i)));
+                    }
+
+                    if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+                        bw.flush();
+                    }
+                }
+            }
+
+            return cnt;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -20,6 +20,20 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * Marks a class as a database entity for ORM mapping purposes.
+ * This annotation indicates that the annotated class represents a database table
+ * and can be used with persistence frameworks.
+ * 
+ * <p>The entity name can be specified explicitly using the {@link #name()} attribute.
+ * If not specified, the class name is typically used as the entity name.</p>
+ * 
+ * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
+ * undergo changes in future versions.</p>
+ * 
+ * @author HaiYang Li
+ * @since 2021
+ */
 @Beta
 @Documented
 @Target(value = { ElementType.TYPE })
@@ -29,11 +43,17 @@ public @interface Entity {
     /**
      * Use {@code name} to specify attribute explicitly
      *
-     * @return
+     * @return the entity name value (deprecated)
      * @deprecated use {@code name} to specify attribute explicitly.
      */
     @Deprecated
     String value() default "";
 
+    /**
+     * The name of the entity. If not specified, the class name is used.
+     * This name is typically used to identify the entity in database operations.
+     * 
+     * @return the entity name, empty string to use class name as default
+     */
     String name() default "";
 }

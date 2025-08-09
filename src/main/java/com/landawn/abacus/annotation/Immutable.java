@@ -19,6 +19,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated type or method represents immutable data or operations.
+ * Immutable types are those whose state cannot be modified after construction,
+ * and immutable methods are those that do not modify the state of the object.
+ * 
+ * <p>This annotation serves as documentation and can be used by static analysis tools
+ * to verify immutability constraints and detect potential violations.</p>
+ * 
+ * <p>When applied to a type, it indicates that all instances of this type are immutable.
+ * When applied to a method, it indicates that the method does not modify the object's state.</p>
+ * 
+ * @author HaiYang Li
+ * @since 2020
+ */
 @Documented
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.CLASS)

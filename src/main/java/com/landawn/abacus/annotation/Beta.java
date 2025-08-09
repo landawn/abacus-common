@@ -20,6 +20,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated API is experimental and subject to change or removal in future versions.
+ * This annotation serves as a warning to developers that the API is not yet stable and should be used
+ * with caution in production code.
+ * 
+ * <p>Beta APIs may have incomplete documentation, limited testing, or may undergo significant changes
+ * without notice. They are provided to allow early access and feedback from developers.</p>
+ * 
+ * <p>This annotation can be applied to:</p>
+ * <ul>
+ *   <li>Types (classes, interfaces, enums, annotations)</li>
+ *   <li>Methods and constructors</li>
+ *   <li>Fields</li>
+ *   <li>Other annotations</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @since 2015
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })

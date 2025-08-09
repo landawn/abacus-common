@@ -151,6 +151,7 @@ public enum NamingPolicy {
      * @return the function that performs the string transformation for this policy
      * @deprecated This method is marked as Beta and may be subject to change
      */
+    @Deprecated
     @Beta
     public Function<String, String> func() {
         return converter;
