@@ -1157,17 +1157,17 @@ public class Stream100Test extends TestBase {
 
         {
             Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
-            Stream<String> distinctByLength = strings.parallel().distinctBy(String::length);
+            List<String> distinctByLength = strings.parallel().distinctBy(String::length).toList();
 
             // assertHaveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength.toList());
-            assertTrue(N.haveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength.toList())
-                    || N.haveSameElements(Arrays.asList("a", "dd", "ccc"), distinctByLength.toList()));
+            assertTrue(N.haveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength)
+                    || N.haveSameElements(Arrays.asList("a", "dd", "ccc"), distinctByLength));
             // Test distinctBy with merge function
             Stream<String> stringsForMerge = createStream01("a", "bb", "ccc", "dd", "e");
-            Stream<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> Stream.of(a, b).sorted().join("+"));
+            List<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> Stream.of(a, b).sorted().join("+")).toList();
             // assertHaveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged.toList());
-            assertTrue(N.haveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged.toList())
-                    || N.haveSameElements(Arrays.asList("a+e", "dd+bb", "ccc"), distinctByLengthMerged.toList()));
+            assertTrue(N.haveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged)
+                    || N.haveSameElements(Arrays.asList("a+e", "dd+bb", "ccc"), distinctByLengthMerged));
         }
     }
 
