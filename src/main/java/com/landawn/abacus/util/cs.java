@@ -318,6 +318,7 @@ public final class cs { // NOSONAR
     public static final String dataSets = "dataSets";
     public static final String componentType = "componentType";
     public static final String capacity = "capacity";
+    public static final String propFilter = "propFilter";
 
     private cs() {
         // Utility class for constant string values.

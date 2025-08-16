@@ -6,7 +6,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 
 ## Features:
 
-* Most daily used APIs: [CommonUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CommonUtil_view.html), 
+* Frequently Used APIs: [CommonUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CommonUtil_view.html), 
 [N](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/N_view.html), 
 [Strings](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Strings_view.html), 
 [Numbers](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Numbers_view.html), 
@@ -197,7 +197,7 @@ compile 'com.landawn:abacus-common:6.3.5'
 
 
 ### Functional Programming:
-(It’s essential to learn Lambdas and Stream APIs introduced in Java 8 to fully leverage the capabilities and achieve the best experience with the APIs offered by abacus-common)
+To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream API is recommended. Helpful resources include:
 
 [What's New in Java 8](https://leanpub.com/whatsnewinjava8/read)
 

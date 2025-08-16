@@ -20,7 +20,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a field should be ignored during a {@code MapDifference.of(Object, Object)} operation.
+ * Indicates that a field should be ignored during bean difference comparison operations.
+ * When this annotation is applied to a field, that field will be excluded from
+ * comparison when using {@code BeanDifference.of(Object, Object)}.
+ * 
+ * <p>This is useful when certain fields should not be considered when determining
+ * if two bean instances are different (e.g., timestamps, internal state fields).</p>
  * 
  * @see com.landawn.abacus.util.Difference.BeanDifference
  * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)

@@ -22,10 +22,21 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * Specifies custom type information for fields or methods during serialization and persistence.
+ * This annotation allows fine-grained control over how values are converted and handled
+ * in different contexts such as JSON/XML serialization or database operations.
+ * 
+ * <p>The annotation can specify:</p>
+ * <ul>
+ *   <li>A custom type name or class for value conversion</li>
+ *   <li>How enum values should be represented (by name or ordinal)</li>
+ *   <li>The scope where the type conversion should apply</li>
+ * </ul>
+ */
 @Documented
 @Target({ FIELD, METHOD })
 @Retention(RUNTIME)
-
 public @interface Type {
 
     /**
@@ -37,17 +48,41 @@ public @interface Type {
     @Deprecated
     String value() default "";
 
+    /**
+     * Specifies the type name to use for type conversion.
+     * If not specified, the default type handling is used.
+     * 
+     * @return the type name, empty string for default
+     */
     String name() default "";
 
+    /**
+     * Specifies a custom Type class to use for value conversion.
+     * The specified class must extend {@link com.landawn.abacus.type.Type}.
+     * 
+     * @return the custom Type class, defaults to base Type class
+     */
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
 
+    /**
+     * Specifies how enum values should be represented when converted.
+     * The default is EnumBy.NAME which uses the enum constant name.
+     * 
+     * @return the enum representation strategy
+     */
     EnumBy enumerated() default EnumBy.NAME;
 
+    /**
+     * Specifies the scope where this type conversion should apply.
+     * The default is Scope.ALL which applies to all contexts.
+     * 
+     * @return the scope of type conversion
+     */
     Scope scope() default Scope.ALL;
 
     /**
-     * The Enum EnumType.
+     * Defines how enum values should be represented during conversion.
      */
     enum EnumBy {
         /** Persist enumerated type property or field as an integer. */
@@ -58,7 +93,7 @@ public @interface Type {
     }
 
     /**
-     * The Enum Scope.
+     * Defines the contexts where type conversion should be applied.
      */
     enum Scope {
         /**

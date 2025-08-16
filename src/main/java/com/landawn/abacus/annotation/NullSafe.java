@@ -20,6 +20,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that the annotated element is null-safe and properly handles null values.
+ * This annotation can be applied to constructors, methods, and parameters to document
+ * that they have been designed to handle null inputs without throwing NullPointerException.
+ * 
+ * <p>When applied to:</p>
+ * <ul>
+ *   <li>A method or constructor: indicates it can safely handle null arguments</li>
+ *   <li>A parameter: indicates that null is an acceptable value for that parameter</li>
+ * </ul>
+ * 
+ * <p>This annotation is for documentation and may be used by static analysis tools
+ * to verify null-safety contracts.</p>
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER })

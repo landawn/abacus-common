@@ -255,6 +255,31 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Generates a new universally unique identifier (UUID) string.
+     *
+     * <p>This method creates a standard UUID using {@link UUID#randomUUID()} and returns it
+     * as a string in the canonical format with hyphens (8-4-4-4-12 format).</p>
+     *
+     * <p>The UUID is generated using a cryptographically strong pseudo random number generator.</p>
+     *
+     * <p>Example:
+     * <pre>{@code
+     * String uuid = uuid();                          // returns something like "550e8400-e29b-41d4-a716-446655440000"
+     * 
+     * // Common use cases
+     * String id = uuid();                            // returns "123e4567-e89b-12d3-a456-426614174000"
+     * String uniqueKey = "KEY_" + uuid();            // returns "KEY_123e4567-e89b-12d3-a456-426614174000"
+     * }</pre>
+     *
+     * @return A new UUID string in the standard format (8-4-4-4-12).
+     * @see #guid()
+     * @see UUID#randomUUID()
+     */
+    public static String uuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
      * Generates a new globally unique identifier (GUID) string without hyphens.
      *
      * <p>This method creates a UUID using {@link UUID#randomUUID()} and removes all hyphen characters
@@ -278,31 +303,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String guid() {
         return uuid().replace("-", "");
-    }
-
-    /**
-     * Generates a new universally unique identifier (UUID) string.
-     *
-     * <p>This method creates a standard UUID using {@link UUID#randomUUID()} and returns it
-     * as a string in the canonical format with hyphens (8-4-4-4-12 format).</p>
-     *
-     * <p>The UUID is generated using a cryptographically strong pseudo random number generator.</p>
-     *
-     * <p>Example:
-     * <pre>{@code
-     * String uuid = uuid();                          // returns something like "550e8400-e29b-41d4-a716-446655440000"
-     * 
-     * // Common use cases
-     * String id = uuid();                            // returns "123e4567-e89b-12d3-a456-426614174000"
-     * String uniqueKey = "KEY_" + uuid();            // returns "KEY_123e4567-e89b-12d3-a456-426614174000"
-     * }</pre>
-     *
-     * @return A new UUID string in the standard format (8-4-4-4-12).
-     * @see #guid()
-     * @see UUID#randomUUID()
-     */
-    public static String uuid() {
-        return UUID.randomUUID().toString();
     }
 
     /**

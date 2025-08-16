@@ -6003,7 +6003,9 @@ public final class Beans {
     public static Stream<Map.Entry<String, Object>> properties(final Object bean) {
         N.checkArgNotNull(bean, cs.bean);
 
-        return Stream.of(Beans.getPropNameList(bean.getClass())).map(propName -> N.newEntry(propName, Beans.getPropValue(bean, propName)));
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
+
+        return Stream.of(beanInfo.propInfoList).map(propInfo -> N.newEntry(propInfo.name, propInfo.getPropValue(bean)));
     }
 
     /**
@@ -6029,9 +6031,11 @@ public final class Beans {
     public static Stream<Map.Entry<String, Object>> properties(final Object bean, final BiPredicate<String, Object> propFilter) {
         N.checkArgNotNull(bean, cs.bean);
 
-        return Stream.of(Beans.getPropNameList(bean.getClass())).map(propName -> {
-            final Object propValue = Beans.getPropValue(bean, propName);
-            return propFilter.test(propName, propValue) ? N.newEntry(propName, propValue) : null;
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
+
+        return Stream.of(beanInfo.propInfoList).map(propInfo -> {
+            final Object propValue = propInfo.getPropValue(bean);
+            return propFilter.test(propInfo.name, propValue) ? N.newEntry(propInfo.name, propValue) : null;
         }).skipNulls();
     }
 }
