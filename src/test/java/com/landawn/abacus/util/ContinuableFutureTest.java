@@ -5,6 +5,7 @@
 package com.landawn.abacus.util;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,29 @@ public class ContinuableFutureTest extends AbstractTest {
         }).thenRun((BiConsumer<String, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
 
         N.println("#################");
+
+        N.sleep(3000);
+    }
+
+    @Test
+    public void test_CompletableFuture() {
+        System.out.println(Thread.currentThread().getName() + ": " + System.currentTimeMillis());
+
+        CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + ": CompletableFuture1 : " + System.currentTimeMillis());
+            return "Hello";
+        }).thenAccept(result -> {
+            // runs in the same thread that completed the future
+            System.out.println(Thread.currentThread().getName() + ": " + result);
+        });
+
+        CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + ": CompletableFuture2 : " + System.currentTimeMillis());
+            return "world";
+        }).thenAcceptAsync(result -> {
+            // runs in ForkJoinPool.commonPool() by default, or given executor
+            System.out.println(Thread.currentThread().getName() + ": " + result);
+        });
 
         N.sleep(3000);
     }

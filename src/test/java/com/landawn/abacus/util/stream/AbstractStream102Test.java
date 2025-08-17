@@ -1846,6 +1846,7 @@ public class AbstractStream102Test extends TestBase {
         assertTrue(result.contains("]"));
     }
 
+
     @Test
     public void testCrossJoin() {
         stream = createStream(1, 2);

@@ -139,8 +139,6 @@ public class StreamTest extends AbstractTest {
         Stream.of("a", "ab", "ac", "b", "c", "cb").rangeMap((a, b) -> b.startsWith(a), (a, b) -> a + "<->" + b).println();
     }
 
-    
-
     //    @Test
     //    public void test_sliding_2() {
     //        IntStream.range(0, 10).slidingToList(3).skip(0).println();
