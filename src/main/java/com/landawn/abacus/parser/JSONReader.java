@@ -151,6 +151,23 @@ interface JSONReader {
      */
     int nextToken() throws UncheckedIOException;
 
+    /**
+     * Reads the next token of a specific type from the JSON input.
+     * This method allows reading tokens that match a specific type,
+     * which can be useful for parsing structured data.
+     * 
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * Type<Integer> intType = N.typeOf(Integer.class);
+     * int token = reader.nextToken(intType);
+     * }</pre>
+     *
+     * @param nextTokenValueType the type of the next token to read
+     * @return the token identifier, or -1 if no next symbol is found
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
+    int nextToken(Type<?> nextTokenValueType) throws UncheckedIOException;
+
     // int nextNameToken() throws UncheckedIOException;
 
     /**

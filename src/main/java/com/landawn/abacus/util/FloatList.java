@@ -82,6 +82,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public FloatList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_FLOAT_ARRAY : new float[initialCapacity];
     }
 

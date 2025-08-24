@@ -89,6 +89,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         }
     }
 
+    @Override
+    public boolean isDouble() {
+        return true;
+    }
+
     /**
      * Retrieves a double value from a ResultSet at the specified column index.
      *

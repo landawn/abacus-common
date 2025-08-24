@@ -545,8 +545,8 @@ public final class HARUtil {
      * }</pre>
      * 
      * @param requestEntry the HAR request entry map
-     * @return a tuple where the first element is the request body text (may be null) 
-     *         and the second element is the MIME type (may be null)
+     * @return a tuple where the first element is the request body text 
+     *         and the second element is the MIME type
      */
     public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) {
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");

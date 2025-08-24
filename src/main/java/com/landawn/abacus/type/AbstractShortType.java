@@ -119,6 +119,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
         return (short) i;
     }
 
+    @Override
+    public boolean isShort() {
+        return true;
+    }
+
     /**
      * Retrieves a short value from a ResultSet at the specified column index.
      *

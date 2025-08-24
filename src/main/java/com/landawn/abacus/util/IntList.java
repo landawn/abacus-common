@@ -89,6 +89,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public IntList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_INT_ARRAY : new int[initialCapacity];
     }
 

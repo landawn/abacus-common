@@ -525,196 +525,315 @@ public interface Type<T> {
      *
      * @return {@code true} if this is a primitive type
      */
-    boolean isPrimitiveType();
+    default boolean isPrimitiveType() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a primitive wrapper type (Integer, Long, Double, etc.).
      *
      * @return {@code true} if this is a primitive wrapper type
      */
-    boolean isPrimitiveWrapper();
+    default boolean isPrimitiveWrapper() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a primitive list type (IntList, LongList, etc.).
      *
      * @return {@code true} if this is a primitive list type
      */
-    boolean isPrimitiveList();
+    default boolean isPrimitiveList() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a boolean type (boolean or Boolean).
      *
      * @return {@code true} if this is a boolean type
      */
-    boolean isBoolean();
+    default boolean isBoolean() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a char type (char or Character).
+     *
+     * @return {@code true} if this is a char type
+     */
+    default boolean isCharacter() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a number type (numeric primitive or wrapper).
      *
      * @return {@code true} if this is a number type
      */
-    boolean isNumber();
+    default boolean isNumber() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a byte type (byte or Byte).
+     *
+     * @return {@code true} if this is a byte type
+     */
+    default boolean isByte() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a short type (short or Short).
+     *
+     * @return {@code true} if this is a short type
+     */
+    default boolean isShort() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is an int type (int or Integer).
+     *
+     * @return {@code true} if this is an int type
+     */
+    default boolean isInteger() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a long type (long or Long).
+     *
+     * @return {@code true} if this is a long type
+     */
+    default boolean isLong() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a float type (float or Float).
+     *
+     * @return {@code true} if this is a float type
+     */
+    default boolean isFloat() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is a double type (double or Double).
+     *
+     * @return {@code true} if this is a double type
+     */
+    default boolean isDouble() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a String type.
      *
      * @return {@code true} if this is a String type
      */
-    boolean isString();
+    default boolean isString() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a CharSequence type.
      *
      * @return {@code true} if this is a CharSequence type
      */
-    boolean isCharSequence();
+    default boolean isCharSequence() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Date.
      *
      * @return {@code true} if this is a Date type
      */
-    boolean isDate();
+    default boolean isDate() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Calendar.
      *
      * @return {@code true} if this is a Calendar type
      */
-    boolean isCalendar();
+    default boolean isCalendar() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Joda DateTime.
      *
      * @return {@code true} if this is a Joda DateTime type
      */
-    boolean isJodaDateTime();
+    default boolean isJodaDateTime() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a primitive array.
      *
      * @return {@code true} if this is a primitive array type
      */
-    boolean isPrimitiveArray();
+    default boolean isPrimitiveArray() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a byte array (byte[]).
      *
      * @return {@code true} if this is a byte array type
      */
-    boolean isPrimitiveByteArray();
+    default boolean isPrimitiveByteArray() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents an object array.
      *
      * @return {@code true} if this is an object array type
      */
-    boolean isObjectArray();
+    default boolean isObjectArray() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents any kind of array.
      *
      * @return {@code true} if this is an array type
      */
-    boolean isArray();
+    default boolean isArray() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a List.
      *
      * @return {@code true} if this is a List type
      */
-    boolean isList();
+    default boolean isList() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Set.
      *
      * @return {@code true} if this is a Set type
      */
-    boolean isSet();
+    default boolean isSet() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Collection.
      *
      * @return {@code true} if this is a Collection type
      */
-    boolean isCollection();
+    default boolean isCollection() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Map.
      *
      * @return {@code true} if this is a Map type
      */
-    boolean isMap();
+    default boolean isMap() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Bean (POJO with properties).
      *
      * @return {@code true} if this is a Bean type
      */
-    boolean isBean();
+    default boolean isBean() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a MapEntity.
      *
      * @return {@code true} if this is a MapEntity type
      */
-    boolean isMapEntity();
+    default boolean isMapEntity() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents an EntityId.
      *
      * @return {@code true} if this is an EntityId type
      */
-    boolean isEntityId();
+    default boolean isEntityId() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a DataSet.
      *
      * @return {@code true} if this is a DataSet type
      */
-    boolean isDataSet();
+    default boolean isDataSet() {
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents an InputStream.
      *
      * @return {@code true} if this is an InputStream type
      */
-    boolean isInputStream();
+    default boolean isInputStream() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a Reader.
      *
      * @return {@code true} if this is a Reader type
      */
-    boolean isReader();
+    default boolean isReader() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents a ByteBuffer.
      *
      * @return {@code true} if this is a ByteBuffer type
      */
-    boolean isByteBuffer();
+    default boolean isByteBuffer() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this is a generic type with type parameters.
      *
      * @return {@code true} if this is a generic type
      */
-    boolean isGenericType();
+    default boolean isGenericType() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if values of this type are immutable.
      *
      * @return {@code true} if this type is immutable
      */
-    boolean isImmutable();
+    default boolean isImmutable() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if values of this type can be compared.
      *
      * @return {@code true} if this type is comparable
      */
-    boolean isComparable();
+    default boolean isComparable() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if values of this type can be serialized directly to JSON/XML string.
@@ -723,21 +842,18 @@ public interface Type<T> {
      *
      * @return {@code true} if this type is serializable
      */
-    boolean isSerializable();
-
-    /**
-     * Checks if this is the Object type.
-     *
-     * @return {@code true} if this is the Object type
-     */
-    boolean isObjectType();
+    default boolean isSerializable() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if this type represents optional or nullable values.
      *
      * @return {@code true} if this is an optional or nullable type
      */
-    boolean isOptionalOrNullable();
+    default boolean isOptionalOrNullable() {
+        return false; // Default implementation, can be overridden by specific types
+    }
 
     /**
      * Checks if values of this type should not be quoted in CSV format.
@@ -746,7 +862,16 @@ public interface Type<T> {
      * @return {@code true} if values should not be quoted in CSV
      */
     default boolean isNonQuotableCsvType() {
-        return false;
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
+     * Checks if this is the Object type.
+     *
+     * @return {@code true} if this is the Object type
+     */
+    default boolean isObjectType() {
+        return false; // Default implementation, can be overridden by specific types
     }
 
     /**

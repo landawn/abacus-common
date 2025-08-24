@@ -19,6 +19,7 @@ import java.io.Reader;
 
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
@@ -61,8 +62,26 @@ class JSONStreamReader extends JSONStringReader {
         return new JSONStreamReader(reader, rbuf, cbuf);
     }
 
+    /**
+     * Reads and returns the next token from the JSON input.
+     * This method advances the reader position and identifies the next
+     * structural token or value in the JSON stream.
+     * 
+     * <p>The method handles:</p>
+     * <ul>
+     *   <li>Quoted strings (double and single quotes)</li>
+     *   <li>Numbers (integers and decimals)</li>
+     *   <li>Boolean values (true/false)</li>
+     *   <li>Null values</li>
+     *   <li>Structural tokens (braces, brackets, colons, commas)</li>
+     * </ul>
+     *
+     * @return the token identifier, or -1 if no next token is found
+     * @param nextTokenValueType the expected type of the next token value
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
     @Override
-    public int nextToken() throws UncheckedIOException {
+    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -136,13 +155,11 @@ class JSONStreamReader extends JSONStringReader {
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
                             isNumber = true;
-                            readNumber(ch);
+                            readNumber(ch, nextTokenValueType);
+                            //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
+                            //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
+                            //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
                         }
-
-                        //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
-                        //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
-                        //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
-                        //    }
 
                         if (isNumber) {
                             // done in readNumber...
@@ -195,7 +212,7 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     @Override
-    protected void readNumber(final int firstChar) {
+    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -272,16 +289,16 @@ class JSONStreamReader extends JSONStringReader {
                 ret = -ret;
             }
 
-            if (typeFlag > 0) {
+            if (nextTokenValueType.isNumber() || typeFlag > 0) {
                 if (pointPosition > 0) {
-                    if (typeFlag == 'f' || typeFlag == 'F') {
+                    if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                         numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPosition]);
                     } else { // ignore 'l' or 'L' if it's specified.
                         numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
                     }
-                } else if (typeFlag == 'f' || typeFlag == 'F') {
+                } else if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                     numValue = (float) ret;
-                } else if (typeFlag == 'd' || typeFlag == 'D') {
+                } else if (nextTokenValueType.isDouble() || typeFlag == 'd' || typeFlag == 'D') {
                     numValue = (double) ret;
                 } else { // typeFlag == 'l' or 'L'.
                     numValue = ret;

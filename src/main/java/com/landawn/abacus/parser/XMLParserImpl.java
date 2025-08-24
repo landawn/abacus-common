@@ -1145,7 +1145,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @param source the XML reader
      * @param config the deserialization configuration
      * @param nodeClasses mapping of node names to classes
-     * @param targetClass the target class (may be null)
+     * @param targetClass the target class
      * @param <T> the type of the target object
      * @return the deserialized object
      */

@@ -14,8 +14,35 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Abstract base class for JSON readers that provides common functionality and constants
+ * for parsing JSON documents. This class implements the {@link JSONReader} interface
+ * and serves as the foundation for various JSON reading implementations.
+ * 
+ * <p>This class defines essential constants and lookup tables used for efficient JSON parsing,
+ * including character event mappings, special value constants, and numeric parsing utilities.</p>
+ * 
+ * <p>Key features provided:</p>
+ * <ul>
+ *   <li><strong>Character Event Mapping:</strong> Fast lookup tables for JSON structural characters</li>
+ *   <li><strong>Numeric Constants:</strong> Pre-computed powers of ten for efficient number parsing</li>
+ *   <li><strong>Special Value Constants:</strong> Interned string constants for null, true, and false</li>
+ *   <li><strong>Alphanumeric Support:</strong> Extended character mappings for various JSON tokens</li>
+ * </ul>
+ * 
+ * <p>The character event mapping system allows for efficient parsing by providing direct
+ * index-based lookup for ASCII characters (0-127), making JSON token recognition very fast.</p>
+ * 
+ * <p>Subclasses should implement the specific parsing logic while leveraging these
+ * common constants and utilities for consistent and efficient JSON processing.</p>
+ * 
+ * @see JSONReader
+ * @see Type
+ */
 abstract class AbstractJSONReader implements JSONReader { //NOSONAR
     static final int MAX_PARSABLE_NUM_LEN = Long.toString(Long.MAX_VALUE, 10).length() - 1;
 
@@ -106,5 +133,12 @@ abstract class AbstractJSONReader implements JSONReader { //NOSONAR
         eventChars[END_QUOTATION_S] = '\'';
         eventChars[COLON] = ':';
         eventChars[COMMA] = ',';
+    }
+
+    protected static final Type<String> strType = Type.of(String.class);
+
+    @Override
+    public int nextToken() throws UncheckedIOException {
+        return nextToken(strType);
     }
 }

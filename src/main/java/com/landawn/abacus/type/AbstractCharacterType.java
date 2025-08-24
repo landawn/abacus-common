@@ -96,6 +96,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         return (len == 1) ? cbuf[offset] : (char) parseInt(cbuf, offset, len);
     }
 
+    @Override
+    public boolean isCharacter() {
+        return true;
+    }
+
     /**
      * Retrieves a character value from a ResultSet at the specified column index.
      * Gets the value as a string and returns the first character.

@@ -86,6 +86,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public DoubleList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
     }
 

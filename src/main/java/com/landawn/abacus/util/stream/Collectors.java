@@ -142,42 +142,42 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     // ============================================================================================================
 
-    static final Function<List<Object>, ImmutableList<Object>> ImmutableList_Finisher = ImmutableList::wrap;
+    private static final Function<List<Object>, ImmutableList<Object>> ImmutableList_Finisher = ImmutableList::wrap;
 
-    static final Function<Set<Object>, ImmutableSet<Object>> ImmutableSet_Finisher = ImmutableSet::wrap;
+    private static final Function<Set<Object>, ImmutableSet<Object>> ImmutableSet_Finisher = ImmutableSet::wrap;
 
-    static final Function<Map<Object, Object>, ImmutableMap<Object, Object>> ImmutableMap_Finisher = ImmutableMap::wrap;
+    private static final Function<Map<Object, Object>, ImmutableMap<Object, Object>> ImmutableMap_Finisher = ImmutableMap::wrap;
 
-    static final BiConsumer<Multiset<Object>, Object> Multiset_Accumulator = Multiset::add;
+    private static final BiConsumer<Multiset<Object>, Object> Multiset_Accumulator = Multiset::add;
 
-    static final BinaryOperator<Multiset<Object>> Multiset_Combiner = (a, b) -> {
+    private static final BinaryOperator<Multiset<Object>> Multiset_Combiner = (a, b) -> {
         a.addAll(b);
         return a;
     };
 
-    static final BiConsumer<BooleanList, Boolean> BooleanList_Accumulator = BooleanList::add;
+    private static final BiConsumer<BooleanList, Boolean> BooleanList_Accumulator = BooleanList::add;
 
-    static final BinaryOperator<BooleanList> BooleanList_Combiner = (a, b) -> {
-        a.addAll(b);
-        return a;
-    };
-
-    @SuppressWarnings("deprecation")
-    static final Function<BooleanList, boolean[]> BooleanArray_Finisher = t -> t.trimToSize().array();
-
-    static final BiConsumer<CharList, Character> CharList_Accumulator = CharList::add;
-
-    static final BinaryOperator<CharList> CharList_Combiner = (a, b) -> {
+    private static final BinaryOperator<BooleanList> BooleanList_Combiner = (a, b) -> {
         a.addAll(b);
         return a;
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<CharList, char[]> CharArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<BooleanList, boolean[]> BooleanArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<ByteList, Byte> ByteList_Accumulator = ByteList::add;
+    private static final BiConsumer<CharList, Character> CharList_Accumulator = CharList::add;
 
-    static final BinaryOperator<ByteList> ByteList_Combiner = (a, b) -> {
+    private static final BinaryOperator<CharList> CharList_Combiner = (a, b) -> {
+        a.addAll(b);
+        return a;
+    };
+
+    @SuppressWarnings("deprecation")
+    private static final Function<CharList, char[]> CharArray_Finisher = t -> t.trimToSize().array();
+
+    private static final BiConsumer<ByteList, Byte> ByteList_Accumulator = ByteList::add;
+
+    private static final BinaryOperator<ByteList> ByteList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -188,11 +188,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<ByteList, byte[]> ByteArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<ByteList, byte[]> ByteArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<ShortList, Short> ShortList_Accumulator = ShortList::add;
+    private static final BiConsumer<ShortList, Short> ShortList_Accumulator = ShortList::add;
 
-    static final BinaryOperator<ShortList> ShortList_Combiner = (a, b) -> {
+    private static final BinaryOperator<ShortList> ShortList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -203,11 +203,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<ShortList, short[]> ShortArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<ShortList, short[]> ShortArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<IntList, Integer> IntList_Accumulator = IntList::add;
+    private static final BiConsumer<IntList, Integer> IntList_Accumulator = IntList::add;
 
-    static final BinaryOperator<IntList> IntList_Combiner = (a, b) -> {
+    private static final BinaryOperator<IntList> IntList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -218,11 +218,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<IntList, int[]> IntArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<IntList, int[]> IntArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<LongList, Long> LongList_Accumulator = LongList::add;
+    private static final BiConsumer<LongList, Long> LongList_Accumulator = LongList::add;
 
-    static final BinaryOperator<LongList> LongList_Combiner = (a, b) -> {
+    private static final BinaryOperator<LongList> LongList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -233,11 +233,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<LongList, long[]> LongArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<LongList, long[]> LongArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<FloatList, Float> FloatList_Accumulator = FloatList::add;
+    private static final BiConsumer<FloatList, Float> FloatList_Accumulator = FloatList::add;
 
-    static final BinaryOperator<FloatList> FloatList_Combiner = (a, b) -> {
+    private static final BinaryOperator<FloatList> FloatList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -248,11 +248,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<FloatList, float[]> FloatArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<FloatList, float[]> FloatArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<DoubleList, Double> DoubleList_Accumulator = DoubleList::add;
+    private static final BiConsumer<DoubleList, Double> DoubleList_Accumulator = DoubleList::add;
 
-    static final BinaryOperator<DoubleList> DoubleList_Combiner = (a, b) -> {
+    private static final BinaryOperator<DoubleList> DoubleList_Combiner = (a, b) -> {
         if (a.size() >= b.size()) {
             a.addAll(b);
             return a;
@@ -263,11 +263,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    static final Function<DoubleList, double[]> DoubleArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<DoubleList, double[]> DoubleArray_Finisher = t -> t.trimToSize().array();
 
-    static final BiConsumer<Joiner, Object> Joiner_Accumulator = Joiner::append;
+    private static final BiConsumer<Joiner, Object> Joiner_Accumulator = Joiner::append;
 
-    static final BinaryOperator<Joiner> Joiner_Combiner = (a, b) -> {
+    private static final BinaryOperator<Joiner> Joiner_Combiner = (a, b) -> {
         if (a.length() > b.length()) {
             a.merge(b);
             b.close();
@@ -279,176 +279,177 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
     };
 
-    static final Function<Joiner, String> Joiner_Finisher = Joiner::toString;
+    private static final Function<Joiner, String> Joiner_Finisher = Joiner::toString;
 
-    static final Supplier<int[]> SummingInt_Supplier = () -> new int[1];
-    static final Supplier<int[]> SummingInt_Supplier_2 = () -> new int[2];
-    static final Supplier<int[]> SummingInt_Supplier_3 = () -> new int[3];
+    private static final Supplier<int[]> SummingInt_Supplier = () -> new int[1];
+    private static final Supplier<int[]> SummingInt_Supplier_2 = () -> new int[2];
+    private static final Supplier<int[]> SummingInt_Supplier_3 = () -> new int[3];
 
-    static final Supplier<long[]> SummingIntToLong_Supplier = () -> new long[1];
-    static final Supplier<long[]> SummingIntToLong_Supplier_2 = () -> new long[2];
-    static final Supplier<long[]> SummingIntToLong_Supplier_3 = () -> new long[3];
+    private static final Supplier<long[]> SummingIntToLong_Supplier = () -> new long[1];
+    private static final Supplier<long[]> SummingIntToLong_Supplier_2 = () -> new long[2];
+    private static final Supplier<long[]> SummingIntToLong_Supplier_3 = () -> new long[3];
 
-    static final BinaryOperator<int[]> SummingInt_Combiner = (a, b) -> {
+    private static final BinaryOperator<int[]> SummingInt_Combiner = (a, b) -> {
         a[0] += b[0];
         return a;
     };
 
-    static final BinaryOperator<int[]> SummingInt_Combiner_2 = (a, b) -> {
-        a[0] += b[0];
-        a[1] += b[1];
-        return a;
-    };
-
-    static final BinaryOperator<int[]> SummingInt_Combiner_3 = (a, b) -> {
-        a[0] += b[0];
-        a[1] += b[1];
-        a[2] += b[2];
-        return a;
-    };
-
-    static final BinaryOperator<long[]> SummingIntToLong_Combiner = (a, b) -> {
-        a[0] += b[0];
-        return a;
-    };
-
-    static final BinaryOperator<long[]> SummingIntToLong_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<int[]> SummingInt_Combiner_2 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         return a;
     };
 
-    static final BinaryOperator<long[]> SummingIntToLong_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<int[]> SummingInt_Combiner_3 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         a[2] += b[2];
         return a;
     };
 
-    static final Function<int[], Integer> SummingInt_Finisher = a -> a[0];
-    static final Function<int[], Tuple2<Integer, Integer>> SummingInt_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<int[], Tuple3<Integer, Integer, Integer>> SummingInt_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
-
-    static final Function<long[], Long> SummingIntToLong_Finisher = a -> a[0];
-    static final Function<long[], Tuple2<Long, Long>> SummingIntToLong_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<long[], Tuple3<Long, Long, Long>> SummingIntToLong_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
-
-    static final Supplier<long[]> SummingLong_Supplier = () -> new long[1];
-    static final Supplier<long[]> SummingLong_Supplier_2 = () -> new long[2];
-    static final Supplier<long[]> SummingLong_Supplier_3 = () -> new long[3];
-
-    static final BinaryOperator<long[]> SummingLong_Combiner = (a, b) -> {
+    private static final BinaryOperator<long[]> SummingIntToLong_Combiner = (a, b) -> {
         a[0] += b[0];
         return a;
     };
 
-    static final BinaryOperator<long[]> SummingLong_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<long[]> SummingIntToLong_Combiner_2 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         return a;
     };
 
-    static final BinaryOperator<long[]> SummingLong_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<long[]> SummingIntToLong_Combiner_3 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         a[2] += b[2];
         return a;
     };
 
-    static final Function<long[], Long> SummingLong_Finisher = a -> a[0];
-    static final Function<long[], Tuple2<Long, Long>> SummingLong_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<long[], Tuple3<Long, Long, Long>> SummingLong_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+    private static final Function<int[], Integer> SummingInt_Finisher = a -> a[0];
+    private static final Function<int[], Tuple2<Integer, Integer>> SummingInt_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    private static final Function<int[], Tuple3<Integer, Integer, Integer>> SummingInt_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
 
-    static final Supplier<KahanSummation> SummingDouble_Supplier = KahanSummation::new;
-    static final Supplier<KahanSummation[]> SummingDouble_Supplier_2 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation() };
-    static final Supplier<KahanSummation[]> SummingDouble_Supplier_3 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation(),
+    private static final Function<long[], Long> SummingIntToLong_Finisher = a -> a[0];
+    private static final Function<long[], Tuple2<Long, Long>> SummingIntToLong_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    private static final Function<long[], Tuple3<Long, Long, Long>> SummingIntToLong_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+
+    private static final Supplier<long[]> SummingLong_Supplier = () -> new long[1];
+    private static final Supplier<long[]> SummingLong_Supplier_2 = () -> new long[2];
+    private static final Supplier<long[]> SummingLong_Supplier_3 = () -> new long[3];
+
+    private static final BinaryOperator<long[]> SummingLong_Combiner = (a, b) -> {
+        a[0] += b[0];
+        return a;
+    };
+
+    private static final BinaryOperator<long[]> SummingLong_Combiner_2 = (a, b) -> {
+        a[0] += b[0];
+        a[1] += b[1];
+        return a;
+    };
+
+    private static final BinaryOperator<long[]> SummingLong_Combiner_3 = (a, b) -> {
+        a[0] += b[0];
+        a[1] += b[1];
+        a[2] += b[2];
+        return a;
+    };
+
+    private static final Function<long[], Long> SummingLong_Finisher = a -> a[0];
+    private static final Function<long[], Tuple2<Long, Long>> SummingLong_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    private static final Function<long[], Tuple3<Long, Long, Long>> SummingLong_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+
+    private static final Supplier<KahanSummation> SummingDouble_Supplier = KahanSummation::new;
+    private static final Supplier<KahanSummation[]> SummingDouble_Supplier_2 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation() };
+    private static final Supplier<KahanSummation[]> SummingDouble_Supplier_3 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation(),
             new KahanSummation() };
 
-    static final BinaryOperator<KahanSummation> SummingDouble_Combiner = (a, b) -> {
+    private static final BinaryOperator<KahanSummation> SummingDouble_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final BinaryOperator<KahanSummation[]> SummingDouble_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<KahanSummation[]> SummingDouble_Combiner_2 = (a, b) -> {
         a[0].combine(b[0]);
         a[1].combine(b[1]);
         return a;
     };
 
-    static final BinaryOperator<KahanSummation[]> SummingDouble_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<KahanSummation[]> SummingDouble_Combiner_3 = (a, b) -> {
         a[0].combine(b[0]);
         a[1].combine(b[1]);
         a[2].combine(b[2]);
         return a;
     };
 
-    static final Function<KahanSummation, Double> SummingDouble_Finisher = KahanSummation::sum;
-    static final Function<KahanSummation[], Tuple2<Double, Double>> SummingDouble_Finisher_2 = a -> Tuple.of(a[0].sum(), a[1].sum());
-    static final Function<KahanSummation[], Tuple3<Double, Double, Double>> SummingDouble_Finisher_3 = a -> Tuple.of(a[0].sum(), a[1].sum(), a[2].sum());
+    private static final Function<KahanSummation, Double> SummingDouble_Finisher = KahanSummation::sum;
+    private static final Function<KahanSummation[], Tuple2<Double, Double>> SummingDouble_Finisher_2 = a -> Tuple.of(a[0].sum(), a[1].sum());
+    private static final Function<KahanSummation[], Tuple3<Double, Double, Double>> SummingDouble_Finisher_3 = a -> Tuple.of(a[0].sum(), a[1].sum(),
+            a[2].sum());
 
-    static final Supplier<BigInteger[]> SummingBigInteger_Supplier = () -> new BigInteger[] { BigInteger.ZERO };
-    static final Supplier<BigInteger[]> SummingBigInteger_Supplier_2 = () -> new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO };
-    static final Supplier<BigInteger[]> SummingBigInteger_Supplier_3 = () -> new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO };
+    private static final Supplier<BigInteger[]> SummingBigInteger_Supplier = () -> new BigInteger[] { BigInteger.ZERO };
+    private static final Supplier<BigInteger[]> SummingBigInteger_Supplier_2 = () -> new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO };
+    private static final Supplier<BigInteger[]> SummingBigInteger_Supplier_3 = () -> new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO };
 
-    static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner = (a, b) -> {
+    private static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner = (a, b) -> {
         a[0] = a[0].add(b[0]);
         return a;
     };
 
-    static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner_2 = (a, b) -> {
-        a[0] = a[0].add(b[0]);
-        a[1] = a[1].add(b[1]);
-        return a;
-    };
-
-    static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner_3 = (a, b) -> {
-        a[0] = a[0].add(b[0]);
-        a[1] = a[1].add(b[1]);
-        a[2] = a[2].add(b[2]);
-        return a;
-    };
-
-    static final Function<BigInteger[], BigInteger> SummingBigInteger_Finisher = a -> a[0];
-    static final Function<BigInteger[], Tuple2<BigInteger, BigInteger>> SummingBigInteger_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<BigInteger[], Tuple3<BigInteger, BigInteger, BigInteger>> SummingBigInteger_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
-
-    static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier = () -> new BigDecimal[] { BigDecimal.ZERO };
-    static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier_2 = () -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO };
-    static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier_3 = () -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO };
-
-    static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner = (a, b) -> {
-        a[0] = a[0].add(b[0]);
-        return a;
-    };
-
-    static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner_2 = (a, b) -> {
         a[0] = a[0].add(b[0]);
         a[1] = a[1].add(b[1]);
         return a;
     };
 
-    static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<BigInteger[]> SummingBigInteger_Combiner_3 = (a, b) -> {
         a[0] = a[0].add(b[0]);
         a[1] = a[1].add(b[1]);
         a[2] = a[2].add(b[2]);
         return a;
     };
 
-    static final Function<BigDecimal[], BigDecimal> SummingBigDecimal_Finisher = a -> a[0];
-    static final Function<BigDecimal[], Tuple2<BigDecimal, BigDecimal>> SummingBigDecimal_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<BigDecimal[], Tuple3<BigDecimal, BigDecimal, BigDecimal>> SummingBigDecimal_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+    private static final Function<BigInteger[], BigInteger> SummingBigInteger_Finisher = a -> a[0];
+    private static final Function<BigInteger[], Tuple2<BigInteger, BigInteger>> SummingBigInteger_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    private static final Function<BigInteger[], Tuple3<BigInteger, BigInteger, BigInteger>> SummingBigInteger_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
 
-    static final Supplier<long[]> AveragingInt_Supplier = () -> new long[2];
-    static final Supplier<Pair<long[], long[]>> AveragingInt_Supplier_2 = () -> Pair.of(new long[2], new long[2]);
-    static final Supplier<Pair<long[], long[]>> AveragingInt_Supplier_3 = () -> Pair.of(new long[3], new long[3]);
+    private static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier = () -> new BigDecimal[] { BigDecimal.ZERO };
+    private static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier_2 = () -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO };
+    private static final Supplier<BigDecimal[]> SummingBigDecimal_Supplier_3 = () -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO };
 
-    static final BinaryOperator<long[]> AveragingInt_Combiner = (a, b) -> {
+    private static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner = (a, b) -> {
+        a[0] = a[0].add(b[0]);
+        return a;
+    };
+
+    private static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner_2 = (a, b) -> {
+        a[0] = a[0].add(b[0]);
+        a[1] = a[1].add(b[1]);
+        return a;
+    };
+
+    private static final BinaryOperator<BigDecimal[]> SummingBigDecimal_Combiner_3 = (a, b) -> {
+        a[0] = a[0].add(b[0]);
+        a[1] = a[1].add(b[1]);
+        a[2] = a[2].add(b[2]);
+        return a;
+    };
+
+    private static final Function<BigDecimal[], BigDecimal> SummingBigDecimal_Finisher = a -> a[0];
+    private static final Function<BigDecimal[], Tuple2<BigDecimal, BigDecimal>> SummingBigDecimal_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    private static final Function<BigDecimal[], Tuple3<BigDecimal, BigDecimal, BigDecimal>> SummingBigDecimal_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+
+    private static final Supplier<long[]> AveragingInt_Supplier = () -> new long[2];
+    private static final Supplier<Pair<long[], long[]>> AveragingInt_Supplier_2 = () -> Pair.of(new long[2], new long[2]);
+    private static final Supplier<Pair<long[], long[]>> AveragingInt_Supplier_3 = () -> Pair.of(new long[3], new long[3]);
+
+    private static final BinaryOperator<long[]> AveragingInt_Combiner = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         return a;
     };
 
-    static final BinaryOperator<Pair<long[], long[]>> AveragingInt_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<Pair<long[], long[]>> AveragingInt_Combiner_2 = (a, b) -> {
         a.left()[0] += b.left()[0];
         a.left()[1] += b.left()[1];
         a.right()[0] += b.right()[0];
@@ -456,7 +457,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final BinaryOperator<Pair<long[], long[]>> AveragingInt_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<Pair<long[], long[]>> AveragingInt_Combiner_3 = (a, b) -> {
         a.left()[0] += b.left()[0];
         a.left()[1] += b.left()[1];
         a.left()[2] += b.left()[2];
@@ -466,15 +467,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final Function<long[], Double> AveragingInt_Finisher = a -> {
-        if (a[1] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return ((double) a[0]) / a[1];
-    };
-
-    static final Function<long[], OptionalDouble> AveragingInt_Finisher_op = a -> {
+    private static final Function<long[], OptionalDouble> AveragingInt_Finisher_op = a -> {
         if (a[1] == 0) {
             return OptionalDouble.empty();
         } else {
@@ -482,33 +475,34 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
     };
 
-    static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingInt_Finisher_2 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0) {
+    private static final Function<long[], Double> AveragingInt_Finisher_orElseThrow = a -> {
+        if (a[1] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
+        return ((double) a[0]) / a[1];
     };
 
-    static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0 || a.right()[2] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
+    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingInt_Finisher_2 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
     };
 
-    static final Supplier<long[]> AveragingLong_Supplier = () -> new long[2];
-    static final Supplier<Pair<long[], long[]>> AveragingLong_Supplier_2 = () -> Pair.of(new long[2], new long[2]);
-    static final Supplier<Pair<long[], long[]>> AveragingLong_Supplier_3 = () -> Pair.of(new long[3], new long[3]);
+    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
+        return Tuple.of((a.right()[0] == 0 ? 0.0D : (double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1],
+                a.right()[2] == 0 ? 0.0D : ((double) a.left()[2]) / a.right()[2]);
+    };
 
-    static final BinaryOperator<long[]> AveragingLong_Combiner = (a, b) -> {
+    private static final Supplier<long[]> AveragingLong_Supplier = () -> new long[2];
+    private static final Supplier<Pair<long[], long[]>> AveragingLong_Supplier_2 = () -> Pair.of(new long[2], new long[2]);
+    private static final Supplier<Pair<long[], long[]>> AveragingLong_Supplier_3 = () -> Pair.of(new long[3], new long[3]);
+
+    private static final BinaryOperator<long[]> AveragingLong_Combiner = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         return a;
     };
 
-    static final BinaryOperator<Pair<long[], long[]>> AveragingLong_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<Pair<long[], long[]>> AveragingLong_Combiner_2 = (a, b) -> {
         a.left()[0] += b.left()[0];
         a.left()[1] += b.left()[1];
         a.right()[0] += b.right()[0];
@@ -516,7 +510,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final BinaryOperator<Pair<long[], long[]>> AveragingLong_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<Pair<long[], long[]>> AveragingLong_Combiner_3 = (a, b) -> {
         a.left()[0] += b.left()[0];
         a.left()[1] += b.left()[1];
         a.left()[2] += b.left()[2];
@@ -526,15 +520,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final Function<long[], Double> AveragingLong_Finisher = a -> {
-        if (a[1] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return ((double) a[0]) / a[1];
-    };
-
-    static final Function<long[], OptionalDouble> AveragingLong_Finisher_op = a -> {
+    private static final Function<long[], OptionalDouble> AveragingLong_Finisher_op = a -> {
         if (a[1] == 0) {
             return OptionalDouble.empty();
         } else {
@@ -542,46 +528,49 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
     };
 
-    static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0) {
+    private static final Function<long[], Double> AveragingLong_Finisher_orElseThrow = a -> {
+        if (a[1] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1]);
+        return ((double) a[0]) / a[1];
     };
 
-    static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0 || a.right()[2] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(((double) a.left()[0]) / a.right()[0], ((double) a.left()[1]) / a.right()[1], ((double) a.left()[2]) / a.right()[2]);
+    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? 0.0D : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1]);
     };
 
-    static final Supplier<KahanSummation> AveragingDouble_Supplier = KahanSummation::new;
-    static final Supplier<KahanSummation[]> AveragingDouble_Supplier_2 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation() };
-    static final Supplier<KahanSummation[]> AveragingDouble_Supplier_3 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation(),
+    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? 0.0D : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1],
+                a.right()[2] == 0 ? 0.0D : ((double) a.left()[2]) / a.right()[2]);
+    };
+
+    private static final Supplier<KahanSummation> AveragingDouble_Supplier = KahanSummation::new;
+    private static final Supplier<KahanSummation[]> AveragingDouble_Supplier_2 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation() };
+    private static final Supplier<KahanSummation[]> AveragingDouble_Supplier_3 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation(),
             new KahanSummation() };
 
-    static final BinaryOperator<KahanSummation> AveragingDouble_Combiner = (a, b) -> {
+    private static final BinaryOperator<KahanSummation> AveragingDouble_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final BinaryOperator<KahanSummation[]> AveragingDouble_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<KahanSummation[]> AveragingDouble_Combiner_2 = (a, b) -> {
         a[0].combine(b[0]);
         a[1].combine(b[1]);
         return a;
     };
 
-    static final BinaryOperator<KahanSummation[]> AveragingDouble_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<KahanSummation[]> AveragingDouble_Combiner_3 = (a, b) -> {
         a[0].combine(b[0]);
         a[1].combine(b[1]);
         a[2].combine(b[2]);
         return a;
     };
 
-    static final Function<KahanSummation, Double> AveragingDouble_Finisher = a -> {
+    private static final Function<KahanSummation, OptionalDouble> AveragingDouble_Finisher_op = KahanSummation::average;
+
+    private static final Function<KahanSummation, Double> AveragingDouble_Finisher_orElseThrow = a -> {
         if (a.count() == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
@@ -589,39 +578,30 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a.average().get();
     };
 
-    static final Function<KahanSummation, OptionalDouble> AveragingDouble_Finisher_op = KahanSummation::average;
-
-    static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> {
-        if (a[0].count() == 0 || a[1].count() == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(a[0].average().get(), a[1].average().get());
+    private static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> {
+        return Tuple.of(a[0].count() == 0 ? 0.0D : a[0].average().get(), a[1].count() == 0 ? 0.0D : a[1].average().get());
     };
 
-    static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> {
-        if (a[0].count() == 0 || a[1].count() == 0 || a[2].count() == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(a[0].average().get(), a[1].average().get(), a[2].average().get());
+    private static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> {
+        return Tuple.of(a[0].count() == 0 ? 0.0D : a[0].average().get(), a[1].count() == 0 ? 0.0D : a[1].average().get(),
+                a[2].count() == 0 ? 0.0D : a[2].average().get());
     };
 
-    static final Supplier<Pair<BigInteger, long[]>> AveragingBigInteger_Supplier = () -> Pair.of(BigInteger.ZERO, new long[1]);
+    private static final Supplier<Pair<BigInteger, long[]>> AveragingBigInteger_Supplier = () -> Pair.of(BigInteger.ZERO, new long[1]);
 
-    static final Supplier<Pair<BigInteger[], long[]>> AveragingBigInteger_Supplier_2 = () -> Pair.of(new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO },
-            new long[2]);
+    private static final Supplier<Pair<BigInteger[], long[]>> AveragingBigInteger_Supplier_2 = () -> Pair
+            .of(new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO }, new long[2]);
 
-    static final Supplier<Pair<BigInteger[], long[]>> AveragingBigInteger_Supplier_3 = () -> Pair
+    private static final Supplier<Pair<BigInteger[], long[]>> AveragingBigInteger_Supplier_3 = () -> Pair
             .of(new BigInteger[] { BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO }, new long[3]);
 
-    static final BinaryOperator<Pair<BigInteger, long[]>> AveragingBigInteger_Combiner = (a, b) -> {
+    private static final BinaryOperator<Pair<BigInteger, long[]>> AveragingBigInteger_Combiner = (a, b) -> {
         a.setLeft(a.left().add(b.left()));
         a.right()[0] += b.right()[0];
         return a;
     };
 
-    static final BinaryOperator<Pair<BigInteger[], long[]>> AveragingBigInteger_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<Pair<BigInteger[], long[]>> AveragingBigInteger_Combiner_2 = (a, b) -> {
         a.left()[0] = a.left()[0].add(b.left()[0]);
         a.left()[1] = a.left()[1].add(b.left()[1]);
         a.right()[0] += b.right()[0];
@@ -629,7 +609,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final BinaryOperator<Pair<BigInteger[], long[]>> AveragingBigInteger_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<Pair<BigInteger[], long[]>> AveragingBigInteger_Combiner_3 = (a, b) -> {
         a.left()[0] = a.left()[0].add(b.left()[0]);
         a.left()[1] = a.left()[1].add(b.left()[1]);
         a.left()[2] = a.left()[2].add(b.left()[2]);
@@ -640,7 +620,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> {
+    private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> {
+        return a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]));
+    };
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private static final Function<Pair<BigInteger, long[]>, Optional<BigDecimal>> AveragingBigInteger_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
+            : Optional.of(new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0])));
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher_orElseThrow = a -> {
         if (a.right()[0] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
@@ -649,43 +638,33 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigInteger, long[]>, Optional<BigDecimal>> AveragingBigInteger_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
-            : Optional.of(new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0])));
-
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])), new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])));
+    private static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
+                a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])));
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0 || a.right()[2] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])), new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])),
-                new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2])));
+    private static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
+                a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])),
+                a.right()[2] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2])));
     };
 
-    static final Supplier<Pair<BigDecimal, long[]>> AveragingBigDecimal_Supplier = () -> Pair.of(BigDecimal.ZERO, new long[1]);
+    private static final Supplier<Pair<BigDecimal, long[]>> AveragingBigDecimal_Supplier = () -> Pair.of(BigDecimal.ZERO, new long[1]);
 
-    static final Supplier<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Supplier_2 = () -> Pair.of(new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO },
-            new long[2]);
+    private static final Supplier<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Supplier_2 = () -> Pair
+            .of(new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO }, new long[2]);
 
-    static final Supplier<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Supplier_3 = () -> Pair
+    private static final Supplier<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Supplier_3 = () -> Pair
             .of(new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO }, new long[3]);
 
-    static final BinaryOperator<Pair<BigDecimal, long[]>> AveragingBigDecimal_Combiner = (a, b) -> {
+    private static final BinaryOperator<Pair<BigDecimal, long[]>> AveragingBigDecimal_Combiner = (a, b) -> {
         a.setLeft(a.left().add(b.left()));
         a.right()[0] += b.right()[0];
         return a;
     };
 
-    static final BinaryOperator<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Combiner_2 = (a, b) -> {
         a.left()[0] = a.left()[0].add(b.left()[0]);
         a.left()[1] = a.left()[1].add(b.left()[1]);
         a.right()[0] += b.right()[0];
@@ -693,7 +672,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final BinaryOperator<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Combiner_3 = (a, b) -> {
+    private static final BinaryOperator<Pair<BigDecimal[], long[]>> AveragingBigDecimal_Combiner_3 = (a, b) -> {
         a.left()[0] = a.left()[0].add(b.left()[0]);
         a.left()[1] = a.left()[1].add(b.left()[1]);
         a.left()[2] = a.left()[2].add(b.left()[2]);
@@ -704,7 +683,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> {
+    private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> {
+        return a.right()[0] == 0 ? BigDecimal.ZERO : a.left().divide(new BigDecimal(a.right()[0]));
+    };
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private static final Function<Pair<BigDecimal, long[]>, Optional<BigDecimal>> AveragingBigDecimal_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
+            : Optional.of(a.left().divide(new BigDecimal(a.right()[0])));
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher_orElseThrow = a -> {
         if (a.right()[0] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
@@ -713,96 +701,86 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigDecimal, long[]>, Optional<BigDecimal>> AveragingBigDecimal_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
-            : Optional.of(a.left().divide(new BigDecimal(a.right()[0])));
-
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(a.left()[0].divide(new BigDecimal(a.right()[0])), a.left()[1].divide(new BigDecimal(a.right()[1])));
+    private static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
+                a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])));
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> {
-        if (a.right()[0] == 0 || a.right()[1] == 0 || a.right()[2] == 0) {
-            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        }
-
-        return Tuple.of(a.left()[0].divide(new BigDecimal(a.right()[0])), a.left()[1].divide(new BigDecimal(a.right()[1])),
-                a.left()[2].divide(new BigDecimal(a.right()[2])));
+    private static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> {
+        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
+                a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])),
+                a.right()[2] == 0 ? BigDecimal.ZERO : a.left()[2].divide(new BigDecimal(a.right()[2])));
     };
 
-    static final Supplier<CharSummaryStatistics> SummarizingChar_Supplier = CharSummaryStatistics::new;
+    private static final Supplier<CharSummaryStatistics> SummarizingChar_Supplier = CharSummaryStatistics::new;
 
-    static final BinaryOperator<CharSummaryStatistics> SummarizingChar_Combiner = (a, b) -> {
+    private static final BinaryOperator<CharSummaryStatistics> SummarizingChar_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<ByteSummaryStatistics> SummarizingByte_Supplier = ByteSummaryStatistics::new;
+    private static final Supplier<ByteSummaryStatistics> SummarizingByte_Supplier = ByteSummaryStatistics::new;
 
-    static final BinaryOperator<ByteSummaryStatistics> SummarizingByte_Combiner = (a, b) -> {
+    private static final BinaryOperator<ByteSummaryStatistics> SummarizingByte_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<ShortSummaryStatistics> SummarizingShort_Supplier = ShortSummaryStatistics::new;
+    private static final Supplier<ShortSummaryStatistics> SummarizingShort_Supplier = ShortSummaryStatistics::new;
 
-    static final BinaryOperator<ShortSummaryStatistics> SummarizingShort_Combiner = (a, b) -> {
+    private static final BinaryOperator<ShortSummaryStatistics> SummarizingShort_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<IntSummaryStatistics> SummarizingInt_Supplier = IntSummaryStatistics::new;
+    private static final Supplier<IntSummaryStatistics> SummarizingInt_Supplier = IntSummaryStatistics::new;
 
-    static final BinaryOperator<IntSummaryStatistics> SummarizingInt_Combiner = (a, b) -> {
+    private static final BinaryOperator<IntSummaryStatistics> SummarizingInt_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<LongSummaryStatistics> SummarizingLong_Supplier = LongSummaryStatistics::new;
+    private static final Supplier<LongSummaryStatistics> SummarizingLong_Supplier = LongSummaryStatistics::new;
 
-    static final BinaryOperator<LongSummaryStatistics> SummarizingLong_Combiner = (a, b) -> {
+    private static final BinaryOperator<LongSummaryStatistics> SummarizingLong_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<FloatSummaryStatistics> SummarizingFloat_Supplier = FloatSummaryStatistics::new;
+    private static final Supplier<FloatSummaryStatistics> SummarizingFloat_Supplier = FloatSummaryStatistics::new;
 
-    static final BinaryOperator<FloatSummaryStatistics> SummarizingFloat_Combiner = (a, b) -> {
+    private static final BinaryOperator<FloatSummaryStatistics> SummarizingFloat_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<DoubleSummaryStatistics> SummarizingDouble_Supplier = DoubleSummaryStatistics::new;
+    private static final Supplier<DoubleSummaryStatistics> SummarizingDouble_Supplier = DoubleSummaryStatistics::new;
 
-    static final BinaryOperator<DoubleSummaryStatistics> SummarizingDouble_Combiner = (a, b) -> {
+    private static final BinaryOperator<DoubleSummaryStatistics> SummarizingDouble_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<BigIntegerSummaryStatistics> SummarizingBigInteger_Supplier = BigIntegerSummaryStatistics::new;
+    private static final Supplier<BigIntegerSummaryStatistics> SummarizingBigInteger_Supplier = BigIntegerSummaryStatistics::new;
 
-    static final BinaryOperator<BigIntegerSummaryStatistics> SummarizingBigInteger_Combiner = (a, b) -> {
+    private static final BinaryOperator<BigIntegerSummaryStatistics> SummarizingBigInteger_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Supplier<BigDecimalSummaryStatistics> SummarizingBigDecimal_Supplier = BigDecimalSummaryStatistics::new;
+    private static final Supplier<BigDecimalSummaryStatistics> SummarizingBigDecimal_Supplier = BigDecimalSummaryStatistics::new;
 
-    static final BinaryOperator<BigDecimalSummaryStatistics> SummarizingBigDecimal_Combiner = (a, b) -> {
+    private static final BinaryOperator<BigDecimalSummaryStatistics> SummarizingBigDecimal_Combiner = (a, b) -> {
         a.combine(b);
         return a;
     };
 
-    static final Function<Holder<Object>, Object> Reducing_Finisher_0 = Holder::value;
+    private static final Function<Holder<Object>, Object> Reducing_Finisher_0 = Holder::value;
 
-    static final BiConsumer<OptHolder<Object>, Object> Reducing_Accumulator = OptHolder::accept;
+    private static final BiConsumer<OptHolder<Object>, Object> Reducing_Accumulator = OptHolder::accept;
 
-    static final BinaryOperator<OptHolder<Object>> Reducing_Combiner = (a, b) -> {
+    private static final BinaryOperator<OptHolder<Object>> Reducing_Combiner = (a, b) -> {
         if (b.present) {
             a.accept(b.value);
         }
@@ -810,11 +788,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final Function<OptHolder<Object>, Optional<Object>> Reducing_Finisher = a -> a.present ? Optional.of(a.value) : (Optional<Object>) Optional.empty();
+    private static final Function<OptHolder<Object>, Optional<Object>> Reducing_Finisher = a -> a.present ? Optional.of(a.value)
+            : (Optional<Object>) Optional.empty();
 
-    static final BiConsumer<MappingOptHolder<Object, Object>, Object> Reducing_Accumulator_2 = MappingOptHolder::accept;
+    private static final BiConsumer<MappingOptHolder<Object, Object>, Object> Reducing_Accumulator_2 = MappingOptHolder::accept;
 
-    static final BinaryOperator<MappingOptHolder<Object, Object>> Reducing_Combiner_2 = (a, b) -> {
+    private static final BinaryOperator<MappingOptHolder<Object, Object>> Reducing_Combiner_2 = (a, b) -> {
         if (b.present) {
             if (a.present) {
                 a.value = a.op.apply(a.value, b.value);
@@ -827,7 +806,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    static final Function<MappingOptHolder<Object, Object>, Optional<Object>> Reducing_Finisher_2 = a -> a.present ? Optional.of(a.value)
+    private static final Function<MappingOptHolder<Object, Object>, Optional<Object>> Reducing_Finisher_2 = a -> a.present ? Optional.of(a.value)
             : (Optional<Object>) Optional.empty();
 
     // ============================================================================================================
@@ -2795,171 +2774,171 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return flatmapping(mapper, Collectors.<U> toList());
     }
 
-    /**
-     * Returns a {@code Collector} that applies both a flat mapping function and an
-     * element mapping function, collecting the results downstream.
-     * 
-     * <p>This collector first applies the flat mapper to get a stream of intermediate
-     * elements, then applies the element mapper to transform each intermediate element
-     * before passing it to the downstream collector. This is useful for complex
-     * transformations that involve both flattening and mapping.</p>
-     * 
-     * <p>The streams returned by the flat mapper are automatically closed after use.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Extract and transform nested data
-     * List<String> result = departments.stream()
-     *     .collect(Collectors.flatMapping(
-     *         dept -> dept.getEmployees().stream(),
-     *         (dept, emp) -> dept.getName() + ": " + emp.getName(),
-     *         Collectors.toList()));
-     * // Creates strings like "Sales: John", "Sales: Jane", etc.
-     * }</pre>
-     *
-     * @param <T> the type of the input elements
-     * @param <T2> the type of elements in streams returned by flatMapper
-     * @param <U> the type of elements after applying both mappers
-     * @param <A> intermediate accumulation type of the downstream collector
-     * @param <R> result type of collector
-     * @param flatMapper a function to transform input elements into streams
-     * @param mapper a function to transform the combination of original element and
-     *               flattened element
-     * @param downstream a collector which will accept the final mapped values
-     * @return a collector which applies both mapping functions and provides results to
-     *         the downstream collector
-     */
-    @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
-            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
-        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
-
-        final BiConsumer<A, T> accumulator = (a, t) -> {
-            try (Stream<? extends T2> stream = flatMapper.apply(t)) {
-                final ObjIterator<? extends T2> iter = StreamBase.iterate(stream);
-
-                while (iter.hasNext()) {
-                    downstreamAccumulator.accept(a, mapper.apply(t, iter.next()));
-                }
-            }
-        };
-
-        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
-    }
-
-    /**
-     * Returns a {@code Collector} that applies both a flat mapping function and an
-     * element mapping function, collecting the results to a {@code List}.
-     * 
-     * <p>This is a convenience method that combines the two-stage mapping with collecting
-     * to a list. Each input element is first flat mapped to a stream, then each element
-     * from that stream is combined with the original element using the mapper function.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Create pairs of parent-child relationships
-     * List<String> pairs = parents.stream()
-     *     .collect(Collectors.flatMappingToList(
-     *         parent -> parent.getChildren().stream(),
-     *         (parent, child) -> parent.getName() + " -> " + child.getName()));
-     * // Results like ["John -> Alice", "John -> Bob", "Jane -> Charlie"]
-     * }</pre>
-     *
-     * @param <T> the type of the input elements
-     * @param <T2> the type of elements in streams returned by flatMapper
-     * @param <U> the type of the final mapped elements
-     * @param flatMapper a function to transform input elements into streams
-     * @param mapper a function to transform the combination of original element and
-     *               flattened element
-     * @return a collector which applies both mapping functions and collects results to
-     *         a {@code List}
-     */
-    @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
-            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
-        return flatMapping(flatMapper, mapper, Collectors.<U> toList());
-    }
-
-    /**
-     * Returns a {@code Collector} that applies both a flat mapping function returning
-     * collections and an element mapping function, collecting the results downstream.
-     * 
-     * <p>This collector is similar to the stream-based flat mapping but works with
-     * collections for better efficiency when collections are already available.
-     * Each input element is transformed to a collection, then each element from that
-     * collection is combined with the original element using the mapper function.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Map orders to item descriptions with order ID
-     * List<String> descriptions = orders.stream()
-     *     .collect(Collectors.flatmapping(
-     *         order -> order.getItems(),
-     *         (order, item) -> "Order " + order.getId() + ": " + item.getName(),
-     *         Collectors.toList()));
-     * }</pre>
-     *
-     * @param <T> the type of the input elements
-     * @param <T2> the type of elements in collections returned by flatMapper
-     * @param <U> the type of elements after applying both mappers
-     * @param <A> intermediate accumulation type of the downstream collector
-     * @param <R> result type of collector
-     * @param flatMapper a function to transform input elements into collections
-     * @param mapper a function to transform the combination of original element and
-     *               flattened element
-     * @param downstream a collector which will accept the final mapped values
-     * @return a collector which applies both mapping functions and provides results to
-     *         the downstream collector
-     */
-    @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
-            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
-        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
-
-        final BiConsumer<A, T> accumulator = (a, t) -> {
-            final Collection<? extends T2> c = flatMapper.apply(t);
-
-            if (N.notEmpty(c)) {
-                for (final T2 t2 : c) {
-                    downstreamAccumulator.accept(a, mapper.apply(t, t2));
-                }
-            }
-        };
-
-        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
-    }
-
-    /**
-     * Returns a {@code Collector} that applies both a flat mapping function returning
-     * collections and an element mapping function, collecting the results to a {@code List}.
-     * 
-     * <p>This is a convenience method for the common case of flat mapping with collections
-     * and collecting to a list. It's more efficient than using streams when the data is
-     * already in collection form.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Create formatted strings for all course-student combinations
-     * List<String> enrollments = courses.stream()
-     *     .collect(Collectors.flatmappingToList(
-     *         course -> course.getStudents(),
-     *         (course, student) -> student.getName() + " enrolled in " + course.getName()));
-     * }</pre>
-     *
-     * @param <T> the type of the input elements
-     * @param <T2> the type of elements in collections returned by flatMapper
-     * @param <U> the type of the final mapped elements
-     * @param flatMapper a function to transform input elements into collections
-     * @param mapper a function to transform the combination of original element and
-     *               flattened element
-     * @return a collector which applies both mapping functions and collects results to
-     *         a {@code List}
-     */
-    @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
-            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
-        return flatmapping(flatMapper, mapper, Collectors.<U> toList());
-    }
+    //    /**
+    //     * Returns a {@code Collector} that applies both a flat mapping function and an
+    //     * element mapping function, collecting the results downstream.
+    //     * 
+    //     * <p>This collector first applies the flat mapper to get a stream of intermediate
+    //     * elements, then applies the element mapper to transform each intermediate element
+    //     * before passing it to the downstream collector. This is useful for complex
+    //     * transformations that involve both flattening and mapping.</p>
+    //     * 
+    //     * <p>The streams returned by the flat mapper are automatically closed after use.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Extract and transform nested data
+    //     * List<String> result = departments.stream()
+    //     *     .collect(Collectors.flatMapping(
+    //     *         dept -> dept.getEmployees().stream(),
+    //     *         (dept, emp) -> dept.getName() + ": " + emp.getName(),
+    //     *         Collectors.toList()));
+    //     * // Creates strings like "Sales: John", "Sales: Jane", etc.
+    //     * }</pre>
+    //     *
+    //     * @param <T> the type of the input elements
+    //     * @param <T2> the type of elements in streams returned by flatMapper
+    //     * @param <U> the type of elements after applying both mappers
+    //     * @param <A> intermediate accumulation type of the downstream collector
+    //     * @param <R> result type of collector
+    //     * @param flatMapper a function to transform input elements into streams
+    //     * @param mapper a function to transform the combination of original element and
+    //     *               flattened element
+    //     * @param downstream a collector which will accept the final mapped values
+    //     * @return a collector which applies both mapping functions and provides results to
+    //     *         the downstream collector
+    //     */
+    //    @Beta
+    //    public static <T, T2, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+    //        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+    //
+    //        final BiConsumer<A, T> accumulator = (a, t) -> {
+    //            try (Stream<? extends T2> stream = flatMapper.apply(t)) {
+    //                final ObjIterator<? extends T2> iter = StreamBase.iterate(stream);
+    //
+    //                while (iter.hasNext()) {
+    //                    downstreamAccumulator.accept(a, mapper.apply(t, iter.next()));
+    //                }
+    //            }
+    //        };
+    //
+    //        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //    }
+    //
+    //    /**
+    //     * Returns a {@code Collector} that applies both a flat mapping function and an
+    //     * element mapping function, collecting the results to a {@code List}.
+    //     * 
+    //     * <p>This is a convenience method that combines the two-stage mapping with collecting
+    //     * to a list. Each input element is first flat mapped to a stream, then each element
+    //     * from that stream is combined with the original element using the mapper function.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Create pairs of parent-child relationships
+    //     * List<String> pairs = parents.stream()
+    //     *     .collect(Collectors.flatMappingToList(
+    //     *         parent -> parent.getChildren().stream(),
+    //     *         (parent, child) -> parent.getName() + " -> " + child.getName()));
+    //     * // Results like ["John -> Alice", "John -> Bob", "Jane -> Charlie"]
+    //     * }</pre>
+    //     *
+    //     * @param <T> the type of the input elements
+    //     * @param <T2> the type of elements in streams returned by flatMapper
+    //     * @param <U> the type of the final mapped elements
+    //     * @param flatMapper a function to transform input elements into streams
+    //     * @param mapper a function to transform the combination of original element and
+    //     *               flattened element
+    //     * @return a collector which applies both mapping functions and collects results to
+    //     *         a {@code List}
+    //     */
+    //    @Beta
+    //    public static <T, T2, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
+    //        return flatMapping(flatMapper, mapper, Collectors.<U> toList());
+    //    }
+    //
+    //    /**
+    //     * Returns a {@code Collector} that applies both a flat mapping function returning
+    //     * collections and an element mapping function, collecting the results downstream.
+    //     * 
+    //     * <p>This collector is similar to the stream-based flat mapping but works with
+    //     * collections for better efficiency when collections are already available.
+    //     * Each input element is transformed to a collection, then each element from that
+    //     * collection is combined with the original element using the mapper function.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Map orders to item descriptions with order ID
+    //     * List<String> descriptions = orders.stream()
+    //     *     .collect(Collectors.flatmapping(
+    //     *         order -> order.getItems(),
+    //     *         (order, item) -> "Order " + order.getId() + ": " + item.getName(),
+    //     *         Collectors.toList()));
+    //     * }</pre>
+    //     *
+    //     * @param <T> the type of the input elements
+    //     * @param <T2> the type of elements in collections returned by flatMapper
+    //     * @param <U> the type of elements after applying both mappers
+    //     * @param <A> intermediate accumulation type of the downstream collector
+    //     * @param <R> result type of collector
+    //     * @param flatMapper a function to transform input elements into collections
+    //     * @param mapper a function to transform the combination of original element and
+    //     *               flattened element
+    //     * @param downstream a collector which will accept the final mapped values
+    //     * @return a collector which applies both mapping functions and provides results to
+    //     *         the downstream collector
+    //     */
+    //    @Beta
+    //    public static <T, T2, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+    //        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+    //
+    //        final BiConsumer<A, T> accumulator = (a, t) -> {
+    //            final Collection<? extends T2> c = flatMapper.apply(t);
+    //
+    //            if (N.notEmpty(c)) {
+    //                for (final T2 t2 : c) {
+    //                    downstreamAccumulator.accept(a, mapper.apply(t, t2));
+    //                }
+    //            }
+    //        };
+    //
+    //        return create(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //    }
+    //
+    //    /**
+    //     * Returns a {@code Collector} that applies both a flat mapping function returning
+    //     * collections and an element mapping function, collecting the results to a {@code List}.
+    //     * 
+    //     * <p>This is a convenience method for the common case of flat mapping with collections
+    //     * and collecting to a list. It's more efficient than using streams when the data is
+    //     * already in collection form.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Create formatted strings for all course-student combinations
+    //     * List<String> enrollments = courses.stream()
+    //     *     .collect(Collectors.flatmappingToList(
+    //     *         course -> course.getStudents(),
+    //     *         (course, student) -> student.getName() + " enrolled in " + course.getName()));
+    //     * }</pre>
+    //     *
+    //     * @param <T> the type of the input elements
+    //     * @param <T2> the type of elements in collections returned by flatMapper
+    //     * @param <U> the type of the final mapped elements
+    //     * @param flatMapper a function to transform input elements into collections
+    //     * @param mapper a function to transform the combination of original element and
+    //     *               flattened element
+    //     * @return a collector which applies both mapping functions and collects results to
+    //     *         a {@code List}
+    //     */
+    //    @Beta
+    //    public static <T, T2, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
+    //        return flatmapping(flatMapper, mapper, Collectors.<U> toList());
+    //    }
 
     /**
      * Returns a {@code Collector} that performs an additional finishing transformation
@@ -5114,9 +5093,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the sum of a double-valued function
      * applied to the input elements.
      * 
-     * <p>This collector uses Kahan summation algorithm to reduce numerical errors
-     * in the summation process. If no elements are present, the result is 0.0.</p>
-     * 
      * <p>Example:
      * <pre>{@code
      * // Sum prices with decimal values
@@ -5187,6 +5163,32 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of an integer-valued
+     * function applied to the input elements.
+     * 
+     * <p>If no elements are present, the result is 0.0.
+     * The average is calculated as a double to preserve precision.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Calculate average length of strings
+     * Double avgLength = Stream.of("hello", "world", "!")
+     *     .collect(Collectors.averagingInt(String::length));
+     * // Result: 3.6666666666666665
+     * }</pre>
+     *
+     * @param <T> the type of input elements
+     * @param mapper function to extract an integer value from an element
+     * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingIntOrEmpty(ToIntFunction)
+     * @see #averagingIntOrElseThrow(ToIntFunction)
+     * @see java.util.stream.Collectors#averagingInt(ToIntFunction)
+     */
+    public static <T> Collector<T, ?, Double> averagingInt(final ToIntFunction<? super T> mapper) {
+        return java.util.stream.Collectors.averagingInt(mapper);
+    }
+
+    /**
+     * Returns a {@code Collector} that produces the arithmetic mean of an integer-valued
      * function applied to the input elements, wrapped in an {@code OptionalDouble}.
      * 
      * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
@@ -5203,8 +5205,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract an integer value from an element
      * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingInt(ToIntFunction)
+     * @see #averagingIntOrElseThrow(ToIntFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingInt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingIntOrEmpty(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsInt(t);
             a[1]++;
@@ -5231,6 +5235,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper function to extract an integer value from an element
      * @return a {@code Collector} that produces the average of the extracted values
      * @throws ArithmeticException if no elements are present
+     * @see #averagingInt(ToIntFunction)
+     * @see #averagingIntOrEmpty(ToIntFunction)
      */
     public static <T> Collector<T, ?, Double> averagingIntOrElseThrow(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -5238,7 +5244,32 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return create(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingInt_Supplier, accumulator, AveragingInt_Combiner, AveragingInt_Finisher_orElseThrow, CH_UNORDERED_NOID);
+    }
+
+    /**
+     * Returns a {@code Collector} that produces the arithmetic mean of a long-valued
+     * function applied to the input elements.
+     * 
+     * <p>If no elements are present, the result is 0.0.
+     * The average is calculated as a double to preserve precision.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Calculate average file size
+     * Double avgSize = files.stream()
+     *     .collect(Collectors.averagingLong(File::length));
+     * }</pre>
+     *
+     * @param <T> the type of input elements
+     * @param mapper function to extract a long value from an element
+     * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingLongOrEmpty(ToLongFunction)
+     * @see #averagingLongOrElseThrow(ToLongFunction)
+     * @see java.util.stream.Collectors#averagingLong(ToLongFunction)
+     */
+    public static <T> Collector<T, ?, Double> averagingLong(final ToLongFunction<? super T> mapper) {
+        return java.util.stream.Collectors.averagingLong(mapper);
     }
 
     /**
@@ -5258,8 +5289,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a long value from an element
      * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingLong(ToLongFunction)
+     * @see #averagingLongOrElseThrow(ToLongFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingLong(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingLongOrEmpty(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsLong(t);
             a[1]++;
@@ -5286,6 +5319,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper function to extract a long value from an element
      * @return a {@code Collector} that produces the average of the extracted values
      * @throws ArithmeticException if no elements are present
+     * @see #averagingLong(ToLongFunction)
+     * @see #averagingLongOrEmpty(ToLongFunction)
      */
     public static <T> Collector<T, ?, Double> averagingLongOrElseThrow(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -5293,15 +5328,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a[1]++;
         };
 
-        return create(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher_orElseThrow, CH_UNORDERED_NOID);
+    }
+
+    /** 
+     * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
+     * function applied to the input elements.
+     *
+     * <p>If no elements are present, the result is 0.0.
+     * The average is calculated as a double to preserve precision.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Calculate average price
+     * Double avgPrice = products.stream()
+     *     .collect(Collectors.averagingDouble(Product::getPrice));
+     * }</pre>
+     *
+     * @param <T> the type of input elements
+     * @param mapper function to extract a double value from an element
+     * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingDoubleOrEmpty(ToDoubleFunction)
+     * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
+     * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
+     */
+    public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) {
+        return java.util.stream.Collectors.averagingDouble(mapper);
     }
 
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, wrapped in an {@code OptionalDouble}.
-     * 
-     * <p>This collector uses Kahan summation algorithm to reduce numerical errors.
-     * If no elements are present, the result is an empty {@code OptionalDouble}.</p>
+     *
+     * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
+     * The average is calculated as a double to preserve precision.</p>
      * 
      * <p>Example:
      * <pre>{@code
@@ -5313,8 +5373,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a double value from an element
      * @return a {@code Collector} that produces the average of the extracted values
+     * @see #averagingDouble(ToDoubleFunction)
+     * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingDouble(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingDoubleOrEmpty(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
         return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_op, CH_UNORDERED_NOID);
@@ -5323,9 +5385,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, throwing an exception if no elements are present.
-     * 
-     * <p>This collector uses Kahan summation algorithm to reduce numerical errors.
-     * It's useful when an empty stream represents an error condition.</p>
      * 
      * <p>Example:
      * <pre>{@code
@@ -5338,11 +5397,44 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper function to extract a double value from an element
      * @return a {@code Collector} that produces the average of the extracted values
      * @throws ArithmeticException if no elements are present
+     * @see #averagingDouble(ToDoubleFunction)
+     * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_orElseThrow, CH_UNORDERED_NOID);
+    }
+
+    /**
+     * Returns a {@code Collector} that produces the arithmetic mean of {@code BigInteger}
+     * values extracted from the input elements.
+     * 
+     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
+     * If no elements are present, the result is {@code BigDecimal.ZERO}.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Calculate average of very large numbers
+     * BigDecimal avg = Stream.of("1000000000000", "2000000000000")
+     *     .collect(Collectors.averagingBigInteger(BigInteger::new));
+     * // Result: 1500000000000
+     * }</pre>
+     *
+     * @param <T> the type of input elements
+     * @param mapper function to extract a {@code BigInteger} value from an element
+     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @see #averagingBigIntegerOrEmpty(Function)
+     * @see #averagingBigIntegerOrElseThrow(Function)
+     * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
+     */
+    public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+        final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
+            a.setLeft(a.left().add(mapper.apply(t)));
+            a.right()[0] += 1;
+        };
+
+        return create(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -5363,8 +5455,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigInteger} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @see #averagingBigInteger(Function)
+     * @see #averagingBigIntegerOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigIntegerOrEmpty(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -5391,6 +5485,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper function to extract a {@code BigInteger} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
      * @throws ArithmeticException if no elements are present
+     * @see #averagingBigInteger(Function)
+     * @see #averagingBigIntegerOrEmpty(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrElseThrow(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -5398,7 +5494,38 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right()[0] += 1;
         };
 
-        return create(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingBigInteger_Supplier, accumulator, AveragingBigInteger_Combiner, AveragingBigInteger_Finisher_orElseThrow, CH_UNORDERED_NOID);
+    }
+
+    /**
+     * Returns a {@code Collector} that produces the arithmetic mean of {@code BigDecimal}
+     * values extracted from the input elements.
+     * 
+     * <p>This collector is useful for precise decimal arithmetic, especially for
+     * financial calculations. If no elements are present, the result is
+     * {@code BigDecimal.ZERO}.</p>
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * // Calculate average transaction amount
+     * BigDecimal avgAmount = transactions.stream()
+     *     .collect(Collectors.averagingBigDecimal(Transaction::getAmount));
+     * }</pre>
+     *
+     * @param <T> the type of input elements
+     * @param mapper function to extract a {@code BigDecimal} value from an element
+     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @see #averagingBigDecimalOrEmpty(Function)
+     * @see #averagingBigDecimalOrElseThrow(Function)
+     * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
+     */
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+        final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
+            a.setLeft(a.left().add(mapper.apply(t)));
+            a.right()[0] += 1;
+        };
+
+        return create(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -5418,8 +5545,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigDecimal} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @see #averagingBigDecimal(Function)
+     * @see #averagingBigDecimalOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimalOrEmpty(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -5446,6 +5575,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper function to extract a {@code BigDecimal} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
      * @throws ArithmeticException if no elements are present
+     * @see #averagingBigDecimal(Function)
+     * @see #averagingBigDecimalOrEmpty(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrElseThrow(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -5453,7 +5584,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             a.right()[0] += 1;
         };
 
-        return create(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher, CH_UNORDERED_NOID);
+        return create(AveragingBigDecimal_Supplier, accumulator, AveragingBigDecimal_Combiner, AveragingBigDecimal_Finisher_orElseThrow, CH_UNORDERED_NOID);
     }
 
     /**
@@ -8443,7 +8574,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, R1, R2, R> Collector<T, ?, R> teeing(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
             final BiFunction<? super R1, ? super R2, R> merger) {
-        return MoreCollectors.combine(downstream1, downstream2, merger);
+        return java.util.stream.Collectors.teeing(downstream1, downstream2, merger);
     }
 
     public static final class MoreCollectors extends Collectors {
@@ -8687,11 +8818,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * Returns a {@code Collector} that computes the sum of two double-valued functions
          * applied to the input elements.
          * 
-         * <p>This collector uses Kahan summation algorithm to reduce numerical errors
-         * in the summation of floating-point values. The result is a tuple containing
-         * both sums. This is useful when you need to calculate multiple double sums
-         * from the same stream in a single pass with high precision.</p>
-         * 
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
@@ -8724,11 +8850,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three double-valued functions
          * applied to the input elements.
-         * 
-         * <p>This collector uses Kahan summation algorithm to reduce numerical errors
-         * in the summation of floating-point values. The result is a tuple containing
-         * all three sums. This is useful when you need to calculate multiple double sums
-         * from the same stream in a single pass with high precision.</p>
          * 
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
@@ -9088,14 +9209,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * Returns a {@code Collector} that computes the arithmetic mean of two double-valued
          * functions applied to the input elements.
          * 
-         * <p>This collector uses Kahan summation algorithm to maintain high precision
-         * when computing averages of floating-point values. The count of elements is
-         * tracked separately for each average calculation. If no elements are collected,
-         * both averages will be 0.0.</p>
-         * 
-         * <p>Special floating-point values (NaN, infinity) are handled according to
-         * IEEE 754 standard. The presence of NaN in any calculation will result in
-         * NaN for that average.</p>
+         * <p>This collector calculates the average of values extracted by three different
+         * mapping functions from each element. The averages are computed using double
+         * arithmetic to handle the division. If no elements are collected, all averages
+         * will be 0.0.</p>
          * 
          * <p>Example:
          * <pre>{@code
@@ -9126,14 +9243,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * Returns a {@code Collector} that computes the arithmetic mean of three double-valued
          * functions applied to the input elements.
          * 
-         * <p>This collector uses Kahan summation algorithm to maintain high precision
-         * when computing averages of floating-point values. The count of elements is
-         * tracked separately for each average calculation. If no elements are collected,
-         * all averages will be 0.0.</p>
-         * 
-         * <p>Special floating-point values (NaN, infinity) are handled according to
-         * IEEE 754 standard. The presence of NaN in any calculation will result in
-         * NaN for that average.</p>
+         * <p>This collector calculates the average of values extracted by three different
+         * mapping functions from each element. The averages are computed using double
+         * arithmetic to handle the division. If no elements are collected, all averages
+         * will be 0.0.</p>
          * 
          * <p>Example:
          * <pre>{@code
@@ -9174,7 +9287,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p>The returned collector produces a {@code Tuple2} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
-         * the sum divided by the count of elements.</p>
+         * the sum divided by the count of elements.
+         * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
          * <p>Example:
          * <pre>{@code
@@ -9215,7 +9329,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p>The returned collector produces a {@code Tuple3} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
-         * the sum divided by the count of elements.</p>
+         * the sum divided by the count of elements.
+         * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
          * <p>Example:
          * <pre>{@code
@@ -9260,7 +9375,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p>The returned collector produces a {@code Tuple2} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
-         * the sum divided by the count of elements using {@code BigDecimal} arithmetic.</p>
+         * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
+         * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
          * <p>Example:
          * <pre>{@code
@@ -9301,7 +9417,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p>The returned collector produces a {@code Tuple3} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
-         * the sum divided by the count of elements using {@code BigDecimal} arithmetic.</p>
+         * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
+         * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
          * <p>Example:
          * <pre>{@code

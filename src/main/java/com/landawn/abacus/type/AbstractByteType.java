@@ -132,6 +132,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
         return rs.getByte(columnIndex);
     }
 
+    @Override
+    public boolean isByte() {
+        return true;
+    }
+
     /**
      * Retrieves a byte value from a ResultSet using the specified column label.
      *

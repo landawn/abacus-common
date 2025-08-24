@@ -79,6 +79,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public ByteList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
     }
 

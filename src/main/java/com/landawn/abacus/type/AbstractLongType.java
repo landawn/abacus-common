@@ -150,6 +150,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
         return ((cbuf == null) || (len == 0)) ? ((Long) defaultValue()) : (Long) parseLong(cbuf, offset, len);
     }
 
+    @Override
+    public boolean isLong() {
+        return true;
+    }
+
     /**
      * Retrieves a long value from a ResultSet at the specified column index.
      *

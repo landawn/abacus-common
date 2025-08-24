@@ -24,6 +24,33 @@ import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
+/**
+ * Internal utility class that provides commonly used static instances of parsers, serialization configurations,
+ * and type objects for the Abacus framework. This class serves as a centralized registry for frequently
+ * accessed objects to improve performance and reduce object creation overhead.
+ * 
+ * <p>This class is package-private and intended for internal use only within the util package.
+ * It provides lazy initialization of parsers to avoid potential NoClassDefFoundError issues
+ * when certain parser implementations may not be available on the classpath.</p>
+ * 
+ * <p>Key components provided:</p>
+ * <ul>
+ *   <li><strong>Parsers:</strong> Pre-configured instances of JSON, XML, and Kryo parsers</li>
+ *   <li><strong>Serialization Configs:</strong> Common configurations for JSON and XML serialization</li>
+ *   <li><strong>Type Objects:</strong> Cached Type instances for primitive types</li>
+ * </ul>
+ * 
+ * <p>The parser instances are conditionally initialized based on availability:</p>
+ * <ul>
+ *   <li>JSON parser is always available</li>
+ *   <li>XML parsers are only initialized if XML libraries are present</li>
+ *   <li>Kryo parser is only initialized if Kryo library is present</li>
+ * </ul>
+ * 
+ * @see ParserFactory
+ * @see JSONSerializationConfig
+ * @see XMLSerializationConfig
+ */
 final class Utils {
 
     // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl

@@ -611,33 +611,33 @@ public class Collectors101Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
-    @Test
-    public void testFlatMappingWithBiFunction() {
-        List<String> result = Stream.of("a", "b").collect(Collectors.flatMapping(s -> Stream.of(1, 2), (s, n) -> s + n, Collectors.toList()));
-
-        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    }
-
-    @Test
-    public void testFlatMappingToListWithBiFunction() {
-        List<String> result = Stream.of("a", "b").collect(Collectors.flatMappingToList(s -> Stream.of(1, 2), (s, n) -> s + n));
-
-        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    }
-
-    @Test
-    public void testFlatmappingWithBiFunctionAndCollection() {
-        List<String> result = Stream.of("a", "b").collect(Collectors.flatmapping(s -> Arrays.asList(1, 2), (s, n) -> s + n, Collectors.toList()));
-
-        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    }
-
-    @Test
-    public void testFlatmappingToListWithBiFunctionAndCollection() {
-        List<String> result = Stream.of("a", "b").collect(Collectors.flatmappingToList(s -> Arrays.asList(1, 2), (s, n) -> s + n));
-
-        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    }
+    //    @Test
+    //    public void testFlatMappingWithBiFunction() {
+    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatMapping(s -> Stream.of(1, 2), (s, n) -> s + n, Collectors.toList()));
+    //
+    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
+    //    }
+    //
+    //    @Test
+    //    public void testFlatMappingToListWithBiFunction() {
+    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatMappingToList(s -> Stream.of(1, 2), (s, n) -> s + n));
+    //
+    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
+    //    }
+    //
+    //    @Test
+    //    public void testFlatmappingWithBiFunctionAndCollection() {
+    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatmapping(s -> Arrays.asList(1, 2), (s, n) -> s + n, Collectors.toList()));
+    //
+    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
+    //    }
+    //
+    //    @Test
+    //    public void testFlatmappingToListWithBiFunctionAndCollection() {
+    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatmappingToList(s -> Arrays.asList(1, 2), (s, n) -> s + n));
+    //
+    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
+    //    }
 
     @Test
     public void testCollectingAndThen() {
@@ -1306,7 +1306,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testAveragingInt() {
-        OptionalDouble avg = Stream.of("a", "bb", "ccc").collect(Collectors.averagingInt(String::length));
+        OptionalDouble avg = Stream.of("a", "bb", "ccc").collect(Collectors.averagingIntOrEmpty(String::length));
 
         Assertions.assertTrue(avg.isPresent());
         Assertions.assertEquals(2.0, avg.getAsDouble(), 0.001); // (1 + 2 + 3) / 3
@@ -1323,7 +1323,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testAveragingLong() {
-        OptionalDouble avg = Stream.of(1L, 2L, 3L).collect(Collectors.averagingLong(e -> e));
+        OptionalDouble avg = Stream.of(1L, 2L, 3L).collect(Collectors.averagingLongOrEmpty(e -> e));
 
         Assertions.assertTrue(avg.isPresent());
         Assertions.assertEquals(2.0, avg.getAsDouble(), 0.001);
@@ -1340,7 +1340,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testAveragingDouble() {
-        OptionalDouble avg = Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDouble(e -> e));
+        OptionalDouble avg = Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDoubleOrEmpty(e -> e));
 
         Assertions.assertTrue(avg.isPresent());
         Assertions.assertEquals(2.0, avg.getAsDouble(), 0.001);
@@ -1357,7 +1357,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testAveragingBigInteger() {
-        Optional<BigDecimal> avg = Stream.of("1", "2", "3").collect(Collectors.averagingBigInteger(BigInteger::new));
+        Optional<BigDecimal> avg = Stream.of("1", "2", "3").collect(Collectors.averagingBigIntegerOrEmpty(BigInteger::new));
 
         Assertions.assertTrue(avg.isPresent());
         Assertions.assertEquals(new BigDecimal("2"), avg.get());
@@ -1375,7 +1375,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testAveragingBigDecimal() {
-        Optional<BigDecimal> avg = Stream.of("1", "2", "3").collect(Collectors.averagingBigDecimal(BigDecimal::new));
+        Optional<BigDecimal> avg = Stream.of("1", "2", "3").collect(Collectors.averagingBigDecimalOrEmpty(BigDecimal::new));
 
         Assertions.assertTrue(avg.isPresent());
         Assertions.assertEquals(new BigDecimal("2"), avg.get());

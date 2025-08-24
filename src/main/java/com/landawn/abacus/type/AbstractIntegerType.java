@@ -107,6 +107,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
         return ((cbuf == null) || (len == 0)) ? ((Integer) defaultValue()) : (Integer) parseInt(cbuf, offset, len);
     }
 
+    @Override
+    public boolean isInteger() {
+        return true;
+    }
+
     /**
      * Retrieves an integer value from a ResultSet at the specified column index.
      * Note: This method uses rs.getInt() which returns 0 for SQL NULL values.

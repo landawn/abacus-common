@@ -1,3 +1,7 @@
+### 6.3.7
+
+* Improves javadoc and unit tests
+
 ### 6.3.6
 
 * Improves javadoc and unit tests

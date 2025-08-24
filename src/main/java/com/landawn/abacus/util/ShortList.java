@@ -75,6 +75,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public ShortList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
     }
 

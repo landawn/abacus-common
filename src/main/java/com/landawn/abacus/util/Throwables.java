@@ -148,7 +148,6 @@ public final class Throwables {
      * @return the result returned by the callable command if successful, or the default value if an exception occurs
      * @throws IllegalArgumentException if cmd is null
      * @see #call(Throwables.Callable, java.util.function.Supplier)
-     * @see Try#call(java.util.concurrent.Callable, Object)
      */
     @Beta
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
@@ -205,7 +204,6 @@ public final class Throwables {
      * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @throws IllegalArgumentException if cmd or predicate is null
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
-     * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, Object)
      */
     @Beta
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.

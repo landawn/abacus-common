@@ -84,6 +84,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public BooleanList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
     }
 

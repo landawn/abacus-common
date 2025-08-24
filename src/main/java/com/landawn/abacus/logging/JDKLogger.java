@@ -280,7 +280,7 @@ class JDKLogger extends AbstractLogger {
      * @param callerFQCN the fully qualified class name of the caller
      * @param level the logging level
      * @param msg the message to log
-     * @param t the exception to log (may be null)
+     * @param t the exception to log
      */
     private void log(final String callerFQCN, final Level level, final String msg, final Throwable t) {
         // millis and thread are filled by the constructor

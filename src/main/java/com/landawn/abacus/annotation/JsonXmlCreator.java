@@ -19,6 +19,46 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks a method or constructor as the preferred creator for JSON/XML deserialization.
+ * This annotation indicates that the annotated method or constructor should be used
+ * when deserializing objects from JSON or XML formats.
+ * 
+ * <p>When applied to a constructor, it designates that constructor as the primary
+ * way to create instances during deserialization. When applied to a static factory method,
+ * it indicates that method should be used instead of the default constructor.</p>
+ * 
+ * <p>This annotation is particularly useful when:</p>
+ * <ul>
+ *   <li>A class has multiple constructors and you need to specify which one to use</li>
+ *   <li>You want to use a static factory method instead of a constructor</li>
+ *   <li>Special initialization logic is required during deserialization</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * public class Person {
+ *     private final String name;
+ *     private final int age;
+ *     
+ *     // This constructor will be used for JSON/XML deserialization
+ *     @JsonXmlCreator
+ *     public Person(String name, int age) {
+ *         this.name = name;
+ *         this.age = age;
+ *     }
+ *     
+ *     // Or use with a static factory method
+ *     @JsonXmlCreator
+ *     public static Person create(String name, int age) {
+ *         return new Person(name, age);
+ *     }
+ * }
+ * }</pre>
+ * 
+ * @see JsonXmlField
+ * @see JsonXmlValue
+ */
 @Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlCreator {

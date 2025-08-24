@@ -3567,7 +3567,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(final String keyColumnName, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        return groupBy(keyColumnName, NULL_PARAM_INDICATOR_1, aggregateOnColumnName, aggregateResultColumnName, collector);
+        return groupBy(keyColumnName, NULL_FUNC_INDICATOR_1, aggregateOnColumnName, aggregateResultColumnName, collector);
     }
 
     @Override
@@ -3613,7 +3613,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> DataSet groupBy(final String keyColumnName, final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return groupBy(keyColumnName, NULL_PARAM_INDICATOR_1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+        return groupBy(keyColumnName, NULL_FUNC_INDICATOR_1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
     }
 
     private DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor) {
@@ -3749,8 +3749,8 @@ public final class RowDataSet implements DataSet, Cloneable {
     }
 
     private static final Function<? super DisposableObjArray, Object[]> CLONE = DisposableObjArray::copy;
-    private static final Function<?, ?> NULL_PARAM_INDICATOR_1 = null;
-    private static final Function<? super DisposableObjArray, ?> NULL_PARAM_INDICATOR_2 = null;
+    private static final Function<?, ?> NULL_FUNC_INDICATOR_1 = null;
+    private static final Function<? super DisposableObjArray, ?> NULL_FUNC_INDICATOR_2 = null;
 
     @Override
     public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final Collection<String> aggregateOnColumnNames,
@@ -3833,13 +3833,13 @@ public final class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public DataSet groupBy(final Collection<String> keyColumnNames) {
-        return groupBy(keyColumnNames, NULL_PARAM_INDICATOR_2);
+        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2);
     }
 
     @Override
     public DataSet groupBy(final Collection<String> keyColumnNames, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        return groupBy(keyColumnNames, NULL_PARAM_INDICATOR_2, aggregateOnColumnName, aggregateResultColumnName, collector);
+        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2, aggregateOnColumnName, aggregateResultColumnName, collector);
     }
 
     @Override
@@ -3925,7 +3925,7 @@ public final class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> DataSet groupBy(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return groupBy(keyColumnNames, NULL_PARAM_INDICATOR_2, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
     }
 
     @Override
@@ -4896,7 +4896,7 @@ public final class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public DataSet distinctBy(final Collection<String> columnNames) {
-        return distinctBy(columnNames, NULL_PARAM_INDICATOR_2);
+        return distinctBy(columnNames, NULL_FUNC_INDICATOR_2);
     }
 
     @Override

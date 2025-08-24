@@ -525,7 +525,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
          * @param h the hash code of the key
          * @param k the key
          * @param v the value
-         * @param n the next entry in the chain (may be null)
+         * @param n the next entry in the chain
          */
         Entry(final int h, final K k, final V v, final Entry<K, V> n) {
             value = v;

@@ -20,6 +20,35 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks elements that are intended for testing purposes only and should not be used in production code.
+ * This annotation serves as a clear indicator that the annotated element exists solely to support
+ * testing infrastructure and may have relaxed access modifiers or special behavior for testability.
+ * 
+ * <p>Elements marked with {@code @Test} may include:</p>
+ * <ul>
+ *   <li>Methods or constructors with package-private or public access for test access</li>
+ *   <li>Fields exposed for test verification</li>
+ *   <li>Classes designed as test doubles or mocks</li>
+ *   <li>Special test-only implementations</li>
+ * </ul>
+ * 
+ * <p>This annotation helps maintain clear boundaries between production and test code,
+ * making it easier to identify code that should not be used in production contexts.</p>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * public class UserService {
+ *     @Test
+ *     void resetForTesting() {
+ *         // Method exposed only for test cleanup
+ *         cache.clear();
+ *         connections.closeAll();
+ *     }
+ * }
+ * }</pre>
+ *
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })

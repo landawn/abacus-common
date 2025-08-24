@@ -175,7 +175,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * 
      * @param writer the CharacterWriter to write to
      * @param x the OptionalInt value to write
-     * @param config the serialization configuration (may be null)
+     * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

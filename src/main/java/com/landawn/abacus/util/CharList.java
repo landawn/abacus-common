@@ -85,6 +85,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public CharList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
     }
 

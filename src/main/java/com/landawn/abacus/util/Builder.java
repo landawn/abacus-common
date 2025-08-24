@@ -1440,8 +1440,9 @@ public class Builder<T> {
             return this;
         }
 
+        @SafeVarargs
         @Override
-        public ListBuilder<T, L> addAll(final T... a) {
+        public final ListBuilder<T, L> addAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.addAll(Arrays.asList(a));
             }
@@ -1467,8 +1468,9 @@ public class Builder<T> {
             return this;
         }
 
+        @SafeVarargs
         @Override
-        public ListBuilder<T, L> removeAll(final T... a) {
+        public final ListBuilder<T, L> removeAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.removeAll(Arrays.asList(a));
             }
@@ -3070,8 +3072,8 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <T> the type of objects being compared (must be Comparable)
-     * @param left the first object to compare (may be null)
-     * @param right the second object to compare (may be null)
+     * @param left the first object to compare
+     * @param right the second object to compare
      * @return a new ComparisonBuilder for method chaining
      */
     public static <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(final T left, final T right) {
@@ -3090,8 +3092,8 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <T> the type of objects being compared (must be Comparable)
-     * @param left the first object to compare (may be null)
-     * @param right the second object to compare (may be null)
+     * @param left the first object to compare
+     * @param right the second object to compare
      * @return a new ComparisonBuilder for method chaining
      */
     public static <T extends Comparable<? super T>> ComparisonBuilder compareNullBigger(final T left, final T right) {

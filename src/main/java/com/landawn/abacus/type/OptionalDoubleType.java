@@ -175,7 +175,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * 
      * @param writer the CharacterWriter to write to
      * @param x the OptionalDouble value to write
-     * @param config the serialization configuration (may be null)
+     * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

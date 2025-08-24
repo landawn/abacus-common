@@ -821,7 +821,7 @@ public class Collectors100Test extends TestBase {
     // Test averaging collectors
     @Test
     public void testAveragingInt() {
-        OptionalDouble result = integerList.stream().collect(Collectors.averagingInt(i -> i));
+        OptionalDouble result = integerList.stream().collect(Collectors.averagingIntOrEmpty(i -> i));
         assertTrue(result.isPresent());
         assertEquals(3.0, result.getAsDouble(), 0.01);
     }
@@ -836,14 +836,14 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testAveragingLong() {
-        OptionalDouble result = Arrays.asList(1L, 2L, 3L, 4L, 5L).stream().collect(Collectors.averagingLong(l -> l));
+        OptionalDouble result = Arrays.asList(1L, 2L, 3L, 4L, 5L).stream().collect(Collectors.averagingLongOrEmpty(l -> l));
         assertTrue(result.isPresent());
         assertEquals(3.0, result.getAsDouble(), 0.01);
     }
 
     @Test
     public void testAveragingDouble() {
-        OptionalDouble result = doubleList.stream().collect(Collectors.averagingDouble(d -> d));
+        OptionalDouble result = doubleList.stream().collect(Collectors.averagingDoubleOrEmpty(d -> d));
         assertTrue(result.isPresent());
         assertEquals(3.3, result.getAsDouble(), 0.01);
     }
@@ -852,7 +852,7 @@ public class Collectors100Test extends TestBase {
     public void testAveragingBigInteger() {
         Optional<BigDecimal> result = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3))
                 .stream()
-                .collect(Collectors.averagingBigInteger(Function.identity()));
+                .collect(Collectors.averagingBigIntegerOrEmpty(Function.identity()));
         assertTrue(result.isPresent());
         assertEquals(0, BigDecimal.valueOf(2).compareTo(result.get()));
     }
@@ -861,7 +861,7 @@ public class Collectors100Test extends TestBase {
     public void testAveragingBigDecimal() {
         Optional<BigDecimal> result = Arrays.asList(new BigDecimal("1.0"), new BigDecimal("2.0"), new BigDecimal("3.0"))
                 .stream()
-                .collect(Collectors.averagingBigDecimal(Function.identity()));
+                .collect(Collectors.averagingBigDecimalOrEmpty(Function.identity()));
         assertTrue(result.isPresent());
         assertEquals(0, new BigDecimal("2").compareTo(result.get()));
     }
@@ -1440,7 +1440,7 @@ public class Collectors100Test extends TestBase {
     @Test
     public void testMoreCollectorsCombine3() {
         Tuple3<Long, Integer, OptionalDouble> result = integerList.stream()
-                .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingInt(i -> i)));
+                .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingIntOrEmpty(i -> i)));
 
         assertEquals(5L, result._1);
         assertEquals(15, result._2);
@@ -1463,7 +1463,7 @@ public class Collectors100Test extends TestBase {
     public void testMoreCollectorsCombine5() {
         Tuple5<Long, Integer, Optional<Integer>, Optional<Integer>, OptionalDouble> result = integerList.stream()
                 .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.minBy(Fn.identity()),
-                        Collectors.maxBy(Fn.identity()), Collectors.averagingInt(i -> i)));
+                        Collectors.maxBy(Fn.identity()), Collectors.averagingIntOrEmpty(i -> i)));
 
         assertEquals(5L, result._1);
         assertEquals(15, result._2);
@@ -1476,7 +1476,7 @@ public class Collectors100Test extends TestBase {
     public void testMoreCollectorsCombine6() {
         Tuple6<Long, Integer, Optional<Integer>, Optional<Integer>, OptionalDouble, List<Integer>> result = integerList.stream()
                 .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.minBy(Fn.identity()),
-                        Collectors.maxBy(Fn.identity()), Collectors.averagingInt(i -> i), Collectors.toList()));
+                        Collectors.maxBy(Fn.identity()), Collectors.averagingIntOrEmpty(i -> i), Collectors.toList()));
 
         assertEquals(5L, result._1);
         assertEquals(15, result._2);
@@ -1490,7 +1490,7 @@ public class Collectors100Test extends TestBase {
     public void testMoreCollectorsCombine7() {
         Tuple7<Long, Integer, Optional<Integer>, Optional<Integer>, OptionalDouble, List<Integer>, Set<Integer>> result = integerList.stream()
                 .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.minBy(Fn.identity()),
-                        Collectors.maxBy(Fn.identity()), Collectors.averagingInt(i -> i), Collectors.toList(), Collectors.toSet()));
+                        Collectors.maxBy(Fn.identity()), Collectors.averagingIntOrEmpty(i -> i), Collectors.toList(), Collectors.toSet()));
 
         assertEquals(5L, result._1);
         assertEquals(15, result._2);
@@ -1512,7 +1512,7 @@ public class Collectors100Test extends TestBase {
     @Test
     public void testMoreCollectorsCombineWithMerger3() {
         String result = integerList.stream()
-                .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingInt(i -> i),
+                .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingIntOrEmpty(i -> i),
                         (count, sum, avg) -> String.format("Count: %d, Sum: %d, Avg: %.2f", count, sum, ((OptionalDouble) avg).get())));
 
         assertEquals("Count: 5, Sum: 15, Avg: 3.00", result);
@@ -1539,7 +1539,7 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testMoreCollectorsCombineWithCollection() {
-        List<Collector<Integer, ?, ?>> collectors = Arrays.asList(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingInt(i -> i));
+        List<Collector<Integer, ?, ?>> collectors = Arrays.asList(Collectors.counting(), Collectors.summingInt(i -> i), Collectors.averagingIntOrEmpty(i -> i));
 
         String result = integerList.stream()
                 .collect(MoreCollectors.combine(collectors,
@@ -1606,7 +1606,7 @@ public class Collectors100Test extends TestBase {
         Integer sum = largeList.stream().collect(Collectors.summingInt(i -> i));
         assertEquals(49995000, sum);
 
-        OptionalDouble avg = largeList.stream().collect(Collectors.averagingInt(i -> i));
+        OptionalDouble avg = largeList.stream().collect(Collectors.averagingIntOrEmpty(i -> i));
         assertTrue(avg.isPresent());
         assertEquals(4999.5, avg.getAsDouble(), 0.01);
     }

@@ -225,7 +225,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      *
      * @param writer the CharacterWriter to write to
      * @param x the Tuple5 object to write
-     * @param config the serialization configuration (may be null)
+     * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

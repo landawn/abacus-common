@@ -5644,7 +5644,7 @@ public final class IOUtil {
         final List<File> files = listFiles(srcDir);
 
         if (N.isEmpty(files)) {
-            for (final File file : srcDir.listFiles()) {
+            for (final File file : files) {
                 if (file != null) {
                     copyToDirectory(file, destDir);
                 }
@@ -6478,7 +6478,7 @@ public final class IOUtil {
      * @see #sizeOfDirectory(File)
      * @see #sizeOfAsBigInteger(File)
      */
-    public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) throws FileNotFoundException {
+    public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) {
         N.checkArgNotNull(directory, cs.directory);
 
         return sizeOfDirectoryAsBigInteger0(directory);

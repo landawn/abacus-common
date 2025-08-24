@@ -55,25 +55,46 @@ import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive utility class for string operations and manipulations.
+ * 
+ * <p>This class provides a wide range of static methods for common string operations including:
+ * <ul>
+ *   <li><b>Null-safe operations:</b> Methods that gracefully handle {@code null} inputs without throwing exceptions</li>
+ *   <li><b>Validation:</b> Check if strings are empty, blank, valid email addresses, URLs, or Java identifiers</li>
+ *   <li><b>Transformation:</b> Convert case, reverse, abbreviate, pad, trim, and normalize strings</li>
+ *   <li><b>Search and Replace:</b> Find substrings, count occurrences, replace text with various options</li>
+ *   <li><b>Comparison:</b> Compare strings with options for case sensitivity and locale</li>
+ *   <li><b>Parsing:</b> Convert strings to numeric types, booleans, and other data types</li>
+ *   <li><b>Encoding/Decoding:</b> Base64, URL encoding, Unicode operations</li>
+ *   <li><b>String Building:</b> Efficient concatenation and joining operations</li>
+ *   <li><b>Pattern Matching:</b> Work with regular expressions and wildcards</li>
+ * </ul>
+ * 
+ * <h3>Design Philosophy</h3>
+ * <ul>
+ *   <li>Methods are designed to be null-safe where reasonable, returning sensible defaults instead of throwing exceptions</li>
+ *   <li>Empty strings are preferred over {@code null} as return values</li>
+ *   <li>Methods follow consistent naming patterns for discoverability</li>
+ *   <li>Performance optimizations are applied for common operations</li>
+ * </ul>
+ * 
+ * <h3>Exception Handling</h3>
+ * <p>This class is designed to avoid throwing unnecessary exceptions. For example:
+ * <ul>
+ *   <li>Reversing a {@code null} or empty string returns the input unchanged</li>
+ *   <li>Checking if a {@code null} string is empty returns {@code true}</li>
+ *   <li>Exceptions are only thrown when the method contract is violated (e.g., negative array size)</li>
+ * </ul>
+ * 
+ * <h3>Thread Safety</h3>
+ * <p>All methods in this class are thread-safe as they operate on immutable strings and don't maintain state.
+ * 
+ * <h3>Attribution</h3>
+ * <p>This class includes code adapted from Apache Commons Lang, Google Guava, and other open source projects
+ * under the Apache License 2.0. The methods may have been modified to fit the design of this library.
  *
- * <br />
- * <br />
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
- * <br />
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
- * <br />
- *
- *
- * @see {@code Joiner}, {@code Splitter}
- *
+ * @see Joiner
+ * @see Splitter
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables

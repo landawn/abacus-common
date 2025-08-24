@@ -380,7 +380,6 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
      * @return The result of the {@code cmd} or the default value if an exception occurs.
      * @see #call(java.util.concurrent.Callable, Supplier)
-     * @see Throwables#call(Throwables.Callable, Object)
      */
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
@@ -470,7 +469,6 @@ public final class Try<T extends AutoCloseable> {
      * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
-     * @see Throwables#call(Throwables.Callable, Predicate, Object)
      */
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate,

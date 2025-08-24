@@ -16,6 +16,46 @@ package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link Type} objects themselves, allowing Type instances to be serialized,
+ * deserialized, and converted within the Abacus type system.
+ * 
+ * <p>This class provides the ability to treat Type objects as first-class values that can be:</p>
+ * <ul>
+ *   <li>Serialized to and from strings (using the type name)</li>
+ *   <li>Used as column values in DataSet operations</li>
+ *   <li>Stored in databases as type metadata</li>
+ *   <li>Passed as parameters in dynamic type scenarios</li>
+ * </ul>
+ * 
+ * <p>This is particularly useful in scenarios where type information needs to be:</p>
+ * <ul>
+ *   <li>Stored as configuration data</li>
+ *   <li>Transmitted over network protocols</li>
+ *   <li>Used in reflection-based frameworks</li>
+ *   <li>Dynamically determined at runtime</li>
+ * </ul>
+ * 
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Convert Type to string
+ * Type stringType = TypeFactory.getType(String.class);
+ * TypeType typeHandler = new TypeType();
+ * String typeName = typeHandler.stringOf(stringType); // "String"
+ * 
+ * // Convert string back to Type
+ * Type reconstructed = typeHandler.valueOf("String");
+ * assert reconstructed.equals(stringType);
+ * 
+ * // Store type information in a map
+ * Map<String, Type> typeRegistry = new HashMap<>();
+ * typeRegistry.put("userType", TypeFactory.getType(User.class));
+ * }</pre>
+ * 
+ * @see Type
+ * @see TypeFactory
+ * @see AbstractType
+ */
 @SuppressWarnings("rawtypes")
 public class TypeType extends AbstractType<Type> {
 

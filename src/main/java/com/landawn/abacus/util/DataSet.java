@@ -68,6 +68,11 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Returns an immutable empty {@code DataSet}.
      * This method can be used when you need an empty DataSet for initialization or comparison purposes.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * boolean isEmpty = DataSet.empty().isEmpty(); // returns true;
+     * }</pre>
      *
      * @return an immutable empty {@code DataSet}
      */
@@ -82,6 +87,14 @@ public sealed interface DataSet permits RowDataSet {
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
      * The <i>rows</i> parameter is a 2D array where each subarray represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(
+     *     Arrays.asList("id", "name", "age"),
+     *     new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}}
+     * );
+     * }</pre>
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param rows A 2D array representing the data in the DataSet. Each subarray is a row.
@@ -100,6 +113,14 @@ public sealed interface DataSet permits RowDataSet {
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
      * The <i>rows</i> parameter is a collection of collections where each sub-collection represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(
+     *     Arrays.asList("id", "name", "age"),
+     *     Arrays.asList(Arrays.asList(1, "Alice", 25), Arrays.asList(2, "Bob", 30))
+     * );
+     * }</pre>
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param rows A collection of collections representing the data in the DataSet. Each sub-collection is a row which can be: Map/Bean/Array/List.
@@ -118,6 +139,14 @@ public sealed interface DataSet permits RowDataSet {
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
      * The <i>columns</i> parameter is a 2D array where each subarray represents a column in the DataSet.
      * The order of elements in each column should correspond to the order of column names.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.columns(
+     *     Arrays.asList("id", "name", "age"),
+     *     new Object[][] {{1, 2}, {"Alice", "Bob"}, {25, 30}}
+     * );
+     * }</pre>
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param columns A 2D array representing the data in the DataSet. Each subarray is a column.
@@ -152,6 +181,14 @@ public sealed interface DataSet permits RowDataSet {
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
      * The <i>columns</i> parameter is a collection of collections where each sub-collection represents a column in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.columns(
+     *     Arrays.asList("id", "name"),
+     *     Arrays.asList(Arrays.asList(1, 2), Arrays.asList("Alice", "Bob"))
+     * );
+     * }</pre>
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param columns A collection of collections representing the data in the DataSet. Each sub-collection is a column.
@@ -216,6 +253,13 @@ public sealed interface DataSet permits RowDataSet {
      * Returns an immutable list of column names in this DataSet.
      * The order of the column names in the list reflects the order of the columns in the DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * ImmutableList<String> columns = dataSet.columnNameList();
+     * // columns contains ["id", "name", "age"]
+     * }</pre>
+     *
      * @return an ImmutableList of column names
      */
     ImmutableList<String> columnNameList();
@@ -223,21 +267,40 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Returns the number of columns in this DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * int count = dataSet.columnCount(); // returns 3
+     * }</pre>
+     *
      * @return the count of columns
      */
     int columnCount();
 
     /**
-     * Returns the column name for the specified column index.
+     * Returns the column name at the specified index.
+     * Column indices are zero-based.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet ds = DataSet.rows(Arrays.asList("id", "name"), data);
+     * String name = ds.getColumnName(1); // returns "name"
+     * }</pre>
      *
-     * @param columnIndex the index of the column.
-     * @return the name of the column at the specified index.
-     * @throws IndexOutOfBoundsException if the specified column index is out of bounds
+     * @param columnIndex the zero-based index of the column
+     * @return the name of the column at the specified index
+     * @throws IndexOutOfBoundsException if columnIndex is negative or >= columnCount()
      */
     String getColumnName(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
      * Returns the index of the specified column in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * int index = dataSet.getColumnIndex("name"); // returns 1
+     * }</pre>
      *
      * @param columnName the name(case-sensitive) of the column for which the index is required.
      * @return the index of the specified column.
@@ -248,6 +311,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Returns an array of column indexes corresponding to the provided column names.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * int[] indexes = dataSet.getColumnIndexes(Arrays.asList("name", "age")); // returns [1, 2]
+     * }</pre>
+     *
      * @param columnNames the collection of column names(case-sensitive) for which indexes are required.
      * @return an array of integers representing the indexes of the specified columns.
      * @throws IllegalArgumentException if any of the provided column names does not exist in the DataSet.
@@ -257,6 +326,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Checks if the specified column name exists in this DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * boolean exists = dataSet.containsColumn("name"); // returns true
+     * }</pre>
+     *
      * @param columnName the name(case-sensitive) of the column to check.
      * @return {@code true} if the column exists, {@code false} otherwise.
      */
@@ -264,6 +339,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Check if this {@code DataSet} contains all the specified columns.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * boolean hasAll = dataSet.containsAllColumns(Arrays.asList("id", "name")); // returns true
+     * }</pre>
      *
      * @param columnNames the collection of column names(case-sensitive) to check.
      * @return {@code true} if all the specified columns are included in the this {@code DataSet}
@@ -273,6 +354,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Renames a column in the DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.renameColumn("name", "fullName");
+     * }</pre>
+     *
      * @param columnName the current name of the column.
      * @param newColumnName the new name for the column.
      * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or the new column name exists in the DataSet.
@@ -281,6 +368,15 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Renames multiple columns in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * Map<String, String> renames = new HashMap<>();
+     * renames.put("name", "fullName");
+     * renames.put("age", "yearsOld");
+     * dataSet.renameColumns(renames);
+     * }</pre>
      *
      * @param oldNewNames a map where the key is the current name of the column and the value is the new name for the column.
      * @throws IllegalArgumentException if any of the specified old column names does not exist in the DataSet or any of the new column names already exists in the DataSet.
@@ -297,6 +393,13 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Renames multiple columns in the DataSet using a function to determine the new names.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("first_name", "last_name"), data);
+     * dataSet.renameColumns(Arrays.asList("first_name", "last_name"), 
+     *     name -> name.replace("_", ""));
+     * }</pre>
+     *
      * @param columnNames the collection of current column names to be renamed.
      * @param func a function that takes the current column name as input and returns the new column name.
      * @throws IllegalArgumentException if any of the specified old column names does not exist in the DataSet or any of the new column names already exists in the DataSet.
@@ -306,6 +409,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Renames all columns in the DataSet using a function to determine the new names.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataSet.renameColumns(name -> name.toUpperCase());
+     * }</pre>
+     *
      * @param func a function that takes the current column name as input and returns the new column name.
      * @throws IllegalArgumentException if any of the new column names already exists in the DataSet.
      */
@@ -313,6 +422,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Moves a column in the DataSet to a new position.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * dataSet.moveColumn("age", 1); // moves "age" to position 1
+     * }</pre>
      *
      * @param columnName the name of the column to be moved.
      * @param newPosition the new position for the column.
@@ -324,6 +439,15 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Moves multiple columns in the DataSet to new positions.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * Map<String, Integer> moves = new HashMap<>();
+     * moves.put("age", 0);
+     * moves.put("name", 2);
+     * dataSet.moveColumns(moves);
+     * }</pre>
+     *
      * @param columnNameNewPositionMap a map where the key is the current name of the column and the value is the new position for the column.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or any of the new positions are out of bounds.
      */
@@ -331,6 +455,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Swaps the positions of two columns in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * dataSet.swapColumnPosition("name", "age"); // swaps "name" and "age" positions
+     * }</pre>
      *
      * @param columnNameA the name of the first column to be swapped.
      * @param columnNameB the name of the second column to be swapped.
@@ -341,6 +471,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Moves a row in the DataSet to a new position.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.moveRow(0, 2); // moves row at index 0 to index 2
+     * }</pre>
+     *
      * @param rowIndex the index of the row to be moved.
      * @param newRowIndex the new position for the row.
      * @throws IndexOutOfBoundsException if the specified row index is out of bounds or the new position is out of bounds.
@@ -349,6 +485,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Swaps the positions of two rows in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.swapRowPosition(0, 1); // swaps row 0 and row 1
+     * }</pre>
      *
      * @param rowIndexA the index of the first row to be swapped.
      * @param rowIndexB the index of the second row to be swapped.
@@ -361,6 +503,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * String name = dataSet.get(0, 1); // gets value at row 0, column 1
+     * }</pre>
      *
      * @param <T> the type of the value to be returned.
      * @param rowIndex the index of the row.
@@ -410,6 +558,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Sets the value at the specified row and column index in the DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.set(0, 1, "John"); // sets value at row 0, column 1
+     * }</pre>
+     *
      * @param rowIndex the index of the row.
      * @param columnIndex the index of the column.
      * @param element the new value to be set at the specified row and column index.
@@ -435,6 +589,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Checks if the value at the specified row and column index in the DataSet is {@code null}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * boolean isNull = dataSet.isNull(0, 1); // checks if value at row 0, column 1 is null
+     * }</pre>
      *
      * @param rowIndex the index of the row.
      * @param columnIndex the index of the column.
@@ -463,6 +623,12 @@ public sealed interface DataSet permits RowDataSet {
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * String value = dataSet.get(1); // gets value at column index 1 for current row
+     * }</pre>
+     *
      * @param <T> the type of the value to be returned.
      * @param columnIndex the index of the column.
      * @return the value at the specified column index.
@@ -477,6 +643,12 @@ public sealed interface DataSet permits RowDataSet {
      * So the column values must be the type which is assignable to target type.
      * <br />
      * Using {@code get(int)} for better performance.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * String name = dataSet.get("name"); // gets value for "name" column in current row
+     * }</pre>
      *
      * @param <T> the type of the value to be returned.
      * @param columnName the name of the column.
@@ -569,6 +741,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * Returns default value (false) if the property is {@code null}.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "active"), data);
+     * boolean isActive = dataSet.getBoolean(1); // gets boolean value at column index 1
+     * }</pre>
+     *
      * @param columnIndex the index of the column.
      * @return the boolean value at the specified column index.
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
@@ -585,6 +763,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * Using {@code getBoolean(int)} for better performance.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "active"), data);
+     * boolean isActive = dataSet.getBoolean("active");
+     * }</pre>
+     *
      * @param columnName the name of the column.
      * @return the boolean value at the specified column.
      * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
@@ -599,6 +783,12 @@ public sealed interface DataSet permits RowDataSet {
      * So the column values must be the type which is assignable to target type.
      * <br />
      * Returns default value (0) if the property is {@code null}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "grade"), data);
+     * char grade = dataSet.getChar(1); // gets char value at column index 1
+     * }</pre>
      *
      * @param columnIndex the index of the column.
      * @return the char value at the specified column index.
@@ -693,6 +883,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * Returns default value (0) if the property is {@code null}.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "age"), data);
+     * int age = dataSet.getInt(1); // gets integer value at column index 1
+     * }</pre>
+     *
      * @param columnIndex the index of the column.
      * @return the integer value at the specified column index.
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
@@ -709,6 +905,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * Using {@code getInt(int)} for better performance.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "age"), data);
+     * int age = dataSet.getInt("age");
+     * }</pre>
      *
      * @param columnName the name of the column.
      * @return the integer value at the specified column.
@@ -724,6 +925,12 @@ public sealed interface DataSet permits RowDataSet {
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "timestamp"), data);
+     * long timestamp = dataSet.getLong(1); // gets long value at column index 1
+     * }</pre>
      *
      * @param columnIndex the index of the column.
      * @return the long value at the specified column index.
@@ -756,6 +963,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * Returns default value (0f) if the property is {@code null}.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "price"), data);
+     * float price = dataSet.getFloat(1); // gets float value at column index 1
+     * }</pre>
+     *
      * @param columnIndex the index of the column.
      * @return the float value at the specified column index.
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
@@ -786,6 +999,12 @@ public sealed interface DataSet permits RowDataSet {
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
      * Returns default value (0d) if the property is {@code null}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "score"), data);
+     * double score = dataSet.getDouble(1); // gets double value at column index 1
+     * }</pre>
      *
      * @param columnIndex the index of the column.
      * @return the double value at the specified column index.
@@ -867,6 +1086,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The order of the values in the list reflects the order of the rows in the DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * ImmutableList<String> names = dataSet.getColumn(1);
+     * }</pre>
+     *
      * @param <T> the type of the values to be returned.
      * @param columnIndex the index of the column.
      * @return an ImmutableList of values at the specified column index.
@@ -883,6 +1108,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The order of the values in the list reflects the order of the rows in the DataSet.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * ImmutableList<String> names = dataSet.getColumn("name");
+     * }</pre>
+     *
      * @param <T> the type of the values to be returned.
      * @param columnName the name of the column.
      * @return an ImmutableList of values at the specified column.
@@ -897,6 +1128,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The type of the values in the list will be the same as the type of the column.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * List<String> names = dataSet.copyColumn("name");
+     * names.add("newName"); // This won't affect the original DataSet
+     * }</pre>
+     *
      * @param <T> the type of the values to be returned.
      * @param columnName the name of the column.
      * @return a List of values at the specified column.
@@ -909,6 +1146,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The new column is added at the end of the existing columns.
      * The size of this list should match the number of rows in the DataSet.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.addColumn("age", Arrays.asList(25, 30, 35));
+     * }</pre>
      *
      * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
      * @param column The data for the new column. It should be a list where each element represents a row in the column.
@@ -939,6 +1182,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The new column is added at the end of the existing columns.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("salary"), data);
+     * dataSet.addColumn("taxAmount", "salary", salary -> (Double) salary * 0.25);
+     * }</pre>
+     *
      * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
      * @param fromColumnName The name of the existing column to be used as input for the function.
      * @param func The function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
@@ -953,6 +1201,11 @@ public sealed interface DataSet permits RowDataSet {
      * The new column is generated by applying a function to an existing column. The function takes the value of the existing column for each row and returns the value for the new column for that row.
      * <br />
      * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("name", "age"), data);
+     * dataSet.addColumn(1, "ageGroup", "age", age -> (Integer) age >= 18 ? "Adult" : "Minor");
+     * }</pre>
      *
      * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
      * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
@@ -970,6 +1223,12 @@ public sealed interface DataSet permits RowDataSet {
      * The new column is generated by applying a function to multiple existing columns. The function takes the values of the existing columns for each row and returns the value for the new column for that row.
      * <br />
      * The new column is added at the end of the existing columns.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataSet.addColumn("fullName", Arrays.asList("firstName", "lastName"), 
+     *     row -> row.get(0) + " " + row.get(1));
+     * }</pre>
      *
      * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
      * @param fromColumnNames The names of the existing columns to be used as input for the function.
@@ -1070,6 +1329,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The order of the values in the returned list reflects the order of the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * List<Integer> removedIds = dataSet.removeColumn("id");
+     * }</pre>
+     *
      * @param <T> The type of the values in the column.
      * @param columnName The name of the column to be removed. It should be a name that exists in the DataSet.
      * @return A List containing the values of the removed column.
@@ -1083,6 +1347,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The columns are identified by their names provided in the collection. All data in these columns are removed.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age", "salary"), data);
+     * dataSet.removeColumns(Arrays.asList("id", "salary"));
+     * }</pre>
+     *
      * @param columnNames A collection containing the names of the columns to be removed. These should be names that exist in the DataSet.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
@@ -1093,6 +1362,11 @@ public sealed interface DataSet permits RowDataSet {
      * Removes multiple columns from the DataSet.
      * <br />
      * The columns to be removed are identified by a Predicate function. The function is applied to each column name, and if it returns {@code true}, the column is removed.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("tempId", "name", "tempAge", "salary"), data);
+     * dataSet.removeColumns(columnName -> columnName.startsWith("temp"));
+     * }</pre>
      *
      * @param filter A Predicate function to determine which columns should be removed. It should return {@code true} for column names that should be removed, and {@code false} for those that should be kept.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1113,6 +1387,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The update is performed by applying a function to each value in the column. The function takes the current value and returns the new value.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("name", "age"), data);
+     * dataSet.updateColumn("name", name -> ((String) name).toUpperCase());
+     * }</pre>
+     *
      * @param columnName The name of the column to be updated. It should be a name that exists in the DataSet.
      * @param func The function to be applied to each value in the column. It takes the current value and returns the new value.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1125,6 +1404,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The update is performed by applying a function to each value in the specified columns. The function takes the current value and returns the new value.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataSet.updateColumns(Arrays.asList("firstName", "lastName"), name -> ((String) name).trim());
+     * }</pre>
+     *
      * @param columnNames A collection containing the names of the columns to be updated. These should be names that exist in the DataSet.
      * @param func The function to be applied to each value in the columns. It takes the current value and returns the new value.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1134,6 +1418,11 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Converts the values in a specified column of the DataSet to a specified target type.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("age"), data);
+     * dataSet.convertColumn("age", Integer.class); // Convert string ages to integers
+     * }</pre>
      *
      * @param columnName The name of the column to be converted. It should be a name that exists in the DataSet.
      * @param targetType The Class object representing the target type to which the column values should be converted.
@@ -1147,6 +1436,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Converts the values in multiple specified columns of the DataSet to their respective target types.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("age", "salary"), data);
+     * Map<String, Class<?>> types = Map.of("age", Integer.class, "salary", Double.class);
+     * dataSet.convertColumns(types);
+     * }</pre>
      *
      * @param columnTargetTypes A map where the key is the column name and the value is the Class object representing the target type to which the column values should be converted. The column names should exist in the DataSet.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1171,6 +1466,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataSet.combineColumns(Arrays.asList("firstName", "lastName"), "fullName", String.class);
+     * }</pre>
+     *
      * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the DataSet.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
      * @param newColumnType The Class object representing the type of the new column.
@@ -1183,6 +1483,12 @@ public sealed interface DataSet permits RowDataSet {
      * Combines multiple columns into a new column in the DataSet.
      * <br />
      * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("x", "y", "z"), data);
+     * dataSet.combineColumns(Arrays.asList("x", "y", "z"), "coordinates", 
+     *     row -> "(" + row.get(0) + "," + row.get(1) + "," + row.get(2) + ")");
+     * }</pre>
      *
      * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the DataSet.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
@@ -1198,6 +1504,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The new column is created by applying a BiFunction to the values of the specified columns for each row.
      * The BiFunction takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("width", "height"), data);
+     * dataSet.combineColumns(Tuple.of("width", "height"), "area", (w, h) -> (Double) w * (Double) h);
+     * }</pre>
      *
      * @param columnNames A Tuple2 containing the names of the two columns to be combined. These should be names that exist in the DataSet.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
@@ -1262,6 +1573,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The new columns are added at the end of the existing columns.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("fullName"), data);
+     * dataSet.divideColumn("fullName", Arrays.asList("firstName", "lastName"), 
+     *     name -> Arrays.asList(((String) name).split(" ")));
+     * }</pre>
+     *
      * @param columnName The name of the column to be divided. It should be a name that exists in the DataSet.
      * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the DataSet. The size of this collection should match the size of the Lists returned by the divideFunc.
      * @param divideFunc The function to be applied to each value in the column. It takes the current value and returns a List of new values. The size of this List should match the size of the newColumnNames collection.
@@ -1324,6 +1641,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The row can be represented in various formats such as an Object array, List, Map, or a Bean with getter/setter methods.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), existingData);
+     * dataSet.addRow(Arrays.asList(101, "John Doe", 30));
+     * }</pre>
+     *
      * @param row The new row to be added to the DataSet. It can be an Object array, List, Map, or a Bean with getter/setter methods.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
      * @throws IllegalArgumentException if the structure of the row does not match the required type - Object array, List, Map, or Bean.
@@ -1347,6 +1669,11 @@ public sealed interface DataSet permits RowDataSet {
      * Removes a row from the DataSet.
      * <br />
      * The row is identified by its index. All data in the row is removed.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * dataSet.removeRow(2); // Remove the third row (0-based index)
+     * }</pre>
      *
      * @param rowIndex The index of the row to be removed. It should be a valid index within the current row range.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1381,6 +1708,11 @@ public sealed interface DataSet permits RowDataSet {
      * Updates a specific row in the DataSet.
      * <br />
      * The update is performed by applying a function to each value in the specified row. The function takes the current value and returns the new value.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("name", "status"), data);
+     * dataSet.updateRow(0, value -> value instanceof String ? ((String) value).toUpperCase() : value);
+     * }</pre>
      *
      * @param rowIndex The index of the row to be updated. It should be a valid index within the current row range.
      * @param func The function to be applied to each value in the row. It takes the current value and returns the new value.
@@ -1430,6 +1762,12 @@ public sealed interface DataSet permits RowDataSet {
      * The operation is performed by adding all rows from the provided DataSet to the beginning of the current DataSet.
      * The structure (columns and their types) of the provided DataSet should match the structure of the current DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet1 = DataSet.rows(Arrays.asList("id", "name"), existingData);
+     * DataSet dataSet2 = DataSet.rows(Arrays.asList("id", "name"), newData);
+     * dataSet1.prepend(dataSet2); // Adds dataSet2 rows to the beginning of dataSet1
+     * }</pre>
+     *
      * @param other The DataSet to be prepended to the current DataSet. It should have the same structure as the current DataSet.
      * @throws IllegalStateException if the current DataSet is frozen (read-only).
      * @throws IllegalArgumentException if this DataSet and the provided DataSet don't have the same column names.
@@ -1442,6 +1780,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * The operation is performed by adding all rows from the provided DataSet to the end of the current DataSet.
      * The structure (columns and their types) of the provided DataSet should match the structure of the current DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet1 = DataSet.rows(Arrays.asList("id", "name"), existingData);
+     * DataSet dataSet2 = DataSet.rows(Arrays.asList("id", "name"), newData);
+     * dataSet1.append(dataSet2); // Adds dataSet2 rows to the end of dataSet1
+     * }</pre>
      *
      * @param other The DataSet to be appended to the current DataSet. It should have the same structure as the current DataSet.
      * @throws IllegalStateException if the current DataSet is frozen (read-only).
@@ -1472,6 +1816,11 @@ public sealed interface DataSet permits RowDataSet {
      * Retrieves a row from the DataSet as an array of Objects.
      * <br />
      * This method is typically used when accessing the data in a specific row.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * Object[] firstRow = dataSet.getRow(0); // Gets first row as Object[]
+     * }</pre>
      *
      * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
      * @return An array of Objects representing the data in the specified row.
@@ -1687,6 +2036,11 @@ public sealed interface DataSet permits RowDataSet {
      * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
      * The action is applied to each row in the DataSet in the order they appear.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.forEach(row -> System.out.println("Row: " + Arrays.toString(row.toArray())));
+     * }</pre>
+     *
      * @param <E> The type of the exception that the action can throw.
      * @param action The action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the DataSet. The action should not cache or update the input DisposableObjArray or its values(Array).
      * @throws E if the action throws an exception.
@@ -1700,6 +2054,11 @@ public sealed interface DataSet permits RowDataSet {
      * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
      * The action is applied to each row in the DataSet in the order they appear.
      * Only the columns specified in the {@code columnNames} collection will be included in the DisposableObjArray.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * dataSet.forEach(Arrays.asList("name", "age"), row -> System.out.println("Name-Age: " + Arrays.toString(row.toArray())));
+     * }</pre>
      *
      * @param <E> The type of the exception that the action can throw.
      * @param columnNames The collection of column names to be included in the DisposableObjArray.
@@ -1754,6 +2113,11 @@ public sealed interface DataSet permits RowDataSet {
      * The action is a BiConsumer function that takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}.
      * The action is applied to each row in the DataSet in the order they appear.
      * Only the columns specified in the Tuple {@code columnNames} will be included in the action.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("name", "age", "salary"), data);
+     * dataSet.forEach(Tuple.of("name", "salary"), (name, salary) -> System.out.println(name + ": $" + salary));
+     * }</pre>
      *
      * @param <E> The type of the exception that the action can throw.
      * @param columnNames A Tuple2 representing the names of the two columns to be included in the action.
@@ -1828,6 +2192,11 @@ public sealed interface DataSet permits RowDataSet {
      * The order of the elements in the array matches the order of the columns in the DataSet.
      * The resulting list of Object arrays is in the same order as the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * List<Object[]> rows = dataSet.toList(); // Convert all rows to List<Object[]>
+     * }</pre>
+     *
      * @return A List of Object arrays representing the data in the DataSet. Each Object array is a row in the DataSet.
      */
     List<Object[]> toList();
@@ -1839,6 +2208,11 @@ public sealed interface DataSet permits RowDataSet {
      * Each row in the specified range of the DataSet is converted into an Object array, where each element in the array corresponds to a column in the row.
      * The order of the elements in the array matches the order of the columns in the DataSet.
      * The resulting list of Object arrays is in the same order as the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age"), data);
+     * List<Object[]> firstThreeRows = dataSet.toList(0, 3); // Get rows 0, 1, 2
+     * }</pre>
      *
      * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
      * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
@@ -1855,6 +2229,11 @@ public sealed interface DataSet permits RowDataSet {
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * List<Map<String, Object>> maps = dataSet.toList(Map.class); // Convert to List of Maps
+     * }</pre>
+     *
      * @param <T> The target type of the row.
      * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
      * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
@@ -1869,6 +2248,11 @@ public sealed interface DataSet permits RowDataSet {
      * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * List<Employee> firstFiveEmployees = dataSet.toList(0, 5, Employee.class);
+     * }</pre>
      *
      * @param <T> The target type of the row.
      * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
@@ -1889,6 +2273,11 @@ public sealed interface DataSet permits RowDataSet {
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age", "salary"), data);
+     * List<Employee> employees = dataSet.toList(Arrays.asList("name", "salary"), Employee.class);
+     * }</pre>
+     *
      * @param <T> The target type of the row.
      * @param columnNames The collection of column names to be included in the instance.
      * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
@@ -1905,6 +2294,11 @@ public sealed interface DataSet permits RowDataSet {
      * Only the columns specified in the {@code columnNames} collection will be included in the instance.
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "age", "department"), data);
+     * List<Employee> topEmployees = dataSet.toList(0, 10, Arrays.asList("name", "department"), Employee.class);
+     * }</pre>
      *
      * @param <T> The target type of the row.
      * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
@@ -1926,6 +2320,11 @@ public sealed interface DataSet permits RowDataSet {
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * List<LinkedHashMap> maps = dataSet.toList(size -> new LinkedHashMap<>());
+     * }</pre>
+     *
      * @param <T> The target type of the row.
      * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
      * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
@@ -1940,6 +2339,11 @@ public sealed interface DataSet permits RowDataSet {
      * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * List<ArrayList> firstFiveRows = dataSet.toList(0, 5, size -> new ArrayList<>());
+     * }</pre>
      *
      * @param <T> The target type of the row.
      * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
@@ -1959,6 +2363,11 @@ public sealed interface DataSet permits RowDataSet {
      * Only the columns specified in the {@code columnNames} collection will be included in the instance.
      * The order of the properties in the instance matches the order of the columns in the DataSet.
      * The resulting list of instances is in the same order as the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "salary"), data);
+     * List<TreeMap> subsetMaps = dataSet.toList(Arrays.asList("name", "salary"), size -> new TreeMap<>());
+     * }</pre>
      *
      * @param <T> The target type of the row.
      * @param columnNames The collection of column names to be included in the instance.
@@ -2156,6 +2565,11 @@ public sealed interface DataSet permits RowDataSet {
      * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
      * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "department"), data);
+     * List<Employee> employees = dataSet.toMergedEntities(Employee.class);
+     * }</pre>
+     *
      * @param <T> The target type of the row.
      * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
      * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
@@ -2263,6 +2677,11 @@ public sealed interface DataSet permits RowDataSet {
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name", "department"), data);
+     * Map<Integer, String> idToNameMap = dataSet.toMap("id", "name");
+     * }</pre>
+     *
      * @param <K> The type of the keys in the resulting map.
      * @param <V> The type of the values in the resulting map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
@@ -2279,6 +2698,11 @@ public sealed interface DataSet permits RowDataSet {
      * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
      * The map is created by a provided supplier function, which allows the user to control the type of the map.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * LinkedHashMap<Integer, String> idToNameMap = dataSet.toMap("id", "name", LinkedHashMap::new);
+     * }</pre>
      *
      * @param <K> The type of the keys in the resulting map.
      * @param <V> The type of the values in the resulting map.
@@ -2297,6 +2721,11 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting map does not preserve the order of the rows in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * Map<Integer, String> topTenMap = dataSet.toMap(0, 10, "id", "name"); // First 10 rows
+     * }</pre>
      *
      * @param <K> The type of the keys in the resulting map.
      * @param <V> The type of the values in the resulting map.
@@ -2588,6 +3017,11 @@ public sealed interface DataSet permits RowDataSet {
      * This method is typically used when you need to export data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
      * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("department", "name", "salary"), data);
+     * ListMultimap<String, Employee> deptToEmployees = dataSet.toMultimap("department", Arrays.asList("name", "salary"), Employee.class);
+     * }</pre>
+     *
      * @param <K> The type of the keys in the resulting map.
      * @param <T> The type of the values in the resulting map.
      * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
@@ -2761,6 +3195,11 @@ public sealed interface DataSet permits RowDataSet {
      * The resulting JSON string represents the entire DataSet, including all rows and columns.
      * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
      * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * String json = dataSet.toJson(); // Convert DataSet to JSON array string
+     * }</pre>
      *
      * @return A JSON string representing the current DataSet.
      * @see #toJson(int, int, Collection)
@@ -3515,6 +3954,12 @@ public sealed interface DataSet permits RowDataSet {
      * <br />
      * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by another column's values.
      * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified column.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet sales = DataSet.rows(Arrays.asList("department", "amount"), data);
+     * DataSet deptTotals = sales.groupBy("department", "amount", "total", Collectors.summingDouble(Double.class::cast));
+     * }</pre>
      *
      * @param keyColumnName The name of the column to group by.
      * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
@@ -4334,6 +4779,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Sorts the DataSet based on the specified column name.
      * The sorting is done in ascending order.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "age", "salary"), data);
+     * employees.sortBy("age"); // sorts by age in ascending order
+     * }</pre>
      *
      * @param columnName The name of the column to be used for sorting.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -4448,6 +4899,12 @@ public sealed interface DataSet permits RowDataSet {
      * Returns the top <i>n</i> rows from the DataSet based on the values in the specified column.
      * The rows are sorted in ascending order based on the values in the specified column.
      * If two rows have the same value in the specified column, their order is determined by their original order in the DataSet.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "salary", "age"), data);
+     * DataSet topPaid = employees.topBy("salary", 5); // top 5 highest salaries
+     * }</pre>
      *
      * @param columnName The name of the column to be used for sorting.
      * @param n The number of top rows to return.
@@ -4511,6 +4968,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Returns a new DataSet containing only the distinct rows from the original DataSet.
      * The distinctness of rows is determined by the equals method of the row objects.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet orders = DataSet.rows(Arrays.asList("product", "customer"), data);
+     * DataSet uniqueOrders = orders.distinct(); // removes duplicate rows
+     * }</pre>
      *
      * @return A new DataSet containing only distinct rows.
      */
@@ -4519,6 +4982,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Returns a new DataSet containing only the distinct rows based on the specified column from the original DataSet.
      * The distinctness of rows is determined by the equals method of the column values.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "department", "salary"), data);
+     * DataSet uniqueDepts = employees.distinctBy("department"); // one row per department
+     * }</pre>
      *
      * @param columnName The name of the column to be used for determining distinctness.
      * @return A new DataSet containing only distinct rows based on the specified column.
@@ -4561,6 +5030,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Filters the rows of the DataSet based on the provided predicate.
      * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "age", "salary"), data);
+     * DataSet highEarners = employees.filter(row -> (Integer) row.get(2) > 50000);
+     * }</pre>
      *
      * @param filter The predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
      * @return A new DataSet containing only the rows that satisfy the provided predicate.
@@ -4571,6 +5046,12 @@ public sealed interface DataSet permits RowDataSet {
      * Filters the rows of the DataSet based on the provided predicate and limits the number of results.
      * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet products = DataSet.rows(Arrays.asList("name", "price", "category"), data);
+     * DataSet cheapProducts = products.filter(row -> (Double) row.get(1) < 100.0, 5);
+     * }</pre>
      *
      * @param filter The predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
      * @param max The maximum number of rows to include in the returned DataSet.
@@ -4988,6 +5469,13 @@ public sealed interface DataSet permits RowDataSet {
      * Performs an inner join operation between this DataSet and another DataSet based on the specified column names.
      * The inner join operation combines rows from two DataSets based on a related column between them.
      * Only rows that have matching values in both DataSets will be included in the resulting DataSet.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("id", "name"), empData);
+     * DataSet departments = DataSet.rows(Arrays.asList("dept_id", "dept_name"), deptData);
+     * DataSet joined = employees.innerJoin(departments, "id", "dept_id");
+     * }</pre>
      *
      * @param right The other DataSet to join with.
      * @param columnName The name of the column in this DataSet to use for the join.
@@ -5051,6 +5539,13 @@ public sealed interface DataSet permits RowDataSet {
      * The left join operation combines rows from two DataSets based on related columns between them.
      * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
      * If there is no match, the result is {@code null} on the right side.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("id", "name"), empData);
+     * DataSet salaries = DataSet.rows(Arrays.asList("emp_id", "salary"), salData);
+     * DataSet result = employees.leftJoin(salaries, "id", "emp_id"); // includes all employees
+     * }</pre>
      *
      * @param right The other DataSet to join with.
      * @param columnName The column name in this DataSet to join on.
@@ -6099,6 +6594,13 @@ public sealed interface DataSet permits RowDataSet {
      * If there are columns in the other DataSet that are not present in this DataSet, they will be added to the new DataSet.
      * If there are columns in this DataSet that are not present in the other DataSet, they will also be included in the new DataSet.
      * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet current = DataSet.rows(Arrays.asList("id", "name"), currentData);
+     * DataSet new = DataSet.rows(Arrays.asList("id", "name"), newData);
+     * DataSet combined = current.merge(new); // combines all rows from both DataSets
+     * }</pre>
      *
      * @param other The DataSet to merge with.
      * @return A new DataSet that is the result of the merge operation.
@@ -6302,6 +6804,12 @@ public sealed interface DataSet permits RowDataSet {
      * Creates a new DataSet that is a copy of the current DataSet.
      * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet original = DataSet.rows(Arrays.asList("name", "age"), data);
+     * DataSet backup = original.copy(); // creates an independent copy
+     * }</pre>
      *
      * @return A new DataSet that is a copy of the current DataSet.
      */
@@ -6519,6 +7027,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Creates a Stream of objects of type {@code T} converted from rows in the DataSet.
      * The type of objects in the resulting Stream is determined by the provided rowType.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Employee> empStream = employees.stream(Employee.class);
+     * }</pre>
      *
      * @param <T> The type of objects in the resulting Stream.
      * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
@@ -6871,6 +7385,12 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Freezes the DataSet to prevent further modification.
      * This method is useful when you want to ensure the DataSet remains constant after a certain point in your program.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet config = DataSet.rows(Arrays.asList("key", "value"), data);
+     * config.freeze(); // prevents further modifications
+     * }</pre>
      */
     void freeze();
 
@@ -6884,11 +7404,24 @@ public sealed interface DataSet permits RowDataSet {
     /**
      * Clears the DataSet.
      * This method removes all data from the DataSet, leaving it empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet tempData = DataSet.rows(Arrays.asList("id", "name"), data);
+     * tempData.clear(); // removes all rows
+     * }</pre>
      */
     void clear();
 
     /**
      * Checks if the DataSet is empty.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * if (dataSet.isEmpty()) { 
+     *    // handle empty DataSet
+     * }</pre>
      *
      * @return {@code true} if the DataSet is empty, {@code false} otherwise.
      */
@@ -6902,6 +7435,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Returns the number of rows in the DataSet.
+     * 
+     * <p>Example:</p>
+     * <pre>{@code
+     * DataSet employees = DataSet.rows(Arrays.asList("name", "age"), data);
+     * int totalEmployees = employees.size(); // returns row count
+     * }</pre>
      *
      * @return The number of rows in the DataSet.
      */
@@ -6944,11 +7483,21 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Prints the content of the DataSet to the standard output.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.println(); // Print entire DataSet to console
+     * }</pre>
      */
     void println();
 
     /**
      * Prints a portion of the DataSet to the standard output.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * dataSet.println(0, 10); // Print first 10 rows to console
+     * }</pre>
      *
      * @param fromRowIndex the starting index of the row, inclusive
      * @param toRowIndex the ending index of the row, exclusive
@@ -6968,6 +7517,12 @@ public sealed interface DataSet permits RowDataSet {
 
     /**
      * Prints the DataSet to the provided Writer.
+     *
+     * <pre>{@code
+     * DataSet dataSet = DataSet.rows(Arrays.asList("id", "name"), data);
+     * StringWriter writer = new StringWriter();
+     * dataSet.println(writer); // Print DataSet to StringWriter
+     * }</pre>
      *
      * @param outputWriter the Writer where the DataSet will be printed
      * @throws UncheckedIOException if an I/O error occurs

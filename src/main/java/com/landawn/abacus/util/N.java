@@ -31717,7 +31717,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmd the {@code Callable} to be executed
      * @return a {@code Nullable} containing the result or an empty {@code Nullable} if an exception occurs
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
@@ -31739,7 +31738,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param func the function to be executed
      * @return a {@code Nullable} containing the result or an empty {@code Nullable} if an exception occurs
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
@@ -31760,7 +31758,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param supplierForDefaultIfExceptionOccurred the supplier to provide the default value if an exception occurs
      * @return the result of the {@code Callable} or the result from the supplier if an exception occurs
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
@@ -31782,7 +31779,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the {@code Callable} or the default value if an exception occurs
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
@@ -31806,7 +31802,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param supplierForDefaultIfExceptionOccurred the supplier to provide the default value if an exception occurs
      * @return the result of the function or the result from the supplier if an exception occurs
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
@@ -31831,7 +31826,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the function or the default value if an exception occurs
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
      * @see Try#call(Throwables.Function)
-     * @see Try#call(Throwables.Function, Object)
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta

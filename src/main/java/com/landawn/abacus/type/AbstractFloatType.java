@@ -90,6 +90,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         }
     }
 
+    @Override
+    public boolean isFloat() {
+        return true;
+    }
+
     /**
      * Retrieves a float value from a ResultSet at the specified column index.
      *

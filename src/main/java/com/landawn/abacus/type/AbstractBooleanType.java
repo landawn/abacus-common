@@ -36,28 +36,6 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Checks if this type represents a boolean type.
-     * This method always returns {@code true} for boolean types.
-     *
-     * @return {@code true}, indicating this is a boolean type
-     */
-    @Override
-    public boolean isBoolean() {
-        return true;
-    }
-
-    /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * Boolean values are self-delimiting and don't require quotes in CSV files.
-     *
-     * @return {@code true}, indicating that boolean values should not be quoted in CSV format
-     */
-    @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
-    }
-
-    /**
      * Converts a Boolean value to its string representation.
      * Returns {@code null} if the input is {@code null}, otherwise returns
      * the string representation of the boolean value ("true" or "false").
@@ -142,6 +120,28 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
                 : (((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
                         && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) ? Boolean.TRUE
                                 : Boolean.FALSE);
+    }
+
+    /**
+     * Checks if this type represents a boolean type.
+     * This method always returns {@code true} for boolean types.
+     *
+     * @return {@code true}, indicating this is a boolean type
+     */
+    @Override
+    public boolean isBoolean() {
+        return true;
+    }
+
+    /**
+     * Checks if this type represents values that should not be quoted in CSV format.
+     * Boolean values are self-delimiting and don't require quotes in CSV files.
+     *
+     * @return {@code true}, indicating that boolean values should not be quoted in CSV format
+     */
+    @Override
+    public boolean isNonQuotableCsvType() {
+        return true;
     }
 
     /**

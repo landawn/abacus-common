@@ -207,7 +207,7 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the Tuple3 object to write
-     * @param config the serialization configuration (may be null)
+     * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

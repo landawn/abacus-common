@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>6.3.7</version>
+	<version>6.3.8</version>
 	<packaging>jar</packaging> 
 	<name>abacus-common</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>6.3.6</version>
+			<version>6.3.7</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

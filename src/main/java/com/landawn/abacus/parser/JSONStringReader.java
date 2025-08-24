@@ -245,10 +245,11 @@ class JSONStringReader extends AbstractJSONReader {
      * </ul>
      *
      * @return the token identifier, or -1 if no next token is found
+     * @param nextTokenValueType the expected type of the next token value
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
-    public int nextToken() throws UncheckedIOException {
+    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException {
         lastEvent = nextEvent;
 
         text = null;
@@ -317,13 +318,11 @@ class JSONStringReader extends AbstractJSONReader {
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
                             isNumber = true;
-                            readNumber(ch);
+                            readNumber(ch, nextTokenValueType);
+                            //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
+                            //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
+                            //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
                         }
-
-                        //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
-                        //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
-                        //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
-                        //    }
 
                         if (isNumber) {
                             // done in readNumber...
@@ -389,8 +388,9 @@ class JSONStringReader extends AbstractJSONReader {
      * </ul>
      *
      * @param firstChar the first character of the number
+     * @param nextTokenValueType the expected type of the next token value
      */
-    protected void readNumber(final int firstChar) {
+    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) {
         final boolean negative = firstChar == '-';
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
@@ -472,16 +472,16 @@ class JSONStringReader extends AbstractJSONReader {
                 ret = -ret;
             }
 
-            if (typeFlag > 0) {
+            if (nextTokenValueType.isNumber() || typeFlag > 0) {
                 if (pointPosition > 0) {
-                    if (typeFlag == 'f' || typeFlag == 'F') {
+                    if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                         numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPosition]);
                     } else { // ignore 'l' or 'L' if it's specified.
                         numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
                     }
-                } else if (typeFlag == 'f' || typeFlag == 'F') {
+                } else if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                     numValue = (float) ret;
-                } else if (typeFlag == 'd' || typeFlag == 'D') {
+                } else if (nextTokenValueType.isDouble() || typeFlag == 'd' || typeFlag == 'D') {
                     numValue = (double) ret;
                 } else { // typeFlag == 'l' or 'L'.
                     numValue = ret;

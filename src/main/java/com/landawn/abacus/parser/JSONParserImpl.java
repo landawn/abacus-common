@@ -2102,7 +2102,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         // firstToken;; token = isPropName ? jr.nextNameToken() :
         // jr.nextToken()) { // TODO .Why it's even slower by jr.nextNameToken
         // which has less comparison. Fuck???!!!...
-        for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
+        for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken(propInfo == null ? strType : propInfo.jsonXmlType)) {
             switch (token) {
                 case START_QUOTATION_D, START_QUOTATION_S:
 
@@ -2620,7 +2620,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             Object value = null;
 
             try {
-                for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
+                for (int preToken = firstToken,
+                        token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                     switch (token) {
                         case START_QUOTATION_D, START_QUOTATION_S:
 
@@ -2693,7 +2694,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             int idx = 0;
             Object value = null;
 
-            for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
+            for (int preToken = firstToken,
+                    token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                 switch (token) {
                     case START_QUOTATION_D, START_QUOTATION_S:
 
@@ -2819,7 +2821,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             return (T) creatorAndConvertor._2.apply(result);
         }
 
-        for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
+        for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
             switch (token) {
                 case START_QUOTATION_D, START_QUOTATION_S:
 

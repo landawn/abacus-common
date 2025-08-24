@@ -80,6 +80,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      */
     public LongList(final int initialCapacity) {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
+
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
     }
 

@@ -302,7 +302,7 @@ public final class Numbers {
             final short value = it.shortValue();
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -313,7 +313,7 @@ public final class Numbers {
             final int value = it.intValue();
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -324,7 +324,7 @@ public final class Numbers {
             final long value = it.longValue();
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -333,7 +333,7 @@ public final class Numbers {
 
         temp.put(float.class, it -> {
             if (Float.compare(it.floatValue(), Byte.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Byte.MIN_VALUE) < 0) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -342,7 +342,7 @@ public final class Numbers {
 
         temp.put(double.class, it -> {
             if (Double.compare(it.doubleValue(), Byte.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Byte.MIN_VALUE) < 0) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -353,7 +353,7 @@ public final class Numbers {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_BYTE_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_BYTE_VALUE) < 0) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -364,7 +364,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_BYTE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_BYTE_VALUE) < 0) {
-                throw new ArithmeticException("byte overflow");
+                throw new ArithmeticException("byte overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -383,7 +383,7 @@ public final class Numbers {
             final int value = it.intValue();
 
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -394,7 +394,7 @@ public final class Numbers {
             final long value = it.longValue();
 
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -403,7 +403,7 @@ public final class Numbers {
 
         temp.put(float.class, it -> {
             if (Float.compare(it.floatValue(), Short.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Short.MIN_VALUE) < 0) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -412,7 +412,7 @@ public final class Numbers {
 
         temp.put(double.class, it -> {
             if (Double.compare(it.doubleValue(), Short.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Short.MIN_VALUE) < 0) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -423,7 +423,7 @@ public final class Numbers {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_SHORT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_SHORT_VALUE) < 0) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -434,7 +434,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_SHORT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_SHORT_VALUE) < 0) {
-                throw new ArithmeticException("short overflow");
+                throw new ArithmeticException("short overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -454,7 +454,7 @@ public final class Numbers {
             final long value = it.longValue();
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE) {
-                throw new ArithmeticException("integer overflow");
+                throw new ArithmeticException("integer overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -463,7 +463,7 @@ public final class Numbers {
 
         temp.put(float.class, it -> {
             if (Float.compare(it.floatValue(), Integer.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Integer.MIN_VALUE) < 0) {
-                throw new ArithmeticException("integer overflow");
+                throw new ArithmeticException("integer overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -472,7 +472,7 @@ public final class Numbers {
 
         temp.put(double.class, it -> {
             if (Double.compare(it.doubleValue(), Integer.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Integer.MIN_VALUE) < 0) {
-                throw new ArithmeticException("integer overflow");
+                throw new ArithmeticException("integer overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -483,7 +483,7 @@ public final class Numbers {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_INT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_INT_VALUE) < 0) {
-                throw new ArithmeticException("integer overflow");
+                throw new ArithmeticException("integer overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -494,7 +494,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_INT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_INT_VALUE) < 0) {
-                throw new ArithmeticException("integer overflow");
+                throw new ArithmeticException("integer overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -513,7 +513,7 @@ public final class Numbers {
 
         temp.put(float.class, it -> {
             if (Float.compare(it.floatValue(), Long.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Long.MIN_VALUE) < 0) {
-                throw new ArithmeticException("long overflow");
+                throw new ArithmeticException("long overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -522,7 +522,7 @@ public final class Numbers {
 
         temp.put(double.class, it -> {
             if (Double.compare(it.doubleValue(), Long.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Long.MIN_VALUE) < 0) {
-                throw new ArithmeticException("long overflow");
+                throw new ArithmeticException("long overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -533,7 +533,7 @@ public final class Numbers {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0) {
-                throw new ArithmeticException("long overflow");
+                throw new ArithmeticException("long overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -544,7 +544,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0) {
-                throw new ArithmeticException("long overflow");
+                throw new ArithmeticException("long overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -568,22 +568,21 @@ public final class Numbers {
 
             if (num.isNaN()) {
                 return Float.NaN;
-            } else if (num.isInfinite() && Double.compare(it.doubleValue(), Double.POSITIVE_INFINITY) == 0) {
-                return Float.POSITIVE_INFINITY;
-            } else if (num.isInfinite() && Double.compare(it.doubleValue(), Double.NEGATIVE_INFINITY) == 0) {
-                return Float.NEGATIVE_INFINITY;
+            } else if (num.isInfinite()) {
+                return Double.compare(it.doubleValue(), Double.POSITIVE_INFINITY) == 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY;
             } else if (Double.compare(it.doubleValue(), Float.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), -Float.MIN_VALUE) < 0) {
-                throw new ArithmeticException("float overflow");
+                throw new ArithmeticException("float overflow: " + it);
+            } else {
+                // return Float.valueOf(num.floatValue()); // 1.21D May not be 1.21F
+                return Float.parseFloat(num.toString());
             }
-
-            return Float.parseFloat(num.toString());
         });
 
         temp.put(BigInteger.class, it -> {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_FLOAT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_FLOAT_VALUE) < 0) {
-                throw new ArithmeticException("float overflow");
+                throw new ArithmeticException("float overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -594,7 +593,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_FLOAT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_FLOAT_VALUE) < 0) {
-                throw new ArithmeticException("float overflow");
+                throw new ArithmeticException("float overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -610,14 +609,27 @@ public final class Numbers {
         temp.put(short.class, Number::doubleValue);
         temp.put(int.class, Number::doubleValue);
         temp.put(long.class, Number::doubleValue);
-        temp.put(float.class, it -> Double.parseDouble(it.toString()));
+
+        temp.put(float.class, it -> {
+            final Float num = (Float) it;
+
+            if (num.isNaN()) {
+                return Double.NaN;
+            } else if (num.isInfinite()) {
+                return Float.compare(num, Float.POSITIVE_INFINITY) == 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+            } else {
+                // return Double.valueOf(num.doubleValue()); // 1.21F May not be 1.21D
+                return Double.parseDouble(it.toString());
+            }
+        });
+
         temp.put(double.class, UnaryOperator.identity());
 
         temp.put(BigInteger.class, it -> {
             final BigInteger bigInteger = (BigInteger) it;
 
             if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_DOUBLE_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_DOUBLE_VALUE) < 0) {
-                throw new ArithmeticException("double overflow");
+                throw new ArithmeticException("double overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -628,7 +640,7 @@ public final class Numbers {
             final BigDecimal bigDecimal = (BigDecimal) it;
 
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE) < 0) {
-                throw new ArithmeticException("double overflow");
+                throw new ArithmeticException("double overflow: " + it);
             }
 
             //noinspection UnnecessaryBoxing
@@ -715,7 +727,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
-     * @param value the number to convert (may be null)
+     * @param value the number to convert
      * @param targetType the class object representing the target type
      * @return the converted number as an instance of the target type,
      *         or the default value of the target type if the input value is null
@@ -761,7 +773,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
-     * @param value the number to convert (may be null)
+     * @param value the number to convert
      * @param targetType the class object representing the target type
      * @param defaultValueForNull the value to return if the input value is null
      * @return the converted number as an instance of the target type,
@@ -800,7 +812,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
-     * @param value the number to convert (may be null)
+     * @param value the number to convert
      * @param targetType the Type object representing the target type
      * @return the converted number as an instance of the target type,
      *         or the default value of the target type if the input value is null
@@ -2011,7 +2023,7 @@ public final class Numbers {
      */
     public static int toIntExact(final long value) {
         //    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-        //        throw new ArithmeticException("integer overflow");
+        //        throw new ArithmeticException("integer overflow: " + value);
         //    }
         //
         //    return (int) value;

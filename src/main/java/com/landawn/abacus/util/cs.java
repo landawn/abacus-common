@@ -19,7 +19,29 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
-// cs -> constant/common String; ps -> parameter String; fs -> field string. s -> string?
+/**
+ * String constants utility class providing commonly used parameter names, field names, and SQL keywords.
+ * This class centralizes string constants to avoid hardcoding strings throughout the codebase,
+ * improving maintainability and reducing typos.
+ * 
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * // Instead of hardcoding strings
+ * map.put("columnName", value);
+ * 
+ * // Use constants from cs class
+ * map.put(cs.columnName, value);
+ * 
+ * // In method signatures and calls
+ * void processData(String columnName) { ... }
+ * processData(cs.columnName);
+ * }</pre>
+ * 
+ * <p><strong>Note:</strong> This class is marked as {@link Beta} and {@link Internal}, 
+ * indicating it's experimental and intended for internal framework use only. 
+ * External code should not depend on this class as it may change without notice.</p>
+ * 
+ */
 @Beta // Not sure if it's a good idea or not.
 @Internal
 @SuppressWarnings({ "java:S1845", "java:S115" })

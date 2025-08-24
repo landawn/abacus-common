@@ -245,21 +245,33 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
             }
 
-            if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - totalDataSize.get()) {
-                // ignore.
+            if (memoryMeasure != null) {
+                try {
+                    final long elementSize = memoryMeasure.sizeOf(e);
 
-                return false;
+                    if (elementSize < 0) {
+                        logger.warn("Memory measure returned negative size for element: " + elementSize);
+                        return false;
+                    }
+
+                    if (elementSize > maxMemorySize - totalDataSize.get()) {
+                        // ignore.
+                        return false;
+                    }
+
+                    pool.push(e);
+                    totalDataSize.addAndGet(elementSize); //NOSONAR
+                } catch (final Exception ex) {
+                    logger.warn("Error measuring memory size of element", ex);
+                    return false;
+                }
             } else {
                 pool.push(e);
-
-                if (memoryMeasure != null) {
-                    totalDataSize.addAndGet(memoryMeasure.sizeOf(e)); //NOSONAR
-                }
-
-                notEmpty.signal();
-
-                return true;
             }
+
+            notEmpty.signal();
+
+            return true;
         } finally {
             lock.unlock();
         }

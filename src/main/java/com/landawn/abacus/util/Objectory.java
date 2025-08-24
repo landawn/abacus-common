@@ -869,7 +869,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param list the list to recycle (may be null)
+     * @param list the list to recycle
      * @deprecated for internal use only
      */
     @Deprecated
@@ -890,7 +890,7 @@ public final class Objectory {
      * Sets larger than {@link #POOLABLE_SIZE} are not pooled.
      * LinkedHashSets are pooled separately from regular HashSets.
      *
-     * @param set the set to recycle (may be null)
+     * @param set the set to recycle
      * @deprecated for internal use only
      */
     @Deprecated
@@ -918,7 +918,7 @@ public final class Objectory {
      * Maps larger than {@link #POOLABLE_SIZE} are not pooled.
      * LinkedHashMaps are pooled separately from regular HashMaps.
      *
-     * @param map the map to recycle (may be null)
+     * @param map the map to recycle
      * @deprecated for internal use only
      */
     @Deprecated
@@ -955,7 +955,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param objArray the array to recycle (may be null)
+     * @param objArray the array to recycle
      */
     public static void recycle(final Object[] objArray) {
         if ((objArray == null) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
@@ -980,7 +980,7 @@ public final class Objectory {
      * Returns a char array buffer to the object pool for reuse.
      * Arrays larger than {@link #BUFFER_SIZE} are not pooled.
      *
-     * @param cbuf the char array to recycle (may be null)
+     * @param cbuf the char array to recycle
      */
     public static void recycle(final char[] cbuf) {
         if ((cbuf == null) || (cbuf.length > BUFFER_SIZE)) {
@@ -994,7 +994,7 @@ public final class Objectory {
      * Returns a byte array buffer to the object pool for reuse.
      * Arrays larger than {@link #BUFFER_SIZE} are not pooled.
      *
-     * @param bbuf the byte array to recycle (may be null)
+     * @param bbuf the byte array to recycle
      */
     public static void recycle(final byte[] bbuf) {
         if ((bbuf == null) || (bbuf.length > BUFFER_SIZE)) {
@@ -1020,7 +1020,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param sb the StringBuilder to recycle (may be null)
+     * @param sb the StringBuilder to recycle
      */
     public static void recycle(final StringBuilder sb) {
         if ((sb == null) || (sb.capacity() > BUFFER_SIZE)) {
@@ -1038,7 +1038,7 @@ public final class Objectory {
      * The stream is reset before being added to the pool.
      * Streams with capacity larger than {@link #BUFFER_SIZE} are not pooled.
      *
-     * @param os the ByteArrayOutputStream to recycle (may be null)
+     * @param os the ByteArrayOutputStream to recycle
      */
     public static void recycle(final ByteArrayOutputStream os) {
         if ((os == null) || (os.capacity() > BUFFER_SIZE)) {
@@ -1055,7 +1055,7 @@ public final class Objectory {
      * Returns a BufferedXMLWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      *
-     * @param bw the BufferedXMLWriter to recycle (may be null)
+     * @param bw the BufferedXMLWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
     public static void recycle(final BufferedXMLWriter bw) {
@@ -1077,7 +1077,7 @@ public final class Objectory {
      * Returns a BufferedJSONWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      *
-     * @param bw the BufferedJSONWriter to recycle (may be null)
+     * @param bw the BufferedJSONWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
     public static void recycle(final BufferedJSONWriter bw) {
@@ -1100,7 +1100,7 @@ public final class Objectory {
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      * Writers are pooled separately based on their escape character settings.
      *
-     * @param bw the BufferedCSVWriter to recycle (may be null)
+     * @param bw the BufferedCSVWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
     public static void recycle(final BufferedCSVWriter bw) {
@@ -1139,7 +1139,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param writer the BufferedWriter to recycle (may be null)
+     * @param writer the BufferedWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
     public static void recycle(final java.io.BufferedWriter writer) {
@@ -1177,7 +1177,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param reader the BufferedReader to recycle (may be null)
+     * @param reader the BufferedReader to recycle
      */
     public static void recycle(final java.io.BufferedReader reader) {
         if (reader instanceof BufferedReader br) {

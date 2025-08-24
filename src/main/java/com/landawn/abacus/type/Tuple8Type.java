@@ -254,7 +254,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      *
      * @param writer the CharacterWriter to write to
      * @param x the Tuple8 object to write
-     * @param config the serialization configuration (may be null)
+     * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

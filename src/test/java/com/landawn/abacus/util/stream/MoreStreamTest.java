@@ -680,7 +680,7 @@ public class MoreStreamTest {
         res2.forEach(Fn.println());
 
         final Tuple4<List<String>, Set<String>, OptionalDouble, LongSummaryStatistics> res3 = Stream.of("a", "b", "c", "a", "d")
-                .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.averagingDouble(String::hashCode),
+                .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.averagingDoubleOrEmpty(String::hashCode),
                         Collectors.summarizingLong(String::hashCode), Tuple::of));
 
         res3.forEach(Fn.println());
